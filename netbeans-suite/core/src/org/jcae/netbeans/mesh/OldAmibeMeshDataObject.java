@@ -53,12 +53,12 @@ public class OldAmibeMeshDataObject extends MultiDataObject implements SaveCooki
 
 	protected Node createNodeDelegate()
 	{
-		return new MeshNode(this);
+		return new OldAmibeMeshNode(this);
 	}
 
-	private OldAmibeMesh mesh;
+	private Mesh mesh;
 
-	public OldAmibeMesh getMesh()
+	public Mesh getMesh()
 	{
 		if(mesh==null)
 		{
@@ -68,15 +68,15 @@ public class OldAmibeMeshDataObject extends MultiDataObject implements SaveCooki
 		return mesh;
 	}
 
-	protected OldAmibeMesh initMesh()
+	protected Mesh initMesh()
 	{
 		InputStream in=null;
-		OldAmibeMesh toReturn;
+		Mesh toReturn;
 		try
 		{
 			in=getPrimaryFile().getInputStream();
 			XMLDecoder decoder=new XMLDecoder(in);
-			toReturn=(OldAmibeMesh)decoder.readObject();
+			toReturn=(Mesh)decoder.readObject();
 		}
 		catch (Exception ex)
 		{
@@ -84,7 +84,7 @@ public class OldAmibeMeshDataObject extends MultiDataObject implements SaveCooki
 			String name=Utilities.getFreeName(
 				getPrimaryFile().getParent(),
 				"amibe",".dir");
-			toReturn = new OldAmibeMesh(name);
+			toReturn = new Mesh(name);
 		}
 		finally
 		{

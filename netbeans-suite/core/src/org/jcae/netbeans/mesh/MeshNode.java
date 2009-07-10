@@ -255,9 +255,8 @@ public class MeshNode extends DataNode implements ViewCookie
 	}
 	
 	@Override
-	public String getDisplayName()
-	{
-		return getName();
+	public String getHtmlDisplayName() {
+		return "<font color='0000FF'>" + getName() + "</font>";
 	}
 
 	@Override
@@ -266,7 +265,7 @@ public class MeshNode extends DataNode implements ViewCookie
 		try
 		{
 			String o=getName();
-			getDataObject().rename(arg0+"_mesh");
+			getDataObject().rename(arg0+"_meshBora");
 			fireDisplayNameChange(o, arg0);
 			fireNameChange(o, arg0);
 		}
@@ -279,7 +278,7 @@ public class MeshNode extends DataNode implements ViewCookie
 	public String getName()
 	{
 		String s = getDataObject().getName();
-		return s.substring(0, s.length()-"_mesh".length());
+		return s.substring(0, s.length()-"_meshBora".length());
 	}
 	
 

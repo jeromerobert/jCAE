@@ -30,7 +30,7 @@ import org.openide.util.NbBundle;
 public class MeshDataLoader extends UniFileLoader
 {
 	
-	public static final String REQUIRED_MIME = "text/mesh+xml";
+	public static final String REQUIRED_MIME = "text/meshBora+xml";
 	
 	private static final long serialVersionUID = 1L;
 	

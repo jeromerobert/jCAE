@@ -33,7 +33,7 @@ import org.openide.util.actions.SystemAction;
  */
 public class SubmeshNode extends AbstractNode implements Node.Cookie {
 
-	private final String boraFileName;
+	private final String boraFileName; //needed for delete operation
 	private final DataModel dataModel = new DataModel();
 
 
@@ -133,7 +133,7 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 			Iterator<BCADGraphCell> it = root.shapesExplorer(type);
 			while (it.hasNext()) {
 				BCADGraphCell cell = it.next();
-				toAdd.add(new BCADGraphNode(cell.getType()+""+cell.getId(),cell, dataModel));
+				toAdd.add(new BCADGraphNode(true,cell, dataModel));
 			}
 			node.getChildren().add(toAdd.toArray(new Node[0]));
 			node.setName(type.toString());
@@ -152,6 +152,7 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 		private final Map<BCADGraphCell, Constraint> constraints = new HashMap<BCADGraphCell, Constraint>();
 
 		public void addConstraint(BCADGraphCell cell, Hypothesis hyp) {
+			subMesh.getModel().resetConstraints();
 			if (!constraints.containsKey(cell)) {
 				Constraint cons = new Constraint(cell, hyp);
 				constraints.put(cell, cons);
@@ -171,6 +172,7 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 		}
 
 		public void removeConstraint(BCADGraphCell cell) {
+			subMesh.getModel().resetConstraints();
 			if (!constraints.containsKey(cell))
 				return;
 			Constraint cons = constraints.get(cell);

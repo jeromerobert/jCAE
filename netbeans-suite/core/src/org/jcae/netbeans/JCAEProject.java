@@ -91,7 +91,8 @@ public class JCAEProject implements Project, LogicalViewProvider, ActionProvider
 			{
 				String s=FileUtil.getMIMEType(os[i]);
 				if(s!=null && !MIME_UNKNOWN.equals(s) && 
-					!"text/x-unv".equals(s) && !"text/mesh+xml".equals(s))
+					!"text/x-unv".equals(s) && !"text/mesh+xml".equals(s)
+					&& !"text/meshBora+xml".equals(s))
 				{					
 					try
 					{					

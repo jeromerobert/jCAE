@@ -22,16 +22,10 @@
 package org.jcae.netbeans.mesh;
 
 import java.awt.Image;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Collection;
 import javax.swing.Action;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
-import org.jcae.mesh.bora.ds.BSubMesh;
-import org.jcae.mesh.bora.ds.Constraint;
 import org.jcae.mesh.bora.ds.Hypothesis;
-import org.jcae.netbeans.cad.GeomUtils;
-import org.jcae.netbeans.cad.NbShape;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
@@ -42,8 +36,99 @@ import org.openide.util.actions.SystemAction;
 
 public class BCADGraphNode extends AbstractNode implements Node.Cookie
 {
+	private final Attributes attributes = new Attributes();
 
-	private class Attributes {
+	public BCADGraphNode(BCADGraphCell cell, SubmeshNode.DataModel dataModel) {
+		super(new BCADCellNode(cell, dataModel));
+		init(cell, dataModel);
+	}
+
+	/**
+	 * Use this constructor if you wish the node not to have children
+	 * @param isLeaf
+	 * @param cell
+	 * @param dataModel
+	 */
+	public BCADGraphNode(boolean isLeaf, BCADGraphCell cell, SubmeshNode.DataModel dataModel) {
+		super(Children.LEAF);
+		init(cell, dataModel);
+	}
+
+	/**
+	 * Initialize name and attributes of this object
+	 * @param cell
+	 * @param dataModel
+	 */
+	private void init(BCADGraphCell cell, SubmeshNode.DataModel dataModel) {
+		setDisplayName(cell.getType() + "" + cell.getId());
+		attributes.initialize(cell, dataModel);
+	}
+
+	@Override
+	protected Sheet createSheet() {
+		Sheet sheet = Sheet.createDefault();
+		Sheet.Set set = new Sheet.Set();
+		set.setName("Mesh constraints");
+		set.setShortDescription("Mesh constraints");
+		try {
+			Property deflectionProp = new PropertySupport.Reflection(
+					this.attributes,
+					Double.class, "getDeflection", "setDeflection");
+			deflectionProp.setName("Deflextion");
+
+			Property edgeProp = new PropertySupport.Reflection(this.attributes,
+					Double.class, "getEdgeLength", "setEdgeLength");
+			edgeProp.setName("Edge length");
+
+			Property elementProp = new PropertySupport.Reflection(
+					this.attributes,
+					String.class, "getElement", "setElement");
+			elementProp.setName("Element");
+			elementProp.setValue("suppressCustomEditor", true);
+
+			set.put(deflectionProp);
+			set.put(edgeProp);
+			set.put(elementProp);
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		sheet.put(set);
+		return sheet;
+	}
+	
+	public BCADGraphCell getGraphCell() {
+		return attributes.cell;
+	}
+
+	@Override
+	public Image getIcon(int type) {
+		return Utilities.loadImage("org/jcae/netbeans/cad/link.png");
+	}
+
+	@Override
+	public Image getOpenedIcon(int arg0) {
+		return getIcon(arg0);
+	}
+
+
+	@Override
+	public Action[] getActions(boolean arg0) {
+		ArrayList<Action> l = new ArrayList<Action>();
+		l.add(SystemAction.get(ViewBCellGeometryAction.class));
+		l.add(SystemAction.get(ViewBCellMeshAction.class));
+		return l.toArray(new Action[l.size()]);
+	}
+
+	@Override
+	public Object getValue(String attributeName) {
+		if (attributeName.equals("CELL"))
+			return attributes.cell;
+		return super.getValue(attributeName);
+	}
+
+
+	public class Attributes {
 		private BCADGraphCell cell;
 		private Hypothesis hyp;
 		private SubmeshNode.DataModel dataModel;
@@ -80,7 +165,7 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 		/**
 		 * @param deflection the deflection to set
 		 */
-		public void setDeflection(double deflection) {
+		public void setDeflection(Double deflection) {
 			this.hyp.setDeflection(deflection);
 			updateConstraints();
 		}
@@ -95,7 +180,7 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 		/**
 		 * @param edgeLength the edgeLength to set
 		 */
-		public void setEdgeLength(double edgeLength) {
+		public void setEdgeLength(Double edgeLength) {
 			this.hyp.setLength(edgeLength);
 			updateConstraints();
 		}
@@ -115,104 +200,4 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 			updateConstraints();
 		}
 	}
-
-	private final Attributes attributes = new Attributes();
-
-	public BCADGraphCell getGraphCell() {
-		return attributes.cell;
-	}
-
-	public BCADGraphNode(BCADGraphCell cell, SubmeshNode.DataModel dataModel) {
-		super(new BCADCellNode(cell, dataModel));
-		setDisplayName(cell.getType() + "" + cell.getId());
-		attributes.initialize(cell, dataModel);
-		createSheetSet();
-	}
-
-	public BCADGraphNode(String name, BCADGraphCell cell, SubmeshNode.DataModel dataModel) {
-		super(Children.LEAF);
-		setDisplayName(name);
-		attributes.initialize(cell, dataModel);
-		createSheetSet();
-	}
-
-	@Override
-	public Image getIcon(int type) {
-		return Utilities.loadImage("org/jcae/netbeans/cad/link.png");
-	}
-
-	@Override
-	public Image getOpenedIcon(int arg0) {
-		return getIcon(arg0);
-	}
-
-	private void createSheetSet()
-	{
-		Sheet.Set set=new Sheet.Set();
-		set.setName("Mesh constraints");
-
-		set.put(new PropertySupport.ReadWrite<Double>(
-				"deflection", Double.class, "Deflection", "Deflection") {
-
-			public Double getValue() {
-				return attributes.getDeflection();
-			}
-
-			@Override
-			public void setValue(Double arg0) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-				attributes.setDeflection(arg0);
-			}
-		});
-
-		set.put(new PropertySupport.ReadWrite<Double>(
-				"edgeLength", Double.class, "Edge Length", "Edge Length") {
-
-			public Double getValue() {
-				return attributes.getEdgeLength();
-			}
-
-			@Override
-			public void setValue(Double arg0) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-				attributes.setEdgeLength(arg0);
-			}
-		});
-
-
-		set.put(new PropertySupport.ReadWrite<String> (
-			"element", String.class, "Element", "Element")
-		{
-			@Override
-			public String getValue() throws IllegalAccessException,
-				InvocationTargetException
-			{
-				return attributes.getElement();
-			}
-
-			@Override
-			public void setValue(String val) throws IllegalAccessException,
-				IllegalArgumentException, InvocationTargetException
-			{
-				attributes.setElement(val);
-			}
-		});
-		getSheet().put(set);
-	}
-
-	@Override
-	public Action[] getActions(boolean arg0) {
-		ArrayList<Action> l = new ArrayList<Action>();
-		l.add(SystemAction.get(ViewBCellGeometryAction.class));
-		l.add(SystemAction.get(ViewBCellMeshAction.class));
-		return l.toArray(new Action[l.size()]);
-	}
-
-	@Override
-	public Object getValue(String attributeName) {
-		if (attributeName.equals("CELL"))
-			return attributes.cell;
-		return super.getValue(attributeName);
-	}
-
-
-
 }

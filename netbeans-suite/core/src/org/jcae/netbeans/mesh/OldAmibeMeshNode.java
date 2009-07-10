@@ -274,14 +274,13 @@ public class OldAmibeMeshNode extends DataNode implements ViewCookie
         }
 	}
 
-	public OldAmibeMesh getMesh() {
+	public Mesh getMesh() {
 		return getCookie(OldAmibeMeshDataObject.class).getMesh();
 	}
 
 	@Override
-	public String getDisplayName()
-	{
-		return "OLD_" + getName();
+	public String getHtmlDisplayName() {
+		return "<i>" + "OLD_" + getName() + "</i>";
 	}
 
 	@Override

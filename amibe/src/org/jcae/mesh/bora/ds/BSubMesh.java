@@ -79,6 +79,10 @@ public class BSubMesh
 		model = m;
 		this.id = id;
 	}
+
+	public final BModel getModel() {
+		return model;
+	}
 	
 	public int getId()
 	{

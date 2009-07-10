@@ -29,6 +29,8 @@ public class MeshResolver extends MIMEResolver
 	{
 		if(fileObject.getNameExt().endsWith("_mesh.xml"))
 			return "text/mesh+xml";
+		else if (fileObject.getNameExt().endsWith("_meshBora.xml"))
+			return "text/meshBora+xml";
 		else
 			return null;
 	}	

@@ -64,6 +64,7 @@ public class ModuleNode extends AbstractNode
 			return new Node[]{((DataObject) arg0).getNodeDelegate()};
 		}
 		
+		@Override
 		protected void addNotify()
 		{
 			try
@@ -72,7 +73,9 @@ public class ModuleNode extends AbstractNode
 				ArrayList<DataObject> l=new ArrayList<DataObject>();
 				for(int i=0; i<os.length; i++)
 				{
-					if(os[i].getNameExt().endsWith("_mesh.xml"))
+					if(os[i].getNameExt().endsWith("_meshBora.xml"))
+						l.add(DataObject.find(os[i]));
+					else if(os[i].getNameExt().endsWith("_mesh.xml"))
 						l.add(DataObject.find(os[i]));
 					else if("text/x-unv".equals(FileUtil.getMIMEType(os[i])))
 						l.add(DataObject.find(os[i]));
@@ -133,16 +136,19 @@ public class ModuleNode extends AbstractNode
 		((MyLookup)getLookup()).setDelegates(Lookups.fixed(project, this));
 	}
 	
+	@Override
 	public String getName()
 	{
 		return "Meshes";
 	}
 	
+	@Override
 	public Action[] getActions(boolean arg0)
 	{
 		return new Action[]{SystemAction.get(NewAction.class)};
 	}
 	
+	@Override
 	public NewType[] getNewTypes()
 	{
 		return new NewType[]{new NewType()
@@ -151,7 +157,7 @@ public class ModuleNode extends AbstractNode
 			{
 				Project p=getLookup().lookup(Project.class);
 				FileObject fo=p.getProjectDirectory();
-				FileObject m=fo.createData(Utilities.getFreeName(fo,"new","_mesh.xml"));
+				FileObject m=fo.createData(Utilities.getFreeName(fo,"new","_meshBora.xml"));
 				MeshDataObject mdo=(MeshDataObject) DataObject.find(m);
 				mdo.getMesh();
 				mdo.save();

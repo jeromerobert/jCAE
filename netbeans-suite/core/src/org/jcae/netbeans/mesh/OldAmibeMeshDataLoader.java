@@ -50,9 +50,14 @@ public class OldAmibeMeshDataLoader extends UniFileLoader
 		getExtensions().addMimeType(REQUIRED_MIME);
 	}
 
+	@Override
+	protected FileObject findPrimaryFile(FileObject arg0) {
+		return super.findPrimaryFile(arg0);
+	}
+
 	protected MultiDataObject createMultiObject(FileObject primaryFile) throws DataObjectExistsException, IOException
 	{
-		return new MeshDataObject(primaryFile, this);
+		return new OldAmibeMeshDataObject(primaryFile, this);
 	}
 
 	protected String actionsContext()
