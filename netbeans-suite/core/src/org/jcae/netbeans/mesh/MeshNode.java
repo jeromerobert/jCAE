@@ -282,42 +282,6 @@ public class MeshNode extends DataNode implements ViewCookie
 		return s.substring(0, s.length()-"_mesh".length());
 	}
 	
-	/*protected void createPasteTypes(Transferable arg0, List arg1)
-	{
-		super.createPasteTypes(arg0, arg1);
-		DataFlavor[] dts = arg0.getTransferDataFlavors();
-		for(int i=0; i<dts.length; i++)
-		{
-			System.out.println("createPasteTypes"+i+":"+dts[i]);
-		}
-
-		if(arg0.isDataFlavorSupported(BrepNode.OPENCASCADE_DATAFLAVOR))
-		{
-			try
-			{
-				final String name = (String) arg0.getTransferData(BrepNode.OPENCASCADE_DATAFLAVOR);
-				arg1.add(new PasteType()
-				{
-					public Transferable paste() throws IOException
-					{
-						mesh.setGeometryFile(name);
-						firePropertyChange(null, null, null);
-						return null;
-					}
-				});
-			}
-			catch (UnsupportedFlavorException e) 
-			{
-				ErrorManager.getDefault().notify(e);
-			}
-			catch (IOException e)
-			{
-				ErrorManager.getDefault().notify(e);
-			}
-		}
-	}*/
-
-
 
 	/**
 	 * Indicate if groups is the same than has the groupNode
