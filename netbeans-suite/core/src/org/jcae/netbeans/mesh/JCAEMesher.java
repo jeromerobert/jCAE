@@ -97,52 +97,54 @@ public class JCAEMesher implements Runnable, Cancellable
 	 */		
 	public void run()
 	{
-		try
-		{
-			InputOutput io=IOProvider.getDefault().getIO("jCAE Mesher "+ioProviderCounter, true);				
-			ioProviderCounter++;
-			
-			final String brepName=Utilities.absoluteFileName(mesh.getGeometryFile(), reference);
-			String xmlDir=Utilities.absoluteFileName(mesh.getMeshFile(), reference);
-			
-			final OutputWriter ow=io.getOut();
-			if(Settings.getDefault().isRunInSameJVM())
-			{				
-				Logger root = Logger.getLogger("");
-				root.setLevel(Level.INFO);
-				Formatter jcaeFormatter = new JCAEFormatter();
-				for (Handler h: root.getHandlers())
-				{
-					h.setFormatter(jcaeFormatter);
-				}
-				thread=Thread.currentThread();
-				Mesher.main(new String[]{brepName, xmlDir, ""+mesh.getEdgeLength(), ""+mesh.getDeflection()});
-				thread=null;
-			}
-			else
-			{											
-				ArrayList<String> array=new ArrayList<String>();
-				array.addAll(Arrays.asList(Settings.getDefault().getCommandLine()));
-				array.add(brepName);
-				array.add(xmlDir);
-				array.add(""+mesh.getEdgeLength());
-				array.add(""+mesh.getDeflection());
-				array.addAll(Arrays.asList(Settings.getDefault().getCustomMesherParameters()));
-				String[] cmdLine = array.toArray(new String[array.size()]);
-				System.err.println("jcae-netbeans-mesh: Running command line "+array);					
-				process=Runtime.getRuntime().exec(cmdLine);										
-				new Thread(new Redirector(process.getInputStream(), ow)).start();
-				new Thread(new Redirector(process.getErrorStream(), ow)).start();
-				process.waitFor();
-				process=null;
-			}
-			
-			ow.close();			
-		}
-		catch(Exception ex)
-		{
-			ErrorManager.getDefault().notify(ex);
-		}
+		mesh.getBoraModel().compute();
+//		try
+//		{
+//			InputOutput io=IOProvider.getDefault().getIO("jCAE Mesher "+ioProviderCounter, true);
+//			ioProviderCounter++;
+//
+//			final String brepName=Utilities.absoluteFileName(mesh.getGeometryFile(), reference);
+//			String xmlDir=Utilities.absoluteFileName(mesh.getMeshFile(), reference);
+//
+//			final OutputWriter ow=io.getOut();
+//			if(Settings.getDefault().isRunInSameJVM())
+//			{
+//				Logger root = Logger.getLogger("");
+//				root.setLevel(Level.INFO);
+//				Formatter jcaeFormatter = new JCAEFormatter();
+//				for (Handler h: root.getHandlers())
+//				{
+//					h.setFormatter(jcaeFormatter);
+//				}
+//				thread=Thread.currentThread();
+//
+////				Mesher.main(new String[]{brepName, xmlDir, ""+mesh.getEdgeLength(), ""+mesh.getDeflection()});
+//				thread=null;
+//			}
+//			else
+//			{
+//				ArrayList<String> array=new ArrayList<String>();
+//				array.addAll(Arrays.asList(Settings.getDefault().getCommandLine()));
+//				array.add(brepName);
+//				array.add(xmlDir);
+//				array.add(""+mesh.getEdgeLength());
+//				array.add(""+mesh.getDeflection());
+//				array.addAll(Arrays.asList(Settings.getDefault().getCustomMesherParameters()));
+//				String[] cmdLine = array.toArray(new String[array.size()]);
+//				System.err.println("jcae-netbeans-mesh: Running command line "+array);
+//				process=Runtime.getRuntime().exec(cmdLine);
+//				new Thread(new Redirector(process.getInputStream(), ow)).start();
+//				new Thread(new Redirector(process.getErrorStream(), ow)).start();
+//				process.waitFor();
+//				process=null;
+//			}
+//
+//			ow.close();
+//		}
+//		catch(Exception ex)
+//		{
+//			ErrorManager.getDefault().notify(ex);
+//		}
 	}			
 	
 	@Override

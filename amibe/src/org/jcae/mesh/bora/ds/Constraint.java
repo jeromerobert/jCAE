@@ -27,7 +27,7 @@ import java.util.ArrayList;
 public class Constraint
 {
 	private final BCADGraphCell graphCell;
-	private final Hypothesis hypothesis;
+	private Hypothesis hypothesis;
 	// List of BSubMesh instances containing this Constraint.
 	private final Collection<BSubMesh> submesh = new ArrayList<BSubMesh>();
 	private Constraint origin;
@@ -106,6 +106,10 @@ public class Constraint
 	public Hypothesis getHypothesis()
 	{
 		return hypothesis;
+	}
+
+	public void setHypothesis(Hypothesis h) {
+		hypothesis = h;
 	}
 
 	public Constraint getOrigin()

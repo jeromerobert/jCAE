@@ -146,6 +146,12 @@
 			<file name="org-jcae-netbeans-mesh-OEMMViewAction.instance">
 				<attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.OEMMViewAction"/>
 			</file>
+			<file name="org-jcae-netbeans-mesh-ViewBCellGeometryAction.instance">
+				<attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.ViewBCellGeometryAction"/>
+			</file>
+			<file name="org-jcae-netbeans-mesh-ViewBCellMeshAction.instance">
+				<attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.ViewBCellMeshAction"/>
+			</file>
 		    </folder>
 	</folder>
 

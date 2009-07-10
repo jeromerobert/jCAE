@@ -29,16 +29,22 @@ import java.util.Iterator;
 import java.util.List;
 import javax.swing.Action;
 import javax.xml.parsers.ParserConfigurationException;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.bora.ds.BModel;
+import org.jcae.mesh.bora.xmldata.Storage;
 import org.jcae.mesh.xmldata.Group;
 import org.jcae.mesh.xmldata.Groups;
 import org.jcae.mesh.xmldata.GroupsReader;
+import org.jcae.mesh.xmldata.MeshWriter;
 import org.jcae.netbeans.BeanProperty;
 import org.jcae.netbeans.Utilities;
 import org.jcae.netbeans.cad.BrepNode;
 import org.jcae.netbeans.viewer3d.SelectionManager;
+import org.jcae.netbeans.viewer3d.ViewManager;
+import org.jcae.vtk.AmibeProvider;
 import org.jcae.vtk.AmibeToMesh;
 import org.jcae.vtk.View;
+import org.jcae.vtk.Viewable;
 import org.jcae.vtk.ViewableMesh;
 import org.openide.ErrorManager;
 import org.openide.actions.*;
@@ -193,32 +199,26 @@ public class MeshNode extends DataNode implements ViewCookie
 		SelectionManager.getDefault().addInteractor(interactor, groups);
 		view.add(interactor);
 	}
-	
-	public void view()
-	{
-//		updateGeomNode();
-//		if(groups!=null)
-		getMesh().getBoraModel().printConstraints();
-//		{
-//			View view=ViewManager.getDefault().getCurrentView();
-//			try
-//			{
-//				displayGroups(groups, getName(),
-//					Arrays.asList(groups.getGroups()), view);
-//			}
-//			catch (ParserConfigurationException ex)
-//			{
-//				Exceptions.printStackTrace(ex);
-//			}
-//			catch (SAXException ex)
-//			{
-//				Exceptions.printStackTrace(ex);
-//			}
-//			catch (IOException ex)
-//			{
-//				Exceptions.printStackTrace(ex);
-//			}
-//		}
+
+	public void view() {
+		if (geomNode != null && getMesh() != null && getMesh().getBoraModel() != null) {
+			MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault3D();
+			mtb.addNodeList();
+			org.jcae.mesh.amibe.ds.Mesh m = new org.jcae.mesh.amibe.ds.Mesh(mtb);
+			Storage.readAllFaces(m,
+					getMesh().getBoraModel().getGraph().getRootCell());
+			try {
+				MeshWriter.writeObject3D(m, "/tmp/Bora", "dummy.brep");
+				View v = ViewManager.getDefault().getCurrentView();
+				AmibeToMesh toMesh = new AmibeToMesh("/tmp/Bora");
+				ViewableMesh vMesh = new ViewableMesh(toMesh.getMesh());
+				vMesh.setName(getMesh().getBoraModel().getOutputFile());
+				v.add(vMesh);
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				return;
+			}
+		}
 	}
 	
 	public String getMeshDirectory()

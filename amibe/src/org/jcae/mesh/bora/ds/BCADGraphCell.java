@@ -358,6 +358,26 @@ public class BCADGraphCell
 		found.addSubMesh(sub);
 	}
 
+	void removeSubMeshConstraint(BSubMesh sub, Constraint cons)
+	{
+		BDiscretization d = getDiscretizationSubMesh(sub);
+		if (d == null)
+			throw new RuntimeException("Constraint "+cons+" cannot be removed from shape "+shape+", beacause it doesn't exist");
+		BDiscretization found = null;
+		for (BDiscretization discr : discrete)
+		{
+			if (discr.getConstraint() == cons)
+			{
+				found = discr;
+				break;
+			}
+		}
+		if (found != null)
+		{
+			found.removeSubMesh(sub);
+		}
+	}
+
 	/**
 	 * Returns an immutable view of the list of BDiscretization instances bound to this cell.
 	 */

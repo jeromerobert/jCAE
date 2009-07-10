@@ -22,102 +22,53 @@
 package org.jcae.netbeans.mesh;
 
 import java.awt.Image;
-import java.beans.IntrospectionException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collection;
+import javax.swing.Action;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.bora.ds.BSubMesh;
 import org.jcae.mesh.bora.ds.Constraint;
 import org.jcae.mesh.bora.ds.Hypothesis;
-import org.jcae.netbeans.BeanProperty;
-import org.openide.ErrorManager;
+import org.jcae.netbeans.cad.GeomUtils;
+import org.jcae.netbeans.cad.NbShape;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
+import org.openide.nodes.PropertySupport;
+import org.openide.nodes.Sheet;
 import org.openide.util.Utilities;
+import org.openide.util.actions.SystemAction;
 
 public class BCADGraphNode extends AbstractNode implements Node.Cookie
 {
 
-	public class Attributes {
-		private Collection<Constraint> allConstraints;
-		private Constraint myConstraint;
+	private class Attributes {
 		private BCADGraphCell cell;
-		private Hypothesis hyp = new Hypothesis();
-		private BSubMesh subMesh;
+		private Hypothesis hyp;
+		private SubmeshNode.DataModel dataModel;
 
+		public void initialize(BCADGraphCell cell, SubmeshNode.DataModel dataModel) {
+			this.cell = cell;
+			this.dataModel = dataModel;
+			refresh();
+		}
 
-		public void initialize(Collection<Constraint> allConstraints, BCADGraphCell cell, BSubMesh subMesh) {
-			setAllConstraints(allConstraints);
-			setCell(cell);
-			this.subMesh = subMesh;
-			for (Constraint c : allConstraints) {
-				if (c.getGraphCell().equals(cell)) {
-					hyp = c.getHypothesis();
-					myConstraint = c;
-					break;
-				}
+		/**
+		 * Synchronizes the attributes with the SubmeshNode DataModel
+		 */
+		public void refresh() {
+			if (dataModel.getConstraint(cell) != null) {
+				hyp = dataModel.getConstraint(cell).getHypothesis();
 			}
+			else if (hyp == null)
+				hyp = new Hypothesis();
 		}
 
 		private void updateConstraints() {
-			if (myConstraint == null) {
-				myConstraint = new Constraint(cell, hyp);
-				subMesh.add(myConstraint);
-//				allConstraints.add(myConstraint);
-			}
-			Node node = getParentNode();
-			while (node != null) {
-				if (node instanceof MeshNode) {
-					MeshNode mNode = (MeshNode)node;
-					mNode.getMesh().refresh();
-					break;
-				}
-				node = node.getParentNode();
-			}
-			assert (allConstraints.contains(myConstraint));
+			dataModel.addConstraint(cell, hyp);
 		}
 
-		/**
-		 * @param allConstraints the allConstraints to set
-		 */
-		private void setAllConstraints(Collection<Constraint> allConstraints) {
-			this.allConstraints = allConstraints;
-		}
-
-		/**
-		 * @return the myConstraint
-		 */
-		public Constraint getMyConstraint() {
-			return myConstraint;
-		}
-
-		/**
-		 * @param myConstraint the myConstraint to set
-		 */
-		public void setMyConstraint(Constraint myConstraint) {
-			this.myConstraint = myConstraint;
-		}
-
-		/**
-		 * @param cell the cell to set
-		 */
-		private void setCell(BCADGraphCell cell) {
-			this.cell = cell;
-		}
-
-		/**
-		 * @return the hyp
-		 */
-		public Hypothesis getHyp() {
-			return hyp;
-		}
-
-		/**
-		 * @param hyp the hyp to set
-		 */
-		public void setHyp(Hypothesis hyp) {
-			this.hyp = hyp;
-		}
 
 		/**
 		 * @return the deflection
@@ -167,15 +118,22 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 
 	private final Attributes attributes = new Attributes();
 
-	public BCADGraphNode(BCADGraphCell cell, Collection<Constraint> constraints, BSubMesh subMesh) {
-		super(new BCADCellNode(cell, constraints, subMesh));
-		setDisplayName(cell.getType() + "" + cell.getId());
-		attributes.initialize(constraints, cell, subMesh);
+	public BCADGraphCell getGraphCell() {
+		return attributes.cell;
 	}
 
-	public BCADGraphNode(String name, BCADGraphCell cell, Collection<Constraint> constraints, BSubMesh subMesh) {
+	public BCADGraphNode(BCADGraphCell cell, SubmeshNode.DataModel dataModel) {
+		super(new BCADCellNode(cell, dataModel));
+		setDisplayName(cell.getType() + "" + cell.getId());
+		attributes.initialize(cell, dataModel);
+		createSheetSet();
+	}
+
+	public BCADGraphNode(String name, BCADGraphCell cell, SubmeshNode.DataModel dataModel) {
 		super(Children.LEAF);
 		setDisplayName(name);
+		attributes.initialize(cell, dataModel);
+		createSheetSet();
 	}
 
 	@Override
@@ -188,38 +146,73 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 		return getIcon(arg0);
 	}
 
-	private Attributes getAttributes() {
-		return attributes;
-	}
+	private void createSheetSet()
+	{
+		Sheet.Set set=new Sheet.Set();
+		set.setName("Mesh constraints");
 
-	protected Property[] getMeshProperties() {
-		try {
-			return new Property[]{
-						new BeanProperty(getAttributes(), "deflection"),
-						new BeanProperty(getAttributes(), "edgeLength"),
-						new BeanProperty(getAttributes(), "element")};
-		} catch (NoSuchMethodException e) {
-			ErrorManager.getDefault().notify(e);
-			return new Property[0];
-		} catch (IntrospectionException e) {
-			ErrorManager.getDefault().notify(e);
-			return new Property[0];
-		}
+		set.put(new PropertySupport.ReadWrite<Double>(
+				"deflection", Double.class, "Deflection", "Deflection") {
+
+			public Double getValue() {
+				return attributes.getDeflection();
+			}
+
+			@Override
+			public void setValue(Double arg0) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+				attributes.setDeflection(arg0);
+			}
+		});
+
+		set.put(new PropertySupport.ReadWrite<Double>(
+				"edgeLength", Double.class, "Edge Length", "Edge Length") {
+
+			public Double getValue() {
+				return attributes.getEdgeLength();
+			}
+
+			@Override
+			public void setValue(Double arg0) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+				attributes.setEdgeLength(arg0);
+			}
+		});
+
+
+		set.put(new PropertySupport.ReadWrite<String> (
+			"element", String.class, "Element", "Element")
+		{
+			@Override
+			public String getValue() throws IllegalAccessException,
+				InvocationTargetException
+			{
+				return attributes.getElement();
+			}
+
+			@Override
+			public void setValue(String val) throws IllegalAccessException,
+				IllegalArgumentException, InvocationTargetException
+			{
+				attributes.setElement(val);
+			}
+		});
+		getSheet().put(set);
 	}
 
 	@Override
-	public PropertySet[] getPropertySets() {
-		return new PropertySet[]{
-					new PropertySet() {
-						public Property[] getProperties() {
-							return BCADGraphNode.this.getMeshProperties();
-						}
-
-						public String getName() {
-							return "Mesh";
-						}
-					}
-				};
+	public Action[] getActions(boolean arg0) {
+		ArrayList<Action> l = new ArrayList<Action>();
+		l.add(SystemAction.get(ViewBCellGeometryAction.class));
+		l.add(SystemAction.get(ViewBCellMeshAction.class));
+		return l.toArray(new Action[l.size()]);
 	}
+
+	@Override
+	public Object getValue(String attributeName) {
+		if (attributeName.equals("CELL"))
+			return attributes.cell;
+		return super.getValue(attributeName);
+	}
+
+
 
 }

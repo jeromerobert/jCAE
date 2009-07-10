@@ -23,14 +23,12 @@ import org.openide.nodes.Node;
  */
 public class BCADCellNode extends Children.Keys implements Node.Cookie {
 
-	protected BCADGraphCell cell;
-	protected Collection<Constraint> constraints;
-	protected BSubMesh subMesh;
+	protected final BCADGraphCell cell;
+	protected final SubmeshNode.DataModel dataModel;
 
-	public BCADCellNode(BCADGraphCell cell, Collection<Constraint> constraints, BSubMesh subMesh) {
+	public BCADCellNode(BCADGraphCell cell, SubmeshNode.DataModel dataModel) {
 		this.cell = cell;
-		this.constraints = constraints;
-		this.subMesh = subMesh;
+		this.dataModel = dataModel;
 	}
 
 	@Override
@@ -48,6 +46,6 @@ public class BCADCellNode extends Children.Keys implements Node.Cookie {
 
 	protected Node[] createNodes(Object o) {
 		BCADGraphCell obj = (BCADGraphCell) o;
-		return new Node[]{new BCADGraphNode(obj, constraints, subMesh)};
+		return new Node[]{new BCADGraphNode(obj, dataModel)};
 	}
 }

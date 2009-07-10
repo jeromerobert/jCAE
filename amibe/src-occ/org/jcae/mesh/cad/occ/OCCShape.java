@@ -44,7 +44,7 @@ public class OCCShape implements CADShape
 		myShape = o;
 	}
 	
-	protected TopoDS_Shape getShape()
+	public TopoDS_Shape getShape()
 	{
 		return myShape;
 	}

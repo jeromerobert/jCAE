@@ -85,6 +85,11 @@ public class BDiscretization
 		submesh.add(s);
 	}
 
+	void removeSubMesh(BSubMesh s)
+	{
+		submesh.remove(s);
+	}
+
 	public BSubMesh getFirstSubMesh()
 	{
 		return submesh.iterator().next();

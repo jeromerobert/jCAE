@@ -201,6 +201,12 @@ public class BModel
 		allConstraints.add(cons);
 	}
 
+	void removeConstraint(Constraint cons) {
+		if (state != State.INPUT)
+			throw new RuntimeException("Constraints cannot be removed after model has been computed");
+		allConstraints.remove(cons);
+	}
+
 	/**
   	 * Combines all hypothesis.
 	 */

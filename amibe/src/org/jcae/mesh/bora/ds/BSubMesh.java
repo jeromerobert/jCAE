@@ -107,6 +107,18 @@ public class BSubMesh
 	}
 
 	/**
+	 * Remove a constraint from the current submesh
+	 * @param cons constraint to remove
+	 */
+	public void remove(Constraint cons) {
+		model.removeConstraint(cons);
+		constraints.remove(cons);
+		// Remove the constraint from the CAD Cell
+		BCADGraphCell cell = cons.getGraphCell();
+		cell.removeSubMeshConstraint(this, cons);
+	}
+
+	/**
 	 * Prints discretizations of a submesh.
 	 * Some cells may appear twice with opposite orientations but the same discretization.
 	 * This is due to the use of shapesExplorer on the root of the CAD. Another solution 

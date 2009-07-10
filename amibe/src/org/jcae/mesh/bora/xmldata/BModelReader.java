@@ -126,7 +126,7 @@ public class BModelReader
 					for (int j = 0; j < c.length; j++)
 						s.add(consIdMap.get(Integer.parseInt(c[j])));
 				}
-//				model.computeConstraints();
+				model.save();
 			}
 			if (!validate)
 				return model;
