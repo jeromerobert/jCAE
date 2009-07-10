@@ -33,6 +33,8 @@ import java.util.Stack;
 import java.util.Iterator;
 import java.io.File;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -242,17 +244,25 @@ public class BModel
 		if (state == State.INPUT)
 			return;
 		LOGGER.info("Reset constraints");
+		Map<BSubMesh, Collection<Constraint>> saveConstraints = new HashMap<BSubMesh, Collection<Constraint>>();
+		for (BSubMesh s : submesh)
+		{
+			saveConstraints.put(s, s.getConstraints());
+			s.resetConstraints();
+		}
 		BCADGraphCell root = cad.getRootCell();
 		for (CADShapeEnum cse : CADShapeEnum.iterable(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND))
 		{
 			for (Iterator<BCADGraphCell> it = root.shapesExplorer(cse); it.hasNext(); )
-			{
-				BCADGraphCell cell = it.next();
-				for (BDiscretization discr : cell.getDiscretizations())
-					discr.resetConstraint();
-			}
+				it.next().removeDiscretizations();
 		}
 		state = State.INPUT;
+		allConstraints.clear();
+		for (BSubMesh s : submesh)
+		{
+			for (Constraint c : saveConstraints.get(s))
+				s.add(c);
+		}
 	}
 	
 	public void save() {

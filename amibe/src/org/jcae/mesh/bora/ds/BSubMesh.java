@@ -94,6 +94,11 @@ public class BSubMesh
 		return Collections.unmodifiableCollection(constraints);
 	}
 
+	void resetConstraints()
+	{
+		constraints.clear();
+	}
+
 	/**
 	 * Add a constraint to current submesh
 	 *

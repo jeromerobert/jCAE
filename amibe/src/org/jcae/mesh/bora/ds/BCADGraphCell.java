@@ -449,6 +449,11 @@ public class BCADGraphCell
 		}
 	}
 
+	void removeDiscretizations()
+	{
+		discrete.clear();
+	}
+
 	@Override
 	public String toString()
 	{
