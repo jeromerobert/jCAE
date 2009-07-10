@@ -247,7 +247,7 @@ public class BModel
 		Map<BSubMesh, Collection<Constraint>> saveConstraints = new HashMap<BSubMesh, Collection<Constraint>>();
 		for (BSubMesh s : submesh)
 		{
-			saveConstraints.put(s, s.getConstraints());
+			saveConstraints.put(s, new ArrayList<Constraint>(s.getConstraints()));
 			s.resetConstraints();
 		}
 		BCADGraphCell root = cad.getRootCell();
