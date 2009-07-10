@@ -28,7 +28,7 @@ import org.jcae.opencascade.jni.BRep_Tool;
 public class OCCVertex extends OCCShape implements CADVertex
 {
 	@Override
-	protected TopoDS_Vertex getShape()
+	public TopoDS_Vertex getShape()
 	{
 		return (TopoDS_Vertex) myShape;
 	}
