@@ -26,6 +26,8 @@ import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.IOException;
 import java.io.InputStream;
+import org.jcae.mesh.bora.ds.BModel;
+import org.jcae.mesh.bora.xmldata.BModelReader;
 import org.jcae.netbeans.Utilities;
 import org.openide.ErrorManager;
 import org.openide.cookies.SaveCookie;
@@ -38,6 +40,7 @@ import org.openide.nodes.Node;
 
 public class MeshDataObject extends MultiDataObject implements SaveCookie, PropertyChangeListener
 {
+
 	public MeshDataObject(FileObject arg0, MultiFileLoader arg1) throws DataObjectExistsException
 	{
 		super(arg0, arg1);
@@ -45,7 +48,8 @@ public class MeshDataObject extends MultiDataObject implements SaveCookie, Prope
 
 	protected Node createNodeDelegate()
 	{
-		return new MeshNode(this);
+		MeshNode toReturn = new MeshNode(this);
+		return toReturn;
 	}
 	
 	private Mesh mesh;
@@ -55,6 +59,12 @@ public class MeshDataObject extends MultiDataObject implements SaveCookie, Prope
 		if(mesh==null)
 		{
 			mesh=initMesh();
+			if (mesh.getBoraFile() != null && !mesh.getBoraFile().isEmpty()) {
+				String xmlDir = mesh.getBoraFile().substring(0,
+						mesh.getBoraFile().lastIndexOf("/"));
+				String xmlFile = mesh.getBoraFile().substring(mesh.getBoraFile().lastIndexOf("/") + 1);
+				mesh.setBoraModel(BModelReader.readObject(xmlDir, xmlFile));
+			}
 			mesh.addPropertyChangeListener(this);
 		}
 		return mesh;
@@ -103,6 +113,9 @@ public class MeshDataObject extends MultiDataObject implements SaveCookie, Prope
 			l = out.lock();
 			encoder = new XMLEncoder(out.getOutputStream(l));
 			encoder.writeObject(mesh);
+			if (mesh.getBoraModel() != null) {
+				mesh.getBoraModel().computeConstraints(); // saving the file
+			}
 			setModified(false);
 		}
 		catch(IOException ex)

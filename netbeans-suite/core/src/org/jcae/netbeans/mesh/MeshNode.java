@@ -24,12 +24,12 @@ import java.awt.datatransfer.Transferable;
 import java.beans.IntrospectionException;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import javax.swing.Action;
 import javax.xml.parsers.ParserConfigurationException;
+import org.jcae.mesh.bora.ds.BModel;
 import org.jcae.mesh.xmldata.Group;
 import org.jcae.mesh.xmldata.Groups;
 import org.jcae.mesh.xmldata.GroupsReader;
@@ -37,7 +37,6 @@ import org.jcae.netbeans.BeanProperty;
 import org.jcae.netbeans.Utilities;
 import org.jcae.netbeans.cad.BrepNode;
 import org.jcae.netbeans.viewer3d.SelectionManager;
-import org.jcae.netbeans.viewer3d.ViewManager;
 import org.jcae.vtk.AmibeToMesh;
 import org.jcae.vtk.View;
 import org.jcae.vtk.ViewableMesh;
@@ -53,7 +52,6 @@ import org.openide.nodes.Node;
 import org.openide.nodes.Node.Property;
 import org.openide.nodes.Node.PropertySet;
 import org.openide.nodes.NodeTransfer;
-import org.openide.util.Exceptions;
 import org.openide.util.actions.SystemAction;
 import org.openide.util.datatransfer.PasteType;
 import org.openide.util.lookup.Lookups;
@@ -84,35 +82,7 @@ public class MeshNode extends DataNode implements ViewCookie
 		return groupsNode;
 	}
 
-	private AbstractNode createGeomNode(String geomFile)
-	{
-		int i=geomFile.lastIndexOf('.');
-		final String s=geomFile.substring(0, i);
-		return new AbstractNode(Children.LEAF)
-		{
-			public String getDisplayName()
-			{
-				return s;
-			}
-			
-			public void destroy() throws IOException
-			{
-				super.destroy();
-				getMesh().setGeometryFile(null);
-			}
-			
-			public Action[] getActions(boolean arg0)
-			{
-				return new Action[]{SystemAction.get(DeleteAction.class)};
-			}
-			
-			public boolean canDestroy()
-			{
-				return true;
-			}
-		};
-	}
-	
+
 	protected Property[] getMeshProperties()
 	{
 		try
@@ -139,7 +109,8 @@ public class MeshNode extends DataNode implements ViewCookie
 		{
 			return new Property[]{
 				new BeanProperty(getMesh(), "geometryFile"),
-				new BeanProperty(getMesh(), "meshFile")
+				new BeanProperty(getMesh(), "meshFile"),
+				new BeanProperty(getMesh(), "boraFile")
 			};
 		}
 		catch (NoSuchMethodException e)
@@ -225,27 +196,29 @@ public class MeshNode extends DataNode implements ViewCookie
 	
 	public void view()
 	{
-		if(groups!=null)
-		{
-			View view=ViewManager.getDefault().getCurrentView();
-			try
-			{
-				displayGroups(groups, getName(),
-					Arrays.asList(groups.getGroups()), view);
-			}
-			catch (ParserConfigurationException ex)
-			{
-				Exceptions.printStackTrace(ex);
-			}
-			catch (SAXException ex)
-			{
-				Exceptions.printStackTrace(ex);
-			}
-			catch (IOException ex)
-			{
-				Exceptions.printStackTrace(ex);
-			}
-		}
+//		updateGeomNode();
+//		if(groups!=null)
+		getMesh().getBoraModel().printConstraints();
+//		{
+//			View view=ViewManager.getDefault().getCurrentView();
+//			try
+//			{
+//				displayGroups(groups, getName(),
+//					Arrays.asList(groups.getGroups()), view);
+//			}
+//			catch (ParserConfigurationException ex)
+//			{
+//				Exceptions.printStackTrace(ex);
+//			}
+//			catch (SAXException ex)
+//			{
+//				Exceptions.printStackTrace(ex);
+//			}
+//			catch (IOException ex)
+//			{
+//				Exceptions.printStackTrace(ex);
+//			}
+//		}
 	}
 	
 	public String getMeshDirectory()
@@ -343,7 +316,9 @@ public class MeshNode extends DataNode implements ViewCookie
 			}
 		}
 	}*/
-	
+
+
+
 	/**
 	 * Indicate if groups is the same than has the groupNode
 	 * @param groups
@@ -364,7 +339,14 @@ public class MeshNode extends DataNode implements ViewCookie
 			{
 				public Transferable paste()
 				{
-					getMesh().setGeometryFile(n.getDataObject().getPrimaryFile().getNameExt());					
+					getMesh().setGeometryFile(n.getDataObject().getPrimaryFile().getNameExt());
+					String geomPath = n.getDataObject().getPrimaryFile().getPath();
+					geomPath = "/" + geomPath;
+					String outPath =  geomPath.substring(0, geomPath.lastIndexOf("/"));
+					getMesh().setBoraModel(new BModel(geomPath,outPath));
+					getMesh().setBoraFile(outPath+ getMesh().getBoraModel().getOutputFile());
+					getMesh().getBoraModel().newMesh();
+					getMesh().getBoraModel().save(); //writing the file to disk.
 					updateGeomNode();
 					firePropertyChange(null, null, null);
 					return null;
@@ -379,9 +361,9 @@ public class MeshNode extends DataNode implements ViewCookie
 	{
 		if(geomNode!=null)
 			getChildren().remove(new Node[]{geomNode});
-		if(getMesh().getGeometryFile()!=null)
-		{
-			geomNode=createGeomNode(getMesh().getGeometryFile());
+		if (getMesh().getBoraModel() != null) {
+			geomNode = new SubmeshNode(getMesh().getGeometryFile().substring(
+					0, getMesh().getGeometryFile().lastIndexOf(".")), getMesh().getBoraModel());
 			getChildren().add(new Node[] { geomNode } );
 		}
 			

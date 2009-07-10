@@ -199,7 +199,7 @@ public class BCADGraph
 	/**
 	 * Prints the list of geometrical elements.
 	 */
-	void printShapes()
+	public void printShapes()
 	{
 		System.out.println("List of geometrical entities");
 		for (CADShapeEnum cse : CADShapeEnum.iterable(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND))
