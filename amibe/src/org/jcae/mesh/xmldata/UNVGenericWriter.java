@@ -38,7 +38,7 @@ public class UNVGenericWriter
 {
 	private static Logger logger=Logger.getLogger(UNVGenericWriter.class.getName());
 	private String unvFile;
-	private PrintStream streamN, streamT, streamG;
+	private PrintStream streamN, streamE, streamG;
 	private final static String CR=System.getProperty("line.separator");
 	private final static int BUFFER_SIZE = 16 * 1024;
 	
@@ -47,24 +47,24 @@ public class UNVGenericWriter
 		this.unvFile = unvFile;
 		try
 		{
-			BufferedOutputStream bosN, bosT, bosG;
+			BufferedOutputStream bosN, bosE, bosG;
 			bosN=new BufferedOutputStream(new FileOutputStream(unvFile));
-			bosT=new BufferedOutputStream(new FileOutputStream(unvFile+"T"));
+			bosE=new BufferedOutputStream(new FileOutputStream(unvFile+"E"));
 			bosG=new BufferedOutputStream(new FileOutputStream(unvFile+"G"));
 			if(unvFile.endsWith(".gz"))
 			{
 				streamN = new PrintStream(new GZIPOutputStream(bosN));
-				streamT = new PrintStream(new GZIPOutputStream(bosT));
+				streamE = new PrintStream(new GZIPOutputStream(bosE));
 				streamG = new PrintStream(new GZIPOutputStream(bosG));
 			}
 			else
 			{
 				streamN = new PrintStream(bosN);
-				streamT = new PrintStream(bosT);
+				streamE = new PrintStream(bosE);
 				streamG = new PrintStream(bosG);
 			}
 			streamN.println("    -1"+CR+"  2411");
-			streamT.println("    -1"+CR+"  2412");
+			streamE.println("    -1"+CR+"  2412");
 			streamG.println("    -1"+CR+"  2435");
 		}
 		catch(FileNotFoundException ex)
@@ -82,11 +82,11 @@ public class UNVGenericWriter
 		MeshExporter.UNV.writeSingleNode(streamN, label, coord[0], coord[1], coord[2]);
 	}
 	
-	public void writeTriangle(int label, int [] ind)
+	public void writeElement(int label, int [] ind)
 	{
-		MeshExporter.UNV.writeSingleTriangle(streamT, label, ind[0], ind[1], ind[2]);
+		MeshExporter.UNV.writeSingleLinearElement(streamE, label, ind);
 	}
-	
+
 	public void writeGroup(int groupId, String name, int [] ids)
 	{
 		MeshExporter.UNV.writeSingleGroup(streamG, groupId, name, ids);
@@ -101,19 +101,19 @@ public class UNVGenericWriter
 		try
 		{
 			streamN.println("    -1");
-			streamT.println("    -1");
+			streamE.println("    -1");
 			streamG.println("    -1");
 			streamN.close();
-			streamT.close();
+			streamE.close();
 			streamG.close();
 			// Now concatenate all files
 			FileChannel fc = new FileOutputStream(unvFile, true).getChannel();
 			ByteBuffer bb = ByteBuffer.allocate(BUFFER_SIZE);
-			appendFile(fc, unvFile+"T", bb);
+			appendFile(fc, unvFile+"E", bb);
 			appendFile(fc, unvFile+"G", bb);
 			fc.close();
 			// And delete old files
-			new File(unvFile+"T").delete();
+			new File(unvFile+"E").delete();
 			new File(unvFile+"G").delete();
 			logger.info("Total number of nodes: "+nrNodes);
 			logger.info("Total number of triangles: "+nrTriangles);

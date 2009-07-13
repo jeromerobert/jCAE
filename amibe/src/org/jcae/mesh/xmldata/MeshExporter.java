@@ -480,6 +480,36 @@ abstract public class MeshExporter
 			out.println(FORMAT_D25_16.format(x)+FORMAT_D25_16.format(y)+FORMAT_D25_16.format(z));
 		}
 
+		// We use our own convention for elements:
+		//      2: linear beam
+		//      3: linear triangle
+		//      4: linear tetrahedron
+		public static void writeSingleLinearElement(PrintStream out, int count, int[] ids)
+		{
+			int type;
+			if (ids[0] == 2)
+			{
+				assert ids.length == 3;
+				type = 21;
+			}
+			else if (ids[0] == 3)
+			{
+				assert ids.length == 4;
+				type = 91;
+			}
+			else if (ids[0] == 4)
+			{
+				assert ids.length == 5;
+				type = 111;
+			}
+			else
+				throw new IllegalArgumentException();
+			out.println(FORMAT_I10.format(count)+FORMAT_I10.format(type)+"         1         1         1"+FORMAT_I10.format(ids.length-1));
+			for (int i = 1; i < ids.length; i++)
+				out.print(FORMAT_I10.format(ids[i]));
+			out.println();
+		}
+
 		public static void writeSingleTriangle(PrintStream out, int count, int n0, int n1, int n2)
 		{
 			out.println(FORMAT_I10.format(count)+"        91         1         1         1         3");

@@ -331,7 +331,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 			int numberOfFaces = Integer.parseInt(xpath.evaluate(
 				"number/text()", submeshFaces));
 			logger.fine("Reading "+numberOfFaces+" faces");
-			int ind [] = new int[3];
+			int ind [] = new int[4];
 			int indLoc [] = new int[3];
 			int cntTriangles = 0;
 			for (int i = 0; i < numberOfFaces; i++)
@@ -350,11 +350,11 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 				{
 					// Global node number
 					if (indLoc[j] < numberOfNodes - numberOfReferences)
-						ind[j] = indLoc[j] + nodeOffset;
+						ind[j+1] = indLoc[j] + nodeOffset;
 					else
-						ind[j] = xrefs.get(refs[indLoc[j] - numberOfNodes + numberOfReferences]) + nrIntNodes;
+						ind[j+1] = xrefs.get(refs[indLoc[j] - numberOfNodes + numberOfReferences]) + nrIntNodes;
 				}
-				if (ind[0] == ind[1] || ind[1] == ind[2] || ind[2] == ind[0])
+				if (ind[1] == ind[2] || ind[2] == ind[3] || ind[3] == ind[1])
 				{
 					logger.fine("Triangle bound from a degenerated edge skipped");
 					continue;
@@ -378,17 +378,18 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 				}
 				if (F.isOrientationForward())
 				{
-					int temp = ind[0];
-					ind[0] = ind[2];
+					int temp = ind[1];
+					ind[1] = ind[2];
 					ind[2] = temp;
 				}
-				for (int j = 0; j < 3; j++)
+				for (int j = 1; j < 4; j++)
 					trianglesOut.writeInt(ind[j]);
 				if (unvWriter != null)
 				{
-					for (int j = 0; j < 3; j++)
+					ind[0] = 3;
+					for (int j = 1; j < 4; j++)
 						ind[j]++;
-					unvWriter.writeTriangle(cntTriangles+nrTriangles+1, ind);
+					unvWriter.writeElement(cntTriangles+nrTriangles+1, ind);
 				}
 				cntTriangles++;
 			}

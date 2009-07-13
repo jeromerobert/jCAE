@@ -1,3 +1,8 @@
+Mon Jul 13 17:40:12 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/bora/xmldata/BoraToUnvConvert.java: New helper
+	class to export bora meshes as UNV files.
+
 Tue Jul  7 15:54:17 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/MeshExporter.java: Fix UNV export of
