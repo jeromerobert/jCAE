@@ -34,15 +34,15 @@ import java.util.zip.GZIPOutputStream;
 import java.util.logging.Logger;
 
 
-public class MeshToUNVConvert
+public class UNVGenericWriter
 {
-	private static Logger logger=Logger.getLogger(MeshToUNVConvert.class.getName());
+	private static Logger logger=Logger.getLogger(UNVGenericWriter.class.getName());
 	private String unvFile;
 	private PrintStream streamN, streamT, streamG;
 	private final static String CR=System.getProperty("line.separator");
 	private final static int BUFFER_SIZE = 16 * 1024;
 	
-	public MeshToUNVConvert(String unvFile)
+	public UNVGenericWriter(String unvFile)
 	{
 		this.unvFile = unvFile;
 		try

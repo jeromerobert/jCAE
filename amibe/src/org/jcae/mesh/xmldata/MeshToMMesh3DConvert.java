@@ -61,8 +61,8 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 	private File nodesFile, refFile, normalsFile, trianglesFile, groupsFile;
 	private Document documentOut;
 	private Element groupsElement;
-	private MeshToUNVConvert unv = null;
-	
+	private UNVGenericWriter unvWriter;
+
 	public MeshToMMesh3DConvert(String dir, String bFile, CADShape shape)
 	{
 		xmlDir = dir;
@@ -79,7 +79,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 	public void exportUNV(boolean b, String unvName)
 	{
 		if (b)
-			unv = new MeshToUNVConvert(unvName);
+			unvWriter = new UNVGenericWriter(unvName);
 	}
 	
 	public void collectBoundaryNodes(int[] faces)
@@ -186,8 +186,8 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 				normalsOut.close();
 			trianglesOut.close();
 			groupsOut.close();
-			if (unv != null)
-				unv.finish(nrRefs, nrIntNodes, nrTriangles, coordRefs);
+			if (unvWriter != null)
+				unvWriter.finish(nrRefs, nrIntNodes, nrTriangles, coordRefs);
 			
 			// Write 3d files
 			Element jcaeElement = documentOut.getDocumentElement();
@@ -298,8 +298,8 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 				double [] p3 = surface.value(u, v);
 				for (int j = 0; j < 3; j++)
 					nodesOut.writeDouble(p3[j]);
-				if (unv != null)
-					unv.writeNode(i+nodeOffset+1, p3);
+				if (unvWriter != null)
+					unvWriter.writeNode(i+nodeOffset+1, p3);
 				surface.setParameter(u, v);
 				p3 = surface.normal();
 				for (int j = 0; j < 3; j++)
@@ -384,11 +384,11 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 				}
 				for (int j = 0; j < 3; j++)
 					trianglesOut.writeInt(ind[j]);
-				if (unv != null)
+				if (unvWriter != null)
 				{
 					for (int j = 0; j < 3; j++)
 						ind[j]++;
-					unv.writeTriangle(cntTriangles+nrTriangles+1, ind);
+					unvWriter.writeTriangle(cntTriangles+nrTriangles+1, ind);
 				}
 				cntTriangles++;
 			}
@@ -396,12 +396,12 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 			
 			for (int i=0; i < cntTriangles; i++)
 				groupsOut.writeInt(i+nrTriangles);
-			if (unv != null)
+			if (unvWriter != null)
 			{
 				int [] ids = new int[cntTriangles];
 				for (int i = 0; i < cntTriangles; i++)
 					ids[i] = i + nrTriangles + 1;
-				unv.writeGroup(groupId, groupName, ids);
+				unvWriter.writeGroup(groupId, groupName, ids);
 			}
 			groupsElement.appendChild(XMLHelper.parseXMLString(documentOut,
 				"<group id=\""+(groupId-1)+"\">"+
