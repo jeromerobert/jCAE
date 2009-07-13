@@ -22,9 +22,11 @@ package org.jcae.netbeans.viewer3d;
 
 import java.util.HashMap;
 import org.jcae.mesh.xmldata.Groups;
+import org.jcae.netbeans.cad.BCADSelection;
 import org.jcae.netbeans.cad.CADSelection;
 import org.jcae.netbeans.cad.NbShape;
 import org.jcae.netbeans.mesh.MeshSelection;
+import org.jcae.netbeans.mesh.ViewBCellGeometryAction.NbBShape;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
 import org.jcae.vtk.ViewableCAD;
@@ -113,8 +115,12 @@ public class SelectionManager {
 	 */
 	private EntitySelection createEntitySelection(Viewable viewable, Object entity) {
 		if(viewable instanceof ViewableCAD) {
-			if(entity instanceof NbShape)
+			if (entity instanceof NbBShape) 
+				return new BCADSelection((NbBShape)entity);
+			
+			else if(entity instanceof NbShape)
 				return new CADSelection((NbShape)entity);
+			
 			else
 				throw new IllegalArgumentException("The entity associated wit ha ViewableCAD has to be a NbShape");
 		}

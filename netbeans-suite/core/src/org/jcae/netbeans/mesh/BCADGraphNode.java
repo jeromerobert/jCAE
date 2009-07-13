@@ -40,10 +40,14 @@ import org.openide.util.actions.SystemAction;
 public class BCADGraphNode extends AbstractNode implements Node.Cookie
 {
 	private final Attributes attributes = new Attributes();
+	//tells if this node is displayed in the graph view
+	//or in the Entities view
+	private final boolean isEntitie;
 
 	public BCADGraphNode(BCADGraphCell cell, SubmeshNode.DataModel dataModel) {
 		super(new BCADCellNode(cell, dataModel));
 		init(cell, dataModel);
+		isEntitie = false; //graph view
 	}
 
 	/**
@@ -55,6 +59,7 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 	public BCADGraphNode(boolean isLeaf, BCADGraphCell cell, SubmeshNode.DataModel dataModel) {
 		super(Children.LEAF);
 		init(cell, dataModel);
+		isEntitie = true; //entitie view
 	}
 
 	/**
@@ -146,6 +151,8 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 			return attributes.cell;
 		else if (attributeName.equals("ATTRIBUTES"))
 			return attributes;
+		else if (attributeName.equals("ENTITIE"))
+			return isEntitie;
 		return super.getValue(attributeName);
 	}
 

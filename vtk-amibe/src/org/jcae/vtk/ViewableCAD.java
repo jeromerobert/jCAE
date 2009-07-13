@@ -244,7 +244,15 @@ public class ViewableCAD extends Viewable
 		}
 		return selection;
 	}
-	
+
+	public void selectSelectionNodes() {
+		for (LeafNode n :rootNode.getLeaves())
+			n.unselect();
+		for (LeafNode n : selectionNode)
+			if (n!=null)
+				n.select();
+	}
+
 	/**
 	 * Set the new selection.
 	 * Be careful, the listeners of change selection will not  be informed.

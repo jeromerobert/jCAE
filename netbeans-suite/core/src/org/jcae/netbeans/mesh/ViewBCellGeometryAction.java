@@ -6,9 +6,13 @@
  */
 package org.jcae.netbeans.mesh;
 
+import java.util.HashMap;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.cad.occ.OCCShape;
+import org.jcae.netbeans.cad.NbShape;
+import org.jcae.netbeans.viewer3d.SelectionManager;
 import org.jcae.netbeans.viewer3d.ViewManager;
+import org.jcae.opencascade.jni.TopoDS_Shape;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
 import org.jcae.vtk.ViewableCAD;
@@ -28,18 +32,23 @@ public final class ViewBCellGeometryAction extends CookieAction {
 		return "View Geometry";
 	}
 
+
 	@Override
 	protected void performAction(Node[] arg0) {
+		String name = "";
+		NbBShape toDisplay = new NbBShape((TopoDS_Shape)null);
 		for (Node n : arg0) {
 			BCADGraphCell cell = (BCADGraphCell)n.getValue("CELL");
-			view((OCCShape) cell.getShape(), cell.getType() + ""+cell.getId());
+			TopoDS_Shape shape = ((OCCShape)cell.getShape()).getShape();
+			name+=n.getDisplayName() + " ";
+			NbShape toAdd = new NbShape(shape);
+			toAdd.setNode(n);
+			toDisplay.add(toAdd);
 		}
+		view(toDisplay, name);
 	}
 
-
-//	WeakReference<ViewableCAD> viewableRef = new WeakReference<ViewableCAD>(null);
-
-	private void view(OCCShape shape, String name) {
+	private void view(NbBShape shape, String name) {
 		View v = ViewManager.getDefault().getCurrentView();
 		for (Viewable w : v.getViewables()) {
 			if (w instanceof ViewableCAD) {
@@ -50,15 +59,13 @@ public final class ViewBCellGeometryAction extends CookieAction {
 				}
 			}
 		}
-		
-		ViewableCAD	viewable = new ViewableCAD(shape.getShape());
+
+		ViewableCAD viewable = new ViewableCAD(shape.getImpl());
 		viewable.setName(name);
 
-		// TODO manage selection...
-		// SelectionManager.getDefault().addInteractor(viewable, shape.getShape());
+		SelectionManager.getDefault().addInteractor(viewable, shape);
 		v.add(viewable);
 	}
-
 
 	@Override
 	protected boolean asynchronous() {
@@ -94,5 +101,13 @@ public final class ViewBCellGeometryAction extends CookieAction {
 	}
 
 
+	/**
+	 * Decoy class, to use a BCADSelection in Selection Manager
+	 */
+	public static class NbBShape extends NbShape {
+		public NbBShape(TopoDS_Shape shape) {
+			super(shape, new HashMap<TopoDS_Shape, NbShape>(), new NbShape[0]);
+		}
+	}
 
 }
