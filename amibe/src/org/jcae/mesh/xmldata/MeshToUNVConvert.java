@@ -38,7 +38,7 @@ public class MeshToUNVConvert
 {
 	private static Logger logger=Logger.getLogger(MeshToUNVConvert.class.getName());
 	private String unvFile;
-	private PrintStream streamN, streamE, streamG;
+	private PrintStream streamN, streamT, streamG;
 	private final static String CR=System.getProperty("line.separator");
 	private final static int BUFFER_SIZE = 16 * 1024;
 	
@@ -47,24 +47,24 @@ public class MeshToUNVConvert
 		this.unvFile = unvFile;
 		try
 		{
-			BufferedOutputStream bosN, bosE, bosG;
+			BufferedOutputStream bosN, bosT, bosG;
 			bosN=new BufferedOutputStream(new FileOutputStream(unvFile));
-			bosE=new BufferedOutputStream(new FileOutputStream(unvFile+"E"));
+			bosT=new BufferedOutputStream(new FileOutputStream(unvFile+"T"));
 			bosG=new BufferedOutputStream(new FileOutputStream(unvFile+"G"));
 			if(unvFile.endsWith(".gz"))
 			{
 				streamN = new PrintStream(new GZIPOutputStream(bosN));
-				streamE = new PrintStream(new GZIPOutputStream(bosE));
+				streamT = new PrintStream(new GZIPOutputStream(bosT));
 				streamG = new PrintStream(new GZIPOutputStream(bosG));
 			}
 			else
 			{
 				streamN = new PrintStream(bosN);
-				streamE = new PrintStream(bosE);
+				streamT = new PrintStream(bosT);
 				streamG = new PrintStream(bosG);
 			}
 			streamN.println("    -1"+CR+"  2411");
-			streamE.println("    -1"+CR+"  2412");
+			streamT.println("    -1"+CR+"  2412");
 			streamG.println("    -1"+CR+"  2435");
 		}
 		catch(FileNotFoundException ex)
@@ -84,7 +84,7 @@ public class MeshToUNVConvert
 	
 	public void writeTriangle(int label, int [] ind)
 	{
-		MeshExporter.UNV.writeSingleTriangle(streamE, label, ind[0], ind[1], ind[2]);
+		MeshExporter.UNV.writeSingleTriangle(streamT, label, ind[0], ind[1], ind[2]);
 	}
 	
 	public void writeGroup(int groupId, String name, int [] ids)
@@ -92,7 +92,7 @@ public class MeshToUNVConvert
 		MeshExporter.UNV.writeSingleGroup(streamG, groupId, name, ids);
 	}
 	
-	public void finish(int nr, int nrIntNodes, int nrElements, double [] coordRefs)
+	public void finish(int nr, int nrIntNodes, int nrTriangles, double [] coordRefs)
 	{
 		int nrNodes = nrIntNodes + nr;
 		logger.fine("Append coordinates of "+nr+" nodes");
@@ -101,10 +101,10 @@ public class MeshToUNVConvert
 		try
 		{
 			streamN.println("    -1");
-			streamE.println("    -1");
+			streamT.println("    -1");
 			streamG.println("    -1");
 			streamN.close();
-			streamE.close();
+			streamT.close();
 			streamG.close();
 			// Now concatenate all files
 			FileChannel fc = new FileOutputStream(unvFile, true).getChannel();
@@ -116,7 +116,7 @@ public class MeshToUNVConvert
 			new File(unvFile+"T").delete();
 			new File(unvFile+"G").delete();
 			logger.info("Total number of nodes: "+nrNodes);
-			logger.info("Total number of triangles: "+nrElements);
+			logger.info("Total number of triangles: "+nrTriangles);
 		}
 		catch(Exception ex)
 		{
