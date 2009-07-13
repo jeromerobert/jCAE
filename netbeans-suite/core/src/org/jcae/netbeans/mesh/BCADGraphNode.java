@@ -77,8 +77,8 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 		CADShapeEnum type = attributes.cell.getType();
 		if (type != CADShapeEnum.FACE && type != CADShapeEnum.EDGE)
 			return getDisplayName();
-		String color = "00FF00"; //green
-		String txt = "- constraint defined";
+		String color = "006900"; //green
+		String txt = " - constraint defined";
 		if (!attributes.hasConstraint) {
 			color = "FF0000";//red
 			txt = " - constraint undefined!";

@@ -20,6 +20,8 @@ import org.jcae.mesh.bora.ds.BSubMesh;
 import org.jcae.mesh.bora.ds.Constraint;
 import org.jcae.mesh.bora.ds.Hypothesis;
 import org.jcae.mesh.cad.CADShapeEnum;
+import org.jcae.mesh.cad.occ.OCCShape;
+import org.jcae.opencascade.jni.TopoDS_Shape;
 import org.openide.actions.DeleteAction;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
@@ -52,11 +54,11 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 			allCells.addAll(bModel.getGraph().getCellList(type));
 		}
 		for (BCADGraphCell cell : allCells) {
-				dataModel.constraints.put(cell, null);
+				dataModel.constraints.put(getShapeFromCell(cell), null);
 		}
 		//getting the existing constraints and filling the constraints map
 		for (Constraint c : dataModel.subMesh.getConstraints()) {
-			dataModel.constraints.put(c.getGraphCell(), c);
+			dataModel.constraints.put(getShapeFromCell(c.getGraphCell()), c);
 		}
 
 		final AbstractNode graph = new AbstractNode(new BCADCellNode(rootCell, dataModel));
@@ -145,25 +147,29 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 	public class DataModel {
 		private BSubMesh subMesh;
 		//this constraint map is the data model used by the BCADGraphNode
-		private final Map<BCADGraphCell, Constraint> constraints = new HashMap<BCADGraphCell, Constraint>();
+		//actually, this map maps TopoDS_SHape and constraint, 'cause constraint are applied
+		//to topods_shape, not BCADGraphCell, and this is the only way to detect multiple values in the GUI
+		//for example, the edge between 2 faces of a cube is defined by 2 BCADGraphCell, and only 1 TopoDS_Shape
+		private final Map<TopoDS_Shape, Constraint> constraints = new HashMap<TopoDS_Shape, Constraint>();
 		private ArrayList<BCADGraphNode> listeners = new ArrayList<BCADGraphNode>();
 
 		public void addConstraint(BCADGraphCell cell, Hypothesis hyp) {
 			subMesh.getModel().resetConstraints();
-			if (!constraints.containsKey(cell)) {
+			TopoDS_Shape shape = getShapeFromCell(cell);
+			if (!constraints.containsKey(shape)) {
 				Constraint cons = new Constraint(cell, hyp);
-				constraints.put(cell, cons);
+				constraints.put(shape, cons);
 				subMesh.add(cons);
 			}
 			else {
 				//the key already exists, but the constraint might not
-				if (constraints.get(cell) == null) {
+				if (constraints.get(shape) == null) {
 					Constraint cons = new Constraint(cell, hyp);
-					constraints.put(cell, cons);
+					constraints.put(shape, cons);
 					subMesh.add(cons);
 				}
 				else {
-					constraints.get(cell).setHypothesis(hyp);
+					constraints.get(shape).setHypothesis(hyp);
 				}
 			}
 			fireModelChanged();
@@ -171,18 +177,19 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 
 		public void removeConstraint(BCADGraphCell cell) {
 			subMesh.getModel().resetConstraints();
-			if (!constraints.containsKey(cell))
+			TopoDS_Shape shape = getShapeFromCell(cell);
+			if (!constraints.containsKey(shape))
 				return;
-			Constraint cons = constraints.get(cell);
+			Constraint cons = constraints.get(shape);
 			if (cons != null) {
 				subMesh.remove(cons);
-				constraints.put(cell, null);
+				constraints.put(shape, null);
 			}
 			fireModelChanged();
 		}
 
 		public Constraint getConstraint(BCADGraphCell cell) {
-			return constraints.get(cell);
+			return constraints.get(getShapeFromCell(cell));
 		}
 
 		private void fireModelChanged() {
@@ -194,5 +201,9 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 			if (!listeners.contains(node))
 				listeners.add(node);
 		}
+	}
+
+	private static TopoDS_Shape getShapeFromCell(BCADGraphCell cell) {
+		return ((OCCShape)cell.getShape()).getShape();
 	}
 }
