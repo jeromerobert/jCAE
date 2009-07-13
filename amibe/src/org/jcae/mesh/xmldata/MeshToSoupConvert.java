@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2003,2004,2005, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -41,20 +41,24 @@ import org.jcae.mesh.cad.CADFace;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import gnu.trove.TIntIntHashMap;
+import gnu.trove.TIntObjectHashMap;
+import gnu.trove.TIntArrayList;
 import java.util.logging.Logger;
 
 
-public class MeshToSoupConvert extends JCAEXMLData
+public class MeshToSoupConvert extends JCAEXMLData implements FilterInterface
 {
 	private static Logger logger=Logger.getLogger(MeshToSoupConvert.class.getName());
 	private int nrTriangles = 0;
 	private int nrIntNodes = 0;
 	private int nrNodes = 0;
 	private int nrRefs = 0;
-	private String xmlDir;
+	private final String xmlDir;
+	private final String soupFile;
 	private File rawFile;
-	private TIntIntHashMap xrefs = null;
-	private double [] coordRefs = null;
+	private TIntIntHashMap xrefs;
+	private TIntObjectHashMap<CADFace> mapFaces = new TIntObjectHashMap<CADFace>();
+	private double [] coordRefs;
 	// Must be a multiple of 8*2, 4*3 and 8*10
 	private static final int bufferSize = 15 << 12;
 	private ByteBuffer bb = ByteBuffer.allocate(bufferSize);
@@ -82,8 +86,9 @@ public class MeshToSoupConvert extends JCAEXMLData
 		int maxFace=Integer.getInteger("org.jcae.mesh.Mesher.maxFace", 0).intValue();
 
 		int iFace = 0;
-		MeshToSoupConvert m2dTo3D = new MeshToSoupConvert(xmlDir);
+		MeshToSoupConvert m2dTo3D = new MeshToSoupConvert("soup", xmlDir, shape);
 		logger.info("Read informations on boundary nodes");
+		TIntArrayList listOfFaces = new TIntArrayList();
 		for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
 		{
 			iFace++;
@@ -93,9 +98,10 @@ public class MeshToSoupConvert extends JCAEXMLData
 				continue;
 			if (maxFace != 0 && iFace > maxFace)
 				continue;
-			m2dTo3D.computeRefs(iFace);
+			listOfFaces.add(iFace);
 		}
-		m2dTo3D.initialize("soup", false);
+		m2dTo3D.collectBoundaryNodes(listOfFaces.toNativeArray());
+		m2dTo3D.beforeProcessingAllShapes(false);
 		iFace = 0;
 		for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
 		{
@@ -108,76 +114,88 @@ public class MeshToSoupConvert extends JCAEXMLData
 			if (maxFace != 0 && iFace > maxFace)
 				continue;
 			logger.info("Importing face "+iFace);
-			m2dTo3D.convert(iFace, F);
+			m2dTo3D.processOneShape(iFace, ""+iFace, iFace);
 		}
-		m2dTo3D.finish();
+		m2dTo3D.afterProcessingAllShapes();
 	}
 	
-	public MeshToSoupConvert (String dir)
+	public MeshToSoupConvert (String file, String dir, CADShape shape)
 	{
 		xmlDir = dir;
+		soupFile = file;
+
+		CADExplorer expF = CADShapeFactory.getFactory().newExplorer();
+		int iFace = 0;
+		for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
+		{
+			iFace++;
+			mapFaces.put(iFace, (CADFace) expF.current());
+		}
 	}
-	
-	public void computeRefs(int iFace)
+
+	public void collectBoundaryNodes(int[] faces)
 	{
-		Document document;
-		File xmlFile2d = null;
-		try
+		for (int iFace : faces)
 		{
-			xmlFile2d = new File(xmlDir, JCAEXMLData.xml2dFilename+iFace);
-			document = XMLHelper.parseXML(xmlFile2d);
+			Document document;
+			File xmlFile2d = null;
+			try
+			{
+				xmlFile2d = new File(xmlDir, JCAEXMLData.xml2dFilename+iFace);
+				document = XMLHelper.parseXML(xmlFile2d);
+			}
+			catch(FileNotFoundException ex)
+			{
+				continue;
+			}
+			catch(Exception ex)
+			{
+				ex.printStackTrace();
+				throw new RuntimeException(ex);
+			}
+			XPath xpath = XPathFactory.newInstance().newXPath();
+			try
+			{
+				String formatVersion = xpath.evaluate("/jcae/@version", document);
+				if (formatVersion != null && formatVersion.length() > 0)
+					throw new RuntimeException("File "+xmlFile2d+" has been written by a newer version of jCAE and cannot be re-read");
+				Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh",
+					document, XPathConstants.NODE);
+				Node submeshNodes = (Node) xpath.evaluate("nodes", submeshElement,
+					XPathConstants.NODE);
+				
+				int numberOfReferences = Integer.parseInt(
+					xpath.evaluate("references/number/text()", submeshNodes));
+				nrRefs += numberOfReferences;
+				int numberOfNodes = Integer.parseInt(
+					xpath.evaluate("number/text()", submeshNodes));
+				nrIntNodes += numberOfNodes - numberOfReferences;
+			}
+			catch(Exception ex)
+			{
+				ex.printStackTrace();
+				throw new RuntimeException(ex);
+			}
+			logger.fine("Total: "+nrRefs+" references");
 		}
-		catch(FileNotFoundException ex)
-		{
-			return;
-		}
-		catch(Exception ex)
-		{
-			ex.printStackTrace();
-			throw new RuntimeException(ex);
-		}
-		XPath xpath = XPathFactory.newInstance().newXPath();
-		try
-		{
-			String formatVersion = xpath.evaluate("/jcae/@version", document);
-			if (formatVersion != null && formatVersion.length() > 0)
-				throw new RuntimeException("File "+xmlFile2d+" has been written by a newer version of jCAE and cannot be re-read");
-			Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh",
-				document, XPathConstants.NODE);
-			Node submeshNodes = (Node) xpath.evaluate("nodes", submeshElement,
-				XPathConstants.NODE);
-			
-			int numberOfReferences = Integer.parseInt(
-				xpath.evaluate("references/number/text()", submeshNodes));
-			nrRefs += numberOfReferences;
-			int numberOfNodes = Integer.parseInt(
-				xpath.evaluate("number/text()", submeshNodes));
-			nrIntNodes += numberOfNodes - numberOfReferences;
-		}
-		catch(Exception ex)
-		{
-			ex.printStackTrace();
-			throw new RuntimeException(ex);
-		}
-		logger.fine("Total: "+nrRefs+" references");
 	}
 	
-	public void initialize(String xmlOutFile, boolean writeNormal)
+	public void beforeProcessingAllShapes(boolean writeNormal)
 	{
 		coordRefs = new double[3*nrRefs];
 		xrefs = new TIntIntHashMap(nrRefs);
 
-		rawFile = new File(xmlDir, xmlOutFile);
+		rawFile = new File(xmlDir, soupFile);
 		rawFile.delete();
 	}
 	
-	public void finish()
+	public void afterProcessingAllShapes()
 	{
 		logger.info("Total number of nodes: "+(nrNodes+nrIntNodes));
 		logger.info("Total number of triangles: "+nrTriangles);
 	}
 	
-	public void convert(int iFace, CADFace F)
+	public void processOneShape(int groupId, String groupName, int iFace)
 	{
 		Document documentIn;
 		try
@@ -194,6 +212,7 @@ public class MeshToSoupConvert extends JCAEXMLData
 			throw new RuntimeException(ex);
 		}
 
+		CADFace F = mapFaces.get(iFace);
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		CADGeomSurface surface = F.getGeomSurface();
 		surface.dinit(0);

@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2003,2004,2005,2006, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -334,11 +334,12 @@ public class Mesher
 	 */
 	protected void mesh3D(String brepFile)
 	{
-		int iFace = 0;
-		CADExplorer expF = CADShapeFactory.getFactory().newExplorer();
-		MeshToMMesh3DConvert m2dTo3D = new MeshToMMesh3DConvert(outputDir, brepFile);
+		MeshToMMesh3DConvert m2dTo3D = new MeshToMMesh3DConvert(outputDir, brepFile, shape);
 		m2dTo3D.exportUNV(exportUNV, unvName);
 		logger.info("Read informations on boundary nodes");
+		TIntArrayList listOfFaces = new TIntArrayList();
+		int iFace = 0;
+		CADExplorer expF = CADShapeFactory.getFactory().newExplorer();
 		for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
 		{
 			iFace++;
@@ -348,13 +349,13 @@ public class Mesher
 				continue;
 			if (maxFace != 0 && iFace > maxFace)
 				continue;
-			m2dTo3D.computeRefs(iFace);
+			listOfFaces.add(iFace);
 		}
-		m2dTo3D.initialize(writeNormals);
+		m2dTo3D.collectBoundaryNodes(listOfFaces.toNativeArray());
+		m2dTo3D.beforeProcessingAllShapes(writeNormals);
 		iFace = 0;
 		for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
 		{
-			CADFace F = (CADFace) expF.current();
 			iFace++;
 			if (numFace != 0 && iFace != numFace)
 				continue;
@@ -363,9 +364,9 @@ public class Mesher
 			if (maxFace != 0 && iFace > maxFace)
 				continue;
 			logger.info("Importing face "+iFace);
-			m2dTo3D.convert(iFace, F);
+			m2dTo3D.processOneShape(iFace, ""+iFace, iFace);
 		}
-		m2dTo3D.finish();
+		m2dTo3D.afterProcessingAllShapes();
 	}
 	
 	/** 

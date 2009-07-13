@@ -21,8 +21,12 @@
 
 package org.jcae.mesh.xmldata;
 
-import org.jcae.mesh.cad.CADGeomSurface;
+import org.jcae.mesh.cad.CADExplorer;
 import org.jcae.mesh.cad.CADFace;
+import org.jcae.mesh.cad.CADGeomSurface;
+import org.jcae.mesh.cad.CADShape;
+import org.jcae.mesh.cad.CADShapeEnum;
+import org.jcae.mesh.cad.CADShapeFactory;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
@@ -32,13 +36,14 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import gnu.trove.TIntIntHashMap;
+import gnu.trove.TIntObjectHashMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import java.util.logging.Logger;
 
 
-public class MeshToMMesh3DConvert extends JCAEXMLData
+public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 {
 	private static Logger logger=Logger.getLogger(MeshToMMesh3DConvert.class.getName());
 	private int nrRefs = 0;
@@ -46,7 +51,8 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 	private int nrTriangles = 0;
 	private int offsetBnd = 0;
 	private int nodeOffset = 0;
-	private TIntIntHashMap xrefs = null;
+	private TIntIntHashMap xrefs;
+	private TIntObjectHashMap<CADFace> mapFaces = new TIntObjectHashMap<CADFace>();
 	private double [] coordRefs = null;
 	private DataOutputStream nodesOut, refsOut, normalsOut, trianglesOut, groupsOut;
 	private String xmlDir;
@@ -57,10 +63,17 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 	private Element groupsElement;
 	private MeshToUNVConvert unv = null;
 	
-	public MeshToMMesh3DConvert (String dir, String bFile)
+	public MeshToMMesh3DConvert(String dir, String bFile, CADShape shape)
 	{
 		xmlDir = dir;
 		brepFile = bFile;
+		int iFace = 0;
+		CADExplorer expF = CADShapeFactory.getFactory().newExplorer();
+		for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
+		{
+			iFace++;
+			mapFaces.put(iFace, (CADFace) expF.current());
+		}
 	}
 	
 	public void exportUNV(boolean b, String unvName)
@@ -69,51 +82,54 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			unv = new MeshToUNVConvert(unvName);
 	}
 	
-	public void computeRefs(int iFace)
+	public void collectBoundaryNodes(int[] faces)
 	{
-		Document document;
-		File xmlFile2d = null;
-		try
+		for (int iFace : faces)
 		{
-			xmlFile2d = new File(xmlDir, JCAEXMLData.xml2dFilename+iFace);
-			document = XMLHelper.parseXML(xmlFile2d);
+			Document document;
+			File xmlFile2d = null;
+			try
+			{
+				xmlFile2d = new File(xmlDir, JCAEXMLData.xml2dFilename+iFace);
+				document = XMLHelper.parseXML(xmlFile2d);
+			}
+			catch(FileNotFoundException ex)
+			{
+				continue;
+			}
+			catch(Exception ex)
+			{
+				ex.printStackTrace();
+				throw new RuntimeException(ex);
+			}
+			XPath xpath = XPathFactory.newInstance().newXPath();
+			try
+			{
+				String formatVersion = xpath.evaluate("/jcae/@version", document);
+				if (formatVersion != null && formatVersion.length() > 0)
+					throw new RuntimeException("File "+xmlFile2d+" has been written by a newer version of jCAE and cannot be re-read");
+				Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh",
+					document, XPathConstants.NODE);
+				Node submeshNodes = (Node) xpath.evaluate("nodes", submeshElement,
+					XPathConstants.NODE);
+				
+				int numberOfReferences = Integer.parseInt(
+					xpath.evaluate("references/number/text()", submeshNodes));
+				nrRefs += numberOfReferences;
+				int numberOfNodes = Integer.parseInt(
+					xpath.evaluate("number/text()", submeshNodes));
+				nrIntNodes += numberOfNodes - numberOfReferences;
+			}
+			catch(Exception ex)
+			{
+				ex.printStackTrace();
+				throw new RuntimeException(ex);
+			}
+			logger.fine("Total: "+nrRefs+" references");
 		}
-		catch(FileNotFoundException ex)
-		{
-			return;
-		}
-		catch(Exception ex)
-		{
-			ex.printStackTrace();
-			throw new RuntimeException(ex);
-		}
-		XPath xpath = XPathFactory.newInstance().newXPath();
-		try
-		{
-			String formatVersion = xpath.evaluate("/jcae/@version", document);
-			if (formatVersion != null && formatVersion.length() > 0)
-				throw new RuntimeException("File "+xmlFile2d+" has been written by a newer version of jCAE and cannot be re-read");
-			Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh",
-				document, XPathConstants.NODE);
-			Node submeshNodes = (Node) xpath.evaluate("nodes", submeshElement,
-				XPathConstants.NODE);
-			
-			int numberOfReferences = Integer.parseInt(
-				xpath.evaluate("references/number/text()", submeshNodes));
-			nrRefs += numberOfReferences;
-			int numberOfNodes = Integer.parseInt(
-				xpath.evaluate("number/text()", submeshNodes));
-			nrIntNodes += numberOfNodes - numberOfReferences;
-		}
-		catch(Exception ex)
-		{
-			ex.printStackTrace();
-			throw new RuntimeException(ex);
-		}
-		logger.fine("Total: "+nrRefs+" references");
 	}
 	
-	public void initialize(boolean writeNormal)
+	public void beforeProcessingAllShapes(boolean writeNormal)
 	{
 		coordRefs = new double[3*nrRefs];
 		xrefs = new TIntIntHashMap(nrRefs);
@@ -152,7 +168,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 		}
 	}
 	
-	public void finish()
+	public void afterProcessingAllShapes()
 	{
 		//  Stores coordinates of boundary nodes
 		//  Set nrRefs to its final value after elimination
@@ -220,7 +236,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 	 * @param groupId Group number of this 2D mesh
 	 * @param F Topological face
 	 */
-	public void convert(int groupId, CADFace F)
+	public void processOneShape(int groupId, String groupName, int iFace)
 	{
 		Document documentIn;
 		File xmlFile2d = null;
@@ -238,6 +254,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
+		CADFace F = mapFaces.get(iFace);
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		CADGeomSurface surface = F.getGeomSurface();
 		surface.dinit(1);
@@ -384,11 +401,11 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 				int [] ids = new int[cntTriangles];
 				for (int i = 0; i < cntTriangles; i++)
 					ids[i] = i + nrTriangles + 1;
-				unv.writeGroup(groupId, ""+groupId, ids);
+				unv.writeGroup(groupId, groupName, ids);
 			}
 			groupsElement.appendChild(XMLHelper.parseXMLString(documentOut,
 				"<group id=\""+(groupId-1)+"\">"+
-				"<name>"+groupId+"</name>"+
+				"<name>"+groupName+"</name>"+
 				"<number>"+cntTriangles+"</number>"+ 
 				"<file format=\"integerstream\" location=\""+
 				XMLHelper.canonicalize(xmlDir, groupsFile.toString())+"\""+
