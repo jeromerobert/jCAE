@@ -488,7 +488,7 @@ abstract public class MeshExporter
 
 		public static void writeSingleGroup(PrintStream out, int groupId, String name, int[] ids)
 		{
-			out.println(FORMAT_I10.format(groupId)+"        0         0         0         0         0         0"+FORMAT_I10.format(ids.length));
+			out.println(FORMAT_I10.format(groupId)+"         0         0         0         0         0         0"+FORMAT_I10.format(ids.length));
 			out.println(name);
 			boolean newline = true;
 			for(int j : ids)
