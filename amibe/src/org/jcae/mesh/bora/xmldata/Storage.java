@@ -42,9 +42,8 @@ import org.jcae.mesh.cad.CADGeomSurface;
 import org.jcae.mesh.cad.CADShapeFactory;
 import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.mesh.xmldata.DoubleFileReader;
-import org.jcae.mesh.xmldata.DoubleFileReaderByDirectBuffer;
 import org.jcae.mesh.xmldata.IntFileReader;
-import org.jcae.mesh.xmldata.IntFileReaderByDirectBuffer;
+import org.jcae.mesh.xmldata.PrimitiveFileReaderFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -476,7 +475,7 @@ public class Storage
 		throws IOException, FileNotFoundException
 	{
 		File refFile = new File(dir, "r");
-		IntFileReader ifrR = new IntFileReaderByDirectBuffer(refFile);
+		IntFileReader ifrR = new PrimitiveFileReaderFactory().getIntReader(refFile);
 		int numberOfReferences = (int) refFile.length() / 4;
 		int [] refs = new int[numberOfReferences];
 		ifrR.get(refs);
@@ -488,7 +487,7 @@ public class Storage
 		throws IOException, FileNotFoundException
 	{
 		File nodesFile = new File(dir, "n");
-		DoubleFileReader dfrN = new DoubleFileReaderByDirectBuffer(nodesFile);
+		DoubleFileReader dfrN = new PrimitiveFileReaderFactory().getDoubleReader(nodesFile);
 
 		int numberOfNodes = (int) nodesFile.length() / 24;
 		int numberOfReferences = refs.length / 2;
@@ -528,7 +527,7 @@ public class Storage
 		throws IOException, FileNotFoundException
 	{
 		File trianglesFile = new File(dir, "f");
-		IntFileReader ifr = new IntFileReaderByDirectBuffer(trianglesFile);
+		IntFileReader ifr = new PrimitiveFileReaderFactory().getIntReader(trianglesFile);
 
 		int numberOfTriangles = (int) trianglesFile.length() / (4*nr);
 		if (LOGGER.isLoggable(Level.FINE))

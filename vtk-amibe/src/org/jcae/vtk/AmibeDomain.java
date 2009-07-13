@@ -25,9 +25,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 import org.jcae.mesh.xmldata.DoubleFileReader;
-import org.jcae.mesh.xmldata.DoubleFileReaderByDirectBuffer;
 import org.jcae.mesh.xmldata.IntFileReader;
-import org.jcae.mesh.xmldata.IntFileReaderByDirectBuffer;
+import org.jcae.mesh.xmldata.PrimitiveFileReaderFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -159,7 +158,7 @@ public class AmibeDomain
 	private float[] readNodes(int[] nodesID) throws IOException
 	{
 		File f = getNodeFile();
-		DoubleFileReader dfr = new DoubleFileReaderByDirectBuffer(f);
+		DoubleFileReader dfr = new PrimitiveFileReaderFactory().getDoubleReader(f);
 
 		float[] toReturn = new float[nodesID.length * 3];
 
@@ -188,10 +187,11 @@ public class AmibeDomain
 		String os = ((Element) e.getElementsByTagName("file").item(0)).getAttribute("offset");
 		File groupFile = new File(directory, groupFileN);
 		int offset = Integer.parseInt(os);
-		IntFileReader ifrG = new IntFileReaderByDirectBuffer(groupFile);
+		PrimitiveFileReaderFactory pfrf = new PrimitiveFileReaderFactory();
+		IntFileReader ifrG = pfrf.getIntReader(groupFile);
 
 		File f = getTriaFile();
-		IntFileReader ifrT = new IntFileReaderByDirectBuffer(f);
+		IntFileReader ifrT = pfrf.getIntReader(f);
 
 		int[] toReturn = new int[number * 3];
 

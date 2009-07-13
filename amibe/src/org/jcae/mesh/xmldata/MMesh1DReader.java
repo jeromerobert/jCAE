@@ -104,19 +104,20 @@ public class MMesh1DReader
 				"/jcae/mesh/submesh/nodes/file/@location", document);
 			if (nodesFile.charAt(0) != File.separatorChar)
 				nodesFile = xmlDir+File.separator+nodesFile;
-			DoubleFileReader dfrN = new DoubleFileReaderByDirectBuffer(new File(nodesFile));
+			PrimitiveFileReaderFactory pfrf = new PrimitiveFileReaderFactory();
+			DoubleFileReader dfrN = pfrf.getDoubleReader(new File(nodesFile));
 
 			String refFile = xpath.evaluate(
 				"/jcae/mesh/submesh/nodes/references/file/@location", document);
 			if (refFile.charAt(0) != File.separatorChar)
 				refFile = xmlDir+File.separator+refFile;
-			IntFileReader ifrR = new IntFileReaderByDirectBuffer(new File(refFile));
+			IntFileReader ifrR = pfrf.getIntReader(new File(refFile));
 
 			String edgesFile = xpath.evaluate(
 				"/jcae/mesh/submesh/beams/file/@location", document);
 			if (edgesFile.charAt(0) != File.separatorChar)
 				edgesFile = xmlDir+File.separator+edgesFile;
-			IntFileReader ifrE = new IntFileReaderByDirectBuffer(new File(edgesFile));
+			IntFileReader ifrE = pfrf.getIntReader(new File(edgesFile));
 
 			NodeList submeshList = (NodeList) xpath.evaluate(
 				"/jcae/mesh/submesh", document.getDocumentElement(),

@@ -337,7 +337,7 @@ public class Groups
 		IntFileReader ifr = null;
 		try
 		{
-			ifr = new IntFileReaderByDirectBuffer(fileGroup);
+			ifr = new PrimitiveFileReaderFactory().getIntReader(fileGroup);
 			trianglesGroup = new int[g.getNumberOfElements()];
 			ifr.get(g.getOffset(), trianglesGroup);
 		}

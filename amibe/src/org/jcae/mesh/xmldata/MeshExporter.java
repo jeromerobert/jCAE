@@ -307,7 +307,7 @@ abstract public class MeshExporter
 	
 	private void readGroups() throws IOException
 	{
-		IntFileReader ifrG = new IntFileReaderByDirectBuffer(getGroupFile());
+		IntFileReader ifrG = new PrimitiveFileReaderFactory().getIntReader(getGroupFile());
 		Element xmlGroups=(Element) document.getElementsByTagName("groups").item(0);
 		groups=new int[groupIds.length][];
 		numberOfTriangles=0;
@@ -336,7 +336,7 @@ abstract public class MeshExporter
 	
 	private int[] readTriangles() throws IOException
 	{
-		IntFileReader ifrT = new IntFileReaderByDirectBuffer(getTriaFile());
+		IntFileReader ifrT = new PrimitiveFileReaderFactory().getIntReader(getTriaFile());
 		int[] toReturn = new int[numberOfTriangles * 3];
 		int count = 0;
 		for (int i = 0; i < groups.length; i++)
@@ -529,7 +529,7 @@ abstract public class MeshExporter
 		public void writeNodes(PrintStream out, int[] nodesID, TIntIntHashMap amibeToUNV) throws IOException
 		{
 			File f=getNodeFile();
-			DoubleFileReader dfrN = new DoubleFileReaderByDirectBuffer(f);
+			DoubleFileReader dfrN = new PrimitiveFileReaderFactory().getDoubleReader(f);
 
 			out.println("    -1"+CR+"  2411");
 			int count =  0;
@@ -630,7 +630,7 @@ abstract public class MeshExporter
 			throws IOException
 		{
 			File f=getNodeFile();
-			DoubleFileReader dfrN = new DoubleFileReaderByDirectBuffer(f);
+			DoubleFileReader dfrN = new PrimitiveFileReaderFactory().getDoubleReader(f);
 			
 			out.println("solid export");
 			int count=0;
@@ -694,7 +694,7 @@ abstract public class MeshExporter
 		public void writeNodes(PrintStream out, int[] nodesID, TIntIntHashMap amibeToUNV) throws IOException
 		{
 			File f=getNodeFile();
-			DoubleFileReader dfrN = new DoubleFileReaderByDirectBuffer(f);
+			DoubleFileReader dfrN = new PrimitiveFileReaderFactory().getDoubleReader(f);
 			
 			int count =  0;
 			double x,y,z;
@@ -749,7 +749,7 @@ abstract public class MeshExporter
 			File f=getNormalFile();
 			if (f == null)
 				throw new IOException();
-			DoubleFileReader dfrN = new DoubleFileReaderByDirectBuffer(f);
+			DoubleFileReader dfrN = new PrimitiveFileReaderFactory().getDoubleReader(f);
 			
 			int count=0;
 			for(int i=0; i<groups.length; i++)
@@ -814,7 +814,7 @@ abstract public class MeshExporter
 		public void writeNodes(PrintStream out, int[] nodesID, TIntIntHashMap amibeToUNV) throws IOException
 		{
 			File f=getNodeFile();
-			DoubleFileReader dfrN = new DoubleFileReaderByDirectBuffer(f);
+			DoubleFileReader dfrN = new PrimitiveFileReaderFactory().getDoubleReader(f);
 			
 			int count =  0;
 			double x,y,z;
@@ -957,7 +957,7 @@ abstract public class MeshExporter
 			//Write the size of the array in octets
 			dos.writeInt(nodesID.length*8*3);
 			File f=getNodeFile();
-			DoubleFileReader dfrN = new DoubleFileReaderByDirectBuffer(f);
+			DoubleFileReader dfrN = new PrimitiveFileReaderFactory().getDoubleReader(f);
 			
 			int count =  0;
 			double x,y,z;

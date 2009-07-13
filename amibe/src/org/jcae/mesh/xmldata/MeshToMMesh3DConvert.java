@@ -248,16 +248,17 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 				throw new RuntimeException("File "+xmlFile2d+" has been written by a newer version of jCAE and cannot be re-read");
 			String nodesFileInput = xpath.evaluate(
 				"/jcae/mesh/submesh/nodes/file/@location", documentIn);
-			DoubleFileReader dfrN = new DoubleFileReaderByDirectBuffer(new File(xmlDir, nodesFileInput));
+			PrimitiveFileReaderFactory pfrf = new PrimitiveFileReaderFactory();
+			DoubleFileReader dfrN = pfrf.getDoubleReader(new File(xmlDir, nodesFileInput));
 
 			String refFileInput = xpath.evaluate(
 				"/jcae/mesh/submesh/nodes/references/file/@location",
 				documentIn);
-			IntFileReader ifrR = new IntFileReaderByDirectBuffer(new File(xmlDir, refFileInput));
+			IntFileReader ifrR = pfrf.getIntReader(new File(xmlDir, refFileInput));
 
 			String trianglesFileInput = xpath.evaluate(
 				"/jcae/mesh/submesh/triangles/file/@location", documentIn);
-			IntFileReader ifrT = new IntFileReaderByDirectBuffer(new File(xmlDir, trianglesFileInput));
+			IntFileReader ifrT = pfrf.getIntReader(new File(xmlDir, trianglesFileInput));
 			
 			Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh",
 				documentIn, XPathConstants.NODE);

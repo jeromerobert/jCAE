@@ -98,13 +98,14 @@ public class MeshReader
 			if (refFile.charAt(0) != File.separatorChar)
 				refFile = xmlDir + File.separator + refFile;
 
-			IntFileReader ifrR = new IntFileReaderByDirectBuffer(new File(refFile));
+			PrimitiveFileReaderFactory pfrf = new PrimitiveFileReaderFactory();
+			IntFileReader ifrR = pfrf.getIntReader(new File(refFile));
 
 			String nodesFile = xpath.evaluate("file/@location", submeshNodes);
 			
 			if (nodesFile.charAt(0) != File.separatorChar) nodesFile = xmlDir
 				+ File.separator + nodesFile;
-			DoubleFileReader dfrN = new DoubleFileReaderByDirectBuffer(new File(nodesFile));
+			DoubleFileReader dfrN = pfrf.getDoubleReader(new File(nodesFile));
 			
 			Node submeshTriangles = (Node) xpath.evaluate("triangles",
 				submeshElement, XPathConstants.NODE);
@@ -112,7 +113,7 @@ public class MeshReader
 				submeshTriangles);
 			if (trianglesFile.charAt(0) != File.separatorChar)
 				trianglesFile = xmlDir+File.separator+trianglesFile;
-			IntFileReader ifrT = new IntFileReaderByDirectBuffer(new File(trianglesFile));
+			IntFileReader ifrT = pfrf.getIntReader(new File(trianglesFile));
 
 			int numberOfReferences = Integer.parseInt(
 				xpath.evaluate("references/number/text()", submeshNodes));
@@ -235,11 +236,12 @@ public class MeshReader
 			int [] refs = null;
 			int numberOfReferences = 0;
 
+			PrimitiveFileReaderFactory pfrf = new PrimitiveFileReaderFactory();
 			if (refFile != null && refFile.length() > 0)
 			{
 				if (refFile.charAt(0) != File.separatorChar)
 					refFile = xmlDir+File.separator+refFile;
-				IntFileReader ifrR = new IntFileReaderByDirectBuffer(new File(refFile));
+				IntFileReader ifrR = pfrf.getIntReader(new File(refFile));
 
 				numberOfReferences = Integer.parseInt(
 					xpath.evaluate("references/number/text()", submeshNodes));
@@ -252,7 +254,7 @@ public class MeshReader
 			String nodesFile = xpath.evaluate("file/@location", submeshNodes);
 			if (nodesFile.charAt(0) != File.separatorChar)
 				nodesFile = xmlDir+File.separator+nodesFile;
-			DoubleFileReader dfrN = new DoubleFileReaderByDirectBuffer(new File(nodesFile));
+			DoubleFileReader dfrN = pfrf.getDoubleReader(new File(nodesFile));
 			
 			int numberOfNodes = Integer.parseInt(
 				xpath.evaluate("number/text()", submeshNodes));
@@ -304,7 +306,7 @@ public class MeshReader
 				submeshTriangles);
 			if (trianglesFile.charAt(0) != File.separatorChar)
 				trianglesFile = xmlDir+File.separator+trianglesFile;
-			IntFileReader ifrT = new IntFileReaderByDirectBuffer(new File(trianglesFile));
+			IntFileReader ifrT = pfrf.getIntReader(new File(trianglesFile));
 			
 			int numberOfTriangles = Integer.parseInt(
 				xpath.evaluate("number/text()", submeshTriangles));
@@ -340,7 +342,7 @@ public class MeshReader
 			String groupsFile = xpath.evaluate("file/@location", groupsList.item(0));
 			if (groupsFile.charAt(0) != File.separatorChar)
 				groupsFile = xmlDir+File.separator+groupsFile;
-			IntFileReader ifrG = new IntFileReaderByDirectBuffer(new File(groupsFile));
+			IntFileReader ifrG = pfrf.getIntReader(new File(groupsFile));
 
 			// WARNING: xpath.evaluate() scans the whole XML document and not context
 			// node only, which is very counter-intuitive.  This will dramatically slow
@@ -430,7 +432,7 @@ public class MeshReader
 			if (groupsFileName.charAt(0) != File.separatorChar)
 				groupsFileDir = xmlDir;
 			File oldGroupsFile = new File(groupsFileDir, groupsFileName);
-			IntFileReader ifrG = new IntFileReaderByDirectBuffer(oldGroupsFile);
+			IntFileReader ifrG = new PrimitiveFileReaderFactory().getIntReader(oldGroupsFile);
 			int maxId = -1;
 			MGroup3D [] groups = new MGroup3D[numberOfGroups];
 			TIntIntHashMap numGroups = new TIntIntHashMap(numberOfGroups);

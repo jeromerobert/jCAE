@@ -30,7 +30,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.logging.Logger;
 import org.jcae.mesh.xmldata.IntFileReader;
-import org.jcae.mesh.xmldata.IntFileReaderByDirectBuffer;
+import org.jcae.mesh.xmldata.PrimitiveFileReaderFactory;
 import org.w3c.dom.Element;
 
 public class AmibeBeanDomain
@@ -85,7 +85,7 @@ public class AmibeBeanDomain
 		Element beamE=(Element) subMesh.getElementsByTagName("beams").item(0);
 		Element fileE=(Element) beamE.getElementsByTagName("file").item(0);
 		File f=new File(directory, fileE.getAttribute("location"));
-		IntFileReader irf = new IntFileReaderByDirectBuffer(f);
+		IntFileReader irf = new PrimitiveFileReaderFactory().getIntReader(f);
 		int[] toReturn=new int[(int) (f.length()/4)];
 		irf.get(toReturn);
 		irf.close();
