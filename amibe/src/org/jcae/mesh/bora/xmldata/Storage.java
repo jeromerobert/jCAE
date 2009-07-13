@@ -83,7 +83,7 @@ public class Storage
 		}
 	}
 
-	public static void writeEdge(BDiscretization d, String outDir)
+	public static void writeEdge(BDiscretization d)
 	{
 		BCADGraphCell edge = d.getGraphCell();
 		CADEdge E = (CADEdge) edge.getShape();
@@ -95,7 +95,7 @@ public class Storage
 
 		try
 		{
-			File dir = new File(outDir);
+			File dir = new File(edge.getGraph().getModel().getOutputDir(d));
 			writeId(dir, edge.getId());
 			Collection<MNode1D> nodelist = submesh.getNodes();
 			// Write node references and compute local indices
@@ -112,7 +112,7 @@ public class Storage
 		}
 	}
 
-	public static void writeFace(BDiscretization d, String outDir)
+	public static void writeFace(BDiscretization d)
 	{
 		BCADGraphCell face = d.getGraphCell();
 		Mesh2D submesh = (Mesh2D) d.getMesh();
@@ -121,7 +121,7 @@ public class Storage
 
 		try
 		{
-			File dir = new File(outDir);
+			File dir = new File(face.getGraph().getModel().getOutputDir(d));
 			writeId(dir, face.getId());
 			CADFace F = (CADFace) face.getShape();
 			Collection<Triangle> trianglelist = submesh.getTriangles();
@@ -137,7 +137,7 @@ public class Storage
 		}
 	}
 
-	public static void writeSolid(BDiscretization d, String outDir)
+	public static void writeSolid(BDiscretization d)
 	{
 		BCADGraphCell solid = d.getGraphCell();
 		Mesh submesh = (Mesh) d.getMesh();
@@ -146,7 +146,7 @@ public class Storage
 
 		try
 		{
-			File dir = new File(outDir);
+			File dir = new File(solid.getGraph().getModel().getOutputDir(d));
 			writeId(dir, solid.getId());
 			Collection<Vertex> nodelist = submesh.getNodes();
 			TObjectIntHashMap<Vertex> localIdx = write2dNodeReferences(dir, solid.getId(), nodelist, submesh.outerVertex);

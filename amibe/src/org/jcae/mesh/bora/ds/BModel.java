@@ -307,7 +307,7 @@ public class BModel
 			for (BDiscretization d : cell.getDiscretizations())
 			{
 				d.discretize();
-				Storage.writeEdge(d, getOutputDir(d));
+				Storage.writeEdge(d);
 			}
 		}
 		state = State.TESSELLATION_1;
@@ -326,7 +326,7 @@ public class BModel
 			for (BDiscretization d : cell.getDiscretizations())
 			{
 				d.discretize();
-				Storage.writeFace(d, getOutputDir(d));
+				Storage.writeFace(d);
 			}
 		}
 		state = State.TESSELLATION_2;
@@ -345,7 +345,7 @@ public class BModel
 			for (BDiscretization d : cell.getDiscretizations())
 			{
 				d.discretize();
-				Storage.writeSolid(d, getOutputDir(d));
+				Storage.writeSolid(d);
 			}
 		}
 		state = State.TESSELLATION_3;

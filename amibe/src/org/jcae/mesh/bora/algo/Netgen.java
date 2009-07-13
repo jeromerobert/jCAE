@@ -110,7 +110,7 @@ public class Netgen implements AlgoInterface
 			MESHReader.readMesh(m, pfx+".mesh");
 			d.setMesh(m);
 			// ... and store it on disk
-			Storage.writeSolid(d, d.getGraphCell().getGraph().getModel().getOutputDir(d));
+			Storage.writeSolid(d);
 			// Remove temporary files
 			//new File(pfx+".stl").delete();
 			//new File(pfx+".mesh").delete();

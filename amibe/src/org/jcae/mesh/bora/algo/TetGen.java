@@ -116,7 +116,7 @@ public class TetGen implements AlgoInterface
 			MESHReader.readMesh(m, pfx+".1.mesh");
 			d.setMesh(m);
 			// ... and store it on disk
-			Storage.writeSolid(d, d.getGraphCell().getGraph().getModel().getOutputDir(d));
+			Storage.writeSolid(d);
 			// Remove temporary files
 			new File(pfx+".poly").delete();
 			new File(pfx+".1.mesh").delete();
