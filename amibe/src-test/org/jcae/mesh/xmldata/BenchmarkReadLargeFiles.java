@@ -82,7 +82,7 @@ public class BenchmarkReadLargeFiles
 			Logger.getLogger(BenchmarkReadLargeFiles.class.getName()).log(Level.SEVERE, null, ex);
 		}
 
-		System.out.println("processing time: "+(System.currentTimeMillis() - start)+" ms");
+		System.out.println(ifr.getClass().getCanonicalName()+" Processing time: "+(System.currentTimeMillis() - start)+" ms");
 		return sum;
 	}
 
@@ -104,7 +104,7 @@ public class BenchmarkReadLargeFiles
 			Logger.getLogger(BenchmarkReadLargeFiles.class.getName()).log(Level.SEVERE, null, ex);
 		}
 
-		System.out.println("processing time: "+(System.currentTimeMillis() - start)+" ms");
+		System.out.println(ifr.getClass().getCanonicalName()+" Processing time: "+(System.currentTimeMillis() - start)+" ms");
 		return sum;
 	}
 
@@ -122,7 +122,7 @@ public class BenchmarkReadLargeFiles
 			Logger.getLogger(BenchmarkReadLargeFiles.class.getName()).log(Level.SEVERE, null, ex);
 		}
 
-		System.out.println("processing time: "+(System.currentTimeMillis() - start)+" ms");
+		System.out.println(ifr.getClass().getCanonicalName()+" Processing time: "+(System.currentTimeMillis() - start)+" ms");
 		return sum;
 	}
 
@@ -148,7 +148,7 @@ public class BenchmarkReadLargeFiles
 			Logger.getLogger(BenchmarkReadLargeFiles.class.getName()).log(Level.SEVERE, null, ex);
 		}
 
-		System.out.println("processing time: "+(System.currentTimeMillis() - start)+" ms");
+		System.out.println(ifr.getClass().getCanonicalName()+" Processing time: "+(System.currentTimeMillis() - start)+" ms");
 		return sum;
 	}
 
