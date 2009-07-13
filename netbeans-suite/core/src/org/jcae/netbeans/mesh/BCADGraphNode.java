@@ -22,10 +22,13 @@
 package org.jcae.netbeans.mesh;
 
 import java.awt.Image;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import javax.swing.Action;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.bora.ds.Hypothesis;
+import org.jcae.mesh.cad.CADShapeEnum;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
@@ -65,6 +68,22 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 	}
 
 	@Override
+	public String getHtmlDisplayName() {
+		CADShapeEnum type = attributes.cell.getType();
+		if (type != CADShapeEnum.FACE && type != CADShapeEnum.EDGE)
+			return getDisplayName();
+		String color = "00FF00"; //green
+		String txt = "- constraint defined";
+		if (!attributes.hasConstraint) {
+			color = "FF0000";//red
+			txt = " - constraint undefined!";
+		}
+		return  getDisplayName()+"<font color='" + color + "'>" + txt +"</font>";
+	}
+
+
+
+	@Override
 	protected Sheet createSheet() {
 		Sheet sheet = Sheet.createDefault();
 		Sheet.Set set = new Sheet.Set();
@@ -74,7 +93,7 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 			Property deflectionProp = new PropertySupport.Reflection(
 					this.attributes,
 					Double.class, "getDeflection", "setDeflection");
-			deflectionProp.setName("Deflextion");
+			deflectionProp.setName("Deflection");
 
 			Property edgeProp = new PropertySupport.Reflection(this.attributes,
 					Double.class, "getEdgeLength", "setEdgeLength");
@@ -117,6 +136,7 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 		ArrayList<Action> l = new ArrayList<Action>();
 		l.add(SystemAction.get(ViewBCellGeometryAction.class));
 		l.add(SystemAction.get(ViewBCellMeshAction.class));
+		l.add(SystemAction.get(RemoveConstraintAction.class));
 		return l.toArray(new Action[l.size()]);
 	}
 
@@ -124,7 +144,14 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 	public Object getValue(String attributeName) {
 		if (attributeName.equals("CELL"))
 			return attributes.cell;
+		else if (attributeName.equals("ATTRIBUTES"))
+			return attributes;
 		return super.getValue(attributeName);
+	}
+
+	public void refresh() {
+		attributes.refresh();
+		fireDisplayNameChange(null, getDisplayName());
 	}
 
 
@@ -132,11 +159,22 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 		private BCADGraphCell cell;
 		private Hypothesis hyp;
 		private SubmeshNode.DataModel dataModel;
+		private boolean hasConstraint = false;
 
 		public void initialize(BCADGraphCell cell, SubmeshNode.DataModel dataModel) {
 			this.cell = cell;
 			this.dataModel = dataModel;
+			dataModel.addListener(BCADGraphNode.this);
 			refresh();
+		}
+
+		public boolean hasConstraint() {
+			return hasConstraint;
+		}
+
+		public void deleteAttachedConstraint() {
+			assert hasConstraint;
+			dataModel.removeConstraint(cell);
 		}
 
 		/**
@@ -145,13 +183,17 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 		public void refresh() {
 			if (dataModel.getConstraint(cell) != null) {
 				hyp = dataModel.getConstraint(cell).getHypothesis();
+				hasConstraint = true;
 			}
-			else if (hyp == null)
+			else {
 				hyp = new Hypothesis();
+				hasConstraint = false;
+			}
 		}
 
 		private void updateConstraints() {
 			dataModel.addConstraint(cell, hyp);
+			fireCookieChange();
 		}
 
 

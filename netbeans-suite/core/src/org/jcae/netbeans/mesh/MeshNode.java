@@ -41,10 +41,8 @@ import org.jcae.netbeans.Utilities;
 import org.jcae.netbeans.cad.BrepNode;
 import org.jcae.netbeans.viewer3d.SelectionManager;
 import org.jcae.netbeans.viewer3d.ViewManager;
-import org.jcae.vtk.AmibeProvider;
 import org.jcae.vtk.AmibeToMesh;
 import org.jcae.vtk.View;
-import org.jcae.vtk.Viewable;
 import org.jcae.vtk.ViewableMesh;
 import org.openide.ErrorManager;
 import org.openide.actions.*;
@@ -73,13 +71,13 @@ public class MeshNode extends DataNode implements ViewCookie
 {
 	private Groups groups;
 	private AbstractNode groupsNode;
-	private AbstractNode geomNode;
+	private AbstractNode subMeshNode;
 	
 	public MeshNode(DataObject arg0)
 	{
 		super(arg0, new Children.Array());	
 		getCookieSet().add(this);
-		updateGeomNode();
+		updateSubmeshNode();
 		refreshGroups();
 	}
 
@@ -88,26 +86,6 @@ public class MeshNode extends DataNode implements ViewCookie
 		return groupsNode;
 	}
 
-
-	protected Property[] getMeshProperties()
-	{
-		try
-		{
-			return new Property[]{
-				new BeanProperty(getMesh(), "deflection"),
-				new BeanProperty(getMesh(), "edgeLength"),
-			};
-		}
-		catch (NoSuchMethodException e)
-		{
-			ErrorManager.getDefault().notify(e);
-			return new Property[0];
-		}
-		catch (IntrospectionException e) {
-			ErrorManager.getDefault().notify(e);
-			return new Property[0];
-		}
-	}
 
 	protected Property[] getExpertProperties()
 	{
@@ -130,38 +108,26 @@ public class MeshNode extends DataNode implements ViewCookie
 		}
 	}
 	
-	
-	public PropertySet[] getPropertySets()
-	{
+	@Override
+	public PropertySet[] getPropertySets() {
 		return new PropertySet[]{
-			new PropertySet()
-			{
-				public Property[] getProperties() {
-					return MeshNode.this.getMeshProperties();
-				}
-				
-				public String getName()
-				{
-					return "Mesh";
-				}
-			},
-			new PropertySet()
-			{
-				public Property[] getProperties() {
-					return MeshNode.this.getExpertProperties();
-				}
-				
-				public String getName()
-				{
-					return "Expert";
-				}
-				
-				public boolean isExpert() {
-					return true;
-				}
-				
-			}
-		};
+					new PropertySet() {
+
+						public Property[] getProperties() {
+							return MeshNode.this.getExpertProperties();
+						}
+
+						@Override
+						public String getName() {
+							return "Expert";
+						}
+
+						@Override
+						public boolean isExpert() {
+							return true;
+						}
+					}
+				};
 	}
 
 	/**
@@ -201,18 +167,19 @@ public class MeshNode extends DataNode implements ViewCookie
 	}
 
 	public void view() {
-		if (geomNode != null && getMesh() != null && getMesh().getBoraModel() != null) {
-			MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault3D();
-			mtb.addNodeList();
-			org.jcae.mesh.amibe.ds.Mesh m = new org.jcae.mesh.amibe.ds.Mesh(mtb);
-			Storage.readAllFaces(m,
-					getMesh().getBoraModel().getGraph().getRootCell());
+		if (subMeshNode != null && getMesh() != null && getMesh().getBoraModel() != null) {
 			try {
-				MeshWriter.writeObject3D(m, "/tmp/Bora", "dummy.brep");
+				MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault3D();
+				mtb.addNodeList();
+				org.jcae.mesh.amibe.ds.Mesh m = new org.jcae.mesh.amibe.ds.Mesh(
+						mtb);
+				Storage.readAllFaces(m,
+						getMesh().getBoraModel().getGraph().getRootCell());
+				MeshWriter.writeObject3D(m, getMeshDirectory(), "dummy.brep");
 				View v = ViewManager.getDefault().getCurrentView();
-				AmibeToMesh toMesh = new AmibeToMesh("/tmp/Bora");
+				AmibeToMesh toMesh = new AmibeToMesh(getMeshDirectory());
 				ViewableMesh vMesh = new ViewableMesh(toMesh.getMesh());
-				vMesh.setName(getMesh().getBoraModel().getOutputFile());
+				vMesh.setName(subMeshNode.getDisplayName()+" mesh");
 				v.add(vMesh);
 			} catch (Exception ex) {
 				ex.printStackTrace();
@@ -220,9 +187,8 @@ public class MeshNode extends DataNode implements ViewCookie
 			}
 		}
 	}
-	
-	public String getMeshDirectory()
-	{
+
+	public String getMeshDirectory() {
 		String ref=FileUtil.toFile(getDataObject().getPrimaryFile().getParent()).getPath();
 		return Utilities.absoluteFileName(getMesh().getMeshFile(), ref);		
 	}
@@ -275,6 +241,7 @@ public class MeshNode extends DataNode implements ViewCookie
 		}
 	}
 	
+	@Override
 	public String getName()
 	{
 		String s = getDataObject().getName();
@@ -310,7 +277,7 @@ public class MeshNode extends DataNode implements ViewCookie
 					getMesh().setBoraFile(outPath+ getMesh().getBoraModel().getOutputFile());
 					getMesh().getBoraModel().newMesh();
 					getMesh().getBoraModel().save(); //writing the file to disk.
-					updateGeomNode();
+					updateSubmeshNode();
 					firePropertyChange(null, null, null);
 					return null;
 				}
@@ -320,30 +287,32 @@ public class MeshNode extends DataNode implements ViewCookie
 		super.createPasteTypes(t, ls);
 	}
 	
-	private void updateGeomNode()
+	private void updateSubmeshNode()
 	{
-		if(geomNode!=null) {
-			getChildren().remove(new Node[]{geomNode});
+		if(subMeshNode!=null) {
+			getChildren().remove(new Node[]{subMeshNode});
 			try {
-				geomNode.destroy();
+				subMeshNode.destroy();
 			}
 			catch (IOException io) {
 				io.printStackTrace();
 			}
 		}
 		if (getMesh().getBoraModel() != null) {
-			geomNode = new SubmeshNode(getMesh().getGeometryFile().substring(
+			subMeshNode = new SubmeshNode(getMesh().getGeometryFile().substring(
 					0, getMesh().getGeometryFile().lastIndexOf(".")), getMesh().getBoraModel());
-			getChildren().add(new Node[] { geomNode } );
+			getChildren().add(new Node[] { subMeshNode } );
 		}
 			
 	}
 		
+	@Override
 	public Action getPreferredAction()
 	{
 		return SystemAction.get(PropertiesAction.class);
 	}
 	
+	@Override
 	public Action[] getActions(boolean b)
 	{		
 		Action[] actions=super.getActions(b);

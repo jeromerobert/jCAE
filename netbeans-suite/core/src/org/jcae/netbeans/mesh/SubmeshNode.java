@@ -47,14 +47,10 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 		dataModel.subMesh = bModel.getSubMeshes().iterator().next();
 
 		//now putting cell without constraints as keys
-		Collection<BCADGraphCell> allCells = bModel.getGraph().getCellList(CADShapeEnum.COMPOUND);
-		allCells.addAll(bModel.getGraph().getCellList(CADShapeEnum.COMPSOLID));
-		allCells.addAll(bModel.getGraph().getCellList(CADShapeEnum.EDGE));
-		allCells.addAll(bModel.getGraph().getCellList(CADShapeEnum.FACE));
-		allCells.addAll(bModel.getGraph().getCellList(CADShapeEnum.SHELL));
-		allCells.addAll(bModel.getGraph().getCellList(CADShapeEnum.SOLID));
-		allCells.addAll(bModel.getGraph().getCellList(CADShapeEnum.VERTEX));
-		allCells.addAll(bModel.getGraph().getCellList(CADShapeEnum.WIRE));
+		Collection<BCADGraphCell> allCells = new ArrayList<BCADGraphCell>();
+		for (CADShapeEnum type : CADShapeEnum.iterable(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND)) {
+			allCells.addAll(bModel.getGraph().getCellList(type));
+		}
 		for (BCADGraphCell cell : allCells) {
 				dataModel.constraints.put(cell, null);
 		}
@@ -150,6 +146,7 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 		private BSubMesh subMesh;
 		//this constraint map is the data model used by the BCADGraphNode
 		private final Map<BCADGraphCell, Constraint> constraints = new HashMap<BCADGraphCell, Constraint>();
+		private ArrayList<BCADGraphNode> listeners = new ArrayList<BCADGraphNode>();
 
 		public void addConstraint(BCADGraphCell cell, Hypothesis hyp) {
 			subMesh.getModel().resetConstraints();
@@ -169,6 +166,7 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 					constraints.get(cell).setHypothesis(hyp);
 				}
 			}
+			fireModelChanged();
 		}
 
 		public void removeConstraint(BCADGraphCell cell) {
@@ -180,9 +178,21 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 				subMesh.remove(cons);
 				constraints.put(cell, null);
 			}
+			fireModelChanged();
 		}
+
 		public Constraint getConstraint(BCADGraphCell cell) {
 			return constraints.get(cell);
+		}
+
+		private void fireModelChanged() {
+			for (BCADGraphNode node : listeners)
+				node.refresh();
+		}
+
+		public void addListener(BCADGraphNode node) {
+			if (!listeners.contains(node))
+				listeners.add(node);
 		}
 	}
 }

@@ -243,7 +243,6 @@ public class BModel
 	{
 		if (state == State.INPUT)
 			return;
-		LOGGER.info("Reset constraints");
 		Map<BSubMesh, Collection<Constraint>> saveConstraints = new HashMap<BSubMesh, Collection<Constraint>>();
 		for (BSubMesh s : submesh)
 		{
@@ -260,8 +259,9 @@ public class BModel
 		allConstraints.clear();
 		for (BSubMesh s : submesh)
 		{
-			for (Constraint c : saveConstraints.get(s))
+			for (Constraint c : saveConstraints.get(s)) {
 				s.add(c);
+			}
 		}
 	}
 	

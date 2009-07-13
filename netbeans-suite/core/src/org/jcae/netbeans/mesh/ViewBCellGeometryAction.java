@@ -30,10 +30,8 @@ public final class ViewBCellGeometryAction extends CookieAction {
 
 	@Override
 	protected void performAction(Node[] arg0) {
-		System.out.println("Nodes : ");
 		for (Node n : arg0) {
 			BCADGraphCell cell = (BCADGraphCell)n.getValue("CELL");
-			System.out.println("Cell type : " + cell.getType());
 			view((OCCShape) cell.getShape(), cell.getType() + ""+cell.getId());
 		}
 	}

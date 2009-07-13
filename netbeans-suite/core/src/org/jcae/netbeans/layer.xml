@@ -149,6 +149,9 @@
 			<file name="org-jcae-netbeans-mesh-ViewBCellGeometryAction.instance">
 				<attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.ViewBCellGeometryAction"/>
 			</file>
+			<file name="org-jcae-netbeans-mesh-RemoveConstraintAction.instance">
+				<attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.RemoveConstraintAction"/>
+			</file>
 			<file name="org-jcae-netbeans-mesh-ViewBCellMeshAction.instance">
 				<attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.ViewBCellMeshAction"/>
 			</file>
