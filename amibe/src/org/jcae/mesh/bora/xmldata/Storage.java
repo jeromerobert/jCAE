@@ -217,7 +217,7 @@ public class Storage
 		{
 			File dir = new File(model.getOutputDir(d));
 			// Read vertex references
-			int [] refs = read2dNodeReferences(dir);
+			int [] refs = readNodeReferences(d);
 			// Create a Vertex array, and insert new references
 			// into mapRefVertex.
 			Vertex [] nodelist = read2dCoordinates(dir, mesh, refs, mapRefVertex);
@@ -276,7 +276,7 @@ public class Storage
 		{
 			File dir = new File(model.getOutputDir(d));
 			// Read vertex references
-			int [] refs = read2dNodeReferences(dir);
+			int [] refs = readNodeReferences(d);
 			// Create a Vertex array, and insert new references
 			// into mapRefVertex.
 			Vertex [] nodelist = read2dCoordinates(dir, mesh, refs, mapRefVertex);
@@ -471,16 +471,34 @@ public class Storage
 		facesout.close();
 	}
 
-	private static int [] read2dNodeReferences(File dir)
+	public static int [] readNodeReferences(BDiscretization d)
 		throws IOException, FileNotFoundException
 	{
-		File refFile = new File(dir, "r");
+		File refFile = new File(d.getGraphCell().getGraph().getModel().getOutputDir(d), "r");
 		IntFileReader ifrR = new PrimitiveFileReaderFactory().getIntReader(refFile);
 		int numberOfReferences = (int) refFile.length() / 4;
 		int [] refs = new int[numberOfReferences];
 		ifrR.get(refs);
 		ifrR.close();
 		return refs;
+	}
+
+	public static int getNumberOfNodes(BDiscretization d)
+	{
+		File nodesFile = new File(d.getGraphCell().getGraph().getModel().getOutputDir(d), "n");
+		return (int) nodesFile.length() / 4;
+	}
+
+	public static double[] readNodeCoordinates(BDiscretization d)
+		throws IOException, FileNotFoundException
+	{
+		File nodesFile = new File(d.getGraphCell().getGraph().getModel().getOutputDir(d), "n");
+		DoubleFileReader dfrN = new PrimitiveFileReaderFactory().getDoubleReader(nodesFile);
+		int numberOfNodes = (int) nodesFile.length() / 24;
+		double [] coord = new double[3*numberOfNodes];
+		dfrN.get(coord);
+		dfrN.close();
+		return coord;
 	}
 
 	private static Vertex [] read2dCoordinates(File dir, Mesh mesh, int [] refs, TIntObjectHashMap<Vertex> mapRefVertex)
@@ -521,6 +539,38 @@ public class Storage
 		if (LOGGER.isLoggable(Level.FINE))
 			LOGGER.log(Level.FINE, "end reading "+dir+File.separator+"n");
 		return nodelist;
+	}
+
+	public static int[] readConnectivity(BDiscretization d)
+		throws IOException, FileNotFoundException
+	{
+		File trianglesFile = null;
+		int nodesByElement;
+		if (d.getGraphCell().getType().equals(CADShapeEnum.EDGE))
+		{
+			trianglesFile = new File(d.getGraphCell().getGraph().getModel().getOutputDir(d), "b");
+			nodesByElement = 2;
+		}
+		else if (d.getGraphCell().getType().equals(CADShapeEnum.FACE))
+		{
+			trianglesFile = new File(d.getGraphCell().getGraph().getModel().getOutputDir(d), "f");
+			nodesByElement = 3;
+		}
+		else if (d.getGraphCell().getType().equals(CADShapeEnum.SOLID))
+		{
+			trianglesFile = new File(d.getGraphCell().getGraph().getModel().getOutputDir(d), "f");
+			nodesByElement = 4;
+		}
+		else
+		{
+			throw new IllegalArgumentException();
+		}
+		IntFileReader ifr = new PrimitiveFileReaderFactory().getIntReader(trianglesFile);
+
+		int[] connectivity = new int[(int) trianglesFile.length() / 4];
+		ifr.get(connectivity);
+		ifr.close();
+		return connectivity;
 	}
 
 	private static void read2dTriangles(File dir, int id, int nr, Mesh mesh, boolean reversed, Vertex [] nodelist)
