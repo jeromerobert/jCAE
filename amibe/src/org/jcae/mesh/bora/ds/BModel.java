@@ -57,7 +57,7 @@ public class BModel
 	private final String cadFile;
 	//   Output variables
 	private final String xmlDir;
-	private String xmlFile = "model";
+	private final String xmlFile = "model";
 	private final String xmlBrepDir;
 	//   List of all constraints
 	private final Collection<Constraint> allConstraints = new LinkedHashSet<Constraint>();
@@ -89,7 +89,6 @@ public class BModel
 			throw new RuntimeException("Cannot write to "+xmlDir);
 
 		cadFile = (new File(brep)).getAbsoluteFile().getPath();
-		xmlFile = brep.substring(brep.lastIndexOf("/"), brep.lastIndexOf(".")) + ".bora.xml";
 		xmlBrepDir = relativize(new File(brep).getAbsoluteFile().getParentFile(), new File(xmlDir).getAbsoluteFile()).getPath();
 		// CAD graph
 		cad = new BCADGraph(this, factory.newShape(brep));

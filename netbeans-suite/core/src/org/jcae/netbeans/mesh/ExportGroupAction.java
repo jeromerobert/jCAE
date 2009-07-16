@@ -79,11 +79,11 @@ public class ExportGroupAction extends CookieAction
 		try
 		{
 			HashSet<String> set=new HashSet<String>();
-			MeshNode meshNode=null;
+			OldAmibeMeshNode meshNode=null;
 			for(int i=0; i<arg0.length; i++)
 			{
 				meshNode=arg0[i].getParentNode().getParentNode()
-					.getCookie(MeshNode.class);
+					.getCookie(OldAmibeMeshNode.class);
 				set.add(meshNode.getMeshDirectory());
 			}
 			

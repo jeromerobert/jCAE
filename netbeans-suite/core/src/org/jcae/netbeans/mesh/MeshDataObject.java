@@ -22,20 +22,16 @@ package org.jcae.netbeans.mesh;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import org.jcae.mesh.bora.ds.BModel;
 import org.jcae.mesh.bora.xmldata.BModelReader;
-import org.jcae.netbeans.Utilities;
-import org.openide.ErrorManager;
 import org.openide.cookies.SaveCookie;
-import org.openide.filesystems.FileLock;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.MultiDataObject;
 import org.openide.loaders.MultiFileLoader;
+import org.openide.loaders.OperationEvent.Rename;
 import org.openide.nodes.Node;
 
 public class MeshDataObject extends MultiDataObject implements SaveCookie, PropertyChangeListener
@@ -44,95 +40,64 @@ public class MeshDataObject extends MultiDataObject implements SaveCookie, Prope
 	public MeshDataObject(FileObject arg0, MultiFileLoader arg1) throws DataObjectExistsException
 	{
 		super(arg0, arg1);
+		dir = arg0;
+		load();
 	}
 
+	@Override
 	protected Node createNodeDelegate()
 	{
 		MeshNode toReturn = new MeshNode(this);
 		return toReturn;
 	}
 	
-	private Mesh mesh;
-	
-	public Mesh getMesh()
-	{
-		if(mesh==null)
-		{
-			mesh=initMesh();
-			if (mesh.getBoraFile() != null && !mesh.getBoraFile().isEmpty()) {
-				String xmlDir = mesh.getBoraFile().substring(0,
-						mesh.getBoraFile().lastIndexOf("/"));
-				String xmlFile = mesh.getBoraFile().substring(mesh.getBoraFile().lastIndexOf("/") + 1);
-				mesh.setBoraModel(BModelReader.readObject(xmlDir, xmlFile));
-			}
-			mesh.addPropertyChangeListener(this);
-		}
-		return mesh;
+	private BModel bModel;
+	private FileObject dir;
+
+	public BModel getBModel() {
+		return bModel;
 	}
-	
-	protected Mesh initMesh()
-	{
-		InputStream in=null;
-		Mesh toReturn;
-		try
-		{
-			in=getPrimaryFile().getInputStream();
-			XMLDecoder decoder=new XMLDecoder(in);
-			toReturn=(Mesh)decoder.readObject();
-		}
-		catch (Exception ex)
-		{
-			ErrorManager.getDefault().log(ex.getMessage());
-			String name=Utilities.getFreeName(
-				getPrimaryFile().getParent(),
-				"amibe",".dir");
-			toReturn = new Mesh(name);
-		}
-		finally
-		{
-			if(in!=null)				
-				try
-				{
-					in.close();
-				}
-				catch (IOException ex)
-				{
-					ErrorManager.getDefault().notify(ex);
-				}
-		}
-		return toReturn;
+
+	public BModel getBModel(String geomFile) {
+		//TODO : if bModel != null, delete it
+		bModel = new BModel(geomFile,  getDirectory());
+		return bModel;
 	}
-	
+
 	public void save() throws IOException
 	{
-		FileLock l = null;
-		XMLEncoder encoder = null;
-		try
-		{
-			FileObject out = getPrimaryFile();
-			l = out.lock();
-			encoder = new XMLEncoder(out.getOutputStream(l));
-			encoder.writeObject(mesh);
-			if (mesh.getBoraModel() != null) {
-				mesh.getBoraModel().save(); // saving the file
-			}
-			setModified(false);
+		if (bModel != null)
+			bModel.save();
+	}
+
+	/**
+	 * If the "model" file exists in the directory of the Bora mesh
+	 * this method loads the BModel
+	 */
+	private void load() {
+		String tmpDir =  getDirectory();
+		if (!tmpDir.endsWith(File.separator))
+			tmpDir += File.separator;
+		tmpDir += "model";
+		File f = new File(tmpDir);
+		if (f.exists()) {
+			bModel = BModelReader.readObject( getDirectory());
 		}
-		catch(IOException ex)
-		{
-			ErrorManager.getDefault().notify(ex);
-		}
-		finally
-		{
-			if(encoder!=null)
-				encoder.close();
-			if(l!=null)
-				l.releaseLock();			
-		}
+
+	}
+
+	@Override
+	public String getName() {
+		String directory = getDirectory();
+		return directory.substring(directory.lastIndexOf(File.separator) + 1, directory.lastIndexOf("."));
 	}
 
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		setModified(true);
+	}
+
+	private String getDirectory() {
+		return dir.toString();
 	}
 }

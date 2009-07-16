@@ -29,9 +29,6 @@ import org.openide.util.NbBundle;
 
 public class MeshDataLoader extends UniFileLoader
 {
-	
-	public static final String REQUIRED_MIME = "text/meshBora+xml";
-	
 	private static final long serialVersionUID = 1L;
 	
 	public MeshDataLoader()
@@ -39,25 +36,23 @@ public class MeshDataLoader extends UniFileLoader
 		super("org.jcae.netbeans.mesh.MeshDataObject");
 	}
 	
+	@Override
 	protected String defaultDisplayName()
 	{
 		return NbBundle.getMessage(MeshDataLoader.class, "LBL_Mesh_loader_name");
 	}
-	
-	protected void initialize()
-	{
-		super.initialize();
-		getExtensions().addMimeType(REQUIRED_MIME);
+
+	@Override
+	protected FileObject findPrimaryFile(FileObject fo) {
+		if (fo.getNameExt().endsWith(".bora"))
+			return fo;
+		return null;
 	}
-	
+
+
+
 	protected MultiDataObject createMultiObject(FileObject primaryFile) throws DataObjectExistsException, IOException
 	{
 		return new MeshDataObject(primaryFile, this);
 	}
-	
-	protected String actionsContext()
-	{
-		return "Loaders/" + REQUIRED_MIME + "/Actions";
-	}
-	
 }

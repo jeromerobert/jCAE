@@ -1,13 +1,10 @@
 package org.jcae.netbeans.mesh.smooth;
 
-import java.io.File;
 import org.jcae.netbeans.ProcessExecutor;
 import org.jcae.netbeans.Utilities;
 import org.jcae.netbeans.mesh.MeshDataObject;
+import org.jcae.netbeans.mesh.OldAmibeMeshDataObject;
 import org.jcae.netbeans.mesh.Settings;
-import org.openide.DialogDescriptor;
-import org.openide.DialogDisplayer;
-import org.openide.NotifyDescriptor;
 import org.openide.filesystems.FileUtil;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
@@ -22,7 +19,7 @@ public final class Smooth extends CookieAction
 		SmoothParameters bean=new SmoothParameters();
 		if(Utilities.showEditBeanDialog(bean))
 		{
-			MeshDataObject c = activatedNodes[0].getCookie(MeshDataObject.class);
+			OldAmibeMeshDataObject c = activatedNodes[0].getCookie(OldAmibeMeshDataObject.class);
 
 			String reference = FileUtil.toFile(
 				c.getPrimaryFile().getParent()).getPath();

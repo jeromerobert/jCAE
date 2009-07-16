@@ -87,48 +87,44 @@ public class MeshNode extends DataNode implements ViewCookie
 	}
 
 
-	protected Property[] getExpertProperties()
-	{
-		try
-		{
-			return new Property[]{
-				new BeanProperty(getMesh(), "geometryFile"),
-				new BeanProperty(getMesh(), "meshFile"),
-				new BeanProperty(getMesh(), "boraFile")
-			};
-		}
-		catch (NoSuchMethodException e)
-		{
-			ErrorManager.getDefault().notify(e);
-			return new Property[0];
-		}
-		catch (IntrospectionException e) {
-			ErrorManager.getDefault().notify(e);
-			return new Property[0];
-		}
-	}
-	
-	@Override
-	public PropertySet[] getPropertySets() {
-		return new PropertySet[]{
-					new PropertySet() {
-
-						public Property[] getProperties() {
-							return MeshNode.this.getExpertProperties();
-						}
-
-						@Override
-						public String getName() {
-							return "Expert";
-						}
-
-						@Override
-						public boolean isExpert() {
-							return true;
-						}
-					}
-				};
-	}
+//	protected Property[] getExpertProperties()
+//	{
+//		try
+//		{
+//			return new Property[]{
+//				new BeanProperty(getBModel(), "geometryFile"),
+//				new BeanProperty(getBModel(), "meshFile"),
+//				new BeanProperty(getBModel(), "boraFile")
+//			};
+//		}
+//		catch (Exception e)
+//		{
+//			ErrorManager.getDefault().notify(e);
+//			return new Property[0];
+//		}
+//	}
+//
+//	@Override
+//	public PropertySet[] getPropertySets() {
+//		return new PropertySet[]{
+//					new PropertySet() {
+//
+//						public Property[] getProperties() {
+//							return MeshNode.this.getExpertProperties();
+//						}
+//
+//						@Override
+//						public String getName() {
+//							return "Expert";
+//						}
+//
+//						@Override
+//						public boolean isExpert() {
+//							return true;
+//						}
+//					}
+//				};
+//	}
 
 	/**
 	 * Display in a View3D a list of groups.
@@ -167,17 +163,17 @@ public class MeshNode extends DataNode implements ViewCookie
 	}
 
 	public void view() {
-		if (subMeshNode != null && getMesh() != null && getMesh().getBoraModel() != null) {
+		if (subMeshNode != null && getBModel() != null) {
 			try {
 				MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault3D();
 				mtb.addNodeList();
 				org.jcae.mesh.amibe.ds.Mesh m = new org.jcae.mesh.amibe.ds.Mesh(
 						mtb);
 				Storage.readAllFaces(m,
-						getMesh().getBoraModel().getGraph().getRootCell());
-				MeshWriter.writeObject3D(m, getMeshDirectory(), "dummy.brep");
+						getBModel().getGraph().getRootCell());
+				MeshWriter.writeObject3D(m, getBModel().getOutputDir(), "dummy.brep");
 				View v = ViewManager.getDefault().getCurrentView();
-				AmibeToMesh toMesh = new AmibeToMesh(getMeshDirectory());
+				AmibeToMesh toMesh = new AmibeToMesh(getBModel().getOutputDir());
 				ViewableMesh vMesh = new ViewableMesh(toMesh.getMesh());
 				vMesh.setName(subMeshNode.getDisplayName()+" mesh");
 				v.add(vMesh);
@@ -188,36 +184,40 @@ public class MeshNode extends DataNode implements ViewCookie
 		}
 	}
 
-	public String getMeshDirectory() {
-		String ref=FileUtil.toFile(getDataObject().getPrimaryFile().getParent()).getPath();
-		return Utilities.absoluteFileName(getMesh().getMeshFile(), ref);		
-	}
+//	public String getMeshDirectory() {
+//		String ref=FileUtil.toFile(getDataObject().getPrimaryFile().getParent()).getPath();
+//		return Utilities.absoluteFileName(getMesh().getMeshFile(), ref);
+//	}
 	/**
 	 * @return Returns the groups
 	 */
 	public void refreshGroups()
 	{
-		String meshDir=getMeshDirectory();
-		File xmlFile=new File(meshDir, "jcae3d");
-        if (xmlFile.exists())
-            groups = GroupsReader.getGroups(meshDir);
-        
-        if(groupsNode!=null)
-        {
-        	getChildren().remove(new Node[]{groupsNode});
-        }
-        
-        if(groups!=null && groups.getGroups().length>0)
-        {
-			GroupChildren groupChildren = new GroupChildren(groups);
-        	groupsNode=new AbstractNode(groupChildren, Lookups.fixed(groupChildren));
-        	groupsNode.setDisplayName("Groups");
-        	getChildren().add(new Node[]{groupsNode});
-        }
+//		String meshDir=getMeshDirectory();
+//		File xmlFile=new File(meshDir, "jcae3d");
+//        if (xmlFile.exists())
+//            groups = GroupsReader.getGroups(meshDir);
+//
+//        if(groupsNode!=null)
+//        {
+//        	getChildren().remove(new Node[]{groupsNode});
+//        }
+//
+//        if(groups!=null && groups.getGroups().length>0)
+//        {
+//			GroupChildren groupChildren = new GroupChildren(groups);
+//        	groupsNode=new AbstractNode(groupChildren, Lookups.fixed(groupChildren));
+//        	groupsNode.setDisplayName("Groups");
+//        	getChildren().add(new Node[]{groupsNode});
+//        }
 	}
 
-	public Mesh getMesh() {
-		return getCookie(MeshDataObject.class).getMesh();
+	public BModel getBModel() {
+		return getCookie(MeshDataObject.class).getBModel();
+	}
+
+	public BModel getBModel(String geomFile) {
+		return getCookie(MeshDataObject.class).getBModel(geomFile);
 	}
 	
 	@Override
@@ -231,7 +231,7 @@ public class MeshNode extends DataNode implements ViewCookie
 		try
 		{
 			String o=getName();
-			getDataObject().rename(arg0+"_meshBora");
+			getDataObject().rename(arg0+"_bmesh");
 			fireDisplayNameChange(o, arg0);
 			fireNameChange(o, arg0);
 		}
@@ -244,8 +244,7 @@ public class MeshNode extends DataNode implements ViewCookie
 	@Override
 	public String getName()
 	{
-		String s = getDataObject().getName();
-		return s.substring(0, s.length()-"_meshBora".length());
+		return getDataObject().getName();
 	}
 	
 
@@ -269,14 +268,8 @@ public class MeshNode extends DataNode implements ViewCookie
 			{
 				public Transferable paste()
 				{
-					getMesh().setGeometryFile(n.getDataObject().getPrimaryFile().getNameExt());
-					String geomPath = n.getDataObject().getPrimaryFile().getPath();
-					geomPath = "/" + geomPath;
-					String outPath =  geomPath.substring(0, geomPath.lastIndexOf("/"));
-					getMesh().setBoraModel(new BModel(geomPath,outPath));
-					getMesh().setBoraFile(outPath+ getMesh().getBoraModel().getOutputFile());
-					getMesh().getBoraModel().newMesh();
-					getMesh().getBoraModel().save(); //writing the file to disk.
+					getBModel(getGeomFile(n)).newMesh();
+					getBModel().save();
 					updateSubmeshNode();
 					firePropertyChange(null, null, null);
 					return null;
@@ -285,6 +278,16 @@ public class MeshNode extends DataNode implements ViewCookie
 		}
 		// Also try superclass, but give it lower priority:
 		super.createPasteTypes(t, ls);
+	}
+
+	/**
+	 * @param n the BrepNode of the geometry
+	 * @return the absolute path of a file (ex : /home/toto/Geom.brep)
+	 */
+	private static String getGeomFile(BrepNode n) {
+		String ref = FileUtil.toFile(n.getDataObject().getPrimaryFile().getParent()).getPath();
+		String nameExt = n.getDataObject().getPrimaryFile().getNameExt();
+		return Utilities.absoluteFileName(nameExt, ref);
 	}
 	
 	private void updateSubmeshNode()
@@ -298,12 +301,15 @@ public class MeshNode extends DataNode implements ViewCookie
 				io.printStackTrace();
 			}
 		}
-		if (getMesh().getBoraModel() != null) {
-			subMeshNode = new SubmeshNode(getMesh().getGeometryFile().substring(
-					0, getMesh().getGeometryFile().lastIndexOf(".")), getMesh().getBoraModel());
+		if (getBModel() != null) {
+			subMeshNode = new SubmeshNode(getCADName(getBModel().getCADFile()), getBModel());
 			getChildren().add(new Node[] { subMeshNode } );
 		}
 			
+	}
+
+	private static String getCADName(String cadFile) {
+		return cadFile.substring(cadFile.lastIndexOf(File.separator) + 1, cadFile.lastIndexOf("."));
 	}
 		
 	@Override
@@ -315,10 +321,11 @@ public class MeshNode extends DataNode implements ViewCookie
 	@Override
 	public Action[] getActions(boolean b)
 	{		
-		Action[] actions=super.getActions(b);
-		Action[] toReturn=new Action[actions.length+1];
-		System.arraycopy(actions, 0, toReturn, 0, actions.length);
-		toReturn[actions.length]=SystemAction.get(ExpertMenu.class);
+		Action[] toReturn=new Action[4];
+		toReturn[3]=SystemAction.get(ExpertMenu.class);
+		toReturn[0]=SystemAction.get(ComputeMeshAction.class);
+		toReturn[1]=SystemAction.get(ViewAction.class);
+		toReturn[2]=SystemAction.get(DeleteAction.class);
 		return toReturn;
 	}	
 }

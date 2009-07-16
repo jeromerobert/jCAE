@@ -73,7 +73,7 @@ public class ModuleNode extends AbstractNode
 				ArrayList<DataObject> l=new ArrayList<DataObject>();
 				for(int i=0; i<os.length; i++)
 				{
-					if(os[i].getNameExt().endsWith("_meshBora.xml"))
+					if (os[i].getNameExt().endsWith(".bora"))
 						l.add(DataObject.find(os[i]));
 					else if(os[i].getNameExt().endsWith("_mesh.xml"))
 						l.add(DataObject.find(os[i]));
@@ -149,24 +149,22 @@ public class ModuleNode extends AbstractNode
 	}
 	
 	@Override
-	public NewType[] getNewTypes()
-	{
-		return new NewType[]{new NewType()
-		{
-			public void create() throws IOException
-			{
-				Project p=getLookup().lookup(Project.class);
-				FileObject fo=p.getProjectDirectory();
-				FileObject m=fo.createData(Utilities.getFreeName(fo,"new","_meshBora.xml"));
-				MeshDataObject mdo=(MeshDataObject) DataObject.find(m);
-				mdo.getMesh();
-				mdo.save();
-			}
-			
-			public String getName()
-			{
-				return "Mesh";
-			}
-		}};
+	public NewType[] getNewTypes() {
+		return new NewType[]{new NewType() {
+				public void create() throws IOException {
+					Project p = getLookup().lookup(Project.class);
+					FileObject fo = p.getProjectDirectory();
+					String outputDir = Utilities.getFreeName(fo,"mesh", ".bora");
+					FileObject m = fo.createFolder(outputDir);
+					MeshDataObject mdo = (MeshDataObject) DataObject.find(m);
+					mdo.save();
+				}
+
+				@Override
+				public String getName() {
+					return "Mesh";
+				}
+
+			}};
 	}
 }

@@ -1,6 +1,5 @@
 package org.jcae.netbeans.mesh;
 
-import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
@@ -31,7 +30,7 @@ public abstract class AbstractEdgesAction extends CookieAction
 	{
 		try
 		{
-			MeshDataObject c = activatedNodes[0].getCookie(MeshDataObject.class);
+			OldAmibeMeshDataObject c = activatedNodes[0].getCookie(OldAmibeMeshDataObject.class);
 			
 			String reference = FileUtil.toFile(
 				c.getPrimaryFile().getParent()).getPath();

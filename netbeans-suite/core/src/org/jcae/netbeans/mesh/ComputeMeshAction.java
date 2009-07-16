@@ -20,12 +20,10 @@
 
 package org.jcae.netbeans.mesh;
 
-import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.LifecycleManager;
-import org.openide.filesystems.FileUtil;
 import org.openide.nodes.Node;
 import org.openide.util.Cancellable;
 import org.openide.util.HelpCtx;
@@ -78,31 +76,12 @@ public class ComputeMeshAction extends CookieAction
 		for (int i = 0; i < arg0.length; i++)
 		{
 			MeshNode m = arg0[0].getCookie(MeshNode.class);			
-			String ref = FileUtil.toFile(
-				m.getDataObject().getPrimaryFile().getParent()).getPath();
-
-			if(m.getMesh().getGeometryFile()!=null)
-			{
-				JCAEMesher r=new JCAEMesher(ref, m.getMesh());
-				new Thread(new MeshRun(r, r, m)).start();
-			}
-			else
-			{
-				SwingUtilities.invokeLater(new Runnable(){
-					public void run()
-					{
-						JOptionPane.showMessageDialog(
-							WindowManager.getDefault().getMainWindow(),
-							"This mesh have no geometry. To set a geometry in "+
-							"this mesh copy/past or drag/drop a geomtry node on it.",
-							"Undefined geometry file",
-							JOptionPane.ERROR_MESSAGE);
-					}
-				});
-			}
+			if (m.getBModel() != null)
+				m.getBModel().compute();
 		}
 	}
 
+	@Override
 	protected boolean asynchronous()
 	{
 		return true;

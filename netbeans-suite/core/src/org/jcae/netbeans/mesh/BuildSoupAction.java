@@ -37,7 +37,7 @@ public final class BuildSoupAction extends CookieAction
 {	
 	protected void performAction(Node[] activatedNodes)
 	{
-		MeshDataObject c = activatedNodes[0].getCookie(MeshDataObject.class);
+		OldAmibeMeshDataObject c = activatedNodes[0].getCookie(OldAmibeMeshDataObject.class);
 		
 		String reference = FileUtil.toFile(
 			c.getPrimaryFile().getParent()).getPath();

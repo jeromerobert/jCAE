@@ -29,7 +29,8 @@ import org.openide.nodes.Node;
 import org.openide.util.actions.SystemAction;
 
 /**
- *
+ * Note : this class is not fused in MeshNode because we may have
+ * more than one subMeshes in a MeshNode in the future
  * @author Gautam Botrel
  *
  */
@@ -44,8 +45,16 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 			@Override
 			protected Node[] createNodes(Object arg0) {return null;}
 		});
-		boraFileName = bModel.getOutputDir() + bModel.getOutputFile();
+		if (!bModel.getOutputDir().endsWith(File.separator))
+			boraFileName = bModel.getOutputDir() + File.separator + bModel.getOutputFile();
+		else
+			boraFileName = bModel.getOutputDir() + bModel.getOutputFile();
+		
 		final BCADGraphCell rootCell = bModel.getGraph().getRootCell();
+		//submeshes can be empty if the user created a meshnode and did not
+		//specify any constraints, so we must "re"create the submesh
+		if (bModel.getSubMeshes().isEmpty())
+			bModel.newMesh();
 		dataModel.subMesh = bModel.getSubMeshes().iterator().next();
 
 		//now putting cell without constraints as keys
@@ -76,6 +85,7 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 		try {
 			super.destroy();
 			new File(boraFileName).delete();
+			//TODO : clean the 1d01 & cie directories (meshes files)
 		} catch (Exception e) {
 			throw new RuntimeException(
 					"Could not delete " + boraFileName + ". Cause : " + e);
