@@ -20,39 +20,73 @@
 
 package org.jcae.netbeans.mesh;
 
+import java.util.logging.Formatter;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
+import org.jcae.mesh.JCAEFormatter;
+import org.jcae.mesh.bora.ds.BModel;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.LifecycleManager;
+import org.openide.execution.ExecutionEngine;
+import org.openide.execution.ExecutorTask;
 import org.openide.nodes.Node;
 import org.openide.util.Cancellable;
 import org.openide.util.HelpCtx;
+import org.openide.util.Task;
+import org.openide.util.TaskListener;
 import org.openide.util.actions.CookieAction;
+import org.openide.windows.IOProvider;
+import org.openide.windows.InputOutput;
 import org.openide.windows.WindowManager;
 
 public class ComputeMeshAction extends CookieAction
 {
 	static private class MeshRun implements Runnable
 	{
-		private Runnable runnable;
-		private Cancellable cancellable;
+		private BModel model;
 		private MeshNode node;
 
-		public MeshRun(Runnable r, Cancellable cancellable, MeshNode node)
+		public MeshRun(BModel model, MeshNode node)
 		{
-			runnable=r;
-			this.cancellable=cancellable;
+			this.model = model;
 			this.node=node;
 		}
 		
 		public void run()
 		{
-			ProgressHandle ph = ProgressHandleFactory.createHandle(runnable.toString(), cancellable);
-			ph.start();
-			runnable.run();
+			final Formatter jcaeFormatter = new JCAEFormatter();
+
+			//getting and redirecting logs from Bora mesher
+			Logger root = Logger.getLogger("org.jcae.mesh.bora");
+			root.setLevel(Level.INFO);
+			Handler redirector = new Handler() {
+				@Override
+				public void publish(LogRecord record) {
+					System.out.println(jcaeFormatter.format(record));
+				}
+				@Override
+				public void close() throws SecurityException {
+				}
+				@Override
+				public void flush() {
+				}
+			};
+			root.addHandler(redirector);
+			for (Handler h : root.getHandlers()) {
+				h.setFormatter(jcaeFormatter);
+			}
+
+			//computing the bora model
+			model.compute();
 			node.refreshGroups();
-			ph.finish();
+
+			root.removeHandler(redirector);
 		}
+
 	}  
 	protected int mode()
 	{
@@ -64,20 +98,36 @@ public class ComputeMeshAction extends CookieAction
 		return new Class[]{MeshNode.class};
 	}
 
+	private static transient int ioProviderCounter=1;
+
 	protected void performAction(Node[] arg0)
 	{
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
-
 				WindowManager.getDefault().findTopComponent("output").open();
 			}
 		});
+
 		LifecycleManager.getDefault().saveAll();
-		for (int i = 0; i < arg0.length; i++)
-		{
-			MeshNode m = arg0[0].getCookie(MeshNode.class);			
-			if (m.getBModel() != null)
-				m.getBModel().compute();
+		InputOutput io=IOProvider.getDefault().getIO("jCAE Mesher "+ioProviderCounter, true);
+		ioProviderCounter++;
+		for (int i = 0; i < arg0.length; i++) {
+			final MeshNode m = arg0[i].getCookie(MeshNode.class);
+			if (m.getBModel() != null) {
+				final ExecutorTask task = ExecutionEngine.getDefault().execute("Bora Mesher",new MeshRun(m.getBModel(), m), io);
+				final ProgressHandle ph = ProgressHandleFactory.createHandle("Bora Mesher", new Cancellable() {
+					public boolean cancel() {
+						task.stop();
+						return true;
+					}
+				});
+				ph.start();
+				task.addTaskListener(new TaskListener() {
+					public void taskFinished(Task arg0) {
+						ph.finish();
+					}
+				});
+			}
 		}
 	}
 

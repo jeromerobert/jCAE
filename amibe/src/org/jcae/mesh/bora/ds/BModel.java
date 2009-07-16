@@ -273,7 +273,9 @@ public class BModel
 	 */
 	public void compute()
 	{
+		LOGGER.info("Computing the model");
 		discretizeSolids();
+		LOGGER.info("Done");
 	}
 
 	public void discretizeVertices()

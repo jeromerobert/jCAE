@@ -20,7 +20,6 @@
 
 package org.jcae.mesh;
 
-import java.util.Date;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
@@ -28,6 +27,11 @@ public class JCAEFormatter extends Formatter
 {
 	private static long startDate = -1L;
 	private static final String lineSep = System.getProperty("line.separator");
+
+	public JCAEFormatter() {
+		startDate = -1L;
+	}
+
 	@Override
 	public String format(LogRecord record)
 	{
