@@ -114,7 +114,9 @@ public class BModelReader
 					int id = Integer.parseInt(xpath.evaluate("@id", consNode));
 					int cId = Integer.parseInt(xpath.evaluate("cadId/text()", consNode));
 					int hId = Integer.parseInt(xpath.evaluate("hypId/text()", consNode));
+					String group = xpath.evaluate("group/text()", consNode);
 					Constraint c = new Constraint(model.getGraph().getById(cId), hypIdMap.get(hId));
+					c.setGroup(group);
 					consIdMap.put(id, c);
 				}
 				NodeList subList = (NodeList) xpath.evaluate("submesh", constraints, XPathConstants.NODESET);

@@ -36,6 +36,9 @@ public class Constraint
 	private int id = -1;
 	private static int nextId = -1;
 
+	//User's tag (group)
+	private String group;
+
 	public Constraint(BCADGraphCell g, Hypothesis h)
 	{
 		// Store forward oriented cell
@@ -131,6 +134,20 @@ public class Constraint
 		if (origin != null)
 			ret += " [derived from "+origin.id+"]";
 		return ret;
+	}
+
+	/**
+	 * @return the group
+	 */
+	public String getGroup() {
+		return group;
+	}
+
+	/**
+	 * @param group the group to set
+	 */
+	public void setGroup(String group) {
+		this.group = group;
 	}
 
 }

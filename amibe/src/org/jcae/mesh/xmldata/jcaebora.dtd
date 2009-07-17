@@ -34,17 +34,18 @@ brep are http://www.opencascade.org files.
 <!ELEMENT length (#PCDATA)>
 <!ELEMENT deflection (#PCDATA)>
 
-<!ELEMENT constraint (cadId,hypId)>
+<!ELEMENT constraint (cadId,hypId,group?)>
 <!ATTLIST constraint id CDATA #IMPLIED>
 
 <!ELEMENT cadId (#PCDATA)>
 <!ELEMENT hypId (#PCDATA)>
+<!ELEMENT group (#PCDATA)>
 
 <!ELEMENT submesh EMPTY>
 <!ATTLIST submesh id CDATA #IMPLIED
 	      list CDATA #REQUIRED>
 
-<!ELEMENT graph (description?,cad+,group*)>
+<!ELEMENT graph (description?,cad+)>
 
 <!ELEMENT description (#PCDATA)>
 
@@ -53,9 +54,6 @@ brep are http://www.opencascade.org files.
               type (vertex|edge|wire|face|shell|solid|compsolid|compound) #REQUIRED
               orientation CDATA #REQUIRED
               reversed CDATA "">
-
-<!ELEMENT group (children?,discretization?)>
-<!ATTLIST group id CDATA #IMPLIED>
 
 <!ELEMENT children EMPTY>
 <!ATTLIST children list CDATA #REQUIRED>

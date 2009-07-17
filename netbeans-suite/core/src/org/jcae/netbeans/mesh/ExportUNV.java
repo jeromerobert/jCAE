@@ -67,7 +67,7 @@ public final class ExportUNV extends CookieAction
 	protected Class[] cookieClasses()
 	{
 		return new Class[] {
-			MeshDataObject.class
+			OldAmibeMeshDataObject.class
 		};
 	}
 	

@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.Map;
 import javax.swing.Action;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
+import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.bora.ds.BModel;
 import org.jcae.mesh.bora.ds.BSubMesh;
 import org.jcae.mesh.bora.ds.Constraint;
@@ -156,18 +157,20 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 	 */
 	public class DataModel {
 		private BSubMesh subMesh;
+
+		/** Constraint Section **/
 		//this constraint map is the data model used by the BCADGraphNode
 		//actually, this map maps TopoDS_SHape and constraint, 'cause constraint are applied
 		//to topods_shape, not BCADGraphCell, and this is the only way to detect multiple values in the GUI
 		//for example, the edge between 2 faces of a cube is defined by 2 BCADGraphCell, and only 1 TopoDS_Shape
 		private final Map<TopoDS_Shape, Constraint> constraints = new HashMap<TopoDS_Shape, Constraint>();
-		private ArrayList<BCADGraphNode> listeners = new ArrayList<BCADGraphNode>();
-
-		public void addConstraint(BCADGraphCell cell, Hypothesis hyp) {
+		
+		public void addConstraint(BCADGraphCell cell, Hypothesis hyp, String group) {
 			subMesh.getModel().resetConstraints();
 			TopoDS_Shape shape = getShapeFromCell(cell);
 			if (!constraints.containsKey(shape)) {
 				Constraint cons = new Constraint(cell, hyp);
+				cons.setGroup(group);
 				constraints.put(shape, cons);
 				subMesh.add(cons);
 			}
@@ -175,11 +178,13 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 				//the key already exists, but the constraint might not
 				if (constraints.get(shape) == null) {
 					Constraint cons = new Constraint(cell, hyp);
+					cons.setGroup(group);
 					constraints.put(shape, cons);
 					subMesh.add(cons);
 				}
 				else {
 					constraints.get(shape).setHypothesis(hyp);
+					constraints.get(shape).setGroup(group);
 				}
 			}
 			fireModelChanged();
@@ -201,7 +206,9 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 		public Constraint getConstraint(BCADGraphCell cell) {
 			return constraints.get(getShapeFromCell(cell));
 		}
+		/** End Constraint section **/
 
+		private ArrayList<BCADGraphNode> listeners = new ArrayList<BCADGraphNode>();
 		private void fireModelChanged() {
 			for (BCADGraphNode node : listeners)
 				node.refresh();

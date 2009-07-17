@@ -91,10 +91,17 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 	@Override
 	protected Sheet createSheet() {
 		Sheet sheet = Sheet.createDefault();
-		Sheet.Set set = new Sheet.Set();
-		set.setName("Mesh constraints");
-		set.setShortDescription("Mesh constraints");
+		Sheet.Set meshSet = new Sheet.Set();
+		Sheet.Set groupsSet = new Sheet.Set();
+
+		meshSet.setName("Mesh constraints");
+		meshSet.setShortDescription("Mesh constraints");
+
+		groupsSet.setName("Group constraint");
+		groupsSet.setShortDescription("Group constraint");
+		
 		try {
+			//mesh constraints
 			Property deflectionProp = new PropertySupport.Reflection(
 					this.attributes,
 					Double.class, "getDeflection", "setDeflection");
@@ -110,14 +117,23 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 			elementProp.setName("Element");
 			elementProp.setValue("suppressCustomEditor", true);
 
-			set.put(deflectionProp);
-			set.put(edgeProp);
-			set.put(elementProp);
+			meshSet.put(deflectionProp);
+			meshSet.put(edgeProp);
+//			meshSet.put(elementProp);
+
+			//group constraint
+			Property groupProp = new PropertySupport.Reflection(
+					this.attributes,
+					String.class, "getGroup", "setGroup");
+			groupProp.setName("Group name");
+			groupProp.setValue("suppressCustomEditor", true);
+			groupsSet.put(groupProp);
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-		sheet.put(set);
+		sheet.put(meshSet);
+		sheet.put(groupsSet);
 		return sheet;
 	}
 	
@@ -161,18 +177,30 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 		fireDisplayNameChange(null, getDisplayName());
 	}
 
+	public final static String DEFAULT_GROUP_NAME = "DEFAULT_GROUP";
 
 	public class Attributes {
 		private BCADGraphCell cell;
 		private Hypothesis hyp;
 		private SubmeshNode.DataModel dataModel;
 		private boolean hasConstraint = false;
+		private String group; // user's tag (group)
 
 		public void initialize(BCADGraphCell cell, SubmeshNode.DataModel dataModel) {
 			this.cell = cell;
 			this.dataModel = dataModel;
 			dataModel.addListener(BCADGraphNode.this);
 			refresh();
+		}
+
+		public String getGroup() {
+			return group;
+		}
+
+		public void setGroup(String group) {
+			this.group = group;
+			if (hasConstraint)
+				updateConstraints();
 		}
 
 		public boolean hasConstraint() {
@@ -182,6 +210,7 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 		public void deleteAttachedConstraint() {
 			assert hasConstraint;
 			dataModel.removeConstraint(cell);
+			BCADGraphNode.this.fireCookieChange();
 		}
 
 		/**
@@ -190,16 +219,20 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 		public void refresh() {
 			if (dataModel.getConstraint(cell) != null) {
 				hyp = dataModel.getConstraint(cell).getHypothesis();
+				group = dataModel.getConstraint(cell).getGroup();
+				if (group == null)
+					group = DEFAULT_GROUP_NAME;
 				hasConstraint = true;
 			}
 			else {
 				hyp = new Hypothesis();
 				hasConstraint = false;
+				group = DEFAULT_GROUP_NAME;
 			}
 		}
 
 		private void updateConstraints() {
-			dataModel.addConstraint(cell, hyp);
+			dataModel.addConstraint(cell, hyp, group);
 			fireCookieChange();
 		}
 

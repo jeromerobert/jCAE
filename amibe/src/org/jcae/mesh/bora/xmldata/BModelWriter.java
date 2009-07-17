@@ -98,10 +98,15 @@ public class BModelWriter
 				}
 				for (Constraint c : allConstraints)
 				{
-					constraintsElement.appendChild(
-						XMLHelper.parseXMLString(document, "<constraint id=\""+c.getId()+"\">"+
+					String xmlString = "<constraint id=\""+c.getId()+"\">"+
 							"<cadId>"+c.getGraphCell().getId()+"</cadId>"+
-							"<hypId>"+c.getHypothesis().getId()+"</hypId></constraint>"));
+							"<hypId>"+c.getHypothesis().getId()+"</hypId>";
+					if (c.getGroup() != null)
+						xmlString +="<group>" + c.getGroup() + "</group>";
+					xmlString +="</constraint>";
+					
+					constraintsElement.appendChild(	
+							XMLHelper.parseXMLString(document, xmlString));
 				}
 				for (BSubMesh s : model.getSubMeshes())
 				{
