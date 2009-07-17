@@ -81,6 +81,7 @@ public class ComputeMeshAction extends CookieAction
 			}
 
 			//computing the bora model
+			model.cleanWorkDirectory();
 			model.compute();
 			node.refreshGroups();
 

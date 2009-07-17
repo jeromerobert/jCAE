@@ -100,6 +100,35 @@ public class BModel
 		BDiscretization.nextId = -1;
 	}
 
+	/**
+	 * Cleans up the current working directory
+	 * Remove all files except model
+	 */
+	public void cleanWorkDirectory() {
+		LOGGER.info("Cleaning " + xmlDir);
+		deleteDirectory(new File(xmlDir), true, new File(xmlFile));
+		BDiscretization.nextId = -1;
+
+	}
+
+	private static void deleteDirectory(File dir, boolean clean,final File toConserve) {
+		if (dir.exists()) {
+			File[] files = dir.listFiles();
+			for (int i = 0; i < files.length; i++) {
+				if (files[i].equals(toConserve))
+					continue;
+				if (files[i].isDirectory()) {
+					deleteDirectory(files[i], false, toConserve);
+				}
+				else {
+					files[i].delete();
+				}
+			}
+		}
+		if (!clean)
+			dir.delete();
+	}
+
 	public int getId()
 	{
 		return id;

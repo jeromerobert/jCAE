@@ -169,6 +169,9 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 			return attributes;
 		else if (attributeName.equals("ENTITIE"))
 			return isEntitie;
+		else if (attributeName.equals("SUBMESH"))
+			return attributes.dataModel.getSubMesh();
+
 		return super.getValue(attributeName);
 	}
 

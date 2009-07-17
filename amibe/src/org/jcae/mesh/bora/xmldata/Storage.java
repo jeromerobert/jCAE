@@ -198,7 +198,7 @@ public class Storage
 	 * @param mapRefVertex    map between references and Vertex instances
 	 * @throws  RuntimeException if an error occurred
 	 */
-	private static void readFace(Mesh mesh, BCADGraphCell face, BSubMesh s, TIntObjectHashMap<Vertex> mapRefVertex)
+	public static void readFace(Mesh mesh, BCADGraphCell face, BSubMesh s, TIntObjectHashMap<Vertex> mapRefVertex)
 	{
 		assert face.getShape() instanceof CADFace;
 		BModel model = face.getGraph().getModel();
@@ -210,7 +210,7 @@ public class Storage
 				face = face.getReversed();
 		}
 		BDiscretization d = face.getDiscretizationSubMesh(s);
-		if (null == d)
+		if (null == d) 
 			return;
 		int id = face.getId();
 		try
@@ -226,6 +226,8 @@ public class Storage
 		}
 		catch(java.io.FileNotFoundException ex)
 		{
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
 		}
 		catch(Exception ex)
 		{

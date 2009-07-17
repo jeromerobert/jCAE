@@ -6,9 +6,15 @@
  */
 package org.jcae.netbeans.mesh;
 
+import gnu.trove.TIntObjectHashMap;
+import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.patch.Mesh2D;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.bora.ds.BDiscretization;
+import org.jcae.mesh.bora.ds.BSubMesh;
+import org.jcae.mesh.bora.xmldata.Storage;
+import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.mesh.xmldata.MeshWriter;
 import org.jcae.netbeans.viewer3d.ViewManager;
 import org.jcae.vtk.AmibeToMesh;
@@ -33,70 +39,32 @@ public final class ViewBCellMeshAction extends CookieAction {
 	@Override
 	protected void performAction(Node[] arg0) {
 		View v = ViewManager.getDefault().getCurrentView();
+		TIntObjectHashMap<Vertex> refMap = new TIntObjectHashMap<Vertex>();
+		MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault3D();
+		mtb.addNodeList();
+		org.jcae.mesh.amibe.ds.Mesh m = new org.jcae.mesh.amibe.ds.Mesh(mtb);
+		BSubMesh subMesh = null;
+		String name = "";
 		for (Node n : arg0) {
-			BCADGraphCell cell = (BCADGraphCell)n.getValue("CELL");
-			System.out.println("Cell type : " + cell.getType());
-			for (BDiscretization discr :cell.getDiscretizations()) {
-				try {
-				Mesh2D mesh = (Mesh2D)discr.getMesh();
-				MeshWriter.writeObject3D(mesh, "/tmp/Bora", "dummy.brep");
-				AmibeToMesh toMesh = new AmibeToMesh("/tmp/Bora");
-				ViewableMesh vMesh = new ViewableMesh(toMesh.getMesh());
-				vMesh.setName(n.getName());
-				v.add(vMesh);
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-//			view((Mesh) cell.getShape(), cell.getType() + ""+cell.getId());
+			BCADGraphCell cell = (BCADGraphCell) n.getValue("CELL");
+			subMesh = (BSubMesh) n.getValue("SUBMESH");
+			Storage.readFace(m, cell, subMesh, refMap);
+			name += cell.getType() + "" + cell.getId() + " ";
+		}
+
+		try {
+			MeshWriter.writeObject3D(m, subMesh.getModel().getOutputDir(),
+					"dummy.brep");
+			AmibeToMesh toMesh = new AmibeToMesh(
+					subMesh.getModel().getOutputDir());
+			ViewableMesh vMesh = new ViewableMesh(toMesh.getMesh());
+			vMesh.setName(name);
+			v.add(vMesh);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
-
-//	WeakReference<ViewableCAD> viewableRef = new WeakReference<ViewableCAD>(null);
-
-//	private void view(OCCShape shape, String name) {
-//		View v = ViewManager.getDefault().getCurrentView();
-//		for (Viewable w : v.getViewables()) {
-//			if (w instanceof ViewableCAD) {
-//				ViewableCAD wCad = (ViewableCAD)w;
-//				if (wCad.getName().equals(name)) {
-//					wCad.refresh();
-//					return;
-//				}
-//			}
-//		}
-//
-//		ViewableCAD	viewable = new ViewableCAD(shape.getShape());
-//		viewable.setName(name);
-//
-//		// TODO manage selection...
-//		// SelectionManager.getDefault().addInteractor(viewable, shape.getShape());
-//		v.add(viewable);
-//	}
-//
-//		public void view() {
-//		if (subMeshNode != null && getMesh() != null && getMesh().getBoraModel() != null) {
-//			try {
-//				MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault3D();
-//				mtb.addNodeList();
-//				org.jcae.mesh.amibe.ds.Mesh m = new org.jcae.mesh.amibe.ds.Mesh(
-//						mtb);
-//				Storage.readAllFaces(m,
-//						getMesh().getBoraModel().getGraph().getRootCell());
-//				MeshWriter.writeObject3D(m, getMeshDirectory(), "dummy.brep");
-//				View v = ViewManager.getDefault().getCurrentView();
-//				AmibeToMesh toMesh = new AmibeToMesh(getMeshDirectory());
-//				ViewableMesh vMesh = new ViewableMesh(toMesh.getMesh());
-//				vMesh.setName(subMeshNode.getName());
-//				v.add(vMesh);
-//			} catch (Exception ex) {
-//				ex.printStackTrace();
-//				return;
-//			}
-//		}
-//	}
 
 	@Override
 	protected boolean asynchronous() {
@@ -108,14 +76,17 @@ public final class ViewBCellMeshAction extends CookieAction {
 	protected boolean enable(Node[] arg0) {
 		for (Node n : arg0) {
 			BCADGraphCell cell = (BCADGraphCell)n.getValue("CELL");
-			if (cell == null ||cell.getDiscretizations() == null)
+			if (cell == null)
 				return false;
-			if (cell.getDiscretizations().isEmpty())
+			if (!cell.getType().equals(CADShapeEnum.FACE))
 				return false;
-			for (BDiscretization disc : cell.getDiscretizations()) {
-				if (disc.getMesh() == null)
-					return false;
-			}
+//			if (cell == null ||cell.getDiscretizations() == null)
+//				return false;
+//			if (cell.getDiscretizations().isEmpty())
+//				return false;
+//			for (BDiscretization disc : cell.getDiscretizations()) {
+//				if (disc.getMesh() == null)
+//					return false;
 		}
 		return true;
 	}

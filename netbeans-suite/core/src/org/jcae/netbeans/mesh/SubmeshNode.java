@@ -64,7 +64,7 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 			allCells.addAll(bModel.getGraph().getCellList(type));
 		}
 		for (BCADGraphCell cell : allCells) {
-				dataModel.constraints.put(getShapeFromCell(cell), null);
+			dataModel.constraints.put(getShapeFromCell(cell), null);
 		}
 		//getting the existing constraints and filling the constraints map
 		for (Constraint c : dataModel.subMesh.getConstraints()) {
@@ -86,7 +86,7 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 		try {
 			super.destroy();
 			new File(boraFileName).delete();
-			//TODO : clean the 1d01 & cie directories (meshes files)
+			dataModel.subMesh.getModel().cleanWorkDirectory();
 		} catch (Exception e) {
 			throw new RuntimeException(
 					"Could not delete " + boraFileName + ". Cause : " + e);
@@ -157,7 +157,9 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 	 */
 	public class DataModel {
 		private BSubMesh subMesh;
-
+		public BSubMesh getSubMesh() {
+			return subMesh;
+		}
 		/** Constraint Section **/
 		//this constraint map is the data model used by the BCADGraphNode
 		//actually, this map maps TopoDS_SHape and constraint, 'cause constraint are applied
