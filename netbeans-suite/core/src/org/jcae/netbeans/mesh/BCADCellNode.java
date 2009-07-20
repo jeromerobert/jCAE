@@ -33,12 +33,16 @@ public class BCADCellNode extends Children.Keys implements Node.Cookie {
 
 	@Override
 	protected void addNotify() {
-		Iterator<BCADGraphCell> it = cell.shapesIterator();
+		Iterator<BCADGraphCell> it = cell.uniqueShapesIterator();
 		ArrayList<BCADGraphCell> toReturn = new ArrayList<BCADGraphCell>();
 		while (it.hasNext()) {
 			BCADGraphCell c = it.next();
 			if (c != null) {
-					toReturn.add(c);
+					BCADGraphCell cReverse = c.getReversed();
+					if (cReverse != null && cReverse.getId() < c.getId())
+						toReturn.add(cReverse);
+					else
+						toReturn.add(c);
 			}
 		}
 		setKeys(toReturn.toArray());

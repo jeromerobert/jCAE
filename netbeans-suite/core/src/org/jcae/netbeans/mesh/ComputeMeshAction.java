@@ -66,7 +66,7 @@ public class ComputeMeshAction extends CookieAction
 			Handler redirector = new Handler() {
 				@Override
 				public void publish(LogRecord record) {
-					System.out.println(jcaeFormatter.format(record));
+					System.out.print(jcaeFormatter.format(record));
 				}
 				@Override
 				public void close() throws SecurityException {

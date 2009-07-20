@@ -16,6 +16,7 @@ import org.jcae.opencascade.jni.TopoDS_Shape;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
 import org.jcae.vtk.ViewableCAD;
+import org.openide.nodes.Children;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CookieAction;
@@ -32,11 +33,28 @@ public final class ViewBCellGeometryAction extends CookieAction {
 		return "View Geometry";
 	}
 
+	private static Node getParentSubmeshNode(Node n) {
+//		Node parent = n;
+//		int iter = 0;
+//		while (iter < 10) {
+//			parent = parent.getParentNode();
+//			SubmeshNode toReturn = parent.getCookie(SubmeshNode.class);
+//			if (toReturn != null) {
+//				Children c = toReturn.getChildren();
+//				for (Node no : c.getNodes()) {
+//					if (no.getDisplayName().equals("Graph")) {
+//						return no;
+//					}
+//				}
+//			}
+//		}
+		return n.getParentNode();
+	}
 
 	@Override
 	protected void performAction(Node[] arg0) {
 		String name = "";
-		NbBShape toDisplay = new NbBShape((TopoDS_Shape)null);
+		NbBShape toDisplay = new NbBShape((TopoDS_Shape)null, getParentSubmeshNode(arg0[0]));
 		for (Node n : arg0) {
 			BCADGraphCell cell = (BCADGraphCell)n.getValue("CELL");
 			TopoDS_Shape shape = ((OCCShape)cell.getShape()).getShape();
@@ -105,8 +123,14 @@ public final class ViewBCellGeometryAction extends CookieAction {
 	 * Decoy class, to use a BCADSelection in Selection Manager
 	 */
 	public static class NbBShape extends NbShape {
-		public NbBShape(TopoDS_Shape shape) {
+		public NbBShape(TopoDS_Shape shape, Node node) {
 			super(shape, new HashMap<TopoDS_Shape, NbShape>(), new NbShape[0]);
+			ref = node;
+		}
+		//ref to the node to explore (e.g the Graph of the Geometry)
+		private final Node ref;
+		public Node getRefToExploreNode() {
+			return ref;
 		}
 	}
 

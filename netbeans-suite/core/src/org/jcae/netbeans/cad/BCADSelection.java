@@ -35,6 +35,7 @@ import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.cad.occ.OCCShape;
 import org.jcae.netbeans.NodeSelectionManager;
 import org.jcae.netbeans.Utilities;
+import org.jcae.netbeans.mesh.ViewBCellGeometryAction.NbBShape;
 import org.jcae.netbeans.viewer3d.CurrentViewableChangeListener;
 import org.jcae.netbeans.viewer3d.SelectionManager;
 import org.jcae.netbeans.viewer3d.ViewManager;
@@ -60,11 +61,12 @@ public class BCADSelection implements EntitySelection, SelectionListener,
 	private boolean selectionLock = false;
 	private NbShape entity = null;
 	private Set<ViewableCAD> interactors = new HashSet<ViewableCAD>();
+	private final Node refToExplore;
 
-
-	public BCADSelection(NbShape entity)
+	public BCADSelection(NbBShape entity)
 	{
 		this.entity = entity;
+		refToExplore = entity.getRefToExploreNode();
 		ViewManager.getDefault().addViewableListener(this);
 		NodeSelectionManager.getDefault().addPropertyChangeListener(this);
 	}
@@ -113,7 +115,7 @@ public class BCADSelection implements EntitySelection, SelectionListener,
 		ArrayList<Node> toReturn = new ArrayList<Node>();
 		//explore the mesh to find corresponding nodes
 		ArrayDeque<Children> toExplore = new ArrayDeque<Children>();
-		toExplore.push(findModuleNode(Utilities.getExplorerManagers()[0]).getChildren());
+		toExplore.push(refToExplore.getChildren());
 		while (!toExplore.isEmpty()) {
 			Children c = toExplore.pop();
 			for (Node n : c.getNodes()) {
@@ -172,7 +174,6 @@ public class BCADSelection implements EntitySelection, SelectionListener,
 						nnodes.addAll(Arrays.asList(exm.getSelectedNodes()));
 
 					nnodes.addAll(nodes);
-
 					try
 					{
 						SelectionManager.getDefault().setDisableListeningProperty(true);

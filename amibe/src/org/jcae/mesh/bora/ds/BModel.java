@@ -56,7 +56,7 @@ public class BModel
 	//   Geometry file
 	private final String cadFile;
 	//   Output variables
-	private final String xmlDir;
+	private String xmlDir;
 	private final String xmlFile = "model";
 	private final String xmlBrepDir;
 	//   List of all constraints
@@ -93,7 +93,12 @@ public class BModel
 		// CAD graph
 		cad = new BCADGraph(this, factory.newShape(brep));
 	}
-	
+
+
+	public void setOutputDir(String newDir) {
+		xmlDir = newDir;
+	}
+
 	public static void reset()
 	{
 		freeIndex = 1;

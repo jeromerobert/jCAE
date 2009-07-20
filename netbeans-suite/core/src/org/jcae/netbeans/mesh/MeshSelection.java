@@ -129,7 +129,7 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 						for (Node meshProxy : moduleNode.getChildren().getNodes())
 						{
 
-							MeshNode meshNode = meshProxy.getLookup().lookup(MeshNode.class);
+							OldAmibeMeshNode meshNode = meshProxy.getLookup().lookup(OldAmibeMeshNode.class);
 							if (meshNode != null)
 								if (meshNode.hasThisGroupsNode(entity))
 								{

@@ -97,6 +97,11 @@ public class MeshDataObject extends MultiDataObject implements SaveCookie, Prope
 		setModified(true);
 	}
 
+	public void updateBModelDir() {
+		if (bModel != null)
+			bModel.setOutputDir(getDirectory());
+	}
+
 	private String getDirectory() {
 		return dir.toString();
 	}

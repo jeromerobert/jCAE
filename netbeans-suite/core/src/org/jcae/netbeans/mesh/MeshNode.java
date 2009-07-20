@@ -21,9 +21,9 @@
 package org.jcae.netbeans.mesh;
 
 import java.awt.datatransfer.Transferable;
-import java.beans.IntrospectionException;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -34,9 +34,7 @@ import org.jcae.mesh.bora.ds.BModel;
 import org.jcae.mesh.bora.xmldata.Storage;
 import org.jcae.mesh.xmldata.Group;
 import org.jcae.mesh.xmldata.Groups;
-import org.jcae.mesh.xmldata.GroupsReader;
 import org.jcae.mesh.xmldata.MeshWriter;
-import org.jcae.netbeans.BeanProperty;
 import org.jcae.netbeans.Utilities;
 import org.jcae.netbeans.cad.BrepNode;
 import org.jcae.netbeans.viewer3d.SelectionManager;
@@ -53,12 +51,9 @@ import org.openide.loaders.DataObject;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
-import org.openide.nodes.Node.Property;
-import org.openide.nodes.Node.PropertySet;
 import org.openide.nodes.NodeTransfer;
 import org.openide.util.actions.SystemAction;
 import org.openide.util.datatransfer.PasteType;
-import org.openide.util.lookup.Lookups;
 import org.xml.sax.SAXException;
 
 /**
@@ -69,8 +64,6 @@ import org.xml.sax.SAXException;
  */
 public class MeshNode extends DataNode implements ViewCookie
 {
-	private Groups groups;
-	private AbstractNode groupsNode;
 	private AbstractNode subMeshNode;
 	
 	public MeshNode(DataObject arg0)
@@ -79,11 +72,6 @@ public class MeshNode extends DataNode implements ViewCookie
 		getCookieSet().add(this);
 		updateSubmeshNode();
 		refreshGroups();
-	}
-
-	public AbstractNode getGroupsNode()
-	{
-		return groupsNode;
 	}
 
 
@@ -184,32 +172,14 @@ public class MeshNode extends DataNode implements ViewCookie
 		}
 	}
 
-//	public String getMeshDirectory() {
-//		String ref=FileUtil.toFile(getDataObject().getPrimaryFile().getParent()).getPath();
-//		return Utilities.absoluteFileName(getMesh().getMeshFile(), ref);
-//	}
 	/**
 	 * @return Returns the groups
 	 */
 	public void refreshGroups()
 	{
-//		String meshDir=getMeshDirectory();
-//		File xmlFile=new File(meshDir, "jcae3d");
-//        if (xmlFile.exists())
-//            groups = GroupsReader.getGroups(meshDir);
-//
-//        if(groupsNode!=null)
-//        {
-//        	getChildren().remove(new Node[]{groupsNode});
-//        }
-//
-//        if(groups!=null && groups.getGroups().length>0)
-//        {
-//			GroupChildren groupChildren = new GroupChildren(groups);
-//        	groupsNode=new AbstractNode(groupChildren, Lookups.fixed(groupChildren));
-//        	groupsNode.setDisplayName("Groups");
-//        	getChildren().add(new Node[]{groupsNode});
-//        }
+		SubmeshNode subNode = (SubmeshNode)subMeshNode;
+		if (subNode != null)
+			subNode.refreshGroupsNode(true);
 	}
 
 	public BModel getBModel() {
@@ -231,7 +201,10 @@ public class MeshNode extends DataNode implements ViewCookie
 		try
 		{
 			String o=getName();
-			getDataObject().rename(arg0+"_bmesh");
+			getDataObject().rename(arg0);
+			if (getBModel() != null) {
+				getCookie(MeshDataObject.class).updateBModelDir();
+			}
 			fireDisplayNameChange(o, arg0);
 			fireNameChange(o, arg0);
 		}
@@ -245,16 +218,6 @@ public class MeshNode extends DataNode implements ViewCookie
 	public String getName()
 	{
 		return getDataObject().getName();
-	}
-	
-
-	/**
-	 * Indicate if groups is the same than has the groupNode
-	 * @param groups
-	 */
-	boolean hasThisGroupsNode(Groups groups)
-	{
-		return this.groups == groups;
 	}
 	
 	@Override
@@ -320,12 +283,12 @@ public class MeshNode extends DataNode implements ViewCookie
 	
 	@Override
 	public Action[] getActions(boolean b)
-	{		
-		Action[] toReturn=new Action[4];
-		toReturn[3]=SystemAction.get(ExpertMenu.class);
-		toReturn[0]=SystemAction.get(ComputeMeshAction.class);
-		toReturn[1]=SystemAction.get(ViewAction.class);
-		toReturn[2]=SystemAction.get(DeleteAction.class);
-		return toReturn;
+	{
+		ArrayList<Action> l = new ArrayList<Action>();
+		l.add(SystemAction.get(ComputeMeshAction.class));
+		l.add(SystemAction.get(ViewAction.class));
+		l.add(SystemAction.get(DeleteAction.class));
+		l.add(SystemAction.get(RenameAction.class));
+		return l.toArray(new Action[l.size()]);
 	}	
 }

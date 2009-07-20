@@ -11,11 +11,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import javax.swing.Action;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
-import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.bora.ds.BModel;
 import org.jcae.mesh.bora.ds.BSubMesh;
 import org.jcae.mesh.bora.ds.Constraint;
@@ -39,7 +39,7 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 
 	private final String boraFileName; //needed for delete operation
 	private final DataModel dataModel = new DataModel();
-
+	private final BGroupsNode groupsNode;
 
 	public SubmeshNode(String objName,final BModel bModel) {
 		super(new Children.Keys() {
@@ -66,10 +66,22 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 		for (BCADGraphCell cell : allCells) {
 			dataModel.constraints.put(getShapeFromCell(cell), null);
 		}
+		ArrayList<BCADGraphCell> definedCells = new ArrayList<BCADGraphCell>();
 		//getting the existing constraints and filling the constraints map
 		for (Constraint c : dataModel.subMesh.getConstraints()) {
-			dataModel.constraints.put(getShapeFromCell(c.getGraphCell()), c);
+			BCADGraphCell cell = c.getGraphCell();
+			dataModel.constraints.put(getShapeFromCell(cell), c);
+			if (c.getGroup() != null) { //groups initialisation
+					dataModel.addGroup(c.getGroup(), cell);
+					definedCells.add(cell);
+			}
 		}
+
+//		allCells.removeAll(definedCells);
+//		for (BCADGraphCell cell : allCells) {
+//			//looping on cells whoose groups is undefined (no constraint attached)
+//			dataModel.addGroup(BCADGraphNode.DEFAULT_GROUP_NAME, cell);
+//		}
 
 		final AbstractNode graph = new AbstractNode(new BCADCellNode(rootCell, dataModel));
 		graph.setDisplayName("Graph");
@@ -77,8 +89,26 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 		final AbstractNode entities = new AbstractNode(new EntitieChildrenNode(rootCell));
 		entities.setDisplayName("Entities");
 
-		getChildren().add(new Node[] {graph, entities});
+		groupsNode = new BGroupsNode(dataModel);
+		groupsNode.setDisplayName("Groups");
+
+		getChildren().add(new Node[] {graph, entities, groupsNode});
 		this.setDisplayName(objName);
+	}
+
+	/**
+	 * Refreshes the groups node from DataModel
+	 */
+	public void refreshGroupsNode(boolean refreshModel) {
+		if (groupsNode != null) {
+			if (refreshModel) {
+				for (Constraint c : dataModel.subMesh.getConstraints()) {
+					dataModel.addGroup(c.getGroup(), c.getGraphCell());
+				}
+			}
+
+			groupsNode.fireModelChanged();
+		}
 	}
 
 	@Override
@@ -97,6 +127,7 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 	public Action[] getActions(boolean arg0) {
 		ArrayList<Action> l = new ArrayList<Action>();
 		l.add(SystemAction.get(DeleteAction.class));
+		l.add(SystemAction.get(ExportBUNV.class));
 		return l.toArray(new Action[l.size()]);
 	}
 
@@ -160,6 +191,55 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 		public BSubMesh getSubMesh() {
 			return subMesh;
 		}
+
+		/** Group section **/
+		private final Map<String, HashSet<BCADGraphCell>> groups = new HashMap<String, HashSet<BCADGraphCell>>();
+
+		public void addGroup(String group, BCADGraphCell cell) {
+			removeCell(cell);
+			if (groups.get(group) != null)
+				groups.get(group).add(cell);
+			else {
+				HashSet<BCADGraphCell> set = new HashSet<BCADGraphCell>();
+				set.add(cell);
+				groups.put(group, set);
+			}
+			refreshGroups();
+		}
+
+		private void removeCell(BCADGraphCell cell) {
+			for (String key : groups.keySet()) {
+				HashSet<BCADGraphCell> ens = groups.get(key);
+				if (ens.remove(cell))
+					break;
+			}
+		}
+
+		public void removeGroup(String group) {
+			groups.remove(group);
+			refreshGroups();
+		}
+
+		public Collection<String> getAllGroups() {
+			return groups.keySet();
+		}
+
+		public Map<String, HashSet<BCADGraphCell>> getGroupMap() {
+			return groups;
+		}
+
+		/**
+		 * Called when adding or removing a Cell / group
+		 * This method refreshes the group node
+		 */
+		private void refreshGroups() {
+			SubmeshNode.this.refreshGroupsNode(false);
+		}
+		public Collection<BCADGraphCell> getCellsInGroup(String group) {
+			return groups.get(group);
+		}
+		/** End Group section **/
+
 		/** Constraint Section **/
 		//this constraint map is the data model used by the BCADGraphNode
 		//actually, this map maps TopoDS_SHape and constraint, 'cause constraint are applied
@@ -214,6 +294,7 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 		private void fireModelChanged() {
 			for (BCADGraphNode node : listeners)
 				node.refresh();
+			refreshGroups();
 		}
 
 		public void addListener(BCADGraphNode node) {
@@ -224,5 +305,9 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 
 	private static TopoDS_Shape getShapeFromCell(BCADGraphCell cell) {
 		return ((OCCShape)cell.getShape()).getShape();
+	}
+
+	public DataModel getDataModel() {
+		return dataModel;
 	}
 }

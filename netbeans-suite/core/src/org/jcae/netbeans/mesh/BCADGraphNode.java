@@ -22,13 +22,13 @@
 package org.jcae.netbeans.mesh;
 
 import java.awt.Image;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import javax.swing.Action;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.bora.ds.Hypothesis;
 import org.jcae.mesh.cad.CADShapeEnum;
+import org.openide.actions.CopyAction;
+import org.openide.actions.CutAction;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
@@ -158,6 +158,8 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 		l.add(SystemAction.get(ViewBCellGeometryAction.class));
 		l.add(SystemAction.get(ViewBCellMeshAction.class));
 		l.add(SystemAction.get(RemoveConstraintAction.class));
+		l.add(SystemAction.get(CopyAction.class));
+		l.add(SystemAction.get(CutAction.class));
 		return l.toArray(new Action[l.size()]);
 	}
 
@@ -179,6 +181,12 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 		attributes.refresh();
 		fireDisplayNameChange(null, getDisplayName());
 	}
+
+	@Override
+	public boolean canCopy() {
+		return true;
+	}
+
 
 	public final static String DEFAULT_GROUP_NAME = "DEFAULT_GROUP";
 
@@ -202,6 +210,7 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 
 		public void setGroup(String group) {
 			this.group = group;
+			dataModel.addGroup(group, cell);
 			if (hasConstraint)
 				updateConstraints();
 		}
