@@ -89,7 +89,7 @@ public class BoraToUnvConvert implements FilterInterface
 
 	public void afterProcessingAllShapes()
 	{
-		unvWriter.finish(nrBoundaryNodes, nrInnerNodes, 0, coordRefs);
+		unvWriter.finish(nrBoundaryNodes, nrInnerNodes, indexElements, coordRefs);
 	}
 
 	public void processOneShape(int groupId, String groupName, int iFace)

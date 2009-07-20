@@ -488,7 +488,7 @@ public class Storage
 	public static int getNumberOfNodes(BDiscretization d)
 	{
 		File nodesFile = new File(d.getGraphCell().getGraph().getModel().getOutputDir(d), "n");
-		return (int) nodesFile.length() / 4;
+		return (int) nodesFile.length() / 24;
 	}
 
 	public static double[] readNodeCoordinates(BDiscretization d)
