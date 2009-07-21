@@ -55,9 +55,8 @@ public class BGroupNode extends AbstractNode {
 			if (ns[0] instanceof BCADGraphNode) {
 				final BCADGraphNode n = (BCADGraphNode) ns[0];
 				ls.add(new PasteType() {
-
 					public Transferable paste() {
-						dataModel.addGroup(getName(), n.getGraphCell());
+						dataModel.addGroup(BGroupNode.this.getName(), n.getGraphCell());
 						firePropertyChange(null, null, null);
 						return null;
 					}

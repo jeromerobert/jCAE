@@ -10,6 +10,7 @@ package org.jcae.netbeans.mesh;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -201,9 +202,11 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 				groups.get(group).add(cell);
 			else {
 				HashSet<BCADGraphCell> set = new HashSet<BCADGraphCell>();
-				set.add(cell);
+				if (cell!=null)
+					set.add(cell);
 				groups.put(group, set);
 			}
+			changeGroupTo(Collections.singletonList(cell), group);
 			refreshGroups();
 		}
 

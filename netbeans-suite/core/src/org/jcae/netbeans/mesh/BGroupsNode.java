@@ -6,16 +6,18 @@
  */
 package org.jcae.netbeans.mesh;
 
-import java.awt.datatransfer.Transferable;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import javax.swing.Action;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.netbeans.mesh.SubmeshNode.DataModel;
+import org.openide.actions.NewAction;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
-import org.openide.nodes.NodeTransfer;
-import org.openide.util.datatransfer.PasteType;
+import org.openide.util.actions.SystemAction;
+import org.openide.util.datatransfer.NewType;
 
 /**
  *
@@ -56,6 +58,18 @@ public class BGroupsNode extends AbstractNode {
 			}
 		}
 
+		public void addNewGroupNode() {
+			final String group = "group";
+			Collection<String> existing = dataModel.getAllGroups();
+			int i = 0;
+			String toAdd = group;
+			while (existing.contains(toAdd)) {
+				toAdd = group + i++;
+			}
+			dataModel.addGroup(toAdd,null);
+			fireModelChanged();
+		}
+
 		@Override
 		protected Node[] createNodes(Object arg0) {
 			ArrayList<Node> toCreate = new ArrayList<Node>();
@@ -68,5 +82,26 @@ public class BGroupsNode extends AbstractNode {
 			BGroupNode toAdd = new BGroupNode(group, toCreate, dataModel);
 			return new Node[]{toAdd};
 		}
+	}
+
+	@Override
+	public Action[] getActions(boolean arg0)
+	{
+		return new Action[]{SystemAction.get(NewAction.class)};
+	}
+
+	@Override
+	public NewType[] getNewTypes() {
+		return new NewType[]{new NewType() {
+				public void create() throws IOException {
+					groupNode.addNewGroupNode();
+				}
+
+				@Override
+				public String getName() {
+					return "Group";
+				}
+
+			}};
 	}
 }
