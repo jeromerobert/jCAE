@@ -215,9 +215,51 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 			}
 		}
 
-		public void removeGroup(String group) {
+		/**
+		 * Destroy the given Group from the groups, and migrate the associated cells
+		 * to the DEFAULT GROUP or the first group.
+		 * @param group
+		 */
+		public void destroyGroup(String group) {
+			HashSet<BCADGraphCell> belongsToGroup = groups.get(group);
+			if (belongsToGroup == null ||belongsToGroup.isEmpty()) {
+				groups.remove(group);
+				refreshGroups();
+				return;
+			}
+			//we have to "migrate" cells in this group to default group
+			assert (groups.keySet().size() > 1);
+			String DEFAULT = BCADGraphNode.DEFAULT_GROUP_NAME;
+			if (group.equals(DEFAULT) || !groups.keySet().contains(DEFAULT)) {
+				//we are deleting the default group or it doesn't exist
+				Iterator<String> groupIterator = groups.keySet().iterator();
+				String first = groupIterator.next();
+				if (group.equals(first))
+					first = groupIterator.next(); //if we are attempting to delete the first group
+				changeGroupTo(belongsToGroup, first);
+				groups.get(first).addAll(belongsToGroup);
+			}
+			else {
+				changeGroupTo(belongsToGroup, DEFAULT);
+				groups.get(DEFAULT).addAll(belongsToGroup);
+			}
 			groups.remove(group);
 			refreshGroups();
+		}
+
+		/**
+		 * Changes in the constraint of the model the Group associated with the
+		 * given collection of cells to group.
+		 * @param cellsToChange
+		 * @param group
+		 */
+		private void changeGroupTo(Collection<BCADGraphCell> cellsToChange, String group) {
+			for (Constraint cons : constraints.values()) {
+					if (cons != null && cellsToChange.contains(
+							cons.getGraphCell())) {
+						cons.setGroup(group);
+					}
+			}
 		}
 
 		public Collection<String> getAllGroups() {
@@ -226,6 +268,19 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 
 		public Map<String, HashSet<BCADGraphCell>> getGroupMap() {
 			return groups;
+		}
+
+		public void renameGroup(String old, String newName) {
+			if (groups.get(newName) != null)
+				return; //cannot rename group into an existing one
+			HashSet<BCADGraphCell> belongsToGroup = groups.get(old);
+			groups.remove(old);
+			if (belongsToGroup == null)
+				return;
+
+			changeGroupTo(belongsToGroup, newName);
+			groups.put(newName, belongsToGroup);
+			refreshGroups();
 		}
 
 		/**

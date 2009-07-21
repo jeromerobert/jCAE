@@ -24,11 +24,11 @@ import org.openide.util.datatransfer.PasteType;
  */
 public class BGroupsNode extends AbstractNode {
 
-	private final BGroupNode groupNode;
+	private final BGroupsNodeKeys groupNode;
 
 	public BGroupsNode(SubmeshNode.DataModel dataModel) {
 		super(Children.LEAF);
-		groupNode = new BGroupNode(dataModel);
+		groupNode = new BGroupsNodeKeys(dataModel);
 		setChildren(groupNode);
 	}
 
@@ -36,11 +36,11 @@ public class BGroupsNode extends AbstractNode {
 		groupNode.fireModelChanged();
 	}
 
-	public class BGroupNode extends Children.Keys {
+	public class BGroupsNodeKeys extends Children.Keys {
 
 		private final SubmeshNode.DataModel dataModel;
 
-		public BGroupNode(DataModel dataModel) {
+		public BGroupsNodeKeys(DataModel dataModel) {
 			this.dataModel = dataModel;
 		}
 
@@ -61,40 +61,11 @@ public class BGroupsNode extends AbstractNode {
 			ArrayList<Node> toCreate = new ArrayList<Node>();
 			final String group = arg0.toString();
 			for (BCADGraphCell cell : dataModel.getCellsInGroup(group)) {
-				toCreate.add(new BCADGraphNode(true, cell, dataModel));
+				BCADGraphNode newNode = new BCADGraphNode(true, cell, dataModel);
+				dataModel.addListener(newNode);
+				toCreate.add(newNode);
 			}
-			AbstractNode toAdd = new AbstractNode(new Children.Keys() {
-				@Override
-				protected Node[] createNodes(Object arg0) {
-					return null;
-				}
-			}) {
-
-				@Override
-				protected void createPasteTypes(Transferable t,
-												List<PasteType> ls) {
-					final Node[] ns = NodeTransfer.nodes(t,
-							NodeTransfer.COPY | NodeTransfer.MOVE);
-					if (ns != null && ns.length == 1) {
-						if (ns[0] instanceof BCADGraphNode) {
-							final BCADGraphNode n = (BCADGraphNode) ns[0];
-							ls.add(new PasteType() {
-								public Transferable paste() {
-									dataModel.addGroup(group, n.getGraphCell());
-									fireModelChanged();
-									firePropertyChange(null, null, null);
-									return null;
-								}
-							});
-						}
-					}
-					// Also try superclass, but give it lower priority:
-					super.createPasteTypes(t, ls);
-				}
-			};
-			toAdd.getChildren().add(toCreate.toArray(new Node[0]));
-			toAdd.setDisplayName(group);
-
+			BGroupNode toAdd = new BGroupNode(group, toCreate, dataModel);
 			return new Node[]{toAdd};
 		}
 	}

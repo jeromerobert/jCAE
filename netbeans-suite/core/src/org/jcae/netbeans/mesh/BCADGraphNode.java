@@ -158,8 +158,6 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 		l.add(SystemAction.get(ViewBCellGeometryAction.class));
 		l.add(SystemAction.get(ViewBCellMeshAction.class));
 		l.add(SystemAction.get(RemoveConstraintAction.class));
-		l.add(SystemAction.get(CopyAction.class));
-		l.add(SystemAction.get(CutAction.class));
 		return l.toArray(new Action[l.size()]);
 	}
 
