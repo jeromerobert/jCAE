@@ -86,7 +86,11 @@ public class BrepNode extends DataNode implements Node.Cookie, OpenCookie
 	{
 		return getLookup().lookup(BrepDataObject.class).isLoaded();
 	}
-	
+
+
+	public void save() {
+		getLookup().lookup(BrepDataObject.class).save();
+	}
 	/**
 	 * Default behaviour is to be open when the node is unfold. We want to have
 	 * an explicit open/closed status

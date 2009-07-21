@@ -226,18 +226,19 @@ public class MeshNode extends DataNode implements ViewCookie
 		final Node[] ns = NodeTransfer.nodes(t, NodeTransfer.COPY|NodeTransfer.MOVE);
 		if (ns != null && ns.length==1) {
 			final BrepNode n=ns[0].getCookie(BrepNode.class);
-			if(n!=null)
-			ls.add(new PasteType()
-			{
-				public Transferable paste()
-				{
-					getBModel(getGeomFile(n)).newMesh();
-					getBModel().save();
-					updateSubmeshNode();
-					firePropertyChange(null, null, null);
-					return null;
-				}
-			});
+			if (n != null) {
+				n.save();
+				ls.add(new PasteType() {
+
+					public Transferable paste() {
+						getBModel(getGeomFile(n)).newMesh();
+						getBModel().save();
+						updateSubmeshNode();
+						firePropertyChange(null, null, null);
+						return null;
+					}
+				});
+			}
 		}
 		// Also try superclass, but give it lower priority:
 		super.createPasteTypes(t, ls);
