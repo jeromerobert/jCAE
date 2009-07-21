@@ -40,6 +40,7 @@ public class BGroupNode extends AbstractNode {
 				return null;
 			}
 		});
+		setIconBaseWithExtension("org/jcae/netbeans/mesh/GroupNode.png");
 		this.dataModel = dataModel;
 		setName(displayName);
 		getChildren().add(children.toArray(new Node[0]));

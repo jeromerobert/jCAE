@@ -134,6 +134,7 @@ public class ModuleNode extends AbstractNode
 	{
 		super(new ModuleChildren(project.getProjectDirectory()), new MyLookup());
 		((MyLookup)getLookup()).setDelegates(Lookups.fixed(project, this));
+		setIconBaseWithExtension("org/jcae/netbeans/mesh/MeshesNode.png");
 	}
 	
 	@Override

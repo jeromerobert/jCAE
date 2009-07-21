@@ -47,6 +47,7 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 			@Override
 			protected Node[] createNodes(Object arg0) {return null;}
 		});
+		setIconBaseWithExtension("org/jcae/netbeans/mesh/SubmeshNode.png");
 		if (!bModel.getOutputDir().endsWith(File.separator))
 			boraFileName = bModel.getOutputDir() + File.separator + bModel.getOutputFile();
 		else
@@ -86,12 +87,15 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 
 		final AbstractNode graph = new AbstractNode(new BCADCellNode(rootCell, dataModel));
 		graph.setDisplayName("Graph");
+		graph.setIconBaseWithExtension("org/jcae/netbeans/mesh/GraphNode.png");
 
 		final AbstractNode entities = new AbstractNode(new EntitieChildrenNode(rootCell));
 		entities.setDisplayName("Entities");
+		entities.setIconBaseWithExtension("org/jcae/netbeans/mesh/EntitieNode.png");
 
 		groupsNode = new BGroupsNode(dataModel);
 		groupsNode.setDisplayName("Groups");
+		groupsNode.setIconBaseWithExtension("org/jcae/netbeans/mesh/GroupsNode.png");
 
 		getChildren().add(new Node[] {graph, entities, groupsNode});
 		this.setDisplayName(objName);
@@ -170,6 +174,7 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 					return null;
 				}
 			});
+			node.setIconBaseWithExtension("org/jcae/netbeans/mesh/EntitiesNode.png");
 			ArrayList<BCADGraphNode> toAdd = new ArrayList<BCADGraphNode>();
 			Iterator<BCADGraphCell> it = root.shapesExplorer(type);
 			while (it.hasNext()) {

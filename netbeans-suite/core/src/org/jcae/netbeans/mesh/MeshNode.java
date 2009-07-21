@@ -68,7 +68,8 @@ public class MeshNode extends DataNode implements ViewCookie
 	
 	public MeshNode(DataObject arg0)
 	{
-		super(arg0, new Children.Array());	
+		super(arg0, new Children.Array());
+		setIconBaseWithExtension("org/jcae/netbeans/mesh/MeshNode.png");
 		getCookieSet().add(this);
 		updateSubmeshNode();
 		refreshGroups();

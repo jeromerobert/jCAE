@@ -70,6 +70,25 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 	private void init(BCADGraphCell cell, SubmeshNode.DataModel dataModel) {
 		setDisplayName(cell.getType() + "" + cell.getId());
 		attributes.initialize(cell, dataModel);
+		setIconBaseWithExtension(getIconLocation(cell));
+	}
+
+	private static String getIconLocation(BCADGraphCell cell) {
+		CADShapeEnum type = cell.getType();
+		if (type.equals(CADShapeEnum.FACE)) {
+			return "org/jcae/netbeans/mesh/FaceNode.png";
+		}
+		else if (type.equals(CADShapeEnum.EDGE)) {
+			return "org/jcae/netbeans/mesh/EdgeNode.png";
+		}
+		else if (type.equals(CADShapeEnum.VERTEX)) {
+			return "org/jcae/netbeans/mesh/VertexNode.png";
+		}
+		else if (type.equals(CADShapeEnum.WIRE)) {
+			return "org/jcae/netbeans/mesh/WireNode.png";
+		}
+		return "org/jcae/netbeans/mesh/UndefShapeNode.png";
+
 	}
 
 	@Override
@@ -140,17 +159,6 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 	public BCADGraphCell getGraphCell() {
 		return attributes.cell;
 	}
-
-	@Override
-	public Image getIcon(int type) {
-		return Utilities.loadImage("org/jcae/netbeans/cad/link.png");
-	}
-
-	@Override
-	public Image getOpenedIcon(int arg0) {
-		return getIcon(arg0);
-	}
-
 
 	@Override
 	public Action[] getActions(boolean arg0) {
