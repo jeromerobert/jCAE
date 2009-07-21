@@ -39,9 +39,10 @@ public class UNVToMesh
 
 	private static class GroupData extends LeafNode.DataProvider
 	{
-		GroupData(float[] nodes, int[] indices, int nbrOfCells)
+		GroupData(float[] nodes, int[] lines, int[] indices, int nbrOfCells)
 		{
 			setNodes(nodes);
+			setLines(lines);
 			setPolys(nbrOfCells, indices);
 		}
 		
@@ -104,6 +105,7 @@ public class UNVToMesh
 		{
 			int[] triangles =parser.getTria3FromGroup(id);
 			int[] quads = parser.getQuad4FromGroup(id);
+			int[] beams = parser.getBeam2FromGroup(id);
 			
 			int[] indices = new int[4 * (triangles.length / 3) +  5 * (quads.length / 4)];
 			
@@ -124,8 +126,21 @@ public class UNVToMesh
 				indices[offset++] = triangles[i++];
 				indices[offset++] = triangles[i++];
 			}
+
+			if (beams.length > 0)
+			{
+				int[] newBeams = new int[3 * beams.length / 2];
+				offset = 0;
+				for(int i = 0 ; i < beams.length ; )
+				{
+					newBeams[offset++] = 2;
+					newBeams[offset++] = beams[i++];
+					newBeams[offset++] = beams[i++];
+				}
+				beams = newBeams;
+			}
 			
-			GroupData groupData = new GroupData(nodes, indices, triangles.length / 3 + quads.length / 4);
+			GroupData groupData = new GroupData(nodes, beams, indices, triangles.length / 3 + quads.length / 4);
 			mesh.setGroup(id, groupData);
 		}
 	}

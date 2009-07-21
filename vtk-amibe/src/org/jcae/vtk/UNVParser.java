@@ -15,18 +15,16 @@ public class UNVParser
 	private static final int TRIA3_MASK   = 0x10000000;
 	private static final int TRIA6_MASK   = 0x20000000;
 	private static final int QUAD4_MASK   = 0x40000000;
+	private static final int BEAM2_MASK   = 0x80000000;
 
 	private float[] nodesCoordinates;
 	private TIntIntHashMap nodesIndicesMap;
 	private boolean hasBeam2, hasTria3, hasTria6, hasQuad4, hasTetra4, hasHexa8;
 	private ArrayList<String> surfaceGroupNames=new ArrayList<String>();
 	private ArrayList<int[]> surfaceGroups=new ArrayList<int[]>();
-	private TIntArrayList beamIndices=new TIntArrayList();
 	private TIntArrayList surfaceIndices=new TIntArrayList();
 	private TIntArrayList volumeIndices=new TIntArrayList();
-	private TIntIntHashMap elementBeamIndicesMap, elementSurfaceIndicesMap, elementVolumeIndicesMap;
-
-	public final int BEAM_GROUP = Integer.MAX_VALUE-1;
+	private TIntIntHashMap elementSurfaceIndicesMap, elementVolumeIndicesMap;
 	
 	public float[] getNodesCoordinates()
 	{
@@ -95,17 +93,26 @@ public class UNVParser
 		return toReturn;
 	}
 	
-	/**
-	 * Access to the beams. The beams don't have really a group so we put them into the
-	 * group BEAM_GROUP.
-	 * @param groupId has to be equal to BEAM_GROUP
-	 * @return
-	 */
 	public int[] getBeam2FromGroup(int groupId)
 	{
-		if (groupId == BEAM_GROUP)
-			return beamIndices.toNativeArray();
-		return new int[0];
+		int[] elids=surfaceGroups.get(groupId);
+		int cnt = 0;
+		for(int val: elids)
+		{
+			if ((val & BEAM2_MASK) != 0)
+				cnt++;
+		}
+		int[] toReturn=new int[cnt*2];
+		cnt = 0;
+		for(int val: elids)
+		{
+			if ((val & BEAM2_MASK) == 0)
+				continue;
+			int iid=(val & ~BEAM2_MASK);
+			toReturn[cnt++]=surfaceIndices.get(iid++);
+			toReturn[cnt++]=surfaceIndices.get(iid++);
+		}
+		return toReturn;
 	}
 
 	public int[] getTria6FromGroup(int groupId)
@@ -149,7 +156,6 @@ public class UNVParser
 		double unit = 1.0;
 		String line;
 		
-		elementBeamIndicesMap=new TIntIntHashMap();
 		elementSurfaceIndicesMap=new TIntIntHashMap();
 		elementVolumeIndicesMap=new TIntIntHashMap();
 		nodesIndicesMap=new TIntIntHashMap();
@@ -202,7 +208,6 @@ public class UNVParser
 		
 		//free indices maps.
 		nodesIndicesMap=null;
-		elementBeamIndicesMap=null;
 		elementSurfaceIndicesMap=null;
 		elementVolumeIndicesMap=null;
 	}
@@ -224,9 +229,9 @@ public class UNVParser
 			{
 				case 21: // Linear beam
 					st = new StringTokenizer(line);	
-					elementBeamIndicesMap.put(ind, beamIndices.size());
+					elementSurfaceIndicesMap.put(ind, BEAM2_MASK | surfaceIndices.size());
 					for(int i=0; i<2; i++)
-						beamIndices.add(nodesIndicesMap.get(Integer.parseInt(st.nextToken())));
+						surfaceIndices.add(nodesIndicesMap.get(Integer.parseInt(st.nextToken())));
 					hasBeam2 = true;
 					break;
 				case 74:  // Membrane Linear Triangle
