@@ -223,7 +223,6 @@ public class UNVParser
 			switch(type)
 			{
 				case 21: // Linear beam
-					line=rd.readLine(); //skip          0         1         1
 					st = new StringTokenizer(line);	
 					elementBeamIndicesMap.put(ind, beamIndices.size());
 					for(int i=0; i<2; i++)
