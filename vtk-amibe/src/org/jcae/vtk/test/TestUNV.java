@@ -95,13 +95,13 @@ public class TestUNV implements SelectionListener, KeyListener
 	{
 		JFrame frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setVisible(true);
 		View canvas = new View();
 		frame.add(canvas, BorderLayout.CENTER);
 		vtkRenderer renderer = canvas.GetRenderer();
 		ViewableMesh rbh = new ViewableMesh(new UNVToMesh(args[0], Collections.EMPTY_LIST).getMesh());
 		canvas.add(rbh);
 		frame.setSize(800, 600);
+		frame.setVisible(true);
 		TestUNV test = new TestUNV(rbh);
 		//rbh.setViewMode(ViewableMesh.ViewMode.WIRED);
 		test.canvas = canvas;
