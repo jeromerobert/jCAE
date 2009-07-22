@@ -748,7 +748,7 @@ public class Mesh implements Serializable
 	}
 
 	/**
-	 * Replace sharp edges by non-manifold edges.
+	 * Add {@link AbstractHalfEdge#SHARP} attribute to sharp edges.
 	 *
 	 * @param minAngle  when an edge has a dihedral angle greater than this value,
 	 *   it is considered as a ridge and its endpoints are treated as if they
@@ -756,17 +756,15 @@ public class Mesh implements Serializable
 	 */
 	public int buildRidges(double minAngle)
 	{
+		int toReturn = 0;
 		if (triangleList.isEmpty())
-			return 0;
+			return toReturn;
 
 		double cosMinAngle = Math.cos(Math.PI*minAngle/180.0);
 		double [][] temp = new double[4][3];
 
-		ArrayList<Triangle> newTriangles = new ArrayList<Triangle>();
-		AbstractHalfEdge ot    = null;
-		AbstractHalfEdge sym   = triangleList.iterator().next().getAbstractHalfEdge();
-		AbstractHalfEdge temp0 = null;
-		AbstractHalfEdge temp1 = null;
+		AbstractHalfEdge ot  = null;
+		AbstractHalfEdge sym = triangleList.iterator().next().getAbstractHalfEdge();
 
 		for (Triangle t: triangleList)
 		{
@@ -776,20 +774,21 @@ public class Mesh implements Serializable
 			for (int i = 0; i < 3; i++)
 			{
 				ot = ot.next();
-				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD | AbstractHalfEdge.SHARP))
 					continue;
 				sym = ot.sym(sym);
 				double [] p0 = ot.origin().getUV();
 				double [] p1 = ot.destination().getUV();
 				Matrix3D.computeNormal3D(p0, p1, ot.apex().getUV(), temp[0], temp[1], temp[2]);
 				Matrix3D.computeNormal3D(p1, p0, sym.apex().getUV(), temp[0], temp[1], temp[3]);
-				if (Matrix3D.prodSca(temp[2], temp[3]) > cosMinAngle)
-					bindSymEdgesToVirtualTriangles(ot, sym, temp0, temp1, newTriangles);
+				if (Matrix3D.prodSca(temp[2], temp[3]) < cosMinAngle)
+				{
+					ot.setAttributes(AbstractHalfEdge.SHARP);
+					sym.setAttributes(AbstractHalfEdge.SHARP);
+					toReturn++;
+				}
 			}
 		}
-		makeNonManifoldVertices(newTriangles);
-		int toReturn = newTriangles.size() / 2;
-		triangleList.addAll(newTriangles);
 		if (toReturn > 0 && logger.isLoggable(Level.CONFIG))
 			logger.log(Level.CONFIG, "Found "+toReturn+" sharp edges");
 		return toReturn;
