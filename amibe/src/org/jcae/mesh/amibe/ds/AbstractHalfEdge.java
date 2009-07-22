@@ -388,7 +388,15 @@ public abstract class AbstractHalfEdge
 	 * @see #clearAttributes
 	 */
 	public static final int NONMANIFOLD = 1 << 5;
-	
+
+	/**
+	 * Numeric constants for edge attributes.  Set if edge is sharp.
+	 * @see #setAttributes
+	 * @see #hasAttributes
+	 * @see #clearAttributes
+	 */
+	public static final int SHARP       = 1 << 6;
+
 	/**
 	 * <code>Integer</code> array to store values for 0, 1 and 2.  These objects
 	 * may be useful when edge local numbers are put into <code>HashSet</code> or
