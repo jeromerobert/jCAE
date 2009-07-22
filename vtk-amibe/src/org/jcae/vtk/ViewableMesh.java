@@ -23,6 +23,7 @@ import gnu.trove.TIntHashSet;
 import gnu.trove.TIntObjectHashMap;
 import gnu.trove.TObjectIntHashMap;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.Set;
 import vtk.vtkMapper;
 import vtk.vtkActor;
@@ -93,7 +94,8 @@ public class ViewableMesh extends Viewable
 		for (Entry<Integer, LeafNode.DataProvider> entry : groupSet)
 			groupsLoaded.add(entry.getKey());
 
-		int cID = 0;
+		int cID = new Random().nextInt();
+
 		for (Entry<Integer, LeafNode.DataProvider> group : groupSet)
 		{
 			// Warning: Do *not* replace colorManager.getColor() by

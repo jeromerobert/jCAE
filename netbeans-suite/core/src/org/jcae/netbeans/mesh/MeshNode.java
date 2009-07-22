@@ -25,21 +25,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import javax.swing.Action;
-import javax.xml.parsers.ParserConfigurationException;
-import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
+import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.bora.ds.BModel;
-import org.jcae.mesh.bora.xmldata.Storage;
-import org.jcae.mesh.xmldata.Group;
-import org.jcae.mesh.xmldata.Groups;
-import org.jcae.mesh.xmldata.MeshWriter;
 import org.jcae.netbeans.Utilities;
 import org.jcae.netbeans.cad.BrepNode;
-import org.jcae.netbeans.viewer3d.SelectionManager;
 import org.jcae.netbeans.viewer3d.ViewManager;
-import org.jcae.vtk.AmibeToMesh;
+import org.jcae.vtk.BoraToMesh;
 import org.jcae.vtk.View;
 import org.jcae.vtk.ViewableMesh;
 import org.openide.ErrorManager;
@@ -54,13 +48,9 @@ import org.openide.nodes.Node;
 import org.openide.nodes.NodeTransfer;
 import org.openide.util.actions.SystemAction;
 import org.openide.util.datatransfer.PasteType;
-import org.xml.sax.SAXException;
 
 /**
- * Contains only the geometric node and the groups node.
- * Lookups :
- * this.
- * @author ibarz
+ * Contains the submeshnode(s)
  */
 public class MeshNode extends DataNode implements ViewCookie
 {
@@ -115,62 +105,21 @@ public class MeshNode extends DataNode implements ViewCookie
 //				};
 //	}
 
-	/**
-	 * Display in a View3D a list of groups.
-	 * The xml Directory xmlDir must be setted. After having load a project, xmlDir may be null the first time.
-	 *
-	 * @param the list of groups to display.
-	 * @param the View3D in which the Groups are displayed.
-	 */
-	public static void displayGroups(Groups groups, String meshName,
-		Collection<Group> groupsToDisplay, View view)
-		throws ParserConfigurationException, SAXException, IOException
-	{
-		int[] idGroupsDisplayed = new int[groupsToDisplay.size()];
-		Iterator<Group> iter = groupsToDisplay.iterator();
-		String sb="";
-		boolean full=false;
-		for(int i = 0 ; i < idGroupsDisplayed.length ; ++i)
-		{
-			Group g = iter.next();
-
-			idGroupsDisplayed[i] = g.getId();
-			if(sb.length()<20)
-				sb=sb+" "+g.getName();
-			else
-				full=true;
-		}
-
-		if(full)
-			sb=sb+"...";
-
-		AmibeToMesh reader = new AmibeToMesh(groups.getMeshFile(), idGroupsDisplayed);
-		ViewableMesh interactor = new ViewableMesh(reader.getMesh());
-		interactor.setName(meshName+" ["+sb+"]");
-		SelectionManager.getDefault().addInteractor(interactor, groups);
-		view.add(interactor);
-	}
-
 	public void view() {
 		if (subMeshNode != null && getBModel() != null) {
-			try {
-				MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault3D();
-				mtb.addNodeList();
-				org.jcae.mesh.amibe.ds.Mesh m = new org.jcae.mesh.amibe.ds.Mesh(
-						mtb);
-				Storage.readAllFaces(m,
-						getBModel().getGraph().getRootCell());
-				MeshWriter.writeObject3D(m, getBModel().getOutputDir(), "dummy.brep");
-				View v = ViewManager.getDefault().getCurrentView();
-				AmibeToMesh toMesh = new AmibeToMesh(getBModel().getOutputDir());
-				ViewableMesh vMesh = new ViewableMesh(toMesh.getMesh());
-				vMesh.setName(subMeshNode.getDisplayName()+" mesh");
-				v.add(vMesh);
-			} catch (Exception ex) {
-				ex.printStackTrace();
-				return;
-			}
+			SubmeshNode sNode = (SubmeshNode) subMeshNode;
+			sNode.viewMesh();
 		}
+	}
+
+	public static void view(String vName, Map<String, Collection<BDiscretization>> meshData) {
+		if (meshData == null || meshData.isEmpty())
+			return;
+		View v = ViewManager.getDefault().getCurrentView();
+		BoraToMesh toMesh = new BoraToMesh(meshData);
+		ViewableMesh vMesh = new ViewableMesh(toMesh.getMesh());
+		vMesh.setName(vName);
+		v.add(vMesh);
 	}
 
 	/**

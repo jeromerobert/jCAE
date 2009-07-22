@@ -11,10 +11,20 @@ import java.awt.datatransfer.Transferable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import javax.swing.Action;
+import org.jcae.mesh.bora.ds.BCADGraphCell;
+import org.jcae.mesh.bora.ds.BDiscretization;
+import org.jcae.netbeans.viewer3d.ViewManager;
+import org.jcae.vtk.BoraToMesh;
+import org.jcae.vtk.View;
+import org.jcae.vtk.ViewableMesh;
 import org.openide.actions.DeleteAction;
 import org.openide.actions.RenameAction;
+import org.openide.actions.ViewAction;
+import org.openide.cookies.ViewCookie;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
@@ -27,7 +37,7 @@ import org.openide.util.datatransfer.PasteType;
  * @author Gautam Botrel
  *
  */
-public class BGroupNode extends AbstractNode {
+public class BGroupNode extends AbstractNode implements ViewCookie{
 
 	private final SubmeshNode.DataModel dataModel;
 
@@ -73,6 +83,7 @@ public class BGroupNode extends AbstractNode {
 		ArrayList<Action> l = new ArrayList<Action>();
 		l.add(SystemAction.get(DeleteAction.class));
 		l.add(SystemAction.get(RenameAction.class));
+		l.add(SystemAction.get(ViewAction.class));
 		return l.toArray(new Action[l.size()]);
 	}
 
@@ -108,9 +119,26 @@ public class BGroupNode extends AbstractNode {
 		super.destroy();
 	}
 
+	public void view() {
+		Collection<BCADGraphCell> cells = dataModel.getCellsInGroup(getName());
+		if (cells == null ||cells.isEmpty())
+			return;
 
+		/** Getting the mesh data from groups **/
+		ArrayList<BDiscretization> discrs = new ArrayList<BDiscretization>();
+		for (BCADGraphCell cell : cells) {
+			BDiscretization d = cell.getDiscretizationSubMesh(
+					dataModel.getSubMesh());
+			if (d != null) {
+				discrs.add(d);
+			}
+		}
+		if (discrs.isEmpty())
+			return;
 
+		HashMap<String, Collection<BDiscretization>> meshData = new HashMap<String, Collection<BDiscretization>>();
+		meshData.put(getName(), discrs);
 
-
-
+		MeshNode.view(getName(), meshData);
+	}
 }

@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.Map;
 import javax.swing.Action;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
+import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.bora.ds.BModel;
 import org.jcae.mesh.bora.ds.BSubMesh;
 import org.jcae.mesh.bora.ds.Constraint;
@@ -101,6 +102,30 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 		this.setDisplayName(objName);
 	}
 
+	public void viewMesh() {
+//		refreshGroupsNode(true);
+		/** Getting the mesh data from groups **/
+		HashMap<String, Collection<BDiscretization>> meshData = new HashMap<String, Collection<BDiscretization>>();
+		for (String group : dataModel.groups.keySet()) {
+			HashSet<BCADGraphCell> cellsInGroup = dataModel.groups.get(group);
+			if (cellsInGroup == null || cellsInGroup.isEmpty()) {
+				continue;
+			}
+			ArrayList<BDiscretization> discrs = new ArrayList<BDiscretization>();
+			for (BCADGraphCell cell : cellsInGroup) {
+				BDiscretization d = cell.getDiscretizationSubMesh(
+						dataModel.subMesh);
+				if (d != null) {
+					discrs.add(d);
+				}
+			}
+			if (!discrs.isEmpty()) {
+				meshData.put(group, discrs);
+			}
+		}
+		MeshNode.view(getDisplayName() + " mesh", meshData);
+	}
+
 	/**
 	 * Refreshes the groups node from DataModel
 	 */
@@ -111,7 +136,6 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 					dataModel.addGroup(c.getGroup(), c.getGraphCell());
 				}
 			}
-
 			groupsNode.fireModelChanged();
 		}
 	}
@@ -373,4 +397,6 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 	public DataModel getDataModel() {
 		return dataModel;
 	}
+
+
 }

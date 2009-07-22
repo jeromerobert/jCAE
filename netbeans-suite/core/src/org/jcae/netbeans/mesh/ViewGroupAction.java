@@ -72,7 +72,7 @@ public class ViewGroupAction extends CookieAction
 			while(it.hasNext())
 			{
 				Entry<Groups, Collection<Group>> e=it.next();
-				MeshNode.displayGroups(e.getKey(),
+				OldAmibeMeshNode.displayGroups(e.getKey(),
 					arg0[0].getParentNode().getParentNode().getName(),
 					e.getValue(), v);
 			}

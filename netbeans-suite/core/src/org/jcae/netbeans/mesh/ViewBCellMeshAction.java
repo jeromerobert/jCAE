@@ -6,20 +6,13 @@
  */
 package org.jcae.netbeans.mesh;
 
-import gnu.trove.TIntObjectHashMap;
-import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.patch.Mesh2D;
-import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.bora.ds.BSubMesh;
-import org.jcae.mesh.bora.xmldata.Storage;
-import org.jcae.mesh.cad.CADShapeEnum;
-import org.jcae.mesh.xmldata.MeshWriter;
-import org.jcae.netbeans.viewer3d.ViewManager;
-import org.jcae.vtk.AmibeToMesh;
-import org.jcae.vtk.View;
-import org.jcae.vtk.ViewableMesh;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CookieAction;
@@ -38,31 +31,18 @@ public final class ViewBCellMeshAction extends CookieAction {
 
 	@Override
 	protected void performAction(Node[] arg0) {
-		View v = ViewManager.getDefault().getCurrentView();
-		TIntObjectHashMap<Vertex> refMap = new TIntObjectHashMap<Vertex>();
-		MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault3D();
-		mtb.addNodeList();
-		org.jcae.mesh.amibe.ds.Mesh m = new org.jcae.mesh.amibe.ds.Mesh(mtb);
-		BSubMesh subMesh = null;
 		String name = "";
+		ArrayList<BDiscretization> discrs = new ArrayList<BDiscretization>();
 		for (Node n : arg0) {
 			BCADGraphCell cell = (BCADGraphCell) n.getValue("CELL");
-			subMesh = (BSubMesh) n.getValue("SUBMESH");
-			Storage.readFace(m, cell, subMesh, refMap);
+			BSubMesh subMesh = (BSubMesh) n.getValue("SUBMESH");
+			discrs.add(cell.getDiscretizationSubMesh(subMesh));
 			name += cell.getType() + "" + cell.getId() + " ";
 		}
+		Map<String, Collection<BDiscretization>> meshData = new HashMap<String, Collection<BDiscretization>>();
+		meshData.put(name, discrs);
 
-		try {
-			MeshWriter.writeObject3D(m, subMesh.getModel().getOutputDir(),
-					"dummy.brep");
-			AmibeToMesh toMesh = new AmibeToMesh(
-					subMesh.getModel().getOutputDir());
-			ViewableMesh vMesh = new ViewableMesh(toMesh.getMesh());
-			vMesh.setName(name);
-			v.add(vMesh);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		MeshNode.view(name, meshData);
 	}
 
 
@@ -78,15 +58,11 @@ public final class ViewBCellMeshAction extends CookieAction {
 			BCADGraphCell cell = (BCADGraphCell)n.getValue("CELL");
 			if (cell == null)
 				return false;
-			if (!cell.getType().equals(CADShapeEnum.FACE))
+			BSubMesh subMesh = (BSubMesh)n.getValue("SUBMESH");
+			if (subMesh == null)
 				return false;
-//			if (cell == null ||cell.getDiscretizations() == null)
-//				return false;
-//			if (cell.getDiscretizations().isEmpty())
-//				return false;
-//			for (BDiscretization disc : cell.getDiscretizations()) {
-//				if (disc.getMesh() == null)
-//					return false;
+			if (cell.getDiscretizationSubMesh(subMesh) == null)
+				return false;
 		}
 		return true;
 	}
