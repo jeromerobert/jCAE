@@ -30,6 +30,7 @@ import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.LinkedHashSet;
 import java.util.Collection;
 import java.util.Iterator;
@@ -68,6 +69,7 @@ public class SmoothNodes3DBg
 	int notProcessed = 0;
 	TObjectDoubleHashMap<Triangle> qualityMap;
 	Collection<Vertex> nodeset;
+	Set<Vertex> immutableNodes = new LinkedHashSet<Vertex>();
 	
 	/**
 	 * Creates a <code>SmoothNodes3DBg</code> instance.
@@ -111,6 +113,8 @@ public class SmoothNodes3DBg
 				checkQuality = Boolean.valueOf(val).booleanValue();
 			else if (key.equals("relaxation"))
 				relaxation = Double.valueOf(val).doubleValue();
+			else if (key.equals("angle"))
+				mesh.buildRidges(Double.valueOf(val).doubleValue());
 			else
 				throw new RuntimeException("Unknown option: "+key);
 		}
@@ -160,7 +164,7 @@ public class SmoothNodes3DBg
 			// First compute triangle quality
 			qualityMap = new TObjectDoubleHashMap<Triangle>(mesh.getTriangles().size());
 			computeTriangleQuality();
-	
+
 			nodeset = mesh.getNodes();
 			if (nodeset == null)
 			{
@@ -173,6 +177,24 @@ public class SmoothNodes3DBg
 						nodeset.add(v);
 				}
 			}
+			// Detect immutable nodes
+			AbstractHalfEdge ot = null;
+			for (Triangle f: mesh.getTriangles())
+			{
+				if (f.hasAttributes(AbstractHalfEdge.OUTER))
+					continue;
+				ot = f.getAbstractHalfEdge(ot);
+				for (int i = 0; i < 3; i++)
+				{
+					ot = ot.next();
+					if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.SHARP))
+					{
+						immutableNodes.add(ot.origin());
+						immutableNodes.add(ot.destination());
+					}
+				}
+			}
+
 			for (int i = 0; i < nloop; i++)
 			{
 				processAllNodes();
@@ -199,7 +221,7 @@ public class SmoothNodes3DBg
 		tree.clear();
 		for (Vertex v: nodeset)
 		{
-			if (!v.isManifold() || !v.isMutable())
+			if (!v.isManifold() || !v.isMutable() || immutableNodes.contains(v))
 				continue;
 			Triangle f = (Triangle) v.getLink();
 			ot = f.getAbstractHalfEdge(ot);

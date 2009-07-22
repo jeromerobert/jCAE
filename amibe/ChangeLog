@@ -6,6 +6,8 @@ Wed Jul 22 14:07:27 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
 	to flag edges with this new attribute instead of creating
 	virtual non-manifold edges.  Fix a bug in buildRidges(), angle
 	computation was wrong.
+	* src/org/jcae/mesh/amibe/algos3d/SmoothNodes3DBg.java: Add an
+	option to set a feature angle.
 
 Mon Jul 13 17:40:12 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
 
