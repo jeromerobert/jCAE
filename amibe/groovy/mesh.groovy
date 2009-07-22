@@ -5,6 +5,7 @@ import org.jcae.mesh.cad.*
 import org.jcae.mesh.amibe.*
 import org.jcae.mesh.amibe.algos2d.*
 import org.jcae.mesh.amibe.patch.Mesh2D
+import org.jcae.mesh.amibe.patch.InvalidFaceException
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder
 import org.jcae.mesh.amibe.ds.MMesh1D
 import org.jcae.mesh.amibe.ds.MeshParameters
@@ -287,21 +288,24 @@ if (phases[3])
 		logger.warn("Geometry shape is instead read from "+brepfile)
 	}
 	expl = factory.newExplorer()
-	m2dto3d = new MeshToMMesh3DConvert(outputDir, brepfile)
+	m2dto3d = new MeshToMMesh3DConvert(outputDir, brepfile, shape)
 	m2dto3d.exportUNV(unvName != null, unvName);
 	
 	iface = 0
 	for (expl.init(shape, CADShapeEnum.FACE); expl.more(); expl.next()) {
 		iface ++
-		m2dto3d.computeRefs(iface)
 	}
-	m2dto3d.initialize(false)
+	int[] iArray = new int[iface];
+	for (int i = 0; i < iface; i++)
+		iArray[i] = i+1;
+	m2dto3d.collectBoundaryNodes(iArray);
+	m2dto3d.beforeProcessingAllShapes(false)
 	iface = 0
 	for (expl.init(shape, CADShapeEnum.FACE); expl.more(); expl.next()) {
 		face = expl.current()
 		iface ++
-		m2dto3d.convert(iface, face)
+		m2dto3d.processOneShape(iface, ""+iface, iface)
 	}
-	m2dto3d.finish()
+	m2dto3d.afterProcessingAllShapes()
 }
 
