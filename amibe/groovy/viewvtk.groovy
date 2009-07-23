@@ -15,7 +15,7 @@ import org.jcae.vtk.UNVToMesh;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
 import org.jcae.vtk.ViewableCAD;
-import org.jcae.vtk.ViewableMesh;
+import org.jcae.vtk.OldViewableMesh;
 import org.jcae.vtk.ViewableOEMM;
 
 import vtk.vtkRenderer as VtkRenderer;
@@ -63,7 +63,7 @@ if (handle.isDirectory())
 	if (new File(handle, "jcae3d").exists())
 	{
 		AmibeToMesh reader = new AmibeToMesh(xmlDir);
-		viewable = new ViewableMesh(reader.getMesh());
+		viewable = new OldViewableMesh(reader.getMesh());
 	}
 	else if (new File(handle, "oemm").exists())
 	{
@@ -76,7 +76,7 @@ if (handle.isDirectory())
 }
 else if (xmlDir.endsWith(".unv"))
 {
-	viewable = new ViewableMesh(new UNVToMesh(xmlDir, Collections.EMPTY_LIST).getMesh());
+	viewable = new OldViewableMesh(new UNVToMesh(xmlDir, Collections.EMPTY_LIST).getMesh());
 	canvas.add(viewable);
 }
 else
