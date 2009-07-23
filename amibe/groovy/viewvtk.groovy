@@ -10,12 +10,14 @@ import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.Storage;
 import javax.swing.JFrame;
 import org.jcae.vtk.AmibeToMesh;
+import org.jcae.vtk.BoraToMesh;
 import org.jcae.vtk.Canvas;
 import org.jcae.vtk.UNVToMesh;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
 import org.jcae.vtk.ViewableCAD;
 import org.jcae.vtk.OldViewableMesh;
+import org.jcae.vtk.ViewableMesh;
 import org.jcae.vtk.ViewableOEMM;
 
 import vtk.vtkRenderer as VtkRenderer;
@@ -64,6 +66,11 @@ if (handle.isDirectory())
 	{
 		AmibeToMesh reader = new AmibeToMesh(xmlDir);
 		viewable = new OldViewableMesh(reader.getMesh());
+	}
+	else if (new File(handle, "model").exists())
+	{
+		BoraToMesh reader = new BoraToMesh(xmlDir);
+		viewable = new ViewableMesh(reader.getMesh());
 	}
 	else if (new File(handle, "oemm").exists())
 	{
