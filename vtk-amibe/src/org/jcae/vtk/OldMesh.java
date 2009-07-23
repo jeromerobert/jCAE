@@ -26,34 +26,47 @@ import java.util.Set;
 
 /**
  * Represent a mesh
- * @author Gautam Botrel
+ * @author Julian Ibarz
+ * @deprecated kept to maintain compatibility with old meshes. @see Mesh to use with Bora
  */
-public class Mesh
+public class OldMesh
 {
-	private final HashMap<String, LeafNode.DataProvider> groups;
+	private final HashMap<Integer, LeafNode.DataProvider> groups;
 	
 	int getNbOfGroups()
 	{
 		return groups.size();
 	}
 
-	Mesh()
+	OldMesh()
 	{
 		this(0);
 	}
 	
-	Mesh(int nbOfGroups)
+	OldMesh(int nbOfGroups)
 	{
-		groups = new HashMap<String, LeafNode.DataProvider>(nbOfGroups);
+		groups = new HashMap<Integer, LeafNode.DataProvider>(nbOfGroups);
 	}
 
+	/**
+	 * Construct a submesh of a mesh with the groups given in the tab
+	 */
+	OldMesh(OldMesh mesh, int[] extractedGroups)
+	{
+		groups = new HashMap<Integer, LeafNode.DataProvider>(extractedGroups.length);
+		
+		for(int id : extractedGroups)
+		{
+			groups.put(id, mesh.getGroup(id));
+		}
+	}
 
-	LeafNode.DataProvider getGroup(String id)
+	LeafNode.DataProvider getGroup(int id)
 	{
 		return groups.get(id);
 	}
 	
-	void setGroup(String id, LeafNode.DataProvider group)
+	void setGroup(int id, LeafNode.DataProvider group)
 	{
 		groups.put(id, group);
 	}
@@ -63,7 +76,7 @@ public class Mesh
 		return groups.values();
 	}
 	
-	Set<Entry<String, LeafNode.DataProvider>> getGroupSet()
+	Set<Entry<Integer, LeafNode.DataProvider>> getGroupSet()
 	{
 		return groups.entrySet();
 	}

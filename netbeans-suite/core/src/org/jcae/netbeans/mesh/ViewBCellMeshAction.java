@@ -42,7 +42,7 @@ public final class ViewBCellMeshAction extends CookieAction {
 		Map<String, Collection<BDiscretization>> meshData = new HashMap<String, Collection<BDiscretization>>();
 		meshData.put(name, discrs);
 
-		MeshNode.view(name, meshData);
+		MeshNode.view(name, meshData, null);
 	}
 
 

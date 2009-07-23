@@ -19,10 +19,10 @@
  */
 package org.jcae.netbeans.mesh;
 
+import gnu.trove.TIntArrayList;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
-import java.util.ArrayDeque;
 import org.jcae.netbeans.viewer3d.EntitySelection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,32 +30,33 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import javax.swing.SwingUtilities;
+import org.jcae.mesh.xmldata.Groups;
 import org.jcae.netbeans.NodeSelectionManager;
 import org.jcae.netbeans.Utilities;
 import org.jcae.netbeans.viewer3d.CurrentViewableChangeListener;
 import org.jcae.netbeans.viewer3d.SelectionManager;
 import org.jcae.netbeans.viewer3d.ViewManager;
 import org.jcae.vtk.Viewable;
+import org.jcae.vtk.OldViewableMesh;
 import org.jcae.vtk.SelectionListener;
-import org.jcae.vtk.ViewableMesh;
 import org.openide.ErrorManager;
 import org.openide.explorer.ExplorerManager;
-import org.openide.nodes.Children;
 import org.openide.nodes.Node;
 
 /**
  *
  * @author ibarz
+ * @deprecated kept to maintain compatibility with old meshes. @see MeshSelection to use with Bora
  */
-public class MeshSelection implements EntitySelection, SelectionListener, CurrentViewableChangeListener, PropertyChangeListener
+public class OldMeshSelection implements EntitySelection, SelectionListener, CurrentViewableChangeListener, PropertyChangeListener
 {
 
-	private ArrayList<String> selection = new ArrayList<String>();
+	private TIntArrayList selection = new TIntArrayList();
 	private boolean selectionLock = false;
-	private BGroupsNode entity;
-	private Set<ViewableMesh> interactors = new HashSet<ViewableMesh>();
+	private Groups entity;
+	private Set<OldViewableMesh> interactors = new HashSet<OldViewableMesh>();
 
-	public MeshSelection(BGroupsNode entity)
+	public OldMeshSelection(Groups entity)
 	{
 		this.entity = entity;
 		ViewManager.getDefault().addViewableListener(this);
@@ -67,7 +68,7 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 		if(!selectionLock)
 		{
 			selectionLock = true;
-			selection = new ArrayList<String>();
+			selection = new TIntArrayList();
 			refreshHighlight();
 			selectionLock = false;
 		}
@@ -89,10 +90,10 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 				break;
 			}
 
-		if (newInteractor == null || !(newInteractor instanceof ViewableMesh))
+		if (newInteractor == null || !(newInteractor instanceof OldViewableMesh))
 			return;
 
-		ViewableMesh meshInteractor = (ViewableMesh) newInteractor;
+		OldViewableMesh meshInteractor = (OldViewableMesh) newInteractor;
 
 		if (SelectionManager.getDefault().getEntity(meshInteractor) == entity)
 			if (interactors.add(meshInteractor))
@@ -113,101 +114,109 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 
 		selectionLock = true;
 
-		selection = new ArrayList<String>();
-		for (String s : ((ViewableMesh) interactor).getSelection()) {
-			selection.add(s);
-		}
+		selection = new TIntArrayList(((OldViewableMesh) interactor).getSelection());
 		SelectionManager.getDefault().prepareSelection();
-		final ArrayList<Node> nodes = new ArrayList<Node>();
-		for (Node n : getFilterNodeToExplore().getChildren().getNodes(true)) {
-			if (selection.contains(n.getName())) {
-				nodes.add(n);
-//				nodes.add(n.getLookup().lookup(BGroupNode.class));
-			}
 
-		}
 		refreshHighlight();
 
-			SwingUtilities.invokeLater(new Runnable()
+		SwingUtilities.invokeLater(new Runnable()
 		{
 
 			public void run()
 			{
+				// Get the mesh node
 				for (ExplorerManager exm : Utilities.getExplorerManagers())
-				{
-					ArrayList<Node> nnodes = new ArrayList<Node>();
+					for (Node moduleNode : findModuleNodes(exm))
+						for (Node meshProxy : moduleNode.getChildren().getNodes())
+						{
 
-					if (SelectionManager.getDefault().isAppendSelection())
-						nnodes.addAll(Arrays.asList(exm.getSelectedNodes()));
+							OldAmibeMeshNode meshNode = meshProxy.getLookup().lookup(OldAmibeMeshNode.class);
+							if (meshNode != null)
+								if (meshNode.hasThisGroupsNode(entity))
+								{
+									// Mesh founded now
+									// Get the groups node
+									Node groupsProxy = null;
 
-					nnodes.addAll(nodes);
-					try
-					{
-						SelectionManager.getDefault().setDisableListeningProperty(true);
-						exm.setSelectedNodes(nnodes.toArray(
-								new Node[nnodes.size()]));
-						SelectionManager.getDefault().setDisableListeningProperty(false);
-					} catch (PropertyVetoException e)
-					{
-						ErrorManager.getDefault().notify(e);
-					}
-				}
+									for (Node gn : meshProxy.getChildren().getNodes())
+										if (gn.getLookup().lookup(GroupChildren.class) != null)
+										{
+											groupsProxy = gn;
+											break;
+										}
 
-				selectionLock = false;
+									// Append to the selection explorer
+									Node[] childrenProxy = groupsProxy.getChildren().getNodes();
+									Node[] selectionExplorer = exm.getSelectedNodes();
+									ArrayList<Node> nodes = new ArrayList<Node>(childrenProxy.length + selectionExplorer.length);
+									nodes.addAll(Arrays.asList(selectionExplorer));
+									for (Node groupProxy : childrenProxy)
+									{
+										GroupNode groupNode = groupProxy.getLookup().lookup(GroupNode.class);
+										if (groupNode == null)
+											throw new RuntimeException("DEBUG node is not a GroupNode but " + groupNode.getClass().getName());
+
+										// Add if it's in the selection
+										if (selection.contains(groupNode.getGroup().getId()))
+											nodes.add(groupProxy);
+										// Remove from the selection if it is
+										else
+											nodes.remove(groupProxy);
+									}
+
+									try
+									{
+										SelectionManager.getDefault().setDisableListeningProperty(true);
+										exm.setSelectedNodes(nodes.toArray(
+												new Node[nodes.size()]));
+										SelectionManager.getDefault().setDisableListeningProperty(false);
+									} catch (PropertyVetoException e)
+									{
+										ErrorManager.getDefault().notify(e);
+									}
+
+									// RETURN
+									selectionLock = false;
+									return;
+								}
+						}
+
+				selectionLock = false;				
 			}
 		});
-	};
-
-	private Node getFilterNodeToExplore() {
-		for (ExplorerManager exm : Utilities.getExplorerManagers()) {
-			Node n = findModuleNode(exm);
-			ArrayDeque<Children> toExplore = new ArrayDeque<Children>();
-			toExplore.push(n.getChildren());
-			while (!toExplore.isEmpty()) {
-				Children c = toExplore.pop();
-				for (Node nn : c.getNodes()) {
-					if (!nn.isLeaf())
-						toExplore.add(nn.getChildren());
-					BGroupsNode mn = nn.getLookup().lookup(BGroupsNode.class);
-					if (mn != null && mn.equals(entity)) {
-						return nn;
-					}
-				}
-			}
-		}
-		throw new IllegalStateException("Could not find node " + entity);
 	}
-
-	/** Return the Meshmodule node
-	 * @param exm
-	 * @return*/
-	private static Node findModuleNode(ExplorerManager exm)
-	{
-		for (Node n : exm.getRootContext().getChildren().getNodes())
-			for (Node nn : n.getChildren().getNodes())
-			{
-				org.jcae.netbeans.mesh.ModuleNode mn = nn.getLookup().lookup(org.jcae.netbeans.mesh.ModuleNode.class);
-				if (mn != null)
-				{
-					return nn;
-				}
-			}
-		throw new IllegalStateException("Could not find mesh module node");
-	}
+	;
 
 	/**
 	 * Refresh highlight on all views
 	 */
 	private void refreshHighlight()
 	{
-		for (ViewableMesh interactor : interactors)
+		for (OldViewableMesh interactor : interactors)
 		{
-			interactor.setSelection(selection.toArray(new String[0]));
-			interactor.selectSelectionNodes();
+			interactor.setSelection(selection.toNativeArray());
 			interactor.highlight();
 		}
 	}
 
+	/** Return all ModuleNode
+	 * @param exm
+	 * @return*/
+	private static Collection<Node> findModuleNodes(ExplorerManager exm)
+	{
+		ArrayList<Node> toReturn = new ArrayList<Node>();
+		for (Node n : exm.getRootContext().getChildren().getNodes())
+			for (Node nn : n.getChildren().getNodes())
+			{
+				ModuleNode mn = nn.getLookup().lookup(ModuleNode.class);
+				if (mn != null)
+				{
+					toReturn.add(nn);
+					break;
+				}
+			}
+		return toReturn;
+	}
 
 	public void propertyChange(PropertyChangeEvent evt)
 	{
@@ -215,13 +224,17 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 		{
 			selectionLock = true;		
 			Node[] nodes = (Node[]) evt.getNewValue();
-			selection = new ArrayList<String>(nodes.length);
+
+			selection = new TIntArrayList(nodes.length);
 			for (Node node : nodes)
 			{
-				for (Node n : entity.getChildren().getNodes()) {
-					if (node.equals(n))
-						selection.add(n.getName());
-				}
+				GroupNode groupNode = node.getLookup().lookup(GroupNode.class);
+				if (groupNode == null)
+					continue;
+
+				// If it is a group of our mesh
+				if (groupNode.getGroups() == entity)
+					selection.add(groupNode.getGroup().getId());
 			}
 
 			refreshHighlight();

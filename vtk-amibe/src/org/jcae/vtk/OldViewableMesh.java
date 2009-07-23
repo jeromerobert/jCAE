@@ -19,9 +19,9 @@
  */
 package org.jcae.vtk;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import gnu.trove.TIntHashSet;
+import gnu.trove.TIntObjectHashMap;
+import gnu.trove.TObjectIntHashMap;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
@@ -32,13 +32,14 @@ import vtk.vtkActor;
  * TODO : the beams are stored in the polydata with the scalar UNVProvider.OTHERS_GROUP wich can make a bug of color. It can make a bug for the selection in jcae
  * because this group doesn't really exist. Find an example of .unv to check this feature.
  * @author Julian Ibarz
+ * @deprecated kept to maintain compatibility with old meshes. @see ViewableMesh to use with Bora
  */
-public class ViewableMesh extends Viewable
+public class OldViewableMesh extends Viewable
 {
 	private ViewMode viewMode = ViewMode.WIRED;
-	private Map<String, LeafNode> groupIDToNode = new HashMap<String, LeafNode>();
-	private Map<LeafNode, String> groupNodeToID = new HashMap<LeafNode, String>();
-	private HashSet<String> groupsLoaded;
+	private TIntObjectHashMap<LeafNode> groupIDToNode = new TIntObjectHashMap<LeafNode>();
+	private TObjectIntHashMap<LeafNode> groupNodeToID = new TObjectIntHashMap<LeafNode>();
+	private TIntHashSet groupsLoaded;
 	/**
 	 * It explain how the mesh is displayed :
 	 * _ FILLED means the mesh is not in wired mode but the selection remains filled ;
@@ -50,12 +51,12 @@ public class ViewableMesh extends Viewable
 		WIRED
 	}
 
-	public ViewableMesh(Mesh mesh)
+	public OldViewableMesh(OldMesh mesh)
 	{
 		this(mesh, new Palette(Integer.MAX_VALUE));
 	}
 	
-	public ViewableMesh(Mesh mesh, Palette palette)
+	public OldViewableMesh(OldMesh mesh, Palette palette)
 	{		
 		rootNode.setSelectionActorCustomiser(new SelectionActorCustomiser()
 		{
@@ -89,14 +90,14 @@ public class ViewableMesh extends Viewable
 		});
 		setViewMode(viewMode);
 
-		Set<Entry<String, LeafNode.DataProvider>> groupSet = mesh.getGroupSet();
-		groupsLoaded = new HashSet<String>(groupSet.size());
-		for (Entry<String, LeafNode.DataProvider> entry : groupSet)
+		Set<Entry<Integer, LeafNode.DataProvider>> groupSet = mesh.getGroupSet();
+		groupsLoaded = new TIntHashSet(groupSet.size());
+		for (Entry<Integer, LeafNode.DataProvider> entry : groupSet)
 			groupsLoaded.add(entry.getKey());
 
 		int cID = new Random().nextInt();
 
-		for (Entry<String, LeafNode.DataProvider> group : groupSet)
+		for (Entry<Integer, LeafNode.DataProvider> group : groupSet)
 		{
 			// Warning: Do *not* replace colorManager.getColor() by
 			// selectionColor here, some ColorManager may have a
@@ -108,14 +109,6 @@ public class ViewableMesh extends Viewable
 			groupNodeToID.put(groupNode, group.getKey());
 		}
 		rootNode.refresh();
-	}
-
-	public void selectSelectionNodes() {
-		for (LeafNode n :rootNode.getLeaves())
-			n.unselect();
-		for (LeafNode n : selectionNode)
-			if (n!=null)
-				n.select();
 	}
 
 	public ViewMode getViewMode()
@@ -146,9 +139,9 @@ public class ViewableMesh extends Viewable
 	 * Return the selection of the different ids groups
 	 * @return
 	 */
-	public String[] getSelection()
+	public int[] getSelection()
 	{
-		String[] selectionGroups = new String[selectionNode.size()];
+		int[] selectionGroups = new int[selectionNode.size()];
 
 		int i = 0;
 		for (LeafNode leaf : selectionNode)
@@ -168,10 +161,10 @@ public class ViewableMesh extends Viewable
 	 * 
 	 * @param selection 
 	 */
-	public void setSelection(String[] selection)
+	public void setSelection(int[] selection)
 	{
 		selectionNode.clear();
-		for (String id : selection)
+		for (int id : selection)
 		{
 			if (groupsLoaded.contains(id))
 				selectionNode.add(groupIDToNode.get(id));

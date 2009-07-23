@@ -29,7 +29,7 @@ import org.jcae.vtk.SelectionListener;
 import org.jcae.vtk.UNVToMesh;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
-import org.jcae.vtk.ViewableMesh;
+import org.jcae.vtk.OldViewableMesh;
 import vtk.vtkInteractorStyleTrackballCamera;
 import vtk.vtkRenderer;
 
@@ -39,10 +39,10 @@ import vtk.vtkRenderer;
  */
 public class TestUNV implements SelectionListener, KeyListener
 {
-	ViewableMesh viewable;
+	OldViewableMesh viewable;
 	public Canvas canvas;
 
-	public TestUNV(ViewableMesh viewable)
+	public TestUNV(OldViewableMesh viewable)
 	{
 		this.viewable = viewable;
 	}
@@ -82,10 +82,10 @@ public class TestUNV implements SelectionListener, KeyListener
 				canvas.unlock();
 				break;
 				case KeyEvent.VK_O:
-					viewable.setViewMode(ViewableMesh.ViewMode.FILLED);
+					viewable.setViewMode(OldViewableMesh.ViewMode.FILLED);
 					break;
 			case KeyEvent.VK_I:
-					viewable.setViewMode(ViewableMesh.ViewMode.WIRED);
+					viewable.setViewMode(OldViewableMesh.ViewMode.WIRED);
 				break;
 				
 		}
@@ -98,7 +98,7 @@ public class TestUNV implements SelectionListener, KeyListener
 		View canvas = new View();
 		frame.add(canvas, BorderLayout.CENTER);
 		vtkRenderer renderer = canvas.GetRenderer();
-		ViewableMesh rbh = new ViewableMesh(new UNVToMesh(args[0], Collections.EMPTY_LIST).getMesh());
+		OldViewableMesh rbh = new OldViewableMesh(new UNVToMesh(args[0], Collections.EMPTY_LIST).getMesh());
 		canvas.add(rbh);
 		frame.setSize(800, 600);
 		frame.setVisible(true);

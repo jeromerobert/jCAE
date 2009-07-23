@@ -37,7 +37,7 @@ import org.jcae.netbeans.viewer3d.SelectionManager;
 import org.jcae.netbeans.viewer3d.ViewManager;
 import org.jcae.vtk.AmibeToMesh;
 import org.jcae.vtk.View;
-import org.jcae.vtk.ViewableMesh;
+import org.jcae.vtk.OldViewableMesh;
 import org.openide.ErrorManager;
 import org.openide.actions.*;
 import org.openide.cookies.ViewCookie;
@@ -214,7 +214,7 @@ public class OldAmibeMeshNode extends DataNode implements ViewCookie
 			sb=sb+"...";
 
 		AmibeToMesh reader = new AmibeToMesh(groups.getMeshFile(), idGroupsDisplayed);
-		ViewableMesh interactor = new ViewableMesh(reader.getMesh());
+		OldViewableMesh interactor = new OldViewableMesh(reader.getMesh());
 		interactor.setName(meshName+" ["+sb+"]");
 		SelectionManager.getDefault().addInteractor(interactor, groups);
 		view.add(interactor);

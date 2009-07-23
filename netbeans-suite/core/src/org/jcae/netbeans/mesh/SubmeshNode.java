@@ -123,7 +123,7 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 				meshData.put(group, discrs);
 			}
 		}
-		MeshNode.view(getDisplayName() + " mesh", meshData);
+		MeshNode.view(getDisplayName() + " mesh", meshData, groupsNode);
 	}
 
 	/**

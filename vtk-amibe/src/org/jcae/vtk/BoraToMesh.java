@@ -42,9 +42,8 @@ public class BoraToMesh {
 
 	public BoraToMesh(Map<String, Collection<BDiscretization>> meshData) {
 		mesh = new Mesh(meshData.keySet().size());
-		int i = 0;
 		for (String group : meshData.keySet()) {
-			mesh.setGroup(i++, new GroupData(meshData.get(group)));
+			mesh.setGroup(group, new GroupData(meshData.get(group)));
 		}
 	}
 

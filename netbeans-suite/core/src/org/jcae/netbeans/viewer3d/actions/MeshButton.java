@@ -25,7 +25,7 @@ import org.jcae.netbeans.viewer3d.CurrentViewableChangeListener;
 import org.jcae.netbeans.viewer3d.ViewManager;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
-import org.jcae.vtk.ViewableMesh;
+import org.jcae.vtk.OldViewableMesh;
 import org.openide.util.actions.BooleanStateAction;
 import org.openide.util.actions.SystemAction;
 
@@ -50,7 +50,7 @@ public abstract class MeshButton extends BooleanStateAction implements CurrentVi
 		View v = ViewManager.getDefault().getCurrentView();
 		if(v!=null)
 		{
-			ViewableMesh interactor = (ViewableMesh)v.getCurrentViewable();
+			OldViewableMesh interactor = (OldViewableMesh)v.getCurrentViewable();
 			if(interactor == null)
 				throw new RuntimeException("A InteractorMesh is expected");
 			actionPerformed(interactor);
@@ -63,13 +63,13 @@ public abstract class MeshButton extends BooleanStateAction implements CurrentVi
 	public void currentViewableChanged(Viewable interactor)
 	{	
 		
-		if(interactor == null || interactor.getClass() != ViewableMesh.class)
+		if(interactor == null || interactor.getClass() != OldViewableMesh.class)
 		{
 			setEnabled(false);
 		}
 		else
 		{
-			ViewableMesh meshInteractor = (ViewableMesh)interactor;
+			OldViewableMesh meshInteractor = (OldViewableMesh)interactor;
 		
 			setEnabled(true);
 			
@@ -77,12 +77,12 @@ public abstract class MeshButton extends BooleanStateAction implements CurrentVi
 		}
 	}
 	
-	protected abstract void updateButton(ViewableMesh viewer);
+	protected abstract void updateButton(OldViewableMesh viewer);
 
 	/**
 	 * When the selection was maded update all the buttons selection to be to the correct value
 	 */
-	protected void updateButtons(ViewableMesh viewer)
+	protected void updateButtons(OldViewableMesh viewer)
 	{
 		SystemAction.get(MeshGroupSelection.class).updateButton(viewer);
 		SystemAction.get(MeshVertexSelection.class).updateButton(viewer);
@@ -90,5 +90,5 @@ public abstract class MeshButton extends BooleanStateAction implements CurrentVi
 		SystemAction.get(MeshViewMode.class).updateButton(viewer);
 	}
 
-	public abstract void actionPerformed(ViewableMesh interactor);
+	public abstract void actionPerformed(OldViewableMesh interactor);
 }

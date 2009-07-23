@@ -20,7 +20,7 @@ import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.netbeans.viewer3d.ViewManager;
 import org.jcae.vtk.BoraToMesh;
 import org.jcae.vtk.View;
-import org.jcae.vtk.ViewableMesh;
+import org.jcae.vtk.OldViewableMesh;
 import org.openide.actions.DeleteAction;
 import org.openide.actions.RenameAction;
 import org.openide.actions.ViewAction;
@@ -37,7 +37,7 @@ import org.openide.util.datatransfer.PasteType;
  * @author Gautam Botrel
  *
  */
-public class BGroupNode extends AbstractNode implements ViewCookie{
+public class BGroupNode extends AbstractNode implements Node.Cookie, ViewCookie {
 
 	private final SubmeshNode.DataModel dataModel;
 
@@ -139,6 +139,6 @@ public class BGroupNode extends AbstractNode implements ViewCookie{
 		HashMap<String, Collection<BDiscretization>> meshData = new HashMap<String, Collection<BDiscretization>>();
 		meshData.put(getName(), discrs);
 
-		MeshNode.view(getName(), meshData);
+		MeshNode.view(getName(), meshData, (BGroupsNode)getParentNode());
 	}
 }

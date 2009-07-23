@@ -35,7 +35,7 @@ import java.util.zip.GZIPInputStream;
  */
 public class UNVToMesh
 {
-	private Mesh mesh;
+	private OldMesh mesh;
 
 	private static class GroupData extends LeafNode.DataProvider
 	{
@@ -98,7 +98,7 @@ public class UNVToMesh
 		}
 		
 		float[] nodes = parser.getNodesCoordinates();
-		mesh = new Mesh(groupExtraction.size());
+		mesh = new OldMesh(groupExtraction.size());
 		//mesh.setBeams(parser.getBeam2FromGroup(UNVProvider.OTHERS_GROUP));
 		
 		for(Integer id : groupExtraction)
@@ -145,7 +145,7 @@ public class UNVToMesh
 		}
 	}
 
-	public Mesh getMesh()
+	public OldMesh getMesh()
 	{
 		return mesh;
 	}

@@ -42,7 +42,7 @@ import org.jcae.vtk.Utils;
 import vtk.vtkActor;
 import org.jcae.vtk.Canvas;
 import org.jcae.vtk.UNVToMesh;
-import org.jcae.vtk.ViewableMesh;
+import org.jcae.vtk.OldViewableMesh;
 import vtk.vtkCanvas;
 import vtk.vtkFileOutputWindow;
 
@@ -94,7 +94,7 @@ public class TestGUI implements KeyListener
 				//actors.add(cascadeActorManager.getVerticesActor());
 			} else if (args[0].equalsIgnoreCase("mailleur"))
 			{
-				ViewableMesh viewer = new ViewableMesh(new UNVToMesh(args[1],Collections.EMPTY_SET).getMesh());
+				OldViewableMesh viewer = new OldViewableMesh(new UNVToMesh(args[1],Collections.EMPTY_SET).getMesh());
 				viewer.addCanvas(c1);
 				//actors.add(viewer.computeActor());
 			} else

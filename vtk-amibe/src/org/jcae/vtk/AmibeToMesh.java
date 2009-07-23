@@ -36,9 +36,9 @@ public class AmibeToMesh
 {
 	private final static Logger LOGGER=Logger.getLogger(AmibeToMesh.class.getName());
 
-	private final Mesh mesh;
+	private final OldMesh mesh;
 
-	public Mesh getMesh()
+	public OldMesh getMesh()
 	{
 		return mesh;
 	}
@@ -109,7 +109,7 @@ public class AmibeToMesh
 			groupExtraction[i]=Integer.parseInt(e.getAttribute("id"));
 		}
 
-		mesh = new Mesh(groupExtraction.length);
+		mesh = new OldMesh(groupExtraction.length);
 
 		for(int id : groupExtraction)
 			mesh.setGroup(id, new GroupData(provider, id));
@@ -119,7 +119,7 @@ public class AmibeToMesh
 		throws ParserConfigurationException, SAXException, IOException
 	{
 		AmibeProvider provider = new AmibeProvider(new File(filePath));
-		mesh = new Mesh(groupExtraction.length);
+		mesh = new OldMesh(groupExtraction.length);
 
 		for(int id : groupExtraction)
 			mesh.setGroup(id, new GroupData(provider, id));

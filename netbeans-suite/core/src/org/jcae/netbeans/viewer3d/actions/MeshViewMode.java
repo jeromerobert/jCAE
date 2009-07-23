@@ -19,22 +19,22 @@
  */
 package org.jcae.netbeans.viewer3d.actions;
 
-import org.jcae.vtk.ViewableMesh;
+import org.jcae.vtk.OldViewableMesh;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 
 public final class MeshViewMode extends MeshButton
 {
 @Override
-	public void actionPerformed(ViewableMesh viewable)
+	public void actionPerformed(OldViewableMesh viewable)
 	{
 		switch(viewable.getViewMode())
 		{
 			case FILLED:
-				viewable.setViewMode(ViewableMesh.ViewMode.WIRED);
+				viewable.setViewMode(OldViewableMesh.ViewMode.WIRED);
 				break;
 			case WIRED:
-				viewable.setViewMode(ViewableMesh.ViewMode.FILLED);
+				viewable.setViewMode(OldViewableMesh.ViewMode.FILLED);
 				break;
 			default:
 				throw new IllegalArgumentException("Mesh view mode not supported !");
@@ -42,9 +42,9 @@ public final class MeshViewMode extends MeshButton
 		viewable.render();
 	}
 	
-	protected void updateButton(ViewableMesh viewer)
+	protected void updateButton(OldViewableMesh viewer)
 	{
-		setBooleanState(viewer.getViewMode() == ViewableMesh.ViewMode.WIRED);
+		setBooleanState(viewer.getViewMode() == OldViewableMesh.ViewMode.WIRED);
 	}
 
 	public String getName()

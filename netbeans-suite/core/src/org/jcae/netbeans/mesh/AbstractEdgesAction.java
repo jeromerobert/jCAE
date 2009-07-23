@@ -11,7 +11,7 @@ import org.jcae.vtk.AmibeOverlayProvider;
 import org.jcae.vtk.AmibeOverlayToMesh;
 import org.jcae.vtk.Palette;
 import org.jcae.vtk.View;
-import org.jcae.vtk.ViewableMesh;
+import org.jcae.vtk.OldViewableMesh;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileUtil;
 import org.openide.nodes.Node;
@@ -51,7 +51,7 @@ public abstract class AbstractEdgesAction extends CookieAction
 				palette.addColor(AmibeOverlayProvider.MULTI_EDGE_COLOR);
 
 			View view = ViewManager.getDefault().getCurrentView();
-			ViewableMesh mesh = new ViewableMesh(new AmibeOverlayToMesh(
+			OldViewableMesh mesh = new OldViewableMesh(new AmibeOverlayToMesh(
 				new AmibeOverlayProvider(new File(xmlDir), getBranchGroupLabel())).getMesh(), palette);
 			
 			mesh.setName(activatedNodes[0].getName()+" "+getViewSuffix());

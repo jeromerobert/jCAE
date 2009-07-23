@@ -21,20 +21,16 @@
 
 package org.jcae.netbeans.mesh;
 
-import java.awt.Image;
 import java.util.ArrayList;
 import javax.swing.Action;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.bora.ds.Hypothesis;
 import org.jcae.mesh.cad.CADShapeEnum;
-import org.openide.actions.CopyAction;
-import org.openide.actions.CutAction;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
 import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
-import org.openide.util.Utilities;
 import org.openide.util.actions.SystemAction;
 
 public class BCADGraphNode extends AbstractNode implements Node.Cookie

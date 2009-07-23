@@ -26,11 +26,11 @@ import java.awt.event.KeyListener;
 import javax.swing.JFrame;
 import org.jcae.vtk.AmibeToMesh;
 import org.jcae.vtk.Canvas;
-import org.jcae.vtk.Mesh;
+import org.jcae.vtk.OldMesh;
 import org.jcae.vtk.SelectionListener;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
-import org.jcae.vtk.ViewableMesh;
+import org.jcae.vtk.OldViewableMesh;
 import vtk.vtkInteractorStyleTrackballCamera;
 import vtk.vtkRenderer;
 
@@ -38,11 +38,11 @@ import vtk.vtkRenderer;
  *
  * @author Julian Ibarz
  */
-public class TestAmibe extends ViewableMesh implements SelectionListener, KeyListener
+public class TestAmibe extends OldViewableMesh implements SelectionListener, KeyListener
 {
 	public Canvas canvas;
 
-	public TestAmibe(Mesh mesh)
+	public TestAmibe(OldMesh mesh)
 	{
 		super(mesh);
 	}

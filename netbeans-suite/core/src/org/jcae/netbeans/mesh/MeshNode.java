@@ -32,6 +32,7 @@ import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.bora.ds.BModel;
 import org.jcae.netbeans.Utilities;
 import org.jcae.netbeans.cad.BrepNode;
+import org.jcae.netbeans.viewer3d.SelectionManager;
 import org.jcae.netbeans.viewer3d.ViewManager;
 import org.jcae.vtk.BoraToMesh;
 import org.jcae.vtk.View;
@@ -112,13 +113,16 @@ public class MeshNode extends DataNode implements ViewCookie
 		}
 	}
 
-	public static void view(String vName, Map<String, Collection<BDiscretization>> meshData) {
+	public static void view(String vName, Map<String, Collection<BDiscretization>> meshData,
+			BGroupsNode groups) {
 		if (meshData == null || meshData.isEmpty())
 			return;
 		View v = ViewManager.getDefault().getCurrentView();
 		BoraToMesh toMesh = new BoraToMesh(meshData);
 		ViewableMesh vMesh = new ViewableMesh(toMesh.getMesh());
 		vMesh.setName(vName);
+		if (groups != null)
+			SelectionManager.getDefault().addInteractor(vMesh, groups);
 		v.add(vMesh);
 	}
 
