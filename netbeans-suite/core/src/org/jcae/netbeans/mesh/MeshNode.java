@@ -181,7 +181,8 @@ public class MeshNode extends DataNode implements ViewCookie
 		if (ns != null && ns.length==1) {
 			final BrepNode n=ns[0].getCookie(BrepNode.class);
 			if (n != null) {
-				n.save();
+				//TODO : we should save the node when
+				//it's a new one (n.save())
 				ls.add(new PasteType() {
 
 					public Transferable paste() {

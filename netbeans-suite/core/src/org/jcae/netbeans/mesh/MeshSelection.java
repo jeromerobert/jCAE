@@ -160,17 +160,19 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 
 	private Node getFilterNodeToExplore() {
 		for (ExplorerManager exm : Utilities.getExplorerManagers()) {
-			Node n = findModuleNode(exm);
-			ArrayDeque<Children> toExplore = new ArrayDeque<Children>();
-			toExplore.push(n.getChildren());
-			while (!toExplore.isEmpty()) {
-				Children c = toExplore.pop();
-				for (Node nn : c.getNodes()) {
-					if (!nn.isLeaf())
-						toExplore.add(nn.getChildren());
-					BGroupsNode mn = nn.getLookup().lookup(BGroupsNode.class);
-					if (mn != null && mn.equals(entity)) {
-						return nn;
+			for (Node n : findModuleNodes(exm)) {
+				ArrayDeque<Children> toExplore = new ArrayDeque<Children>();
+				toExplore.push(n.getChildren());
+				while (!toExplore.isEmpty()) {
+					Children c = toExplore.pop();
+					for (Node nn : c.getNodes()) {
+						if (!nn.isLeaf()) {
+							toExplore.add(nn.getChildren());
+						}
+						BGroupsNode mn = nn.getLookup().lookup(BGroupsNode.class);
+						if (mn != null && mn.equals(entity)) {
+							return nn;
+						}
 					}
 				}
 			}
@@ -181,18 +183,21 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 	/** Return the Meshmodule node
 	 * @param exm
 	 * @return*/
-	private static Node findModuleNode(ExplorerManager exm)
+	private static Collection<Node> findModuleNodes(ExplorerManager exm)
 	{
+		ArrayList<Node> toReturn = new ArrayList<Node>();
 		for (Node n : exm.getRootContext().getChildren().getNodes())
 			for (Node nn : n.getChildren().getNodes())
 			{
 				org.jcae.netbeans.mesh.ModuleNode mn = nn.getLookup().lookup(org.jcae.netbeans.mesh.ModuleNode.class);
 				if (mn != null)
 				{
-					return nn;
+					toReturn.add(nn);
 				}
 			}
-		throw new IllegalStateException("Could not find mesh module node");
+		if (toReturn.isEmpty())
+			throw new IllegalStateException("Could not find mesh module node");
+		return toReturn;
 	}
 
 	/**
