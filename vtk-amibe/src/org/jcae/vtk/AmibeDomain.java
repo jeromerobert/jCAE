@@ -19,6 +19,7 @@
  */
 package org.jcae.vtk;
 
+import gnu.trove.TIntArrayList;
 import gnu.trove.TIntHashSet;
 import gnu.trove.TIntIntHashMap;
 import java.io.File;
@@ -152,7 +153,10 @@ public class AmibeDomain
 		TIntHashSet set = new TIntHashSet(trias.length / 2);
 		for (int index : trias)
 			set.add(index);
-		return set.toArray();
+		TIntArrayList list = new TIntArrayList(set.size());
+		list.add(set.toArray());
+		list.sort();
+		return list.toNativeArray();
 	}
 
 	private float[] readNodes(int[] nodesID) throws IOException
