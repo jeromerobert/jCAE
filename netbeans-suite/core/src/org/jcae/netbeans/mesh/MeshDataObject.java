@@ -76,12 +76,9 @@ public class MeshDataObject extends MultiDataObject implements SaveCookie, Prope
 	 */
 	private void load() {
 		String tmpDir =  getDirectory();
-		if (!tmpDir.endsWith(File.separator))
-			tmpDir += File.separator;
-		tmpDir += "model";
-		File f = new File(tmpDir);
+		File f = new File(tmpDir, "model");
 		if (f.exists()) {
-			bModel = BModelReader.readObject( getDirectory());
+			bModel = BModelReader.readObject(getDirectory(), "model", false);
 		}
 
 	}
