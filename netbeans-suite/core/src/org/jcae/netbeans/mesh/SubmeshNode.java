@@ -100,6 +100,7 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 
 		getChildren().add(new Node[] {graph, entities, groupsNode});
 		this.setDisplayName(objName);
+		refreshGroupsNode(true);
 	}
 
 	public void viewMesh() {

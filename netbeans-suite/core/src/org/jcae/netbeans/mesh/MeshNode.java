@@ -43,7 +43,7 @@ import org.openide.cookies.ViewCookie;
 import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataNode;
 import org.openide.loaders.DataObject;
-import org.openide.nodes.AbstractNode;
+import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
 import org.openide.nodes.NodeTransfer;
@@ -55,15 +55,15 @@ import org.openide.util.datatransfer.PasteType;
  */
 public class MeshNode extends DataNode implements ViewCookie
 {
-	private AbstractNode subMeshNode;
-	
-	public MeshNode(DataObject arg0)
+	private final Submeshes subMeshesFactory;
+
+	public MeshNode(final DataObject arg0)
 	{
-		super(arg0, new Children.Array());
+		super(arg0, Children.LEAF);
 		setIconBaseWithExtension("org/jcae/netbeans/mesh/MeshNode.png");
 		getCookieSet().add(this);
-		updateSubmeshNode();
-		refreshGroups();
+		subMeshesFactory = new Submeshes(arg0);
+		setChildren(Children.create(subMeshesFactory, true));
 	}
 
 
@@ -106,10 +106,17 @@ public class MeshNode extends DataNode implements ViewCookie
 //				};
 //	}
 
+	private SubmeshNode getEnclosedSubMeshNode() {
+		assert (getChildren().getNodes().length == 0 || getChildren().getNodes().length == 1 );
+		for (Node n : getChildren().getNodes()) {
+			return (SubmeshNode)n;
+		}
+		return null;
+	}
+
 	public void view() {
-		if (subMeshNode != null && getBModel() != null) {
-			SubmeshNode sNode = (SubmeshNode) subMeshNode;
-			sNode.viewMesh();
+		if ( getEnclosedSubMeshNode() != null && getBModel() != null) {
+			 getEnclosedSubMeshNode().viewMesh();
 		}
 	}
 
@@ -131,8 +138,8 @@ public class MeshNode extends DataNode implements ViewCookie
 	 */
 	public void refreshGroups()
 	{
-		SubmeshNode subNode = (SubmeshNode)subMeshNode;
-		if (subNode != null)
+		SubmeshNode subNode =  getEnclosedSubMeshNode();
+		if ( subNode != null)
 			subNode.refreshGroupsNode(true);
 	}
 
@@ -208,23 +215,12 @@ public class MeshNode extends DataNode implements ViewCookie
 		String nameExt = n.getDataObject().getPrimaryFile().getNameExt();
 		return Utilities.absoluteFileName(nameExt, ref);
 	}
-	
+
 	private void updateSubmeshNode()
 	{
-		if(subMeshNode!=null) {
-			getChildren().remove(new Node[]{subMeshNode});
-			try {
-				subMeshNode.destroy();
-			}
-			catch (IOException io) {
-				io.printStackTrace();
-			}
-		}
 		if (getBModel() != null) {
-			subMeshNode = new SubmeshNode(getCADName(getBModel().getCADFile()), getBModel());
-			getChildren().add(new Node[] { subMeshNode } );
+			subMeshesFactory.fireSubmeshNodeChanged();
 		}
-			
 	}
 
 	private static String getCADName(String cadFile) {
@@ -246,5 +242,35 @@ public class MeshNode extends DataNode implements ViewCookie
 		l.add(SystemAction.get(DeleteAction.class));
 		l.add(SystemAction.get(RenameAction.class));
 		return l.toArray(new Action[l.size()]);
-	}	
+	}
+
+	private static class Submeshes extends ChildFactory {
+		private DataObject dataObject;
+		private Submeshes(DataObject dataObject) {
+			this.dataObject = dataObject;
+		}
+
+		@Override
+		protected Node createNodeForKey(Object arg0) {
+			BModel bModel = (BModel) arg0;
+			return new SubmeshNode(getCADName(
+					bModel.getCADFile()), bModel);
+		}
+
+		@Override
+		protected boolean createKeys(List list) {
+			MeshDataObject mObject = (MeshDataObject) dataObject;
+			if (mObject.getBModel() == null)
+				mObject.load();
+			if (mObject.getBModel() != null) {
+				list.add(mObject.getBModel());
+			}
+			return true;
+		}
+
+		public void fireSubmeshNodeChanged() {
+			this.createKeys(new ArrayList());
+			this.refresh(true);
+		}
+	}
 }

@@ -24,6 +24,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Logger;
 import org.jcae.mesh.bora.ds.BModel;
 import org.jcae.mesh.bora.xmldata.BModelReader;
 import org.openide.cookies.SaveCookie;
@@ -31,17 +32,16 @@ import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.MultiDataObject;
 import org.openide.loaders.MultiFileLoader;
-import org.openide.loaders.OperationEvent.Rename;
 import org.openide.nodes.Node;
 
 public class MeshDataObject extends MultiDataObject implements SaveCookie, PropertyChangeListener
 {
+	private static final Logger LOGGER = Logger.getLogger(MeshDataObject.class.getName());
 
 	public MeshDataObject(FileObject arg0, MultiFileLoader arg1) throws DataObjectExistsException
 	{
 		super(arg0, arg1);
 		dir = arg0;
-		load();
 	}
 
 	@Override
@@ -59,8 +59,8 @@ public class MeshDataObject extends MultiDataObject implements SaveCookie, Prope
 	}
 
 	public BModel getBModel(String geomFile) {
-		//TODO : if bModel != null, delete it
 		bModel = new BModel(geomFile,  getDirectory());
+		bModel.cleanWorkDirectory();
 		return bModel;
 	}
 
@@ -74,10 +74,11 @@ public class MeshDataObject extends MultiDataObject implements SaveCookie, Prope
 	 * If the "model" file exists in the directory of the Bora mesh
 	 * this method loads the BModel
 	 */
-	private void load() {
+	public void load() {
 		String tmpDir =  getDirectory();
 		File f = new File(tmpDir, "model");
 		if (f.exists()) {
+			LOGGER.info("Loading Bora model at : " + getDirectory());
 			bModel = BModelReader.readObject(getDirectory(), "model", false);
 		}
 
@@ -99,7 +100,7 @@ public class MeshDataObject extends MultiDataObject implements SaveCookie, Prope
 			bModel.setOutputDir(getDirectory());
 	}
 
-	private String getDirectory() {
+	public String getDirectory() {
 		return dir.toString();
 	}
 }
