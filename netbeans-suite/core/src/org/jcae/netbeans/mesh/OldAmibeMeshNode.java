@@ -280,7 +280,7 @@ public class OldAmibeMeshNode extends DataNode implements ViewCookie
 
 	@Override
 	public String getHtmlDisplayName() {
-		return "<i>" + "OLD_" + getName() + "</i>";
+		return "<i>" + getName() + "</i>";
 	}
 
 	@Override
