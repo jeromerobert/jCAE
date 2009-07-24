@@ -336,9 +336,18 @@ public class BModel
 		discretizeVertices();
 		LOGGER.config("Discretize edges");
 		BCADGraphCell root = cad.getRootCell();
+		int nrEdges = 0;
+		if (LOGGER.isLoggable(Level.CONFIG))
+		{
+			for (Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.EDGE); its.hasNext(); its.next())
+				nrEdges++;
+		}
+		int cnt = 0;
 		for (Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.EDGE); its.hasNext(); )
 		{
 			BCADGraphCell cell = its.next();
+			cnt++;
+			LOGGER.config("  edge "+cnt+"/"+nrEdges);
 			for (BDiscretization d : cell.getDiscretizations())
 			{
 				d.discretize();
@@ -353,15 +362,25 @@ public class BModel
 		if (state.compareTo(State.TESSELLATION_2) >= 0)
 			return;
 		discretizeEdges();
-		LOGGER.config("Discretize faces");
+		LOGGER.info("Discretize faces");
 		BCADGraphCell root = cad.getRootCell();
+		int nrFaces = 0;
+		if (LOGGER.isLoggable(Level.INFO))
+		{
+			for (Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.FACE); its.hasNext(); its.next())
+				nrFaces++;
+		}
+		int cnt = 0;
 		for (Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.FACE); its.hasNext(); )
 		{
 			BCADGraphCell cell = its.next();
+			cnt++;
+			LOGGER.info("  face "+cnt+"/"+nrFaces);
 			for (BDiscretization d : cell.getDiscretizations())
 			{
 				d.discretize();
 				Storage.writeFace(d);
+				d.setMesh(null);
 			}
 		}
 		state = State.TESSELLATION_2;
@@ -372,11 +391,20 @@ public class BModel
 		if (state.compareTo(State.TESSELLATION_3) >= 0)
 			return;
 		discretizeFaces();
-		LOGGER.config("Discretize solids");
+		LOGGER.info("Discretize solids");
 		BCADGraphCell root = cad.getRootCell();
+		int nrSolids = 0;
+		if (LOGGER.isLoggable(Level.INFO))
+		{
+			for (Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.SOLID); its.hasNext(); its.next())
+				nrSolids++;
+		}
+		int cnt = 0;
 		for (Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.SOLID); its.hasNext(); )
 		{
 			BCADGraphCell cell = its.next();
+			cnt++;
+			LOGGER.info("  solid "+cnt+"/"+nrSolids);
 			for (BDiscretization d : cell.getDiscretizations())
 			{
 				d.discretize();
