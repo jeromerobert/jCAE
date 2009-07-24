@@ -20,17 +20,20 @@
 
 package org.jcae.vtk;
 
+import org.jcae.mesh.bora.ds.BDiscretization;
+import org.jcae.mesh.bora.ds.BModel;
+import org.jcae.mesh.bora.ds.BSubMesh;
+import org.jcae.mesh.bora.ds.Constraint;
+import org.jcae.mesh.bora.xmldata.BModelReader;
+import org.jcae.mesh.bora.xmldata.Storage;
+import org.jcae.mesh.cad.CADShapeEnum;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import org.jcae.mesh.bora.ds.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
-import org.jcae.mesh.bora.xmldata.BModelReader;
-import org.jcae.mesh.bora.xmldata.Storage;
-import org.jcae.mesh.cad.CADShapeEnum;
 
 /**
  * Converts a list of discretization to vtk mesh object
@@ -40,46 +43,41 @@ import org.jcae.mesh.cad.CADShapeEnum;
  */
 public class BoraToMesh {
 	private final static Logger LOGGER=Logger.getLogger(BoraToMesh.class.getName());
-	private Mesh mesh;
+	private final Mesh mesh;
 
 	public BoraToMesh(String xmlBoraDir) {
-		BModel bModel = BModelReader.readObject(xmlBoraDir);
-		Map<String, Collection<BDiscretization>> meshData = new HashMap<String, Collection<BDiscretization>>();
-		for (BSubMesh subMesh : bModel.getSubMeshes()){
-			for (Constraint cons : subMesh.getConstraints()) {
-				BDiscretization discr = cons.getGraphCell().getDiscretizationSubMesh(subMesh);
-				if (discr != null) {
-					addMeshData(cons.getGroup(), discr, meshData);
-				}
-			}
-		}
-		buildMeshObject(meshData);
+		this(buildMeshData(xmlBoraDir));
 	}
 
 	public BoraToMesh(Map<String, Collection<BDiscretization>> meshData) {
-		buildMeshObject(meshData);
-	}
-
-	private void buildMeshObject(Map<String, Collection<BDiscretization>> meshData) {
 		mesh = new Mesh(meshData.keySet().size());
 		for (String group : meshData.keySet()) {
 			mesh.setGroup(group, new GroupData(meshData.get(group)));
 		}
 	}
 
-
-	private static void addMeshData(String group, BDiscretization discr,
-			Map<String, Collection<BDiscretization>> meshData)
-	{
-		if (group == null)
-			group = "DEFAULT_GROUP";
-		Collection<BDiscretization> gDiscr = meshData.get(group);
-		if (gDiscr == null)
-			gDiscr = new ArrayList<BDiscretization>();
-		gDiscr.add(discr);
-		meshData.put(group, gDiscr);
+	private static Map<String, Collection<BDiscretization>> buildMeshData(String xmlBoraDir) {
+		BModel bModel = BModelReader.readObject(xmlBoraDir);
+		Map<String, Collection<BDiscretization>> meshData = new HashMap<String, Collection<BDiscretization>>();
+		for (BSubMesh subMesh : bModel.getSubMeshes()){
+			for (Constraint cons : subMesh.getConstraints()) {
+				BDiscretization discr = cons.getGraphCell().getDiscretizationSubMesh(subMesh);
+				if (discr == null)
+					continue;
+				String group = cons.getGroup();
+				if (group == null)
+					group = "DEFAULT_GROUP";
+				Collection<BDiscretization> gDiscr = meshData.get(group);
+				if (gDiscr == null)
+				{
+					gDiscr = new ArrayList<BDiscretization>();
+					meshData.put(group, gDiscr);
+				}
+				gDiscr.add(discr);
+			}
+		}
+		return meshData;
 	}
-
 
 	private static class GroupData extends LeafNode.DataProvider
 	{
