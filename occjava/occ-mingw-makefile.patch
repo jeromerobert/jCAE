@@ -85,10 +85,10 @@ index 0000000..6c46671
 +ros/mingw/
 diff --git a/ros/adm/mingw/Makefile b/ros/adm/mingw/Makefile
 new file mode 100644
-index 0000000..7b5de67
+index 0000000..d66a5ed
 --- /dev/null
 +++ b/ros/adm/mingw/Makefile
-@@ -0,0 +1,32 @@
+@@ -0,0 +1,35 @@
 +all:
 +	javac OCCMingw.java
 +	java OCCMingw
@@ -117,16 +117,19 @@ index 0000000..7b5de67
 +	make -C TKSTEP209
 +	make -C TKSTEP
 +	make -C TKIGES
++	make -C TKService
++	make -C TKV2d
++	make -C TKV3d
 +
 +clean:
 +	rm -rf OCCMingw*.class TKernel FWOSPlugin PTKernel TKAdvTools TKBO TKBRep TKBin TKBinL TKBinTObj TKBinXCAF TKBool TKCAF TKCDF TKCDLFront TKCPPClient TKCPPExt TKCPPIntExt TKCPPJini TKCSFDBSchema TKDCAF TKDraw TKFeat TKFillet TKG2d TKG3d TKGeomAlgo TKGeomBase TKHLR TKIDLFront TKIGES TKLCAF TKMath TKMesh TKMeshVS TKNIS TKOffset TKOpenGl TKPCAF TKPLCAF TKPShape TKPrim TKSTEP TKSTEP209 TKSTEPAttr TKSTEPBase TKSTL TKService TKShHealing TKShapeSchema TKStdLSchema TKStdSchema TKTCPPExt TKTObj TKTObjDRAW TKTopAlgo TKTopTest TKV2d TKV3d TKVRML TKViewerTest TKWOK TKWOKTcl TKXCAF TKXCAFSchema TKXDEDRAW TKXDEIGES TKXDESTEP TKXMesh TKXSBase TKXSDRAW TKXml TKXmlL TKXmlTObj TKXmlXCAF TKjcas 
 +
 diff --git a/ros/adm/mingw/OCCMingw.java b/ros/adm/mingw/OCCMingw.java
 new file mode 100644
-index 0000000..5b9801a
+index 0000000..e1f7b8f
 --- /dev/null
 +++ b/ros/adm/mingw/OCCMingw.java
-@@ -0,0 +1,108 @@
+@@ -0,0 +1,110 @@
 +
 +import java.io.File;
 +import java.io.FileFilter;
@@ -182,6 +185,8 @@ index 0000000..5b9801a
 +			libDir.mkdir();
 +			out = new PrintStream(new File(libDir, "Makefile"));
 +			out.println("include ../header.mk");
++			packages.remove("Xw");
++			packages.remove("ImageUtility");
 +			for(String p:packages)
 +			{
 +				out.println("objects += $(patsubst %.cxx,%.o,$(notdir $(wildcard $(SRC)/"+p+"/*.cxx)))");
@@ -237,10 +242,10 @@ index 0000000..5b9801a
 +}
 diff --git a/ros/adm/mingw/header.mk b/ros/adm/mingw/header.mk
 new file mode 100644
-index 0000000..369ad86
+index 0000000..ab77cb8
 --- /dev/null
 +++ b/ros/adm/mingw/header.mk
-@@ -0,0 +1,36 @@
+@@ -0,0 +1,40 @@
 +CC := i586-mingw32msvc-gcc
 +CXX := i586-mingw32msvc-g++
 +CASROOT := ../../..
@@ -249,7 +254,7 @@ index 0000000..369ad86
 +BIN := $(CASROOT)/mingw/bin
 +LIB := $(CASROOT)/mingw/lib
 +CPPFLAGS := -I$(CASROOT)/inc/ -DWNT -D__MATH_WNT_H -DHAVE_NO_DLL
-+CXXFLAGS := -O2 -g -march=pentium3
++CXXFLAGS := -O2 -march=pentium3 -fno-strict-aliasing
 +LDFLAGS := -shared -Wl,--enable-auto-import -Wl,--enable-runtime-pseudo-reloc -Wl,-export-all-symbols
 +TKernelFLAGS := -lwinspool -lws2_32 -lgdi32
 +TKMathFLAGS := -lTKernel
@@ -276,4 +281,8 @@ index 0000000..369ad86
 +TKIGESFLAGS := -lTKernel -lTKXSBase -lTKSTEPBase -lTKSTEPAttr -lTKMath -lTKG3d -lTKG2d -lTKShHealing -lTKSTEP209 -lTKGeomBase -lTKBRep -lTKGeomAlgo -lTKTopAlgo -lTKPrim -lTKBool
 +TKSTEPAttrFLAGS := -lTKSTEPBase -lTKernel -lTKXSBase
 +TKSTEP209FLAGS := -lTKSTEPBase -lTKernel -lTKXSBase
++TKServiceFLAGS := -lTKernel -lTKMath -lgdi32 -lwinspool
++TKV2dFLAGS := -lTKernel -lTKService -lTKG3d -lTKTopAlgo -lTKMath -lTKBRep -lTKGeomBase -lTKG2d -lTKHLR -lTKGeomAlgo
++TKV3dFLAGS := -lTKernel -lTKG3d -lTKTopAlgo -lTKGeomBase -lTKService -lTKMath -lTKMesh -lTKGeomAlgo -lTKHLR -lTKBRep -lTKG2d -lTKV2d -lcomdlg32 -lgdi32
++
 +

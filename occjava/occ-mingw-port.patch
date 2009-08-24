@@ -70,6 +70,20 @@ index 917255b..5807d46 100644
  #if defined (__hpux) || defined (HPUX)
  # ifdef MAXINT
  #  undef MAXINT
+diff --git a/ros/src/MFT/MFT_FontManager.cxx b/ros/src/MFT/MFT_FontManager.cxx
+index 5820d62..238c58c 100644
+--- a/ros/src/MFT/MFT_FontManager.cxx
++++ b/ros/src/MFT/MFT_FontManager.cxx
+@@ -148,6 +148,9 @@
+ //        -- Category: Local structures 
+ //        --------------------------------
+ 
++#ifdef __MINGW32__
++	#define DrawTextA DrawText
++#endif
+ 
+ #define MFT_COMMANDBUFFERSIZE 512
+ typedef struct _MFT_CommandBuffer {
 diff --git a/ros/src/OSD/OSD.cxx b/ros/src/OSD/OSD.cxx
 index 4422f52..27ecf14 100644
 --- a/ros/src/OSD/OSD.cxx
@@ -124,3 +138,174 @@ index 32a5963..048111a 100644
      CloseHandle (hMap);
  #endif
    }
+diff --git a/ros/src/WNT/EHDC.cxx b/ros/src/WNT/EHDC.cxx
+index 75dd8f2..a184cec 100644
+--- a/ros/src/WNT/EHDC.cxx
++++ b/ros/src/WNT/EHDC.cxx
+@@ -8,6 +8,11 @@
+ 
+ #include <math.h>
+ #include <limits>
++#ifdef __MINGW32__
++	#include <stdlib.h>
++	#include <limits.h>
++	#define min(a,b) ((a)<(b)?(a):(b))
++#endif
+ 
+ #define ROUNDL( d ) ( LONG )(  ( d ) + 0.5  )
+ #define Y( y )      (  mySize.cy - ( y )  )
+@@ -33,6 +38,8 @@ static void WINAPI _XFORMApplyf  ( PFPOINT, int, PXFORM    );
+ static void WINAPI _RenderPath ( HDC, LPPOINT, PBYTE, int );
+ static int  WINAPI _TextPath   ( HDC, int, int, void*, LPPOINT, PBYTE, int, PSIZE, BOOL );
+ 
++VOID CALLBACK ___auxDDAF ( int x, int y, LPARAM lpParam );
++ 
+ EHDC :: EHDC ( HDC hdc, PSIZE szClient ) {
+ 
+  _Init ();
+diff --git a/ros/src/WNT/W32_Allocator.hxx b/ros/src/WNT/W32_Allocator.hxx
+index abdf9eb..33dadcb 100644
+--- a/ros/src/WNT/W32_Allocator.hxx
++++ b/ros/src/WNT/W32_Allocator.hxx
+@@ -101,7 +101,6 @@ struct W32_Note {  // base class to represent graphic object
+ 
+ #ifdef OCC5415
+  void operator delete (void*, W32_Allocator*) {}
+-private: // to protect against possible accidental usage
+  void operator delete (void* p) {}
+ #endif
+ };
+diff --git a/ros/src/WNT/W95_Allocator.cxx b/ros/src/WNT/W95_Allocator.cxx
+index d1501e1..855c7dc 100644
+--- a/ros/src/WNT/W95_Allocator.cxx
++++ b/ros/src/WNT/W95_Allocator.cxx
+@@ -13,6 +13,13 @@
+ #include <math.h>
+ #include <limits>
+ 
++#ifdef __MINGW32__
++	#include <stdlib.h>
++	#include <limits.h>
++	#define min(a,b) ((a)<(b)?(a):(b))
++	#define max(a,b) ((a)>(b)?(a):(b))
++#endif
++
+ #define SGN( x )  (   ( x ) > 0 ? 1 : (  ( x ) < 0 ? -1 : 0 )   )
+ #define ALLOCATOR (   ( PW95_Allocator )myAllocator             )
+ 
+diff --git a/ros/src/WNT/WNT_Allocator.cxx b/ros/src/WNT/WNT_Allocator.cxx
+index 0f7b898..eeedb54 100644
+--- a/ros/src/WNT/WNT_Allocator.cxx
++++ b/ros/src/WNT/WNT_Allocator.cxx
+@@ -16,6 +16,7 @@
+ #include <stdio.h>
+ 
+ #define ALLOCATOR ( ( PWNT_Allocator )myAllocator )
++#define max(a,b) ((a)>(b)?(a):(b))
+ 
+ static XFORM xfmIdent = { ( FLOAT )0.8660,  ( FLOAT )0.5000,
+                           ( FLOAT )-0.5000, ( FLOAT )0.8660,
+diff --git a/ros/src/WNT/WNT_DDriver.cxx b/ros/src/WNT/WNT_DDriver.cxx
+index ca4c01c..cdbbb2d 100644
+--- a/ros/src/WNT/WNT_DDriver.cxx
++++ b/ros/src/WNT/WNT_DDriver.cxx
+@@ -102,7 +102,7 @@ static void __fastcall         _dd_fill_buff ( char* );
+ static int  __fastcall         _dd_dev_size  ( HDC, int );
+ 
+ static int CALLBACK _dd_enum_proc (
+-                     HDC, HANDLETABLE FAR*, CONST ENHMETARECORD FAR*,
++                     HDC, HANDLETABLE FAR*, ENHMETARECORD FAR*,
+                      int, LPARAM
+                     );
+ 
+@@ -1983,7 +1983,7 @@ static int __fastcall _dd_dev_size ( HDC hdc, int index ) {
+ static int CALLBACK _dd_enum_proc (
+                      HDC                         hDC,
+                      HANDLETABLE FAR*       lpHTable,
+-                     CONST ENHMETARECORD FAR* lpEMFR,
++                     ENHMETARECORD FAR* lpEMFR,
+                      int                        nObj,
+                      LPARAM                   lpData
+                     ) {
+diff --git a/ros/src/WNT/WNT_IconBox.cxx b/ros/src/WNT/WNT_IconBox.cxx
+index 90cf263..70df131 100644
+--- a/ros/src/WNT/WNT_IconBox.cxx
++++ b/ros/src/WNT/WNT_IconBox.cxx
+@@ -30,7 +30,7 @@ WNT_IconBox :: WNT_IconBox (
+                ) : WNT_Window (
+                     aDevice, aName,
+                     new WNT_WClass (
+-                         "WNT_IconBoxClass", WNT_IconBoxWndProc,
++                         "WNT_IconBoxClass", (void*)WNT_IconBoxWndProc,
+                          CS_HREDRAW | CS_VREDRAW
+                         ),
+                     aStyle | WS_VSCROLL,
+@@ -322,8 +322,10 @@ Standard_Boolean WNT_IconBox :: IconSize (
+  
+  }  // end for
+ 
+- return ( i > len ) ? Standard_False :
+-                      myImages -> Dim ( i, Width, Height ), Standard_True;
++ bool b = i <= len;
++ if(b)
++    myImages -> Dim ( i, Width, Height );
++ return b;
+ 
+ }  // end WNT_IconBox :: IconSize
+ //***//
+diff --git a/ros/src/WNT/WNT_ImageProcessor.cxx b/ros/src/WNT/WNT_ImageProcessor.cxx
+index ad61cff..2b70470 100644
+--- a/ros/src/WNT/WNT_ImageProcessor.cxx
++++ b/ros/src/WNT/WNT_ImageProcessor.cxx
+@@ -50,6 +50,10 @@
+ #endif  /* _DEBUG */
+ #define WINNT35X() (WNT_osVer.dwPlatformId   == VER_PLATFORM_WIN32_NT && \
+                     WNT_osVer.dwMajorVersion == 3 )
++#ifdef __MINGW32__
++	#define __leave return Standard_False;
++	#define __finally catch(...)
++#endif
+ //***//
+ typedef struct {
+ 
+diff --git a/ros/src/WNT/WNT_WClass.cxx b/ros/src/WNT/WNT_WClass.cxx
+index c2f1d87..44e64ff 100644
+--- a/ros/src/WNT/WNT_WClass.cxx
++++ b/ros/src/WNT/WNT_WClass.cxx
+@@ -47,7 +47,7 @@ WNT_WClass::WNT_WClass (
+ 
+   lpszName = new char[ strlen ( aClassName ) + 1 ];
+   strcpy ( (Standard_PCharacter)lpszName, aClassName );
+-  lpfnWndProc = wc.lpfnWndProc;
++  lpfnWndProc = (void*)wc.lpfnWndProc;
+ 
+ }  // end constructor
+ 
+diff --git a/ros/src/WNT/WNT_Window.cxx b/ros/src/WNT/WNT_Window.cxx
+index dd24caf..cb33623 100644
+--- a/ros/src/WNT/WNT_Window.cxx
++++ b/ros/src/WNT/WNT_Window.cxx
+@@ -439,10 +439,10 @@ Aspect_TypeOfResize WNT_Window :: DoResize () const {
+ 
+  if ( wp.showCmd != SW_SHOWMINIMIZED ) {
+ 
+-  if (  Abs ( wp.rcNormalPosition.left   - aXLeft   ) > 2  ) mask |= 1;
+-  if (  Abs ( wp.rcNormalPosition.right  - aXRight  ) > 2  ) mask |= 2;
+-  if (  Abs ( wp.rcNormalPosition.top    - aYTop    ) > 2  ) mask |= 4;
+-  if (  Abs ( wp.rcNormalPosition.bottom - aYBottom ) > 2  ) mask |= 8;
++  if (  Abs ( (Standard_Integer) (wp.rcNormalPosition.left   - aXLeft)   ) > 2  ) mask |= 1;
++  if (  Abs ( (Standard_Integer) (wp.rcNormalPosition.right  - aXRight ) ) > 2  ) mask |= 2;
++  if (  Abs ( (Standard_Integer) (wp.rcNormalPosition.top    - aYTop   ) ) > 2  ) mask |= 4;
++  if (  Abs ( (Standard_Integer) (wp.rcNormalPosition.bottom - aYBottom) ) > 2  ) mask |= 8;
+ 
+   switch ( mask ) {
+ 
+@@ -1087,7 +1087,7 @@ void WNT_Window :: doCreate (
+ 
+  if ( wProc != &WNT_WndProc ) {
+ 
+-  myWndProc = wProc;
++  myWndProc = (void*)wProc;
+ 
+   SetBackground ( aBackColor );
+ 
