@@ -194,6 +194,11 @@ public class SmoothNodes3DBg
 					}
 				}
 			}
+			for (Vertex v: nodeset)
+			{
+				if (!v.isManifold() || (preserveBoundaries && v.getRef() != 0))
+					immutableNodes.add(v);
+			}
 
 			for (int i = 0; i < nloop; i++)
 			{
@@ -221,8 +226,11 @@ public class SmoothNodes3DBg
 		tree.clear();
 		for (Vertex v: nodeset)
 		{
-			if (!v.isManifold() || !v.isMutable() || immutableNodes.contains(v))
+			if (immutableNodes.contains(v))
+			{
+				notProcessed++;
 				continue;
+			}
 			Triangle f = (Triangle) v.getLink();
 			ot = f.getAbstractHalfEdge(ot);
 			if (ot.destination() == v)
@@ -243,11 +251,6 @@ public class SmoothNodes3DBg
 				break;
 			Vertex v = q.getData();
 			tree.remove(v);
-			if (v.getRef() != 0 && preserveBoundaries)
-			{
-				notProcessed++;
-				continue;
-			}
 			if (smoothNode(v, ot, q.getValue()))
 			{
 				processed++;

@@ -134,7 +134,7 @@ public class MeshLiaison
 			LOGGER.log(Level.FINER, "Trying to move vertex "+v+" to ("+target[0]+", "+target[1]+", "+target[2]+")");
 		Set<Triangle> visited = new HashSet<Triangle>();
 		ProjectedLocation location = mapCurrentVertexProjection.get(v);
-		assert location != null : "No projection found at vertex " + v;
+		assert location != null && location.projection != null : "No projection found at vertex " + v;
 		if (!location.projection.canProject())
 		{
 			if (LOGGER.isLoggable(Level.FINE))

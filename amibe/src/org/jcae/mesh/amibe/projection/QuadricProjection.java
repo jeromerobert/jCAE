@@ -115,7 +115,7 @@ public class QuadricProjection implements LocalSurfaceProjection
 
 	private Matrix3D getMatrix3DLocalFrame(Vertex o)
 	{
-		if (!o.isManifold() || !o.isMutable())
+		if (!o.isManifold())
 		{
 			if (LOGGER.isLoggable(Level.FINER))
 				LOGGER.log(Level.FINER, "Skip boundary vertex: "+o);

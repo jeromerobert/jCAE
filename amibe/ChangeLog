@@ -1,3 +1,12 @@
+Fri Aug 28 12:15:35 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/projection/QuadricProjection.java:
+	Do not check if vertex is mutable in getMatrix3DLocalFrame(),
+	this check must be performed by the caller.
+	* src/org/jcae/mesh/amibe/algos3d/SmoothNodes3DBg.java: Fix
+	handling of nodes on inner boundaries when 'boundaries' option
+	is false.
+
 Wed Jul 22 14:07:27 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/AbstractHalfEdge.java: New SHARP
