@@ -55,7 +55,7 @@ class MySmoothNodes3DBg(SmoothNodes3DBg):
 		self.mesh = mesh
 	def postProcessIteration(self, mesh, counter, *args):
 		if self.prefix:
-			MeshWriter.writeObject3D(mesh, self.prefix + str(counter), None);
+			MeshWriter.writeObject3D(mesh, self.prefix + str(counter+1), None)
 
 xmlDir = args[0]
 outDir = args[1]
@@ -73,6 +73,7 @@ opts.put("size", str(options.size))
 opts.put("tolerance", str(options.tolerance))
 opts.put("relaxation", str(options.relaxation))
 opts.put("refresh", str(options.refresh))
+MeshWriter.writeObject3D(mesh, options.prefix + "0", None)
 sm = MySmoothNodes3DBg(mesh, opts, options.prefix)
 sm.setProgressBarStatus(10000)
 sm.compute()
