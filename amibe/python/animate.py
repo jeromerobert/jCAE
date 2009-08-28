@@ -1,7 +1,7 @@
 
 # jCAE
 from org.jcae.mesh.oemm import OEMM, Storage
-from org.jcae.vtk import ColorManager, AmibeToMesh, Canvas, UNVToMesh, PickContext, View, Viewable, ViewableCAD, ViewableMesh, ViewableOEMM
+from org.jcae.vtk import Palette, AmibeToMesh, Canvas, UNVToMesh, PickContext, View, Viewable, ViewableCAD, OldViewableMesh, ViewableOEMM
 
 # Swing
 from java.awt import BorderLayout, Color
@@ -26,10 +26,12 @@ if (len(args) != 1):
 
 index = 0
 xmlDir = args[0]
+palette = Palette()
+palette.addColor(Color.lightGray)
 
-class MyViewableMesh(ViewableMesh):
+class MyViewableMesh(OldViewableMesh):
 	def __init__(self, mesh):
-		ViewableMesh.__init__(self, mesh, MyColorManager(Color.BLUE))
+		OldViewableMesh.__init__(self, mesh, palette)
 		self.setSelectionType(Viewable.SelectionType.CELL)
 	def manageSelection(self, pickContext):
 		self.super__manageSelection(pickContext)
@@ -92,15 +94,6 @@ class MyView(View):
 			if (oldViewable):
 				self.remove(oldViewable)
 		return index
-
-class MyColorManager(ColorManager):
-	color = Color.BLACK
-	def __init__(self, color):
-		self.color = color
-	def setColor(self, color):
-		pass
-	def getColor(self):
-		return self.color
 
 class SliderListener(ChangeListener):
 	def __init__(self, view):
