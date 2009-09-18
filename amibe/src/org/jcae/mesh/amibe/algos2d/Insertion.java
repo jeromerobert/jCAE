@@ -184,16 +184,16 @@ public class Insertion
 						// This edge has already been checked and cannot be split
 						continue;
 					}
+					// Tag edges
+					ot.setAttributes(AbstractHalfEdge.MARKED);
+					sym.setAttributes(AbstractHalfEdge.MARKED);
+
 					double l = mesh.interpolatedDistance((Vertex2D) ot.origin(), (Vertex2D) ot.destination());
 					if (l < maxlen)
 					{
 						// This edge is smaller than target size and is not split
-						ot.setAttributes(AbstractHalfEdge.MARKED);
-						sym.setAttributes(AbstractHalfEdge.MARKED);
 						continue;
 					}
-					// Tag symmetric edge so that edges are checked only once
-					sym.setAttributes(AbstractHalfEdge.MARKED);
 					//  Long edges are discretized, but do not create more than 4 subsegments
 					double lcrit = 1.0;
 					if (l > 4.0)
@@ -232,10 +232,6 @@ public class Insertion
 					if (nrNodes > nrTriNodes)
 					{
 						nrTriNodes = nrNodes;
-					}
-					else if (nrNodes == 0)
-					{
-						ot.setAttributes(AbstractHalfEdge.MARKED);
 					}
 					checked++;
 				}
