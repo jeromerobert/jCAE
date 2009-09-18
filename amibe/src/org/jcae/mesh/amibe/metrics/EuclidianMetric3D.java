@@ -22,6 +22,18 @@ package org.jcae.mesh.amibe.metrics;
 public final class EuclidianMetric3D implements Metric
 {
 	private final double [] unit_bounds = new double[]{1.0, 1.0, 1.0};
+	private final double scale;
+
+	public EuclidianMetric3D()
+	{
+		scale = 1.0;
+	}
+
+	public EuclidianMetric3D(double s)
+	{
+		scale = 1.0 / (s*s);
+		unit_bounds[0] = unit_bounds[1] = unit_bounds[2] = s;
+	}
 
 	/**
 	 * Return 3D Euclidian square distance between two points.
@@ -32,9 +44,11 @@ public final class EuclidianMetric3D implements Metric
 	 */
 	public double distance2(double[] p1, double[] p2)
 	{
-		return (p1[0] - p2[0]) * (p1[0] - p2[0]) +
+		return scale * (
+			   (p1[0] - p2[0]) * (p1[0] - p2[0]) +
 		       (p1[1] - p2[1]) * (p1[1] - p2[1]) +
-			   (p1[2] - p2[2]) * (p1[2] - p2[2]);
+			   (p1[2] - p2[2]) * (p1[2] - p2[2])
+		);
 	}
 
 	/**

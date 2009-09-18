@@ -1,3 +1,7 @@
+Fri Sep  4 11:46:45 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos3d/Remesh.java: New class.
+
 Fri Aug 28 12:15:35 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/projection/QuadricProjection.java:

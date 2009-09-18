@@ -132,8 +132,13 @@ public class MeshLiaison
 	{
 		if (LOGGER.isLoggable(Level.FINER))
 			LOGGER.log(Level.FINER, "Trying to move vertex "+v+" to ("+target[0]+", "+target[1]+", "+target[2]+")");
-		Set<Triangle> visited = new HashSet<Triangle>();
 		ProjectedLocation location = mapCurrentVertexProjection.get(v);
+		return updateLocation(v, target, location);
+	}
+
+	private boolean updateLocation(Vertex v, double [] target, ProjectedLocation location)
+	{
+		Set<Triangle> visited = new HashSet<Triangle>();
 		assert location != null && location.projection != null : "No projection found at vertex " + v;
 		if (!location.projection.canProject())
 		{
@@ -144,7 +149,7 @@ public class MeshLiaison
 		visited.add(location.t);
 		int counter = 0;
 		// Coordinates of the projection of v on triangle plane
-		double [] vPlane;
+		double [] vPlane = new double[3];
 		while(true)
 		{
 			// Move v to desired location
@@ -152,7 +157,7 @@ public class MeshLiaison
 			// Project v on surface
 			location.projection.project(v);
 			// Check if v crossed triangle boundary
-			vPlane = location.projectOnTriangle(v.getUV());
+			location.projectOnTriangle(v.getUV(), vPlane);
 			boolean inside = location.computeBarycentricCoordinates(vPlane);
 			
 			double [] p0 = location.t.vertex[0].getUV();
@@ -219,7 +224,25 @@ public class MeshLiaison
 		}
 	}
 
-	
+	public boolean project(Vertex v, double[] target, Vertex start)
+	{
+		ProjectedLocation location = mapCurrentVertexProjection.get(start);
+		assert location != null : "Vertex "+start+" not found";
+		ProjectedLocation proj = new ProjectedLocation(target, location.t);
+		return updateLocation(v, target, proj);
+	}
+
+	/**
+	 * Add a Vertex.
+	 *
+	 * @param v vertex in current mesh
+	 * @param bgT triangle in the background mesh
+	 */
+	public void addVertex(Vertex v, Triangle bgT)
+	{
+		mapCurrentVertexProjection.put(v, new ProjectedLocation(v.getUV(), bgT));
+	}
+
 	private class ProjectedLocation
 	{
 		private LocalSurfaceProjection projection;
@@ -233,7 +256,12 @@ public class MeshLiaison
 		private int vIndex = -1;
 		// barycentric coordinates
 		private final double [] b = new double[3];
-		
+
+		/**
+		 *
+		 * @param xyz coordinates
+		 * @param t triangle in background mesh
+		 */
 		public ProjectedLocation(double [] xyz, Triangle t)
 		{
 			updateTriangle(t);
@@ -292,9 +320,8 @@ public class MeshLiaison
 			return true;
 		}
 		
-		private double [] projectOnTriangle(double [] xyz)
+		private void projectOnTriangle(double [] xyz, double [] proj)
 		{
-			double [] proj = new double[3];
 			double [] o = t.vertex[vIndex].getUV();
 			double dist =
 				(xyz[0] - o[0]) * normal[0] +
@@ -302,7 +329,6 @@ public class MeshLiaison
 				(xyz[2] - o[2]) * normal[2];
 			for (int i = 0; i < 3; i++)
 				proj[i] = xyz[i] - dist * normal[i];
-			return proj;
 		}
 	}
 }

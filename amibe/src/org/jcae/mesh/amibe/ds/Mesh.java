@@ -393,6 +393,44 @@ public class Mesh implements Serializable
 	}
 
 	/**
+	 * Move a Vertex to a triangle centroid.
+	 *
+	 * @param t  triangle
+	 * @param c  if <code>null</code>, a new Vertex is created, otherwise this
+	 *    Vertex is moved to triangle centroid.
+	 * @return a {@link Vertex} instance which is located at the triangle centroid.
+	 */
+	public Vertex getTriangleCentroid(Triangle t, Vertex c)
+	{
+		int dim = t.vertex[0].getUV().length;
+		if (c == null)
+		{
+			if (dim > 2)
+				c = createVertex(0.0, 0.0, 0.0);
+			else
+				c = createVertex(0.0, 0.0);
+		}
+		double x = 0.0, y = 0.0, z = 0.0;
+		for (Vertex v : t.vertex)
+		{
+			double [] p = v.getUV();
+			x += p[0];
+			y += p[1];
+			if (dim > 2)
+				z += p[2];
+		}
+		x /= t.vertex.length;
+		y /= t.vertex.length;
+		z /= t.vertex.length;
+		if (dim > 2)
+			c.moveTo(x, y, z);
+		else
+			c.moveTo(x, y);
+
+		return c;
+	}
+
+	/**
 	 * Tells whether mesh contains adjacency relations.
 	 * @return <code>true</code> if mesh contains adjacency relations,
 	 *         <code>false</code> otherwise.
