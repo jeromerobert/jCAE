@@ -20,31 +20,28 @@
 
 package org.jcae.mesh.amibe.algos3d;
 
-import gnu.trove.PrimeFinder;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.KdTree;
 import org.jcae.mesh.amibe.projection.MeshLiaison;
-import org.jcae.mesh.xmldata.MeshReader;
-import org.jcae.mesh.xmldata.MeshWriter;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.LinkedHashSet;
-import java.util.Collection;
-import java.io.IOException;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jcae.mesh.amibe.ds.HalfEdge;
 import org.jcae.mesh.amibe.metrics.EuclidianMetric3D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.metrics.Metric;
+import org.jcae.mesh.xmldata.MeshReader;
+import org.jcae.mesh.xmldata.MeshWriter;
 
+import gnu.trove.PrimeFinder;
+import java.io.IOException;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Collection;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Remesh an existing mesh.
@@ -64,9 +61,7 @@ public class Remesh
 	private final double sizeTarget;
 	private final double minlen;
 	private final double maxlen;
-	private final EuclidianMetric3D euclidian_metric3d = new EuclidianMetric3D();
 	private final Map<Vertex, EuclidianMetric3D> metrics;
-	private final Set<Vertex> immutableNodes = new LinkedHashSet<Vertex>();
 	
 	/**
 	 * Creates a <code>Remesh</code> instance.
@@ -151,7 +146,6 @@ public class Remesh
 			}
 		}
 
-
 		// Arbitrary size: 2*initial number of nodes
 		metrics = new HashMap<Vertex, EuclidianMetric3D>(2*nodeset.size());
 		for (Vertex v : nodeset)
@@ -181,26 +175,50 @@ public class Remesh
 
 		double[] pos = v.getUV();
 		double dmin = Double.MAX_VALUE;
-		int[] index = new int[1];
-		int i = 0;
+		int[] index = new int[2];
+		int i = -1;
 		Vertex d = ot.destination();
+		t = null;
+		// First, find the best triangle in the neighborhood of 'start' vertex
 		do
 		{
 			ot = ot.nextOriginLoop();
+			if (ot.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
 			double dist = sqrDistanceVertexTriangle(pos, ot.getTri(), index);
 			if (dist < dmin)
 			{
 				dmin = dist;
 				t = ot.getTri();
-				i = index[0];
+				i = (index[1] - 1)/ 2;
 			}
 		}
 		while (ot.destination() != d);
+		assert i >= 0 && t != null;
 		ot = t.getAbstractHalfEdge(ot);
-		if (ot.destination() == t.vertex[i])
+		if (ot.origin() == t.vertex[i])
 			ot = ot.next();
-		else if (ot.apex() == t.vertex[i])
+		else if (ot.destination() == t.vertex[i])
 			ot = ot.prev();
+
+		// Now cross edges to see if adjacent triangle is nearer
+		do
+		{
+			if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
+				break;
+			AbstractHalfEdge sym = ot.sym();
+			t = sym.getTri();
+			double dist = sqrDistanceVertexTriangle(pos, t, index);
+			if (dist >= dmin)
+				break;
+			dmin = dist;
+			ot = sym;
+			i = (index[1] - 1)/ 2;
+			if (ot.origin() == t.vertex[i])
+				ot = ot.next();
+			else if (ot.destination() == t.vertex[i])
+				ot = ot.prev();
+		} while (true);
 		return ot;
 	}
 
@@ -254,6 +272,7 @@ public class Remesh
 		double det = a*c - b*b;
 		double s = b*e - c*d;
 		double t = b*d - a*e;
+		index[0] = index[1] = -1;
 		if ( s+t <= det )
 		{
 			if ( s < 0.0 )
@@ -265,19 +284,34 @@ public class Remesh
 					{
 						t = 0.0;
 						if (-d >= a)
+						{
+							index[1] = 6;
 							s = 1.0;
+						}
 						else
+						{
+							index[1] = 5;
 							s = -d/a;
+						}
 					}
 					else
 					{
 						s = 0.0;
 						if (e >= 0.0)
+						{
+							index[1] = 4;
 							t = 0.0;
+						}
 						else if (-e >= c)
+						{
+							index[1] = 2;
 							t = 1.0;
+						}
 						else
+						{
+							index[1] = 3;
 							t = -e/c;
+						}
 					}
 				}
 				else
@@ -285,11 +319,20 @@ public class Remesh
 					// region 3
 					s = 0.0;
 					if (e >= 0.0)
+					{
+						index[1] = 4;
 						t = 0.0;
+					}
 					else if (-e >= c)
+					{
+						index[1] = 2;
 						t = 1.0;
+					}
 					else
+					{
+						index[1] = 3;
 						t = -e/c;
+					}
 				}
 			}
 			else if ( t < 0.0 )
@@ -297,11 +340,20 @@ public class Remesh
 				// region 5
 				t = 0.0;
 				if (d >= 0.0)
+				{
+					index[1] = 4;
 					s = 0.0;
+				}
 				else if (-d >= a)
+				{
+					index[1] = 6;
 					s = 1.0;
+				}
 				else
+				{
+					index[1] = 5;
 					s = -d/a;
+				}
 			}
 			else
 			{
@@ -309,6 +361,14 @@ public class Remesh
 				double invDet = 1.0 / det;
 				s *= invDet;
 				t *= invDet;
+				if (t <= s && t <= 1.0 - s - t)
+					index[1] = 5;
+				else if (s <= t && s <= 1.0 - s - t)
+					index[1] = 3;
+				else if (s >= 1.0 - s - t && t >= 1.0 - s -t)
+					index[1] = 1;
+				else
+					throw new RuntimeException("Illegal arguments: s="+s+" t="+t+" "+det+"\n"+tri);
 			}
 		}
 		else
@@ -322,9 +382,15 @@ public class Remesh
 					double numer = (c+e) - (b+d);
 					double denom = (a-b) + (c-b);
 					if (numer >= denom)
+					{
+						index[1] = 6;
 						s = 1.0;
+					}
 					else
+					{
+						index[1] = 1;
 						s = numer / denom;
+					}
 					t = 1.0 - s;
 				}
 				else
@@ -332,11 +398,20 @@ public class Remesh
 					// minimum on edge s = 0
 					s = 0.0;
 					if (e >= 0.0)
+					{
+						index[1] = 4;
 						t = 0.0;
+					}
 					else if (-e >= c)
+					{
+						index[1] = 2;
 						t = 1.0;
+					}
 					else
+					{
+						index[1] = 3;
 						t = -e/c;
+					}
 				}
 			}
 			else if ( t < 0.0 )
@@ -348,9 +423,15 @@ public class Remesh
 					double numer = (a+d) - (b+e);
 					double denom = (a-b) + (c-b);
 					if (numer >= denom)
+					{
+						index[1] = 6;
 						s = 1.0;
+					}
 					else
+					{
+						index[1] = 1;
 						s = numer / denom;
+					}
 					t = 1.0 - s;
 				}
 				else
@@ -358,11 +439,20 @@ public class Remesh
 					// minimum on edge t=0
 					t = 0.0;
 					if (d >= 0.0)
+					{
+						index[1] = 4;
 						s = 0.0;
+					}
 					else if (-d >= a)
+					{
+						index[1] = 6;
 						s = 1.0;
+					}
 					else
+					{
+						index[1] = 5;
 						s = -d/a;
+					}
 				}
 			}
 			else
@@ -371,15 +461,22 @@ public class Remesh
 				double numer = (c+e) - (b+d);
 				if (numer <= 0.0)
 				{
+					index[1] = 2;
 					s = 0.0;
 				}
 				else
 				{
 					double denom = (a-b)+(c-b);
 					if (numer >= denom)
+					{
+						index[1] = 6;
 						s = 1.0;
+					}
 					else
+					{
+						index[1] = 1;
 						s = numer/denom;
+					}
 					t = 1.0 - s;
 				}
 			}
@@ -388,12 +485,6 @@ public class Remesh
 		// Fix possible numerical errors
 		if (ret < 0.0)
 			ret = 0.0;
-		if (t <= s && s <= 1.0 - 2.0*t)
-			index[0] = 0;
-		else if (1.0 <= s + 2.0*t && 1.0 <= t + 2.0*s)
-			index[0] = 1;
-		else
-			index[0] = 2;
 		return ret;
 	}
 
@@ -419,24 +510,8 @@ public class Remesh
 
 		int nrIter = 0;
 		int processed = 0;
-		HashSet<Triangle> trianglesToCheck = new HashSet<Triangle>(mesh.getTriangles().size());
-		LinkedHashSet<Triangle> oldTrianglesToCheck = new LinkedHashSet<Triangle>(mesh.getTriangles().size());
 		AbstractHalfEdge h = null;
 		AbstractHalfEdge sym = null;
-		for (Triangle f : mesh.getTriangles())
-		{
-			if (f.hasAttributes(AbstractHalfEdge.OUTER))
-				continue;
-
-			oldTrianglesToCheck.add(f);
-			// Clear MARKED attribute
-			h = f.getAbstractHalfEdge(h);
-			if (h.hasAttributes(AbstractHalfEdge.BOUNDARY))
-				h.setAttributes(AbstractHalfEdge.MARKED);
-			else
-				h.clearAttributes(AbstractHalfEdge.MARKED);
-		}
-
 		// We try to insert new nodes by splitting large edges.  As edge collapse
 		// is costful, nodes are inserted only if it does not create small edges,
 		// which means that nodes are not deleted.
@@ -444,8 +519,11 @@ public class Remesh
 		// If an edge has no candidates, either because it is small or because no
 		// nodes can be inserted, it is tagged and will not have to be checked
 		// during next iterations.
-		// For triangle centroids, this is a little bit more difficult, we need to
-		// keep track of triangles which have been modified at previous iteration.
+
+		// Clear MARKED attribute
+		for (Triangle f : mesh.getTriangles())
+			f.clearAttributes(AbstractHalfEdge.MARKED);
+
 		while (true)
 		{
 			nrIter++;
@@ -477,14 +555,9 @@ public class Remesh
 						// This edge has already been checked and cannot be split
 						continue;
 					}
+
+					// Tag symmetric edge to process edges only once
 					sym = h.sym(sym);
-					if (sym.hasAttributes(AbstractHalfEdge.MARKED))
-					{
-						// This edge has already been checked and cannot be split
-						continue;
-					}
-					// Tag edges
-					h.setAttributes(AbstractHalfEdge.MARKED);
 					sym.setAttributes(AbstractHalfEdge.MARKED);
 
 					Vertex start = h.origin();
@@ -493,6 +566,7 @@ public class Remesh
 					if (l < maxlen)
 					{
 						// This edge is smaller than target size and is not split
+						h.setAttributes(AbstractHalfEdge.MARKED);
 						continue;
 					}
 					//  Long edges are discretized, but do not create more than 2 subsegments
@@ -510,7 +584,10 @@ public class Remesh
 						pos[1] = xs[1]+ns*(xe[1]-xs[1])/segments;
 						pos[2] = xs[2]+ns*(xe[2]-xs[2])/segments;
 						np[ns-1] = mesh.createVertex(pos);
-						liaison.project(np[ns-1], pos, start);
+//						if (2*ns <= segments)
+//							liaison.project(np[ns-1], pos, start);
+//						else
+//							liaison.project(np[ns-1], pos, end);*/
 					}
 
 					Vertex last = start;
@@ -569,55 +646,6 @@ public class Remesh
 					}
 				}
 			}
-			//  Try to insert triangle centroids after other points.
-			//  We scan triangles for which centroid have already
-			//  proven to be valid, and all triangles which have been
-			//  modified by vertex insertion.
-			Vertex c = null;
-			trianglesToCheck.clear();
-			LOGGER.fine("Check triangle centroids for "+oldTrianglesToCheck.size()+" triangles");
-			for (Triangle t : oldTrianglesToCheck)
-			{
-				if (t.hasAttributes(AbstractHalfEdge.OUTER))
-					continue;
-				// Check triangle centroid only if at least one edge is large
-				boolean tooSmall = true;
-				h = t.getAbstractHalfEdge(h);
-				for (int j = 0; tooSmall && j < 3; j++)
-				{
-					h = h.next(h);
-					if (h.hasAttributes(AbstractHalfEdge.MARKED))
-					{
-						sym = h.sym(sym);
-						if (!sym.hasAttributes(AbstractHalfEdge.MARKED))
-							tooSmall = false;
-					}
-					else
-						tooSmall = false;
-				}
-				if (tooSmall)
-					continue;
-				c = mesh.getTriangleCentroid(t, c);
-				// Link to surrounding triangle to speed up
-				// kdTree.getNearestVertex() and thus
-				// v.getSurroundingOTriangle() below.
-				c.setLink(t);
-				liaison.project(c, c.getUV(), t.vertex[0]);
-
-				EuclidianMetric3D metric = new EuclidianMetric3D(sizeTarget);
-				Vertex n = kdTree.getNearestVertex(metric, c.getUV());
-				assert checkNearestVertex(metric, c.getUV(), n);
-				if (interpolatedDistance(c, metric, n, metrics.get(n)) > minlen)
-				{
-					kdTree.add(c);
-					metrics.put(c, metric);
-					nodes.add(c);
-					trianglesToCheck.add(t);
-					c = null;
-				}
-				else
-					tooNearNodes++;
-			}
 			if (nodes.isEmpty())
 				break;
 			for (Vertex v : nodes)
@@ -639,7 +667,6 @@ public class Remesh
 			if (prime >= imax)
 				prime = 1;
 			int index = imax / 2;
-			int skippedNodes = 0;
 			int totNrSwap = 0;
 			for (int i = 0; i < imax; i++)
 			{
@@ -651,75 +678,59 @@ public class Remesh
 				AbstractHalfEdge ot = findSurroundingTriangle(v, near);
 				mesh.vertexSplit(ot, v);
 				assert ot.destination() == v : v+" "+ot;
-				assert mesh.isValid();
 				kdTree.add(v);
 				Vertex bgNear = bgKdTree.getNearestVertex(metric, pos);
 				liaison.addVertex(v, findSurroundingTriangle(v, bgNear).getTri());
 				processed++;
 				// Swap edges
 				HalfEdge edge = (HalfEdge) ot;
-				edge = edge.next();
-				Vertex s = edge.destination();
+				edge = edge.prev();
+				Vertex s = edge.origin();
 				int	counter = 0;
 				do
 				{
-					edge = edge.nextOriginLoop();
+					edge = edge.nextApexLoop();
 					counter++;
+					if (edge.hasAttributes(AbstractHalfEdge.SHARP))
+						continue;
 					if (edge.checkSwap3D(0.8) >= 0.0)
 					{
 						edge = (HalfEdge) mesh.edgeSwap(edge);
 						counter--;
+						totNrSwap++;
 					}
 				}
-				while ((edge.destination() != s || counter == 0) && counter < 20);
-				assert mesh.isValid();
+				while ((edge.origin() != s || counter == 0) && counter < 20);
 				index += prime;
 				if (index >= imax)
 					index -= imax;
 			}
+			assert mesh.isValid();
+			assert mesh.checkNoInvertedTriangles();
+			assert mesh.checkNoDegeneratedTriangles();
 
 			if (LOGGER.isLoggable(Level.FINE))
 			{
 				LOGGER.fine("Mesh now contains "+mesh.getTriangles().size()+" triangles");
 				if (checked > 0)
 					LOGGER.fine(checked+" edges checked");
-				if (imax - skippedNodes > 0)
-					LOGGER.fine((imax-skippedNodes)+" nodes added");
+				if (imax > 0)
+					LOGGER.fine(imax+" nodes added");
 				if (tooNearNodes > 0)
 					LOGGER.fine(tooNearNodes+" nodes are too near from existing vertices and cannot be inserted");
-				if (skippedNodes > 0)
-					LOGGER.fine(skippedNodes+" nodes cannot be inserted");
 				if (totNrSwap > 0)
 					LOGGER.fine(totNrSwap+" edges have been swapped during processing");
 				if (kdtreeSplit > 0)
 					LOGGER.fine(kdtreeSplit+" quadtree cells split");
 			}
-			if (skippedNodes == nodes.size())
+			if (nodes.isEmpty())
 				break;
-			// Copy trianglesToCheck into oldTrianglesToCheck and keep original
-			// order from mesh.getTriangles().  This is to make sure that this
-			// use of trianglesToCheck does not modify result.
-			oldTrianglesToCheck.clear();
-			for(Triangle t : mesh.getTriangles())
-			{
-				if (trianglesToCheck.contains(t))
-					oldTrianglesToCheck.add(t);
-			}
 		}
 		LOGGER.info("Number of inserted vertices: "+processed);
 		LOGGER.fine("Number of iterations to insert all nodes: "+nrIter);
 		LOGGER.config("Leave compute()");
 
 		return this;
-	}
-
-	private final boolean checkNearestVertex(Metric metric, double[] uv, Vertex n)
-	{
-		double d1 = metric.distance2(uv, n.getUV());
-		Vertex debug = kdTree.getNearestVertexDebug(metric, uv);
-		double d2 = metric.distance2(uv, debug.getUV());
-		assert d1 == d2 : ""+n+" is at a distance "+d1+" but nearest point is "+debug+" at distance "+d2;
-		return true;
 	}
 
 	protected void postProcessIteration(Mesh mesh, int i)
@@ -733,6 +744,56 @@ public class Remesh
 		System.out.println("Options:");
 		System.out.println(" -h, --help         Display this message and exit");
 		System.exit(rc);
+	}
+
+	public static void checkFindSurroundingTriangle(String[] args) throws java.io.FileNotFoundException
+	{
+		org.jcae.mesh.amibe.traits.MeshTraitsBuilder mtb = org.jcae.mesh.amibe.traits.MeshTraitsBuilder.getDefault3D();
+		mtb.addNodeList();
+		Mesh mesh = new Mesh(mtb);
+		Vertex v0 = mesh.createVertex(10.0, 20.0, 30.0);
+		Vertex v1 = mesh.createVertex(16.0, 20.0, 30.0);
+		Vertex v2 = mesh.createVertex(12.0, 26.0, 30.0);
+		Triangle t = mesh.createTriangle(v0, v1, v2);
+		int [] index = new int[2];
+		int nGrid = 128;
+		double[] pos = new double[3];
+		java.io.PrintStream outMesh = new java.io.PrintStream("test.mesh");
+		java.io.PrintStream outBB = new java.io.PrintStream("test.bb");
+		outMesh.println("MeshVersionFormatted 1\n\nDimension\n3\n\nGeometry\n\"test.mesh\"\n\nVertices");
+		outMesh.println(nGrid*nGrid+3);
+		outBB.println("3 1 "+(nGrid*nGrid+3)+" 2");
+		for (int j = 0; j < nGrid; j++)
+		{
+			pos[1] = 15.0 + (j * 16) / (double)nGrid;
+			pos[2] = 30.05;
+			for (int i = 0; i < nGrid; i++)
+			{
+				pos[0] =  5.0 + (i * 16) / (double)nGrid;
+				sqrDistanceVertexTriangle(pos, t, index);
+				outMesh.println(pos[0]+" "+pos[1]+" "+pos[2]+" 0");
+				outBB.println((double)index[1]);
+			}
+		}
+		index[1] = 0;
+		pos = v0.getUV(); outMesh.println(pos[0]+" "+pos[1]+" "+pos[2]+" "+index[1]);
+		pos = v1.getUV(); outMesh.println(pos[0]+" "+pos[1]+" "+pos[2]+" "+index[1]);
+		pos = v2.getUV(); outMesh.println(pos[0]+" "+pos[1]+" "+pos[2]+" "+index[1]);
+		outBB.println("0.0 0.0 0.0");
+
+		outMesh.println("\n\nQuadrilaterals\n"+((nGrid-1)*(nGrid-1)));
+		for (int j = 0; j < nGrid - 1; j++)
+		{
+			for (int i = 0; i < nGrid - 1; i++)
+			{
+				outMesh.println(""+(j*nGrid+i+1)+" "+(j*nGrid+i+2)+" "+((j+1)*nGrid+i+2)+" "+((j+1)*nGrid+i+1)+" 0");
+			}
+		}
+		int o = nGrid*nGrid;
+		outMesh.println("\n\nTriangles\n1\n"+(o+1)+" "+(o+2)+" "+(o+3)+" 0");
+		outMesh.println("\n\nEnd");
+		outMesh.close();
+		outBB.close();
 	}
 
 	/**
@@ -762,6 +823,8 @@ public class Remesh
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
+		mesh.buildRidges(40.0);
+
 		Remesh smoother = new Remesh(mesh, opts);
 		smoother.compute();			
 		try

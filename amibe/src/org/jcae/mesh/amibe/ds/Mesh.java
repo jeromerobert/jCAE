@@ -1490,6 +1490,59 @@ public class Mesh implements Serializable
 		return true;
 	}
 	
+	public boolean checkNoInvertedTriangles()
+	{
+		AbstractHalfEdge ot = null;
+		AbstractHalfEdge sym = null;
+		double [][] temp = new double[4][3];
+		for (Triangle t : triangleList)
+		{
+			if (t.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
+			ot = t.getAbstractHalfEdge(ot);
+			for (int i = 0; i < 3; i++)
+			{
+				ot = ot.next();
+				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
+					continue;
+				sym = ot.sym();
+				Vertex o = ot.origin();
+				Vertex d = ot.destination();
+				Vertex a = ot.apex();
+				Vertex n = sym.apex();
+				Matrix3D.computeNormal3D(o.getUV(), d.getUV(), a.getUV(), temp[0], temp[1], temp[2]);
+				Matrix3D.computeNormal3D(d.getUV(), o.getUV(), n.getUV(), temp[0], temp[1], temp[3]);
+				if (Matrix3D.prodSca(temp[2], temp[3]) < -0.6)
+				{
+					System.out.println("ERR: "+Matrix3D.prodSca(temp[2], temp[3]));
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	public boolean checkNoDegeneratedTriangles()
+	{
+		for (Triangle t : triangleList)
+		{
+			if (t.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
+			double[] t0 = t.vertex[0].getUV();
+			double[] t1 = t.vertex[1].getUV();
+			double[] t2 = t.vertex[2].getUV();
+			double a = t.vertex[0].sqrDistance3D(t.vertex[1]);
+			double c = t.vertex[0].sqrDistance3D(t.vertex[2]);
+			double b =
+				(t1[0] - t0[0]) * (t2[0] - t0[0]) +
+				(t1[1] - t0[1]) * (t2[1] - t0[1]) +
+				(t1[2] - t0[2]) * (t2[2] - t0[2]);
+			if (a*c == b*b)
+				return false;
+		}
+		return true;
+	}
+
 	// Useful for debugging
 	/*  Following imports must be moved at top.
 import java.io.FileOutputStream;

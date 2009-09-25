@@ -189,6 +189,11 @@ public class MeshLiaison
 				if (LOGGER.isLoggable(Level.FINER))
 					LOGGER.log(Level.FINER, "Point is moved out of triangle by edge "+edge);
 
+				if (edge.hasAttributes(AbstractHalfEdge.BOUNDARY))
+				{
+					LOGGER.log(Level.FINER, "Boundary edge "+edge);
+					return true;
+				}
 				sym = edge.sym(sym);
 				if (visited.contains(sym.getTri()))
 				{

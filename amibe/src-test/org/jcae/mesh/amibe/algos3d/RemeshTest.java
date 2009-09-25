@@ -23,8 +23,6 @@ package org.jcae.mesh.amibe.algos3d;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
-import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.xmldata.MeshReader;
 
@@ -116,31 +114,6 @@ public class RemeshTest
 		return tt;
 	}
 
-	private boolean checkNoInvertedTriangles(Mesh m)
-	{
-		AbstractHalfEdge ot = null;
-		AbstractHalfEdge sym = null;
-		double [][] temp = new double[4][3];
-		for (Triangle t : m.getTriangles())
-		{
-			ot = t.getAbstractHalfEdge(ot);
-			for (int i = 0; i < 3; i++)
-			{
-				ot = ot.next();
-				sym = ot.sym();
-				Vertex o = ot.origin();
-				Vertex d = ot.destination();
-				Vertex a = ot.apex();
-				Vertex n = sym.apex();
-				Matrix3D.computeNormal3D(o.getUV(), d.getUV(), a.getUV(), temp[0], temp[1], temp[2]);
-				Matrix3D.computeNormal3D(d.getUV(), o.getUV(), n.getUV(), temp[0], temp[1], temp[3]);
-				if (Matrix3D.prodSca(temp[2], temp[3]) < -0.6)
-					return false;
-			}
-		}
-		return true;
-	}
-
 	private void testShell(int m, int n, String size)
 	{
 		final Map<String, String> options = new HashMap<String, String>();
@@ -166,7 +139,7 @@ public class RemeshTest
 		options.put("size", "0.02");
 		Mesh newMesh = new Remesh(bgMesh, options).compute().getOutputMesh();
 		assertTrue("Mesh is not valid", newMesh.isValid());
-		assertTrue("Mesh contains inverted triangles", checkNoInvertedTriangles(newMesh));
+		assertTrue("Mesh contains inverted triangles", newMesh.checkNoInvertedTriangles());
 	}
 	
 	@Test public void test4Neighbors()
@@ -214,7 +187,7 @@ public class RemeshTest
 // try { org.jcae.mesh.xmldata.MeshWriter.writeObject3D(newMesh, "XXX", null); } catch (IOException ex) { ex.printStackTrace(); throw new RuntimeException(ex); }
 
 		assertTrue("Mesh is not valid", newMesh.isValid());
-		assertTrue("Mesh contains inverted triangles", checkNoInvertedTriangles(newMesh));
+		assertTrue("Mesh contains inverted triangles", newMesh.checkNoInvertedTriangles());
 	}
 
 }
