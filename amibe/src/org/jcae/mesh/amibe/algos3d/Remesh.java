@@ -528,6 +528,8 @@ public class Remesh
 
 		while (true)
 		{
+		for (int pass=0; pass < 2; pass++)
+		{
 			nrIter++;
 			// Maximal number of nodes which are inserted on an edge
 			int maxNodes = 0;
@@ -552,6 +554,8 @@ public class Remesh
 				for (int i = 0; i < 3; i++)
 				{
 					h = h.next(h);
+					if ((pass == 0) != (h.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD)))
+						continue;
 					if (h.hasAttributes(AbstractHalfEdge.MARKED))
 					{
 						// This edge has already been checked and cannot be split
@@ -678,6 +682,10 @@ public class Remesh
 				double[] pos = v.getUV();
 				Vertex near = kdTree.getNearestVertex(metric, pos);
 				AbstractHalfEdge ot = findSurroundingTriangle(v, near);
+				if (pass == 1 && ot.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+				{
+					continue;
+				}
 				mesh.vertexSplit(ot, v);
 				assert ot.destination() == v : v+" "+ot;
 				kdTree.add(v);
@@ -688,12 +696,12 @@ public class Remesh
 				HalfEdge edge = (HalfEdge) ot;
 				edge = edge.prev();
 				Vertex s = edge.origin();
-				int	counter = 0;
+				int counter = 0;
 				do
 				{
 					edge = edge.nextApexLoop();
 					counter++;
-					if (edge.hasAttributes(AbstractHalfEdge.SHARP))
+					if (edge.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 						continue;
 					if (edge.checkSwap3D(0.8) >= 0.0)
 					{
@@ -725,11 +733,12 @@ public class Remesh
 				if (kdtreeSplit > 0)
 					LOGGER.fine(kdtreeSplit+" quadtree cells split");
 			}
-			if (nodes.isEmpty())
-				break;
 		}
+		if (nodes.isEmpty())
+			break;
 		LOGGER.info("Number of inserted vertices: "+processed);
 		LOGGER.fine("Number of iterations to insert all nodes: "+nrIter);
+		}
 		LOGGER.config("Leave compute()");
 
 		return this;
