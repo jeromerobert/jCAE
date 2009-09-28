@@ -686,6 +686,8 @@ public class Remesh
 					{
 						continue;
 					}
+					ot.clearAttributes(AbstractHalfEdge.MARKED);
+					ot.sym().clearAttributes(AbstractHalfEdge.MARKED);
 					mesh.vertexSplit(ot, v);
 					assert ot.destination() == v : v+" "+ot;
 					kdTree.add(v);
@@ -705,6 +707,8 @@ public class Remesh
 							continue;
 						if (edge.checkSwap3D(0.8) >= 0.0)
 						{
+							edge.getTri().clearAttributes(AbstractHalfEdge.MARKED);
+							edge.sym().getTri().clearAttributes(AbstractHalfEdge.MARKED);
 							edge = (HalfEdge) mesh.edgeSwap(edge);
 							counter--;
 							totNrSwap++;
