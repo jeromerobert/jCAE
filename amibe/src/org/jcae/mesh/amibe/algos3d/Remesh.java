@@ -91,6 +91,8 @@ public class Remesh
 			final String val = opt.getValue();
 			if (key.equals("size"))
 				size = Double.valueOf(val).doubleValue();
+			else if (key.equals("ridgeAngle"))
+				mesh.buildRidges(Double.valueOf(val).doubleValue());
 		}
 		sizeTarget = size;
 		minlen = 1.0 / Math.sqrt(2.0);
@@ -813,6 +815,7 @@ public class Remesh
 		if (argc + 3 != args.length)
 			usage(1);
 		opts.put("size", args[1]);
+		opts.put("ridgeAngle", "20");
 		System.out.println("Running "+args[0]+" "+args[1]+" "+args[2]);
 		try
 		{
@@ -823,7 +826,6 @@ public class Remesh
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
-		mesh.buildRidges(40.0);
 
 		Remesh smoother = new Remesh(mesh, opts);
 		smoother.compute();			
