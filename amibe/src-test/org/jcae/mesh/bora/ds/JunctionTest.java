@@ -22,6 +22,7 @@ package org.jcae.mesh.bora.ds;
 import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.mesh.amibe.ds.SubMesh1D;
 import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.bora.xmldata.Storage;
 
 import java.io.File;
 import java.util.HashSet;
@@ -94,8 +95,8 @@ public class JunctionTest
 		}
 
 		assertEquals(1, face.getDiscretizations().size());
-		d = face.getDiscretizations().iterator().next();
-		Mesh mesh2d = (Mesh) d.getMesh();
+		Mesh mesh2d = new Mesh();
+		Storage.readFace(mesh2d, face, submesh, null);
 		int nrTriangles = mesh2d.getTriangles().size();
 		assertTrue(nrTriangles > 200 && nrTriangles < 300);
 	}
