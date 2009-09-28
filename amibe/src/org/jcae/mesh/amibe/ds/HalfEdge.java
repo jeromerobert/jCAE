@@ -1228,9 +1228,10 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		// Inner edge
 		h1.next.HEglue(n1);
 
-		// Clear BOUNDARY and NONMANIFOLD flags on inner edges
-		h1.next.clearAttributes(BOUNDARY | NONMANIFOLD);
-		n1.clearAttributes(BOUNDARY | NONMANIFOLD);
+		// Clear all flags but OUTER on inner edges
+		byte isOuter = n1.hasAttributes(OUTER) ? (byte) OUTER : 0;
+		h1.next.attributes = isOuter;
+		n1.attributes = isOuter;
 	}
 	
 	private final Iterator<AbstractHalfEdge> identityFanIterator()
