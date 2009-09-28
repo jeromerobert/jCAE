@@ -528,216 +528,216 @@ public class Remesh
 
 		while (true)
 		{
-		for (int pass=0; pass < 2; pass++)
-		{
-			nrIter++;
-			// Maximal number of nodes which are inserted on an edge
-			int maxNodes = 0;
-			// Number of checked edges
-			int checked = 0;
-			// Number of nodes which are too near from existing vertices
-			int tooNearNodes = 0;
-			// Number of quadtree cells split
-			int kdtreeSplit = 0;
-			nodes.clear();
-			LOGGER.fine("Check all edges");
-			for(Triangle t : mesh.getTriangles())
+			for (int pass=0; pass < 2; pass++)
 			{
-				if (t.hasAttributes(AbstractHalfEdge.OUTER))
-					continue;
-				h = t.getAbstractHalfEdge(h);
-				sym = t.getAbstractHalfEdge(sym);
-				triNodes.clear();
-				triMetrics.clear();
-				// Maximal number of nodes which are inserted on edges of this triangle
-				int nrTriNodes = 0;
-				for (int i = 0; i < 3; i++)
+				nrIter++;
+				// Maximal number of nodes which are inserted on an edge
+				int maxNodes = 0;
+				// Number of checked edges
+				int checked = 0;
+				// Number of nodes which are too near from existing vertices
+				int tooNearNodes = 0;
+				// Number of quadtree cells split
+				int kdtreeSplit = 0;
+				nodes.clear();
+				LOGGER.fine("Check all edges");
+				for(Triangle t : mesh.getTriangles())
 				{
-					h = h.next(h);
-					if ((pass == 0) != (h.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD)))
+					if (t.hasAttributes(AbstractHalfEdge.OUTER))
 						continue;
-					if (h.hasAttributes(AbstractHalfEdge.MARKED))
+					h = t.getAbstractHalfEdge(h);
+					sym = t.getAbstractHalfEdge(sym);
+					triNodes.clear();
+					triMetrics.clear();
+					// Maximal number of nodes which are inserted on edges of this triangle
+					int nrTriNodes = 0;
+					for (int i = 0; i < 3; i++)
 					{
-						// This edge has already been checked and cannot be split
-						continue;
-					}
-
-					// Tag symmetric edge to process edges only once
-					sym = h.sym(sym);
-					sym.setAttributes(AbstractHalfEdge.MARKED);
-
-					Vertex start = h.origin();
-					Vertex end = h.destination();
-					double l = interpolatedDistance(start, metrics.get(start), end, metrics.get(end));
-					if (l < maxlen)
-					{
-						// This edge is smaller than target size and is not split
-						h.setAttributes(AbstractHalfEdge.MARKED);
-						continue;
-					}
-					//  Long edges are discretized, but do not create more than 2 subsegments
-					double lcrit = 1.0;
-					if (l > 2.0)
-						lcrit = l / 2.0;
-					double [] xs = start.getUV();
-					double [] xe = end.getUV();
-					int segments = (int) (2.0*l/lcrit) + 10;
-					Vertex [] np = new Vertex[segments-1];
-					double[] pos = new double[3];
-					for (int ns = 1; ns < segments; ns++)
-					{
-						pos[0] = xs[0]+ns*(xe[0]-xs[0])/segments;
-						pos[1] = xs[1]+ns*(xe[1]-xs[1])/segments;
-						pos[2] = xs[2]+ns*(xe[2]-xs[2])/segments;
-						np[ns-1] = mesh.createVertex(pos);
-//						if (2*ns <= segments)
-//							liaison.project(np[ns-1], pos, start);
-//						else
-//							liaison.project(np[ns-1], pos, end);*/
-					}
-
-					Vertex last = start;
-					Metric lastMetric = metrics.get(start);
-					int nrNodes = 0;
-
-					l = 0.0;
-					for (int ns = 0; ns < segments-1; ns++)
-					{
-						EuclidianMetric3D m = new EuclidianMetric3D(sizeTarget);
-						l = interpolatedDistance(last, lastMetric, np[ns], m);
-						if (l > lcrit)
+						h = h.next(h);
+						if ((pass == 0) != (h.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD)))
+							continue;
+						if (h.hasAttributes(AbstractHalfEdge.MARKED))
 						{
-							last = np[ns];
-							triNodes.add(last);
-							triMetrics.add(m);
-							l = 0.0;
-							nrNodes++;
+							// This edge has already been checked and cannot be split
+							continue;
+						}
+
+						// Tag symmetric edge to process edges only once
+						sym = h.sym(sym);
+						sym.setAttributes(AbstractHalfEdge.MARKED);
+
+						Vertex start = h.origin();
+						Vertex end = h.destination();
+						double l = interpolatedDistance(start, metrics.get(start), end, metrics.get(end));
+						if (l < maxlen)
+						{
+							// This edge is smaller than target size and is not split
+							h.setAttributes(AbstractHalfEdge.MARKED);
+							continue;
+						}
+						//  Long edges are discretized, but do not create more than 2 subsegments
+						double lcrit = 1.0;
+						if (l > 2.0)
+							lcrit = l / 2.0;
+						double [] xs = start.getUV();
+						double [] xe = end.getUV();
+						int segments = (int) (2.0*l/lcrit) + 10;
+						Vertex [] np = new Vertex[segments-1];
+						double[] pos = new double[3];
+						for (int ns = 1; ns < segments; ns++)
+						{
+							pos[0] = xs[0]+ns*(xe[0]-xs[0])/segments;
+							pos[1] = xs[1]+ns*(xe[1]-xs[1])/segments;
+							pos[2] = xs[2]+ns*(xe[2]-xs[2])/segments;
+							np[ns-1] = mesh.createVertex(pos);
+	//						if (2*ns <= segments)
+	//							liaison.project(np[ns-1], pos, start);
+	//						else
+	//							liaison.project(np[ns-1], pos, end);*/
+						}
+
+						Vertex last = start;
+						Metric lastMetric = metrics.get(start);
+						int nrNodes = 0;
+
+						l = 0.0;
+						for (int ns = 0; ns < segments-1; ns++)
+						{
+							EuclidianMetric3D m = new EuclidianMetric3D(sizeTarget);
+							l = interpolatedDistance(last, lastMetric, np[ns], m);
+							if (l > lcrit)
+							{
+								last = np[ns];
+								triNodes.add(last);
+								triMetrics.add(m);
+								l = 0.0;
+								nrNodes++;
+							}
+						}
+						if (nrNodes > nrTriNodes)
+						{
+							nrTriNodes = nrNodes;
+						}
+						checked++;
+					}
+					if (nrTriNodes > maxNodes)
+						maxNodes = nrTriNodes;
+					if (!triNodes.isEmpty())
+					{
+						//  Process in pseudo-random order
+						int prime = PrimeFinder.nextPrime(nrTriNodes);
+						int imax = triNodes.size();
+						while (imax % prime == 0)
+							prime = PrimeFinder.nextPrime(prime+1);
+						if (prime >= imax)
+							prime = 1;
+						int index = imax / 2;
+						for (int i = 0; i < imax; i++)
+						{
+							Vertex v = triNodes.get(index);
+							EuclidianMetric3D metric = triMetrics.get(index);
+							double[] uv = v.getUV();
+							Vertex n = kdTree.getNearestVertex(metric, uv);
+							if (interpolatedDistance(v, metric, n, metrics.get(n)) > minlen)
+							{
+								kdTree.add(v);
+								metrics.put(v, metric);
+								nodes.add(v);
+							}
+							else
+								tooNearNodes++;
+							index += prime;
+							if (index >= imax)
+								index -= imax;
 						}
 					}
-					if (nrNodes > nrTriNodes)
-					{
-						nrTriNodes = nrNodes;
-					}
-					checked++;
 				}
-				if (nrTriNodes > maxNodes)
-					maxNodes = nrTriNodes;
-				if (!triNodes.isEmpty())
+				if (nodes.isEmpty())
+					break;
+				for (Vertex v : nodes)
 				{
-					//  Process in pseudo-random order
-					int prime = PrimeFinder.nextPrime(nrTriNodes);
-					int imax = triNodes.size();
-					while (imax % prime == 0)
-						prime = PrimeFinder.nextPrime(prime+1);
-					if (prime >= imax)
-						prime = 1;
-					int index = imax / 2;
-					for (int i = 0; i < imax; i++)
+					//  These vertices are not bound to any triangles, so
+					//  they must be removed, otherwise getSurroundingOTriangle
+					//  may return a null pointer.
+					kdTree.remove(v);
+					metrics.remove(v);
+				}
+				LOGGER.fine("Try to insert "+nodes.size()+" nodes");
+				//  Process in pseudo-random order.  There are at most maxNodes nodes
+				//  on an edge, we choose an increment step greater than this value
+				//  to try to split all edges.
+				int prime = PrimeFinder.nextPrime(maxNodes);
+				int imax = nodes.size();
+				while (imax % prime == 0)
+					prime = PrimeFinder.nextPrime(prime+1);
+				if (prime >= imax)
+					prime = 1;
+				int index = imax / 2;
+				int totNrSwap = 0;
+				for (int i = 0; i < imax; i++)
+				{
+					Vertex v = nodes.get(index);
+					EuclidianMetric3D metric = new EuclidianMetric3D(sizeTarget);
+					metrics.put(v, metric);
+					double[] pos = v.getUV();
+					Vertex near = kdTree.getNearestVertex(metric, pos);
+					AbstractHalfEdge ot = findSurroundingTriangle(v, near);
+					if (pass == 1 && ot.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 					{
-						Vertex v = triNodes.get(index);
-						EuclidianMetric3D metric = triMetrics.get(index);
-						double[] uv = v.getUV();
-						Vertex n = kdTree.getNearestVertex(metric, uv);
-						if (interpolatedDistance(v, metric, n, metrics.get(n)) > minlen)
-						{
-							kdTree.add(v);
-							metrics.put(v, metric);
-							nodes.add(v);
-						}
-						else
-							tooNearNodes++;
-						index += prime;
-						if (index >= imax)
-							index -= imax;
+						continue;
 					}
+					mesh.vertexSplit(ot, v);
+					assert ot.destination() == v : v+" "+ot;
+					kdTree.add(v);
+					Vertex bgNear = bgKdTree.getNearestVertex(metric, pos);
+					liaison.addVertex(v, findSurroundingTriangle(v, bgNear).getTri());
+					processed++;
+					// Swap edges
+					HalfEdge edge = (HalfEdge) ot;
+					edge = edge.prev();
+					Vertex s = edge.origin();
+					int counter = 0;
+					do
+					{
+						edge = edge.nextApexLoop();
+						counter++;
+						if (edge.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+							continue;
+						if (edge.checkSwap3D(0.8) >= 0.0)
+						{
+							edge = (HalfEdge) mesh.edgeSwap(edge);
+							counter--;
+							totNrSwap++;
+						}
+					}
+					while ((edge.origin() != s || counter == 0) && counter < 20);
+					index += prime;
+					if (index >= imax)
+						index -= imax;
+				}
+				assert mesh.isValid();
+				assert mesh.checkNoInvertedTriangles();
+				assert mesh.checkNoDegeneratedTriangles();
+
+				if (LOGGER.isLoggable(Level.FINE))
+				{
+					LOGGER.fine("Mesh now contains "+mesh.getTriangles().size()+" triangles");
+					if (checked > 0)
+						LOGGER.fine(checked+" edges checked");
+					if (imax > 0)
+						LOGGER.fine(imax+" nodes added");
+					if (tooNearNodes > 0)
+						LOGGER.fine(tooNearNodes+" nodes are too near from existing vertices and cannot be inserted");
+					if (totNrSwap > 0)
+						LOGGER.fine(totNrSwap+" edges have been swapped during processing");
+					if (kdtreeSplit > 0)
+						LOGGER.fine(kdtreeSplit+" quadtree cells split");
 				}
 			}
 			if (nodes.isEmpty())
 				break;
-			for (Vertex v : nodes)
-			{
-				//  These vertices are not bound to any triangles, so
-				//  they must be removed, otherwise getSurroundingOTriangle
-				//  may return a null pointer.
-				kdTree.remove(v);
-				metrics.remove(v);
-			}
-			LOGGER.fine("Try to insert "+nodes.size()+" nodes");
-			//  Process in pseudo-random order.  There are at most maxNodes nodes
-			//  on an edge, we choose an increment step greater than this value
-			//  to try to split all edges.
-			int prime = PrimeFinder.nextPrime(maxNodes);
-			int imax = nodes.size();
-			while (imax % prime == 0)
-				prime = PrimeFinder.nextPrime(prime+1);
-			if (prime >= imax)
-				prime = 1;
-			int index = imax / 2;
-			int totNrSwap = 0;
-			for (int i = 0; i < imax; i++)
-			{
-				Vertex v = nodes.get(index);
-				EuclidianMetric3D metric = new EuclidianMetric3D(sizeTarget);
-				metrics.put(v, metric);
-				double[] pos = v.getUV();
-				Vertex near = kdTree.getNearestVertex(metric, pos);
-				AbstractHalfEdge ot = findSurroundingTriangle(v, near);
-				if (pass == 1 && ot.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
-				{
-					continue;
-				}
-				mesh.vertexSplit(ot, v);
-				assert ot.destination() == v : v+" "+ot;
-				kdTree.add(v);
-				Vertex bgNear = bgKdTree.getNearestVertex(metric, pos);
-				liaison.addVertex(v, findSurroundingTriangle(v, bgNear).getTri());
-				processed++;
-				// Swap edges
-				HalfEdge edge = (HalfEdge) ot;
-				edge = edge.prev();
-				Vertex s = edge.origin();
-				int counter = 0;
-				do
-				{
-					edge = edge.nextApexLoop();
-					counter++;
-					if (edge.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
-						continue;
-					if (edge.checkSwap3D(0.8) >= 0.0)
-					{
-						edge = (HalfEdge) mesh.edgeSwap(edge);
-						counter--;
-						totNrSwap++;
-					}
-				}
-				while ((edge.origin() != s || counter == 0) && counter < 20);
-				index += prime;
-				if (index >= imax)
-					index -= imax;
-			}
-			assert mesh.isValid();
-			assert mesh.checkNoInvertedTriangles();
-			assert mesh.checkNoDegeneratedTriangles();
-
-			if (LOGGER.isLoggable(Level.FINE))
-			{
-				LOGGER.fine("Mesh now contains "+mesh.getTriangles().size()+" triangles");
-				if (checked > 0)
-					LOGGER.fine(checked+" edges checked");
-				if (imax > 0)
-					LOGGER.fine(imax+" nodes added");
-				if (tooNearNodes > 0)
-					LOGGER.fine(tooNearNodes+" nodes are too near from existing vertices and cannot be inserted");
-				if (totNrSwap > 0)
-					LOGGER.fine(totNrSwap+" edges have been swapped during processing");
-				if (kdtreeSplit > 0)
-					LOGGER.fine(kdtreeSplit+" quadtree cells split");
-			}
-		}
-		if (nodes.isEmpty())
-			break;
-		LOGGER.info("Number of inserted vertices: "+processed);
-		LOGGER.fine("Number of iterations to insert all nodes: "+nrIter);
+			LOGGER.info("Number of inserted vertices: "+processed);
+			LOGGER.fine("Number of iterations to insert all nodes: "+nrIter);
 		}
 		LOGGER.config("Leave compute()");
 
