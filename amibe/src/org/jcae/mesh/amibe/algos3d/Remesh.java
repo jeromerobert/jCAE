@@ -653,7 +653,7 @@ public class Remesh
 					}
 				}
 				if (nodes.isEmpty())
-					break;
+					continue;
 				for (Vertex v : nodes)
 				{
 					//  These vertices are not bound to any triangles, so
