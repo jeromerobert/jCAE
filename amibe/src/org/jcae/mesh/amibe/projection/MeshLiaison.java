@@ -24,6 +24,7 @@ import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -50,6 +51,11 @@ public class MeshLiaison
 	
 	public MeshLiaison(Mesh backgroundMesh)
 	{
+		this(backgroundMesh, MeshTraitsBuilder.getDefault3D());
+	}
+
+	public MeshLiaison(Mesh backgroundMesh, MeshTraitsBuilder mtb)
+	{
 		this.backgroundMesh = backgroundMesh;
 		
 		// Adjacency relations are needed on backgroundMesh
@@ -71,7 +77,7 @@ public class MeshLiaison
 			}
 		}
 		
-		this.currentMesh = new Mesh();
+		this.currentMesh = new Mesh(mtb);
 		// Create vertices of currentMesh
 		Map<Vertex, Vertex> mapBgToCurrent = new HashMap<Vertex, Vertex>(backgroundNodeset.size()+1);
 		for (Vertex v : backgroundNodeset)

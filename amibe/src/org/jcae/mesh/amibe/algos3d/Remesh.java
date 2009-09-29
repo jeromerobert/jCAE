@@ -30,6 +30,7 @@ import org.jcae.mesh.amibe.ds.HalfEdge;
 import org.jcae.mesh.amibe.metrics.EuclidianMetric3D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.metrics.Metric;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 
@@ -70,9 +71,19 @@ public class Remesh
 	 */
 	public Remesh(Mesh m)
 	{
-		this(m, new HashMap<String, String>());
+		this(m, MeshTraitsBuilder.getDefault3D());
 	}
-	
+
+	public Remesh(Mesh m, Map<String, String> opts)
+	{
+		this(m, MeshTraitsBuilder.getDefault3D(), opts);
+	}
+
+	public Remesh(Mesh m, MeshTraitsBuilder mtb)
+	{
+		this(m, mtb, new HashMap<String, String>());
+	}
+
 	/**
 	 * Creates a <code>Remesh</code> instance.
 	 *
@@ -80,9 +91,9 @@ public class Remesh
 	 * @param options  map containing key-value pairs to modify algorithm
 	 *        behaviour.  No options are available for now.
 	 */
-	public Remesh(final Mesh bgMesh, final Map<String, String> options)
+	public Remesh(final Mesh bgMesh, final MeshTraitsBuilder mtb, final Map<String, String> options)
 	{
-		liaison = new MeshLiaison(bgMesh);
+		liaison = new MeshLiaison(bgMesh, mtb);
 		mesh = liaison.getMesh();
 		double size = 1.0;
 		for (final Map.Entry<String, String> opt: options.entrySet())
