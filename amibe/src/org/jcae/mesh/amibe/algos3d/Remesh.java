@@ -588,8 +588,8 @@ int cnt = 0;
 						}
 						//  Long edges are discretized, but do not create more than 2 subsegments
 						double lcrit = 1.0;
-						if (l > 2.0)
-							lcrit = l / 2.0;
+						if (l > (3.0 - pass))
+							lcrit = l / (3.0 - pass);
 						//  Ensure that start point has the lowest edge size
 						double [] xs = start.getUV();
 						double [] xe = end.getUV();
