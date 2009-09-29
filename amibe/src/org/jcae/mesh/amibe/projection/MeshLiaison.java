@@ -64,7 +64,15 @@ public class MeshLiaison
 
 		Collection<Vertex> backgroundNodeset;
 		if (this.backgroundMesh.hasNodes())
+		{
 			backgroundNodeset= this.backgroundMesh.getNodes();
+			int label = 0;
+			for (Vertex v : backgroundNodeset)
+			{
+				label++;
+				v.setLabel(label);
+			}
+		}
 		else
 		{
 			backgroundNodeset = new LinkedHashSet<Vertex>(this.backgroundMesh.getTriangles().size() / 2);

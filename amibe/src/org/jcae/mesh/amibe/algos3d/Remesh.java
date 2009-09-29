@@ -33,8 +33,12 @@ import org.jcae.mesh.amibe.metrics.Metric;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
+import org.jcae.mesh.xmldata.DoubleFileReader;
+import org.jcae.mesh.xmldata.PrimitiveFileReaderFactory;
 
 import gnu.trove.PrimeFinder;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
 import java.util.HashMap;
@@ -60,6 +64,7 @@ public class Remesh
 	// Octree to find nearest Vertex in background mesh
 	private final KdTree<Vertex> bgKdTree;
 	private final double sizeTarget;
+	private DoubleFileReader dfrMetrics;
 	private final double minlen;
 	private final double maxlen;
 	private final Map<Vertex, EuclidianMetric3D> metrics;
@@ -106,7 +111,14 @@ public class Remesh
 				mesh.buildRidges(Double.valueOf(val).doubleValue());
 			else if (key.equals("metricsFile"))
 			{
-				//readMetrics();
+				PrimitiveFileReaderFactory pfrf = new PrimitiveFileReaderFactory();
+				try {
+					dfrMetrics = pfrf.getDoubleReader(new File(val));
+				} catch (FileNotFoundException ex) {
+					LOGGER.log(Level.SEVERE, null, ex);
+				} catch (IOException ex) {
+					LOGGER.log(Level.SEVERE, null, ex);
+				}
 			}
 		}
 		sizeTarget = size;
@@ -165,12 +177,20 @@ public class Remesh
 
 		// Arbitrary size: 2*initial number of nodes
 		metrics = new HashMap<Vertex, EuclidianMetric3D>(2*nodeset.size());
-int cnt = 0;
 		for (Vertex v : nodeset)
 		{
 			kdTree.add(v);
-	cnt++;
-			metrics.put(v, new EuclidianMetric3D(sizeTarget / (double)cnt));
+			if (dfrMetrics != null)
+			{
+				try {
+					metrics.put(v, new EuclidianMetric3D(dfrMetrics.get(v.getLabel() - 1)));
+				} catch (IOException ex) {
+					LOGGER.log(Level.SEVERE, null, ex);
+					metrics.put(v, new EuclidianMetric3D(sizeTarget));
+				}
+			}
+			else
+				metrics.put(v, new EuclidianMetric3D(sizeTarget));
 		}
 
 		for (Vertex v : bgNodeset)
@@ -867,7 +887,7 @@ int cnt = 0;
 			usage(1);
 		opts.put("size", args[1]);
 		opts.put("ridgeAngle", "20");
-		opts.put("metricsFile", "metrics");
+		opts.put("metricsFile", args[0]+File.separator+"metricsMap");
 		System.out.println("Running "+args[0]+" "+args[1]+" "+args[2]);
 		try
 		{
