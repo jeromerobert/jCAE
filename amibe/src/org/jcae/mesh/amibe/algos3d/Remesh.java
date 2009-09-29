@@ -93,6 +93,10 @@ public class Remesh
 				size = Double.valueOf(val).doubleValue();
 			else if (key.equals("ridgeAngle"))
 				mesh.buildRidges(Double.valueOf(val).doubleValue());
+			else if (key.equals("metricsFile"))
+			{
+				//readMetrics();
+			}
 		}
 		sizeTarget = size;
 		minlen = 1.0 / Math.sqrt(2.0);
@@ -150,10 +154,12 @@ public class Remesh
 
 		// Arbitrary size: 2*initial number of nodes
 		metrics = new HashMap<Vertex, EuclidianMetric3D>(2*nodeset.size());
+int cnt = 0;
 		for (Vertex v : nodeset)
 		{
 			kdTree.add(v);
-			metrics.put(v, new EuclidianMetric3D(sizeTarget));
+	cnt++;
+			metrics.put(v, new EuclidianMetric3D(sizeTarget / (double)cnt));
 		}
 
 		for (Vertex v : bgNodeset)
@@ -496,10 +502,13 @@ public class Remesh
 		assert m2 != null : "Metric null at point "+pt2;
 		double[] p1 = pt1.getUV();
 		double[] p2 = pt2.getUV();
-		// Linear interpolation:
 		double a = Math.sqrt(m1.distance2(p1, p2));
 		double b = Math.sqrt(m2.distance2(p1, p2));
-		double l = (2.0/3.0) * (a*a + a*b + b*b) / (a + b);
+		// Linear interpolation:
+		//double l = (2.0/3.0) * (a*a + a*b + b*b) / (a + b);
+		// Geometric interpolation
+		double l = Math.abs(a-b) < 1.e-6*(a+b) ? 0.5*(a+b) : (a - b)/Math.log(a/b);
+		
 		return l;
 	}
 
@@ -568,7 +577,9 @@ public class Remesh
 
 						Vertex start = h.origin();
 						Vertex end = h.destination();
-						double l = interpolatedDistance(start, metrics.get(start), end, metrics.get(end));
+						EuclidianMetric3D mS = metrics.get(start);
+						EuclidianMetric3D mE = metrics.get(end);
+						double l = interpolatedDistance(start, mS, end, mE);
 						if (l < maxlen)
 						{
 							// This edge is smaller than target size and is not split
@@ -579,16 +590,28 @@ public class Remesh
 						double lcrit = 1.0;
 						if (l > 2.0)
 							lcrit = l / 2.0;
+						//  Ensure that start point has the lowest edge size
 						double [] xs = start.getUV();
 						double [] xe = end.getUV();
+						if (mS.distance2(xs, xe) < mE.distance2(xs, xe))
+						{
+							Vertex tempV = start;
+							start = end;
+							end = tempV;
+							xs = xe;
+							xe = end.getUV();
+							mS = mE;
+							mE = metrics.get(end);
+						}
 						int segments = (int) (2.0*l/lcrit) + 10;
 						Vertex [] np = new Vertex[segments-1];
 						double[] pos = new double[3];
+						double delta = 1.0 / (double) segments;
 						for (int ns = 1; ns < segments; ns++)
 						{
-							pos[0] = xs[0]+ns*(xe[0]-xs[0])/segments;
-							pos[1] = xs[1]+ns*(xe[1]-xs[1])/segments;
-							pos[2] = xs[2]+ns*(xe[2]-xs[2])/segments;
+							pos[0] = xs[0]+ns*(xe[0]-xs[0])*delta;
+							pos[1] = xs[1]+ns*(xe[1]-xs[1])*delta;
+							pos[2] = xs[2]+ns*(xe[2]-xs[2])*delta;
 							np[ns-1] = mesh.createVertex(pos);
 	//						if (2*ns <= segments)
 	//							liaison.project(np[ns-1], pos, start);
@@ -597,13 +620,16 @@ public class Remesh
 						}
 
 						Vertex last = start;
-						Metric lastMetric = metrics.get(start);
+						Metric lastMetric = mS;
 						int nrNodes = 0;
 
 						l = 0.0;
+						double hS = mS.getUnitBallBBox()[0];
+						double hE = mE.getUnitBallBBox()[0];
+						double logRatio = Math.log(hE/hS);
 						for (int ns = 0; ns < segments-1; ns++)
 						{
-							EuclidianMetric3D m = new EuclidianMetric3D(sizeTarget);
+							EuclidianMetric3D m = new EuclidianMetric3D(hS*Math.exp((ns+1.0)*delta*logRatio));
 							l = interpolatedDistance(last, lastMetric, np[ns], m);
 							if (l > lcrit)
 							{
@@ -636,6 +662,7 @@ public class Remesh
 						{
 							Vertex v = triNodes.get(index);
 							EuclidianMetric3D metric = triMetrics.get(index);
+							assert metric != null;
 							double[] uv = v.getUV();
 							Vertex n = kdTree.getNearestVertex(metric, uv);
 							if (interpolatedDistance(v, metric, n, metrics.get(n)) > minlen)
@@ -660,7 +687,6 @@ public class Remesh
 					//  they must be removed, otherwise getSurroundingOTriangle
 					//  may return a null pointer.
 					kdTree.remove(v);
-					metrics.remove(v);
 				}
 				LOGGER.fine("Try to insert "+nodes.size()+" nodes");
 				//  Process in pseudo-random order.  There are at most maxNodes nodes
@@ -677,13 +703,14 @@ public class Remesh
 				for (int i = 0; i < imax; i++)
 				{
 					Vertex v = nodes.get(index);
-					EuclidianMetric3D metric = new EuclidianMetric3D(sizeTarget);
-					metrics.put(v, metric);
+					EuclidianMetric3D metric = metrics.get(v);
+					assert metric != null;
 					double[] pos = v.getUV();
 					Vertex near = kdTree.getNearestVertex(metric, pos);
 					AbstractHalfEdge ot = findSurroundingTriangle(v, near);
 					if (pass == 1 && ot.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 					{
+						// Vertex is not inserted
 						continue;
 					}
 					ot.clearAttributes(AbstractHalfEdge.MARKED);
@@ -829,6 +856,7 @@ public class Remesh
 			usage(1);
 		opts.put("size", args[1]);
 		opts.put("ridgeAngle", "20");
+		opts.put("metricsFile", "metrics");
 		System.out.println("Running "+args[0]+" "+args[1]+" "+args[2]);
 		try
 		{
