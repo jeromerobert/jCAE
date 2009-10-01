@@ -832,10 +832,12 @@ public class Remesh
 		int nGrid = 128;
 		double[] pos = new double[3];
 		java.io.PrintStream outMesh = new java.io.PrintStream("test.mesh");
-		java.io.PrintStream outBB = new java.io.PrintStream("test.bb");
+		java.io.PrintStream outBB = new java.io.PrintStream("region.bb");
+		java.io.PrintStream distBB = new java.io.PrintStream("test.bb");
 		outMesh.println("MeshVersionFormatted 1\n\nDimension\n3\n\nGeometry\n\"test.mesh\"\n\nVertices");
 		outMesh.println(nGrid*nGrid+3);
 		outBB.println("3 1 "+(nGrid*nGrid+3)+" 2");
+		distBB.println("3 1 "+(nGrid*nGrid+3)+" 2");
 		for (int j = 0; j < nGrid; j++)
 		{
 			pos[1] = 15.0 + (j * 16) / (double)nGrid;
@@ -843,16 +845,25 @@ public class Remesh
 			for (int i = 0; i < nGrid; i++)
 			{
 				pos[0] =  5.0 + (i * 16) / (double)nGrid;
-				sqrDistanceVertexTriangle(pos, t, index);
+				double d = sqrDistanceVertexTriangle(pos, t, index);
 				outMesh.println(pos[0]+" "+pos[1]+" "+pos[2]+" 0");
 				outBB.println((double)index[1]);
+				distBB.println(d);
 			}
 		}
 		index[1] = 0;
-		pos = v0.getUV(); outMesh.println(pos[0]+" "+pos[1]+" "+pos[2]+" "+index[1]);
-		pos = v1.getUV(); outMesh.println(pos[0]+" "+pos[1]+" "+pos[2]+" "+index[1]);
-		pos = v2.getUV(); outMesh.println(pos[0]+" "+pos[1]+" "+pos[2]+" "+index[1]);
-		outBB.println("0.0 0.0 0.0");
+		pos = v0.getUV();
+		outMesh.println(pos[0]+" "+pos[1]+" "+pos[2]+" "+index[1]);
+		outBB.println("0.0");
+		distBB.println(sqrDistanceVertexTriangle(pos, t, index));
+		pos = v1.getUV();
+		outMesh.println(pos[0]+" "+pos[1]+" "+pos[2]+" "+index[1]);
+		outBB.println("0.0");
+		distBB.println(sqrDistanceVertexTriangle(pos, t, index));
+		pos = v2.getUV();
+		outMesh.println(pos[0]+" "+pos[1]+" "+pos[2]+" "+index[1]);
+		outBB.println("0.0");
+		distBB.println(sqrDistanceVertexTriangle(pos, t, index));
 
 		outMesh.println("\n\nQuadrilaterals\n"+((nGrid-1)*(nGrid-1)));
 		for (int j = 0; j < nGrid - 1; j++)
@@ -867,6 +878,7 @@ public class Remesh
 		outMesh.println("\n\nEnd");
 		outMesh.close();
 		outBB.close();
+		distBB.close();
 	}
 
 	/**
