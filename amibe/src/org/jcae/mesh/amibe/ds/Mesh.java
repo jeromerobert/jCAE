@@ -1514,7 +1514,9 @@ public class Mesh implements Serializable
 				Matrix3D.computeNormal3D(d.getUV(), o.getUV(), n.getUV(), temp[0], temp[1], temp[3]);
 				if (Matrix3D.prodSca(temp[2], temp[3]) < -0.6)
 				{
-					System.out.println("ERR: "+Matrix3D.prodSca(temp[2], temp[3]));
+					System.err.println("ERROR: dot product of normals of triangles below is: "+Matrix3D.prodSca(temp[2], temp[3]));
+					System.err.println("T1: "+t);
+					System.err.println("T2: "+sym.getTri());
 					return false;
 				}
 			}
@@ -1538,7 +1540,10 @@ public class Mesh implements Serializable
 				(t1[1] - t0[1]) * (t2[1] - t0[1]) +
 				(t1[2] - t0[2]) * (t2[2] - t0[2]);
 			if (a*c == b*b)
+			{
+				System.err.println("ERROR: degenerated triangle: "+t);
 				return false;
+			}
 		}
 		return true;
 	}
