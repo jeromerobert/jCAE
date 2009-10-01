@@ -729,10 +729,13 @@ public class Remesh
 					prime = PrimeFinder.nextPrime(prime+1);
 				if (prime >= imax)
 					prime = 1;
-				int index = imax / 2;
+				int index = imax / 2 - prime;
 				int totNrSwap = 0;
 				for (int i = 0; i < imax; i++)
 				{
+					index += prime;
+					if (index >= imax)
+						index -= imax;
 					Vertex v = nodes.get(index);
 					EuclidianMetric3D metric = metrics.get(v);
 					assert metric != null;
@@ -773,9 +776,6 @@ public class Remesh
 						}
 					}
 					while ((edge.origin() != s || counter == 0) && counter < 20);
-					index += prime;
-					if (index >= imax)
-						index -= imax;
 				}
 				assert mesh.isValid();
 				assert mesh.checkNoInvertedTriangles();
