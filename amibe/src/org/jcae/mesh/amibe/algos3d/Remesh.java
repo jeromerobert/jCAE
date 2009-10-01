@@ -819,7 +819,7 @@ public class Remesh
 		System.exit(rc);
 	}
 
-	public static void checkFindSurroundingTriangle(String[] args) throws java.io.FileNotFoundException
+	public static void checkFindSurroundingTriangle(String[] args) throws FileNotFoundException
 	{
 		org.jcae.mesh.amibe.traits.MeshTraitsBuilder mtb = org.jcae.mesh.amibe.traits.MeshTraitsBuilder.getDefault3D();
 		mtb.addNodeList();
@@ -873,7 +873,7 @@ public class Remesh
 	 * 
 	 * @param args [options] xmlDir outDir
 	 */
-	public static void main(String[] args)
+	public static void main(String[] args) throws FileNotFoundException, IOException
 	{
 		org.jcae.mesh.amibe.traits.MeshTraitsBuilder mtb = org.jcae.mesh.amibe.traits.MeshTraitsBuilder.getDefault3D();
 		mtb.addNodeList();
@@ -887,7 +887,26 @@ public class Remesh
 			usage(1);
 		opts.put("size", args[1]);
 		opts.put("ridgeAngle", "20");
-		opts.put("metricsFile", args[0]+File.separator+"metricsMap");
+if(false) {
+		String metricsFile = args[0]+File.separator+"metricsMap";
+		opts.put("metricsFile", metricsFile);
+
+		PrimitiveFileReaderFactory pfrf = new PrimitiveFileReaderFactory();
+		DoubleFileReader dfr = pfrf.getDoubleReader(new File(args[0]+File.separator+"jcae3d.files"+File.separator+"nodes3d.bin"));
+		long n = dfr.size();
+		java.io.DataOutputStream out = new java.io.DataOutputStream(new java.io.BufferedOutputStream(new java.io.FileOutputStream(metricsFile)));
+		for (long i = 0; i < n; i += 3)
+		{
+			double x = dfr.get();
+			double y = dfr.get();
+			double z = dfr.get();
+			double val = (x - 9000.0)*(x - 9000.0) / 2250.0;
+			if (val > 200.0)
+				val = 200.0;
+			out.writeDouble(val);
+		}
+		out.close();
+}
 		System.out.println("Running "+args[0]+" "+args[1]+" "+args[2]);
 		try
 		{
