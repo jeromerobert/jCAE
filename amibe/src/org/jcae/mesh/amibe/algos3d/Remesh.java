@@ -464,14 +464,14 @@ public class Remesh
 					if (numer >= denom)
 					{
 						index[1] = 6;
-						s = 1.0;
+						t = 1.0;
 					}
 					else
 					{
 						index[1] = 1;
-						s = numer / denom;
+						t = numer / denom;
 					}
-					t = 1.0 - s;
+					s = 1.0 - t;
 				}
 				else
 				{
@@ -516,8 +516,8 @@ public class Remesh
 						index[1] = 1;
 						s = numer/denom;
 					}
-					t = 1.0 - s;
 				}
+				t = 1.0 - s;
 			}
 		}
 		double ret = a*s*s + 2.0*b*s*t + c*t*t + 2.0*d*s + 2.0*e*t + f;
