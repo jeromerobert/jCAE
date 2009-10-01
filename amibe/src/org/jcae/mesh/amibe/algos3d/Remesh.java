@@ -552,8 +552,13 @@ public class Remesh
 
 		int nrIter = 0;
 		int processed = 0;
+		// Number of nodes which were skipped
+		int skippedNodes = 0;
 		AbstractHalfEdge h = null;
 		AbstractHalfEdge sym = null;
+
+		EuclidianMetric3D euclid = new EuclidianMetric3D();
+		double[][] temp = new double[4][3];
 		// We try to insert new nodes by splitting large edges.  As edge collapse
 		// is costful, nodes are inserted only if it does not create small edges,
 		// which means that nodes are not deleted.
@@ -580,6 +585,7 @@ public class Remesh
 				// Number of quadtree cells split
 				int kdtreeSplit = 0;
 				nodes.clear();
+				skippedNodes = 0;
 				LOGGER.fine("Check all edges");
 				for(Triangle t : mesh.getTriangles())
 				{
@@ -737,14 +743,26 @@ public class Remesh
 					if (index >= imax)
 						index -= imax;
 					Vertex v = nodes.get(index);
-					EuclidianMetric3D metric = metrics.get(v);
-					assert metric != null;
 					double[] pos = v.getUV();
-					Vertex near = kdTree.getNearestVertex(metric, pos);
+					Vertex near = kdTree.getNearestVertex(euclid, pos);
 					AbstractHalfEdge ot = findSurroundingTriangle(v, near);
+					// Check whether edge can be split
+					sym = ot.sym(sym);
+					Vertex o = ot.origin();
+					Vertex d = ot.destination();
+					Vertex n = sym.apex();
+					Matrix3D.computeNormal3D(o.getUV(), n.getUV(), pos, temp[0], temp[1], temp[2]);
+					Matrix3D.computeNormal3D(n.getUV(), d.getUV(), pos, temp[0], temp[1], temp[3]);
+					if (Matrix3D.prodSca(temp[2], temp[3]) < -0.6)
+					{
+						// Vertex is not inserted
+						skippedNodes++;
+						continue;
+					}
 					if (pass == 1 && ot.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 					{
 						// Vertex is not inserted
+						skippedNodes++;
 						continue;
 					}
 					ot.clearAttributes(AbstractHalfEdge.MARKED);
@@ -752,7 +770,7 @@ public class Remesh
 					mesh.vertexSplit(ot, v);
 					assert ot.destination() == v : v+" "+ot;
 					kdTree.add(v);
-					Vertex bgNear = bgKdTree.getNearestVertex(metric, pos);
+					Vertex bgNear = bgKdTree.getNearestVertex(euclid, pos);
 					liaison.addVertex(v, findSurroundingTriangle(v, bgNear).getTri());
 					processed++;
 					// Swap edges
@@ -790,13 +808,15 @@ public class Remesh
 						LOGGER.fine(imax+" nodes added");
 					if (tooNearNodes > 0)
 						LOGGER.fine(tooNearNodes+" nodes are too near from existing vertices and cannot be inserted");
+					if (skippedNodes > 0)
+						LOGGER.fine(skippedNodes+" nodes are skipped");
 					if (totNrSwap > 0)
 						LOGGER.fine(totNrSwap+" edges have been swapped during processing");
 					if (kdtreeSplit > 0)
 						LOGGER.fine(kdtreeSplit+" quadtree cells split");
 				}
 			}
-			if (nodes.isEmpty())
+			if (nodes.size() == skippedNodes)
 				break;
 			LOGGER.info("Number of inserted vertices: "+processed);
 			LOGGER.fine("Number of iterations to insert all nodes: "+nrIter);
