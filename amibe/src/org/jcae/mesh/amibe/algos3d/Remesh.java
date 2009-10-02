@@ -746,18 +746,21 @@ public class Remesh
 					double[] pos = v.getUV();
 					Vertex near = kdTree.getNearestVertex(euclid, pos);
 					AbstractHalfEdge ot = findSurroundingTriangle(v, near);
-					// Check whether edge can be split
-					sym = ot.sym(sym);
-					Vertex o = ot.origin();
-					Vertex d = ot.destination();
-					Vertex n = sym.apex();
-					Matrix3D.computeNormal3D(o.getUV(), n.getUV(), pos, temp[0], temp[1], temp[2]);
-					Matrix3D.computeNormal3D(n.getUV(), d.getUV(), pos, temp[0], temp[1], temp[3]);
-					if (Matrix3D.prodSca(temp[2], temp[3]) < -0.6)
+					if (!ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
 					{
-						// Vertex is not inserted
-						skippedNodes++;
-						continue;
+						// Check whether edge can be split
+						sym = ot.sym(sym);
+						Vertex o = ot.origin();
+						Vertex d = ot.destination();
+						Vertex n = sym.apex();
+						Matrix3D.computeNormal3D(o.getUV(), n.getUV(), pos, temp[0], temp[1], temp[2]);
+						Matrix3D.computeNormal3D(n.getUV(), d.getUV(), pos, temp[0], temp[1], temp[3]);
+						if (Matrix3D.prodSca(temp[2], temp[3]) <= 0.0)
+						{
+							// Vertex is not inserted
+							skippedNodes++;
+							continue;
+						}
 					}
 					if (pass == 1 && ot.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 					{
