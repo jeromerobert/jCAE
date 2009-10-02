@@ -202,11 +202,19 @@ public class Matrix3D implements Serializable
 		tempD2[2] = p2[2] - p0[2];
 		prodVect3D(tempD1, tempD2, ret);
 		double norm = norm(ret);
-		if (norm != 0.0)
+		if (norm*norm > 1.e-12 * (
+				tempD1[0]*tempD1[0] + tempD1[1]*tempD1[1] + tempD1[2]*tempD1[2] +
+				tempD2[0]*tempD2[0] + tempD2[1]*tempD2[1] + tempD2[2]*tempD2[2]
+				))
 		{
 			ret[0] /= norm;
 			ret[1] /= norm;
 			ret[2] /= norm;
+		}
+		else
+		{
+			ret[0] = ret[1] = ret[2] = 0.0;
+			norm = 0.0;
 		}
 		return 0.5 * norm;
 	}
@@ -221,11 +229,20 @@ public class Matrix3D implements Serializable
 		ret[2] = p2[2] - p0[2];
 		prodVect3D(tempD1, ret, tempD2);
 		double norm = norm(tempD2);
-		if (norm != 0.0)
+		if (norm*norm > 1.e-12 * (
+				tempD1[0]*tempD1[0] + tempD1[1]*tempD1[1] + tempD1[2]*tempD1[2] +
+				ret[0]*ret[0] + ret[1]*ret[1] + ret[2]*ret[2]
+				))
 		{
 			tempD2[0] /= norm;
 			tempD2[1] /= norm;
 			tempD2[2] /= norm;
+		}
+		else
+		{
+			tempD2[0] = tempD2[1] = tempD2[2] = 0.0;
+			norm = 0.0;
+
 		}
 		prodVect3D(tempD1, tempD2, ret);
 		return 0.5*norm;
