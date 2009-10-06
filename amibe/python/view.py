@@ -1,7 +1,7 @@
 
 # jCAE
 from org.jcae.mesh.oemm import OEMM, Storage
-from org.jcae.vtk import AmibeToMesh, Canvas, UNVToMesh, View, Viewable, ViewableCAD, ViewableMesh, ViewableOEMM
+from org.jcae.vtk import AmibeToMesh, Canvas, UNVToMesh, View, Viewable, ViewableCAD, OldViewableMesh, ViewableOEMM
 
 # Swing
 from java.awt import BorderLayout
@@ -33,14 +33,14 @@ renderer = canvas.GetRenderer()
 if (os.path.isdir(xmlDir)):
 	if (os.path.exists(os.path.join(xmlDir, "jcae3d"))):
 		reader = AmibeToMesh(xmlDir)
-		viewable = ViewableMesh(reader.getMesh())
+		viewable = OldViewableMesh(reader.getMesh())
 	elif (os.path.exists(os.path.join(xmlDir, "oemm"))):
 		oemm = Storage.readOEMMStructure(xmlDir)
 		viewable = ViewableOEMM(oemm)
 	else:
 		raise IOError, "Cannot find file"
 elif (xmlDir.endswith(".unv")):
-	viewable = ViewableMesh(UNVToMesh(xmlDir, Collections.EMPTY_LIST).getMesh())
+	viewable = OldViewableMesh(UNVToMesh(xmlDir, Collections.EMPTY_LIST).getMesh())
 else:
 	viewable = ViewableCAD(xmlDir)
 canvas.add(viewable)
