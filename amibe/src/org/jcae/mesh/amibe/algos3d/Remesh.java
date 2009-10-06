@@ -40,6 +40,8 @@ import gnu.trove.PrimeFinder;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -63,12 +65,17 @@ public class Remesh
 	private final KdTree<Vertex> kdTree;
 	// Octree to find nearest Vertex in background mesh
 	private final KdTree<Vertex> bgKdTree;
-	private final double sizeTarget;
 	private DoubleFileReader dfrMetrics;
 	private final double minlen;
 	private final double maxlen;
+	private final AnalyticMetricInterface analyticMetric;
 	private final Map<Vertex, EuclidianMetric3D> metrics;
-	
+
+	public interface AnalyticMetricInterface
+	{
+		double getTargetSize(double x, double y, double z);
+	}
+
 	/**
 	 * Creates a <code>Remesh</code> instance.
 	 *
@@ -101,6 +108,7 @@ public class Remesh
 		liaison = new MeshLiaison(bgMesh, mtb);
 		mesh = liaison.getMesh();
 		double size = 1.0;
+		AnalyticMetricInterface userAnalyticMetric = null;
 		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
 			final String key = opt.getKey();
@@ -120,10 +128,46 @@ public class Remesh
 					LOGGER.log(Level.SEVERE, null, ex);
 				}
 			}
+			else if (key.equals("metricsClass"))
+			{
+				Constructor cons = null;
+				try {
+					cons = Class.forName(val).getConstructor();
+				} catch (ClassNotFoundException ex) {
+					LOGGER.log(Level.SEVERE, "Class "+val+" not found", ex);
+					cons = null;
+				} catch (NoSuchMethodException ex) {
+					LOGGER.log(Level.SEVERE, "Constructor with no argument was not found", ex);
+					cons = null;
+				} catch (SecurityException ex) {
+					LOGGER.log(Level.SEVERE, "Invalid security policy", ex);
+					cons = null;
+				}
+				if (cons != null)
+				{
+					try {
+						userAnalyticMetric = (AnalyticMetricInterface) cons.newInstance();
+					} catch (InstantiationException ex) {
+						LOGGER.log(Level.SEVERE, null, ex);
+						userAnalyticMetric = null;
+					} catch (IllegalAccessException ex) {
+						LOGGER.log(Level.SEVERE, null, ex);
+						userAnalyticMetric = null;
+					} catch (InvocationTargetException ex) {
+						LOGGER.log(Level.SEVERE, null, ex);
+						userAnalyticMetric = null;
+					}
+				}
+			}
+			else
+			{
+				LOGGER.warning("Unknown option: "+key);
+			}
 		}
-		sizeTarget = size;
+		double targetSize = size;
 		minlen = 1.0 / Math.sqrt(2.0);
 		maxlen = Math.sqrt(2.0);
+		analyticMetric = userAnalyticMetric;
 
 		// Compute bounding box
 		double [] bbox = new double[6];
@@ -175,26 +219,35 @@ public class Remesh
 			}
 		}
 
-		// Arbitrary size: 2*initial number of nodes
-		metrics = new HashMap<Vertex, EuclidianMetric3D>(2*nodeset.size());
 		for (Vertex v : nodeset)
-		{
 			kdTree.add(v);
-			if (dfrMetrics != null)
-			{
-				try {
-					metrics.put(v, new EuclidianMetric3D(dfrMetrics.get(v.getLabel() - 1)));
-				} catch (IOException ex) {
-					LOGGER.log(Level.SEVERE, null, ex);
-					metrics.put(v, new EuclidianMetric3D(sizeTarget));
-				}
-			}
-			else
-				metrics.put(v, new EuclidianMetric3D(sizeTarget));
-		}
-
 		for (Vertex v : bgNodeset)
 			bgKdTree.add(v);
+
+		// Arbitrary size: 2*initial number of nodes
+		metrics = new HashMap<Vertex, EuclidianMetric3D>(2*nodeset.size());
+		if (dfrMetrics != null)
+		{
+			try {
+				for (Vertex v : nodeset)
+					metrics.put(v, new EuclidianMetric3D(dfrMetrics.get(v.getLabel() - 1)));
+			} catch (IOException ex) {
+					LOGGER.log(Level.SEVERE, null, ex);
+			}
+		}
+		else if (analyticMetric != null)
+		{
+			for (Vertex v : nodeset)
+			{
+				double[] pos = v.getUV();
+				metrics.put(v, new EuclidianMetric3D(analyticMetric.getTargetSize(pos[0], pos[1], pos[2])));
+			}
+		}
+		else
+		{
+			for (Vertex v : nodeset)
+				metrics.put(v, new EuclidianMetric3D(targetSize));
+		}
 	}
 
 	public Mesh getOutputMesh()
@@ -666,7 +719,14 @@ public class Remesh
 						double logRatio = Math.log(hE/hS);
 						for (int ns = 0; ns < segments-1; ns++)
 						{
-							EuclidianMetric3D m = new EuclidianMetric3D(hS*Math.exp((ns+1.0)*delta*logRatio));
+							EuclidianMetric3D m;
+							if (analyticMetric != null)
+							{
+								pos = np[ns].getUV();
+								m = new EuclidianMetric3D(analyticMetric.getTargetSize(pos[0], pos[1], pos[2]));
+							}
+							else
+								m = new EuclidianMetric3D(hS*Math.exp((ns+1.0)*delta*logRatio));
 							l = interpolatedDistance(last, lastMetric, np[ns], m);
 							if (l > lcrit)
 							{
@@ -904,6 +964,20 @@ public class Remesh
 		distBB.close();
 	}
 
+//// Sample analytic metrics definition, add
+////   opts.put("metricsClass", "org.jcae.mesh.amibe.algos3d.Remesh$Test");
+//// in main() to use it
+//static class Test implements org.jcae.mesh.amibe.algos3d.Remesh.AnalyticMetricInterface
+//{
+//	// It seems that inner classes must define a public constructor, otherwise
+//	// getConstructor() throws a NoSuchMethodException.
+//	public Test() {}
+//	public double getTargetSize(double x, double y, double z)
+//	{
+//		return Math.min(200.0, (x - 9000.0)*(x - 9000.0) / 2250.0);
+//	}
+//}
+
 	/**
 	 * 
 	 * @param args [options] xmlDir outDir
@@ -922,6 +996,8 @@ public class Remesh
 			usage(1);
 		opts.put("size", args[1]);
 		opts.put("ridgeAngle", "20");
+		//opts.put("metricsClass", "org.jcae.mesh.amibe.algos3d.Remesh$Test");
+
 if(false) {
 		String metricsFile = args[0]+File.separator+"metricsMap";
 		opts.put("metricsFile", metricsFile);
