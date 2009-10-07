@@ -60,7 +60,7 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 			if (key.equals("angle"))
 			{
 				planarMin = new Double(val).doubleValue();
-				LOGGER.fine("Planar angle: "+planarMin);
+				LOGGER.fine("Minimum dot product of face normals allowed for swapping an edge: "+planarMin);
 			}
 			else
 				throw new RuntimeException("Unknown option: "+key);

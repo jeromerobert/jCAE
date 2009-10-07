@@ -28,7 +28,7 @@ options.addOption(
 		.create('h'));
 options.addOption(
 	OptionBuilder.withArgName("FLOAT").hasArg()
-		.withDescription("Planar angle")
+		.withDescription("Minimum dot product of face normals allowed for swapping an edge (default 0.95)")
 		.withLongOpt("angle")
 		.create('a'));
 CommandLineParser parser = new GnuParser();
