@@ -148,6 +148,25 @@ public class Quadric3DError implements Serializable
 		cachedDet = false;
 	}
 
+	// Used when adding virtual planes on boundaries
+	public void addWeightedError(double [] normal, double d, double a, double scale)
+	{
+		for (int k = 0; k < 3; k++)
+		{
+			b[k] += scale * d * normal[k];
+			A[k] += scale * normal[0] * normal[k];
+		}
+
+		A[3] += scale * normal[1] * normal[1];
+		A[4] += scale * normal[1] * normal[2];
+		A[5] += scale * normal[2] * normal[2];
+
+		c += scale * d*d;
+		// area is not scaled!
+		area += a;
+		cachedDet = false;
+	}
+
 	private double detA()
 	{
 		if (!cachedDet)

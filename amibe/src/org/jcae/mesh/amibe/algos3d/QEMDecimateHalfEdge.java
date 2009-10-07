@@ -233,38 +233,25 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 						//  In his dissertation, Garland suggests to
 						//  add a weight proportional to squared edge
 						//  length.
-						//  length(vect2) == length(b)
+						//  Here norm(vect2) == norm(vect1)
 						p0 = b.origin().getUV();
 						p1 = b.destination().getUV();
 						vect1[0] = p1[0] - p0[0];
 						vect1[1] = p1[1] - p0[1];
 						vect1[2] = p1[2] - p0[2];
-						if (e.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+						Matrix3D.prodVect3D(vect1, normal, vect2);
+						norm = Matrix3D.norm(vect2);
+						if (norm > 1.e-20)
 						{
-							p2 = b.apex().getUV();
-							vect2[0] = p2[0] - p0[0];
-							vect2[1] = p2[1] - p0[1];
-							vect2[2] = p2[2] - p0[2];
-							Matrix3D.prodVect3D(vect1, vect2, vect3);
-							norm = Matrix3D.norm(vect3);
-							if (norm > 1.e-20)
-							{
-								norm = 1.0 / norm;
-								for (int k = 0; k < 3; k++)
-									vect3[k] *=  norm;
-							}
-							Matrix3D.prodVect3D(vect1, vect3, vect2);
+							norm = 1.0 / norm;
 							for (int k = 0; k < 3; k++)
-								vect2[k] *= 100.0;
+								vect2[k] *=  norm;
 						}
-						else
-							Matrix3D.prodVect3D(vect1, normal, vect2);
 						d = - Matrix3D.prodSca(vect2, b.origin().getUV());
 						final Quadric3DError q1 = quadricMap.get(b.origin());
 						final Quadric3DError q2 = quadricMap.get(b.destination());
-						// Consider that the virtual triangle is 100 times larger than current one
-						q1.addError(vect2, d, 100.0*area);
-						q2.addError(vect2, d, 100.0*area);
+						q1.addWeightedError(vect2, d, norm*norm, 100.0);
+						q2.addWeightedError(vect2, d, norm*norm, 100.0);
 					}
 				}
 			}
