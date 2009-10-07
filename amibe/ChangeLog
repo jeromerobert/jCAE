@@ -1,3 +1,8 @@
+Wed Oct  7 14:16:47 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos3d/QEMDecimateHalfEdge.java: Change
+	handling of virtual planes on boundary edges.
+
 Fri Sep  4 11:46:45 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos3d/Remesh.java: New class.

@@ -201,9 +201,9 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 			vect2[0] = p2[0] - p0[0];
 			vect2[1] = p2[1] - p0[1];
 			vect2[2] = p2[2] - p0[2];
-			// This is in fact 2*area, but that does not matter
 			Matrix3D.prodVect3D(vect1, vect2, normal);
 			double norm = Matrix3D.norm(normal);
+			// This is in fact 2*area, but that does not matter
 			double area = norm;
 			if (tolerance > 0.0)
 				area /= tolerance;
@@ -254,18 +254,17 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 									vect3[k] *=  norm;
 							}
 							Matrix3D.prodVect3D(vect1, vect3, vect2);
+							for (int k = 0; k < 3; k++)
+								vect2[k] *= 100.0;
 						}
 						else
 							Matrix3D.prodVect3D(vect1, normal, vect2);
-						for (int k = 0; k < 3; k++)
-							vect2[k] *= 100.0;
 						d = - Matrix3D.prodSca(vect2, b.origin().getUV());
 						final Quadric3DError q1 = quadricMap.get(b.origin());
 						final Quadric3DError q2 = quadricMap.get(b.destination());
-						//area = Matrix3D.norm(vect2) / tolerance;
-						area = 0.0;
-						q1.addError(vect2, d, area);
-						q2.addError(vect2, d, area);
+						// Consider that the virtual triangle is 100 times larger than current one
+						q1.addError(vect2, d, 100.0*area);
+						q2.addError(vect2, d, 100.0*area);
 					}
 				}
 			}
