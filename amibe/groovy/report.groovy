@@ -31,7 +31,7 @@ options.addOption(
 		.create('h'));
 options.addOption(
 	OptionBuilder.withArgName("LIST").hasArg()
-		.withDescription("comma separated list of values, implies -H (default: 0.2,0.4,0.6,0.8)")
+		.withDescription("comma separated list of values, implies -H")
 		.withLongOpt("bounds")
 		.create('b'));
 options.addOption(
@@ -160,7 +160,10 @@ for (int i = 0; i < data.length; i++)
 	if (histogram)
 	{
 		// Prints histogram on console
-		data[i].split(bounds);
+		if (cmd.hasOption('b'))
+			data[i].split(bounds);
+		else
+			data[i].split(10);
 		data[i].printLayers();
 	}
 	else

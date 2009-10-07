@@ -30,7 +30,7 @@ def list_criteria(option, opt, value, parser):
 parser = OptionParser(usage="amibebatch report [OPTIONS] <dir>\n\nPrint statistics about mesh quality", prog="report")
 parser.add_option("-b", "--bounds", metavar="LIST",
                   action="store", type="string", dest="bounds",
-                  help="comma separated list of values, implies -H (default: 0.2,0.4,0.6,0.8)")
+                  help="comma separated list of values, implies -H")
 parser.add_option("-H", "--histogram", action="store_true", dest="histogram",
                   help="prints histogram")
 parser.add_option("-d", "--detailed", action="store_true", dest="detailed",
@@ -59,12 +59,11 @@ if len(args) != 1:
 
 xmlDir = args[0]
 if options.bounds:
-	strBounds = options.bounds
 	options.histogram = True
+	bounds = [float(i) for i in options.bounds.split(",")]
 else:
-	strBounds = "0.2,0.4,0.6,0.8"
+	bounds = None
 
-bounds = [float(i) for i in strBounds.split(",")]          
 qprocFactory = QualityProcedureFactory("org.jcae.mesh.amibe.validation."+options.crit)
 qproc = qprocFactory.buildQualityProcedure()
 mesh = qprocFactory.buildMesh()
@@ -98,7 +97,10 @@ for i in xrange(len(data)):
 		print("Face "+str(i+1))
 	if options.histogram:
 		# Prints histogram on console
-		data[i].split(bounds)
+		if bounds:
+			data[i].split(bounds)
+		else:
+			data[i].split(10)
 		data[i].printLayers()
 	else:
 		data[i].printStatistics()
