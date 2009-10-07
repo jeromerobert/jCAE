@@ -179,10 +179,10 @@ public class RemeshTest
 			throw new RuntimeException();
 		}
 		assertTrue("Mesh is not valid", bgMesh.isValid());
-// SmoothNodes3DTest.shuffleTorus(bgMesh, 0.3, 1.0);
 
 		final Map<String, String> options = new HashMap<String, String>();
-		options.put("size", "0.01");
+		options.put("size", "0.05");
+		options.put("ridgeAngle", "0.9");
 		Mesh newMesh = new Remesh(bgMesh, options).compute().getOutputMesh();
 // try { org.jcae.mesh.xmldata.MeshWriter.writeObject3D(newMesh, "XXX", null); } catch (IOException ex) { ex.printStackTrace(); throw new RuntimeException(ex); }
 
