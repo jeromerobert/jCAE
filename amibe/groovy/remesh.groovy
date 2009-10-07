@@ -62,6 +62,11 @@ if (cmd.hasOption('t') && cmd.hasOption('m'))
 String xmldir = remaining[0]
 String outDir = cmd.getOptionValue('o', xmldir)
 
+MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault3D();
+mtb.addNodeList();
+Mesh mesh = new Mesh(mtb)
+MeshReader.readObject3D(mesh, xmldir)
+
 boolean setAnalytic = false
 HashMap<String, String> algoOptions = new HashMap<String, String>();
 if (cmd.hasOption('t'))
@@ -71,10 +76,6 @@ else if (cmd.hasOption('m'))
 else
 	setAnalytic = true
 
-MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault3D();
-mtb.addNodeList();
-Mesh mesh = new Mesh(mtb)
-MeshReader.readObject3D(mesh, xmldir)
 Remesh algo = new Remesh(mesh, algoOptions)
 public static class RemeshMetric implements Remesh.AnalyticMetricInterface
 {
