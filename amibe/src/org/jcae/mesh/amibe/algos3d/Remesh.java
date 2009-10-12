@@ -889,9 +889,9 @@ public class Remesh
 			}
 			if (nodes.size() == skippedNodes)
 				break;
-			LOGGER.info("Number of inserted vertices: "+processed);
-			LOGGER.fine("Number of iterations to insert all nodes: "+nrIter);
 		}
+		LOGGER.info("Number of inserted vertices: "+processed);
+		LOGGER.fine("Number of iterations to insert all nodes: "+nrIter);
 		LOGGER.config("Leave compute()");
 
 		return this;
