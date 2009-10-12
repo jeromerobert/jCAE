@@ -66,6 +66,8 @@ public class Remesh
 	private DoubleFileReader dfrMetrics;
 	private final double minlen;
 	private final double maxlen;
+	private final boolean project;
+	private final boolean hasRidges;
 	private AnalyticMetricInterface analyticMetric = LATER_BINDING;
 	private final Map<Vertex, EuclidianMetric3D> metrics;
 	private static final AnalyticMetricInterface LATER_BINDING = new AnalyticMetricInterface() {
@@ -112,6 +114,8 @@ public class Remesh
 		liaison = new MeshLiaison(bgMesh, mtb);
 		mesh = liaison.getMesh();
 		double size = 0.0;
+		boolean proj = false;
+		boolean ridges = false;
 		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
 			final String key = opt.getKey();
@@ -122,7 +126,10 @@ public class Remesh
 				analyticMetric = null;
 			}
 			else if (key.equals("ridgeAngle"))
+			{
 				mesh.buildRidges(Double.valueOf(val).doubleValue());
+				ridges = true;
+			}
 			else if (key.equals("metricsFile"))
 			{
 				PrimitiveFileReaderFactory pfrf = new PrimitiveFileReaderFactory();
@@ -135,12 +142,16 @@ public class Remesh
 				}
 				analyticMetric = null;
 			}
+			else if (key.equals("project"))
+				proj = Boolean.valueOf(val).booleanValue();
 			else
 				LOGGER.warning("Unknown option: "+key);
 		}
 		double targetSize = size;
 		minlen = 1.0 / Math.sqrt(2.0);
 		maxlen = Math.sqrt(2.0);
+		project = proj;
+		hasRidges = ridges;
 
 		// Compute bounding box
 		double [] bbox = new double[6];
@@ -613,6 +624,8 @@ public class Remesh
 		{
 			for (int pass=0; pass < 2; pass++)
 			{
+				if (pass == 0 && !hasRidges)
+					continue;
 				nrIter++;
 				// Maximal number of nodes which are inserted on an edge
 				int maxNodes = 0;
@@ -688,10 +701,20 @@ public class Remesh
 							pos[1] = xs[1]+ns*(xe[1]-xs[1])*delta;
 							pos[2] = xs[2]+ns*(xe[2]-xs[2])*delta;
 							np[ns-1] = mesh.createVertex(pos);
-	//						if (2*ns <= segments)
-	//							liaison.project(np[ns-1], pos, start);
-	//						else
-	//							liaison.project(np[ns-1], pos, end);*/
+						}
+						if (project && !h.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+						{
+							int mid = (segments + 1) / 2;
+							for (int ns = 0; ns < mid; ns++)
+							{
+								pos = np[ns].getUV();
+								liaison.project(np[ns], pos, start);
+							}
+							for (int ns = mid; ns < segments - 1; ns++)
+							{
+								pos = np[ns].getUV();
+								liaison.project(np[ns], pos, end);
+							}
 						}
 
 						Vertex last = start;

@@ -44,6 +44,11 @@ options.addOption(
 		.withDescription("writes new mesh into this directory")
 		.withLongOpt("output")
 		.create('o'));
+options.addOption(
+	OptionBuilder.hasArg(false)
+		.withDescription("project vertices onto local surface")
+		.withLongOpt("project")
+		.create('p'));
 
 CommandLineParser parser = new GnuParser();
 CommandLine cmd = parser.parse(options, args, true);
@@ -77,6 +82,8 @@ else
 	setAnalytic = true
 if (cmd.hasOption('a'))
 	algoOptions.put("ridgeAngle", cmd.getOptionValue('a'));
+if (cmd.hasOption('p'))
+	algoOptions.put("project", "true");
 
 Remesh algo = new Remesh(mesh, algoOptions)
 public static class RemeshMetric implements Remesh.AnalyticMetricInterface
