@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2005, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
  
 	This library is free software; you can redistribute it and/or
 	modify it under the terms of the GNU Lesser General Public
@@ -194,6 +194,7 @@ public class UNVReader
 		TIntObjectHashMap<Triangle> facesmap = new TIntObjectHashMap<Triangle>();
 		String line = "";
 		boolean quad = false;
+		boolean beam = false;
 		
 		try
 		{
@@ -204,7 +205,8 @@ public class UNVReader
 				String index = st.nextToken();
 				String type = st.nextToken();
 				int ind = Integer.valueOf(index).intValue();
-				if (type.equals("74") || type.equals("91"))
+				if (type.equals("41") || type.equals("51") || type.equals("61")
+				 || type.equals("74") || type.equals("91"))
 				{
 					line=rd.readLine();
 					// triangle
@@ -223,7 +225,8 @@ public class UNVReader
 					// fill the map of faces
 					facesmap.put(ind, f);
 				}
-				else if (type.equals("94"))
+				else if (type.equals("44") || type.equals("54") || type.equals("64")
+				      || type.equals("71") || type.equals("94"))
 				{
 					quad = true;
 					line=rd.readLine();
@@ -248,6 +251,12 @@ public class UNVReader
 					mesh.add(f);
 					facesmap.put(-ind, f);
 				}
+				else if (type.equals("11") || type.equals("21"))
+				{
+					beam = true;
+					rd.readLine();
+					rd.readLine();
+				}
 				else
 					throw new RuntimeException("Type "+type+" unknown");
 			}
@@ -259,6 +268,13 @@ public class UNVReader
 		logger.fine("Found "+facesmap.size()+" triangles");
 		if (quad)
 			logger.severe("Quadrangles have been detected and converted into triangles.  If errors occur, convert this UNV file to only use triangles!");
+		if (beam)
+		{
+			if (facesmap.isEmpty())
+				logger.severe("Beams have been found but are discarded, and this mesh does not contain any triangle!");
+			else
+				logger.severe("Beams have been found but are discarded, only triangles are read.");
+		}
 		return facesmap;
 	}
 	
