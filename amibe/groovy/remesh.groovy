@@ -75,6 +75,8 @@ else if (cmd.hasOption('m'))
 	algoOptions.put("metricsFile", cmd.getOptionValue('m'));
 else
 	setAnalytic = true
+if (cmd.hasOption('a'))
+	algoOptions.put("ridgeAngle", cmd.getOptionValue('a'));
 
 Remesh algo = new Remesh(mesh, algoOptions)
 public static class RemeshMetric implements Remesh.AnalyticMetricInterface
