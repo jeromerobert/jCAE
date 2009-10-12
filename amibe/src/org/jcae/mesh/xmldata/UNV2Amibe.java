@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2007,2008, by EADS France
+ * (C) Copyright 2007,2008,2009, by EADS France
  */
 
 package org.jcae.mesh.xmldata;
@@ -463,6 +463,9 @@ public class UNV2Amibe
 			p1 = 1; p2 = 1; p3 = 1;  
 			switch(type)
 			{
+				case 41:
+				case 51:
+				case 61:
 				case 74:
 				case 91:
 					line=rd.readLine();
@@ -472,7 +475,9 @@ public class UNV2Amibe
 					p2 = Integer.parseInt(st.nextToken());
 					p3 = Integer.parseInt(st.nextToken());					
 					break;
-				case 94: break; //ignored
+				case 94:
+					break; //ignored
+				case 11: //rod
 				case 21: //linear beam
 					elements.add(new Element21(line, rd));
 					break;
