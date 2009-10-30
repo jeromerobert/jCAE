@@ -320,7 +320,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	 * calling {@link org.jcae.mesh.amibe.patch.Mesh2D} constructor without
 	 * {@link MeshTraitsBuilder} argument.
 	 */
-	public static final MeshTraitsBuilder getDefault2D()
+	public static MeshTraitsBuilder getDefault2D()
 	{
 		MeshTraitsBuilder ret = new MeshTraitsBuilder();
 		ret.addTriangleList();
@@ -337,7 +337,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	 * calling {@link org.jcae.mesh.amibe.ds.Mesh} constructor without
 	 * {@link MeshTraitsBuilder} argument.
 	 */
-	public static final MeshTraitsBuilder getDefault3D()
+	public static MeshTraitsBuilder getDefault3D()
 	{
 		MeshTraitsBuilder ret = new MeshTraitsBuilder();
 		ret.addTriangleSet();

@@ -192,7 +192,7 @@ public class Matrix3D implements Serializable
 		ret[2] = v1[0] * v2[1] - v1[1] * v2[0];
 	}
 	
-	public static final double computeNormal3D(double [] p0, double [] p1, double [] p2, double [] tempD1, double [] tempD2, double [] ret)
+	public static double computeNormal3D(double [] p0, double [] p1, double [] p2, double [] tempD1, double [] tempD2, double [] ret)
 	{
 		tempD1[0] = p1[0] - p0[0];
 		tempD1[1] = p1[1] - p0[1];
@@ -219,7 +219,7 @@ public class Matrix3D implements Serializable
 		return 0.5 * norm;
 	}
 
-	public static final double computeNormal3DT(double [] p0, double [] p1, double [] p2, double [] tempD1, double [] tempD2, double [] ret)
+	public static double computeNormal3DT(double [] p0, double [] p1, double [] p2, double [] tempD1, double [] tempD2, double [] ret)
 	{
 		tempD1[0] = p1[0] - p0[0];
 		tempD1[1] = p1[1] - p0[1];

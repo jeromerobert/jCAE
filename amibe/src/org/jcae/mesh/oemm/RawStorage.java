@@ -278,7 +278,7 @@ public class RawStorage
 	 * @param  structFile  output file containing dispatched data structure
 	 * @param  dataFile  dispatched data file
 	 */
-	public static final void dispatch(OEMM tree, String soupFile, String structFile, String dataFile)
+	public static void dispatch(OEMM tree, String soupFile, String structFile, String dataFile)
 	{
 		if (tree == null)
 		{
@@ -374,7 +374,7 @@ public class RawStorage
 		}
 	}
 
-	static final void addToCell(FileChannel fc, OEMM.Node current, Map<OEMM.Node, ByteBuffer> buffers, int [] ijk, int attribute)
+	static void addToCell(FileChannel fc, OEMM.Node current, Map<OEMM.Node, ByteBuffer> buffers, int [] ijk, int attribute)
 		throws IOException
 	{
 		assert current.counter <= fc.size();

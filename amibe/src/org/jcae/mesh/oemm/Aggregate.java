@@ -110,7 +110,7 @@ public class Aggregate
 	 * @param max   maximal number of triangles in merged cells
 	 * @return total number of merged nodes
 	 */
-	public final static int compute(OEMM oemm, int max)
+	public static int compute(OEMM oemm, int max)
 	{
 		logger.info("Merge cells, delta="+MAX_DELTA_LEVEL+" triangles="+max);
 

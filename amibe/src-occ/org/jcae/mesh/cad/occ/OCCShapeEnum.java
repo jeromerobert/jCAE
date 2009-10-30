@@ -93,7 +93,7 @@ public abstract class OCCShapeEnum extends CADShapeEnum
 	{
 		return ordinal;
 	}
-	static final Iterator<CADShapeEnum> newShapeEnumIterator(final OCCShapeEnum start, final OCCShapeEnum end)
+	static Iterator<CADShapeEnum> newShapeEnumIterator(final OCCShapeEnum start, final OCCShapeEnum end)
 	{
 		final int iStep;
 		if (start.getOrdinal() > end.getOrdinal())
@@ -122,7 +122,7 @@ public abstract class OCCShapeEnum extends CADShapeEnum
 			}
 		};
 	}
-	static final OCCShapeEnum getSingleton(String name)
+	static OCCShapeEnum getSingleton(String name)
 	{
 		for (int i = 0; i < VALUES.length; i++)
 			if (VALUES[i].toString().equals(name))

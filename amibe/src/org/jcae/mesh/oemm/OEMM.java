@@ -567,7 +567,7 @@ public class OEMM implements Serializable
 	 * @param size  size of child cells
 	 * @param ijk   integer coordinates of desired point
 	 */
-	protected static final int indexSubOctree(int size, int [] ijk)
+	protected static int indexSubOctree(int size, int [] ijk)
 	{
 		int ret = 0;
 		if (size == 0)
@@ -723,7 +723,7 @@ public class OEMM implements Serializable
 	 * @param ijk      integer coordinates of lower-left corner
 	 * @return  the octant of the desired size containing this point.
 	 */
-	public static final Node searchAdjacentNode(Node fromNode, int [] ijk)
+	public static Node searchAdjacentNode(Node fromNode, int [] ijk)
 	{
 		//  Check ijk against OEMM bounds
 		if (!checkBounds(ijk))

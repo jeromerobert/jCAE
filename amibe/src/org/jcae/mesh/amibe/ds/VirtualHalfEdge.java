@@ -387,7 +387,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @param dest  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
-	protected static final void copyOTri(VirtualHalfEdge src, VirtualHalfEdge dest)
+	protected static void copyOTri(VirtualHalfEdge src, VirtualHalfEdge dest)
 	{
 		dest.tri = src.tri;
 		dest.localNumber = src.localNumber;
@@ -401,7 +401,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
-	protected static final void symOTri(VirtualHalfEdge o, VirtualHalfEdge that)
+	protected static void symOTri(VirtualHalfEdge o, VirtualHalfEdge that)
 	{
 		that.tri = o.tri.getAdj(o.localNumber);
 		that.localNumber = o.tri.getAdjLocalNumber(o.localNumber);
@@ -416,7 +416,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
-	protected static final void nextOTri(VirtualHalfEdge o, VirtualHalfEdge that)
+	protected static void nextOTri(VirtualHalfEdge o, VirtualHalfEdge that)
 	{
 		that.tri = o.tri;
 		that.localNumber = next3[o.localNumber];
@@ -431,7 +431,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
-	protected static final void prevOTri(VirtualHalfEdge o, VirtualHalfEdge that)
+	protected static void prevOTri(VirtualHalfEdge o, VirtualHalfEdge that)
 	{
 		that.tri = o.tri;
 		that.localNumber = prev3[o.localNumber];
