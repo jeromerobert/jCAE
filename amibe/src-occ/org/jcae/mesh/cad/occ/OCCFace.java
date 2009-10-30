@@ -28,7 +28,7 @@ import org.jcae.opencascade.jni.BRep_Tool;
 public class OCCFace extends OCCShape implements CADFace
 {
 	@Override
-	public TopoDS_Face getShape()
+	public final TopoDS_Face getShape()
 	{
 		return (TopoDS_Face) myShape;
 	}

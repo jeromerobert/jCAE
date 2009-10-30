@@ -102,7 +102,7 @@ public class Quadric3DError implements Serializable
 	}
 
 	// Add 2 quadrics
-	public void computeQuadric3DError(Quadric3DError q1, Quadric3DError q2)
+	public final void computeQuadric3DError(Quadric3DError q1, Quadric3DError q2)
 	{
 		assert q1.area > 0.0 : q1;
 		assert q2.area > 0.0 : q2;
@@ -120,7 +120,7 @@ public class Quadric3DError implements Serializable
 		cachedDet = false;
 	}
 
-	public double value(double [] vect)
+	public final double value(double [] vect)
 	{
 		double ret = c;
 		ret += 2.0 * Matrix3D.prodSca(b, vect);
@@ -131,7 +131,7 @@ public class Quadric3DError implements Serializable
 		return ret;
 	}
 
-	public void addError(double [] normal, double d, double a)
+	public final void addError(double [] normal, double d, double a)
 	{
 		for (int k = 0; k < 3; k++)
 		{
@@ -149,7 +149,7 @@ public class Quadric3DError implements Serializable
 	}
 
 	// Used when adding virtual planes on boundaries
-	public void addWeightedError(double [] normal, double d, double a, double scale)
+	public final void addWeightedError(double [] normal, double d, double a, double scale)
 	{
 		for (int k = 0; k < 3; k++)
 		{
@@ -177,7 +177,7 @@ public class Quadric3DError implements Serializable
 		return detA;
 	}
 
-	public void optimalPlacement(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2, Placement p, Vertex ret)
+	public final void optimalPlacement(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2, Placement p, Vertex ret)
 	{
 		/* FIXME: add an option so that boundary nodes may be frozen.  */
 		switch(p)
@@ -269,7 +269,7 @@ public class Quadric3DError implements Serializable
 	}
 
 	@Override
-	public String toString()
+	public final String toString()
 	{
 		return "A: data|0][]  "+A[0]+" "+A[1]+" "+A[2]+"\ndata|1][]  "+A[1]+" "+A[3]+" "+A[4]+"\ndata|2][]  "+A[2]+" "+A[4]+" "+A[5]+"\n"+
 		       " b: "+b[0]+" "+b[1]+" "+b[2]+"\n"+

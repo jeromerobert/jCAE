@@ -78,7 +78,7 @@ class LongLong
 		assert (lo >= 0L && lo < (1L << 62)) : lo;
 	}
 	
-	protected void add(LongLong that)
+	protected final void add(LongLong that)
 	{
 		hi += that.hi;
 		lo += that.lo;
@@ -89,7 +89,7 @@ class LongLong
 		}
 	}
 	
-	public boolean isNegative()
+	public final boolean isNegative()
 	{
 		return (hi < 0L);
 	}
@@ -100,7 +100,7 @@ class LongLong
 	}
 	
 	@Override
-	public String toString()
+	public final String toString()
 	{
 		return "hi: "+hi+" lo: "+lo;
 	}

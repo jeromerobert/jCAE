@@ -432,7 +432,7 @@ public class PAVLTreeIntArrayDup
 	 *
 	 * @return tree size.
 	 */
-	public int size()
+	public final int size()
 	{
 		return nextIndex / TOTAL_SIZE;
 	}

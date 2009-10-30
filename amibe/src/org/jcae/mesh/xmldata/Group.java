@@ -49,7 +49,7 @@ public class Group
 	/**
 	 * @return Returns the id of the group
 	 */
-	public int getId()
+	public final int getId()
 	{
 		return id;
 	}
@@ -65,7 +65,7 @@ public class Group
 	/**
 	 * @return Returns the number of triangles in the group
 	 */
-	public int getNumberOfElements()
+	public final int getNumberOfElements()
 	{
 		return number;
 	}
@@ -73,7 +73,7 @@ public class Group
 	/**
 	 * @param newId The new id to set
 	 */
-	public void setId(int newId)
+	public final void setId(int newId)
 	{
 		this.id = newId;
 	}
@@ -81,7 +81,7 @@ public class Group
 	/**
 	 * @param newName The new name to set
 	 */
-	public void setName(String newName)
+	public final void setName(String newName)
 	{
 		String oldName=name;
 		this.name = newName;
@@ -91,7 +91,7 @@ public class Group
 	/**
 	 * @param newNumber The new number to set
 	 */
-	public void setNumberOfElements(int newNumber)
+	public final void setNumberOfElements(int newNumber)
 	{
 		this.number = newNumber;
 	}
@@ -99,7 +99,7 @@ public class Group
 	/**
 	 * @param newOffset The new offset to set
 	 */
-	void setOffset(int newOffset)
+	final void setOffset(int newOffset)
 	{
 		this.offset = newOffset;
 	}
@@ -109,12 +109,12 @@ public class Group
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
-	public String toString()
+	public final String toString()
 	{
 		return name;
 	}
 
-	int getOffset()
+	final int getOffset()
 	{
 		return offset;
 	}
@@ -173,7 +173,7 @@ public class Group
 	 *@param baseDir the directory which contains jcae3d.xml.
 	 *@return the DOM element corresponding to the group.
 	 */
-	public Element createXMLGroup(Document xmlDoc, java.io.File groupFile,
+	public final Element createXMLGroup(Document xmlDoc, java.io.File groupFile,
 		String baseDir)
 	{
 		Element newElt = null;
@@ -198,7 +198,7 @@ public class Group
      * Adds a PropertyChangeListener to the listener list.
      * @param l The listener to add.
      */
-    public void addPropertyChangeListener(PropertyChangeListener l)
+    public final void addPropertyChangeListener(PropertyChangeListener l)
     {
         propertyChangeSupport.addPropertyChangeListener(l);
     }

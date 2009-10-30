@@ -77,22 +77,22 @@ public class UNVGenericWriter
 		}
 	}
 	
-	public void writeNode(int label, double [] coord)
+	public final void writeNode(int label, double [] coord)
 	{
 		MeshExporter.UNV.writeSingleNode(streamN, label, coord[0], coord[1], coord[2]);
 	}
 	
-	public void writeElement(int label, int [] ind)
+	public final void writeElement(int label, int [] ind)
 	{
 		MeshExporter.UNV.writeSingleLinearElement(streamE, label, ind);
 	}
 
-	public void writeGroup(int groupId, String name, int [] ids)
+	public final void writeGroup(int groupId, String name, int [] ids)
 	{
 		MeshExporter.UNV.writeSingleGroup(streamG, groupId, name, ids);
 	}
 	
-	public void finish(int nr, int nrIntNodes, int nrTriangles, double [] coordRefs)
+	public final void finish(int nr, int nrIntNodes, int nrTriangles, double [] coordRefs)
 	{
 		int nrNodes = nrIntNodes + nr;
 		logger.fine("Append coordinates of "+nr+" nodes");

@@ -234,7 +234,7 @@ public class Remesh
 		analyticMetric = m;
 	}
 
-	public Mesh getOutputMesh()
+	public final Mesh getOutputMesh()
 	{
 		return mesh;
 	}
@@ -578,7 +578,7 @@ public class Remesh
 		return l;
 	}
 
-	public Remesh compute()
+	public final Remesh compute()
 	{
 		LOGGER.info("Run "+getClass().getName());
 

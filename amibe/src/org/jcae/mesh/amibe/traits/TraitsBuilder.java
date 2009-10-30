@@ -49,7 +49,7 @@ public class TraitsBuilder
 	 * @return <code>true</code> if traits builder contains this feature,
 	 * <code>false</code> otherwise.
 	 */
-	public boolean hasCapability(int c)
+	public final boolean hasCapability(int c)
 	{
 		return ((attributes & c) != 0);
 	}
@@ -99,7 +99,7 @@ public class TraitsBuilder
 	 *
 	 * @return a {@link Traits} instance
 	 */
-	public Traits createTraits()
+	public final Traits createTraits()
 	{
 		if (attributes == 0)
 			return null;
@@ -138,7 +138,7 @@ public class TraitsBuilder
 	}
 
 	@Override
-	public String toString()
+	public final String toString()
 	{
 		return ""+Integer.toHexString(attributes);
 	}

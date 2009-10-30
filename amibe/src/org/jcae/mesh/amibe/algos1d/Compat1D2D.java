@@ -74,7 +74,7 @@ public class Compat1D2D
 	/**
 	 * Explores each edge of the mesh and calls the discretisation method.
 	 */
-	public void compute()
+	public final void compute()
 	{
 		int nbTEdges = 0, nbNodes = 0, nbEdges = 0;
 		/* Explore the shape for each edge */

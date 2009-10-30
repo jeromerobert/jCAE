@@ -159,7 +159,7 @@ public class SmoothNodes2D
 			qualityMap.put(f, val);
 		}
 	}
-	public void compute()
+	public final void compute()
 	{
 		LOGGER.config("Enter compute()");
 		if (nloop > 0)

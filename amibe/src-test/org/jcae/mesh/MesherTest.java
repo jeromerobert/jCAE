@@ -76,7 +76,7 @@ public class MesherTest
 	// This EntityResolver avoids FileNotFoundException when parsing XML output since logger.dtd is unavailable.
 	public static class FakeEntityResolver implements EntityResolver
 	{
-		public InputSource resolveEntity(String publicId, String systemId)
+		public final InputSource resolveEntity(String publicId, String systemId)
 		{
 			return new InputSource(new java.io.ByteArrayInputStream(new byte[0]));
 		}

@@ -62,7 +62,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	 *
 	 * @return  this instance
 	 */
-	public MeshTraitsBuilder addTriangleList()
+	public final MeshTraitsBuilder addTriangleList()
 	{
 		attributes &= ~TRIANGLESET;
 		return this;
@@ -73,7 +73,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	 *
 	 * @return  this instance
 	 */
-	public MeshTraitsBuilder addTriangleSet()
+	public final MeshTraitsBuilder addTriangleSet()
 	{
 		attributes |= TRIANGLESET;
 		return this;
@@ -86,7 +86,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	 * @return collection of triangles
 	 */
 	@SuppressWarnings("unchecked")
-	public Collection<Triangle> getTriangles(Traits t)
+	public final Collection<Triangle> getTriangles(Traits t)
 	{
 		return (Collection<Triangle>) t.array[index[BITTRIANGLES]];
 	}
@@ -98,7 +98,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	 *
 	 * @return <code>true</code>
 	 */
-	public boolean hasTriangles()
+	public final boolean hasTriangles()
 	{
 		return true;
 	}
@@ -108,7 +108,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	 *
 	 * @return  this instance
 	 */
-	public MeshTraitsBuilder addNodeList()
+	public final MeshTraitsBuilder addNodeList()
 	{
 		attributes |= NODES;
 		attributes &= ~NODESET;
@@ -120,7 +120,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	 *
 	 * @return  this instance
 	 */
-	public MeshTraitsBuilder addNodeSet()
+	public final MeshTraitsBuilder addNodeSet()
 	{
 		attributes |= NODES;
 		attributes |= NODESET;
@@ -134,7 +134,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	 * @return collection of nodes
 	 */
 	@SuppressWarnings("unchecked")
-	public Collection<Vertex> getNodes(Traits t)
+	public final Collection<Vertex> getNodes(Traits t)
 	{
 		if ((attributes & NODES) != 0)
 			return (Collection<Vertex>) t.array[index[BITNODES]];
@@ -147,7 +147,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	 * @return <code>true</code> if {@link #addNodeList} or {@link #addNodeSet}
 	 * was called, <code>false</code> otherwise.
 	 */
-	public boolean hasNodes()
+	public final boolean hasNodes()
 	{
 		return hasCapability(NODES);
 	}
@@ -181,7 +181,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	 *
 	 * @return  this instance
 	 */
-	public MeshTraitsBuilder addKdTree(int d)
+	public final MeshTraitsBuilder addKdTree(int d)
 	{
 		attributes |= KDTREE;
 		dimension = d;
@@ -194,7 +194,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	 * @param t  mesh traits
 	 * @return {@link KdTree} instance
 	 */
-	public KdTree getKdTree(Traits t)
+	public final KdTree getKdTree(Traits t)
 	{
 		if ((attributes & KDTREE) != 0)
 			return (KdTree) t.array[index[BITKDTREE]];
@@ -225,7 +225,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	 * @param triangles  desired number of triangles
 	 * @param t  mesh traits
 	 */
-	public void ensureCapacity(int triangles, Traits t)
+	public final void ensureCapacity(int triangles, Traits t)
 	{
 		// These methods must be synchronized with subInitTraits()
 		if ((attributes & TRIANGLESET) != 0)
@@ -270,7 +270,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	 * @param t   traits builder
 	 * @return {@link KdTree} instance
 	 */
-	public MeshTraitsBuilder add(TraitsBuilder t)
+	public final MeshTraitsBuilder add(TraitsBuilder t)
 	{
 		if (t instanceof VertexTraitsBuilder)
 			vertexTraitsBuilder = (VertexTraitsBuilder) t;
@@ -288,7 +288,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	 *
 	 * @return {@link VertexTraitsBuilder} instance
 	 */
-	public VertexTraitsBuilder getVertexTraitsBuilder()
+	public final VertexTraitsBuilder getVertexTraitsBuilder()
 	{
 		return vertexTraitsBuilder;
 	}
@@ -298,7 +298,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	 *
 	 * @return {@link HalfEdgeTraitsBuilder} instance
 	 */
-	public HalfEdgeTraitsBuilder getHalfEdgeTraitsBuilder()
+	public final HalfEdgeTraitsBuilder getHalfEdgeTraitsBuilder()
 	{
 		return halfedgeTraitsBuilder;
 	}
@@ -308,7 +308,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	 *
 	 * @return {@link TriangleTraitsBuilder} instance
 	 */
-	public TriangleTraitsBuilder getTriangleTraitsBuilder()
+	public final TriangleTraitsBuilder getTriangleTraitsBuilder()
 	{
 		return triangleTraitsBuilder;
 	}

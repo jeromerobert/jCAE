@@ -130,7 +130,7 @@ public class MeshLiaison
 		mapBgToCurrent.clear();
 	}
 	
-	public Mesh getMesh()
+	public final Mesh getMesh()
 	{
 		return currentMesh;
 	}
@@ -142,7 +142,7 @@ public class MeshLiaison
 	 * @return <code>true</code> if a projection has been found, <code>false</code> otherwise.  In the
 	 *  latter case, vertex could have been moved, but iterative scheme did not converge to a solution.
 	 */
-	public boolean move(Vertex v, double [] target)
+	public final boolean move(Vertex v, double [] target)
 	{
 		if (LOGGER.isLoggable(Level.FINER))
 			LOGGER.log(Level.FINER, "Trying to move vertex "+v+" to ("+target[0]+", "+target[1]+", "+target[2]+")");
@@ -243,7 +243,7 @@ public class MeshLiaison
 		}
 	}
 
-	public boolean project(Vertex v, double[] target, Vertex start)
+	public final boolean project(Vertex v, double[] target, Vertex start)
 	{
 		ProjectedLocation location = mapCurrentVertexProjection.get(start);
 		assert location != null : "Vertex "+start+" not found";
@@ -257,7 +257,7 @@ public class MeshLiaison
 	 * @param v vertex in current mesh
 	 * @param bgT triangle in the background mesh
 	 */
-	public void addVertex(Vertex v, Triangle bgT)
+	public final void addVertex(Vertex v, Triangle bgT)
 	{
 		mapCurrentVertexProjection.put(v, new ProjectedLocation(v.getUV(), bgT));
 	}

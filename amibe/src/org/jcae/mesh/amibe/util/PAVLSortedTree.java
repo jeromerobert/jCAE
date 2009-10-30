@@ -70,7 +70,7 @@ public class PAVLSortedTree<E> extends QSortedTree<E>
 		    T2 T3            T1 T2
 		*/
 		@Override
-		public Node<E> rotateL()
+		public final Node<E> rotateL()
 		{
 			Node<E> right = (Node<E>) super.rotateL();
 			if (right.balanceFactor != 0)
@@ -97,7 +97,7 @@ public class PAVLSortedTree<E> extends QSortedTree<E>
 		      T1 T2                    T2 T3
 		*/
 		@Override
-		public Node<E> rotateR()
+		public final Node<E> rotateR()
 		{
 			Node<E> left = (Node<E>) super.rotateR();
 			if (left.balanceFactor != 0)
@@ -126,7 +126,7 @@ public class PAVLSortedTree<E> extends QSortedTree<E>
 		   T2 T3                      T3 T4
 		*/
 		@Override
-		public Node<E> rotateRL()
+		public final Node<E> rotateRL()
 		{
 			Node<E> newRoot = (Node<E>) super.rotateRL();
 			assert balanceFactor == 2;
@@ -163,7 +163,7 @@ public class PAVLSortedTree<E> extends QSortedTree<E>
 		    T2 T3          T1 T2
 		*/
 		@Override
-		public Node<E> rotateLR()
+		public final Node<E> rotateLR()
 		{
 			Node<E> newRoot = (Node<E>) super.rotateLR();
 			assert balanceFactor == -2;
@@ -193,7 +193,7 @@ public class PAVLSortedTree<E> extends QSortedTree<E>
 		}
 
 		@Override
-		public String toString()
+		public final String toString()
 		{
 			return super.toString()+" bal. "+balanceFactor;
 		}

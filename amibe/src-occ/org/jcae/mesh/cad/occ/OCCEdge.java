@@ -29,7 +29,7 @@ import org.jcae.opencascade.jni.BRep_Tool;
 public class OCCEdge extends OCCShape implements CADEdge
 {
 	@Override
-	public TopoDS_Edge getShape()
+	public final TopoDS_Edge getShape()
 	{
 		return (TopoDS_Edge) myShape;
 	}

@@ -59,7 +59,7 @@ public class MGroup3D
 	 *
 	 * @return the group name.
 	 */
-	public String getName()
+	public final String getName()
 	{
 		return name;
 	}
@@ -69,7 +69,7 @@ public class MGroup3D
 	 *
 	 * @return the group id.
 	 */
-	public int getId()
+	public final int getId()
 	{
 		return id;
 	}
@@ -79,7 +79,7 @@ public class MGroup3D
 	 *
 	 * @return an iterator over the set of faces.
 	 */
-	public Iterator<Triangle> getFacesIterator()
+	public final Iterator<Triangle> getFacesIterator()
 	{
 		return facelist.iterator();
 	}
@@ -89,7 +89,7 @@ public class MGroup3D
 	 *
 	 * @return the number of faces.
 	 */
-	public int numberOfFaces()
+	public final int numberOfFaces()
 	{
 		return facelist.size();
 	}
@@ -99,7 +99,7 @@ public class MGroup3D
 	 *
 	 * @return the merged group.
 	 */
-	public MGroup3D merge(MGroup3D that)
+	public final MGroup3D merge(MGroup3D that)
 	{
 		facelist.addAll(that.facelist);
 		that.facelist.clear();

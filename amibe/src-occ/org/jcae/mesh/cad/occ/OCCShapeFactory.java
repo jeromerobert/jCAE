@@ -43,7 +43,7 @@ public class OCCShapeFactory extends CADShapeFactory
 	private static final Logger logger=Logger.getLogger(OCCShapeFactory.class.getName());
 	
 	@Override
-	public CADShape newShape(Object o)
+	public final CADShape newShape(Object o)
 	{
 		if (!(o instanceof TopoDS_Shape))
 			throw new IllegalArgumentException();

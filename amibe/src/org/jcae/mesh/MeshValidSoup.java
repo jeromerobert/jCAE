@@ -68,7 +68,7 @@ public class MeshValidSoup
 			int index = (int) (a1 * split);
 			nr[group][index]++;
 		}
-		public void printStats()
+		public final void printStats()
 		{
 			double amintot = amin[1];
 			for (int g = 1; g <= nrgroup; g++)

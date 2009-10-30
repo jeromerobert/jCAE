@@ -60,7 +60,7 @@ public class BoraToUnvConvert implements FilterInterface
 		}
 	}
 
-	public void collectBoundaryNodes(int[] shapes)
+	public final void collectBoundaryNodes(int[] shapes)
 	{
 		for (int id : shapes)
 		{
@@ -81,18 +81,18 @@ public class BoraToUnvConvert implements FilterInterface
 		}
 	}
 
-	public void beforeProcessingAllShapes(boolean writeNormal)
+	public final void beforeProcessingAllShapes(boolean writeNormal)
 	{
 		coordRefs = new double[3*nrBoundaryNodes];
 		mapReferences = new TIntIntHashMap(nrBoundaryNodes);
 	}
 
-	public void afterProcessingAllShapes()
+	public final void afterProcessingAllShapes()
 	{
 		unvWriter.finish(nrBoundaryNodes, nrInnerNodes, indexElements, coordRefs);
 	}
 
-	public void processOneShape(int groupId, String groupName, int iFace)
+	public final void processOneShape(int groupId, String groupName, int iFace)
 	{
 		BDiscretization d = mapDiscretizations.get(iFace);
 		int[] refs = null;

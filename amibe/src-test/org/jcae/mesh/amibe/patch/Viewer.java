@@ -79,19 +79,19 @@ public class Viewer extends JFrame
 		setSize(800,600);
     }		
 
-	public void addBranchGroup(BranchGroup branchGroup)
+	public final void addBranchGroup(BranchGroup branchGroup)
 	{
 		branchGroup.setCapability(BranchGroup.ALLOW_DETACH);
 		mainBranchGroup.addChild(branchGroup);
 	}
 	
-	public void removeAllBranchGroup()
+	public final void removeAllBranchGroup()
 	{
 		mainBranchGroup.removeAllChildren();
 	}
 
 	public Runnable callBack = null;
-	void canvas3D_mouseClicked(MouseEvent e)
+	final void canvas3D_mouseClicked(MouseEvent e)
 	{
 		try
 		{
@@ -132,12 +132,12 @@ public class Viewer extends JFrame
 	}
 	
 	/** Return the position of last click */
-	public double [] getLastClick()
+	public final double [] getLastClick()
 	{
 		return lastClick;
 	}
 	
-	void canvas3D_keyPressed(KeyEvent e)
+	final void canvas3D_keyPressed(KeyEvent e)
 	{
 		try
 		{
@@ -158,7 +158,7 @@ public class Viewer extends JFrame
 	}
 	
 	/** Fit all the scenes in the current view */	
-	public void zoomTo()
+	public final void zoomTo()
 	{
 		BoundingSphere b= (BoundingSphere)mainBranchGroup.getBounds();
 		Point3d c=new Point3d();
@@ -172,7 +172,7 @@ public class Viewer extends JFrame
 	 * @param z z coordinate of the center of the sphere
 	 * @param radius radius of the sphere
 	 */
-	public void zoomTo(float x, float y, float z, float radius)
+	public final void zoomTo(float x, float y, float z, float radius)
 	{
 		OrbitBehavior orbit;
 		Point3d c=new Point3d(x,y,z);

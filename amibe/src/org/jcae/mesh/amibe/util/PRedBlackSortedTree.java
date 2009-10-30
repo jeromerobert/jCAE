@@ -72,7 +72,7 @@ public class PRedBlackSortedTree<E> extends QSortedTree<E>
 		}
 
 		@Override
-		public String toString()
+		public final String toString()
 		{
 			return super.toString()+" "+(isRed ? "red" : "black");
 		}

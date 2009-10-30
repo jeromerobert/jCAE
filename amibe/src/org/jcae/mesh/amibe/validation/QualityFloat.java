@@ -90,7 +90,7 @@ public class QualityFloat
 	 *
 	 * @param q  the procedure which will compute quality values.
 	 */
-	public void setQualityProcedure(QualityProcedure q)
+	public final void setQualityProcedure(QualityProcedure q)
 	{
 		qproc = q;
 		qproc.bindResult(data);
@@ -102,7 +102,7 @@ public class QualityFloat
 	 *
 	 * @param x  the object on which quality is computed.
 	 */
-	public void compute(Object x)
+	public final void compute(Object x)
 	{
 		assert qproc != null;
 		data.add(qproc.quality(x));
@@ -121,7 +121,7 @@ public class QualityFloat
 	/**
 	 * Call the {@link QualityProcedure#finish} procedure.
 	 */
-	public void finish()
+	public final void finish()
 	{
 		qproc.finish();
 		qmin = Float.MAX_VALUE;
@@ -164,7 +164,7 @@ public class QualityFloat
 	 * @param p  number between 0 and 1
 	 * @return  value associated to this distribution index
 	 */
-	public float getValueByPercent(double p)
+	public final float getValueByPercent(double p)
 	{
 		if (p <= 0.0)
 			return qmin;
@@ -245,7 +245,7 @@ public class QualityFloat
 	 *
 	 * @param factor   the scale factor.
 	 */
-	public void setTarget(float factor)
+	public final void setTarget(float factor)
 	{
 		scaleFactor = 1.0f / factor;
 	}
@@ -294,7 +294,7 @@ public class QualityFloat
 	 * @param v2  maximal value to consider.
 	 * @param nr  the desired number of subsegments.
 	 */
-	public void split(float v1, float v2, int nr)
+	public final void split(float v1, float v2, int nr)
 	{
 		layers = nr;
 		float vmin = v1;
@@ -348,7 +348,7 @@ public class QualityFloat
 	/**
 	 * Display histogram about quality values.
 	 */
-	public void printLayers()
+	public final void printLayers()
 	{
 		if (layers < 0)
 		{
@@ -370,7 +370,7 @@ public class QualityFloat
 	/**
 	 * Display statistics about quality values.
 	 */
-	public void printStatistics()
+	public final void printStatistics()
 	{
 		int nrTotal = data.size();
 		System.out.println("total: "+nrTotal);
@@ -388,7 +388,7 @@ public class QualityFloat
 	 *
 	 * @param file   name of the output file
 	 */
-	public void printMeshBB(String file)
+	public final void printMeshBB(String file)
 	{
 		int nrTotal = data.size();
 		try

@@ -60,27 +60,27 @@ public class BDiscretization
 		id = nextId;
 	}
 
-	public int getId()
+	public final int getId()
 	{
 		return id;
 	}
 
-	public BCADGraphCell getGraphCell()
+	public final BCADGraphCell getGraphCell()
 	{
 		return graphCell;
 	}
 
-	public Constraint getConstraint()
+	public final Constraint getConstraint()
 	{
 		return constraint;
 	}
 
-	public Collection<BSubMesh> getSubmesh()
+	public final Collection<BSubMesh> getSubmesh()
 	{
 		return submesh;
 	}
 
-	void addSubMesh(BSubMesh s)
+	final void addSubMesh(BSubMesh s)
 	{
 		submesh.add(s);
 	}
@@ -90,7 +90,7 @@ public class BDiscretization
 		submesh.remove(s);
 	}
 
-	public BSubMesh getFirstSubMesh()
+	public final BSubMesh getFirstSubMesh()
 	{
 		return submesh.iterator().next();
 	}
@@ -101,7 +101,7 @@ public class BDiscretization
 	 * ensure that those two constraints are not both "original" constraints
 	 * set by the user on the same object of the CAD.
 	 */
-	void combineConstraint(BDiscretization baseDiscr)
+	final void combineConstraint(BDiscretization baseDiscr)
 	{
 		Constraint newCons = baseDiscr.constraint.createInheritedConstraint(graphCell, constraint);
 		if (constraint != null)
@@ -121,7 +121,7 @@ public class BDiscretization
 		constraint = newCons;
 	}
 
-	void addAllSubMeshes(BDiscretization parent)
+	final void addAllSubMeshes(BDiscretization parent)
 	{
 		submesh.addAll(parent.submesh);
 	}
@@ -132,7 +132,7 @@ public class BDiscretization
 	 * @return <code>true</code> if <code>BSubMesh</code> is already
 	 * found, <code>false</code> otherwise.
 	 */
-	boolean contains(BSubMesh s)
+	final boolean contains(BSubMesh s)
 	{
 		return submesh.contains(s);
 	}
@@ -143,7 +143,7 @@ public class BDiscretization
 	 * submesh list contained in the parameter's submesh list
 	 * @param that  object being checked.
 	 */
-	public boolean contained(BDiscretization that)
+	public final boolean contained(BDiscretization that)
 	{
 		for (BSubMesh s : submesh)
 		{
@@ -160,7 +160,7 @@ public class BDiscretization
 	 * @return <code>false</code> if a <code>BSubMesh</code> is common to
 	 * both sets, <code>true</code> otherwise.
 	 */
-	boolean emptyIntersection(BDiscretization that)
+	final boolean emptyIntersection(BDiscretization that)
 	{
 		for (BSubMesh s : that.submesh)
 		{
@@ -174,7 +174,7 @@ public class BDiscretization
 	 * Check whether a <code>BDiscretization</code> instance is needed for 
 	 * the definition of a <code>BSubMesh</code>.
 	 */
-	public boolean isSubmeshChild(BSubMesh that)
+	public final boolean isSubmeshChild(BSubMesh that)
 	{
 		// if the submesh is not contained in the submesh list, there is no need
 		// to continue further
@@ -200,17 +200,17 @@ public class BDiscretization
 		return false;
 	}
 
-	public Object getMesh()
+	public final Object getMesh()
 	{
 		return mesh;
 	}
 
-	public void setMesh(Object m)
+	public final void setMesh(Object m)
 	{
 		mesh = m;
 	}
 
-	void discretize()
+	final void discretize()
 	{
 		if (computed)
 			return;
@@ -224,7 +224,7 @@ public class BDiscretization
 	}
 
 	@Override
-	public String toString()
+	public final String toString()
 	{
 		String ret = "Discretization: "+id;
 		ret += " (cons. "+constraint+") "+submesh;

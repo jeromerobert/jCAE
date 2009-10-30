@@ -58,7 +58,7 @@ public class Constraint
 	 * constraint of a user constraint on g, or the resultant of the 
 	 * user constraint on g
 	 */
-	Constraint originConstraint(BCADGraphCell g)
+	final Constraint originConstraint(BCADGraphCell g)
 	{
 		Constraint baseOrigCons = null;
 		if (origin == null)
@@ -72,7 +72,7 @@ public class Constraint
 		return baseOrigCons;
 	}
 
-	Constraint createInheritedConstraint(BCADGraphCell g, Constraint old)
+	final Constraint createInheritedConstraint(BCADGraphCell g, Constraint old)
 	{
 		Constraint ret = new Constraint(g, hypothesis.createInheritedHypothesis(g.getType()));
 
@@ -96,17 +96,17 @@ public class Constraint
 		id = nextId;
 	}
 
-	public int getId()
+	public final int getId()
 	{
 		return id;
 	}
 
-	public BCADGraphCell getGraphCell()
+	public final BCADGraphCell getGraphCell()
 	{
 		return graphCell;
 	}
 
-	public Hypothesis getHypothesis()
+	public final Hypothesis getHypothesis()
 	{
 		return hypothesis;
 	}
@@ -127,7 +127,7 @@ public class Constraint
 	}
 
 	@Override
-	public String toString()
+	public final String toString()
 	{
 		String ret = "Constraint: "+id;
 		ret += " (hyp "+hypothesis+", cell "+Integer.toHexString(graphCell.hashCode())+")";
@@ -139,14 +139,14 @@ public class Constraint
 	/**
 	 * @return the group
 	 */
-	public String getGroup() {
+	public final String getGroup() {
 		return group;
 	}
 
 	/**
 	 * @param group the group to set
 	 */
-	public void setGroup(String group) {
+	public final void setGroup(String group) {
 		this.group = group;
 	}
 

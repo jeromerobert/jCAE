@@ -83,7 +83,7 @@ public abstract class QSortedTree<E> implements Serializable
 			value = v;
 		}
 		
-		public int compareTo(final Node<E> that)
+		public final int compareTo(final Node<E> that)
 		{
 			if (value < that.value)
 				return -1;
@@ -96,7 +96,7 @@ public abstract class QSortedTree<E> implements Serializable
 			value = v;
 		}
 		
-		protected void swap(final Node<E> that)
+		protected final void swap(final Node<E> that)
 		{
 			final E temp = that.data;
 			that.data = data;
@@ -105,12 +105,12 @@ public abstract class QSortedTree<E> implements Serializable
 			that.value = value;
 		}
 	
-		public double getValue()
+		public final double getValue()
 		{
 			return value;
 		}
 	
-		public E getData()
+		public final E getData()
 		{
 			return data;
 		}
@@ -231,7 +231,7 @@ public abstract class QSortedTree<E> implements Serializable
 	
 		// The following 4 methods are useful for tree traversal.
 		// A NullPointerException is raised if they are used on an empty tree!
-		private Node<E> firstNode()
+		private final Node<E> firstNode()
 		{
 			Node<E> current = this;
 			while (current.child[0] != null)
@@ -239,7 +239,7 @@ public abstract class QSortedTree<E> implements Serializable
 			return current;
 		}
 	
-		private Node<E> lastNode()
+		private final Node<E> lastNode()
 		{
 			Node<E> current = this;
 			while (current.child[1] != null)
@@ -247,7 +247,7 @@ public abstract class QSortedTree<E> implements Serializable
 			return current;
 		}
 	
-		protected Node<E> previousNode()
+		protected final Node<E> previousNode()
 		{
 			Node<E> current = this;
 			if (current.child[0] != null)
@@ -262,7 +262,7 @@ public abstract class QSortedTree<E> implements Serializable
 			return current.parent;
 		}
 	
-		protected Node<E> nextNode()
+		protected final Node<E> nextNode()
 		{
 			Node<E> current = this;
 			if (current.child[1] != null)
@@ -298,7 +298,7 @@ public abstract class QSortedTree<E> implements Serializable
 	/**
 	 * Tell whether this tree is empty.
 	 */
-	public boolean isEmpty()
+	public final boolean isEmpty()
 	{
 		return root.child[0] == null;
 	}
@@ -380,7 +380,7 @@ public abstract class QSortedTree<E> implements Serializable
 	/**
 	 * Clear this tree.
 	 */
-	public void clear()
+	public final void clear()
 	{
 		// Unlink all nodes to help garbage collector
 		for (Node<E> p: map.values())
@@ -499,7 +499,7 @@ public abstract class QSortedTree<E> implements Serializable
 		public void remove() { throw new RuntimeException(); }
 	};
 
-	public Iterator<Node<E>> iterator()
+	public final Iterator<Node<E>> iterator()
 	{
 		if (nrNodes == 0)
 			return nullIterator;
@@ -527,7 +527,7 @@ public abstract class QSortedTree<E> implements Serializable
 		};
 	}
 	
-	public Iterator<Node<E>> backwardIterator()
+	public final Iterator<Node<E>> backwardIterator()
 	{
 		if (nrNodes == 0)
 			return nullIterator;

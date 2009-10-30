@@ -127,7 +127,7 @@ public class SubMesh1D
 	 *
 	 * @return the topological edge.
 	 */
-	public CADEdge getGeometry()
+	public final CADEdge getGeometry()
 	{
 		return edge;
 	}
@@ -137,7 +137,7 @@ public class SubMesh1D
 	 *
 	 * @return the list of edges.
 	 */
-	public ArrayList<MEdge1D> getEdges()
+	public final ArrayList<MEdge1D> getEdges()
 	{
 		return edgelist;
 	}
@@ -147,7 +147,7 @@ public class SubMesh1D
 	 *
 	 * @return the list of nodes.
 	 */
-	public ArrayList<MNode1D> getNodes()
+	public final ArrayList<MNode1D> getNodes()
 	{
 		return nodelist;
 	}
@@ -157,7 +157,7 @@ public class SubMesh1D
 	 *
 	 * @return an iterator over the list of edges.
 	 */
-	public Iterator<MEdge1D> getEdgesIterator()
+	public final Iterator<MEdge1D> getEdgesIterator()
 	{
 		return edgelist.iterator();
 	}
@@ -167,7 +167,7 @@ public class SubMesh1D
 	 *
 	 * @return an iterator over the list of nodes.
 	 */
-	public Iterator<MNode1D> getNodesIterator()
+	public final Iterator<MNode1D> getNodesIterator()
 	{
 		return nodelist.iterator();
 	}
@@ -180,7 +180,7 @@ public class SubMesh1D
 	 * @return <code>true</code> if all checks pass.
 	 * @throws AssertionError if a check fails.
 	 */
-	public boolean isValid()
+	public final boolean isValid()
 	{
 		HashSet<MNode1D> tempset = new HashSet<MNode1D>(nodelist);
 		Iterator<MEdge1D> ite = edgelist.iterator();
@@ -199,7 +199,7 @@ public class SubMesh1D
 	/**
 	 * Prints edge lengths.
 	 */
-	protected void printInfos()
+	protected final void printInfos()
 	{
 		int n = 0;
 		double minlen = -1.0, maxlen = 0.0,  avglen = 0.0;
@@ -233,7 +233,7 @@ public class SubMesh1D
 	}
 	
 	@Override
-	public String toString()
+	public final String toString()
 	{
 		String cr=System.getProperty("line.separator");
 		StringBuilder r = new StringBuilder("SubMesh1D"+cr);

@@ -39,7 +39,7 @@ public class OCCShape implements CADShape
 	{
 	}
 	
-	protected void setShape(TopoDS_Shape o)
+	protected final void setShape(TopoDS_Shape o)
 	{
 		myShape = o;
 	}
@@ -84,7 +84,7 @@ public class OCCShape implements CADShape
 	}
 	
 	@Override
-	public boolean equals(Object o)
+	public final boolean equals(Object o)
 	{
 		if (o == null)
 			return false;
@@ -106,7 +106,7 @@ public class OCCShape implements CADShape
 	}
 	
 	@Override
-	public int hashCode()
+	public final int hashCode()
 	{
 		return myShape.hashCode();
 	}

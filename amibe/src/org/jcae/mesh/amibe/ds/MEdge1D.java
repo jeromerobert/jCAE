@@ -65,7 +65,7 @@ public class MEdge1D
 	 *
 	 * @return the public identifer.
 	 */
-	public int getID()
+	public final int getID()
 	{
 		if (id > 0)
 			return mapHashcodeToID.get(this);
@@ -77,7 +77,7 @@ public class MEdge1D
 	 *
 	 * @return the first <code>MNode1D</code> instance.
 	 */
-	public MNode1D getNodes1()
+	public final MNode1D getNodes1()
 	{
 		return pt1;
 	}
@@ -87,13 +87,13 @@ public class MEdge1D
 	 *
 	 * @return the second <code>MNode1D</code> instance.
 	 */
-	public MNode1D getNodes2()
+	public final MNode1D getNodes2()
 	{
 		return pt2;
 	}
 	
 	@Override
-	public String toString()
+	public final String toString()
 	{
 		String r = "MEdge1D: id="+getID()+
 			" n1="+pt1.getID()+" n2="+pt2.getID();

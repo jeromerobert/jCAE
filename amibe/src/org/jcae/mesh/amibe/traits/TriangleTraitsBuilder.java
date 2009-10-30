@@ -34,7 +34,7 @@ public class TriangleTraitsBuilder extends TraitsBuilder
 	 *
 	 * @return  this instance
 	 */
-	public TriangleTraitsBuilder addVirtualHalfEdge()
+	public final TriangleTraitsBuilder addVirtualHalfEdge()
 	{
 		attributes |= VIRTUALHALFEDGE;
 		return this;
@@ -46,7 +46,7 @@ public class TriangleTraitsBuilder extends TraitsBuilder
 	 *
 	 * @return  this instance
 	 */
-	public TriangleTraitsBuilder addHalfEdge()
+	public final TriangleTraitsBuilder addHalfEdge()
 	{
 		attributes |= HALFEDGE;
 		return this;

@@ -50,7 +50,7 @@ public class Vertex0d implements AlgoInterface
 	}
 	
 	@Override
-	public String toString()
+	public final String toString()
 	{
 		return "Algo: "+getClass().getName();
 	}

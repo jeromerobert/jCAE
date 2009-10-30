@@ -56,7 +56,7 @@ public class BasicMesh
 	/**
 	 * Launch method to mesh a surface.
 	 */
-	public void compute()
+	public final void compute()
 	{
 		mesh.pushCompGeom(3);
 		new Insertion(mesh, 16.0 / Math.sqrt(2.0), 16.0 * Math.sqrt(2.0)).compute();

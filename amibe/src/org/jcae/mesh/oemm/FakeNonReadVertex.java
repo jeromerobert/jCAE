@@ -46,7 +46,7 @@ public class FakeNonReadVertex extends Vertex
 		setWritable(false);
 	}
 
-	public int getLocalNumber() {
+	public final int getLocalNumber() {
 		return getLabel() - containingNode.minIndex;
 	}
 
@@ -55,12 +55,12 @@ public class FakeNonReadVertex extends Vertex
 		return false;
 	}
 
-	public int getOEMMIndex() {
+	public final int getOEMMIndex() {
 		return containingNode.leafIndex;
 	}
 
 	@Override
-	public String toString() {
+	public final String toString() {
 		return super.toString()+" (fake vertex)";
 	}
 

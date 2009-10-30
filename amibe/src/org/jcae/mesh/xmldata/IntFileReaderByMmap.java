@@ -67,7 +67,7 @@ public class IntFileReaderByMmap implements IntFileReader
 		return get(dst, 0, dst.length);
 	}
 
-	public int get(int[] dst, int offset, int len) throws IOException
+	public final int get(int[] dst, int offset, int len) throws IOException
 	{
 		if (tb.remaining() < len)
 			len = tb.remaining();
@@ -80,7 +80,7 @@ public class IntFileReaderByMmap implements IntFileReader
 		return get(index, dst, 0, dst.length);
 	}
 
-	public int get(int index, int[] dst, int offset, int len) throws IOException
+	public final int get(int index, int[] dst, int offset, int len) throws IOException
 	{
 		fc.position(index * 4L);
 		return get(dst, offset, len);

@@ -84,7 +84,7 @@ public class PrimitiveFileReaderFactory
 	 * @param file  a file name containing only integers
 	 * @return an IntFileReader instance
 	 */
-	public IntFileReader getIntReader(File file) throws IOException
+	public final IntFileReader getIntReader(File file) throws IOException
 	{
 		return instance.getIntFileReader(file);
 	}
@@ -95,7 +95,7 @@ public class PrimitiveFileReaderFactory
 	 * @param file  a file name containing only double values
 	 * @return a DoubleFileReader instance
 	 */
-	public DoubleFileReader getDoubleReader(File file) throws IOException
+	public final DoubleFileReader getDoubleReader(File file) throws IOException
 	{
 		return instance.getDoubleFileReader(file);
 	}

@@ -128,7 +128,7 @@ public class TetGen implements AlgoInterface
 	}
 	
 	@Override
-	public String toString()
+	public final String toString()
 	{
 		String ret = "Algo: "+getClass().getName();
 		ret += "\n"+banner;

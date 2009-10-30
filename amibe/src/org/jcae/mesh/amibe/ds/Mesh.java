@@ -143,7 +143,7 @@ public class Mesh implements Serializable
 		}
 
 		@Override
-		public String toString()
+		public final String toString()
 		{
 			return "outer";
 		}
@@ -182,7 +182,7 @@ public class Mesh implements Serializable
 		meshParameters = mp;
 	}
 	
-	public MeshParameters getMeshParameters()
+	public final MeshParameters getMeshParameters()
 	{
 		return meshParameters;
 	}
@@ -192,7 +192,7 @@ public class Mesh implements Serializable
 	 *
 	 * @param t  triangle being added.
 	 */
-	public void add(Triangle t)
+	public final void add(Triangle t)
 	{
 		triangleList.add(t);
 	}
@@ -202,7 +202,7 @@ public class Mesh implements Serializable
 	 *
 	 * @param t  triangle being removed.
 	 */
-	protected void remove(Triangle t)
+	protected final void remove(Triangle t)
 	{
 		triangleList.remove(t);
 		if (!(t instanceof TriangleHE))
@@ -225,7 +225,7 @@ public class Mesh implements Serializable
 	 *
 	 * @return triangle list.
 	 */
-	public Collection<Triangle> getTriangles()
+	public final Collection<Triangle> getTriangles()
 	{
 		return triangleList;
 	}
@@ -235,7 +235,7 @@ public class Mesh implements Serializable
 	 *
 	 * @param triangles  desired number of triangles
 	 */
-	public void ensureCapacity(int triangles)
+	public final void ensureCapacity(int triangles)
 	{
 		traitsBuilder.ensureCapacity(triangles, traits);
 	}
@@ -243,7 +243,7 @@ public class Mesh implements Serializable
 	/**
 	 *  Adds a vertex to vertex list.
 	 */
-	public void add(Vertex vertex)
+	public final void add(Vertex vertex)
 	{
 		nodeList.add(vertex);
 	}
@@ -253,7 +253,7 @@ public class Mesh implements Serializable
 	 *
 	 * @param v  vertex being removed.
 	 */
-	public void remove(Vertex v)
+	public final void remove(Vertex v)
 	{
 		nodeList.remove(v);
 	}
@@ -274,7 +274,7 @@ public class Mesh implements Serializable
 	 * @return <code>true</code> if mesh was created with a <code>MeshTraitsBuilder</code>
 	 * instance defining nodes, and <code>false</code> otherwise.
 	 */
-	public boolean hasNodes()
+	public final boolean hasNodes()
 	{
 		return traitsBuilder.hasNodes();
 	}
@@ -284,7 +284,7 @@ public class Mesh implements Serializable
 	 *
 	 * @return the Kd-tree associated with this mesh.
 	 */
-	public KdTree<Vertex> getKdTree()
+	public final KdTree<Vertex> getKdTree()
 	{
 		return traitsBuilder.getKdTree(traits);
 	}
@@ -296,7 +296,7 @@ public class Mesh implements Serializable
 	 * @param bbmin  coordinates of bottom-left vertex
 	 * @param bbmax  coordinates of top-right vertex
 	 */
-	public void resetKdTree(double [] bbmin, double [] bbmax)
+	public final void resetKdTree(double [] bbmin, double [] bbmax)
 	{
 		double [] bbox = new double[2*bbmin.length];
 		for (int i = 0; i < bbmin.length; i++)
@@ -314,7 +314,7 @@ public class Mesh implements Serializable
 	 * @param v  array of three vertices
 	 * @return a new {@link Triangle} instance composed of three vertices
 	 */
-	public Triangle createTriangle(Vertex [] v)
+	public final Triangle createTriangle(Vertex [] v)
 	{
 		assert v.length == 3;
 		return factory.createTriangle(v);
@@ -326,7 +326,7 @@ public class Mesh implements Serializable
 	 * @param v  array of four vertices
 	 * @return a new {@link Triangle} instance composed of four vertices
 	 */
-	public Triangle createTetrahedron(Vertex [] v)
+	public final Triangle createTetrahedron(Vertex [] v)
 	{
 		assert v.length == 4;
 		return factory.createTriangle(v);
@@ -340,7 +340,7 @@ public class Mesh implements Serializable
 	 * @param v2  third vertex
 	 * @return a new {@link Triangle} instance composed of three vertices
 	 */
-	public Triangle createTriangle(Vertex v0, Vertex v1, Vertex v2)
+	public final Triangle createTriangle(Vertex v0, Vertex v1, Vertex v2)
 	{
 		return factory.createTriangle(v0, v1, v2);
 	}
@@ -351,7 +351,7 @@ public class Mesh implements Serializable
 	 * @param that  triangle to clone
 	 * @return a new {@link Triangle} instance
 	 */
-	public Triangle createTriangle(Triangle that)
+	public final Triangle createTriangle(Triangle that)
 	{
 		return factory.createTriangle(that);
 	}
@@ -362,7 +362,7 @@ public class Mesh implements Serializable
 	 * @param p  coordinates
 	 * @return a new {@link Vertex} instance with this location.
 	 */
-	public Vertex createVertex(double [] p)
+	public final Vertex createVertex(double [] p)
 	{
 		return factory.createVertex(p);
 	}
@@ -374,7 +374,7 @@ public class Mesh implements Serializable
 	 * @param v  second coordinate
 	 * @return a new {@link Vertex} instance with this location.
 	 */
-	public Vertex createVertex(double u, double v)
+	public final Vertex createVertex(double u, double v)
 	{
 		return factory.createVertex(u, v);
 	}
@@ -387,7 +387,7 @@ public class Mesh implements Serializable
 	 * @param z  third coordinate
 	 * @return a new {@link Vertex} instance with this location.
 	 */
-	public Vertex createVertex(double x, double y, double z)
+	public final Vertex createVertex(double x, double y, double z)
 	{
 		return factory.createVertex(x, y, z);
 	}
@@ -435,7 +435,7 @@ public class Mesh implements Serializable
 	 * @return <code>true</code> if mesh contains adjacency relations,
 	 *         <code>false</code> otherwise.
 	 */
-	public boolean hasAdjacency()
+	public final boolean hasAdjacency()
 	{
 		return factory.hasAdjacency();
 	}
@@ -443,7 +443,7 @@ public class Mesh implements Serializable
 	/**
 	 * Build adjacency relations between triangles.
 	 */
-	public void buildAdjacency()
+	public final void buildAdjacency()
 	{
 		Collection<Vertex> vertices;
 		if (nodeList == null)
@@ -792,7 +792,7 @@ public class Mesh implements Serializable
 	 *   it is considered as a ridge and its endpoints are treated as if they
 	 *   belong to a CAD edge.
 	 */
-	public int buildRidges(double minAngle)
+	public final int buildRidges(double minAngle)
 	{
 		int toReturn = 0;
 		if (triangleList.isEmpty())
@@ -864,7 +864,7 @@ public class Mesh implements Serializable
 	/**
 	 * Build group boundaries.
 	 */
-	public int buildGroupBoundaries()
+	public final int buildGroupBoundaries()
 	{
 		if (triangleList.isEmpty())
 			return 0;
@@ -900,7 +900,7 @@ public class Mesh implements Serializable
 	}
 
 	// This routine can be called when inverting triangles to have consistent normals
-	int scratchVirtualBoundaries()
+	final int scratchVirtualBoundaries()
 	{
 		if (triangleList.isEmpty())
 			return 0;
@@ -1002,7 +1002,7 @@ public class Mesh implements Serializable
 	 * }
 	 * Sets an unused boundary reference on a vertex.
 	 */
-	public void setRefVertexOnBoundary(Vertex v)
+	public final void setRefVertexOnBoundary(Vertex v)
 	{
 		maxLabel++;
 		v.setRef(maxLabel);
@@ -1016,7 +1016,7 @@ public class Mesh implements Serializable
 	/**
 	 * Returns square distance between 2 vertices.
 	 */
-	public double distance2(double [] x1, double [] x2)
+	public final double distance2(double [] x1, double [] x2)
 	{
 		assert x1.length == 3;
 		double dx = x1[0] - x2[0];
@@ -1032,7 +1032,7 @@ public class Mesh implements Serializable
 	 * @param v   the resulting vertex
 	 * @return <code>true</code> if this edge can be contracted into the single vertex n, <code>false</code> otherwise.
 	 */
-	public boolean canCollapseEdge(AbstractHalfEdge e, Vertex v)
+	public final boolean canCollapseEdge(AbstractHalfEdge e, Vertex v)
 	{
 		return e.canCollapse(v);
 	}
@@ -1047,7 +1047,7 @@ public class Mesh implements Serializable
 	 * because there would be no valid return value.  User must then run this
 	 * method against symmetric edge, this is not done automatically.
 	 */
-	public AbstractHalfEdge edgeCollapse(AbstractHalfEdge e, Vertex v)
+	public final AbstractHalfEdge edgeCollapse(AbstractHalfEdge e, Vertex v)
 	{
 		return e.collapse(this, v);
 	}
@@ -1058,7 +1058,7 @@ public class Mesh implements Serializable
 	 * @param e   edge being splitted
 	 * @param v   the resulting vertex
 	 */
-	public AbstractHalfEdge vertexSplit(AbstractHalfEdge e, Vertex v)
+	public final AbstractHalfEdge vertexSplit(AbstractHalfEdge e, Vertex v)
 	{
 		return e.split(this, v);
 	}
@@ -1070,7 +1070,7 @@ public class Mesh implements Serializable
 	 * @throws IllegalArgumentException if edge is on a boundary or belongs
 	 * to an outer triangle.
 	 */
-	public AbstractHalfEdge edgeSwap(AbstractHalfEdge e)
+	public final AbstractHalfEdge edgeSwap(AbstractHalfEdge e)
 	{
 		return e.swap();
 	}
@@ -1083,7 +1083,7 @@ public class Mesh implements Serializable
 	 * @return <code>true</code> if edge origin can be moved without producing
 	 *         inverted triangles, <code>false</code> otherwise.
 	 */
-	public boolean checkNewRingNormals(AbstractHalfEdge e, double [] pt)
+	public final boolean checkNewRingNormals(AbstractHalfEdge e, double [] pt)
 	{
 		return e.checkNewRingNormals(pt);
 	}
@@ -1094,7 +1094,7 @@ public class Mesh implements Serializable
 	 *
 	 * @see #isValid(boolean)
 	 */
-	public boolean isValid()
+	public final boolean isValid()
 	{
 		return isValid(true);
 	}
@@ -1490,7 +1490,7 @@ public class Mesh implements Serializable
 		return true;
 	}
 	
-	public boolean checkNoInvertedTriangles()
+	public final boolean checkNoInvertedTriangles()
 	{
 		AbstractHalfEdge ot = null;
 		AbstractHalfEdge sym = null;
@@ -1524,7 +1524,7 @@ public class Mesh implements Serializable
 		return true;
 	}
 
-	public boolean checkNoDegeneratedTriangles()
+	public final boolean checkNoDegeneratedTriangles()
 	{
 		for (Triangle t : triangleList)
 		{

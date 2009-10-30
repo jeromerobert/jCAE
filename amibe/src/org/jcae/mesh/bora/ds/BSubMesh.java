@@ -84,17 +84,17 @@ public class BSubMesh
 		return model;
 	}
 	
-	public int getId()
+	public final int getId()
 	{
 		return id;
 	}
 
-	public Collection<Constraint> getConstraints()
+	public final Collection<Constraint> getConstraints()
 	{
 		return Collections.unmodifiableCollection(constraints);
 	}
 
-	void resetConstraints()
+	final void resetConstraints()
 	{
 		constraints.clear();
 	}
@@ -104,7 +104,7 @@ public class BSubMesh
 	 *
 	 * @param cons  constraint to add
 	 */
-	public void add(Constraint cons)
+	public final void add(Constraint cons)
 	{
 		if (LOGGER.isLoggable(Level.FINE))
 			LOGGER.log(Level.FINE, "Add constraint "+cons+" to submesh "+id);

@@ -71,7 +71,7 @@ public class CheckDelaunay
 	/**
 	 * Swap edges which are not Delaunay.
 	 */
-	public void compute()
+	public final void compute()
 	{
 		TriangleVH t;
 		VirtualHalfEdge2D ot, sym;

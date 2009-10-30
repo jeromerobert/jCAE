@@ -973,11 +973,11 @@ public class Storage
 			
 		}
 
-		public OEMM.Node getContainedNode() {
+		public final OEMM.Node getContainedNode() {
 			return containedNode;
 		}
 
-		public int getLocalIndex() {
+		public final int getLocalIndex() {
 			return localIndex;
 		}
 	}

@@ -80,7 +80,7 @@ public class Matrix3D implements Serializable
 	/**
 	 * Transpose current matrix.
 	 */
-	public void transp()
+	public final void transp()
 	{
 		swap(0, 1);
 		swap(0, 2);
@@ -94,7 +94,7 @@ public class Matrix3D implements Serializable
 	 * @param A  another Matrix3D
 	 * @return a new Matrix3D containing the multiplication this*A
 	 */
-	public Matrix3D multR(Matrix3D A)
+	public final Matrix3D multR(Matrix3D A)
 	{
 		Matrix3D ret = new Matrix3D();
 		for (int i = 0; i < 3; i++)
@@ -114,7 +114,7 @@ public class Matrix3D implements Serializable
 	 * @param A  another Matrix3D
 	 * @return a new Matrix3D containing the multiplication A*this
 	 */
-	public Matrix3D multL(Matrix3D A)
+	public final Matrix3D multL(Matrix3D A)
 	{
 		Matrix3D ret = new Matrix3D();
 		for (int i = 0; i < 3; i++)
@@ -127,7 +127,7 @@ public class Matrix3D implements Serializable
 		return ret;
 	}
 	
-	public void apply(double [] in, double [] out)
+	public final void apply(double [] in, double [] out)
 	{
 		if (3 != in.length)
 			throw new IllegalArgumentException(in.length+" is different from 3");
@@ -135,7 +135,7 @@ public class Matrix3D implements Serializable
 			out[i] = data[i] * in[0] + data[i+3] * in[1] + data[i+6] * in[2];
 	}
 	
-	public void getValues(double [] temp)
+	public final void getValues(double [] temp)
 	{
 		System.arraycopy(data, 0, temp, 0, 9);
 	}
@@ -277,7 +277,7 @@ public class Matrix3D implements Serializable
 	}
 	
 	@Override
-	public String toString()
+	public final String toString()
 	{
 		StringBuilder ret = new StringBuilder();
 		for (int i = 0; i < 3; i++)

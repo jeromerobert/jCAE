@@ -74,7 +74,7 @@ public class UniformLength
 	/**
 	 * Explores each edge of the mesh and calls the discretisation method.
 	 */
-	public void compute()
+	public final void compute()
 	{
 		int nbTEdges = 0, nbNodes = 0, nbEdges = 0;
 		/*  First compute current nbNodes and nbEdges  */
@@ -112,7 +112,7 @@ public class UniformLength
 	 * @return <code>true</code> if this edge was successfully discretized,
 	 * <code>false</code> otherwise.
 	 */
-	public boolean computeEdge(SubMesh1D submesh1d)
+	public final boolean computeEdge(SubMesh1D submesh1d)
 	{
 		int nbPoints;
 		boolean isCircular = false;

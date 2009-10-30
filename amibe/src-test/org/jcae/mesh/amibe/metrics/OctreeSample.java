@@ -201,7 +201,7 @@ public class OctreeSample
 		}
 	}
 
-	public BranchGroup bgOctree()
+	public final BranchGroup bgOctree()
 	{
 		BranchGroup bg=new BranchGroup();
 		
@@ -221,7 +221,7 @@ public class OctreeSample
 		return bg;
 	}
 	
-	public BranchGroup bgVertices()
+	public final BranchGroup bgVertices()
 	{
 		BranchGroup bg=new BranchGroup();
 		CountVertProcedure cproc = new CountVertProcedure();

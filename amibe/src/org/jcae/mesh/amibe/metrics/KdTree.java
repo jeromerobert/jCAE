@@ -165,12 +165,12 @@ public class KdTree<T extends Location>
 		 */
 		private Object [] subCell;
 
-		public boolean isLeaf()
+		public final boolean isLeaf()
 		{
 			return nItems >= 0;
 		}
 
-		public int count()
+		public final int count()
 		{
 			if (nItems >= 0)
 				return nItems;
@@ -178,7 +178,7 @@ public class KdTree<T extends Location>
 		}
 
 		@SuppressWarnings("unchecked")
-		public T getVertex(int i)
+		public final T getVertex(int i)
 		{
 			assert nItems > 0 && i < nItems;
 			return (T) subCell[i];
@@ -297,7 +297,7 @@ public class KdTree<T extends Location>
 	 * @param p  double coordinates
 	 * @param i  integer coordinates
 	 */
-	public void double2int(double [] p, int [] i)
+	public final void double2int(double [] p, int [] i)
 	{
 		for (int k = 0; k < dimension; k++)
 			i[k] = (int) ((p[k] - x0[k]) * x0[dimension]);
@@ -308,7 +308,7 @@ public class KdTree<T extends Location>
 	 * @param i  integer coordinates
 	 * @param p  double coordinates
 	 */
-	public void int2double(int [] i, double [] p)
+	public final void int2double(int [] i, double [] p)
 	{
 		for (int k = 0; k < dimension; k++)
 			p[k] = x0[k] + i[k] / x0[dimension];
@@ -363,7 +363,7 @@ public class KdTree<T extends Location>
 	 * @param v  the vertex being added.
 	 * @return <code>true</code> if cell was full and had to be split, <code>false</code> otherwise.
 	 */
-	public boolean add(T v)
+	public final boolean add(T v)
 	{
 		if (nCells == 0)
 			throw new RuntimeException("KdTree.setup() must be called before KdTree.add()");
@@ -438,7 +438,7 @@ public class KdTree<T extends Location>
 	 *
 	 * @param v  the vertex being removed.
 	 */
-	public void remove(T v)
+	public final void remove(T v)
 	{
 		if (nCells == 0)
 			throw new RuntimeException("KdTree.setup() must be called before KdTree.remove()");
@@ -509,7 +509,7 @@ public class KdTree<T extends Location>
 	 * @param capacity  initial capacity of the <code>Collection</code>.
 	 * @return a collection containing all vertices.
 	 */
-	public Collection<T> getAllVertices(int capacity)
+	public final Collection<T> getAllVertices(int capacity)
 	{
 		GetAllVerticesProcedure gproc = new GetAllVerticesProcedure(capacity);
 		walk(gproc);
@@ -854,7 +854,7 @@ public class KdTree<T extends Location>
 	 * @param uv  coordinates.
 	 * @return the nearest vertex.
 	 */
-	public T getNearestVertexDebug(Metric metric, double[] uv)
+	public final T getNearestVertexDebug(Metric metric, double[] uv)
 	{
 		if (root.nItems == 0)
 			return null;

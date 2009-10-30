@@ -186,7 +186,7 @@ public class MMesh1D extends MMesh0D
 	 *
 	 * @return the topological shape.
 	 */
-	public CADShape getGeometry()
+	public final CADShape getGeometry()
 	{
 		return shape;
 	}
@@ -197,7 +197,7 @@ public class MMesh1D extends MMesh0D
 	 * a file
 	 * @return the file name containing the topological shape.
 	 */
-	public String getGeometryFilename()
+	public final String getGeometryFilename()
 	{
 		return filename;
 	}
@@ -207,7 +207,7 @@ public class MMesh1D extends MMesh0D
 	 *
 	 * @return the set of faces containing this topological edge.
 	 */
-	public Set<CADFace> getAdjacentFaces(CADEdge E)
+	public final Set<CADFace> getAdjacentFaces(CADEdge E)
 	{
 		Set<CADFace> ret = mapTEdgeToFaces.get(E);
 		// May be null for beams
@@ -217,7 +217,7 @@ public class MMesh1D extends MMesh0D
 	/**
 	 * Update node labels.
 	 */
-	public void updateNodeLabels()
+	public final void updateNodeLabels()
 	{
 		LOGGER.fine("Update node labels");
 		//  Resets all labels
@@ -252,7 +252,7 @@ public class MMesh1D extends MMesh0D
 	 * and before any 2D meshing is performed.
 	 *
 	 */
-	public void duplicateEdges()
+	public final void duplicateEdges()
 	{
 		LOGGER.fine("Compute vertex references");
 		CADExplorer expV = CADShapeFactory.getFactory().newExplorer();
@@ -312,7 +312,7 @@ public class MMesh1D extends MMesh0D
 	 *
 	 * @return the list of topological edges.
 	 */
-	public Collection<CADEdge> getTEdges()
+	public final Collection<CADEdge> getTEdges()
 	{
 		return Collections.unmodifiableCollection(mapTEdgeToSubMesh1D.keySet());
 	}
@@ -327,7 +327,7 @@ public class MMesh1D extends MMesh0D
 	 *
 	 * @return the list of topological edges.
 	 */
-	public Collection<BDiscretization> getBEdges()
+	public final Collection<BDiscretization> getBEdges()
 	{
 		return Collections.unmodifiableCollection(mapDiscrToSubMesh1D.keySet());
 	}
@@ -387,7 +387,7 @@ public class MMesh1D extends MMesh0D
 	 * @param E  a topological edge.
 	 * @return the <code>SubMesh1D</code> instance associated with it.
 	 */
-	public SubMesh1D getSubMesh1DFromMap(CADEdge E)
+	public final SubMesh1D getSubMesh1DFromMap(CADEdge E)
 	       throws NoSuchElementException
 	{
 		if (! mapTEdgeToSubMesh1D.containsKey(E))
@@ -402,7 +402,7 @@ public class MMesh1D extends MMesh0D
 	 * @param discrE  discretization of an edge.
 	 * @return the <code>SubMesh1D</code> instance associated with it.
 	 */
-	public SubMesh1D getSubMesh1DFromMap(BDiscretization discrE)
+	public final SubMesh1D getSubMesh1DFromMap(BDiscretization discrE)
 	       throws NoSuchElementException
 	{
 		if (! mapTEdgeToSubMesh1D.containsKey(discrE))
@@ -410,7 +410,7 @@ public class MMesh1D extends MMesh0D
 		return mapTEdgeToSubMesh1D.get(discrE);
 	}
 
-	public Vertex2D [] boundaryNodes(CADFace face, MeshParameters mp)
+	public final Vertex2D [] boundaryNodes(CADFace face, MeshParameters mp)
 	{
 		double epsilon = mp.getEpsilon();
 		boolean accumulateEpsilon = mp.hasCumulativeEpsilon();
@@ -536,7 +536,7 @@ public class MMesh1D extends MMesh0D
 	 * @return <code>true</code> if all checks pass.
 	 * @throws AssertionError if a check fails.
 	 */
-	public boolean isValid()
+	public final boolean isValid()
 	{
 		for(Iterator<SubMesh1D> it=mapTEdgeToSubMesh1D.values().iterator();it.hasNext();)
 		{
@@ -562,7 +562,7 @@ public class MMesh1D extends MMesh0D
 	}
 	
 	@Override
-	public String toString()
+	public final String toString()
 	{
 		String cr=System.getProperty("line.separator");
 		StringBuilder r = new StringBuilder("MMesh1D"+cr);

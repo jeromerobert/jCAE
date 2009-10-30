@@ -121,7 +121,7 @@ public class Triangle implements Serializable
 	 *
 	 * @return the group identifier of this triangle.
 	 */
-	public int getGroupId()
+	public final int getGroupId()
 	{
 		return groupId;
 	}
@@ -131,17 +131,17 @@ public class Triangle implements Serializable
 	 *
 	 * @param g  the group identifier of this triangle.
 	 */
-	public void setGroupId(int g)
+	public final void setGroupId(int g)
 	{
 		groupId = g;
 	}
 	
-	public void setReadable(boolean b)
+	public final void setReadable(boolean b)
 	{
 		readable = b;
 	}
 	
-	public void setWritable(boolean b)
+	public final void setWritable(boolean b)
 	{
 		writable = b;
 	}
@@ -151,7 +151,7 @@ public class Triangle implements Serializable
 		return readable;
 	}
 	
-	public boolean isWritable()
+	public final boolean isWritable()
 	{
 		return writable;
 	}
@@ -239,7 +239,7 @@ public class Triangle implements Serializable
 		 * Unmark triangles.  This method must be called before freeing
 		 * the list.
 		 */
-		public void clear()
+		public final void clear()
 		{
 			Triangle next;
 			for (Triangle start = listHead; start != listSentinel; start = next)
@@ -291,7 +291,7 @@ public class Triangle implements Serializable
 		/**
 		 * Check whether this element appears in the list.
 		 */
-		public boolean contains(Triangle o)
+		public final boolean contains(Triangle o)
 		{
 			return o.listNext != null;
 		}
@@ -299,7 +299,7 @@ public class Triangle implements Serializable
 		/**
 		 * Get list size.
 		 */
-		public int size()
+		public final int size()
 		{
 			return listSize;
 		}
@@ -307,7 +307,7 @@ public class Triangle implements Serializable
 		/**
 		 * Check whether this list is empty.
 		 */
-		public boolean isEmpty()
+		public final boolean isEmpty()
 		{
 			return listTail == listHead && listTail.listNext == listSentinel;
 		}
@@ -316,7 +316,7 @@ public class Triangle implements Serializable
 		 * Create an iterator over linked triangles.  Note that the list
 		 * can be extended while iterating over elements.
 		 */
-		public Iterator<Triangle> iterator()
+		public final Iterator<Triangle> iterator()
 		{
 			return new Iterator<Triangle>()
 			{

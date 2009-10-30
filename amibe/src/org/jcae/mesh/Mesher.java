@@ -102,7 +102,7 @@ public class Mesher
 	 * Read system properties which affect the meshing behavior.
 	 * See package level javadoc for more information. 
 	 */
-	protected void readProperties()
+	protected final void readProperties()
 	{
 		//TODO Clumsy code, should be rewrote. here are some avenues.
 		//The default value for a boolean property is always false. Doing so
@@ -221,7 +221,7 @@ public class Mesher
 	 * Compute 1D mesh
 	 * @param brepFile basename of the BRep file
 	 */
-	protected MMesh1D mesh1D(String brepFile)
+	protected final MMesh1D mesh1D(String brepFile)
 	{
 		logger.info("1D mesh");
 		MMesh1D mesh1D = new MMesh1D(geometryFile);
@@ -252,7 +252,7 @@ public class Mesher
 	 * @param mtb container for 2D mesh traits
 	 * @return <code>true</code> if face had been successfully meshed, <code>false</code> otherwise.
 	 */
-	protected boolean mesh2D(int iFace, CADFace face, MMesh1D mesh1D, MeshParameters mp,
+	protected final boolean mesh2D(int iFace, CADFace face, MMesh1D mesh1D, MeshParameters mp,
 		String brepFile, MeshTraitsBuilder mtb)
 	{
 		if(Boolean.getBoolean("org.jcae.mesh.Mesher.explodeBrep"))
@@ -306,7 +306,7 @@ public class Mesher
 	/**
 	 * Export the created mesh to various format
 	 */
-	protected void exportMesh()
+	protected final void exportMesh()
 	{
 		if (exportMESH)
 		{
@@ -332,7 +332,7 @@ public class Mesher
 	 * Read 2D meshes and compute 3D mesh
 	 * @param brepFile
 	 */
-	protected void mesh3D(String brepFile)
+	protected final void mesh3D(String brepFile)
 	{
 		MeshToMMesh3DConvert m2dTo3D = new MeshToMMesh3DConvert(outputDir, brepFile, shape);
 		m2dTo3D.exportUNV(exportUNV, unvName);
@@ -373,7 +373,7 @@ public class Mesher
 	 * Run the mesh
 	 * @return the list of face id on which the mesher failed
 	 */
-	protected TIntArrayList mesh()
+	protected final TIntArrayList mesh()
 	{
 		readProperties();
 		//  Declare all variables here
@@ -492,7 +492,7 @@ public class Mesher
 	 * @param badGroups The list of face id which failed
 	 * @param startDate The date when the mesher was started
 	 */
-	protected void report(TIntArrayList badGroups, String startDate)
+	protected final void report(TIntArrayList badGroups, String startDate)
 	{
 		
 		String endDate = DATE_FORMAT.format(new Date());
@@ -573,7 +573,7 @@ public class Mesher
 	 * @param args The main function argument 
 	 * @throws IOException If the creation of the output directory failed
 	 */
-	protected void parseCommandLine(String[] args) throws IOException
+	protected final void parseCommandLine(String[] args) throws IOException
 	{
 		if (args.length < 2 || args.length > 4)
 		{

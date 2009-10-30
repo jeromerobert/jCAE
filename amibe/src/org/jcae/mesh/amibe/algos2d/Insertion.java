@@ -104,7 +104,7 @@ public class Insertion
 	/**
 	 * Iteratively insert inner nodes.
 	 */
-	public void compute()
+	public final void compute()
 	{
 		int nrIter = 0;
 		LOGGER.config("Enter compute()");

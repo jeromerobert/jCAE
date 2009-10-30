@@ -87,7 +87,7 @@ public class QuadricProjection implements LocalSurfaceProjection
 	 * @return <code>true</code> if projection has been performed
 	 * successfully, <code>false</code> otherwise.
 	 */
-	public boolean project(Location pt)
+	public final boolean project(Location pt)
 	{
 		double [] glob = new double[3];
 		double [] param = pt.getUV();
@@ -107,7 +107,7 @@ public class QuadricProjection implements LocalSurfaceProjection
 		return true;
 	}
 	
-	public boolean canProject()
+	public final boolean canProject()
 	{
 		return qD != null;
 	}

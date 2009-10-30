@@ -33,7 +33,7 @@ public class OCCGeomSurface implements CADGeomSurface
 	{
 	}
 	
-	public void setSurface(Object o)
+	public final void setSurface(Object o)
 	{
 		mySurface = (Geom_Surface) o;
 	}

@@ -40,12 +40,12 @@ class KeepOrientationHashingStrategy implements TObjectHashingStrategy<CADShape>
 		return INSTANCE;
 	}
 
-	public int computeHashCode(CADShape o)
+	public final int computeHashCode(CADShape o)
 	{
 		return o.hashCode();
 	}
 
-	public boolean equals(CADShape s1, CADShape s2)
+	public final boolean equals(CADShape s1, CADShape s2)
 	{
 		return s1 != null && s1.equals(s2) && s1.orientation() == s2.orientation();
 	}

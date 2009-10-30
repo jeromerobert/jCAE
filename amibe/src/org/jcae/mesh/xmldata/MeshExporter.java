@@ -72,7 +72,7 @@ abstract public class MeshExporter
 		 * @see java.text.NumberFormat#format(double, java.lang.StringBuffer, java.text.FieldPosition)
 		 */
 		@Override
-		public StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos)
+		public final StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos)
 		{
 			StringBuffer sb=super.format(number, toAppendTo, pos);
 			int n=sb.length()-3;
@@ -106,7 +106,7 @@ abstract public class MeshExporter
 		 * @see java.text.NumberFormat#format(double, java.lang.StringBuffer, java.text.FieldPosition)
 		 */
 		@Override
-		public StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos)
+		public final StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos)
 		{
 			return format((long)number, toAppendTo, pos);
 		}
@@ -115,7 +115,7 @@ abstract public class MeshExporter
 		 * @see java.text.NumberFormat#format(long, java.lang.StringBuffer, java.text.FieldPosition)
 		 */
 		@Override
-		public StringBuffer format(long number, StringBuffer toAppendTo, FieldPosition pos)
+		public final StringBuffer format(long number, StringBuffer toAppendTo, FieldPosition pos)
 		{
 			StringBuffer s=new StringBuffer();
 			s.append(number);
@@ -133,7 +133,7 @@ abstract public class MeshExporter
 		 * @see java.text.NumberFormat#parse(java.lang.String, java.text.ParsePosition)
 		 */
 		@Override
-		public Number parse(String source, ParsePosition parsePosition)
+		public final Number parse(String source, ParsePosition parsePosition)
 		{
 			throw new UnsupportedOperationException();
 		}
@@ -232,7 +232,7 @@ abstract public class MeshExporter
 		return toReturn;
 	}
 	
-	protected File getNodeFile()
+	protected final File getNodeFile()
 	{
 		Element xmlNodes = (Element) document.getElementsByTagName(
 			"nodes").item(0);
@@ -240,7 +240,7 @@ abstract public class MeshExporter
 		return new File(directory, a);
 	}
 	
-	protected File getTriaFile()
+	protected final File getTriaFile()
 	{
 		Element xmlNodes = (Element) document.getElementsByTagName(
 			"triangles").item(0);
@@ -249,7 +249,7 @@ abstract public class MeshExporter
 		return new File(directory, a);
 	}
 	
-	protected File getNormalFile()
+	protected final File getNormalFile()
 	{
 		Element xmlNormals = (Element) document.getElementsByTagName("normals").item(0);
 		if (xmlNormals == null)
@@ -258,7 +258,7 @@ abstract public class MeshExporter
 		return new File(directory, a);
 	}
 
-	protected File getGroupFile()
+	protected final File getGroupFile()
 	{
 		Element xmlGroups = (Element) document.getElementsByTagName("group").item(0);
 		if (xmlGroups == null)
@@ -350,7 +350,7 @@ abstract public class MeshExporter
 		return toReturn;
 	}	
 	
-	public void write(PrintStream out) throws ParserConfigurationException, SAXException, IOException
+	public final void write(PrintStream out) throws ParserConfigurationException, SAXException, IOException
 	{
 		readGroups();
 		int[] nodeIDs=readTriangles();
@@ -383,7 +383,7 @@ abstract public class MeshExporter
 	 * @throws SAXException
 	 * @throws ParserConfigurationException
 	 */
-	public void write(String fileName)
+	public final void write(String fileName)
 	{
 		logger.info("Export into file "+fileName+" (format "+getClass().getSimpleName()+")");
 		try
@@ -469,7 +469,7 @@ abstract public class MeshExporter
 			super(file);
 		}
 
-		public void setUnit(Unit unit)
+		public final void setUnit(Unit unit)
 		{
 			this.unit=unit;
 		}
@@ -533,7 +533,7 @@ abstract public class MeshExporter
 		}
 
 		@Override
-		public void writeInit(PrintStream arg0)
+		public final void writeInit(PrintStream arg0)
 			throws IOException
 		{
 			if(unit.equals(Unit.Unknown))

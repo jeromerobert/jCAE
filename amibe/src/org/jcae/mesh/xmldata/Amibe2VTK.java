@@ -118,7 +118,7 @@ public class Amibe2VTK
 	 * @throws SAXException
 	 * @throws IOException
 	 */
-	public void write(OutputStream out)
+	public final void write(OutputStream out)
 		throws ParserConfigurationException, SAXException, IOException
 	{
 		document=XMLHelper.parseXML(new File(directory, JCAEXMLData.xml3dFilename));
@@ -280,7 +280,7 @@ public class Amibe2VTK
 	 * It's a scalar double value which is the ID of the triangle.
 	 * It won't help you much, it's just to have the code somewhere?
 	 */
-	public void setDummyData(boolean dummyData)
+	public final void setDummyData(boolean dummyData)
 	{
 		this.dummyData = dummyData;
 	}

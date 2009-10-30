@@ -75,7 +75,7 @@ public class Groups
 		meshFile = xmlPath;
 	}
 		
-	public void addGroup(Group group)
+	public final void addGroup(Group group)
 	{
 		groups.add(group);
 		group.addPropertyChangeListener(groupPropertyChangeListener);
@@ -91,7 +91,7 @@ public class Groups
 	 * @throws SAXException
 	 * @throws ParserConfigurationException
 	 */
-	public Group fuse(Collection<Group> listGroup, String name)
+	public final Group fuse(Collection<Group> listGroup, String name)
 		throws TransformerException,
 		ParserConfigurationException, SAXException, IOException
 	{
@@ -219,7 +219,7 @@ public class Groups
 	/**
 	 * @return Returns the Groups
 	 */
-	public Group[] getGroups()
+	public final Group[] getGroups()
 	{
 		Group[] toReturn = new Group[groups.size()];
 		groups.toArray(toReturn);
@@ -273,7 +273,7 @@ public class Groups
 	 *@param groupFile the file groups.bin.
 	 *@param baseDir the directory containing jcae3d.xml.
 	 */
-	public void modifyXMLGroups(org.w3c.dom.Document xmlDoc,
+	public final void modifyXMLGroups(org.w3c.dom.Document xmlDoc,
 		java.io.File groupFile, String baseDir)
 	{		
 		org.w3c.dom.NodeList listGroups = xmlDoc.getElementsByTagName("groups");
@@ -301,7 +301,7 @@ public class Groups
 		}
 	}
 	
-	void modifyXML()
+	final void modifyXML()
 	{	
 		String xmlDir=meshFile;
 		String xmlFile = "jcae3d";
@@ -330,7 +330,7 @@ public class Groups
 	 *@param g the group.
 	 *@return an array of integers.
 	 */
-	public int[] readTrianglesGroup(File fileGroup, Group g)
+	public final int[] readTrianglesGroup(File fileGroup, Group g)
 	{		
 		int[] trianglesGroup = null;
 		IntFileReader ifr = null;
@@ -382,7 +382,7 @@ public class Groups
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
-	public String toString()
+	public final String toString()
 	{
 		return "Groups";
 	}

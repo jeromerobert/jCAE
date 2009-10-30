@@ -98,52 +98,52 @@ public class MeshParameters
 		}
 	}
 
-	public double getLength()
+	public final double getLength()
 	{
 		return edgeLength;
 	}
 
-	public void setLength(double e)
+	public final void setLength(double e)
 	{
 		edgeLength = e;
 	}
 
-	public double getEpsilon()
+	public final double getEpsilon()
 	{
 		return epsilon;
 	}
 
-	public void setEpsilon(double e)
+	public final void setEpsilon(double e)
 	{
 		epsilon = e;
 	}
 
-	public double getDeflection()
+	public final double getDeflection()
 	{
 		return deflection;
 	}
 
-	public boolean isIsotropic()
+	public final boolean isIsotropic()
 	{
 		return isotropic;
 	}
 
-	public boolean hasDeflection()
+	public final boolean hasDeflection()
 	{
 		return deflection > 0.0;
 	}
 
-	public boolean hasRelativeDeflection()
+	public final boolean hasRelativeDeflection()
 	{
 		return relativeDeflection;
 	}
 
-	public boolean hasCumulativeEpsilon()
+	public final boolean hasCumulativeEpsilon()
 	{
 		return cumulativeEpsilon;
 	}
 
-	public void scaleTolerance(double scale)
+	public final void scaleTolerance(double scale)
 	{
 		epsilon *= scale;
 	}

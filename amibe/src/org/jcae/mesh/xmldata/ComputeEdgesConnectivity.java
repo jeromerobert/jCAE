@@ -54,18 +54,18 @@ public class ComputeEdgesConnectivity
 			this.n2=n2;		
 		}
 		
-		int getN1()
+		final int getN1()
 		{
 			return n1;
 		}
 		
-		int getN2()
+		final int getN2()
 		{
 			return n2;
 		}
 		
 		@Override
-		public boolean equals(Object object)
+		public final boolean equals(Object object)
 		{
 			if(object instanceof Edge)
 			{
@@ -76,13 +76,13 @@ public class ComputeEdgesConnectivity
 		}
 		
 		@Override
-		public int hashCode()
+		public final int hashCode()
 		{
 			return n1+n2;
 		}
 		
 		@Override
-		public String toString()
+		public final String toString()
 		{
 			return "Edge["+n1+","+n2+"]";
 		}

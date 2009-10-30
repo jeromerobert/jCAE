@@ -141,17 +141,17 @@ public class BCADGraph
 		}
 	}
 
-	public BModel getModel()
+	public final BModel getModel()
 	{
 		return model;
 	}
 
-	public BCADGraphCell getRootCell()
+	public final BCADGraphCell getRootCell()
 	{
 		return root;
 	}
 
-	public int getFreeIndex()
+	public final int getFreeIndex()
 	{
 		return freeIndex;
 	}
@@ -162,7 +162,7 @@ public class BCADGraph
 	 * @param  s  CAD shape
 	 * @return  graph cell representing s
 	 */
-	public BCADGraphCell getByShape(CADShape s)
+	public final BCADGraphCell getByShape(CADShape s)
 	{
 		return cadShapeToGraphCell.get(s);
 	}
@@ -173,7 +173,7 @@ public class BCADGraph
 	 * @param  i  cell index
 	 * @return  graph cell with identifier i
 	 */
-	public BCADGraphCell getById(int i)
+	public final BCADGraphCell getById(int i)
 	{
 		return indexToCell.get(i);
 	}
@@ -181,7 +181,7 @@ public class BCADGraph
 	/**
 	 * Returns the list of cells for a given dimension.
 	 */
-	public Collection<BCADGraphCell> getCellList(CADShapeEnum cse)
+	public final Collection<BCADGraphCell> getCellList(CADShapeEnum cse)
 	{
 		CADExplorer exp = CADShapeFactory.getFactory().newExplorer();
 		Collection<BCADGraphCell> ret = new LinkedHashSet<BCADGraphCell>();
@@ -199,7 +199,7 @@ public class BCADGraph
 	/**
 	 * Prints the list of geometrical elements.
 	 */
-	public void printShapes()
+	public final void printShapes()
 	{
 		System.out.println("List of geometrical entities");
 		for (CADShapeEnum cse : CADShapeEnum.iterable(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND))

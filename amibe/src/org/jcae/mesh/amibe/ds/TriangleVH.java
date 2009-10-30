@@ -149,7 +149,7 @@ public class TriangleVH extends Triangle
 	 * @param num  the local number of this edge.
 	 * @return the adjacent TriangleVH
 	 */
-	protected TriangleVH getAdj(int num)
+	protected final TriangleVH getAdj(int num)
 	{
 		return adjacentTriangles[num];
 	}
@@ -160,7 +160,7 @@ public class TriangleVH extends Triangle
 	 * @param num  the local number of this edge
 	 * @param link  adjacent TriangleVH
 	 */
-	protected void setAdj(int num, TriangleVH link)
+	protected final void setAdj(int num, TriangleVH link)
 	{
 		adjacentTriangles[num] = link;
 	}
@@ -171,7 +171,7 @@ public class TriangleVH extends Triangle
 	 * @param num   edge local number
 	 * @return  local number of this symmetric edge
 	 */
-	protected int getAdjLocalNumber(int num)
+	protected final int getAdjLocalNumber(int num)
 	{
 		return (adjPos >> (2*num)) & 3;
 	}
@@ -182,7 +182,7 @@ public class TriangleVH extends Triangle
 	 * @param num   edge local number
 	 * @param pos   local number of symmetric edge
 	 */
-	protected void setAdjLocalNumber(int num, int pos)
+	protected final void setAdjLocalNumber(int num, int pos)
 	{
 		//  Clear previous adjacent position ...
 		adjPos &= ~(3 << (2*num));
@@ -196,7 +196,7 @@ public class TriangleVH extends Triangle
 	 * @param num  local edge number
 	 * @return  attributes of this edge
 	 */
-	protected int getEdgeAttributes(int num)
+	protected final int getEdgeAttributes(int num)
 	{
 		return edgeAttributes[num];
 	}
@@ -207,7 +207,7 @@ public class TriangleVH extends Triangle
 	 * @param num   local edge number
 	 * @param attr  attributes to set on this edge
 	 */
-	protected void setEdgeAttributes(int num, int attr)
+	protected final void setEdgeAttributes(int num, int attr)
 	{
 		edgeAttributes[num] = (byte) attr;
 	}
@@ -219,7 +219,7 @@ public class TriangleVH extends Triangle
 	 * @param attr  attributes to set on edges
 	 */
 	@Override
-	public void setAttributes(int attr)
+	public final void setAttributes(int attr)
 	{
 		edgeAttributes[0] |= attr;
 		edgeAttributes[1] |= attr;
@@ -247,7 +247,7 @@ public class TriangleVH extends Triangle
 	 * one of these attributes set, <code>false</code> otherwise
 	 */
 	@Override
-	public boolean hasAttributes(int attr)
+	public final boolean hasAttributes(int attr)
 	{
 		return ((edgeAttributes[0] | edgeAttributes[1] | edgeAttributes[2]) & attr) != 0;
 	}
@@ -260,7 +260,7 @@ public class TriangleVH extends Triangle
 	}
 	
 	@Override
-	public String toString()
+	public final String toString()
 	{
 		StringBuilder r = new StringBuilder(super.toString());
 		r.append("\nAdjacency: ").append(showAdj(0)).append(" ").append(showAdj(1)).append(" ").append(showAdj(2));

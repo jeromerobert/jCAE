@@ -52,7 +52,7 @@ public class TriangleHE extends Triangle
 	 * @return  an <code>HalfEdge</code> instance bound to this triangle
 	 */
 	@Override
-	public HalfEdge getAbstractHalfEdge()
+	public final HalfEdge getAbstractHalfEdge()
 	{
 		return e0;
 	}
@@ -75,7 +75,7 @@ public class TriangleHE extends Triangle
 	 *
 	 * @param e  edge to set as edge 0 of this triangle
 	 */
-	void setHalfEdge(HalfEdge e)
+	final void setHalfEdge(HalfEdge e)
 	{
 		e0 = e;
 	}
@@ -120,7 +120,7 @@ public class TriangleHE extends Triangle
 	}
 	
 	@Override
-	public String toString()
+	public final String toString()
 	{
 		StringBuilder r = new StringBuilder(super.toString());
 		r.append("\nEdge attributes: ").append(e0.getAttributes()).append(" ").append(e0.next().getAttributes()).append(" ").append(e0.prev().getAttributes());

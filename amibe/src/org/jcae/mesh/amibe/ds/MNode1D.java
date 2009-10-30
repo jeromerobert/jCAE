@@ -114,7 +114,7 @@ public class MNode1D
 	 *
 	 * @return the public identifer.
 	 */
-	public int getID()
+	public final int getID()
 	{
 		if (id > 0)
 			return mapHashcodeToID.get(this);
@@ -126,7 +126,7 @@ public class MNode1D
 	 *
 	 * @param l  node label
 	 */
-	public void setLabel(int l)
+	public final void setLabel(int l)
 	{
 		label = l;
 	}
@@ -136,7 +136,7 @@ public class MNode1D
 	 *
 	 * @return the node label.
 	 */
-	public int getLabel()
+	public final int getLabel()
 	{
 		return label;
 	}
@@ -146,7 +146,7 @@ public class MNode1D
 	 *
 	 * @return the curvilinear abscissa.
 	 */
-	public double getParameter()
+	public final double getParameter()
 	{
 		return param;
 	}
@@ -156,7 +156,7 @@ public class MNode1D
 	 *
 	 * @return the topological vertex sharing the same location.
 	 */
-	public CADVertex getCADVertex()
+	public final CADVertex getCADVertex()
 	{
 		if (null != master)
 			return master.vertex;
@@ -169,7 +169,7 @@ public class MNode1D
 	 *
 	 * @return the <i>master</i> <code>MNode1D</code> instance.
 	 */
-	public MNode1D getMaster()
+	public final MNode1D getMaster()
 	{
 		if (null != master)
 			return master;
@@ -181,7 +181,7 @@ public class MNode1D
 	 *
 	 * @param ref   the <i>master</i> <code>MNode1D</code> instance.
 	 */
-	public MNode1D setMaster(MNode1D ref)
+	public final MNode1D setMaster(MNode1D ref)
 	{
 		if (null != ref && (ref.isDegenerated() || isDegenerated()))
 		{
@@ -209,7 +209,7 @@ public class MNode1D
 	 * @return <code>true</code> if this node lies on a degenerated edge,
 	 * <code>false</code> otherwise.
 	 */
-	public boolean isDegenerated()
+	public final boolean isDegenerated()
 	{
 		return isDegenerated;
 	}
@@ -221,14 +221,14 @@ public class MNode1D
 	 * value <code>d</code>.
 	 * @return its <code>d</code> argument.
 	 */
-	public boolean isDegenerated(boolean d)
+	public final boolean isDegenerated(boolean d)
 	{
 		isDegenerated = d;
 		return d;
 	}
 	
 	@Override
-	public String toString()
+	public final String toString()
 	{
 		String r = "MNode1D: id="+getID()+" "+param;
 		if (null != vertex)

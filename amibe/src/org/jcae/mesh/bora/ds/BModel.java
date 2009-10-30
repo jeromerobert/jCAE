@@ -139,7 +139,7 @@ public class BModel
 		return id;
 	}
 
-	public String getCADFile()
+	public final String getCADFile()
 	{
 		return cadFile;
 	}
@@ -154,12 +154,12 @@ public class BModel
 		return cad.getRootCell().getShape();
 	}
 
-	public String getOutputDir()
+	public final String getOutputDir()
 	{
 		return xmlDir;
 	}
 
-	public String getOutputDir(BDiscretization d)
+	public final String getOutputDir(BDiscretization d)
 	{
 		String ret = xmlDir+File.separator;
 		CADShapeEnum cse = d.getGraphCell().getType();
@@ -174,17 +174,17 @@ public class BModel
 		return ret+"d"+d.getId();
 	}
 
-	public String getOutputFile()
+	public final String getOutputFile()
 	{
 		return xmlFile;
 	}
 
-	public BCADGraph getGraph()
+	public final BCADGraph getGraph()
 	{
 		return cad;
 	}
 
-	public Collection<Constraint> getConstraints()
+	public final Collection<Constraint> getConstraints()
 	{
 		return allConstraints;
 	}
@@ -211,7 +211,7 @@ public class BModel
 		}
 	}
 
-	public BSubMesh newMesh()
+	public final BSubMesh newMesh()
 	{
 		if (state != State.INPUT)
 			throw new RuntimeException("BModel.newMesh() cannot be called after model has been computed");
@@ -224,19 +224,19 @@ public class BModel
 	 * Get an immutable view of the list of submeshes.
 	 * @return the list of submeshes.
 	 */
-	public Collection<BSubMesh> getSubMeshes()
+	public final Collection<BSubMesh> getSubMeshes()
 	{
 		return Collections.unmodifiableCollection(submesh);
 	}
 
-	void addConstraint(Constraint cons)
+	final void addConstraint(Constraint cons)
 	{
 		if (state != State.INPUT)
 			throw new RuntimeException("Constraints cannot be added after model has been computed");
 		allConstraints.add(cons);
 	}
 
-	void removeConstraint(Constraint cons) {
+	final void removeConstraint(Constraint cons) {
 		if (state != State.INPUT)
 			throw new RuntimeException("Constraints cannot be removed after model has been computed");
 		allConstraints.remove(cons);
@@ -245,7 +245,7 @@ public class BModel
 	/**
   	 * Combines all hypothesis.
 	 */
-	public void computeConstraints()
+	public final void computeConstraints()
 	{
 		LOGGER.info("Compute constraints");
 		BCADGraphCell root = cad.getRootCell();
@@ -298,21 +298,21 @@ public class BModel
 		}
 	}
 	
-	public void save() {
+	public final void save() {
 		BModelWriter.writeObject(this);
 	}
 
 	/**
 	 * Combines all hypothesis and computes meshes.
 	 */
-	public void compute()
+	public final void compute()
 	{
 		LOGGER.info("Computing the model");
 		discretizeSolids();
 		LOGGER.info("Done");
 	}
 
-	public void discretizeVertices()
+	public final void discretizeVertices()
 	{
 		if (state.compareTo(State.TESSELLATION_0) >= 0)
 			return;
@@ -329,7 +329,7 @@ public class BModel
 		state = State.TESSELLATION_0;
 	}
 
-	public void discretizeEdges()
+	public final void discretizeEdges()
 	{
 		if (state.compareTo(State.TESSELLATION_1) >= 0)
 			return;
@@ -357,7 +357,7 @@ public class BModel
 		state = State.TESSELLATION_1;
 	}
 
-	public void discretizeFaces()
+	public final void discretizeFaces()
 	{
 		if (state.compareTo(State.TESSELLATION_2) >= 0)
 			return;
@@ -386,7 +386,7 @@ public class BModel
 		state = State.TESSELLATION_2;
 	}
 
-	public void discretizeSolids()
+	public final void discretizeSolids()
 	{
 		if (state.compareTo(State.TESSELLATION_3) >= 0)
 			return;

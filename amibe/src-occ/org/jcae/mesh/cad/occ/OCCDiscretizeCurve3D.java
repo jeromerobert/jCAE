@@ -42,7 +42,7 @@ public class OCCDiscretizeCurve3D
 		end = e;
 	}
 	
-	public void discretizeMaxLength(double len)
+	public final void discretizeMaxLength(double len)
 	{
 		logger.fine("Discretize with max length: "+len);
 		int nsegments = 10;
@@ -98,7 +98,7 @@ public class OCCDiscretizeCurve3D
 		adjustAbscissas(xyz, new CheckRatioLength());
 	}
 	
-	public void setDiscretization(double [] param)
+	public final void setDiscretization(double [] param)
 	{
 		nr = param.length;
 		a = new double[nr];
@@ -119,7 +119,7 @@ public class OCCDiscretizeCurve3D
 		length = -1.0;
 	}
 	
-	public void splitSubsegment(int numseg, int nrsub)
+	public final void splitSubsegment(int numseg, int nrsub)
 	{
 		if (numseg < 0 || numseg >= nr)
 			return;
@@ -136,7 +136,7 @@ public class OCCDiscretizeCurve3D
 		nr += ref.nr - 2;
 	}
 	
-	public void discretizeSubsegmentMaxLength(int numseg, double len)
+	public final void discretizeSubsegmentMaxLength(int numseg, double len)
 	{
 		if (numseg < 0 || numseg >= nr)
 			return;
@@ -153,7 +153,7 @@ public class OCCDiscretizeCurve3D
 		nr += ref.nr - 2;
 	}
 	
-	public void discretizeNrPoints(int n)
+	public final void discretizeNrPoints(int n)
 	{
 		nr = n;
 		int nsegments = n;
@@ -234,7 +234,7 @@ public class OCCDiscretizeCurve3D
 		adjustAbscissas(xyz, new CheckRatioLength());
 	}
 	
-	public void discretizeMaxDeflection(double defl, boolean relDefl)
+	public final void discretizeMaxDeflection(double defl, boolean relDefl)
 	{
 		if (defl <= 0.0)
 			return;
@@ -421,17 +421,17 @@ public class OCCDiscretizeCurve3D
 		}
 	}
 	
-	public int nbPoints()
+	public final int nbPoints()
 	{
 		return nr;
 	}
 	
-	public double parameter(int index)
+	public final double parameter(int index)
 	{
 		return a[index-1];
 	}
 	
-	double length(double from, double to, int nrsub)
+	final double length(double from, double to, int nrsub)
 	{
 		assert nr > 0;
 		double delta = (to - from) / nrsub;

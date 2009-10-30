@@ -145,7 +145,7 @@ public class MeshReader extends Storage
 	 * Builds a mesh composed of all octants.
 	 * @return mesh contained in all octants
 	 */
-	public Mesh buildWholeMesh()
+	public final Mesh buildWholeMesh()
 	{
 		TIntHashSet leaves = new TIntHashSet(oemm.getNumberOfLeaves());
 		for(OEMM.Node current: oemm.leaves)
@@ -158,7 +158,7 @@ public class MeshReader extends Storage
 	 * @param leaves set of selected octants
 	 * @return mesh contained in these octants
 	 */
-	public Mesh buildMesh(TIntHashSet leaves)
+	public final Mesh buildMesh(TIntHashSet leaves)
 	{
 		return buildMesh(MeshTraitsBuilder.getDefault3D(), leaves);
 	}
@@ -169,7 +169,7 @@ public class MeshReader extends Storage
 	 * @param leaves set of selected octants
 	 * @return mesh contained in these octants
 	 */
-	public Mesh buildMesh(MeshTraitsBuilder mtb, TIntHashSet leaves)
+	public final Mesh buildMesh(MeshTraitsBuilder mtb, TIntHashSet leaves)
 	{
 		if (mapNodeToMesh != null)
 			throw new RuntimeException("Error: buildMesh() cannot be called after buildMeshes()!");

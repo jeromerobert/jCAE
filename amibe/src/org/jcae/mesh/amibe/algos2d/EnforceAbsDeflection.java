@@ -59,7 +59,7 @@ public class EnforceAbsDeflection
 	/**
 	 * Check all triangles.
 	 */
-	public void compute()
+	public final void compute()
 	{
 		mesh.pushCompGeom(3);
 		LOGGER.fine(" Enforcing absolute deflection");

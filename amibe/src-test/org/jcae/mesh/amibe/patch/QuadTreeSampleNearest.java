@@ -48,12 +48,12 @@ public class QuadTreeSampleNearest extends QuadTreeSample
 		super (q);
 	}
 	
-	public Vertex2D getNearVertex(Metric metric, double[] uv)
+	public final Vertex2D getNearVertex(Metric metric, double[] uv)
 	{
 		return (Vertex2D) quadtree.getNearVertex(metric, uv);
 	}
 
-	public Vertex2D getNearestVertex(Metric metric, double[] uv)
+	public final Vertex2D getNearestVertex(Metric metric, double[] uv)
 	{
 		return (Vertex2D) quadtree.getNearestVertex(metric, uv);
 	}

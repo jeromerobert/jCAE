@@ -109,7 +109,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	}
 
 	@Override
-	public double cost(final HalfEdge e)
+	public final double cost(final HalfEdge e)
 	{
 		//Ensure that boundary and non manifold edges are never processed
 		if (freeEdgeOnly && !e.hasAttributes(AbstractHalfEdge.BOUNDARY |

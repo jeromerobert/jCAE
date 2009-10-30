@@ -73,7 +73,7 @@ public class ConstraintNormal3D
 	/**
 	 * Check all edges.
 	 */
-	public void compute()
+	public final void compute()
 	{
 		VirtualHalfEdge2D ot, sym;
 		int cnt = 0;

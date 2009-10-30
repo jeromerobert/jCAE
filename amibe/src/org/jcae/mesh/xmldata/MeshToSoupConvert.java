@@ -133,7 +133,7 @@ public class MeshToSoupConvert extends JCAEXMLData implements FilterInterface
 		}
 	}
 
-	public void collectBoundaryNodes(int[] faces)
+	public final void collectBoundaryNodes(int[] faces)
 	{
 		for (int iFace : faces)
 		{
@@ -180,7 +180,7 @@ public class MeshToSoupConvert extends JCAEXMLData implements FilterInterface
 		}
 	}
 	
-	public void beforeProcessingAllShapes(boolean writeNormal)
+	public final void beforeProcessingAllShapes(boolean writeNormal)
 	{
 		coordRefs = new double[3*nrRefs];
 		xrefs = new TIntIntHashMap(nrRefs);
@@ -189,13 +189,13 @@ public class MeshToSoupConvert extends JCAEXMLData implements FilterInterface
 		rawFile.delete();
 	}
 	
-	public void afterProcessingAllShapes()
+	public final void afterProcessingAllShapes()
 	{
 		logger.info("Total number of nodes: "+(nrNodes+nrIntNodes));
 		logger.info("Total number of triangles: "+nrTriangles);
 	}
 	
-	public void processOneShape(int groupId, String groupName, int iFace)
+	public final void processOneShape(int groupId, String groupName, int iFace)
 	{
 		Document documentIn;
 		try

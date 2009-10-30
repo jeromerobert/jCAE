@@ -360,7 +360,7 @@ public class ExtractShell
 		 * @see java.text.NumberFormat#format(double, java.lang.StringBuffer, java.text.FieldPosition)
 		 */
 		@Override
-		public StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos)
+		public final StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos)
 		{
 			return format((long)number, toAppendTo, pos);
 		}
@@ -369,7 +369,7 @@ public class ExtractShell
 		 * @see java.text.NumberFormat#format(long, java.lang.StringBuffer, java.text.FieldPosition)
 		 */
 		@Override
-		public StringBuffer format(long number, StringBuffer toAppendTo, FieldPosition pos)
+		public final StringBuffer format(long number, StringBuffer toAppendTo, FieldPosition pos)
 		{
 			StringBuffer s=new StringBuffer();
 			s.append(number);
@@ -387,7 +387,7 @@ public class ExtractShell
 		 * @see java.text.NumberFormat#parse(java.lang.String, java.text.ParsePosition)
 		 */
 		@Override
-		public Number parse(String source, ParsePosition parsePosition)
+		public final Number parse(String source, ParsePosition parsePosition)
 		{
 			throw new UnsupportedOperationException();
 		}

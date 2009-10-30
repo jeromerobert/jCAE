@@ -85,7 +85,7 @@ public class BCADGraphCell
 	 * Returns cell id.
 	 * @return cell id
 	 */
-	public int getId()
+	public final int getId()
 	{
 		return id;
 	}
@@ -94,7 +94,7 @@ public class BCADGraphCell
 	 * Sets cell id.
 	 * @param i  cell id
 	 */
-	public void setId(int i)
+	public final void setId(int i)
 	{
 		id = i;
 	}
@@ -103,7 +103,7 @@ public class BCADGraphCell
 	 * Returns CAD graph.
 	 * @return CAD graph
 	 */
-	public BCADGraph getGraph()
+	public final BCADGraph getGraph()
 	{
 		return graph;
 	}
@@ -112,7 +112,7 @@ public class BCADGraphCell
 	 * Returns CAD shape.
 	 * @return CAD shape
 	 */
-	public CADShape getShape()
+	public final CADShape getShape()
 	{
 		return shape;
 	}
@@ -121,7 +121,7 @@ public class BCADGraphCell
 	 * Returns shape orientation.
 	 * @return shape orientation
 	 */
-	public int getOrientation()
+	public final int getOrientation()
 	{
 		return shape.orientation();
 	}
@@ -130,7 +130,7 @@ public class BCADGraphCell
 	 * Returns cell containing reversed shape.
 	 * @return cell containing reversed shape
 	 */
-	public BCADGraphCell getReversed()
+	public final BCADGraphCell getReversed()
 	{
 		return reversed;
 	}
@@ -139,17 +139,17 @@ public class BCADGraphCell
 	 * Returns CAD shape type.
 	 * @return CAD shape type
 	 */
-	public CADShapeEnum getType()
+	public final CADShapeEnum getType()
 	{
 		return type;
 	}
 
-	public Collection<BCADGraphCell> getParents()
+	public final Collection<BCADGraphCell> getParents()
 	{
 		return Collections.unmodifiableCollection(parents);
 	}
 
-	void addParent(BCADGraphCell that)
+	final void addParent(BCADGraphCell that)
 	{
 		assert that != null;
 		parents.add(that);
@@ -159,7 +159,7 @@ public class BCADGraphCell
 	 * Binds two cells containing reversed shapes together.  These shapes then
 	 * contain the same discretizations.
 	 */
-	void bindReversed(BCADGraphCell that)
+	final void bindReversed(BCADGraphCell that)
 	{
 		assert shape.equals(that.shape);
 		assert shape.orientation() != that.shape.orientation();
@@ -180,7 +180,7 @@ public class BCADGraphCell
 	 * @param cse  CAD shape type
 	 * @return iterator on geometrical elements.
 	 */
-	public Iterator<BCADGraphCell> shapesExplorer(CADShapeEnum cse)
+	public final Iterator<BCADGraphCell> shapesExplorer(CADShapeEnum cse)
 	{
 		return shapesExplorer(cse, new THashSet<CADShape>(KeepOrientationHashingStrategy.getInstance()));
 	}
@@ -194,7 +194,7 @@ public class BCADGraphCell
 	 * @param cse  CAD shape type
 	 * @return iterator on unique geometrical elements.
 	 */
-	public Iterator<BCADGraphCell> uniqueShapesExplorer(CADShapeEnum cse)
+	public final Iterator<BCADGraphCell> uniqueShapesExplorer(CADShapeEnum cse)
 	{
 		return shapesExplorer(cse, new THashSet<CADShape>());
 	}
@@ -256,7 +256,7 @@ public class BCADGraphCell
 	 *
 	 * @return an iterator on immediate sub-shapes
 	 */
-	public Iterator<BCADGraphCell> shapesIterator()
+	public final Iterator<BCADGraphCell> shapesIterator()
 	{
 		return shapesIterator(new THashSet<CADShape>(KeepOrientationHashingStrategy.getInstance()));
 	}
@@ -278,7 +278,7 @@ public class BCADGraphCell
 	 *
 	 * @return an iterator on all immediate sub-shapes
 	 */
-	public Iterator<BCADGraphCell> allShapesIterator()
+	public final Iterator<BCADGraphCell> allShapesIterator()
 	{
 		return shapesIterator(null);
 	}
@@ -326,7 +326,7 @@ public class BCADGraphCell
 	 * @param sub  submesh
 	 * @return the discretization corresponding to a given submesh.
 	 */
-	public BDiscretization getDiscretizationSubMesh(BSubMesh sub)
+	public final BDiscretization getDiscretizationSubMesh(BSubMesh sub)
 	{
 		for (BDiscretization discr : discrete)
 		{
@@ -336,7 +336,7 @@ public class BCADGraphCell
 		return null;
 	}
 
-	void addSubMeshConstraint(BSubMesh sub, Constraint cons)
+	final void addSubMeshConstraint(BSubMesh sub, Constraint cons)
 	{
 		BDiscretization d = getDiscretizationSubMesh(sub);
 		if (d != null)
@@ -358,7 +358,7 @@ public class BCADGraphCell
 		found.addSubMesh(sub);
 	}
 
-	void removeSubMeshConstraint(BSubMesh sub, Constraint cons)
+	final void removeSubMeshConstraint(BSubMesh sub, Constraint cons)
 	{
 		BDiscretization d = getDiscretizationSubMesh(sub);
 		if (d == null)
@@ -369,12 +369,12 @@ public class BCADGraphCell
 	/**
 	 * Returns an immutable view of the list of BDiscretization instances bound to this cell.
 	 */
-	public Collection<BDiscretization> getDiscretizations()
+	public final Collection<BDiscretization> getDiscretizations()
 	{
 		return Collections.unmodifiableCollection(discrete);
 	}
 
-	void addImplicitConstraints(CADShapeEnum cse, boolean recursive)
+	final void addImplicitConstraints(CADShapeEnum cse, boolean recursive)
 	{
 		for (BDiscretization discr : discrete)
 		{
@@ -437,13 +437,13 @@ public class BCADGraphCell
 		}
 	}
 
-	void removeDiscretizations()
+	final void removeDiscretizations()
 	{
 		discrete.clear();
 	}
 
 	@Override
-	public String toString()
+	public final String toString()
 	{
 		String ret = id+" "+shape+" "+shape.orientation()+" "+Integer.toHexString(hashCode());
 		if (reversed != null)

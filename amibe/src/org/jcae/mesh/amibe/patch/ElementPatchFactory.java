@@ -39,7 +39,7 @@ class ElementPatchFactory implements ElementFactoryInterface
 		triangleTraitsBuilder = mtb.getTriangleTraitsBuilder();
 	}
 
-	public Vertex2D createVertex(double u, double v)
+	public final Vertex2D createVertex(double u, double v)
 	{
 		return new Vertex2D(vertexTraitsBuilder, u, v);
 	}

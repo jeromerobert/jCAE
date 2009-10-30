@@ -60,7 +60,7 @@ public class Hypothesis
 			nextId = i;
 	}
 
-	public int getId()
+	public final int getId()
 	{
 		return id;
 	}
@@ -70,7 +70,7 @@ public class Hypothesis
 	 *
 	 * @param e  element type
 	 */
-	public void setElement(String e)
+	public final void setElement(String e)
 	{
 		checkLock();
 		hyp = getAlgo(e);
@@ -83,7 +83,7 @@ public class Hypothesis
 	 *
 	 * @return element type
 	 */
-	public String getElement()
+	public final String getElement()
 	{
 		return hyp.getType();
 	}
@@ -96,7 +96,7 @@ public class Hypothesis
 	 * geometrical objects of a given type, and <code>false</code>
 	 * otherwise.
 	 */
-	boolean checkCompatibility(CADShapeEnum cse)
+	final boolean checkCompatibility(CADShapeEnum cse)
 	{
 		return hyp == null || hyp.getType() == null || hyp.dim() == cse;
 	}
@@ -106,7 +106,7 @@ public class Hypothesis
 	 *
 	 * @param l  length
 	 */
-	public void setLength(double l)
+	public final void setLength(double l)
 	{
 		setLength(l, false);
 	}
@@ -126,12 +126,12 @@ public class Hypothesis
 		lengthBool = b;
 	}
 
-	public double getLength()
+	public final double getLength()
 	{
 		return length;
 	}
 
-	public double getDeflection()
+	public final double getDeflection()
 	{
 		return deflection;
 	}
@@ -170,7 +170,7 @@ public class Hypothesis
 	 *
 	 * @param d  deflection
 	 */
-	public void setDeflection(double d)
+	public final void setDeflection(double d)
 	{
 		checkLock();
 		if (LOGGER.isLoggable(Level.FINE))
@@ -262,7 +262,7 @@ public class Hypothesis
 	 *
 	 * @return <code>true</code> if hypothesis have been successfully combined, <code>false</code> otherwise.
 	 */
-	boolean combine(Hypothesis that)
+	final boolean combine(Hypothesis that)
 	{
 		String elt = getElement();
 		if (elt != null && that.getElement() != null && !elt.equals(that.getElement()))
@@ -277,7 +277,7 @@ public class Hypothesis
 	}
 
 	@Override
-	public String toString()
+	public final String toString()
 	{
 		String ret = "Hyp. "+id+" elementType: "+hyp.getType();
 		if (length >= 0.0)
@@ -299,7 +299,7 @@ public class Hypothesis
 		return ret;
 	}
 
-	Hypothesis createInheritedHypothesis(CADShapeEnum cse)
+	final Hypothesis createInheritedHypothesis(CADShapeEnum cse)
 	{
 		Hypothesis ret = new Hypothesis();
 		ret.length      = length;
@@ -311,7 +311,7 @@ public class Hypothesis
 		return ret;
 	}
 
-	AlgoInterface findAlgorithm(CADShapeEnum cse)
+	final AlgoInterface findAlgorithm(CADShapeEnum cse)
 	{
 		AlgoInterface ret = null;
 		try {
@@ -401,7 +401,7 @@ public class Hypothesis
 		{
 			return CADShapeEnum.VERTEX;
 		}
-		public String getType()
+		public final String getType()
 		{
 			return "V1";
 		}
@@ -422,7 +422,7 @@ public class Hypothesis
 		{
 			return CADShapeEnum.EDGE;
 		}
-		public String getType()
+		public final String getType()
 		{
 			return "E2";
 		}
@@ -446,7 +446,7 @@ public class Hypothesis
 		{
 			return CADShapeEnum.FACE;
 		}
-		public String getType()
+		public final String getType()
 		{
 			return "T3";
 		}
@@ -472,7 +472,7 @@ public class Hypothesis
 		{
 			return CADShapeEnum.FACE;
 		}
-		public String getType()
+		public final String getType()
 		{
 			return "Q4";
 		}
@@ -498,7 +498,7 @@ public class Hypothesis
 		{
 			return CADShapeEnum.SOLID;
 		}
-		public String getType()
+		public final String getType()
 		{
 			return "T4";
 		}

@@ -117,7 +117,7 @@ public abstract class QualityProcedure
 	/**
 	 * Returns default scale factor.
 	 */
-	protected float getScaleFactor()
+	protected final float getScaleFactor()
 	{
 		return 1.0f;
 	}
@@ -125,7 +125,7 @@ public abstract class QualityProcedure
 	/**
 	 * Returns <code>MeshTraitsBuilder</code> instance needed by this class.
 	 */
-	protected MeshTraitsBuilder getMeshTraitsBuilder()
+	protected final MeshTraitsBuilder getMeshTraitsBuilder()
 	{
 		return new MeshTraitsBuilder();
 	}

@@ -124,7 +124,7 @@ public class Vertex2D extends Vertex
 	 * @param v  second coordinate of the new position
 	 */
 	@Override
-	public void moveTo(double u, double v)
+	public final void moveTo(double u, double v)
 	{
 		param[0] = u;
 		param[1] = v;
@@ -168,7 +168,7 @@ public class Vertex2D extends Vertex
 	 * @return a triangle containing this point.
 	 * @see VirtualHalfEdge2D#split3
 	 */
-	public VirtualHalfEdge2D getSurroundingOTriangle(Mesh2D mesh)
+	public final VirtualHalfEdge2D getSurroundingOTriangle(Mesh2D mesh)
 	{
 		if (logger.isLoggable(Level.FINE))
 			logger.fine("Searching for the triangle surrounding "+this);
@@ -274,7 +274,7 @@ public class Vertex2D extends Vertex
 	 * vertices. It is positive if the vertex is on the left of this
 	 * segment, and negative otherwise.
 	 */
-	public long onLeft(KdTree kdTree, Vertex2D v1, Vertex2D v2)
+	public final long onLeft(KdTree kdTree, Vertex2D v1, Vertex2D v2)
 	{
 		kdTree.double2int(param, i0);
 		kdTree.double2int(v1.param, i1);
@@ -461,7 +461,7 @@ public class Vertex2D extends Vertex
 		        Math.sqrt(m0.distance2(vc1.param, vc2.param))));
 	}
 	
-	protected boolean isPseudoIsotropic(Mesh2D mesh)
+	protected final boolean isPseudoIsotropic(Mesh2D mesh)
 	{
 		return mesh.getMetric(this).isPseudoIsotropic();
 	}

@@ -225,7 +225,7 @@ public class Initial
 	/**
 	 * Launch method to mesh a surface.
 	 */
-	public void compute()
+	public final void compute()
 	{
 		LOGGER.config("Enter compute()");
 		if(boundaryNodes==null)

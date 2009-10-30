@@ -446,7 +446,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @return start vertex of this edge
 	 */
 	@Override
-	public Vertex origin()
+	public final Vertex origin()
 	{
 		return tri.vertex[next3[localNumber]];
 	}
@@ -457,7 +457,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @return end vertex of this edge
 	 */
 	@Override
-	public Vertex destination()
+	public final Vertex destination()
 	{
 		return tri.vertex[prev3[localNumber]];
 	}
@@ -468,7 +468,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @return apex of this edge
 	 */
 	@Override
-	public Vertex apex()
+	public final Vertex apex()
 	{
 		return tri.vertex[localNumber];
 	}
@@ -589,7 +589,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @return  triangle area
 	 * Warning: this method uses tempD, tempD1 and tempD2 temporary arrays.
 	 */
-	public double computeNormal3D()
+	public final double computeNormal3D()
 	{
 		double [] p0 = origin().getUV();
 		double [] p1 = destination().getUV();
@@ -618,7 +618,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * Warning: this method uses tempD, tempD1 and tempD2 temporary arrays.
 	 */
 	@Override
-	public double area()
+	public final double area()
 	{
 		double [] p0 = origin().getUV();
 		double [] p1 = destination().getUV();
@@ -636,7 +636,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/**
 	 * Returns the temporary array TempD.
 	 */
-	public double [] getTempVector()
+	public final double [] getTempVector()
 	{
 		return tempD;
 	}
@@ -1590,7 +1590,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 
 	@Override
-	public String toString()
+	public final String toString()
 	{
 		StringBuilder r = new StringBuilder();
 		r.append("hashCode: ").append(hashCode());

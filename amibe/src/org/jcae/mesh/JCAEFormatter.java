@@ -33,7 +33,7 @@ public class JCAEFormatter extends Formatter
 	}
 
 	@Override
-	public String format(LogRecord record)
+	public final String format(LogRecord record)
 	{
 		String loggerName = record.getLoggerName();
 		if(loggerName == null)

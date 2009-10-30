@@ -67,7 +67,7 @@ public abstract class AbstractAlgoHalfEdge
 	{
 		mesh = m;
 	}
-	public void compute()
+	public final void compute()
 	{
 		thisLogger().info("Run "+getClass().getName());
 		preProcessAllHalfEdges();
@@ -138,7 +138,7 @@ public abstract class AbstractAlgoHalfEdge
 	{
 	}
 
-	protected void addToTree(final HalfEdge e)
+	protected final void addToTree(final HalfEdge e)
 	{
 		if (!e.origin().isReadable() || !e.destination().isReadable())
 			return;
@@ -155,7 +155,7 @@ public abstract class AbstractAlgoHalfEdge
 		}
 	}
 
-	protected void removeFromTree(final HalfEdge e)
+	protected final void removeFromTree(final HalfEdge e)
 	{
 		for (Iterator<AbstractHalfEdge> it = e.fanIterator(); it.hasNext(); )
 		{

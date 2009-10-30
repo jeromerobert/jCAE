@@ -91,7 +91,7 @@ public class Mesh2D extends Mesh
 			super(null, u, v);
 		}
 		@Override
-		public String toString()
+		public final String toString()
 		{
 			return "outer";
 		}
@@ -172,7 +172,7 @@ public class Mesh2D extends Mesh
 	 *
 	 * @return the topological face.
 	 */
-	public CADShape getGeometry()
+	public final CADShape getGeometry()
 	{
 		return face;
 	}
@@ -182,7 +182,7 @@ public class Mesh2D extends Mesh
 	 *
 	 * @return the geometrical surface.
 	 */
-	public CADGeomSurface getGeomSurface()
+	public final CADGeomSurface getGeomSurface()
 	{
 		return surface;
 	}
@@ -194,7 +194,7 @@ public class Mesh2D extends Mesh
 	 * @return vertex list.
 	 */
 	@Override
-	public Collection<Vertex> getNodes()
+	public final Collection<Vertex> getNodes()
 	{
 		KdTree<Vertex> quadtree = traitsBuilder.getKdTree(traits);
 		if (quadtree == null)
@@ -210,7 +210,7 @@ public class Mesh2D extends Mesh
 	 * @param v1  second vertex.
 	 * @param v2  third vertex.
 	 */
-	public void bootstrap(Vertex2D v0, Vertex2D v1, Vertex2D v2)
+	public final void bootstrap(Vertex2D v0, Vertex2D v1, Vertex2D v2)
 	{
 		KdTree<Vertex2D> quadtree = traitsBuilder.getKdTree(traits);
 		assert quadtree != null;
@@ -272,7 +272,7 @@ public class Mesh2D extends Mesh
 	 * @throws InitialTriangulationException  if the boundary edge cannot
 	 *         be enforced.
 	 */
-	public VirtualHalfEdge2D forceBoundaryEdge(Vertex2D start, Vertex2D end, int maxIter)
+	public final VirtualHalfEdge2D forceBoundaryEdge(Vertex2D start, Vertex2D end, int maxIter)
 		throws InitialTriangulationException
 	{
 		assert (start != end);
@@ -350,7 +350,7 @@ public class Mesh2D extends Mesh
 	 * @throws IllegalArgumentException  If argument is neither 2 nor 3,
 	 *         this exception is raised.
 	 */
-	public void pushCompGeom(int i)
+	public final void pushCompGeom(int i)
 	{
 		if (i != 2 && i != 3)
 			throw new java.lang.IllegalArgumentException("pushCompGeom argument must be either 2 or 3, current value is: "+i);
@@ -369,7 +369,7 @@ public class Mesh2D extends Mesh
 	 * @throws RuntimeException  If argument is different from
 	 *         metrics dimension.
 	 */
-	public void popCompGeom(int i)
+	public final void popCompGeom(int i)
 		throws RuntimeException
 	{
 		Integer ret = compGeomStack.pop();
@@ -414,7 +414,7 @@ public class Mesh2D extends Mesh
 	}
 
 	@Override
-	public Metric2D getMetric(Location pt)
+	public final Metric2D getMetric(Location pt)
 	{
 		Vertex2D v2 = (Vertex2D) pt;
 		Metric2D m2 = v2.metric;
@@ -433,7 +433,7 @@ public class Mesh2D extends Mesh
 		return m2;
 	}
 
-	public void moveVertex(Vertex2D vertex, double u, double v)
+	public final void moveVertex(Vertex2D vertex, double u, double v)
 	{
 		vertex.metric = null;
 		vertex.moveTo(u, v);
@@ -445,7 +445,7 @@ public class Mesh2D extends Mesh
 	 * @param vertex vertex
 	 * @param t triangle
 	 */
-	public void moveVertexToCentroid(Vertex2D vertex, Triangle t)
+	public final void moveVertexToCentroid(Vertex2D vertex, Triangle t)
 	{
 		double x = 0.0, y = 0.0;
 		for (Vertex v : t.vertex)
@@ -468,7 +468,7 @@ public class Mesh2D extends Mesh
 	 * @param end  the end node
 	 * @return the distance between nodes
 	 **/
-	public double interpolatedDistance(Vertex2D start, Vertex2D end)
+	public final double interpolatedDistance(Vertex2D start, Vertex2D end)
 	{
 		if (compGeomCurrent == 2)
 			return Math.sqrt(euclidian_metric2d.distance2(start.getUV(), end.getUV()));
@@ -524,7 +524,7 @@ public class Mesh2D extends Mesh
 	}
 	
 	@Override
-	public boolean isValid(boolean constrained)
+	public final boolean isValid(boolean constrained)
 	{
 		if (!super.isValid(constrained))
 			return false;

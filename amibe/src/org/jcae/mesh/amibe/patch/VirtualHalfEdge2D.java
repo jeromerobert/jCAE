@@ -313,7 +313,7 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 	}
 	
 	//  Called from BasicMesh to improve initial mesh
-	public int checkSmallerAndSwap(Mesh2D mesh)
+	public final int checkSmallerAndSwap(Mesh2D mesh)
 	{
 		//  As checkAndSwap modifies its arguments, 'this'
 		//  must be protected.

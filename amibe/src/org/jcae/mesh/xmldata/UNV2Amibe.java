@@ -60,12 +60,12 @@ public class UNV2Amibe
 			out.println(buffer);
 		}
 		
-		public int getNode(int id)
+		public final int getNode(int id)
 		{
 			return nodes[id];
 		}
 		
-		public int getNbNodes()
+		public final int getNbNodes()
 		{
 			return nodes.length;
 		}
@@ -131,19 +131,19 @@ public class UNV2Amibe
 	/** a list of 2412 elements which won't be store in the amibe file */
 	private final ArrayList<Element> elements=new ArrayList<Element>();
 	
-	public void importMesh(String input, String output) throws IOException
+	public final void importMesh(String input, String output) throws IOException
 	{
 		importMesh(new File(input), output);
 	}
 
-	public void importMesh(File input, String output) throws IOException
+	public final void importMesh(File input, String output) throws IOException
 	{
 		BufferedReader br=new BufferedReader(new FileReader(input));
 		importMesh(br, new File(output));
 		br.close();
 	}
 
-	public void importMesh(BufferedReader in, File outputDir) throws IOException
+	public final void importMesh(BufferedReader in, File outputDir) throws IOException
 	{
 		outputDir.mkdirs();
 		File dir3d=new File(outputDir, JCAEXMLData.xml3dFilename+".files");
@@ -501,7 +501,7 @@ public class UNV2Amibe
 		}
 	}
 	
-	public void setStripedUnv(String file)
+	public final void setStripedUnv(String file)
 	{
 		stripedUnvFile=file;
 	}

@@ -1294,7 +1294,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 
 	@Override
-	public String toString()
+	public final String toString()
 	{
 		StringBuilder r = new StringBuilder();
 		r.append("hashCode: ").append(hashCode());

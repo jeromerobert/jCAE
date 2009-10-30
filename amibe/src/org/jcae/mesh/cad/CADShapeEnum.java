@@ -38,7 +38,7 @@ public abstract class CADShapeEnum
 	}
 	public abstract Class<? extends CADShape> asClass();
 	@Override
-	public String toString()
+	public final String toString()
 	{
 		return name;
 	}

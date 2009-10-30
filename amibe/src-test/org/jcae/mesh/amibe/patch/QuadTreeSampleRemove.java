@@ -44,7 +44,7 @@ public class QuadTreeSampleRemove extends QuadTreeSample
 		super (q);
 	}
 	
-	public Vertex2D getNearVertex(Metric metric, double[] uv)
+	public final Vertex2D getNearVertex(Metric metric, double[] uv)
 	{
 		return (Vertex2D) quadtree.getNearVertex(metric, uv);
 	}

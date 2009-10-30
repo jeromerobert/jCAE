@@ -27,7 +27,7 @@ import org.jcae.opencascade.jni.TopoDS_Wire;
 public class OCCWire extends OCCShape implements CADWire
 {
 	@Override
-	public TopoDS_Wire getShape()
+	public final TopoDS_Wire getShape()
 	{
 		return (TopoDS_Wire) myShape;
 	}

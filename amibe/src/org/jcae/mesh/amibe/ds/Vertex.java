@@ -118,7 +118,7 @@ public class Vertex implements Location, Serializable
 	 *
 	 * @param that  the Vertex to be copied.
 	 */
-	public void copy(Vertex that)
+	public final void copy(Vertex that)
 	{
 		assert that.param.length == param.length;
 		System.arraycopy(that.param, 0, param, 0, param.length);
@@ -135,7 +135,7 @@ public class Vertex implements Location, Serializable
 	 * and positive for nodes of group borders.
 	 * @return 1D reference of this node
 	 */
-	public int getRef()
+	public final int getRef()
 	{
 		return ref1d;
 	}
@@ -145,7 +145,7 @@ public class Vertex implements Location, Serializable
 	 *
 	 * @param l  1D reference of this node
 	 */
-	public void setRef(int l)
+	public final void setRef(int l)
 	{
 		ref1d = l;
 	}
@@ -155,7 +155,7 @@ public class Vertex implements Location, Serializable
 	 *
 	 * @return coordinates of this vertex
 	 */
-	public double [] getUV ()
+	public final double [] getUV ()
 	{
 		return param;
 	}
@@ -185,7 +185,7 @@ public class Vertex implements Location, Serializable
 	 * @param end  the node to which distance is computed.
 	 * @return the squared distance to <code>end</code>.
 	 **/
-	public double sqrDistance3D(Vertex end)
+	public final double sqrDistance3D(Vertex end)
 	{
 		double x = param[0] - end.param[0];
 		double y = param[1] - end.param[1];
@@ -199,7 +199,7 @@ public class Vertex implements Location, Serializable
 	 * @param end  the node to which distance is computed.
 	 * @return the distance to <code>end</code>.
 	 **/
-	public double distance3D(Vertex end)
+	public final double distance3D(Vertex end)
 	{
 		double x = param[0] - end.param[0];
 		double y = param[1] - end.param[1];
@@ -214,7 +214,7 @@ public class Vertex implements Location, Serializable
 	 * @param n2  second node
 	 * @return the angle at which the segment is seen.
 	 **/
-	public double angle3D(Vertex n1, Vertex n2)
+	public final double angle3D(Vertex n1, Vertex n2)
 	{
 		double normPn1 = distance3D(n1);
 		double normPn2 = distance3D(n2);
@@ -250,7 +250,7 @@ public class Vertex implements Location, Serializable
 	 * @param work2  double[3] temporary array
 	 * @param ret array which will store the outer product of the two vectors
 	 */
-	protected void outer3D(Vertex n1, Vertex n2, double [] work1, double [] work2, double [] ret)
+	protected final void outer3D(Vertex n1, Vertex n2, double [] work1, double [] work2, double [] ret)
 	{
 		for (int i = 0; i < 3; i++)
 		{
@@ -265,7 +265,7 @@ public class Vertex implements Location, Serializable
 	 *
 	 * @return node label.
 	 */
-	public int getLabel()
+	public final int getLabel()
 	{
 		return label;
 	}
@@ -275,7 +275,7 @@ public class Vertex implements Location, Serializable
 	 *
 	 * @param l  node label.
 	 */
-	public void setLabel(int l)
+	public final void setLabel(int l)
 	{
 		label = l;
 	}
@@ -286,7 +286,7 @@ public class Vertex implements Location, Serializable
 	 * @return a <code>Triangle</code> instance for manifold vertices,
 	 * and a <code>Triangle []</code> array otherwise.
 	 */
-	public Object getLink()
+	public final Object getLink()
 	{
 		return link;
 	}
@@ -296,7 +296,7 @@ public class Vertex implements Location, Serializable
 	 *
 	 * @param o  object linked to this Vertex.
 	 */
-	public void setLink(Object o)
+	public final void setLink(Object o)
 	{
 		link = o;
 	}
@@ -311,7 +311,7 @@ public class Vertex implements Location, Serializable
 		return getIncidentAbstractHalfEdge((Triangle) link, null);
 	}
 
-	public AbstractHalfEdge getIncidentAbstractHalfEdge(Triangle t, AbstractHalfEdge ot)
+	public final AbstractHalfEdge getIncidentAbstractHalfEdge(Triangle t, AbstractHalfEdge ot)
 	{
 		ot = t.getAbstractHalfEdge(ot);
 		if (ot.destination() == this)
@@ -328,7 +328,7 @@ public class Vertex implements Location, Serializable
 	 *
 	 * @param triangles  initial set of adjacent triangles.
 	 */
-	public void setLinkFan(Collection<Triangle> triangles)
+	public final void setLinkFan(Collection<Triangle> triangles)
 	{
 		ArrayList<Triangle> res = new ArrayList<Triangle>();
 		Set<Triangle> allTriangles = new HashSet<Triangle>();
@@ -353,17 +353,17 @@ public class Vertex implements Location, Serializable
 		res.toArray((Triangle[]) link);
 	}
 
-	public void setReadable(boolean r)
+	public final void setReadable(boolean r)
 	{
 		readable = r;
 	}
 	
-	public void setWritable(boolean w)
+	public final void setWritable(boolean w)
 	{
 		writable = w;
 	}
 	
-	public boolean isReadable()
+	public final boolean isReadable()
 	{
 		return readable;
 	}
@@ -504,7 +504,7 @@ public class Vertex implements Location, Serializable
 	 *
 	 * @return an iterator over adjacent vertices
 	 */
-	public Iterator<Vertex> getNeighbourIteratorVertex()
+	public final Iterator<Vertex> getNeighbourIteratorVertex()
 	{
 		//if the vertex has no link then we return empty list
 		if (link == null)
@@ -526,7 +526,7 @@ public class Vertex implements Location, Serializable
 	 *
 	 * @return an iterator over incident triangles
 	 */
-	public Iterator<Triangle> getNeighbourIteratorTriangle()
+	public final Iterator<Triangle> getNeighbourIteratorTriangle()
 	{
 		//if the vertex has no link then we return empty list
 		if (link == null)
@@ -570,7 +570,7 @@ public class Vertex implements Location, Serializable
 	 * @return <code>true</code> if this vertex can be modified,
 	 * <code>false</otherwise>.
 	 */
-	public boolean isMutable()
+	public final boolean isMutable()
 	{
 		return ref1d <= 0;
 	}
@@ -725,7 +725,7 @@ public class Vertex implements Location, Serializable
 		return true;
 	}
 
-	public boolean computeTangentPlane(double [] normal, double[] t1, double [] t2)
+	public final boolean computeTangentPlane(double [] normal, double[] t1, double [] t2)
 	{
 		for (int i = 0; i < 3; i++)
 			t2[i] = 0.0;
@@ -830,7 +830,7 @@ public class Vertex implements Location, Serializable
 	}
 	
 	// Common area-weighted mean normal
-	public boolean discreteAverageNormal(double [] normal)
+	public final boolean discreteAverageNormal(double [] normal)
 	{
 		for (int i = 0; i < 3; i++)
 			normal[i] = 0.0;

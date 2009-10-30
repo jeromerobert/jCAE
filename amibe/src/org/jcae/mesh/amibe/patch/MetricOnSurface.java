@@ -90,7 +90,7 @@ public class MetricOnSurface implements Metric2D
 	 *
 	 * @return the determinant of this matrix.
 	 */
-	public double det()
+	public final double det()
 	{
 		//  As this matrix is a metric, its determinant
 		//  is positive, but there may be rounding errors.
@@ -129,7 +129,7 @@ public class MetricOnSurface implements Metric2D
 	 * @param mSecond  metric at second point
 	 * @return <code>true</code> if interpolated metric can be computed, <code>false</code> otherwise
 	 */
-	public boolean interpolateSpecial(Metric2D mFirstInv, Metric2D mSecond)
+	public final boolean interpolateSpecial(Metric2D mFirstInv, Metric2D mSecond)
 	{
 		double d = mSecond.det();
 		if (d == 0.0)
@@ -270,7 +270,7 @@ public class MetricOnSurface implements Metric2D
 	}
 
 	@Override
-	public String toString()
+	public final String toString()
 	{
 		return "Metric2D: E="+E+" F="+F+" G="+G;
 	}

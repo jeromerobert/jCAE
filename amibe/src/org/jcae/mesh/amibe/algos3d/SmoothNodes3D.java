@@ -149,7 +149,7 @@ public class SmoothNodes3D
 			qualityMap.put(f, val);
 		}
 	}
-	public void compute()
+	public final void compute()
 	{
 		LOGGER.info("Run "+getClass().getName());
 		if (nloop > 0)
@@ -273,7 +273,7 @@ public class SmoothNodes3D
 		}
 	}
 	
-	protected void postProcessIteration(Mesh mesh, int i)
+	protected final void postProcessIteration(Mesh mesh, int i)
 	{
 		// Can be overridden
 	}

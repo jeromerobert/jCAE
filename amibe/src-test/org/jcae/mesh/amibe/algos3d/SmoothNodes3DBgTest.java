@@ -202,7 +202,7 @@ public class SmoothNodes3DBgTest
 		{
 			super(bgMesh, options);
 		}
-		public boolean hasMoved()
+		public final boolean hasMoved()
 		{
 			return processed > 0;
 		}

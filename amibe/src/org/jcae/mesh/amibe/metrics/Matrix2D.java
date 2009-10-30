@@ -58,7 +58,7 @@ public class Matrix2D
 	 *
 	 * @return the determinant of this matrix.
 	 */
-	double det()
+	final double det()
 	{
 		return data[0][0] * data[1][1] - data[0][1] * data[1][0];
 	}
@@ -83,7 +83,7 @@ public class Matrix2D
 	/**
 	 * Make this matrix symmetric by averaging non-diagonal coefficients.
 	 */
-	public void makeSymmetric()
+	public final void makeSymmetric()
 	{
 		double sym = 0.5 *(data[0][1] + data[1][0]);
 		data[0][1] = sym;
@@ -93,7 +93,7 @@ public class Matrix2D
 	/**
 	 *  Computes the intersection of 2 metrics.
 	 */
-	public Matrix2D intersection(Matrix2D B)
+	public final Matrix2D intersection(Matrix2D B)
 	{
 		Matrix2D res = simultaneousReduction(B);
 		Matrix2D resInv = res.inv();
@@ -219,7 +219,7 @@ public class Matrix2D
 		return AinvB.eigenvectors();
 	}
 
-	public void getValues(double [][] v)
+	public final void getValues(double [][] v)
 	{
 		v[0][0] = data[0][0];
 		v[0][1] = data[0][1];
@@ -228,7 +228,7 @@ public class Matrix2D
 	}
 
 	@Override
-	public String toString()
+	public final String toString()
 	{
 		return "Matrix2D: ("+data[0][0]+", "+data[0][1]+", "+data[1][0]+", "+data[1][1]+")";
 	}

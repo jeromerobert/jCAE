@@ -104,7 +104,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 	}
 
 	@Override
-	public double cost(final HalfEdge e)
+	public final double cost(final HalfEdge e)
 	{
 		Vertex o = e.origin();
 		Vertex d = e.destination();

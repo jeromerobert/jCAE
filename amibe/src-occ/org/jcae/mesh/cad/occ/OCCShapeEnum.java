@@ -39,7 +39,7 @@ public abstract class OCCShapeEnum extends CADShapeEnum
 		super(name);
 		occExplorerEnum = TopAbs_ShapeEnum.swigToEnum(t);
 	}
-	TopAbs_ShapeEnum asType()
+	final TopAbs_ShapeEnum asType()
 	{
 		return occExplorerEnum;
 	}
@@ -89,7 +89,7 @@ public abstract class OCCShapeEnum extends CADShapeEnum
 		OCC_COMPOUND };
 
 	// Export ordinal to newShapeEnumIterator
-	int getOrdinal()
+	final int getOrdinal()
 	{
 		return ordinal;
 	}

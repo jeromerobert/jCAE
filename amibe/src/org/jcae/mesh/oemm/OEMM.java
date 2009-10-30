@@ -251,7 +251,7 @@ public class OEMM implements Serializable
 			s.writeObject(adjLeaves.toNativeArray());
 		}
 
-		public void setPathComponents(ArrayList<String> dir, int octant)
+		public final void setPathComponents(ArrayList<String> dir, int octant)
 		{
 			if (dir != null && dir.size() > 0)
 			{
@@ -276,7 +276,7 @@ public class OEMM implements Serializable
 		}
 
 		@Override
-		public String toString()
+		public final String toString()
 		{
 			return " IJK "+Integer.toHexString(i0)+" "+Integer.toHexString(j0)+" "+Integer.toHexString(k0)+
 			       " Size=" +Integer.toHexString(size)+
@@ -298,7 +298,7 @@ public class OEMM implements Serializable
 		 * 
 		 * @return correct value of maxIndex
 		 */
-		public int getMaxIndex()
+		public final int getMaxIndex()
 		{
 			return minIndex + Math.abs(maxIndex - minIndex);
 		}

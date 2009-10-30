@@ -241,7 +241,7 @@ public class Basic2d implements AlgoInterface
 	}
 	
 	@Override
-	public String toString()
+	public final String toString()
 	{
 		StringBuilder ret = new StringBuilder("Algo: "+getClass().getName());
 		ret.append("\nTarget size: ").append(maxlen);

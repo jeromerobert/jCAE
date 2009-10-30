@@ -105,7 +105,7 @@ public class IntFileReaderByDirectBuffer implements IntFileReader
 		return get(dst, 0, dst.length);
 	}
 
-	public int get(int[] dst, int pos, int len) throws IOException
+	public final int get(int[] dst, int pos, int len) throws IOException
 	{
 		int ret = 0;
 		// First copy ints from array
@@ -149,7 +149,7 @@ public class IntFileReaderByDirectBuffer implements IntFileReader
 		return get(index, dst, 0, dst.length);
 	}
 
-	public int get(int index, int[] dst, int offset, int len) throws IOException
+	public final int get(int index, int[] dst, int offset, int len) throws IOException
 	{
 		int relIndex = index - startBufferIndex;
 		if (relIndex < 0 || relIndex >= tb.limit())

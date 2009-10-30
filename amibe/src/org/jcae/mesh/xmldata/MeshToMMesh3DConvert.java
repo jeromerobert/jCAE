@@ -76,13 +76,13 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 		}
 	}
 	
-	public void exportUNV(boolean b, String unvName)
+	public final void exportUNV(boolean b, String unvName)
 	{
 		if (b)
 			unvWriter = new UNVGenericWriter(unvName);
 	}
 	
-	public void collectBoundaryNodes(int[] faces)
+	public final void collectBoundaryNodes(int[] faces)
 	{
 		for (int iFace : faces)
 		{
@@ -129,7 +129,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 		}
 	}
 	
-	public void beforeProcessingAllShapes(boolean writeNormal)
+	public final void beforeProcessingAllShapes(boolean writeNormal)
 	{
 		coordRefs = new double[3*nrRefs];
 		xrefs = new TIntIntHashMap(nrRefs);
@@ -168,7 +168,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 		}
 	}
 	
-	public void afterProcessingAllShapes()
+	public final void afterProcessingAllShapes()
 	{
 		//  Stores coordinates of boundary nodes
 		//  Set nrRefs to its final value after elimination
@@ -237,7 +237,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 	 * @param groupName group name
 	 * @param iFace face number
 	 */
-	public void processOneShape(int groupId, String groupName, int iFace)
+	public final void processOneShape(int groupId, String groupName, int iFace)
 	{
 		Document documentIn;
 		File xmlFile2d = null;

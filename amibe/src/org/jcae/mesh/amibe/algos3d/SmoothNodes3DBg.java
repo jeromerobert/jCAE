@@ -130,7 +130,7 @@ public class SmoothNodes3DBg
 		}
 	}
 	
-	public Mesh getOutputMesh()
+	public final Mesh getOutputMesh()
 	{
 		return mesh;
 	}
@@ -156,7 +156,7 @@ public class SmoothNodes3DBg
 		}
 	}
 
-	public SmoothNodes3DBg compute()
+	public final SmoothNodes3DBg compute()
 	{
 		LOGGER.info("Run "+getClass().getName());
 		if (nloop > 0)
@@ -211,7 +211,7 @@ public class SmoothNodes3DBg
 		return this;
 	}
 	
-	protected void postProcessIteration(Mesh mesh, int i)
+	protected final void postProcessIteration(Mesh mesh, int i)
 	{
 		// Can be overridden
 	}

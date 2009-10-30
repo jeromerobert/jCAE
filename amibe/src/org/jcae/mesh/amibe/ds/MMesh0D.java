@@ -144,7 +144,7 @@ public class MMesh0D
 	 * @param V  vertex
 	 * @return the vertex which has the same location as V.
 	 */
-	public CADVertex getGeometricalVertex(CADVertex V)
+	public final CADVertex getGeometricalVertex(CADVertex V)
 	{
 		if (!vnodeset.contains(V))
 			throw new NoSuchElementException("TVertex : "+V);
@@ -176,7 +176,7 @@ public class MMesh0D
 	 * @param pd  discretization of cell, parent discretization 
 	 * @return child discretization on V
 	 */
-	BDiscretization getChildDiscretization(CADVertex V, BCADGraphCell pcell, BDiscretization pd)
+	final BDiscretization getChildDiscretization(CADVertex V, BCADGraphCell pcell, BDiscretization pd)
 	{
 		// Selection of the cell's child that has the same shape as V. The orientation of ccell
 		// is of no importance because both orientations share the same discretizations
@@ -202,7 +202,7 @@ public class MMesh0D
 	 * @param V  vertex
 	 * @return the index of the vertex which has the same location as V.
 	 */
-	public int getIndexGeometricalVertex(CADVertex V)
+	public final int getIndexGeometricalVertex(CADVertex V)
 	{
 		if (!vnodeset.contains(V))
 			return -1;
@@ -215,7 +215,7 @@ public class MMesh0D
 	 * @param index  the index of the vertex.
 	 * @return the geometrical vertex.
 	 */
-	public CADVertex getGeometricalVertex(int index)
+	public final CADVertex getGeometricalVertex(int index)
 	{
 		return vnodelist[index];
 	}

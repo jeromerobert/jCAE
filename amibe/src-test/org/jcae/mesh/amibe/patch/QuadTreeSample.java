@@ -205,7 +205,7 @@ public class QuadTreeSample
 		}
 	}
 	
-	public BranchGroup bgQuadTree()
+	public final BranchGroup bgQuadTree()
 	{
 		BranchGroup bg=new BranchGroup();
 		
@@ -232,7 +232,7 @@ public class QuadTreeSample
 		return bg;
 	}
 	
-	public BranchGroup bgVertices()
+	public final BranchGroup bgVertices()
 	{
 		BranchGroup bg=new BranchGroup();
 		CountVertProcedure cproc = new CountVertProcedure();
@@ -259,7 +259,7 @@ public class QuadTreeSample
 		return bg;
 	}
 	
-	public BranchGroup segment(double[] pvt, double[] pvn, float depth, float r, float g, float b)
+	public final BranchGroup segment(double[] pvt, double[] pvn, float depth, float r, float g, float b)
 	{
 		BranchGroup bg = new BranchGroup();
 		LineArray line = new LineArray(2, GeometryArray.COORDINATES | GeometryArray.COLOR_3);

@@ -64,7 +64,7 @@ public class DoubleFileReaderByMmap implements DoubleFileReader
 		return get(dst, 0, dst.length);
 	}
 
-	public int get(double[] dst, int offset, int len) throws IOException
+	public final int get(double[] dst, int offset, int len) throws IOException
 	{
 		if (tb.remaining() < len)
 			len = tb.remaining();
@@ -77,7 +77,7 @@ public class DoubleFileReaderByMmap implements DoubleFileReader
 		return get(index, dst, 0, dst.length);
 	}
 
-	public int get(int index, double[] dst, int offset, int len) throws IOException
+	public final int get(int index, double[] dst, int offset, int len) throws IOException
 	{
 		fc.position(index * 4L);
 		return get(dst, offset, len);
