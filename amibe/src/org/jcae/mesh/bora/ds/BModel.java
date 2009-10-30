@@ -204,9 +204,9 @@ public class BModel
 			return file;
 		else
 		{
-			current = new File(l.pop().toString());
+			current = new File(l.pop());
 			while(!l.isEmpty())
-				current = new File(current, l.pop().toString());
+				current = new File(current, l.pop());
 			return current;
 		}
 	}
