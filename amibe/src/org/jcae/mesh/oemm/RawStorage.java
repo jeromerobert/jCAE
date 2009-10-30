@@ -351,8 +351,7 @@ public class RawStorage
 			cells[i] = oemm.search(ijk9);
 			if (i < 2)
 			{
-				for (int j = 0; j < 3; j++)
-					ijk9[3*i+3+j] = ijk9[j];
+				System.arraycopy(ijk9, 0, ijk9, 3 * i + 3, 3);
 			}
 		}
 		public void processTriangle(int group)

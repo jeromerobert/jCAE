@@ -303,8 +303,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 					unvWriter.writeNode(i+nodeOffset+1, p3);
 				surface.setParameter(u, v);
 				p3 = surface.normal();
-				for (int j = 0; j < 3; j++)
-					normals[3*i+j] = p3[j];
+				System.arraycopy(p3, 0, normals, 3 * i, 3);
 			}
 			//  Boundary nodes
 			ifrR.get(refs);
@@ -314,14 +313,12 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 				double v = dfrN.get();
 				surface.setParameter(u, v);
 				double [] p3 = surface.normal();
-				for (int j = 0; j < 3; j++)
-					normals[3*(i+numberOfNodes-numberOfReferences)+j] = p3[j];
+				System.arraycopy(p3, 0, normals, 3 * (i + numberOfNodes - numberOfReferences), 3);
 				if (!xrefs.contains(refs[i]))
 				{
 					p3 = surface.value(u, v);
 					xrefs.put(refs[i], offsetBnd);
-					for (int j = 0; j < 3; j++)
-						coordRefs[3*offsetBnd+j] = p3[j];
+					System.arraycopy(p3, 0, coordRefs, 3 * offsetBnd, 3);
 					offsetBnd++;
 					refsOut.writeInt(refs[i]);
 				}

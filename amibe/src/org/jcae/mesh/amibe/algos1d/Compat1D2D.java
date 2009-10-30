@@ -114,8 +114,7 @@ public class Compat1D2D
 		{
 			paramOnEdge[k] = p1.getParameter();
 			double [] xyz = curve3d.value(paramOnEdge[k]);
-			for (int j = 0; j < 3; j++)
-				coord[3*k+j] = xyz[j];
+			System.arraycopy(xyz, 0, coord, 3 * k, 3);
 			k++;
 		}
 		curve3d.setDiscretization(paramOnEdge);

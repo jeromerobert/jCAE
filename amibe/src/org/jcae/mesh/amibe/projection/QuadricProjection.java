@@ -68,8 +68,7 @@ public class QuadricProjection implements LocalSurfaceProjection
 	{
 		discardHyperbolic = d;
 		double [] param = o.getUV();
-		for (int i = 0; i < 3; i++)
-			origin[i] = param[i];
+		System.arraycopy(param, 0, origin, 0, 3);
 
 		// Transformation matrix
 		qP = getMatrix3DLocalFrame(o);

@@ -121,8 +121,7 @@ public class Vertex implements Location, Serializable
 	public void copy(Vertex that)
 	{
 		assert that.param.length == param.length;
-		for (int i = 0; i < param.length; i++)
-			param[i] = that.param[i];
+		System.arraycopy(that.param, 0, param, 0, param.length);
 		link  = that.link;
 		ref1d = that.ref1d;
 		label = that.label;

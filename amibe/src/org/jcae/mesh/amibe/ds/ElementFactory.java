@@ -92,8 +92,7 @@ class ElementFactory implements ElementFactoryInterface
 	{
 		Triangle ret = createTriangle();
 		ret.vertex = new Vertex[v.length];
-		for (int i = 0; i < v.length; i++)
-			ret.vertex[i] = v[i];
+		System.arraycopy(v, 0, ret.vertex, 0, v.length);
 		return ret;
 	}
 

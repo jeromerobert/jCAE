@@ -283,8 +283,7 @@ public class MeshToSoupConvert extends JCAEXMLData implements FilterInterface
 					if (index < numberOfNodes - numberOfReferences)
 					{
 						double [] p3 = surface.value(u, v);
-						for (int j = 0; j < 3; j++)
-							coord[3*index+j] = p3[j];
+						System.arraycopy(p3, 0, coord, 3 * index, 3);
 					}
 					else
 					{
@@ -293,13 +292,11 @@ public class MeshToSoupConvert extends JCAEXMLData implements FilterInterface
 						{
 							double [] p3 = surface.value(u, v);
 							xrefs.put(ref, nrNodes);
-							for (int j = 0; j < 3; j++)
-								coordRefs[3*nrNodes+j] = p3[j];
+							System.arraycopy(p3, 0, coordRefs, 3 * nrNodes, 3);
 							nrNodes++;
 						}
 						ref = xrefs.get(ref);
-						for (int j = 0; j < 3; j++)
-							coord[3*index+j] = coordRefs[3*ref+j];
+						System.arraycopy(coordRefs, 3 * ref, coord, 3 * index, 3);
 					}
 					index++;
 				}
@@ -357,8 +354,7 @@ public class MeshToSoupConvert extends JCAEXMLData implements FilterInterface
 					}
 					nrTriangles++;
 					for (int j = 0; j < 3; j++)
-						for (int k = 0; k < 3; k++)
-							c[3*j+k] = coord[3*ind[j]+k];
+						System.arraycopy(coord, 3 * ind[j], c, 3 * j, 3);
 					if (F.isOrientationForward())
 					{
 						for (int j = 0; j < 3; j++)

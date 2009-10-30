@@ -63,8 +63,7 @@ public class Triangle implements Serializable
 
 	public void copy(Triangle src)
 	{
-		for (int i = 0; i < 3; i++)
-			vertex[i] = src.vertex[i];
+		System.arraycopy(src.vertex, 0, vertex, 0, 3);
 		readable = src.readable;
 		writable = src.writable;
 	}

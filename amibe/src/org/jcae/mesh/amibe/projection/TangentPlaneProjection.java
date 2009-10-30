@@ -42,8 +42,7 @@ public class TangentPlaneProjection implements LocalSurfaceProjection
 		}
 		normal = avgNormal;
 		double [] param = o.getUV();
-		for (int i = 0; i < 3; i++)
-			origin[i] = param[i];
+		System.arraycopy(param, 0, origin, 0, 3);
 	}
 
 	/**

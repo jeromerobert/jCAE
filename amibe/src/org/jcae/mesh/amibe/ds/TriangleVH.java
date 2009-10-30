@@ -103,8 +103,7 @@ public class TriangleVH extends Triangle
 	{
 		super.copy(that);
 		TriangleVH src = (TriangleVH) that;
-		for (int i = 0; i < 3; i++)
-			adjacentTriangles[i] = src.adjacentTriangles[i];
+		System.arraycopy(src.adjacentTriangles, 0, adjacentTriangles, 0, 3);
 		adjPos = src.adjPos;
 		edgeAttributes[0] = src.edgeAttributes[0];
 		edgeAttributes[1] = src.edgeAttributes[1];

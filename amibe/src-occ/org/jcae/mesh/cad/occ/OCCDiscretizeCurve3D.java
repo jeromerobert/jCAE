@@ -102,8 +102,7 @@ public class OCCDiscretizeCurve3D
 	{
 		nr = param.length;
 		a = new double[nr];
-		for (int i = 0; i < nr; i++)
-			a[i] = param[i];
+		System.arraycopy(param, 0, a, 0, nr);
 		length = -1.0;
 	}
 	
