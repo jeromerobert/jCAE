@@ -456,7 +456,7 @@ abstract public class MeshExporter
 			METER,
 			MM,
 			Unknown
-		};
+		}
 		private Unit unit = Unit.METER;
 		
 		public UNV(File directory, int[] groupIds)
