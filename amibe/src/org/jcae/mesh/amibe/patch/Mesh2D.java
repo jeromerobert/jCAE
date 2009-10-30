@@ -295,7 +295,7 @@ public class Mesh2D extends Mesh
 				break;
 			s.nextOrigin();
 			i++;
-			if ((Vertex2D) s.destination() == dest || i > maxIter)
+			if (s.destination() == dest || i > maxIter)
 				throw new InitialTriangulationException();
 		}
 		s.sym();

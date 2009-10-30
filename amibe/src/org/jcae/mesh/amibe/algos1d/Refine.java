@@ -124,7 +124,7 @@ public class Refine
 			for (int i = 1; i < divisions; i++)
 			{
 				double param = firstNode.getParameter() + i * delta;
-				n2 = new MNode1D(param, (CADVertex) null);
+				n2 = new MNode1D(param, null);
 				//  Would be useful if degenerated edges are refined for
 				//  any reason
 				n2.isDegenerated(n1.isDegenerated());

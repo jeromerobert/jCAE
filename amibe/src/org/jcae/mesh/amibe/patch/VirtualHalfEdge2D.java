@@ -350,7 +350,7 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 				// are recreated, so VirtualHalfEdge.nextApexLoop
 				// is not relevant here.
 				nextApexLoopNoBoundaries(mesh);
-				if ((Vertex2D) origin() == first)
+				if (origin() == first)
 				{
 					// If no swap has been performed, processing is over
 					if (nrSwap == 0)
@@ -516,9 +516,9 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 	
 	private boolean isDelaunay_isotropic(Mesh2D mesh, Vertex2D apex2)
 	{
-		assert mesh.outerVertex != (Vertex2D) origin();
-		assert mesh.outerVertex != (Vertex2D) destination();
-		assert mesh.outerVertex != (Vertex2D) apex();
+		assert mesh.outerVertex != origin();
+		assert mesh.outerVertex != destination();
+		assert mesh.outerVertex != apex();
 		Vertex2D vA = (Vertex2D) origin();
 		Vertex2D vB = (Vertex2D) destination();
 		Vertex2D v1 = (Vertex2D) apex();
@@ -539,9 +539,9 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 	
 	private boolean isDelaunay_anisotropic(Mesh2D mesh, Vertex2D apex2)
 	{
-		assert mesh.outerVertex != (Vertex2D) origin();
-		assert mesh.outerVertex != (Vertex2D) destination();
-		assert mesh.outerVertex != (Vertex2D) apex();
+		assert mesh.outerVertex != origin();
+		assert mesh.outerVertex != destination();
+		assert mesh.outerVertex != apex();
 		if (apex2 == mesh.outerVertex)
 			return true;
 		return !apex2.inCircle(mesh, this);
