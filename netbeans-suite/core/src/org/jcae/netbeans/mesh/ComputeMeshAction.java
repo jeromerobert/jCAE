@@ -25,7 +25,6 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-import javax.swing.SwingUtilities;
 import org.jcae.mesh.JCAEFormatter;
 import org.jcae.mesh.bora.ds.BModel;
 import org.netbeans.api.progress.ProgressHandle;
@@ -41,7 +40,6 @@ import org.openide.util.TaskListener;
 import org.openide.util.actions.CookieAction;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
-import org.openide.windows.WindowManager;
 
 public class ComputeMeshAction extends CookieAction
 {
@@ -103,12 +101,6 @@ public class ComputeMeshAction extends CookieAction
 
 	protected void performAction(Node[] arg0)
 	{
-		SwingUtilities.invokeLater(new Runnable(){
-			public void run(){
-				WindowManager.getDefault().findTopComponent("output").open();
-			}
-		});
-
 		LifecycleManager.getDefault().saveAll();
 		InputOutput io=IOProvider.getDefault().getIO("jCAE Mesher "+ioProviderCounter, true);
 		ioProviderCounter++;

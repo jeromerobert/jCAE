@@ -15,146 +15,36 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2005-2009, by EADS France
  */
 
 package org.jcae.netbeans;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.Arrays;
 import org.jcae.netbeans.cad.ModuleNode;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.project.ActionProvider;
 import org.netbeans.spi.project.ProjectState;
 import org.netbeans.spi.project.ui.LogicalViewProvider;
-import org.openide.ErrorManager;
-import org.openide.filesystems.FileAttributeEvent;
-import org.openide.filesystems.FileChangeListener;
-import org.openide.filesystems.FileEvent;
 import org.openide.filesystems.FileObject;
-import org.openide.filesystems.FileRenameEvent;
-import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataFolder;
-import org.openide.loaders.DataLoader;
-import org.openide.loaders.DataObject;
-import org.openide.loaders.DataObjectNotFoundException;
-import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.FilterNode;
 import org.openide.nodes.Node;
 import org.openide.util.Lookup;
-import org.openide.util.RequestProcessor;
 import org.openide.util.lookup.Lookups;
 
 public class JCAEProject implements Project, LogicalViewProvider, ActionProvider
 {
-	private final static String  MIME_UNKNOWN="content/unknown";
-	
-	private class ProjectChildren extends Children.Keys implements FileChangeListener
-	{		
-		private FileObject directory;
-		private final ModuleNode cadNode=new ModuleNode(JCAEProject.this);
-		private final org.jcae.netbeans.mesh.ModuleNode meshNode=
-			new org.jcae.netbeans.mesh.ModuleNode(JCAEProject.this);
-		private final java.util.Map<Class, Node> loaderToMNode=
-			new HashMap<Class, Node>();
-		
+	private class ProjectChildren extends Children.Array
+	{				
 		public ProjectChildren(FileObject directory)
-		{		
-			this.directory=directory;
-			directory.addFileChangeListener(this);
-		}
-		
-		protected Node[] createNodes(Object arg0)
 		{
-			return new Node[]{(Node)arg0};
+			super(Arrays.asList(new Node[]{
+				new ModuleNode(JCAEProject.this),
+				new org.jcae.netbeans.mesh.ModuleNode(JCAEProject.this)
+			}));
 		}
-		
-		private void clearMNodes()
-		{
-			Iterator it=loaderToMNode.values().iterator();
-			while(it.hasNext())
-			{
-				Node n=(Node)it.next();
-				n.getChildren().remove(n.getChildren().getNodes());
-			}
-		}
-		
-		@Override
-		protected void addNotify()
-		{			
-			FileObject[] os=directory.getChildren();
-			HashSet<Node> l=new HashSet<Node>();
-			clearMNodes();
-			for(int i=0; i<os.length; i++)
-			{
-				String s=FileUtil.getMIMEType(os[i]);
-				if(s!=null && !MIME_UNKNOWN.equals(s) && 
-					!"text/x-unv".equals(s) && !"text/mesh+xml".equals(s))
-				{					
-					try
-					{					
-						DataObject dObj = DataObject.find(os[i]);						
-						DataLoader loader=dObj.getLoader();
-						Node mNode=loaderToMNode.get(loader.getClass());						
-						if(mNode==null)
-						{
-							mNode=new AbstractNode(new Children.Array());
-							mNode.setDisplayName(loader.getDisplayName());
-							loaderToMNode.put(loader.getClass(), mNode);							
-						}
-						l.add(mNode);
-						mNode.getChildren().add(new Node[]{dObj.getNodeDelegate()});
-					}
-					catch (DataObjectNotFoundException ex)
-					{
-						ErrorManager.getDefault().notify(ex);
-					}					
-				}
-			}				
-			Object[] keys=new Object[2+l.size()];
-			keys[0]=cadNode;
-			keys[1]=meshNode;
-			System.arraycopy(l.toArray(), 0, keys, 2, l.size());
-			setKeys(keys);				
-		}		
-		
-		public void fileFolderCreated(FileEvent arg0)
-		{		
-			addNotify();
-		}
-
-		public void fileDataCreated(FileEvent arg0)
-		{
-			RequestProcessor.getDefault().post(new Runnable()
-			{
-				public void run()
-				{
-					addNotify();
-				}				
-			});
-		}
-
-		public void fileChanged(FileEvent arg0)
-		{		
-			addNotify();
-		}
-
-		public void fileDeleted(FileEvent arg0)
-		{
-			addNotify();
-		}
-
-		public void fileRenamed(FileRenameEvent arg0)
-		{
-			addNotify();
-		}
-
-		public void fileAttributeChanged(FileAttributeEvent arg0)
-		{
-			addNotify();
-		}		
 	}	
 	
 	private final FileObject projectDirectory;

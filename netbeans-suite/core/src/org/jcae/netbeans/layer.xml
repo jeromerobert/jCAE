@@ -447,13 +447,13 @@
             <file name="ProgressListAction.shadow_hidden"/>
             <file name="Separator4.instance_hidden"/>
             <file name="SwitchToRecentDocumentAction.shadow_hidden"/>
-            <file name="ViewRuntimeTabAction.shadow_hidden"/>
-			<file name="org-netbeans-core-actions-OptionsAction.instance">
+            <file name="ViewRuntimeTabAction.shadow_hidden"/>			
+			<file name="org-netbeans-modules-options-OptionsWindowAction.instance">
                 <attr name="position" intvalue="0"/>
             </file>
-			<file name="org-netbeans-core-output2-OutputWindowAction.instance">
-                <attr name="instanceClass" stringvalue="org.netbeans.core.output2.OutputWindowAction"/>
-                <attr name="position" intvalue="110"/>
+            <file name="org-netbeans-core-io-ui-IOWindowAction.shadow">
+                <attr name="originalFile" stringvalue="Actions/Window/org-netbeans-core-io-ui-IOWindowAction.instance"/>
+                <attr name="position" intvalue="900"/>
             </file>
 			<file name="org-netbeans-modules-autoupdate-ui-actions-PluginManagerAction.instance">
 				<attr name="position" intvalue="700"/>
