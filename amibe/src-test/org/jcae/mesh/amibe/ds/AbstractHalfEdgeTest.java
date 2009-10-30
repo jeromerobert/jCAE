@@ -27,12 +27,12 @@ import org.junit.Ignore;
 @Ignore("Utility class")
 public class AbstractHalfEdgeTest
 {
-	protected Mesh mesh;
-	protected Vertex [] v;
-	protected Triangle [] T;
+	Mesh mesh;
+	Vertex [] v;
+	private Triangle [] T;
 	private int vertexLabel = 0;
 	private int originalVertexCount = 0;
-	protected boolean alterned = true;
+	private boolean alterned = true;
 	
 	private void create3x4Shell()
 	{
@@ -167,7 +167,7 @@ public class AbstractHalfEdgeTest
 		return tt;
 	}
 	
-	protected final Triangle [] rotateMxNShellAroundY(int m, int n, double angle)
+	final Triangle [] rotateMxNShellAroundY(int m, int n, double angle)
 	{
 		// Create new vertices and append them to current mesh
 		assert originalVertexCount == m*n;
@@ -203,20 +203,20 @@ public class AbstractHalfEdgeTest
 		}
 	}
 
-	protected final void buildMesh()
+	final void buildMesh()
 	{
 		createMxNShell(3, 2);
 		mesh.buildAdjacency();
 	}
 	
-	protected final void buildMesh2()
+	final void buildMesh2()
 	{
 		create3x4Shell();
 		mesh.buildAdjacency();
 		assertTrue("Mesh is not valid", mesh.isValid());
 	}
 	
-	protected final void buildMeshTopo()
+	final void buildMeshTopo()
 	{
 		/*
 		 *    This mesh is a prism, it can be unrolled as:
@@ -265,7 +265,7 @@ public class AbstractHalfEdgeTest
 		mesh.buildAdjacency();
 	}
 	
-	protected final void buildMeshNM(int m, int n, boolean alt)
+	final void buildMeshNM(int m, int n, boolean alt)
 	{
 		/*  (2, 4, true)           (4, 4, true)
 		 *  v6         v7      v12       v13       v14       v15
@@ -299,7 +299,7 @@ public class AbstractHalfEdgeTest
 		assertTrue("Mesh is not valid", mesh.isValid());
 	}
 	
-	protected final AbstractHalfEdge find(Vertex v1, Vertex v2)
+	final AbstractHalfEdge find(Vertex v1, Vertex v2)
 	{
 		if (v1.isManifold())
 		{
@@ -345,7 +345,7 @@ public class AbstractHalfEdgeTest
 		return null;
 	}
 	
-	protected void nextOriginLoop()
+	void nextOriginLoop()
 	{
 		// Loop around v0
 		AbstractHalfEdge e = find(v[0], v[1]);
@@ -398,13 +398,13 @@ public class AbstractHalfEdgeTest
 		assertTrue(e.getTri() == T[2]);
 	}
 	
-	protected final void canCollapse(Vertex o, Vertex d, Vertex n, boolean expected)
+	final void canCollapse(Vertex o, Vertex d, Vertex n, boolean expected)
 	{
 		AbstractHalfEdge e = find(o, d);
 		assertTrue(expected == e.canCollapse(n));
 	}
 
-	protected final AbstractHalfEdge collapse(Vertex o, Vertex d, Vertex n)
+	final AbstractHalfEdge collapse(Vertex o, Vertex d, Vertex n)
 	{
 		AbstractHalfEdge e = find(o, d);
 		Vertex a = e.apex();
@@ -415,7 +415,7 @@ public class AbstractHalfEdgeTest
 		return e;
 	}
 
-	protected final void swap(Vertex o, Vertex d)
+	final void swap(Vertex o, Vertex d)
 	{
 		AbstractHalfEdge e = find(o, d);
 		Vertex a = e.apex();
@@ -444,7 +444,7 @@ public class AbstractHalfEdgeTest
 		return e;
 	}
 
-	protected final void countVertexLinks(Vertex o, int count)
+	final void countVertexLinks(Vertex o, int count)
 	{
 		int n = 0;
 		if (o.isManifold())
@@ -454,7 +454,7 @@ public class AbstractHalfEdgeTest
 		assertTrue("Found "+n+" links instead of "+count, n == count);
 	}
 
-	protected final void countEdgeLinks(Vertex o, Vertex d, int count)
+	final void countEdgeLinks(Vertex o, Vertex d, int count)
 	{
 		AbstractHalfEdge e = find(o, d);
 		int n = 0;
@@ -474,7 +474,7 @@ public class AbstractHalfEdgeTest
 		assertTrue("Found "+n+" incident triangles instead of "+count, n == count);
 	}
 
-	protected final void countFanIterator(Vertex o, Vertex d, int count)
+	final void countFanIterator(Vertex o, Vertex d, int count)
 	{
 		AbstractHalfEdge e = find(o, d);
 		int n = 0;

@@ -34,7 +34,7 @@ public abstract class OCCShapeEnum extends CADShapeEnum
 {
 	// occExplorerEnum must be identical to TopAbs_ShapeEnum.
 	private final TopAbs_ShapeEnum occExplorerEnum;
-	OCCShapeEnum(String name, int t)
+	private OCCShapeEnum(String name, int t)
 	{
 		super(name);
 		occExplorerEnum = TopAbs_ShapeEnum.swigToEnum(t);
@@ -78,7 +78,7 @@ public abstract class OCCShapeEnum extends CADShapeEnum
 	};
 	// Note: VALUES must contain items in the same order as they
 	// have been declared in this file!
-	static final OCCShapeEnum [] VALUES = {
+	private static final OCCShapeEnum [] VALUES = {
 		OCC_VERTEX,
 		OCC_EDGE,
 		OCC_WIRE,

@@ -60,7 +60,7 @@ import java.util.logging.Logger;
  */
 public class RawStorage
 {
-	static final Logger logger=Logger.getLogger(RawStorage.class.getName());
+	private static final Logger logger=Logger.getLogger(RawStorage.class.getName());
 
 	//  In triangle soup, a triangle has 9 double coordinates and two ints.
 	private static final int TRIANGLE_SIZE_RAW = 80;
@@ -74,9 +74,9 @@ public class RawStorage
 	// As TRIANGLE_SIZE_RAW is 2*TRIANGLE_SIZE_DISPATCHED, the latter
 	// does not need to be taken into account
 	private static final int bufferSize = (TRIANGLE_SIZE_RAW * VERTEX_SIZE_INDEXED * TRIANGLE_SIZE_INDEXED);
-	static final ByteBuffer bb = ByteBuffer.allocate(bufferSize);
-	static final ByteBuffer bbt = ByteBuffer.allocate(bufferSize);
-	static final ByteBuffer bbpos = ByteBuffer.allocate(8);
+	private static final ByteBuffer bb = ByteBuffer.allocate(bufferSize);
+	private static final ByteBuffer bbt = ByteBuffer.allocate(bufferSize);
+	private static final ByteBuffer bbpos = ByteBuffer.allocate(8);
 
 	public static interface SoupReaderInterface
 	{
@@ -373,7 +373,7 @@ public class RawStorage
 		}
 	}
 
-	static void addToCell(FileChannel fc, OEMM.Node current, Map<OEMM.Node, ByteBuffer> buffers, int [] ijk, int attribute)
+	private static void addToCell(FileChannel fc, OEMM.Node current, Map<OEMM.Node, ByteBuffer> buffers, int [] ijk, int attribute)
 		throws IOException
 	{
 		assert current.counter <= fc.size();
@@ -1079,7 +1079,7 @@ public class RawStorage
 		}
 	}
 	
-	static PAVLTreeIntArrayDup loadVerticesInAVLTreeDup(String outDir, OEMM.Node current)
+	private static PAVLTreeIntArrayDup loadVerticesInAVLTreeDup(String outDir, OEMM.Node current)
 	{
 		PAVLTreeIntArrayDup ret = new PAVLTreeIntArrayDup();
 		int [] ijk = new int[3];

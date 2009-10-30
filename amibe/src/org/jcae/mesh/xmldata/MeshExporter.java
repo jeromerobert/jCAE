@@ -55,7 +55,7 @@ import java.util.logging.Level;
  */
 abstract public class MeshExporter
 {
-	static final Logger logger=Logger.getLogger(MeshExporter.class.getName());
+	private static final Logger logger=Logger.getLogger(MeshExporter.class.getName());
 	
 	public static class FormatD25_16 extends DecimalFormat
 	{
@@ -173,22 +173,22 @@ abstract public class MeshExporter
 		}
 	}
 	
-	final static String CR=System.getProperty("line.separator");
+	private final static String CR=System.getProperty("line.separator");
 	private final static NumberFormat FORMAT_D25_16=new FormatD25_16();
-	final static NumberFormat FORMAT_I10=new FormatI10();
+	private final static NumberFormat FORMAT_I10=new FormatI10();
 	
 	private final File directory;
 	private final Document document;
 	private final int[] groupIds;
-	protected int[][] groups;
-	protected String[] names;
+	int[][] groups;
+	String[] names;
 	private int numberOfTriangles;
 	
 	/**
 	 * @param directory The directory which contains 3d files
 	 * @param groupIds The list of ids of groups to convert
 	 */
-	protected MeshExporter(File directory, int[] groupIds)
+	MeshExporter(File directory, int[] groupIds)
 	{
 		this.directory=directory;
 		Document d = null;
@@ -214,7 +214,7 @@ abstract public class MeshExporter
 	 * Convert all groups to UNV
 	 * @param directory The directory which contains 3d files
 	 */
-	protected MeshExporter(String directory)
+	MeshExporter(String directory)
 	{
 		this(new File(directory), null);
 	}
@@ -232,7 +232,7 @@ abstract public class MeshExporter
 		return toReturn;
 	}
 	
-	protected final File getNodeFile()
+	final File getNodeFile()
 	{
 		Element xmlNodes = (Element) document.getElementsByTagName(
 			"nodes").item(0);
@@ -240,7 +240,7 @@ abstract public class MeshExporter
 		return new File(directory, a);
 	}
 	
-	protected final File getTriaFile()
+	final File getTriaFile()
 	{
 		Element xmlNodes = (Element) document.getElementsByTagName(
 			"triangles").item(0);
@@ -249,7 +249,7 @@ abstract public class MeshExporter
 		return new File(directory, a);
 	}
 	
-	protected final File getNormalFile()
+	final File getNormalFile()
 	{
 		Element xmlNormals = (Element) document.getElementsByTagName("normals").item(0);
 		if (xmlNormals == null)
@@ -258,7 +258,7 @@ abstract public class MeshExporter
 		return new File(directory, a);
 	}
 
-	protected final File getGroupFile()
+	final File getGroupFile()
 	{
 		Element xmlGroups = (Element) document.getElementsByTagName("group").item(0);
 		if (xmlGroups == null)
@@ -424,26 +424,26 @@ abstract public class MeshExporter
 		TIntIntHashMap amibeNodeToUNVNode,
 		TIntIntHashMap amibeTriaToUNVTria) throws IOException;
 	
-	protected void writeInit(PrintStream out)
+	void writeInit(PrintStream out)
 		throws IOException
 	{
 		//To be implemented by instanciating class
 	}
 	
-	protected void writeFinish(PrintStream out)
+	void writeFinish(PrintStream out)
 		throws IOException
 	{
 		//To be implemented by instanciating class
 	}
 	
-	protected void writeNormals(PrintStream out, int[] triangles,
+	void writeNormals(PrintStream out, int[] triangles,
 		TIntIntHashMap amibeNodeToUNVNode,
 		TIntIntHashMap amibeTriaToUNVTria) throws IOException
 	{
 		//To be implemented by instanciating class
 	}
 	
-	protected void writeGroups(PrintStream out,
+	void writeGroups(PrintStream out,
 		TIntIntHashMap amibeTriaToUNVTria) throws IOException
 	{
 		//To be implemented by instanciating class

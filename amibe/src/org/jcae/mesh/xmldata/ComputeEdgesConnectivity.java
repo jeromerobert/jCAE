@@ -88,10 +88,12 @@ public class ComputeEdgesConnectivity
 		}
 	}
 	
-	final File xmlDir;
-	final File xmlFile;
-	int numberOfTriangles, numberOfFreeEdges, numberOfMultiEdges;
-	Document document;
+	private final File xmlDir;
+	private final File xmlFile;
+	private int numberOfTriangles;
+	private int numberOfFreeEdges;
+	private int numberOfMultiEdges;
+	private Document document;
 	
 	public ComputeEdgesConnectivity(String dir, String file)
 	{

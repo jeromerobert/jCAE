@@ -42,7 +42,7 @@ public class OctreeSampleRemove extends OctreeSample
 		super(o);
 	}
 	
-	public static void display(Viewer view, OctreeSample t)
+	private static void display(Viewer view, OctreeSample t)
 	{
 		view.addBranchGroup(t.bgOctree());
 		view.setVisible(true);

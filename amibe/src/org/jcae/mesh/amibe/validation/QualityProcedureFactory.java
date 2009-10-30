@@ -34,7 +34,7 @@ public class QualityProcedureFactory
 {
 	private final static Logger LOGGER = Logger.getLogger(QualityProcedureFactory.class.getName());
 
-	Constructor<QualityProcedure> cons;
+	private Constructor<QualityProcedure> cons;
 	public QualityProcedureFactory(String className)
 	{
 		cons = null;
@@ -53,7 +53,7 @@ public class QualityProcedureFactory
 		}
 	}
 
-	public final QualityProcedure buildQualityProcedure()
+	final QualityProcedure buildQualityProcedure()
 	{
 		if (cons == null)
 			return null;

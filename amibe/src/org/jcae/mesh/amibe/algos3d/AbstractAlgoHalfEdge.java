@@ -42,18 +42,18 @@ import java.util.logging.Logger;
 
 public abstract class AbstractAlgoHalfEdge
 {
-	protected Mesh mesh;
-	protected int nrFinal = 0;
-	protected int nrTriangles = 0;
-	protected double tolerance = 0.0;
-	protected double maxEdgeLength = -1.0;
-	protected int processed = 0;
-	protected int swapped = 0;
-	protected int notProcessed = 0;
-	protected int notInTree = 0;
+	Mesh mesh;
+	int nrFinal = 0;
+	int nrTriangles = 0;
+	double tolerance = 0.0;
+	double maxEdgeLength = -1.0;
+	int processed = 0;
+	int swapped = 0;
+	int notProcessed = 0;
+	int notInTree = 0;
 	private int progressBarStatus = 10000;
-	protected boolean noSwapAfterProcessing = false;
-	protected QSortedTree<HalfEdge> tree = new PAVLSortedTree<HalfEdge>();
+	boolean noSwapAfterProcessing = false;
+	QSortedTree<HalfEdge> tree = new PAVLSortedTree<HalfEdge>();
 	
 	protected abstract void preProcessAllHalfEdges();
 	protected abstract void postProcessAllHalfEdges();
@@ -63,7 +63,7 @@ public abstract class AbstractAlgoHalfEdge
 	protected abstract Logger thisLogger();
 	private static final String dumpFile = "/tmp/jcae.dump";
 
-	protected AbstractAlgoHalfEdge(final Mesh m)
+	AbstractAlgoHalfEdge(final Mesh m)
 	{
 		mesh = m;
 	}
@@ -99,7 +99,7 @@ public abstract class AbstractAlgoHalfEdge
 	 * Ensure that edge orientation is fixed and does not depend on hashcodes.  This method
 	 * must be used when entering canProcessEdge() and processEdge().
 	 */
-	protected static HalfEdge uniqueOrientation(HalfEdge current)
+	static HalfEdge uniqueOrientation(HalfEdge current)
 	{
 		if (current.hasAttributes(AbstractHalfEdge.MARKED) || !current.hasSymmetricEdge())
 			return current;
@@ -129,16 +129,16 @@ public abstract class AbstractAlgoHalfEdge
 		}
 	}
 
-	protected void postComputeTree()
+	void postComputeTree()
 	{
 	}
 
 	// This routine is needed by DecimateHalfedge.
-	protected void preProcessEdge()
+	void preProcessEdge()
 	{
 	}
 
-	protected final void addToTree(final HalfEdge e)
+	final void addToTree(final HalfEdge e)
 	{
 		if (!e.origin().isReadable() || !e.destination().isReadable())
 			return;
@@ -155,7 +155,7 @@ public abstract class AbstractAlgoHalfEdge
 		}
 	}
 
-	protected final void removeFromTree(final HalfEdge e)
+	final void removeFromTree(final HalfEdge e)
 	{
 		for (Iterator<AbstractHalfEdge> it = e.fanIterator(); it.hasNext(); )
 		{
@@ -285,7 +285,7 @@ public abstract class AbstractAlgoHalfEdge
 		return processed > 0;
 	}
 
-	protected final void dumpState()
+	final void dumpState()
 	{
 		ObjectOutputStream out = null;
 		try
@@ -303,13 +303,13 @@ public abstract class AbstractAlgoHalfEdge
 		}
 	}
 
-	protected void appendDumpState(ObjectOutputStream out)
+	void appendDumpState(ObjectOutputStream out)
 		throws IOException
 	{
 	}
 
 	@SuppressWarnings("unchecked")
-	protected final boolean restoreState()
+	final boolean restoreState()
 	{
 		try
 		{
@@ -335,7 +335,7 @@ public abstract class AbstractAlgoHalfEdge
 		return true;
 	}
 
-	protected void appendRestoreState(ObjectInputStream q)
+	void appendRestoreState(ObjectInputStream q)
 		throws IOException
 	{
 	}

@@ -41,7 +41,7 @@ public class GroupsReader
 	 * @param racine l'element dont part la recherche
 	 * @param tag le tag de l'element dont on veut obtenir le Text contenu
 	 */
-	public static String getStringByTagName(Element racine, String tag)
+	private static String getStringByTagName(Element racine, String tag)
 	{
 		Node element = racine.getElementsByTagName(tag).item(0);
 		String result = null;

@@ -480,7 +480,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 *
 	 * @param v  start vertex of this edge
 	 */
-	public final void setOrigin(Vertex v)
+	final void setOrigin(Vertex v)
 	{
 		tri.vertex[next3[localNumber]] = v;
 	}
@@ -500,7 +500,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 *
 	 * @param v  apex of this edge
 	 */
-	public final void setApex(Vertex v)
+	protected final void setApex(Vertex v)
 	{
 		tri.vertex[localNumber] = v;
 	}

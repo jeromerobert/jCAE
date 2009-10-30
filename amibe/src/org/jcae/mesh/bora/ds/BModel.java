@@ -312,7 +312,7 @@ public class BModel
 		LOGGER.info("Done");
 	}
 
-	public final void discretizeVertices()
+	final void discretizeVertices()
 	{
 		if (state.compareTo(State.TESSELLATION_0) >= 0)
 			return;
@@ -329,7 +329,7 @@ public class BModel
 		state = State.TESSELLATION_0;
 	}
 
-	public final void discretizeEdges()
+	final void discretizeEdges()
 	{
 		if (state.compareTo(State.TESSELLATION_1) >= 0)
 			return;
@@ -357,7 +357,7 @@ public class BModel
 		state = State.TESSELLATION_1;
 	}
 
-	public final void discretizeFaces()
+	final void discretizeFaces()
 	{
 		if (state.compareTo(State.TESSELLATION_2) >= 0)
 			return;
@@ -386,7 +386,7 @@ public class BModel
 		state = State.TESSELLATION_2;
 	}
 
-	public final void discretizeSolids()
+	final void discretizeSolids()
 	{
 		if (state.compareTo(State.TESSELLATION_3) >= 0)
 			return;

@@ -66,10 +66,10 @@ public class SmoothNodes3DBg
 	private final QSortedTree<Vertex> tree = new PAVLSortedTree<Vertex>();
 	private boolean refresh = false;
 	int processed = 0;
-	int notProcessed = 0;
-	TObjectDoubleHashMap<Triangle> qualityMap;
-	Collection<Vertex> nodeset;
-	final Set<Vertex> immutableNodes = new LinkedHashSet<Vertex>();
+	private int notProcessed = 0;
+	private TObjectDoubleHashMap<Triangle> qualityMap;
+	private Collection<Vertex> nodeset;
+	private final Set<Vertex> immutableNodes = new LinkedHashSet<Vertex>();
 	
 	/**
 	 * Creates a <code>SmoothNodes3DBg</code> instance.
@@ -211,7 +211,7 @@ public class SmoothNodes3DBg
 		return this;
 	}
 	
-	protected final void postProcessIteration(Mesh mesh, int i)
+	final void postProcessIteration(Mesh mesh, int i)
 	{
 		// Can be overridden
 	}

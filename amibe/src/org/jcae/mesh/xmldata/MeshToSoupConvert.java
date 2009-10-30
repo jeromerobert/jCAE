@@ -119,7 +119,7 @@ public class MeshToSoupConvert extends JCAEXMLData implements FilterInterface
 		m2dTo3D.afterProcessingAllShapes();
 	}
 	
-	public MeshToSoupConvert (String file, String dir, CADShape shape)
+	private MeshToSoupConvert (String file, String dir, CADShape shape)
 	{
 		xmlDir = dir;
 		soupFile = file;

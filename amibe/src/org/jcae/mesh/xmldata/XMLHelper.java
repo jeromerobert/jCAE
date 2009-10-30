@@ -110,7 +110,7 @@ public class XMLHelper
 	}
 
 	/** Removes useless path components.  */
-	public static String canonicalize(String path)
+	private static String canonicalize(String path)
 	{
 		String pattern=File.separator;
 		if(pattern.equals("\\"))

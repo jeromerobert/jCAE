@@ -149,7 +149,7 @@ public class Storage
 	 *
 	 * @param oemm stored object
 	 */
-	public static void storeOEMMStructure(OEMM oemm)
+	private static void storeOEMMStructure(OEMM oemm)
 	{
 		if (logger.isLoggable(Level.INFO)) {
 			logger.info("storeOEMMStructure");
@@ -801,7 +801,7 @@ public class Storage
 		}
 	}
 
-	protected static File getAdjacencyFile(OEMM oemm, Node node)
+	private static File getAdjacencyFile(OEMM oemm, Node node)
 	{
 		return new File(oemm.getDirectory(), node.file+"a");
 	}
@@ -825,7 +825,7 @@ public class Storage
 	 * @return a <code>List<TIntArrayList></code> instance; for each vertex, returns indices of adjacent
 	 *      and non-loaded nodes
 	 */
-	protected static List<TIntArrayList> readAdjacencyFile(OEMM oemm, Node node, TIntHashSet storedLeaves)
+	static List<TIntArrayList> readAdjacencyFile(OEMM oemm, Node node, TIntHashSet storedLeaves)
 	{
 		List<TIntArrayList> result = new ArrayList<TIntArrayList>();
 		TIntArrayList nullList = new TIntArrayList();
@@ -928,7 +928,7 @@ public class Storage
 		return searchNode(oemm, coords, positions);
 	}
 
-	public static int searchNode(OEMM oemm, double[] coords, int[] positions)
+	private static int searchNode(OEMM oemm, double[] coords, int[] positions)
 	{
 		oemm.double2int(coords, positions);
 		return oemm.search(positions).leafIndex;
@@ -940,13 +940,13 @@ public class Storage
 			buffer[i] = fc.readInt();
 	}
 	
-	public static void writeIntArray(DataOutputStream fc, int[] pointIndex) throws IOException
+	private static void writeIntArray(DataOutputStream fc, int[] pointIndex) throws IOException
 	{
 		for(int val: pointIndex)
 			fc.writeInt(val);
 	}
 	
-	public static void writeDoubleArray(DataOutputStream fc, double[] uv) throws IOException
+	private static void writeDoubleArray(DataOutputStream fc, double[] uv) throws IOException
 	{
 		for (double val: uv)
 			fc.writeDouble(val);

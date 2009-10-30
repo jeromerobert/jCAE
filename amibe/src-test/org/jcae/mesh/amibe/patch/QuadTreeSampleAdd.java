@@ -38,12 +38,12 @@ public class QuadTreeSampleAdd extends QuadTreeSample
 {
 	private static final Logger logger=Logger.getLogger(QuadTreeSampleAdd.class.getName());
 	
-	public QuadTreeSampleAdd(KdTree q)
+	private QuadTreeSampleAdd(KdTree q)
 	{
 		super (q);
 	}
 	
-	public static void display(Viewer view, QuadTreeSample r)
+	private static void display(Viewer view, QuadTreeSample r)
 	{
 		view.addBranchGroup(r.bgQuadTree());
 		view.setVisible(true);

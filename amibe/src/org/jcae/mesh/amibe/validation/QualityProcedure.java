@@ -37,13 +37,13 @@ import java.lang.reflect.InvocationTargetException;
 public abstract class QualityProcedure
 {
 	protected static final int FACE = 1;
-	protected static final int NODE = 2;
-	protected static final int EDGE = 3;
+	static final int NODE = 2;
+	static final int EDGE = 3;
 	
 	// By default, values are computed by faces.
-	protected int type = FACE;
-	protected String [] usageStr;
-	protected TFloatArrayList data;
+	int type = FACE;
+	String [] usageStr;
+	private TFloatArrayList data;
 	
 	private static final Class<QualityProcedure> [] subClasses = new Class[]{
 		// AbsoluteDeflection2D.class,  Disabled for now
@@ -91,7 +91,7 @@ public abstract class QualityProcedure
 	}
 
 	protected abstract void setValidationFeatures();
-	public QualityProcedure()
+	QualityProcedure()
 	{
 		setValidationFeatures();
 	}
@@ -117,7 +117,7 @@ public abstract class QualityProcedure
 	/**
 	 * Returns default scale factor.
 	 */
-	protected final float getScaleFactor()
+	final float getScaleFactor()
 	{
 		return 1.0f;
 	}

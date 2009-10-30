@@ -39,12 +39,12 @@ public class QuadTreeSampleRemove extends QuadTreeSample
 {
 	private static final Logger logger=Logger.getLogger(QuadTreeSampleRemove.class.getName());
 	
-	public QuadTreeSampleRemove(KdTree q)
+	private QuadTreeSampleRemove(KdTree q)
 	{
 		super (q);
 	}
 	
-	public final Vertex2D getNearVertex(Metric metric, double[] uv)
+	final Vertex2D getNearVertex(Metric metric, double[] uv)
 	{
 		return (Vertex2D) quadtree.getNearVertex(metric, uv);
 	}
@@ -54,7 +54,7 @@ public class QuadTreeSampleRemove extends QuadTreeSample
 		return (Vertex2D) quadtree.getNearestVertex(metric, uv);
 	}
 
-	public static void display(Viewer view, QuadTreeSample r)
+	private static void display(Viewer view, QuadTreeSample r)
 	{
 		view.addBranchGroup(r.bgQuadTree());
 		view.setVisible(true);

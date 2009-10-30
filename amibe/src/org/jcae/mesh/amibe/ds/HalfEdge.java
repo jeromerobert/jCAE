@@ -52,7 +52,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	private static final int [] prev3 = { 2, 0, 1 };
 	private static final double [][] temp = new double[4][3];
 	
-	protected HalfEdge (HalfEdgeTraitsBuilder htb, TriangleHE tri, byte localNumber, byte attributes)
+	HalfEdge (HalfEdgeTraitsBuilder htb, TriangleHE tri, byte localNumber, byte attributes)
 	{
 		super(htb);
 		this.tri = tri;
@@ -245,7 +245,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 *
 	 * @param v  start vertex of this edge
 	 */
-	public final void setOrigin(Vertex v)
+	final void setOrigin(Vertex v)
 	{
 		tri.vertex[next3[localNumber]] = v;
 	}
@@ -255,7 +255,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 *
 	 * @param v  end vertex of this edge
 	 */
-	public final void setDestination(Vertex v)
+	final void setDestination(Vertex v)
 	{
 		tri.vertex[prev3[localNumber]] = v;
 	}
@@ -265,7 +265,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 *
 	 * @param v  apex of this edge
 	 */
-	public final void setApex(Vertex v)
+	final void setApex(Vertex v)
 	{
 		tri.vertex[localNumber] = v;
 	}
@@ -1323,7 +1323,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		sym = src.sym;
 	}
 	
-	protected final void copy(HalfEdge that)
+	final void copy(HalfEdge that)
 	{
 		HalfEdge to = this;
 		for (int i = 0; i < 3; i++)

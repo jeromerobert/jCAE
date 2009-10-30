@@ -33,13 +33,13 @@ import org.jcae.opencascade.jni.BRepBndLib;
 
 public class OCCShape implements CADShape
 {
-	protected TopoDS_Shape myShape = null;
+	TopoDS_Shape myShape = null;
 	
-	protected OCCShape()
+	OCCShape()
 	{
 	}
 	
-	protected final void setShape(TopoDS_Shape o)
+	final void setShape(TopoDS_Shape o)
 	{
 		myShape = o;
 	}

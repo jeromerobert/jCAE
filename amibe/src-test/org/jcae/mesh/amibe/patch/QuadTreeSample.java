@@ -46,9 +46,9 @@ import java.util.logging.Logger;
 public class QuadTreeSample
 {
 	private static final Logger logger=Logger.getLogger(QuadTreeSample.class.getName());
-	protected final KdTree quadtree;
+	final KdTree quadtree;
 	
-	public QuadTreeSample(KdTree q)
+	QuadTreeSample(KdTree q)
 	{
 		quadtree = q;
 	}
@@ -205,7 +205,7 @@ public class QuadTreeSample
 		}
 	}
 	
-	public final BranchGroup bgQuadTree()
+	final BranchGroup bgQuadTree()
 	{
 		BranchGroup bg=new BranchGroup();
 		
@@ -232,7 +232,7 @@ public class QuadTreeSample
 		return bg;
 	}
 	
-	public final BranchGroup bgVertices()
+	final BranchGroup bgVertices()
 	{
 		BranchGroup bg=new BranchGroup();
 		CountVertProcedure cproc = new CountVertProcedure();
@@ -259,7 +259,7 @@ public class QuadTreeSample
 		return bg;
 	}
 	
-	public final BranchGroup segment(double[] pvt, double[] pvn, float depth, float r, float g, float b)
+	final BranchGroup segment(double[] pvt, double[] pvn, float depth, float r, float g, float b)
 	{
 		BranchGroup bg = new BranchGroup();
 		LineArray line = new LineArray(2, GeometryArray.COORDINATES | GeometryArray.COLOR_3);

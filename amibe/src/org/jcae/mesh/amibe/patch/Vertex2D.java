@@ -67,7 +67,7 @@ public class Vertex2D extends Vertex
 	 * @param u  first coordinate.
 	 * @param v  second coordinate.
 	 */
-	protected Vertex2D(VertexTraitsBuilder vtb, double u, double v)
+	Vertex2D(VertexTraitsBuilder vtb, double u, double v)
 	{
 		super(vtb);
 		param[0] = u;
@@ -80,7 +80,7 @@ public class Vertex2D extends Vertex
 	 * @param pt1  first node.
 	 * @param pt2  second node.
 	 */
-	protected static Vertex2D middle(Vertex2D pt1, Vertex2D pt2)
+	static Vertex2D middle(Vertex2D pt1, Vertex2D pt2)
 	{
 		return new Vertex2D(null,
 			0.5 * (pt1.param[0] + pt2.param[0]),
@@ -287,7 +287,7 @@ public class Vertex2D extends Vertex
 	}
 	
 	//  Current vertex is symmetric apical vertex
-	protected final boolean inCircle2D(Mesh2D mesh, VirtualHalfEdge2D ot)
+	final boolean inCircle2D(Mesh2D mesh, VirtualHalfEdge2D ot)
 	{
 		assert this != mesh.outerVertex;
 		Vertex2D v1 = (Vertex2D) ot.origin();
@@ -361,7 +361,7 @@ public class Vertex2D extends Vertex
 		throw new RuntimeException("Circumcenter cannot be computed");
 	}
 	
-	protected final boolean inCircle(Mesh2D mesh, VirtualHalfEdge2D ot)
+	final boolean inCircle(Mesh2D mesh, VirtualHalfEdge2D ot)
 	{
 		//  vcX: vertices of current edge
 		//  vaX: apices
@@ -432,7 +432,7 @@ public class Vertex2D extends Vertex
 		}
 	}
 	
-	protected final boolean isSmallerDiagonale(Mesh2D mesh, VirtualHalfEdge2D ot)
+	final boolean isSmallerDiagonale(Mesh2D mesh, VirtualHalfEdge2D ot)
 	{
 		//  vcX: vertices of current edge
 		//  vaX: apices
@@ -461,7 +461,7 @@ public class Vertex2D extends Vertex
 		        Math.sqrt(m0.distance2(vc1.param, vc2.param))));
 	}
 	
-	protected final boolean isPseudoIsotropic(Mesh2D mesh)
+	final boolean isPseudoIsotropic(Mesh2D mesh)
 	{
 		return mesh.getMetric(this).isPseudoIsotropic();
 	}

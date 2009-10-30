@@ -250,7 +250,7 @@ public class Vertex implements Location, Serializable
 	 * @param work2  double[3] temporary array
 	 * @param ret array which will store the outer product of the two vectors
 	 */
-	protected final void outer3D(Vertex n1, Vertex n2, double [] work1, double [] work2, double [] ret)
+	final void outer3D(Vertex n1, Vertex n2, double [] work1, double [] work2, double [] ret)
 	{
 		for (int i = 0; i < 3; i++)
 		{

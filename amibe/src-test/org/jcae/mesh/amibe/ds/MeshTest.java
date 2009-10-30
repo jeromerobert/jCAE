@@ -26,9 +26,9 @@ import static org.junit.Assert.*;
 
 public class MeshTest
 {
-	protected Mesh mesh;
-	protected Vertex [] v;
-	protected Triangle [] T;
+	private Mesh mesh;
+	private Vertex [] v;
+	private Triangle [] T;
 	
 	// m Vertex on rows, n Vertex on columns
 	private void createMxNShell(int m, int n)

@@ -97,7 +97,7 @@ public class Remesh
 		this(m, MeshTraitsBuilder.getDefault3D(), opts);
 	}
 
-	public Remesh(Mesh m, MeshTraitsBuilder mtb)
+	private Remesh(Mesh m, MeshTraitsBuilder mtb)
 	{
 		this(m, mtb, new HashMap<String, String>());
 	}
@@ -109,7 +109,7 @@ public class Remesh
 	 * @param options  map containing key-value pairs to modify algorithm
 	 *        behaviour.  No options are available for now.
 	 */
-	public Remesh(final Mesh bgMesh, final MeshTraitsBuilder mtb, final Map<String, String> options)
+	private Remesh(final Mesh bgMesh, final MeshTraitsBuilder mtb, final Map<String, String> options)
 	{
 		liaison = new MeshLiaison(bgMesh, mtb);
 		mesh = liaison.getMesh();

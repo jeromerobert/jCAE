@@ -179,7 +179,7 @@ public class SphereBuilder
 		return true;
 	}
 	
-	public static Mesh createSphereMesh(int level)
+	private static Mesh createSphereMesh(int level)
 	{
 		SphereBuilder sphere = new SphereBuilder();
 		// Create icosahedron

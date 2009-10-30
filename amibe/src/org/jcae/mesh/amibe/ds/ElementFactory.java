@@ -31,7 +31,7 @@ class ElementFactory implements ElementFactoryInterface
 	private final HalfEdgeTraitsBuilder halfedgeTraitsBuilder;
 	private final TriangleTraitsBuilder triangleTraitsBuilder;
 
-	protected ElementFactory(MeshTraitsBuilder mtb)
+	ElementFactory(MeshTraitsBuilder mtb)
 	{
 		vertexTraitsBuilder   = mtb.getVertexTraitsBuilder();
 		halfedgeTraitsBuilder = mtb.getHalfEdgeTraitsBuilder();

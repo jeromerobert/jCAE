@@ -27,18 +27,18 @@ public class TraitsBuilder
 	private static final int BITVECTORFIELD = 2;
 	private static final int BITSCALARFIELD = 3;
 
-	public static final int NORMAL      = 1 << BITNORMAL;
-	public static final int COLOR       = 1 << BITCOLOR;
-	public static final int VECTORFIELD = 1 << BITVECTORFIELD;
-	public static final int SCALARFIELD = 1 << BITSCALARFIELD;
+	private static final int NORMAL      = 1 << BITNORMAL;
+	private static final int COLOR       = 1 << BITCOLOR;
+	private static final int VECTORFIELD = 1 << BITVECTORFIELD;
+	private static final int SCALARFIELD = 1 << BITSCALARFIELD;
 
-	protected int attributes = 0;
-	protected final int [] index = new int[32];
+	int attributes = 0;
+	final int [] index = new int[32];
 
 	/**
 	 * Dummy constructor.
 	 */
-	public TraitsBuilder()
+	TraitsBuilder()
 	{
 	}
 
@@ -133,7 +133,7 @@ public class TraitsBuilder
 	 * Dummy method, overridden by subclasses.
 	 * @param t  traits
 	 */
-	protected void subInitTraits(Traits t)
+	void subInitTraits(Traits t)
 	{
 	}
 

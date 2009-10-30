@@ -67,7 +67,7 @@ public class Amibe2VTK
 	private boolean dummyData;
 	
 	/** @param directory The directory which contain 3d files */
-	public Amibe2VTK(File directory)
+	private Amibe2VTK(File directory)
 	{
 		this.directory=directory;
 	}
@@ -280,7 +280,7 @@ public class Amibe2VTK
 	 * It's a scalar double value which is the ID of the triangle.
 	 * It won't help you much, it's just to have the code somewhere?
 	 */
-	public final void setDummyData(boolean dummyData)
+	final void setDummyData(boolean dummyData)
 	{
 		this.dummyData = dummyData;
 	}

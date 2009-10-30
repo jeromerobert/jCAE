@@ -32,7 +32,7 @@ public class Matrix2D
 	 * Create a <code>Matrix2D</code> instance and set it to the identity
 	 * matrix.
 	 */
-	public Matrix2D()
+	private Matrix2D()
 	{
 		this(1.0, 0.0, 0.0, 1.0);
 	}

@@ -81,10 +81,10 @@ public class SmoothNodes2D
 	private boolean refresh = false;
 	private final QSortedTree<Vertex2D> tree = new PAVLSortedTree<Vertex2D>();
 
-	int processed = 0;
-	int notProcessed = 0;
-	TObjectDoubleHashMap<Triangle> qualityMap;
-	Collection<Vertex> nodeset;
+	private int processed = 0;
+	private int notProcessed = 0;
+	private TObjectDoubleHashMap<Triangle> qualityMap;
+	private Collection<Vertex> nodeset;
 	
 	/**
 	 * Creates a <code>SmoothNodes2D</code> instance.

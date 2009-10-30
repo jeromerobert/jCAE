@@ -107,7 +107,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 	}
 
 	@Override
-	public final double cost(final HalfEdge e)
+	protected final double cost(final HalfEdge e)
 	{
 		double l2 = e.origin().sqrDistance3D(e.destination());
 		if (l2 == 0.0)

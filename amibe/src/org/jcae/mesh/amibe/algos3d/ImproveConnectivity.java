@@ -54,7 +54,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 	 * @param options  map containing key-value pairs to modify algorithm
 	 *        behaviour.  Valid key is <code>coplanar</code>.
 	 */
-	public ImproveConnectivity(final Mesh m, final Map<String, String> options)
+	private ImproveConnectivity(final Mesh m, final Map<String, String> options)
 	{
 		super(m);
 		for (final Map.Entry<String, String> opt: options.entrySet())
@@ -104,7 +104,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 	}
 
 	@Override
-	public final double cost(final HalfEdge e)
+	protected final double cost(final HalfEdge e)
 	{
 		Vertex o = e.origin();
 		Vertex d = e.destination();

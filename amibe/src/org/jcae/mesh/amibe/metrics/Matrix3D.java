@@ -41,7 +41,7 @@ public class Matrix3D implements Serializable
 	 * Create a <code>Matrix3D</code> instance and set it to the identity
 	 * matrix.
 	 */
-	public Matrix3D()
+	private Matrix3D()
 	{
 		data[0] = data[4] = data[8] = 1.0;
 	}

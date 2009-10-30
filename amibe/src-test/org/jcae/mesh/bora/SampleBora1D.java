@@ -58,7 +58,7 @@ import javax.swing.WindowConstants;
 
 public class SampleBora1D
 {
-	public static BranchGroup [] getBranchGroups(BModel model)
+	private static BranchGroup [] getBranchGroups(BModel model)
 	{
 		BCADGraphCell root = model.getGraph().getRootCell();
 		// Count edges

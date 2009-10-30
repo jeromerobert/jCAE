@@ -25,7 +25,7 @@ import org.junit.Test;
 
 public class PAVLTreeIntArrayDupTest
 {
-	static final int [] ijk = new int[3];
+	private static final int [] ijk = new int[3];
 	static
 	{
 		for (int i = 0; i < 3; i++)

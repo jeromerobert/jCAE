@@ -65,7 +65,7 @@ public class MEdge1D
 	 *
 	 * @return the public identifer.
 	 */
-	public final int getID()
+	final int getID()
 	{
 		if (id > 0)
 			return mapHashcodeToID.get(this);

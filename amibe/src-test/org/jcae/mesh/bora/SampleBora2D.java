@@ -60,7 +60,7 @@ public class SampleBora2D
 	private final static float absOffsetStep = Float.parseFloat(System.getProperty("javax.media.j3d.zFactorAbs", "20.0f"));
 	private final static float relOffsetStep = Float.parseFloat(System.getProperty("javax.media.j3d.zFactorRel", "2.0f"));
 
-	public static BranchGroup [] getBranchGroups(BModel model)
+	private static BranchGroup [] getBranchGroups(BModel model)
 	{
 		BCADGraphCell root = model.getGraph().getRootCell();
 		// Count faces

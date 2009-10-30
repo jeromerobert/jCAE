@@ -68,7 +68,7 @@ public class Groups
 	private final ArrayList<Group> groups = new ArrayList<Group>();
 	
 	/** The absolute path to the mesh directory */
-	protected String meshFile = null;	
+	private String meshFile = null;
 
 	Groups(String xmlPath)
 	{
@@ -91,7 +91,7 @@ public class Groups
 	 * @throws SAXException
 	 * @throws ParserConfigurationException
 	 */
-	public final Group fuse(Collection<Group> listGroup, String name)
+	final Group fuse(Collection<Group> listGroup, String name)
 		throws TransformerException,
 		ParserConfigurationException, SAXException, IOException
 	{
@@ -273,7 +273,7 @@ public class Groups
 	 *@param groupFile the file groups.bin.
 	 *@param baseDir the directory containing jcae3d.xml.
 	 */
-	public final void modifyXMLGroups(org.w3c.dom.Document xmlDoc,
+	final void modifyXMLGroups(org.w3c.dom.Document xmlDoc,
 		java.io.File groupFile, String baseDir)
 	{		
 		org.w3c.dom.NodeList listGroups = xmlDoc.getElementsByTagName("groups");
@@ -330,7 +330,7 @@ public class Groups
 	 *@param g the group.
 	 *@return an array of integers.
 	 */
-	public final int[] readTrianglesGroup(File fileGroup, Group g)
+	final int[] readTrianglesGroup(File fileGroup, Group g)
 	{		
 		int[] trianglesGroup = null;
 		IntFileReader ifr = null;

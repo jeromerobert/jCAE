@@ -273,7 +273,7 @@ public class SmoothNodes3D
 		}
 	}
 	
-	protected final void postProcessIteration(Mesh mesh, int i)
+	final void postProcessIteration(Mesh mesh, int i)
 	{
 		// Can be overridden
 	}

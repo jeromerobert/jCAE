@@ -36,7 +36,7 @@ class LongLong
 	// 2^62 - 1
 	private static final long pow62m1 = 0x3fffffffffffffffL;
 	
-	protected LongLong(long l1, long l2)
+	LongLong(long l1, long l2)
 	{
 		assert l1 >= 0L : l1;
 		assert l1 <= 1L << 61 : l1;

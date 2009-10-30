@@ -46,7 +46,7 @@ public class UNV2Amibe
 	private abstract class Element
 	{
 		String buffer;
-		protected int[] nodes;
+		int[] nodes;
 				
 		protected abstract String parse(BufferedReader in) throws IOException;
 		

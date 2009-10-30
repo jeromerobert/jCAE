@@ -51,7 +51,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	 *        behaviour.  Valid keys are <code>size</code>,
 	 *        <code>placement</code> and <code>maxtriangles</code>.
 	 */
-	public LengthDecimateHalfEdge(final Mesh m, final Map<String, String> options)
+	private LengthDecimateHalfEdge(final Mesh m, final Map<String, String> options)
 	{
 		super(m);
 		v3 = null;
@@ -109,7 +109,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	}
 
 	@Override
-	public final double cost(final HalfEdge e)
+	protected final double cost(final HalfEdge e)
 	{
 		//Ensure that boundary and non manifold edges are never processed
 		if (freeEdgeOnly && !e.hasAttributes(AbstractHalfEdge.BOUNDARY |

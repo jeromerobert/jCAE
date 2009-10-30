@@ -402,7 +402,7 @@ public abstract class AbstractHalfEdge
 	 * may be useful when edge local numbers are put into <code>HashSet</code> or
 	 * <code>HashMap</code> structures.
 	 */
-	protected static final Integer [] int3 = new Integer[3];
+	static final Integer [] int3 = new Integer[3];
 	static {
 		int3[0] = Integer.valueOf(0);
 		int3[1] = Integer.valueOf(1);
@@ -413,7 +413,7 @@ public abstract class AbstractHalfEdge
 	 * Constructor.  Creates a new instance, and creates traits by
 	 * @param builder   half-edge traits builder
 	 */
-	protected AbstractHalfEdge(HalfEdgeTraitsBuilder builder)
+	AbstractHalfEdge(HalfEdgeTraitsBuilder builder)
 	{
 		/*if (builder != null)
 			traits = builder.createTraits();

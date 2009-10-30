@@ -149,7 +149,7 @@ public class TriangleVH extends Triangle
 	 * @param num  the local number of this edge.
 	 * @return the adjacent TriangleVH
 	 */
-	protected final TriangleVH getAdj(int num)
+	final TriangleVH getAdj(int num)
 	{
 		return adjacentTriangles[num];
 	}
@@ -160,7 +160,7 @@ public class TriangleVH extends Triangle
 	 * @param num  the local number of this edge
 	 * @param link  adjacent TriangleVH
 	 */
-	protected final void setAdj(int num, TriangleVH link)
+	final void setAdj(int num, TriangleVH link)
 	{
 		adjacentTriangles[num] = link;
 	}
@@ -171,7 +171,7 @@ public class TriangleVH extends Triangle
 	 * @param num   edge local number
 	 * @return  local number of this symmetric edge
 	 */
-	protected final int getAdjLocalNumber(int num)
+	final int getAdjLocalNumber(int num)
 	{
 		return (adjPos >> (2*num)) & 3;
 	}
@@ -182,7 +182,7 @@ public class TriangleVH extends Triangle
 	 * @param num   edge local number
 	 * @param pos   local number of symmetric edge
 	 */
-	protected final void setAdjLocalNumber(int num, int pos)
+	final void setAdjLocalNumber(int num, int pos)
 	{
 		//  Clear previous adjacent position ...
 		adjPos &= ~(3 << (2*num));
@@ -196,7 +196,7 @@ public class TriangleVH extends Triangle
 	 * @param num  local edge number
 	 * @return  attributes of this edge
 	 */
-	protected final int getEdgeAttributes(int num)
+	final int getEdgeAttributes(int num)
 	{
 		return edgeAttributes[num];
 	}
@@ -207,7 +207,7 @@ public class TriangleVH extends Triangle
 	 * @param num   local edge number
 	 * @param attr  attributes to set on this edge
 	 */
-	protected final void setEdgeAttributes(int num, int attr)
+	final void setEdgeAttributes(int num, int attr)
 	{
 		edgeAttributes[num] = (byte) attr;
 	}

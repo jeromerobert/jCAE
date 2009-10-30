@@ -202,7 +202,7 @@ public class Mesh implements Serializable
 	 *
 	 * @param t  triangle being removed.
 	 */
-	protected final void remove(Triangle t)
+	final void remove(Triangle t)
 	{
 		triangleList.remove(t);
 		if (!(t instanceof TriangleHE))
@@ -1107,7 +1107,7 @@ public class Mesh implements Serializable
 	 *
 	 * @param constrained  <code>true</code> if mesh is constrained.
 	 */
-	public boolean isValid(boolean constrained)
+	protected boolean isValid(boolean constrained)
 	{
 		for (Triangle t: triangleList)
 		{

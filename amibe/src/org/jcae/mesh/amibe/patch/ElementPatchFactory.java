@@ -33,7 +33,7 @@ class ElementPatchFactory implements ElementFactoryInterface
 	private final VertexTraitsBuilder vertexTraitsBuilder;
 	private final TriangleTraitsBuilder triangleTraitsBuilder;
 
-	protected ElementPatchFactory(MeshTraitsBuilder mtb)
+	ElementPatchFactory(MeshTraitsBuilder mtb)
 	{
 		vertexTraitsBuilder   = mtb.getVertexTraitsBuilder();
 		triangleTraitsBuilder = mtb.getTriangleTraitsBuilder();

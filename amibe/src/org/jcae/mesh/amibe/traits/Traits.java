@@ -25,7 +25,7 @@ public class Traits
 	/**
 	 * Object array containing user-defined traits.
 	 */
-	protected final Object [] array;
+	final Object [] array;
 
 	/**
 	 * Creates a new <code>Traits</code> instance.

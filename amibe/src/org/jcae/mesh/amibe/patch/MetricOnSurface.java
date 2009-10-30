@@ -55,7 +55,7 @@ public class MetricOnSurface implements Metric2D
 	 * @param surf  geometrical surface
 	 * @param mp    mesh parameters
 	 */
-	protected MetricOnSurface(CADGeomSurface surf, MeshParameters mp)
+	MetricOnSurface(CADGeomSurface surf, MeshParameters mp)
 	{
 		double discr = mp.getLength();
 		assert discr > 0;

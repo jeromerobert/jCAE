@@ -32,7 +32,7 @@ public abstract class TraversalProcedure
 	/**
 	 * Current node is not a leaf and its children have not been processed yet.
 	 */
-	protected static final int PREORDER  = 1;
+	static final int PREORDER  = 1;
 	/**
 	 * Current node is not a leaf and its children have already been processed.
 	 */

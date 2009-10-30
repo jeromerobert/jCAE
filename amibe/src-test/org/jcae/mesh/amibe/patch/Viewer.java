@@ -172,7 +172,7 @@ public class Viewer extends JFrame
 	 * @param z z coordinate of the center of the sphere
 	 * @param radius radius of the sphere
 	 */
-	public final void zoomTo(float x, float y, float z, float radius)
+	final void zoomTo(float x, float y, float z, float radius)
 	{
 		OrbitBehavior orbit;
 		Point3d c=new Point3d(x,y,z);

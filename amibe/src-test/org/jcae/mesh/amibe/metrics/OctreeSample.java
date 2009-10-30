@@ -35,9 +35,9 @@ import javax.media.j3d.PointAttributes;
  */
 public class OctreeSample
 {
-	final KdTree octree;
+	private final KdTree octree;
 
-	public OctreeSample(KdTree o)
+	OctreeSample(KdTree o)
 	{
 		octree = o;
 	}
@@ -201,7 +201,7 @@ public class OctreeSample
 		}
 	}
 
-	public final BranchGroup bgOctree()
+	final BranchGroup bgOctree()
 	{
 		BranchGroup bg=new BranchGroup();
 		
@@ -221,7 +221,7 @@ public class OctreeSample
 		return bg;
 	}
 	
-	public final BranchGroup bgVertices()
+	final BranchGroup bgVertices()
 	{
 		BranchGroup bg=new BranchGroup();
 		CountVertProcedure cproc = new CountVertProcedure();

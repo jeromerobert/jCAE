@@ -38,7 +38,7 @@ import gnu.trove.TObjectIntHashMap;
 
 public class MMesh0D
 {
-	protected final CADShape shape;
+	final CADShape shape;
 	//  Array of distinct geometric nodes
 	private final CADVertex[] vnodelist;
 	private final TObjectIntHashMap<CADVertex> vnodeset;

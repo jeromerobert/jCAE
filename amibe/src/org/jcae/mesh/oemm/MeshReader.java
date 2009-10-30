@@ -51,7 +51,7 @@ public class MeshReader extends Storage
 	
 	protected final OEMM oemm;
 	// Map between octant index and Mesh instance.
-	private TIntObjectHashMap<Mesh> mapNodeToMesh = null;
+	protected TIntObjectHashMap<Mesh> mapNodeToMesh = null;
 	// Map between octant index and a list of vertices from adjacent triangles so that all triangles are readable
 	protected TIntObjectHashMap<List<FakeNonReadVertex>> mapNodeToNonReadVertexList = null;
 

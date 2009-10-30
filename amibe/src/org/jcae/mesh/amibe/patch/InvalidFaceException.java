@@ -29,7 +29,7 @@ public class InvalidFaceException extends RuntimeException
 	{
 	}
 	
-	protected InvalidFaceException(String reason)
+	InvalidFaceException(String reason)
 	{
 		super(reason);
 	}

@@ -41,9 +41,9 @@ public class BDiscretization
 
 	// Unique identitier
 	private int id = -1;
-	protected static int nextId = -1;
+	static int nextId = -1;
 
-	protected BDiscretization(BCADGraphCell g, Constraint c)
+	BDiscretization(BCADGraphCell g, Constraint c)
 	{
 		// Store forward oriented cell
 		if (g.getOrientation() != 0 && g.getReversed() != null)

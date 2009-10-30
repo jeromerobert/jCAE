@@ -289,7 +289,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 	}
 
 	@Override
-	public final double cost(final HalfEdge e)
+	protected final double cost(final HalfEdge e)
 	{
 		final Vertex o = e.origin();
 		final Vertex d = e.destination();

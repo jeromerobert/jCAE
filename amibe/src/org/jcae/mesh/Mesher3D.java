@@ -124,7 +124,7 @@ public class Mesher3D
 		}
 	}
 
-	static public boolean deleteDirectory(File path, File avoid)
+	private static boolean deleteDirectory(File path, File avoid)
 	{
 		if (path.exists())
 		{

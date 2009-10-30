@@ -24,8 +24,8 @@ import org.jcae.mesh.amibe.metrics.Location;
 
 public class TangentPlaneProjection implements LocalSurfaceProjection
 {
-	final double[] origin = new double[3];
-	final double[] normal;
+	private final double[] origin = new double[3];
+	private final double[] normal;
 
 	public TangentPlaneProjection(Vertex o)
 	{

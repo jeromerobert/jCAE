@@ -37,7 +37,7 @@ public class DistanceSurface extends QualityProcedure
 	private final CADGeomSurface [] surfaces;
 	private final TObjectDoubleHashMap<Vertex> distanceMap = new TObjectDoubleHashMap<Vertex>();
 
-	public DistanceSurface(String file)
+	private DistanceSurface(String file)
 	{
 		CADShape shape = CADShapeFactory.getFactory().newShape(file);
 		CADExplorer expF = CADShapeFactory.getFactory().newExplorer();

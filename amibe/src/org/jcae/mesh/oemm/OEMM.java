@@ -93,7 +93,7 @@ public class OEMM implements Serializable
 	/**
 	 * Root cell.
 	 */
-	protected transient Node root = null;
+	transient Node root = null;
 	
 	/**
 	 * Array of leaves.
@@ -399,7 +399,7 @@ public class OEMM implements Serializable
 	 *
 	 * @return size of deepest cell
 	 */
-	protected final int minCellSize()
+	final int minCellSize()
 	{
 		return (1 << (MAXLEVEL + 1 - depth));
 	}
@@ -567,7 +567,7 @@ public class OEMM implements Serializable
 	 * @param size  size of child cells
 	 * @param ijk   integer coordinates of desired point
 	 */
-	protected static int indexSubOctree(int size, int [] ijk)
+	private static int indexSubOctree(int size, int [] ijk)
 	{
 		int ret = 0;
 		if (size == 0)
@@ -698,7 +698,7 @@ public class OEMM implements Serializable
 	 *
 	 * @param node   cell to be merged
 	 */
-	protected final void mergeChildren(Node node)
+	final void mergeChildren(Node node)
 	{
 		assert !node.isLeaf;
 		for (int ind = 0; ind < 8; ind++)

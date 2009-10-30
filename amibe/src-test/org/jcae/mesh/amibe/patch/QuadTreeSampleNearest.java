@@ -43,17 +43,17 @@ public class QuadTreeSampleNearest extends QuadTreeSample
 {
 	private static final Logger logger=Logger.getLogger(QuadTreeSampleNearest.class.getName());
 	
-	public QuadTreeSampleNearest(KdTree q)
+	private QuadTreeSampleNearest(KdTree q)
 	{
 		super (q);
 	}
 	
-	public final Vertex2D getNearVertex(Metric metric, double[] uv)
+	final Vertex2D getNearVertex(Metric metric, double[] uv)
 	{
 		return (Vertex2D) quadtree.getNearVertex(metric, uv);
 	}
 
-	public final Vertex2D getNearestVertex(Metric metric, double[] uv)
+	final Vertex2D getNearestVertex(Metric metric, double[] uv)
 	{
 		return (Vertex2D) quadtree.getNearestVertex(metric, uv);
 	}

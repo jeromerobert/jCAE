@@ -86,14 +86,14 @@ class MetricBuilder
 	private static final double [] values = new double[9];
 	private static final double [][] temp32 = new double[3][2];
 	
-	protected static Matrix2D computeIsotropic(CADGeomSurface surf, double length)
+	static Matrix2D computeIsotropic(CADGeomSurface surf, double length)
 	{
 		double diag = 1.0/length/length;
 		Matrix3D iso = new Matrix3D(diag, diag, diag);
 		return restrict2D(iso, surf);
 	}
 
-	protected static Matrix2D computeGeometric(CADGeomSurface surf, MeshParameters mp)
+	static Matrix2D computeGeometric(CADGeomSurface surf, MeshParameters mp)
 	{
 		if (!mp.hasDeflection())
 			return null;

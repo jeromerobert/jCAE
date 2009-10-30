@@ -28,7 +28,7 @@ import org.junit.Ignore;
 @Ignore("Utility class")
 public class QSortedTreeTest
 {
-	protected QSortedTree<Integer> tree;
+	QSortedTree<Integer> tree;
 
 	private Integer [] unitTestInit(int n)
 	{
@@ -41,7 +41,7 @@ public class QSortedTreeTest
 		return ret;
 	}
 	
-	protected final void unitTestIterator(int n)
+	final void unitTestIterator(int n)
 	{
 		Integer [] iii = unitTestInit(n);
 		int i = 0;
@@ -63,7 +63,7 @@ public class QSortedTreeTest
 		assertTrue("Tree not empty", tree.isEmpty());
 	}
 	
-	protected final void unitTest1(int n)
+	final void unitTest1(int n)
 	{
 		// Remove in ascending order
 		Integer [] iii = unitTestInit(n);
@@ -72,7 +72,7 @@ public class QSortedTreeTest
 		assertTrue("Tree not empty", tree.isEmpty());
 	}
 	
-	protected final void unitTest2(int n)
+	final void unitTest2(int n)
 	{
 		// Remove in descending order
 		Integer [] iii = unitTestInit(n);
@@ -81,7 +81,7 @@ public class QSortedTreeTest
 		assertTrue("Tree not empty", tree.isEmpty());
 	}
 	
-	protected final void unitTest3(int n)
+	final void unitTest3(int n)
 	{
 		Integer [] iii = unitTestInit(n);
 		for (int i = 0; i < iii.length / 2; i++)
@@ -92,7 +92,7 @@ public class QSortedTreeTest
 		assertTrue("Tree not empty", tree.isEmpty());
 	}
 	
-	protected final void unitTest4(int n)
+	final void unitTest4(int n)
 	{
 		Integer [] iii = unitTestInit(n);
 		for (int i = 0; i < iii.length / 2; i++)
@@ -103,7 +103,7 @@ public class QSortedTreeTest
 		assertTrue("Tree not empty", tree.isEmpty());
 	}
 	
-	protected final void unitTest5(int n, int s)
+	final void unitTest5(int n, int s)
 	{
 		int prime = gnu.trove.PrimeFinder.nextPrime(n);
 		Integer [] iii = unitTestInit(prime);
@@ -118,7 +118,7 @@ public class QSortedTreeTest
 		assertTrue("Tree not empty", tree.isEmpty());
 	}
 	
-	protected final void unitTest6(int n, int s)
+	final void unitTest6(int n, int s)
 	{
 		int prime = gnu.trove.PrimeFinder.nextPrime(n);
 		Integer [] iii = new Integer[prime];

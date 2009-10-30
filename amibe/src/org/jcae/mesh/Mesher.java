@@ -68,22 +68,22 @@ public class Mesher
 		new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	/** meshing constraint: edge length */
-	protected double edgeLength;
+	private double edgeLength;
 	
 	/** meshing constraint: deflection */
-	protected double deflection;
+	private double deflection;
 	
 	/** The geometry file to be meshed */
-	protected String geometryFile;
+	private String geometryFile;
 
 	/** CAD shape */
-	protected CADShape shape;
+	private CADShape shape;
 	
 	/** The file where to export the mesh in UNV format */
-	protected String unvName;
+	private String unvName;
 	
 	/** The output directory */
-	protected String outputDir;
+	private String outputDir;
 	private boolean exportTriangleSoup;
 	private boolean exportPOLY;
 	private boolean exportSTL;
@@ -102,7 +102,7 @@ public class Mesher
 	 * Read system properties which affect the meshing behavior.
 	 * See package level javadoc for more information. 
 	 */
-	protected final void readProperties()
+	final void readProperties()
 	{
 		//TODO Clumsy code, should be rewrote. here are some avenues.
 		//The default value for a boolean property is always false. Doing so
@@ -221,7 +221,7 @@ public class Mesher
 	 * Compute 1D mesh
 	 * @param brepFile basename of the BRep file
 	 */
-	protected final MMesh1D mesh1D(String brepFile)
+	final MMesh1D mesh1D(String brepFile)
 	{
 		logger.info("1D mesh");
 		MMesh1D mesh1D = new MMesh1D(geometryFile);
@@ -252,7 +252,7 @@ public class Mesher
 	 * @param mtb container for 2D mesh traits
 	 * @return <code>true</code> if face had been successfully meshed, <code>false</code> otherwise.
 	 */
-	protected final boolean mesh2D(int iFace, CADFace face, MMesh1D mesh1D, MeshParameters mp,
+	final boolean mesh2D(int iFace, CADFace face, MMesh1D mesh1D, MeshParameters mp,
 		String brepFile, MeshTraitsBuilder mtb)
 	{
 		if(Boolean.getBoolean("org.jcae.mesh.Mesher.explodeBrep"))
@@ -306,7 +306,7 @@ public class Mesher
 	/**
 	 * Export the created mesh to various format
 	 */
-	protected final void exportMesh()
+	final void exportMesh()
 	{
 		if (exportMESH)
 		{
@@ -332,7 +332,7 @@ public class Mesher
 	 * Read 2D meshes and compute 3D mesh
 	 * @param brepFile
 	 */
-	protected final void mesh3D(String brepFile)
+	final void mesh3D(String brepFile)
 	{
 		MeshToMMesh3DConvert m2dTo3D = new MeshToMMesh3DConvert(outputDir, brepFile, shape);
 		m2dTo3D.exportUNV(exportUNV, unvName);
@@ -373,7 +373,7 @@ public class Mesher
 	 * Run the mesh
 	 * @return the list of face id on which the mesher failed
 	 */
-	protected final TIntArrayList mesh()
+	final TIntArrayList mesh()
 	{
 		readProperties();
 		//  Declare all variables here
@@ -492,7 +492,7 @@ public class Mesher
 	 * @param badGroups The list of face id which failed
 	 * @param startDate The date when the mesher was started
 	 */
-	protected final void report(TIntArrayList badGroups, String startDate)
+	final void report(TIntArrayList badGroups, String startDate)
 	{
 		
 		String endDate = DATE_FORMAT.format(new Date());
@@ -573,7 +573,7 @@ public class Mesher
 	 * @param args The main function argument 
 	 * @throws IOException If the creation of the output directory failed
 	 */
-	protected final void parseCommandLine(String[] args) throws IOException
+	final void parseCommandLine(String[] args) throws IOException
 	{
 		if (args.length < 2 || args.length > 4)
 		{
