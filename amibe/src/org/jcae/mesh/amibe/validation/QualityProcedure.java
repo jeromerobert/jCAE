@@ -45,7 +45,7 @@ public abstract class QualityProcedure
 	protected String [] usageStr;
 	protected TFloatArrayList data;
 	
-	private static Class<QualityProcedure> [] subClasses = new Class[]{
+	private static final Class<QualityProcedure> [] subClasses = new Class[]{
 		// AbsoluteDeflection2D.class,  Disabled for now
 		Area.class,
 		DihedralAngle.class,

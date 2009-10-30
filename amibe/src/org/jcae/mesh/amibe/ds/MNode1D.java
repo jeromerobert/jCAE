@@ -37,7 +37,7 @@ import gnu.trove.TObjectIntHashMap;
 public class MNode1D
 {
 	//  Curvilinear coordinate on current edge
-	private double param;
+	private final double param;
 	
 	//  The geometrical vertex if any
 	private CADVertex vertex;

@@ -30,7 +30,7 @@ public class FakeNonReadVertex extends Vertex
 	/**
 	 * Containing OEMM node 
 	 */
-	private OEMM.Node containingNode;
+	private final OEMM.Node containingNode;
 
 	public FakeNonReadVertex(OEMM oemm, int leaf, int localNumber)
 	{

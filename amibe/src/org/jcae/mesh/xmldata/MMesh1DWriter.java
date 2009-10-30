@@ -44,7 +44,7 @@ import java.util.logging.Logger;
 
 public class MMesh1DWriter
 {
-	private static Logger logger=Logger.getLogger(MMesh1DWriter.class.getName());
+	private static final Logger logger=Logger.getLogger(MMesh1DWriter.class.getName());
 	
 	/**
 	 * Used by {@link writeObject}

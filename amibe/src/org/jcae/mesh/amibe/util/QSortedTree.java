@@ -492,7 +492,7 @@ public abstract class QSortedTree<E> implements Serializable
 		return root.child[0].getValue();
 	}
 	
-	private Iterator<Node<E>> nullIterator = new Iterator<Node<E>>()
+	private final Iterator<Node<E>> nullIterator = new Iterator<Node<E>>()
 	{
 		public boolean hasNext() { return false; }
 		public Node<E> next() { throw new NoSuchElementException(); }

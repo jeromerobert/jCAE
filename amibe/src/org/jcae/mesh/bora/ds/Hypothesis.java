@@ -44,8 +44,8 @@ public class Hypothesis
 	private final int id;
 	private static int nextId = -1;
 
-	private static Class<?> [] innerClasses = Hypothesis.class.getDeclaredClasses();
-	private static HypNone HypNoneInstance = new HypNone();
+	private static final Class<?> [] innerClasses = Hypothesis.class.getDeclaredClasses();
+	private static final HypNone HypNoneInstance = new HypNone();
 
 	public Hypothesis()
 	{

@@ -34,7 +34,7 @@ import java.util.logging.Logger;
 */
 public class Aggregate
 {
-	private static Logger logger=Logger.getLogger(Aggregate.class.getName());	
+	private static final Logger logger=Logger.getLogger(Aggregate.class.getName());
 	
 	// Maximum level difference between adjacent cells.
 	// With a difference of N, a node has at most

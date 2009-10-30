@@ -40,7 +40,7 @@ import java.util.logging.Logger;
  */
 public class OCCShapeFactory extends CADShapeFactory
 {
-	private static Logger logger=Logger.getLogger(OCCShapeFactory.class.getName());
+	private static final Logger logger=Logger.getLogger(OCCShapeFactory.class.getName());
 	
 	@Override
 	public CADShape newShape(Object o)

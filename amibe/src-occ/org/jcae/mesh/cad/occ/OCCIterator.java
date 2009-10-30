@@ -27,7 +27,7 @@ import org.jcae.opencascade.jni.TopoDS_Iterator;
 
 public class OCCIterator implements CADIterator
 {
-	private TopoDS_Iterator occIt;
+	private final TopoDS_Iterator occIt;
 	public OCCIterator ()
 	{
 		occIt = new TopoDS_Iterator();

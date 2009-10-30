@@ -31,17 +31,17 @@ import java.util.logging.Logger;
  */
 public class MeshValidSoup
 {
-	private static Logger logger=Logger.getLogger(MeshValidSoup.class.getName());
+	private static final Logger logger=Logger.getLogger(MeshValidSoup.class.getName());
 
 	public static class ComputeTriangleQuality implements RawStorage.SoupReaderInterface
 	{
-		Vertex [] n = new Vertex[3];
+		final Vertex [] n = new Vertex[3];
 		int nrgroup = 0;
 		final int maxgroup = 5000;
 		final int split = 10;
-		int [][] nr = new int[maxgroup][split+1];
-		double [] amin = new double[maxgroup];
-		Mesh mesh = new Mesh();
+		final int [][] nr = new int[maxgroup][split+1];
+		final double [] amin = new double[maxgroup];
+		final Mesh mesh = new Mesh();
 		public ComputeTriangleQuality()
 		{
 			for (int i = 0; i < maxgroup; i++)

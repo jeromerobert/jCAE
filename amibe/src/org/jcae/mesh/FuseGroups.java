@@ -29,7 +29,7 @@ import java.util.logging.Logger;
  */
 public class FuseGroups
 {
-	private static Logger logger=Logger.getLogger(FuseGroups.class.getName());
+	private static final Logger logger=Logger.getLogger(FuseGroups.class.getName());
 
 	public static void main(String args[])
 	{

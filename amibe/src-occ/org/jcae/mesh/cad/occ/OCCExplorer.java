@@ -28,7 +28,7 @@ import org.jcae.opencascade.jni.TopExp_Explorer;
 
 public class OCCExplorer implements CADExplorer
 {
-	private TopExp_Explorer occExp;
+	private final TopExp_Explorer occExp;
 	public OCCExplorer ()
 	{
 		occExp = new TopExp_Explorer();

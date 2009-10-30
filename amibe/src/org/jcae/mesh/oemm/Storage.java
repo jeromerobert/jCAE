@@ -82,7 +82,7 @@ import java.util.logging.Logger;
  */
 public class Storage
 {
-	private static Logger logger=Logger.getLogger(Storage.class.getName());	
+	private static final Logger logger=Logger.getLogger(Storage.class.getName());
 	
 	/**
 	 * Number of bytes per triangle.  On disk a triangle is represented by

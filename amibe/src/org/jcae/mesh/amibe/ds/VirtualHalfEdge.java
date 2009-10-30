@@ -55,7 +55,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	
 	//  Complex algorithms require several VirtualHalfEdge, they are
 	//  allocated here to prevent allocation/deallocation overhead.
-	private static VirtualHalfEdge [] work = new VirtualHalfEdge[4];
+	private static final VirtualHalfEdge [] work = new VirtualHalfEdge[4];
 	static {
 		for (int i = 0; i < 4; i++)
 			work[i] = new VirtualHalfEdge();

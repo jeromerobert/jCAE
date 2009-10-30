@@ -39,7 +39,7 @@ import java.util.logging.Logger;
  */
 public class MeshValid2D
 {
-	private static Logger logger=Logger.getLogger(MeshValid2D.class.getName());
+	private static final Logger logger=Logger.getLogger(MeshValid2D.class.getName());
 
 	/** 
 	 * Reads the file, the algorithm type and the constraint value for meshing

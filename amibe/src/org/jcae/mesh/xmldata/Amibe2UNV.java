@@ -47,7 +47,7 @@ public class Amibe2UNV
 {
 	private final static String CR=System.getProperty("line.separator");			
 	private final static NumberFormat FORMAT_I10=new MeshExporter.FormatI10();	
-	private static Logger logger=Logger.getLogger(Amibe2UNV.class.getName());
+	private static final Logger logger=Logger.getLogger(Amibe2UNV.class.getName());
 
 	/**
 	 * A main method for debugging

@@ -56,8 +56,8 @@ import java.util.logging.Logger;
  */
 public class QualityFloat
 {
-	private static Logger logger=Logger.getLogger(QualityFloat.class.getName());
-	private TFloatArrayList data;
+	private static final Logger logger=Logger.getLogger(QualityFloat.class.getName());
+	private final TFloatArrayList data;
 	private QualityProcedure qproc;
 	private int [] sorted;
 	private float [] bounds;

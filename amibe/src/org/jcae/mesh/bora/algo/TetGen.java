@@ -46,7 +46,7 @@ public class TetGen implements AlgoInterface
 {
 	private static final Logger LOGGER=Logger.getLogger(TetGen.class.getName());
 	private static final String tetgenCmd = "tetgen";
-	private double volume;
+	private final double volume;
 	private static boolean available = true;
 	private static String banner = null;
 

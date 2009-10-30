@@ -41,7 +41,7 @@ import org.jcae.mesh.amibe.metrics.Metric;
  */
 public class QuadTreeSampleNearest extends QuadTreeSample
 {
-	private static Logger logger=Logger.getLogger(QuadTreeSampleNearest.class.getName());	
+	private static final Logger logger=Logger.getLogger(QuadTreeSampleNearest.class.getName());
 	
 	public QuadTreeSampleNearest(KdTree q)
 	{

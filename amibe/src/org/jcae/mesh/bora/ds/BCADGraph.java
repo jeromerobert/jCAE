@@ -55,7 +55,7 @@ public class BCADGraph
 	// Map between indices and graph cells or user-defined groups
 	private final TIntObjectHashMap<BCADGraphCell> indexToCell = new TIntObjectHashMap<BCADGraphCell>();
 	// First free index
-	private int freeIndex;
+	private final int freeIndex;
 
 	/**
 	 * Creates a root mesh.

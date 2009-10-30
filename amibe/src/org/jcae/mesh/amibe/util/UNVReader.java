@@ -45,7 +45,7 @@ import java.util.logging.Logger;
 public class UNVReader
 {
 
-	private static Logger logger=Logger.getLogger(UNVReader.class.getName());
+	private static final Logger logger=Logger.getLogger(UNVReader.class.getName());
 	
 	public static void readMesh(Mesh mesh, String file)
 	{

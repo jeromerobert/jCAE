@@ -29,7 +29,7 @@ import org.jcae.opencascade.jni.Geom2dAdaptor_Curve;
 public class OCCGeomCurve2D implements CADGeomCurve2D
 {
 	private Geom2dAdaptor_Curve myCurve = null;
-	private double [] range = new double[2];
+	private final double [] range = new double[2];
 	
 	public OCCGeomCurve2D(CADEdge E, CADFace F)
 	{

@@ -34,7 +34,7 @@ import java.util.logging.Logger;
 public class PAVLSortedTree<E> extends QSortedTree<E>
 {
 	private static final long serialVersionUID = -8379296110137732906L;
-	private static Logger logger=Logger.getLogger(PAVLSortedTree.class.getName());	
+	private static final Logger logger=Logger.getLogger(PAVLSortedTree.class.getName());
 	
 	private static class Node<E> extends QSortedTree.Node<E>
 	{

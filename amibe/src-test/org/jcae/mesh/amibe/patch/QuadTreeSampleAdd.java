@@ -36,7 +36,7 @@ import java.util.logging.Logger;
  */
 public class QuadTreeSampleAdd extends QuadTreeSample
 {
-	private static Logger logger=Logger.getLogger(QuadTreeSampleAdd.class.getName());	
+	private static final Logger logger=Logger.getLogger(QuadTreeSampleAdd.class.getName());
 	
 	public QuadTreeSampleAdd(KdTree q)
 	{

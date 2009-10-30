@@ -55,11 +55,11 @@ import java.util.logging.Level;
  */
 abstract public class MeshExporter
 {
-	static Logger logger=Logger.getLogger(MeshExporter.class.getName());
+	static final Logger logger=Logger.getLogger(MeshExporter.class.getName());
 	
 	public static class FormatD25_16 extends DecimalFormat
 	{
-		private static String PATTERN="0.0000000000000000E00";
+		private static final String PATTERN="0.0000000000000000E00";
 		public FormatD25_16()
 		{
 			super(PATTERN);

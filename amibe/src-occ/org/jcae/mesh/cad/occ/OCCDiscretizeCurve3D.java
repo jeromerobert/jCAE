@@ -26,13 +26,14 @@ import gnu.trove.TIntArrayList;
 
 public class OCCDiscretizeCurve3D
 {
-	private static Logger logger=Logger.getLogger(OCCDiscretizeCurve3D.class.getName());
-	Adaptor3d_Curve curve = null;
+	private static final Logger logger=Logger.getLogger(OCCDiscretizeCurve3D.class.getName());
+	final Adaptor3d_Curve curve;
 	// Number of points
 	private int nr = 0;
 	private double length = -1.0;
 	double [] a;
-	private double start, end;
+	private final double start;
+	private final double end;
 	
 	public OCCDiscretizeCurve3D(Adaptor3d_Curve myCurve, double s, double e)
 	{

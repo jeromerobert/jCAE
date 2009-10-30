@@ -63,8 +63,8 @@ import gnu.trove.THashSet;
  */
 public class Mesher
 {
-	private static Logger logger=Logger.getLogger(Mesher.class.getName());
-	private static SimpleDateFormat DATE_FORMAT =
+	private static final Logger logger=Logger.getLogger(Mesher.class.getName());
+	private static final SimpleDateFormat DATE_FORMAT =
 		new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	/** meshing constraint: edge length */

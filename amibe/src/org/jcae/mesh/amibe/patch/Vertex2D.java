@@ -49,7 +49,7 @@ public class Vertex2D extends Vertex
 	private static final long serialVersionUID = -6099275818186028566L;
 	private static final Logger logger=Logger.getLogger(Vertex2D.class.getName());
 	private static final Random rand = new Random(139L);
-	private static Vertex2D circumcenter = new Vertex2D(null, 0.0, 0.0);
+	private static final Vertex2D circumcenter = new Vertex2D(null, 0.0, 0.0);
 	
 	//  These 2 integer arrays are temporary workspaces
 	private static final int [] i0 = new int[2];

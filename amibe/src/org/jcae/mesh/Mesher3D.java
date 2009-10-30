@@ -42,7 +42,7 @@ import org.jcae.mesh.xmldata.MeshWriter;
  */
 public class Mesher3D
 {
-	private static Logger logger=Logger.getLogger(Mesher3D.class.getName());
+	private static final Logger logger=Logger.getLogger(Mesher3D.class.getName());
 
 	/** 
 	 * Mesh a CAD surface.

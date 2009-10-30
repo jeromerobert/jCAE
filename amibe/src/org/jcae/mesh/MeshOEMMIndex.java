@@ -32,7 +32,7 @@ import java.io.File;
  */
 public class MeshOEMMIndex
 {
-	private static Logger logger=Logger.getLogger(MeshOEMMIndex.class.getName());
+	private static final Logger logger=Logger.getLogger(MeshOEMMIndex.class.getName());
 
 	private static void check(String brepfilename, int lmax, int triangles_max, String soupDir, String outDir)
 	{

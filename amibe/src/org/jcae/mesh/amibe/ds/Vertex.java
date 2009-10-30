@@ -472,7 +472,7 @@ public class Vertex implements Location, Serializable
 	{
 		private int index;
 		private Iterator<E> current;
-		private Iterator<E>[] iterators;
+		private final Iterator<E>[] iterators;
 		private ChainIterator(Iterator<E>[] it)
 		{
 			iterators = it;

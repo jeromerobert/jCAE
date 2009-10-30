@@ -140,7 +140,7 @@ import java.util.logging.Logger;
  */
 public class KdTree<T extends Location>
 {
-	private static Logger logger=Logger.getLogger(KdTree.class.getName());	
+	private static final Logger logger=Logger.getLogger(KdTree.class.getName());
 	/**
 	 * Cell of a {@link KdTree}.  Each cell contains either four children nodes
 	 * or up to <code>BUCKETSIZE</code> vertices.  When this number is exceeded,

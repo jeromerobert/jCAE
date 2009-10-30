@@ -32,10 +32,10 @@ import java.util.Collection;
 public class MGroup3D
 {
 	//  Group name
-	private String name;
+	private final String name;
 	
 	//  Group id
-	private int id;
+	private final int id;
 	
 	//  Face list.
 	private Collection<Triangle> facelist = new ArrayList<Triangle>();

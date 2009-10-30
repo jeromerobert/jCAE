@@ -29,13 +29,13 @@ import java.io.Serializable;
 public class Matrix3D implements Serializable
 {
 	private static final long serialVersionUID = 5729957735771428280L;
-	private double [] data = new double[9];
+	private final double [] data = new double[9];
 	
-	private static double [] c0 = new double[3];
-	private static double [] c1 = new double[3];
-	private static double [] c2 = new double[3];
-	private static double [] c3 = new double[3];
-	private static double [] c4 = new double[3];
+	private static final double [] c0 = new double[3];
+	private static final double [] c1 = new double[3];
+	private static final double [] c2 = new double[3];
+	private static final double [] c3 = new double[3];
+	private static final double [] c4 = new double[3];
 
 	/**
 	 * Create a <code>Matrix3D</code> instance and set it to the identity

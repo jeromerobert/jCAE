@@ -36,7 +36,7 @@ import java.util.logging.Logger;
  */
 public class ClassPathEntityResolver implements EntityResolver
 {
-	private static Logger logger=Logger.getLogger(ClassPathEntityResolver.class.getName());
+	private static final Logger logger=Logger.getLogger(ClassPathEntityResolver.class.getName());
 	
 	public InputSource resolveEntity(String publicId, String systemId)
 		throws SAXException, IOException

@@ -26,7 +26,7 @@ package org.jcae.mesh.amibe.metrics;
  */
 public class Matrix2D
 {
-	private double[][] data = new double[2][2];
+	private final double[][] data = new double[2][2];
 	
 	/**
 	 * Create a <code>Matrix2D</code> instance and set it to the identity

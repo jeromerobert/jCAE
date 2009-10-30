@@ -45,7 +45,7 @@ import java.util.logging.Logger;
  */
 public class QuadTreeSample
 {
-	private static Logger logger=Logger.getLogger(QuadTreeSample.class.getName());	
+	private static final Logger logger=Logger.getLogger(QuadTreeSample.class.getName());
 	protected final KdTree quadtree;
 	
 	public QuadTreeSample(KdTree q)

@@ -99,7 +99,7 @@ public class SphereBuilder
 	@Ignore("Inner class")
 	private static class UnindexedTriangle
 	{
-		double [] coord = new double[9];
+		final double [] coord = new double[9];
 		int group;
 		UnindexedTriangle()
 		{

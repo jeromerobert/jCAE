@@ -79,7 +79,7 @@ public class SmoothNodes2D
 	private double relaxation = 0.6;
 	private final Vertex2D c;
 	private boolean refresh = false;
-	private QSortedTree<Vertex2D> tree = new PAVLSortedTree<Vertex2D>();
+	private final QSortedTree<Vertex2D> tree = new PAVLSortedTree<Vertex2D>();
 
 	int processed = 0;
 	int notProcessed = 0;

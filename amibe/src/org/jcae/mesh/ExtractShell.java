@@ -34,9 +34,9 @@ import java.util.logging.Logger;
 
 public class ExtractShell
 {
-	private static Logger logger=Logger.getLogger(ExtractShell.class.getName());
+	private static final Logger logger=Logger.getLogger(ExtractShell.class.getName());
 	private static int lineno = 0;
-	private static String CR = System.getProperty("line.separator");
+	private static final String CR = System.getProperty("line.separator");
 	private final static NumberFormat FORMAT_I10=new FormatI10();
 	
 	public static void main(String args[])
@@ -306,7 +306,7 @@ public class ExtractShell
 	
 	private static class Face
 	{
-		public int [] v = new int[3];
+		public final int [] v = new int[3];
 		public int count = 0;
 		public int label = 0;
 		public Face(int i, int j, int k)

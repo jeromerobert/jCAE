@@ -28,12 +28,12 @@ import org.jcae.mesh.amibe.metrics.Matrix3D;
 
 public class AbsoluteDeflection2D extends QualityProcedure
 {
-	private Mesh2D mesh;
-	private Vertex [] p = new Vertex[4];
-	private double [] v1 = new double[3];
-	private double [] v2 = new double[3];
-	private double [] v3 = new double[3];
-	private double [] v4 = new double[3];
+	private final Mesh2D mesh;
+	private final Vertex [] p = new Vertex[4];
+	private final double [] v1 = new double[3];
+	private final double [] v2 = new double[3];
+	private final double [] v3 = new double[3];
+	private final double [] v4 = new double[3];
 	private final Vertex2D c;
 	
 	public AbsoluteDeflection2D(Mesh2D m)

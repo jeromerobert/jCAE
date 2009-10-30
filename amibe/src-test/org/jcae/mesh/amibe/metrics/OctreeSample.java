@@ -35,7 +35,7 @@ import javax.media.j3d.PointAttributes;
  */
 public class OctreeSample
 {
-	KdTree octree;
+	final KdTree octree;
 
 	public OctreeSample(KdTree o)
 	{

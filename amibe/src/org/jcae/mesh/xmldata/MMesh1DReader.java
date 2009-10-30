@@ -47,7 +47,7 @@ import java.util.logging.Logger;
 
 public class MMesh1DReader
 {
-	private static Logger logger=Logger.getLogger(MMesh1DReader.class.getName());
+	private static final Logger logger=Logger.getLogger(MMesh1DReader.class.getName());
 	
 	/** Return the first child element of with the given tag name */
 	private static Node getChild(Node e, String tagName)

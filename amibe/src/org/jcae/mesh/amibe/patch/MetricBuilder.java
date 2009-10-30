@@ -80,11 +80,11 @@ class MetricBuilder
 	private static final long serialVersionUID = -5921524911267268608L;
 	private static final Logger logger=Logger.getLogger(MetricBuilder.class.getName());
 	
-	private static double [] c0 = new double[3];
-	private static double [] c1 = new double[3];
-	private static double [] c2 = new double[3];
-	private static double [] values = new double[9];
-	private static double [][] temp32 = new double[3][2];
+	private static final double [] c0 = new double[3];
+	private static final double [] c1 = new double[3];
+	private static final double [] c2 = new double[3];
+	private static final double [] values = new double[9];
+	private static final double [][] temp32 = new double[3][2];
 	
 	protected static Matrix2D computeIsotropic(CADGeomSurface surf, double length)
 	{

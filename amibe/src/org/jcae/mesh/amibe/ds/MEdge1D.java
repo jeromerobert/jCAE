@@ -30,10 +30,10 @@ import gnu.trove.TObjectIntHashMap;
 public class MEdge1D
 {
 	//  First end point
-	private MNode1D pt1;
+	private final MNode1D pt1;
 	
 	//  Second end point
-	private MNode1D pt2;
+	private final MNode1D pt2;
 	
 	private static int id = 0;
 	private static TObjectIntHashMap<MEdge1D> mapHashcodeToID;

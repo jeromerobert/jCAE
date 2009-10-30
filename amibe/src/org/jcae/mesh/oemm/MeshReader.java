@@ -47,7 +47,7 @@ import java.util.logging.Logger;
  */
 public class MeshReader extends Storage
 {
-	private static Logger logger=Logger.getLogger(MeshReader.class.getName());	
+	private static final Logger logger=Logger.getLogger(MeshReader.class.getName());
 	
 	protected final OEMM oemm;
 	// Map between octant index and Mesh instance.
@@ -66,7 +66,7 @@ public class MeshReader extends Storage
 	/**
 	 * Buffer to improve I/O efficiency.
 	 */
-	protected static ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
+	protected static final ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
 	
 	/**
 	 * Constructor.

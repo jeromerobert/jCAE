@@ -53,7 +53,7 @@ import java.util.logging.Logger;
 
 public class MeshReader
 {
-	private static Logger logger=Logger.getLogger(MeshReader.class.getName());
+	private static final Logger logger=Logger.getLogger(MeshReader.class.getName());
 	
 	/**
 	 * Loads an Amibe 2D XML file into an existing Mesh2D instance.

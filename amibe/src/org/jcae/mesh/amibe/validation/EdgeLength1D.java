@@ -29,7 +29,7 @@ import org.jcae.mesh.amibe.metrics.Matrix3D;
 public class EdgeLength1D extends QualityProcedure
 {
 	private CADEdge edge = null;
-	private double [] v1 = new double[3];
+	private final double [] v1 = new double[3];
 		
 	@Override
 	protected void setValidationFeatures()

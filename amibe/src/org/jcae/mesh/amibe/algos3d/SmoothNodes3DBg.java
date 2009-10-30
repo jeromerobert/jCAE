@@ -63,13 +63,13 @@ public class SmoothNodes3DBg
 	private int progressBarStatus = 10000;
 	private static final double scaleFactor = 12.0 * Math.sqrt(3.0);
 	private double relaxation = 0.6;
-	private QSortedTree<Vertex> tree = new PAVLSortedTree<Vertex>();
+	private final QSortedTree<Vertex> tree = new PAVLSortedTree<Vertex>();
 	private boolean refresh = false;
 	int processed = 0;
 	int notProcessed = 0;
 	TObjectDoubleHashMap<Triangle> qualityMap;
 	Collection<Vertex> nodeset;
-	Set<Vertex> immutableNodes = new LinkedHashSet<Vertex>();
+	final Set<Vertex> immutableNodes = new LinkedHashSet<Vertex>();
 	
 	/**
 	 * Creates a <code>SmoothNodes3DBg</code> instance.

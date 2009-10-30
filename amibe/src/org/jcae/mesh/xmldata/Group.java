@@ -34,7 +34,7 @@ public class Group
 	private String name;
 	private int number;
 	private int offset;
-    private PropertyChangeSupport propertyChangeSupport =  new PropertyChangeSupport(this);
+    private final PropertyChangeSupport propertyChangeSupport =  new PropertyChangeSupport(this);
     private boolean visible;   
 	private boolean selected;
     

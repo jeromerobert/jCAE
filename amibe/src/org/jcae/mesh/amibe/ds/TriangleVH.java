@@ -71,7 +71,7 @@ public class TriangleVH extends Triangle
 	/**
 	 * Pointers to adjacent elements through edges.
 	 */
-	private TriangleVH [] adjacentTriangles = new TriangleVH[3];
+	private final TriangleVH [] adjacentTriangles = new TriangleVH[3];
 	
 	/**
 	 * Packed representation of adjacent edge local numbers.
@@ -88,7 +88,7 @@ public class TriangleVH extends Triangle
 	/**
 	 * Edge attributes.
 	 */
-	private byte [] edgeAttributes = new byte[3];
+	private final byte [] edgeAttributes = new byte[3];
 		
 	/**
 	 * Constructor.

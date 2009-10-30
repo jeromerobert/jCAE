@@ -43,7 +43,7 @@ public class Groups
 {
 	private static final Logger LOGGER = Logger.getLogger(Groups.class.getCanonicalName());
 	// TODO Create a table selection
-	private PropertyChangeListener groupPropertyChangeListener=new PropertyChangeListener()
+	private final PropertyChangeListener groupPropertyChangeListener=new PropertyChangeListener()
 	{
 		public void propertyChange(PropertyChangeEvent evt)
 		{			

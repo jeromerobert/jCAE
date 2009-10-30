@@ -60,7 +60,7 @@ import java.util.logging.Logger;
  */
 public class RawStorage
 {
-	static Logger logger=Logger.getLogger(RawStorage.class.getName());	
+	static final Logger logger=Logger.getLogger(RawStorage.class.getName());
 
 	//  In triangle soup, a triangle has 9 double coordinates and two ints.
 	private static final int TRIANGLE_SIZE_RAW = 80;
@@ -74,9 +74,9 @@ public class RawStorage
 	// As TRIANGLE_SIZE_RAW is 2*TRIANGLE_SIZE_DISPATCHED, the latter
 	// does not need to be taken into account
 	private static final int bufferSize = (TRIANGLE_SIZE_RAW * VERTEX_SIZE_INDEXED * TRIANGLE_SIZE_INDEXED);
-	static ByteBuffer bb = ByteBuffer.allocate(bufferSize);
-	static ByteBuffer bbt = ByteBuffer.allocate(bufferSize);
-	static ByteBuffer bbpos = ByteBuffer.allocate(8);
+	static final ByteBuffer bb = ByteBuffer.allocate(bufferSize);
+	static final ByteBuffer bbt = ByteBuffer.allocate(bufferSize);
+	static final ByteBuffer bbpos = ByteBuffer.allocate(8);
 
 	public static interface SoupReaderInterface
 	{
@@ -203,12 +203,12 @@ public class RawStorage
 	
 	private static final class CountTriangles implements SoupReaderInterface
 	{
-		private OEMM.Node [] cells = new OEMM.Node[3];
-		private OEMM oemm;
+		private final OEMM.Node [] cells = new OEMM.Node[3];
+		private final OEMM oemm;
 		private long nrTriangles = 0;
-		private int [] ijk = new int[3];
-		private double [] bbox = new double[6];
-		private boolean build;
+		private final int [] ijk = new int[3];
+		private final double [] bbox = new double[6];
+		private final boolean build;
 		public CountTriangles(OEMM o, boolean b)
 		{
 			oemm = o;
@@ -334,11 +334,11 @@ public class RawStorage
 	
 	private static final class DispatchTriangles implements SoupReaderInterface
 	{
-		private OEMM.Node [] cells = new OEMM.Node[3];
-		private int [] ijk9 = new int[9];
-		private OEMM oemm;
-		private FileChannel fc;
-		private Map<OEMM.Node, ByteBuffer> buffers;
+		private final OEMM.Node [] cells = new OEMM.Node[3];
+		private final int [] ijk9 = new int[9];
+		private final OEMM oemm;
+		private final FileChannel fc;
+		private final Map<OEMM.Node, ByteBuffer> buffers;
 		public DispatchTriangles(OEMM o, FileChannel f, Map<OEMM.Node, ByteBuffer> m)
 		{
 			oemm = o;
@@ -459,8 +459,8 @@ public class RawStorage
 	
 	private static final class FlushBuffersProcedure extends TraversalProcedure
 	{
-		private FileChannel fc;
-		private Map<OEMM.Node, ByteBuffer> buffers;
+		private final FileChannel fc;
+		private final Map<OEMM.Node, ByteBuffer> buffers;
 		FlushBuffersProcedure(FileChannel channel, Map<OEMM.Node, ByteBuffer> m)
 		{
 			fc = channel;
@@ -506,7 +506,7 @@ public class RawStorage
 	
 	private static final class WriteStructureProcedure extends TraversalProcedure
 	{
-		private DataOutputStream out;
+		private final DataOutputStream out;
 		WriteStructureProcedure(DataOutputStream outStream, String dataFile, int l, double [] x0)
 			throws IOException
 		{
@@ -670,12 +670,12 @@ public class RawStorage
 	
 	private static class IndexInternalVerticesProcedure extends TraversalProcedure
 	{
-		private FileChannel fc;
-		private ObjectOutputStream oos;
-		private String outDir;
+		private final FileChannel fc;
+		private final ObjectOutputStream oos;
+		private final String outDir;
 		private int globalIndex = 0;
-		private ArrayList<String> path = new ArrayList<String>();
-		private int [] ijk = new int[3];
+		private final ArrayList<String> path = new ArrayList<String>();
+		private final int [] ijk = new int[3];
 		private int room = 0;
 		IndexInternalVerticesProcedure(FileInputStream in, ObjectOutputStream headerOut, String dir)
 		{
@@ -898,8 +898,8 @@ public class RawStorage
 	
 	private static class IndexExternalVerticesProcedure extends TraversalProcedure
 	{
-		private FileChannel fc;
-		private int [] ijk = new int[3];
+		private final FileChannel fc;
+		private final int [] ijk = new int[3];
 		private PAVLTreeIntArrayDup [] vertices;
 		private SoftReference<PAVLTreeIntArrayDup> [] sr;
 		private int nr_ld_leaves = 0;
@@ -1022,8 +1022,8 @@ public class RawStorage
 	
 	private static class ConvertVertexCoordinatesProcedure extends TraversalProcedure
 	{
-		private int [] ijk = new int[3];
-		private double [] xyz = new double[3];
+		private final int [] ijk = new int[3];
+		private final double [] xyz = new double[3];
 		ConvertVertexCoordinatesProcedure()
 		{
 		}

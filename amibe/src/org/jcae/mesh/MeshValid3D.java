@@ -34,7 +34,7 @@ import java.util.logging.Logger;
  */
 public class MeshValid3D
 {
-	private static Logger logger=Logger.getLogger(MeshValid3D.class.getName());
+	private static final Logger logger=Logger.getLogger(MeshValid3D.class.getName());
 
 	private static void check(String brepfilename, String xmlDir, float discr, float defl)
 	{

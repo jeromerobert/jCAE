@@ -48,10 +48,10 @@ public class SubMesh1D
 	private BDiscretization discr;
 	
 	//  Edge list
-	private ArrayList<MEdge1D> edgelist = new ArrayList<MEdge1D>();
+	private final ArrayList<MEdge1D> edgelist = new ArrayList<MEdge1D>();
 	
 	//  Node list
-	private ArrayList<MNode1D> nodelist = new ArrayList<MNode1D>();
+	private final ArrayList<MNode1D> nodelist = new ArrayList<MNode1D>();
 	
 	/**
 	 * Creates a <code>SubMesh1D</code> instance and initializes it with

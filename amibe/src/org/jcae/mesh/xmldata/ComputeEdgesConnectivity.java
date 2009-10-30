@@ -41,11 +41,12 @@ import org.xml.sax.SAXException;
 
 public class ComputeEdgesConnectivity
 {
-	private static Logger logger=Logger.getLogger(ComputeEdgesConnectivity.class.getName());
+	private static final Logger logger=Logger.getLogger(ComputeEdgesConnectivity.class.getName());
 	
 	private static class Edge
 	{
-		private int n1, n2;
+		private final int n1;
+		private final int n2;
 		
 		Edge(int n1, int n2)
 		{
@@ -87,8 +88,8 @@ public class ComputeEdgesConnectivity
 		}
 	}
 	
-	File xmlDir;
-	File xmlFile;
+	final File xmlDir;
+	final File xmlFile;
 	int numberOfTriangles, numberOfFreeEdges, numberOfMultiEdges;
 	Document document;
 	

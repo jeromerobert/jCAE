@@ -65,7 +65,7 @@ import java.util.logging.Logger;
 public class SplitEdge extends AbstractAlgoHalfEdge
 {
 	private static final Logger LOGGER=Logger.getLogger(SplitEdge.class.getName());
-	private double [] newXYZ = new double[3];
+	private final double [] newXYZ = new double[3];
 	private Vertex insertedVertex = null;
 	
 	/**

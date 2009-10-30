@@ -38,11 +38,11 @@ import java.util.logging.Logger;
 
 public class Viewer extends JFrame
 {	
-	private static Logger logger=Logger.getLogger(Viewer.class.getName());
-	private BorderLayout borderLayout = new BorderLayout();
-	private Canvas3D canvas3D;
-	private SimpleUniverse universe;
-	private BranchGroup mainBranchGroup;
+	private static final Logger logger=Logger.getLogger(Viewer.class.getName());
+	private final BorderLayout borderLayout = new BorderLayout();
+	private final Canvas3D canvas3D;
+	private final SimpleUniverse universe;
+	private final BranchGroup mainBranchGroup;
 	private double [] lastClick = null;
 	private char lastKey = 0;
 	

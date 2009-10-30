@@ -36,8 +36,8 @@ import org.jcae.mesh.amibe.metrics.Matrix3D;
  */
 public class DihedralAngle extends QualityProcedure
 {
-	private VirtualHalfEdge ot = new VirtualHalfEdge();
-	private VirtualHalfEdge sym = new VirtualHalfEdge();
+	private final VirtualHalfEdge ot = new VirtualHalfEdge();
+	private final VirtualHalfEdge sym = new VirtualHalfEdge();
 	
 	@Override
 	protected void setValidationFeatures()

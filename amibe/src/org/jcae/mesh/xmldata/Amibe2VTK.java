@@ -62,7 +62,7 @@ public class Amibe2VTK
 			e.printStackTrace();
 		}
 	}
-	private File directory;
+	private final File directory;
 	private Document document;
 	private boolean dummyData;
 	

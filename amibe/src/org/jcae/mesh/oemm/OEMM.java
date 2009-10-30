@@ -42,7 +42,7 @@ public class OEMM implements Serializable
 {
 	private static final long serialVersionUID = -8244900407797088903L;
 
-	private static Logger logger=Logger.getLogger(OEMM.class.getName());	
+	private static final Logger logger=Logger.getLogger(OEMM.class.getName());
 	
 	/**
 	 * Maximal tree depth.
@@ -88,7 +88,7 @@ public class OEMM implements Serializable
 	 *  D[i] = x0[i] + I[i] / x0[3];
 	 * </pre>
 	 */
-	public double [] x0 = new double[4];
+	public final double [] x0 = new double[4];
 
 	/**
 	 * Root cell.
@@ -137,12 +137,14 @@ public class OEMM implements Serializable
 		/**
 		 * Integer coordinates of lower-left corner.
 		 */
-		public int i0, j0, k0;
+		public final int i0;
+		public final int j0;
+		public final int k0;
 
 		/**
 		 * Cell size.  It is equal to (1 &lt;&lt; (OEMM.MAXLEVEL - depth))
 		 */
-		public int size;
+		public final int size;
 
 		/**
 		 * Total number of triangles found in this node and its children.
@@ -784,7 +786,7 @@ public class OEMM implements Serializable
 	{
 		public final double [] coord;
 		private int index;
-		private boolean onlyLeaves;
+		private final boolean onlyLeaves;
 		public CoordProcedure(boolean b, int nC, int nL)
 		{
 			onlyLeaves = b;

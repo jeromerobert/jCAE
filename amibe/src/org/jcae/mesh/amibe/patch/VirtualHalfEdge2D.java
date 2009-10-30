@@ -39,9 +39,9 @@ import org.jcae.mesh.amibe.metrics.KdTree;
  */
 public class VirtualHalfEdge2D extends VirtualHalfEdge
 {
-	private static Logger logger=Logger.getLogger(VirtualHalfEdge2D.class.getName());
+	private static final Logger logger=Logger.getLogger(VirtualHalfEdge2D.class.getName());
 	private static final Random rand = new Random(139L);
-	private static VirtualHalfEdge2D [] work = new VirtualHalfEdge2D[4];
+	private static final VirtualHalfEdge2D [] work = new VirtualHalfEdge2D[4];
 	static {
 		for (int i = 0; i < 4; i++)
 			work[i] = new VirtualHalfEdge2D();

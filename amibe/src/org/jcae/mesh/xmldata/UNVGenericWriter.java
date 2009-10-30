@@ -36,8 +36,8 @@ import java.util.logging.Logger;
 
 public class UNVGenericWriter
 {
-	private static Logger logger=Logger.getLogger(UNVGenericWriter.class.getName());
-	private String unvFile;
+	private static final Logger logger=Logger.getLogger(UNVGenericWriter.class.getName());
+	private final String unvFile;
 	private PrintStream streamN, streamE, streamG;
 	private final static String CR=System.getProperty("line.separator");
 	private final static int BUFFER_SIZE = 16 * 1024;

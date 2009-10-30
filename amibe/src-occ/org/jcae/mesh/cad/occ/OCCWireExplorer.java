@@ -29,7 +29,7 @@ import org.jcae.opencascade.jni.BRepTools_WireExplorer;
 
 public class OCCWireExplorer implements CADWireExplorer
 {
-	private BRepTools_WireExplorer occWExp;
+	private final BRepTools_WireExplorer occWExp;
 	public OCCWireExplorer ()
 	{
 		occWExp = new BRepTools_WireExplorer();

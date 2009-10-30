@@ -47,7 +47,7 @@ import java.util.logging.Logger;
 
 public class MeshWriter
 {
-	private static Logger logger=Logger.getLogger(MeshWriter.class.getName());
+	private static final Logger logger=Logger.getLogger(MeshWriter.class.getName());
 
 	/**
 	 * Used by {@link writeObject}

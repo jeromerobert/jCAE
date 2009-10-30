@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  */
 public class MeshOEMMPopulate
 {
-	private static Logger logger=Logger.getLogger(MeshOEMMPopulate.class.getName());
+	private static final Logger logger=Logger.getLogger(MeshOEMMPopulate.class.getName());
 
 	public static void main(String args[])
 	{

@@ -121,15 +121,15 @@ public class UNV2Amibe
 		int nbElement;
 	}
 	
-	private static Logger logger=Logger.getLogger(UNV2Amibe.class.getName());
+	private static final Logger logger=Logger.getLogger(UNV2Amibe.class.getName());
 	private String unitBlock;
 		
 	private int numberOfNodes, numberOfTriangles;
-	private ArrayList<Group> groups=new ArrayList<Group>();
+	private final ArrayList<Group> groups=new ArrayList<Group>();
 	private String stripedUnvFile;
 	
 	/** a list of 2412 elements which won't be store in the amibe file */
-	private ArrayList<Element> elements=new ArrayList<Element>();
+	private final ArrayList<Element> elements=new ArrayList<Element>();
 	
 	public void importMesh(String input, String output) throws IOException
 	{

@@ -37,7 +37,7 @@ import org.jcae.mesh.amibe.metrics.Metric;
  */
 public class QuadTreeSampleRemove extends QuadTreeSample
 {
-	private static Logger logger=Logger.getLogger(QuadTreeSampleRemove.class.getName());
+	private static final Logger logger=Logger.getLogger(QuadTreeSampleRemove.class.getName());
 	
 	public QuadTreeSampleRemove(KdTree q)
 	{

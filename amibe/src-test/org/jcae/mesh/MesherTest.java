@@ -69,7 +69,7 @@ public class MesherTest
 	private static FileHandler app = null;
 	private static final XMLFormatter xmlLayout = new XMLFormatter();
 	private static File logFile = null;
-	private static EntityResolver myEntityResolver = new FakeEntityResolver();
+	private static final EntityResolver myEntityResolver = new FakeEntityResolver();
 	// Hopefully test timing depends linearly on CPU power,
 	private static final long timerScale = Long.parseLong(System.getProperty("org.jcae.mesh.timerScale", "1000"));
 

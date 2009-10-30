@@ -45,18 +45,18 @@ import java.util.logging.Logger;
 
 public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 {
-	private static Logger logger=Logger.getLogger(MeshToMMesh3DConvert.class.getName());
+	private static final Logger logger=Logger.getLogger(MeshToMMesh3DConvert.class.getName());
 	private int nrRefs = 0;
 	private int nrIntNodes = 0;
 	private int nrTriangles = 0;
 	private int offsetBnd = 0;
 	private int nodeOffset = 0;
 	private TIntIntHashMap xrefs;
-	private TIntObjectHashMap<CADFace> mapFaces = new TIntObjectHashMap<CADFace>();
+	private final TIntObjectHashMap<CADFace> mapFaces = new TIntObjectHashMap<CADFace>();
 	private double [] coordRefs = null;
 	private DataOutputStream nodesOut, refsOut, normalsOut, trianglesOut, groupsOut;
-	private String xmlDir;
-	private String brepFile;
+	private final String xmlDir;
+	private final String brepFile;
 	private File xmlFile3d;
 	private File nodesFile, refFile, normalsFile, trianglesFile, groupsFile;
 	private Document documentOut;

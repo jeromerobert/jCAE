@@ -45,7 +45,7 @@ import java.util.logging.Logger;
  */
 public class MeshOEMMDecimate
 {
-	private static Logger logger=Logger.getLogger(MeshOEMMDecimate.class.getName());
+	private static final Logger logger=Logger.getLogger(MeshOEMMDecimate.class.getName());
 	private static final int SIZE_OF_BUFFER = 20000024;
 	private final byte[] buffer = new byte[SIZE_OF_BUFFER];
 	

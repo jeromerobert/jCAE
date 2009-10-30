@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  */
 public abstract class CADShapeFactory
 {
-	private static Logger logger=Logger.getLogger(CADShapeFactory.class.getName());
+	private static final Logger logger=Logger.getLogger(CADShapeFactory.class.getName());
 	private static final CADShapeFactory factory;
 	static
 	{

@@ -48,7 +48,7 @@ import java.util.logging.Logger;
 
 public class MeshToSoupConvert extends JCAEXMLData implements FilterInterface
 {
-	private static Logger logger=Logger.getLogger(MeshToSoupConvert.class.getName());
+	private static final Logger logger=Logger.getLogger(MeshToSoupConvert.class.getName());
 	private int nrTriangles = 0;
 	private int nrIntNodes = 0;
 	private int nrNodes = 0;
@@ -57,13 +57,13 @@ public class MeshToSoupConvert extends JCAEXMLData implements FilterInterface
 	private final String soupFile;
 	private File rawFile;
 	private TIntIntHashMap xrefs;
-	private TIntObjectHashMap<CADFace> mapFaces = new TIntObjectHashMap<CADFace>();
+	private final TIntObjectHashMap<CADFace> mapFaces = new TIntObjectHashMap<CADFace>();
 	private double [] coordRefs;
 	// Must be a multiple of 8*2, 4*3 and 8*10
 	private static final int bufferSize = 15 << 12;
-	private ByteBuffer bb = ByteBuffer.allocate(bufferSize);
-	private IntBuffer bbI = bb.asIntBuffer();
-	private DoubleBuffer bbD = bb.asDoubleBuffer();
+	private final ByteBuffer bb = ByteBuffer.allocate(bufferSize);
+	private final IntBuffer bbI = bb.asIntBuffer();
+	private final DoubleBuffer bbD = bb.asDoubleBuffer();
 	
 	/** 
 	 * @param args mesh directory, brep path

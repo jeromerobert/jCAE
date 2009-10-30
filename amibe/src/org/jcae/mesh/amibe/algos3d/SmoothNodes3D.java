@@ -53,8 +53,8 @@ import java.util.logging.Logger;
  */
 public class SmoothNodes3D
 {
-	private static Logger LOGGER=Logger.getLogger(SmoothNodes3D.class.getName());
-	private Mesh mesh;
+	private static final Logger LOGGER=Logger.getLogger(SmoothNodes3D.class.getName());
+	private final Mesh mesh;
 	private double sizeTarget = -1.0;
 	private int nloop = 10;
 	private double tolerance = Double.MAX_VALUE / 2.0;
@@ -64,7 +64,7 @@ public class SmoothNodes3D
 	private static final double scaleFactor = 12.0 * Math.sqrt(3.0);
 	private double relaxation = 0.6;
 	private final Vertex c;
-	private QSortedTree<Vertex> tree = new PAVLSortedTree<Vertex>();
+	private final QSortedTree<Vertex> tree = new PAVLSortedTree<Vertex>();
 	private boolean refresh = false;
 	private int processed = 0;
 	private int notProcessed = 0;

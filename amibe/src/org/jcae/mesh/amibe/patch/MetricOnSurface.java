@@ -44,7 +44,7 @@ import java.util.logging.Logger;
  */
 public class MetricOnSurface implements Metric2D
 {
-	private static Logger logger=Logger.getLogger(MetricOnSurface.class.getName());
+	private static final Logger logger=Logger.getLogger(MetricOnSurface.class.getName());
 	
 	//  First fundamental form
 	private double E, F, G;
