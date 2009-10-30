@@ -71,7 +71,7 @@ public class Group
 	}
 
 	/**
-	 * @param The new id to set
+	 * @param newId The new id to set
 	 */
 	public void setId(int newId)
 	{
@@ -79,7 +79,7 @@ public class Group
 	}
 
 	/**
-	 * @param The new name to set
+	 * @param newName The new name to set
 	 */
 	public void setName(String newName)
 	{
@@ -89,7 +89,7 @@ public class Group
 	}
 
 	/**
-	 * @param The new number to set
+	 * @param newNumber The new number to set
 	 */
 	public void setNumberOfElements(int newNumber)
 	{
@@ -97,7 +97,7 @@ public class Group
 	}
 
 	/**
-	 * @param The new offset to set
+	 * @param newOffset The new offset to set
 	 */
 	void setOffset(int newOffset)
 	{
@@ -168,9 +168,9 @@ public class Group
 	/**
 	 * It creates a DOM element from the document of jcae3d.xml corresponding to this group.
 	 *
-	 *@param the xml DOM document which comes from the parse of jcae3d.xml.
-	 *@param the path of the file groups.bin from baseDir.
-	 *@param the directory which contains jcae3d.xml.
+	 *@param xmlDoc the xml DOM document which comes from the parse of jcae3d.xml.
+	 *@param groupFile the path of the file groups.bin from baseDir.
+	 *@param baseDir the directory which contains jcae3d.xml.
 	 *@return the DOM element corresponding to the group.
 	 */
 	public Element createXMLGroup(Document xmlDoc, java.io.File groupFile,

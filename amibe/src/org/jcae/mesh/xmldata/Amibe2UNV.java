@@ -74,7 +74,6 @@ public class Amibe2UNV
 	
 	/**
 	 * @param directory The directory which contain 3d files
-	 * @param unvFile The name of the generated UNV file
 	 */
 	public Amibe2UNV(File directory)
 	{
@@ -180,7 +179,6 @@ public class Amibe2UNV
 	
 	/**
 	 * @param out
-	 * @param amibeNodeToUNVNode
 	 * @throws IOException 
 	 */
 	private void writeTriangles(PrintStream out) throws IOException

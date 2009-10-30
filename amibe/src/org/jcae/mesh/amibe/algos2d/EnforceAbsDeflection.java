@@ -34,7 +34,7 @@ import java.util.logging.Logger;
 
 /**
  * Split triangles with an absolute deflection greater than
- * requirements.  As explained in {@link org.jcae.mesh.amibe.metrics.Metric3D},
+ * requirements.  As explained in {@link org.jcae.mesh.amibe.patch.MetricBuilder},
  * the geometric error may exceed the desired value if triangles are too far
  * away from local tangent planes.  This algorithm computes the deflection of
  * triangle centroids, and if it is larger than the requested value, this

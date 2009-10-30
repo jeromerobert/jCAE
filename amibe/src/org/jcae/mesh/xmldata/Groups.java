@@ -85,7 +85,7 @@ public class Groups
 	 * It makes the fusion of groups.
 	 * It modifies the list of groups, the file jcae3d.xml and the file groups.bin.
 	 *
-	 *@param the list of groups to fuse.
+	 *@param listGroup the list of groups to fuse.
 	 *@return the group resulting of the fusion.
 	 * @throws IOException
 	 * @throws SAXException
@@ -227,8 +227,8 @@ public class Groups
 	}
 
 	/**
-	 *@param the xml element of DOM tree corresponding to the tag "groups".
-	 *@param a group.
+	 *@param xmlGroups the xml element of DOM tree corresponding to the tag "groups".
+	 *@param g a group.
 	 *@return the xml element of DOM tree corresponding to the group.
 	 */
 	public Element getXmlGroup(Element xmlGroups, Group g)
@@ -269,9 +269,9 @@ public class Groups
 	/**
 	 * It writes the file jcae3d.xml to update the groups, after a fusion for example.
 	 *
-	 *@param the xml document of DOM. It should comes from the parsing of jcae3d.xml.
-	 *@param the file groups.bin.
-	 *@param the directory containing jcae3d.xml.
+	 *@param xmlDoc the xml document of DOM. It should comes from the parsing of jcae3d.xml.
+	 *@param groupFile the file groups.bin.
+	 *@param baseDir the directory containing jcae3d.xml.
 	 */
 	public void modifyXMLGroups(org.w3c.dom.Document xmlDoc,
 		java.io.File groupFile, String baseDir)
@@ -326,9 +326,8 @@ public class Groups
 	/**
 	 * It creates an array of integers which contains the indices of triangles in triangles3d.bin for a particular group.
 	 *
-	 *@param the path of the file groups.bin.
-	 *@param the number of all triangles of the mesh.
-	 *@param the group.
+	 *@param fileGroup the path of the file groups.bin.
+	 *@param g the group.
 	 *@return an array of integers.
 	 */
 	public int[] readTrianglesGroup(File fileGroup, Group g)
@@ -353,7 +352,7 @@ public class Groups
 	}
 
 	/**
-	 * @param The array of groups to set
+	 * @param groups The array of groups to set
 	 */
 	public void setGroups(Group[] groups)
 	{
@@ -371,7 +370,7 @@ public class Groups
 	}
 	
 	/**
-	 * @param the directory of the mesh of a jcae project.
+	 * @param meshFile the directory of the mesh of a jcae project.
 	 */
 	public void setMeshFile(String meshFile)
 	{

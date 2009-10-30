@@ -51,9 +51,9 @@ import java.util.logging.Logger;
  * and collected into a list.  These nodes are boundary nodes, and
  * all other nodes will be inserted in the interior domain.  A bounding
  * box enclosing all these nodes in the 2D space is computed, and
- * a {@link org.jcae.mesh.amibe.util.KdTree} instance can then be
+ * a {@link org.jcae.mesh.amibe.metrics.KdTree} instance can then be
  * initialized by
- * {@link Mesh2D#resetKdTree(double [], double [])}.
+ * {@link Mesh#resetKdTree(double[], double[])}.
  *
  * <p>
  * Some checks have been added to remove tiny edges and make sure that
@@ -78,7 +78,7 @@ import java.util.logging.Logger;
  * Boundary nodes are then inserted iteratively.  For the moment, an Euclidian
  * 2D metric is used because a 3D metric will not help on a very rough
  * triangulation.  The nearest vertex already inserted in the mesh is retrieved
- * with {@link org.jcae.mesh.amibe.util.KdTree#getNearestVertex(Mesh, Vertex)}.
+ * with {@link org.jcae.mesh.amibe.metrics.KdTree#getNearestVertex},
  * It has a reference to a triangle containing this vertex.  From this starting
  * point, we search for the {@link Triangle} containing this boundary node by
  * looking for adjacent triangles into the right direction.  This
@@ -133,7 +133,7 @@ import java.util.logging.Logger;
  * After this initial triangulation has been performed, it is time to
  * add interior vertices to fulfill user's requirements.  The Euclidian
  * 2D metric is replaced by the 2D Riemannian metric
- * {@link org.jcae.mesh.amibe.metrics.Metric2D} induced by surface local
+ * {@link org.jcae.mesh.amibe.patch.Metric2D} induced by surface local
  * properties and user constraints.  But current triangles can cross
  * the whole surface, so metrics of its vertices may be very different.
  * There are two problems:
@@ -148,7 +148,7 @@ import java.util.logging.Logger;
  * In order to improve accuracy, Frédéric Hecht advised to recursively
  * split segments when metrics at end points are very different.  This
  * has been implemented in
- * {@link org.jcae.mesh.amibe.patch.Calculus3D#distance(Vertex2D, Vertex2D)}
+ * {@link org.jcae.mesh.amibe.patch.Mesh2D}
  * but did not give good results.  Now that the whole process works much
  * better, this issue could be investigated again.
  * </p>

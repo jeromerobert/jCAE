@@ -40,7 +40,7 @@ public interface LocalSurfaceProjection
 	/**
 	 * Project a point on local surface.
 	 *
-	 * @param pt   point to project on the approximated surface.
+	 * @param v    position to project on the approximated surface.
 	 * @return     <code>true</code> if projection has been performed
 	 *             successfully, <code>false</code> otherwise.
 	 */

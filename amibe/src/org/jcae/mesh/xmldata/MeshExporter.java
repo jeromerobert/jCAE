@@ -268,8 +268,8 @@ abstract public class MeshExporter
 	}
 
 	/**
-	 * @param the xml element of DOM tree corresponding to the tag "groups".
-	 * @param a group.
+	 * @param xmlGroups the xml element of DOM tree corresponding to the tag "groups".
+	 * @param id a group id.
 	 * @return the xml element of DOM tree corresponding to the group.
 	 */
 	private Element getXmlGroup(Element xmlGroups, int id)

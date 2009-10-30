@@ -48,7 +48,7 @@ import java.util.logging.Logger;
  * TODO: currently edges longer than sqrt(2)*discr/2 will be splitted
  *
  * When an interior edge is splitted, its midpoint is projected onto
- * the surface by {@link Vertex#discreteProject(Vertex)}; if this
+ * the surface by {@link org.jcae.mesh.amibe.projection.QuadricProjection}; if this
  * projection fails, this edge is not splitted.  It is removed from
  * the tree because there are few chances that this projection works
  * later.  This means in particular that an interior edge whose

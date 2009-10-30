@@ -47,7 +47,7 @@ public class MMesh1DWriter
 	private static final Logger logger=Logger.getLogger(MMesh1DWriter.class.getName());
 	
 	/**
-	 * Used by {@link writeObject}
+	 * Used by {@link #writeObject(org.jcae.mesh.amibe.ds.MMesh1D, String, String)}
 	 */
 	private static Element writeObjectNodes(Document document, Iterator<MNode1D> nodesIterator, File nodesFile, File refFile, String baseDir, MMesh1D m1d)
 		throws IOException
@@ -109,7 +109,7 @@ public class MMesh1DWriter
 	}
 	
 	/**
-	 * Used by {@link writeObject}
+	 * Used by {@link #writeObject(org.jcae.mesh.amibe.ds.MMesh1D, String, String)}
 	 */
 	private static Element writeObjectBeams(Document document, Iterator<MEdge1D> edgesIterator, File beamsFile, String baseDir)
 		throws IOException

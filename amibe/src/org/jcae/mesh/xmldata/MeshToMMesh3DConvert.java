@@ -233,8 +233,9 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 	
 	/**
 	 * Convert 2D files to 3D files.
-	 * @param groupId Group number of this 2D mesh
-	 * @param F Topological face
+	 * @param groupId group number of this 2D mesh
+	 * @param groupName group name
+	 * @param iFace face number
 	 */
 	public void processOneShape(int groupId, String groupName, int iFace)
 	{

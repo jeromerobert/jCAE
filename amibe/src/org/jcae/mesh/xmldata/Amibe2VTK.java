@@ -192,7 +192,6 @@ public class Amibe2VTK
 	/**
 	 * write dummy data associated to the triangle
 	 * @param dos the stream to write on
-	 * @param triaFile the amibe triangle file
 	 * @param nbt the number of triangles
 	 * @throws IOException
 	 */

@@ -445,9 +445,9 @@ public class Storage
 	 * of contained vertices.
 	 * @param oemm
 	 * @param mesh
+	 * @param mapVertexToLeafindex
 	 * @param mapLeafindexToVertexList
-	 * @param storedLeaves 
-	 * @param  
+	 * @param movedVertices 
 	 */
 	private static void collectAllVertices(OEMM oemm, Mesh mesh, TObjectIntHashMap<Vertex> mapVertexToLeafindex, TIntObjectHashMap<ArrayList<Vertex>> mapLeafindexToVertexList, TIntHashSet movedVertices)
 	{

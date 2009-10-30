@@ -42,7 +42,7 @@ import java.util.logging.Logger;
  * <p>
  * Each {@link Cell} contains either vertices or four children nodes
  * (some of them may be <code>null</code>).  A cell can contain at most
- * {@link Cell#BUCKETSIZE} vertices (default is 10).  When this number
+ * {@link #BUCKETSIZE} vertices (default is 10).  When this number
  * is exceeded, the cell is splitted and vertices are stored in these children.
  * On the contrary, when all vertices are removed from a cell, it is deleted.
  * And when all children of a cell are null, this cell is removed.
@@ -86,17 +86,6 @@ import java.util.logging.Logger;
  * </p>
  *
  * <p>
- * Distances between vertices can be computed either in Euclidian 2D space, or
- * with a Riemannian metrics.  This is controlled by the
- * {@link org.jcae.metric.amibe.patch.Mesh2D#pushCompGeom(int)} method.
- * Distances are computed in Euclidian 2D space when its argument is
- * an instance of {@link org.jcae.metric.amibe.patch.Calculus2D}, and in
- * Riemannian metrics (see {@link org.jcae.metric.amibe.metrics.Metric2D}) when
- * it is an instance of {@link org.jcae.metric.amibe.patch.Calculus3D}.
- * By default, distances are computed in Euclidian 2D space.
- * </p>
- *
- * <p>
  * In Euclidian 2D space, vertices which have a distance to a point <code>p</code>
  * lower than <code>d</code> are contained in a circle centered at <code>p</code>
  * with radius <code>d</code>.  With Riemannian metrics, this circle becomes
@@ -127,11 +116,11 @@ import java.util.logging.Logger;
  * </ol>
  *
  * <p>
- * The implementation of {@link #getNearestVertex(Mesh, Vertex)} has two
+ * The implementation of {@link #getNearestVertex} has two
  * differences:
  * </p>
  * <ul>
- *   <li>The starting point is computed by {@link #getNearVertex(Mesh, Vertex)}.
+ *   <li>The starting point is computed by {@link #getNearVertex}.
  *       This means that much more cells are skipped.</li>
  *   <li>The ellipsis is replaced by a circle enclosing it, to have simpler
  *       calculus.  Using the real ellipsis could be tested though, it should
@@ -170,7 +159,7 @@ public class KdTree<T extends Location>
 		/**
 		 * References to bound objects.  This variable either contains
 		 * four references to children nodes (some of which may be
-		 * <code>null</code>), or up to {@link #BUCKETSIZE} references
+		 * <code>null</code>), or up to {@link KdTree#BUCKETSIZE} references
 		 * yo vertices.  This compact storage is needed to reduce memory
 		 * usage.
 		 */
@@ -625,7 +614,7 @@ public class KdTree<T extends Location>
 	 * vertices, the nearest one is returned (vertices in other leaves may
 	 * of course be nearer).  Otherwise the nearest vertex from sibling
 	 * children is returned.  The returned vertex is a good starting point
-	 * for {@link #getNearestVertex(Metric, double[])}.
+	 * for {@link #getNearestVertex}.
 	 *
 	 * @param uv  coordinates.
 	 * @return a near vertex.
@@ -859,7 +848,7 @@ public class KdTree<T extends Location>
 	}
 	
 	/**
-	 * Slow implementation of {@link #getNearestVertex(Metric, double[])}.
+	 * Slow implementation of {@link #getNearestVertex}.
 	 * This method should be called only for debugging purpose.
 	 *
 	 * @param uv  coordinates.

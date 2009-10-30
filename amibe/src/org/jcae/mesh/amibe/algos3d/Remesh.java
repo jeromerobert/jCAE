@@ -85,7 +85,7 @@ public class Remesh
 	/**
 	 * Creates a <code>Remesh</code> instance.
 	 *
-	 * @param bgMesh  the <code>Mesh</code> instance to refine.
+	 * @param m  the <code>Mesh</code> instance to refine.
 	 */
 	public Remesh(Mesh m)
 	{

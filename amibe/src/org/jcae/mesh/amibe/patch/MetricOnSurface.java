@@ -53,7 +53,7 @@ public class MetricOnSurface implements Metric2D
 	 * Creates a <code>MetricOnSurface</code> instance at a given point.
 	 *
 	 * @param surf  geometrical surface
-	 * @param pt  node where metrics is computed.
+	 * @param mp    mesh parameters
 	 */
 	protected MetricOnSurface(CADGeomSurface surf, MeshParameters mp)
 	{

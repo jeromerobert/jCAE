@@ -50,7 +50,7 @@ public class MeshWriter
 	private static final Logger logger=Logger.getLogger(MeshWriter.class.getName());
 
 	/**
-	 * Used by {@link writeObject}
+	 * Used by {@link #writeObject(org.jcae.mesh.amibe.patch.Mesh2D, String, String, int)}
 	 */
 	private static Element writeObjectNodes(Document document, Collection<Vertex> nodelist, Vertex outer, File nodesFile, File refFile, String baseDir, TObjectIntHashMap<Vertex> nodeIndex)
 		throws ParserConfigurationException, SAXException, IOException
@@ -139,7 +139,7 @@ public class MeshWriter
 	}
 	
 	/**
-	 * Used by {@link writeObject}
+	 * Used by {@link #writeObject(org.jcae.mesh.amibe.patch.Mesh2D, String, String, int)}
 	 */
 	private static Element writeObjectTriangles(Document document, Collection<Triangle> trianglelist, File trianglesFile, String baseDir, TObjectIntHashMap<Vertex> nodeIndex)
 		throws ParserConfigurationException, SAXException, IOException

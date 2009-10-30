@@ -74,7 +74,7 @@ public class MMesh1D extends MMesh0D
 	 * Creates a <code>MMesh1D</code> instance by discretizing all edges
 	 * of a given shape.
 	 *
-	 * @param cadFile  file containing CAD shape
+	 * @param shape  CAD shape
 	 */
 	private MMesh1D(CADShape shape)
 	{
@@ -534,7 +534,7 @@ public class MMesh1D extends MMesh0D
 	 * <code>boolean</code>.
 	 *
 	 * @return <code>true</code> if all checks pass.
-	 * @throws AssertException if a check fails.
+	 * @throws AssertionError if a check fails.
 	 */
 	public boolean isValid()
 	{

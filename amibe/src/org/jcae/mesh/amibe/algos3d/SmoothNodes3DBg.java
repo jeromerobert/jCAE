@@ -74,7 +74,7 @@ public class SmoothNodes3DBg
 	/**
 	 * Creates a <code>SmoothNodes3DBg</code> instance.
 	 *
-	 * @param bgMesh  the <code>Mesh</code> instance to refine.
+	 * @param m  the <code>Mesh</code> instance to refine.
 	 */
 	public SmoothNodes3DBg(Mesh m)
 	{

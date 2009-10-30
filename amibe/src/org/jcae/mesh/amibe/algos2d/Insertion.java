@@ -45,7 +45,7 @@ import java.util.logging.Logger;
  * The next step is to take vertices from the bucket in random order.
  * For each vertex <code>v</code>, the closest vertex <code>w</code>
  * already present in the mesh is returned by
- * {@link org.jcae.mesh.amibe.util.KdTree#getNearestVertex(Mesh, Vertex)}
+ * {@link org.jcae.mesh.amibe.metrics.KdTree#getNearestVertex}
  * If the distance between <code>v</code> and <code>w</code> is lower
  * than 1/sqrt(2), <code>v</code> is dropped, otherwise it is inserted
  * into the mesh.  Just after a vertex is inserted, incident edges are

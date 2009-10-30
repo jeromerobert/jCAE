@@ -25,7 +25,7 @@ public interface FilterInterface
 	/**
 	 * Nodes on inner boundaries are usually written only once on disk.  A first
 	 * pass is performed to find all boundary nodes so that they can be handled
-	 * specifically by {@link #processOneShape(int, java.lang.String, int, org.jcae.mesh.cad.CADFace)}.
+	 * specifically by {@link #processOneShape(int, java.lang.String, int)}.
 	 *
 	 * @param faces  array of face number
 	 */
@@ -33,7 +33,7 @@ public interface FilterInterface
 
 	/**
 	 * Initialize members which cannot be instantiated by constructor because
-	 * they depend on {@link #collectBoundaryNodesOneShape(iFace)}.
+	 * they depend on {@link #collectBoundaryNodes(int[])}.
 	 *
 	 * @param writeNormal <code>true</code> if normals are written onto disk
 	 */

@@ -178,7 +178,7 @@ public class SubMesh1D
 	 * <code>boolean</code>.
 	 *
 	 * @return <code>true</code> if all checks pass.
-	 * @throws AssertException if a check fails.
+	 * @throws AssertionError if a check fails.
 	 */
 	public boolean isValid()
 	{

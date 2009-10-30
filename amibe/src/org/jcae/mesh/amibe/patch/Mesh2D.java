@@ -440,9 +440,10 @@ public class Mesh2D extends Mesh
 	}
 
 	/**
-	 * Move to the 2D centroid of a list of vertices.
+	 * Move a vertex to the 2D centroid of a triangle.
 	 *
-	 * @param pt array
+	 * @param vertex vertex
+	 * @param t triangle
 	 */
 	public void moveVertexToCentroid(Vertex2D vertex, Triangle t)
 	{
