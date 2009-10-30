@@ -41,7 +41,7 @@ public class BenchmarkReadLargeFiles
 	private static File file;
 	private static int checkSum;
 
-	@BeforeClass public static void createBinaryFile() throws FileNotFoundException, IOException
+	@BeforeClass public static void createBinaryFile() throws IOException
 	{
 		file = new File("BenchmarkReadLargeFiles.bin");
 		byte[] data = new byte[100000];
@@ -152,42 +152,42 @@ public class BenchmarkReadLargeFiles
 		return sum;
 	}
 
-	@Test public void mmap() throws FileNotFoundException, IOException
+	@Test public void mmap() throws IOException
 	{
 		assertEquals(computeSum(new IntFileReaderByMmap(file)), checkSum);
 	}
 
-	@Test public void direct() throws FileNotFoundException, IOException
+	@Test public void direct() throws IOException
 	{
 		assertEquals(computeSum(new IntFileReaderByDirectBuffer(file)), checkSum);
 	}
 
-	@Test public void blockMmap() throws FileNotFoundException, IOException
+	@Test public void blockMmap() throws IOException
 	{
 		assertEquals(computeSumByBlock(new IntFileReaderByMmap(file)), checkSum);
 	}
 
-	@Test public void blockdirect() throws FileNotFoundException, IOException
+	@Test public void blockdirect() throws IOException
 	{
 		assertEquals(computeSumByBlock(new IntFileReaderByDirectBuffer(file)), checkSum);
 	}
 
-	@Test public void absoluteMmap() throws FileNotFoundException, IOException
+	@Test public void absoluteMmap() throws IOException
 	{
 		assertEquals(absoluteComputeSum(new IntFileReaderByMmap(file)), checkSum);
 	}
 
-	@Test public void absoluteDirect() throws FileNotFoundException, IOException
+	@Test public void absoluteDirect() throws IOException
 	{
 		assertEquals(absoluteComputeSum(new IntFileReaderByDirectBuffer(file)), checkSum);
 	}
 
-	@Test public void absoluteBlockMmap() throws FileNotFoundException, IOException
+	@Test public void absoluteBlockMmap() throws IOException
 	{
 		assertEquals(absoluteComputeSumByBlock(new IntFileReaderByMmap(file)), checkSum);
 	}
 
-	@Test public void absoluteBlockDirect() throws FileNotFoundException, IOException
+	@Test public void absoluteBlockDirect() throws IOException
 	{
 		assertEquals(absoluteComputeSumByBlock(new IntFileReaderByDirectBuffer(file)), checkSum);
 	}

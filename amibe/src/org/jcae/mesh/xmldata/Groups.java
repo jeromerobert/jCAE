@@ -92,7 +92,7 @@ public class Groups
 	 * @throws ParserConfigurationException
 	 */
 	public Group fuse(Collection<Group> listGroup, String name)
-		throws TransformerConfigurationException, TransformerException,
+		throws TransformerException,
 		ParserConfigurationException, SAXException, IOException
 	{
 		String xmlDir=meshFile;
@@ -210,7 +210,7 @@ public class Groups
 	}
 
 	public void fuse(Collection<Group> toFuse)
-		throws TransformerConfigurationException, TransformerException,
+		throws TransformerException,
 		ParserConfigurationException, SAXException, IOException
 	{
 		fuse(toFuse, "fused_groups");

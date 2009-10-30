@@ -28,8 +28,8 @@ public class PrimitiveFileReaderFactory
 {
 	private static interface FactoryInterface
 	{
-		IntFileReader getIntFileReader(File file) throws FileNotFoundException, IOException;
-		DoubleFileReader getDoubleFileReader(File file) throws FileNotFoundException, IOException;
+		IntFileReader getIntFileReader(File file) throws IOException;
+		DoubleFileReader getDoubleFileReader(File file) throws IOException;
 	}
 
 	private final static FactoryInterface DIRECT_BUFFER = new FactoryByDirectBuffer();
@@ -37,12 +37,12 @@ public class PrimitiveFileReaderFactory
 
 	private static class FactoryByDirectBuffer implements FactoryInterface
 	{
-		public IntFileReader getIntFileReader(File file) throws FileNotFoundException, IOException
+		public IntFileReader getIntFileReader(File file) throws IOException
 		{
 			return new IntFileReaderByDirectBuffer(file);
 		}
 
-		public DoubleFileReader getDoubleFileReader(File file) throws FileNotFoundException, IOException
+		public DoubleFileReader getDoubleFileReader(File file) throws IOException
 		{
 			return new DoubleFileReaderByDirectBuffer(file);
 		}
@@ -50,12 +50,12 @@ public class PrimitiveFileReaderFactory
 
 	private static class FactoryByMmap implements FactoryInterface
 	{
-		public IntFileReader getIntFileReader(File file) throws FileNotFoundException, IOException
+		public IntFileReader getIntFileReader(File file) throws IOException
 		{
 			return new IntFileReaderByMmap(file);
 		}
 
-		public DoubleFileReader getDoubleFileReader(File file) throws FileNotFoundException, IOException
+		public DoubleFileReader getDoubleFileReader(File file) throws IOException
 		{
 			return new DoubleFileReaderByMmap(file);
 		}
@@ -84,7 +84,7 @@ public class PrimitiveFileReaderFactory
 	 * @param file  a file name containing only integers
 	 * @return an IntFileReader instance
 	 */
-	public IntFileReader getIntReader(File file) throws FileNotFoundException, IOException
+	public IntFileReader getIntReader(File file) throws IOException
 	{
 		return instance.getIntFileReader(file);
 	}
@@ -95,7 +95,7 @@ public class PrimitiveFileReaderFactory
 	 * @param file  a file name containing only double values
 	 * @return a DoubleFileReader instance
 	 */
-	public DoubleFileReader getDoubleReader(File file) throws FileNotFoundException, IOException
+	public DoubleFileReader getDoubleReader(File file) throws IOException
 	{
 		return instance.getDoubleFileReader(file);
 	}

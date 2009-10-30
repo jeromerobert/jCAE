@@ -300,7 +300,7 @@ public class Storage
 	}
 
 	private static TObjectIntHashMap<MNode1D> write1dNodeReferences(File dir, Collection<MNode1D> nodelist, BCADGraphCell edge)
-		throws IOException, FileNotFoundException
+		throws IOException
 	{
 		File refFile = new File(dir, "r");
 		if(refFile.exists())
@@ -334,7 +334,7 @@ public class Storage
 	}
 
 	private static TObjectIntHashMap<Vertex> write2dNodeReferences(File dir, int id, Collection<Vertex> nodelist, Vertex outer)
-		throws IOException, FileNotFoundException
+		throws IOException
 	{
 		File refFile = new File(dir, "r");
 		if(refFile.exists())
@@ -368,7 +368,7 @@ public class Storage
 	}
 
 	private static void write1dCoordinates(File dir, Collection<MNode1D> nodelist, CADGeomCurve3D curve)
-		throws IOException, FileNotFoundException
+		throws IOException
 	{
 		File nodesFile = new File(dir, "n");
 		if(nodesFile.exists())
@@ -395,7 +395,7 @@ public class Storage
 	}
 
 	private static void write2dCoordinates(File dir, Collection<Vertex> nodelist, Vertex outer, CADGeomSurface surface)
-		throws IOException, FileNotFoundException
+		throws IOException
 	{
 		File nodesFile = new File(dir, "n");
 		if(nodesFile.exists())
@@ -432,7 +432,7 @@ public class Storage
 	}
 
 	private static void write1dEdges(File dir, Collection<MEdge1D> edgelist, TObjectIntHashMap<MNode1D> localIdx)
-		throws IOException, FileNotFoundException
+		throws IOException
 	{
 		File beamsFile=new File(dir, "b");
 		if(beamsFile.exists())
@@ -453,7 +453,7 @@ public class Storage
 	}
 
 	private static void write2dTriangles(File dir, Collection<Triangle> trianglelist, TObjectIntHashMap<Vertex> localIdx)
-		throws IOException, FileNotFoundException
+		throws IOException
 	{
 		File facesFile=new File(dir, "f");
 		if(facesFile.exists())
@@ -474,7 +474,7 @@ public class Storage
 	}
 
 	public static int [] readNodeReferences(BDiscretization d)
-		throws IOException, FileNotFoundException
+		throws IOException
 	{
 		File refFile = new File(d.getGraphCell().getGraph().getModel().getOutputDir(d), "r");
 		IntFileReader ifrR = new PrimitiveFileReaderFactory().getIntReader(refFile);
@@ -492,7 +492,7 @@ public class Storage
 	}
 
 	public static double[] readNodeCoordinates(BDiscretization d)
-		throws IOException, FileNotFoundException
+		throws IOException
 	{
 		File nodesFile = new File(d.getGraphCell().getGraph().getModel().getOutputDir(d), "n");
 		DoubleFileReader dfrN = new PrimitiveFileReaderFactory().getDoubleReader(nodesFile);
@@ -504,7 +504,7 @@ public class Storage
 	}
 
 	private static Vertex [] read2dCoordinates(File dir, Mesh mesh, int [] refs, TIntObjectHashMap<Vertex> mapRefVertex)
-		throws IOException, FileNotFoundException
+		throws IOException
 	{
 		File nodesFile = new File(dir, "n");
 		DoubleFileReader dfrN = new PrimitiveFileReaderFactory().getDoubleReader(nodesFile);
@@ -544,7 +544,7 @@ public class Storage
 	}
 
 	public static int[] readConnectivity(BDiscretization d)
-		throws IOException, FileNotFoundException
+		throws IOException
 	{
 		File trianglesFile = null;
 		int nodesByElement;
@@ -576,7 +576,7 @@ public class Storage
 	}
 
 	private static void read2dTriangles(File dir, int id, int nr, Mesh mesh, boolean reversed, Vertex [] nodelist)
-		throws IOException, FileNotFoundException
+		throws IOException
 	{
 		File trianglesFile = new File(dir, "f");
 		IntFileReader ifr = new PrimitiveFileReaderFactory().getIntReader(trianglesFile);

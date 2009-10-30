@@ -39,7 +39,7 @@ public class IntFileReaderByMmap implements IntFileReader
 	private final IntBuffer tb;
 	private final MappedByteBuffer bb;
 
-	public IntFileReaderByMmap(File file) throws FileNotFoundException, IOException
+	public IntFileReaderByMmap(File file) throws IOException
 	{
 		fc = new FileInputStream(file).getChannel();
 		numberOfElements = fc.size() / 4;

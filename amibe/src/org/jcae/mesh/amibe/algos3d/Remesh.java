@@ -974,7 +974,7 @@ public class Remesh
 	 * 
 	 * @param args [options] xmlDir outDir
 	 */
-	public static void main(String[] args) throws FileNotFoundException, IOException
+	public static void main(String[] args) throws IOException
 	{
 		org.jcae.mesh.amibe.traits.MeshTraitsBuilder mtb = org.jcae.mesh.amibe.traits.MeshTraitsBuilder.getDefault3D();
 		mtb.addNodeList();

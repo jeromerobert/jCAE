@@ -161,7 +161,7 @@ public class SphereBuilder
 		}
 	}
 	
-	private boolean writeSoup(String dirname) throws FileNotFoundException, IOException
+	private boolean writeSoup(String dirname) throws IOException
 	{
 		File dir = new File(dirname);
 		if (!dir.isDirectory())

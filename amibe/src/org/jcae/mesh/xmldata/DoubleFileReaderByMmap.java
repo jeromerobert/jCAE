@@ -36,7 +36,7 @@ public class DoubleFileReaderByMmap implements DoubleFileReader
 	private final DoubleBuffer tb;
 	private final MappedByteBuffer bb;
 
-	public DoubleFileReaderByMmap(File file) throws FileNotFoundException, IOException
+	public DoubleFileReaderByMmap(File file) throws IOException
 	{
 		fc = new FileInputStream(file).getChannel();
 		numberOfElements = fc.size() / 8;

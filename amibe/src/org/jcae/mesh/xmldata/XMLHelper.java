@@ -73,7 +73,7 @@ public class XMLHelper
 	
 	/** Write a DOM to a file. */
 	public static void writeXML(Document document, File file)
-		throws IOException, FileNotFoundException
+		throws IOException
 	{
 		// save the DOM to file
 		StreamResult result = new StreamResult(new BufferedOutputStream(new FileOutputStream(file)));

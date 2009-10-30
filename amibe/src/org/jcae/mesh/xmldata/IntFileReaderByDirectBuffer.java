@@ -45,7 +45,7 @@ public class IntFileReaderByDirectBuffer implements IntFileReader
 	private int arrayIndex;
 	private int remaining;
 
-	public IntFileReaderByDirectBuffer(File file) throws FileNotFoundException, IOException
+	public IntFileReaderByDirectBuffer(File file) throws IOException
 	{
 		fc = new FileInputStream(file).getChannel();
 		numberOfElements = fc.size() / ELEMENT_SIZE;

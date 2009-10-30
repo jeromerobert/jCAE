@@ -126,7 +126,7 @@ public class UNVGenericWriter
 	}
 	
 	private void appendFile(FileChannel fc, String file, ByteBuffer bb)
-		throws IOException, FileNotFoundException
+		throws IOException
 	{
 		FileChannel fci = new FileInputStream(file).getChannel();
 		bb.clear();
