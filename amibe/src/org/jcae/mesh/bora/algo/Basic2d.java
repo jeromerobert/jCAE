@@ -244,8 +244,8 @@ public class Basic2d implements AlgoInterface
 	public String toString()
 	{
 		StringBuilder ret = new StringBuilder("Algo: "+getClass().getName());
-		ret.append("\nTarget size: "+maxlen);
-		ret.append("\nDeflection: "+deflection);
+		ret.append("\nTarget size: ").append(maxlen);
+		ret.append("\nDeflection: ").append(deflection);
 		if (relDefl)
 			ret.append(" (relative)");
 		else

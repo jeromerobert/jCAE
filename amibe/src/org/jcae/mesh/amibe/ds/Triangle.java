@@ -160,18 +160,18 @@ public class Triangle implements Serializable
 	public String toString()
 	{
 		StringBuilder r = new StringBuilder();
-		r.append("hashcode: "+hashCode());
+		r.append("hashcode: ").append(hashCode());
 		if (!readable)
 			r.append(" !r");
 		if (!writable)
 			r.append(" !w");
 		if (groupId >= 0)
-			r.append("\nGroup: "+groupId);
+			r.append("\nGroup: ").append(groupId);
 		r.append("\nVertices:");
 		for (int i = 0; i < 3; i++)
-			r.append("\n  "+vertex[i]);
+			r.append("\n  ").append(vertex[i]);
 		if (listNext != null)
-			r.append("\nLink next: "+listNext.hashCode());
+			r.append("\nLink next: ").append(listNext.hashCode());
 		return r.toString();
 	}
 

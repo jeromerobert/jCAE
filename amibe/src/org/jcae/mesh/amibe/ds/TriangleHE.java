@@ -123,7 +123,7 @@ public class TriangleHE extends Triangle
 	public String toString()
 	{
 		StringBuilder r = new StringBuilder(super.toString());
-		r.append("\nEdge attributes: "+e0.getAttributes()+" "+e0.next().getAttributes()+" "+e0.prev().getAttributes());
+		r.append("\nEdge attributes: ").append(e0.getAttributes()).append(" ").append(e0.next().getAttributes()).append(" ").append(e0.prev().getAttributes());
 		return r.toString();
 	}
 

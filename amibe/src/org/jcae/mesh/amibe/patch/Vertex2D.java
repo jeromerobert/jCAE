@@ -487,12 +487,12 @@ public class Vertex2D extends Vertex
 	{
 		StringBuilder r = new StringBuilder("UV:");
 		for (int i = 0; i < param.length; i++)
-			r.append(" "+param[i]);
+			r.append(" ").append(param[i]);
 		if (ref1d != 0)
-			r.append(" ref1d: "+ref1d);
-		r.append(" hash: "+hashCode());
+			r.append(" ref1d: ").append(ref1d);
+		r.append(" hash: ").append(hashCode());
 		if (link != null)
-			r.append(" link: "+link.hashCode());
+			r.append(" link: ").append(link.hashCode());
 		return r.toString();
 	}
 	

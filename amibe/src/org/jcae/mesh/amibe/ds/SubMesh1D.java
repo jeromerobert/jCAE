@@ -239,9 +239,9 @@ public class SubMesh1D
 		StringBuilder r = new StringBuilder("SubMesh1D"+cr);
 		logger.fine("Printing "+r.toString());
 		for(MNode1D n: nodelist)
-			r.append(n+cr);
+			r.append(n).append(cr);
 		for(MEdge1D e: edgelist)
-			r.append(e+cr);
+			r.append(e).append(cr);
 		logger.fine("...done");
 		return r.toString();
 	}

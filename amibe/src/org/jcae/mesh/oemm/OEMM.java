@@ -271,7 +271,7 @@ public class OEMM implements Serializable
 				return;
 			StringBuilder buf = new StringBuilder();
 			for (String p: pathComponents)
-				buf.append(p+java.io.File.separator);
+				buf.append(p).append(java.io.File.separator);
 			file = buf.substring(0, buf.length()-1);
 		}
 

@@ -860,20 +860,20 @@ public class Vertex implements Location, Serializable
 	{
 		StringBuilder r = new StringBuilder("UV:");
 		for (int i = 0; i < param.length; i++)
-			r.append(" "+param[i]);
+			r.append(" ").append(param[i]);
 		if (ref1d != 0)
-			r.append(" ref1d: "+ref1d);
-		r.append(" hash: "+hashCode());
+			r.append(" ref1d: ").append(ref1d);
+		r.append(" hash: ").append(hashCode());
 		if (label > 0)
-			r.append(" label: "+label);
+			r.append(" label: ").append(label);
 		if (link instanceof Triangle)
-			r.append(" link: "+link.hashCode());
+			r.append(" link: ").append(link.hashCode());
 		else if (link instanceof Triangle[])
 		{
 			Triangle [] list = (Triangle []) link;
-			r.append(" link: ["+list[0].hashCode());
+			r.append(" link: [").append(list[0].hashCode());
 			for (int i = 1; i < list.length; i++)
-				r.append(","+list[i].hashCode());
+				r.append(",").append(list[i].hashCode());
 			r.append("]");
 		}
 		if (!readable)

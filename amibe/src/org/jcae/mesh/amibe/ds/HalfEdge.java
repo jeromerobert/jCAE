@@ -1297,17 +1297,17 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	public String toString()
 	{
 		StringBuilder r = new StringBuilder();
-		r.append("hashCode: "+hashCode());
-		r.append("\nTriangle: "+tri.hashCode());
-		r.append("\nGroup: "+tri.getGroupId());
-		r.append("\nLocal number: "+localNumber);
+		r.append("hashCode: ").append(hashCode());
+		r.append("\nTriangle: ").append(tri.hashCode());
+		r.append("\nGroup: ").append(tri.getGroupId());
+		r.append("\nLocal number: ").append(localNumber);
 		if (sym != null)
-			r.append("\nSym: "+sym.hashCode()+"   T="+sym.tri.hashCode()+"["+sym.localNumber+"]");
-		r.append("\nAttributes: "+attributes);
+			r.append("\nSym: ").append(sym.hashCode()).append("   T=").append(sym.tri.hashCode()).append("[").append(sym.localNumber).append("]");
+		r.append("\nAttributes: ").append(attributes);
 		r.append("\nVertices:");
-		r.append("\n  Origin: "+origin());
-		r.append("\n  Destination: "+destination());
-		r.append("\n  Apex: "+apex());
+		r.append("\n  Origin: ").append(origin());
+		r.append("\n  Destination: ").append(destination());
+		r.append("\n  Apex: ").append(apex());
 		return r.toString();
 	}
 

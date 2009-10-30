@@ -148,7 +148,7 @@ public class BModelWriter
 						while (itc.hasNext())
 						{
 							c = itc.next();
-							sblist.append(","+c.getId());
+							sblist.append(",").append(c.getId());
 						}
 						Element child = document.createElement("children");
 						child.setAttribute("list", sblist.toString());

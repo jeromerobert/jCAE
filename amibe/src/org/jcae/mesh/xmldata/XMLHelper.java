@@ -105,7 +105,7 @@ public class XMLHelper
 		StringBuilder ret = new StringBuilder();
 		ret.append(pathSpec.get(0));
 		for (int i = 1, n = pathSpec.size(); i < n; i++)
-			ret.append(File.separator+pathSpec.get(i));
+			ret.append(File.separator).append(pathSpec.get(i));
 		return ret.toString();
 	}
 

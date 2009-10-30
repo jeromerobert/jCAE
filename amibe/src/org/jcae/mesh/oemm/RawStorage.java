@@ -713,7 +713,7 @@ public class RawStorage
 			{
 				StringBuilder sbdir = new StringBuilder(path.get(0));
 				for (int i = 1; i < path.size(); i++)
-					sbdir.append(File.separator + path.get(i));
+					sbdir.append(File.separator).append(path.get(i));
 				String dir = sbdir.toString();
 				File d = new File(outDir, dir);
 				d.mkdirs();

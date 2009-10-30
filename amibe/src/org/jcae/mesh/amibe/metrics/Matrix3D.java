@@ -282,9 +282,9 @@ public class Matrix3D implements Serializable
 		StringBuilder ret = new StringBuilder();
 		for (int i = 0; i < 3; i++)
 		{
-			ret.append("data|"+i+"][] ");
+			ret.append("data|").append(i).append("][] ");
 			for (int j = 0; j < 3; j++)
-				ret.append(" "+data[i+3*j]);
+				ret.append(" ").append(data[i + 3 * j]);
 			if (i < 2)
 				ret.append("\n");
 		}

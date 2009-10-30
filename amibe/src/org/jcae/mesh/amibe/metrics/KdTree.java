@@ -278,7 +278,7 @@ public class KdTree<T extends Location>
 			sb.append("  origin=(");
 			sb.append(x0[0]);
 			for (int i = 1; i < dimension; i++)
-				sb.append(","+x0[i]);
+				sb.append(",").append(x0[i]);
 			sb.append(")\nBounding box:\n");
 			for (int i = 0; i < dimension; i++)
 			{

@@ -159,7 +159,7 @@ public class BModelReader
 						while (itc.hasNext())
 						{
 							c = itc.next();
-							sblist.append(","+c.getId());
+							sblist.append(",").append(c.getId());
 						}
 						String list = sblist.toString();
 						if (!children.getAttributes().getNamedItem("list").getNodeValue().equals(list))

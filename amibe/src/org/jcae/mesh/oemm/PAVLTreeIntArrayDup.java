@@ -157,7 +157,7 @@ public class PAVLTreeIntArrayDup
 	{
 		StringBuilder ret = new StringBuilder();
 		for (int i = 0; i < nrInt; i++)
-			ret.append(" 0x"+Integer.toHexString(data[offKey+i]));
+			ret.append(" 0x").append(Integer.toHexString(data[offKey + i]));
 		return ret.toString();
 	}
 	
@@ -450,11 +450,11 @@ public class PAVLTreeIntArrayDup
 	{
 		StringBuilder r = new StringBuilder("Key: "+keyString(work, work[current+POS_KEY])+"  bal. "+work[current+POS_BALANCE]);
 		if (work[current+POS_CHILD] != POS_NIL)
-			r.append(" Left -> "+keyString(work, work[work[current+POS_CHILD]+POS_KEY]));
+			r.append(" Left -> ").append(keyString(work, work[work[current + POS_CHILD] + POS_KEY]));
 		if (work[current+POS_CHILD+1] != POS_NIL)
-			r.append(" Right -> "+keyString(work, work[work[current+POS_CHILD+1]+POS_KEY]));
+			r.append(" Right -> ").append(keyString(work, work[work[current + POS_CHILD + 1] + POS_KEY]));
 		if (work[current+POS_PARENT] != POS_NIL)
-			r.append(" Parent -> "+keyString(work, work[work[current+POS_PARENT]+POS_KEY]));
+			r.append(" Parent -> ").append(keyString(work, work[work[current + POS_PARENT] + POS_KEY]));
 		System.out.println(r.toString());
 		if (work[current+POS_CHILD] != POS_NIL)
 		{

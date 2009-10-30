@@ -1593,17 +1593,17 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	public String toString()
 	{
 		StringBuilder r = new StringBuilder();
-		r.append("hashCode: "+hashCode());
-		r.append("\nTri hashcode: "+tri.hashCode());
-		r.append("\nGroup: "+tri.getGroupId());
-		r.append("\nLocal number: "+localNumber);
+		r.append("hashCode: ").append(hashCode());
+		r.append("\nTri hashcode: ").append(tri.hashCode());
+		r.append("\nGroup: ").append(tri.getGroupId());
+		r.append("\nLocal number: ").append(localNumber);
 		if (hasSymmetricEdge())
-			r.append("\nSym: "+tri.getAdj(localNumber).hashCode()+"["+tri.getAdjLocalNumber(localNumber)+"]");
-		r.append("\nAttributes: "+Integer.toHexString(tri.getEdgeAttributes(localNumber)));
+			r.append("\nSym: ").append(tri.getAdj(localNumber).hashCode()).append("[").append(tri.getAdjLocalNumber(localNumber)).append("]");
+		r.append("\nAttributes: ").append(Integer.toHexString(tri.getEdgeAttributes(localNumber)));
 		r.append("\nVertices:");
-		r.append("\n  Origin: "+origin());
-		r.append("\n  Destination: "+destination());
-		r.append("\n  Apex: "+apex());
+		r.append("\n  Origin: ").append(origin());
+		r.append("\n  Destination: ").append(destination());
+		r.append("\n  Apex: ").append(apex());
 		return r.toString();
 	}
 
