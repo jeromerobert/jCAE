@@ -59,7 +59,7 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 			final String val = opt.getValue();
 			if (key.equals("angle"))
 			{
-				planarMin = new Double(val).doubleValue();
+				planarMin = Double.parseDouble(val);
 				LOGGER.fine("Minimum dot product of face normals allowed for swapping an edge: "+planarMin);
 			}
 			else

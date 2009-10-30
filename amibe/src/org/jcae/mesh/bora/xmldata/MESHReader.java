@@ -85,9 +85,9 @@ public class MESHReader
 				x1 = x1.replace('D','E');
 				y1 = y1.replace('D','E');
 				z1 = z1.replace('D','E');
-				x = new Double(x1).doubleValue();
-				y = new Double(y1).doubleValue();
-				z = new Double(z1).doubleValue();
+				x = Double.parseDouble(x1);
+				y = Double.parseDouble(y1);
+				z = Double.parseDouble(z1);
 				Vertex n = m.createVertex(x,y,z);
 				if (m.hasNodes())
 					m.add(n);

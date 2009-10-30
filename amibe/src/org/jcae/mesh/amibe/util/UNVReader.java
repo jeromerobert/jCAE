@@ -126,7 +126,7 @@ public class UNVReader
 			StringTokenizer st = new StringTokenizer(line);
 			String unite = st.nextToken();
 			unite = unite.replace('D','E');
-			unit = new Double(unite).doubleValue();
+			unit = Double.parseDouble(unite);
 			while(!rd.readLine().trim().equals("-1"))
 			{
 			}
@@ -151,7 +151,7 @@ public class UNVReader
 			{
 				//First number : the node's id
 				StringTokenizer st = new StringTokenizer(line);
-				int index = new Integer(st.nextToken()).intValue();
+				int index = Integer.parseInt(st.nextToken());
 				line = rd.readLine();
 				
 				//line contains coord x,y,z
@@ -171,9 +171,9 @@ public class UNVReader
 				x1 = x1.replace('D','E');
 				y1 = y1.replace('D','E');
 				z1 = z1.replace('D','E');
-				x = new Double(x1).doubleValue()/unit;
-				y = new Double(y1).doubleValue()/unit;
-				z = new Double(z1).doubleValue()/unit;
+				x = Double.parseDouble(x1) /unit;
+				y = Double.parseDouble(y1) /unit;
+				z = Double.parseDouble(z1) /unit;
 				Vertex n = m.createVertex(x,y,z);
 				nodesmap.put(index, n);
 				if (m.hasNodes())

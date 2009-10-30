@@ -63,7 +63,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 			final String val = opt.getValue();
 			if (key.equals("coplanar"))
 			{
-				planarMin = new Double(val).doubleValue();
+				planarMin = Double.parseDouble(val);
 				LOGGER.fine("Coplanar value: "+planarMin);
 			}
 			else

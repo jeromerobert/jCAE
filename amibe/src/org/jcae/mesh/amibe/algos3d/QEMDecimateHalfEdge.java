@@ -136,7 +136,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 			final String val = opt.getValue();
 			if (key.equals("size"))
 			{
-				final double sizeTarget = new Double(val).doubleValue();
+				final double sizeTarget = Double.parseDouble(val);
 				tolerance = sizeTarget * sizeTarget;
 				LOGGER.fine("Tolerance: "+tolerance);
 			}
@@ -152,7 +152,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 			}
 			else if (key.equals("maxlength"))
 			{
-				maxEdgeLength = new Double(val).doubleValue();
+				maxEdgeLength = Double.parseDouble(val);
 				LOGGER.fine("Max edge length: "+maxEdgeLength);
 				maxEdgeLength = maxEdgeLength*maxEdgeLength;
 			}

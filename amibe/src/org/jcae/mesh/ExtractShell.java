@@ -173,7 +173,7 @@ public class ExtractShell
 				lineno++;
 				//First number : the node's id
 				StringTokenizer st = new StringTokenizer(line);
-				int index = new Integer(st.nextToken()).intValue();
+				int index = Integer.parseInt(st.nextToken());
 				boolean found = inodes.contains(index);
 				if (found)
 					count++;
