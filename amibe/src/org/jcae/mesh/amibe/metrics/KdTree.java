@@ -610,7 +610,7 @@ public class KdTree<T extends Location>
 	}
 
 	// Called in log messages
-	private final String coordinatesToString(double[] uv)
+	private String coordinatesToString(double[] uv)
 	{
 		if (uv.length == 2)
 			return "("+uv[0]+", "+uv[1]+")";
@@ -671,7 +671,7 @@ public class KdTree<T extends Location>
 		return ret;
 	}
 	
-	private final T getNearVertexInSubCells(Cell current, Metric metric, double [] uv, int searchedCells)
+	private T getNearVertexInSubCells(Cell current, Metric metric, double [] uv, int searchedCells)
 	{
 		T ret = null;
 		int [] ijk = new int[dimension];
@@ -901,7 +901,7 @@ public class KdTree<T extends Location>
 		}
 	}
 	
-	private final int getMinSize()
+	private int getMinSize()
 	{
 		GetMinSizeProcedure gproc = new GetMinSizeProcedure();
 		walk(gproc);

@@ -98,7 +98,7 @@ public class XMLHelper
 		result.getOutputStream().close();
 	}
 
-	private static final String listToString(ArrayList<String> pathSpec)
+	private static String listToString(ArrayList<String> pathSpec)
 	{
 		if (pathSpec.isEmpty())
 			return "";

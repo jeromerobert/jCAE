@@ -201,7 +201,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	// Adjust attributes after tri.adjPos is modified.
-	private final void pullAttributes()
+	private void pullAttributes()
 	{
 		attributes = tri.getEdgeAttributes(localNumber);
 	}
@@ -533,7 +533,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 *
 	 * @param link  the triangle bond to this one if this edge is manifold, or an Object otherwise
 	 */
-	private final void setAdj(TriangleVH link)
+	private void setAdj(TriangleVH link)
 	{
 		tri.setAdj(localNumber, link);
 	}
@@ -653,11 +653,11 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 *    by swapping this edge.
 	 */
 	@SuppressWarnings("unused")
-	private final double checkSwap3D(double minCos)
+	private double checkSwap3D(double minCos)
 	{
 		return checkSwap3D(minCos, 0.0);
 	}
-	private final double checkSwap3D(double minCos, double maxLength)
+	private double checkSwap3D(double minCos, double maxLength)
 	{
 		double invalid = -1.0;
 		// Check if there is an adjacent edge
@@ -716,7 +716,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		VHswap();
 		return this;
 	}
-	private final void VHswap()
+	private void VHswap()
 	{
 		if (hasAttributes(OUTER | BOUNDARY | NONMANIFOLD))
 			throw new IllegalArgumentException("Cannot swap "+this);
@@ -810,7 +810,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/*
 	 * Warning: this method uses work[0] temporary array.
 	 */
-	private final boolean checkNewRingNormalsSameFan(double [] newpt, TriangleVH t1, TriangleVH t2)
+	private boolean checkNewRingNormalsSameFan(double [] newpt, TriangleVH t1, TriangleVH t2)
 	{
 		Vertex d = destination();
 		copyOTri(this, work[0]);
@@ -909,7 +909,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/*
 	 * Warning: this method uses work[0] and work[1] temporary arrays.
 	 */
-	private final boolean checkNewRingNormalsNonManifoldVertex(double [] newpt, Collection<TriangleVH> ignored)
+	private boolean checkNewRingNormalsNonManifoldVertex(double [] newpt, Collection<TriangleVH> ignored)
 	{
 		Vertex o = origin();
 		if (o.isManifold())
@@ -930,7 +930,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/*
 	 * Warning: this method uses work[0] temporary array.
 	 */
-	private final boolean checkNewRingNormalsSameFanNonManifoldVertex(double [] newpt, Collection<TriangleVH> ignored)
+	private boolean checkNewRingNormalsSameFanNonManifoldVertex(double [] newpt, Collection<TriangleVH> ignored)
 	{
 		// Loop around origin.  We need to copy current instance
 		// into work[0] because loop may be interrupted.
@@ -965,7 +965,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * check is needed.
 	 * Warning: this method uses work[0] temporary array.
 	 */
-	private final boolean canCollapseTopology()
+	private boolean canCollapseTopology()
 	{
 		Collection<Vertex> neighbours = new HashSet<Vertex>();
 		// We need to copy current instance into work[0]
@@ -1159,7 +1159,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/*
 	 * Warning: this method uses work[0] temporary array.
 	 */
-	private static final void replaceEndpointsNonManifold(Vertex o, Vertex n)
+	private static void replaceEndpointsNonManifold(Vertex o, Vertex n)
 	{
 		Triangle [] oList = (Triangle []) o.getLink();
 		for (Triangle t: oList)
@@ -1476,7 +1476,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/*
 	 * Warning: this method uses work[1] and work[2] temporary arrays.
 	 */
-	private final void splitVertexAddOneTriangle(Mesh m, Vertex n)
+	private void splitVertexAddOneTriangle(Mesh m, Vertex n)
 	{
 		/*
 		 *            V1                             V1
@@ -1520,7 +1520,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		prev();                         // (onV1)
 	}
 	
-	private final Iterator<AbstractHalfEdge> identityFanIterator()
+	private Iterator<AbstractHalfEdge> identityFanIterator()
 	{
 		final VirtualHalfEdge current = this;
 		logger.fine("Manifold fan iterator");

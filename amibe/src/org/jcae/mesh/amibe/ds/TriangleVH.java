@@ -253,7 +253,7 @@ public class TriangleVH extends Triangle
 		return ((edgeAttributes[0] | edgeAttributes[1] | edgeAttributes[2]) & attr) != 0;
 	}
 
-	private final String showAdj(int num)
+	private String showAdj(int num)
 	{
 		if (adjacentTriangles[num] == null)
 			return "N/A";

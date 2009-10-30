@@ -170,7 +170,7 @@ public class Aggregate
 		return ret;
 	}
 	
-	private static final boolean checkLevelNeighbors(OEMM.Node current, OEMM.Node [] nodeStack)
+	private static boolean checkLevelNeighbors(OEMM.Node current, OEMM.Node [] nodeStack)
 	{
 		// If an adjacent node has a size lower than minSize, children
 		// nodes must not be merged

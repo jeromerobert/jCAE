@@ -644,7 +644,7 @@ public class Mesh implements Serializable
 		}
 	}
 
-	private final void glueIncidentHalfEdges(HashMap<Vertex, ArrayList<Triangle>> tVertList, ArrayList<Triangle> newTri)
+	private void glueIncidentHalfEdges(HashMap<Vertex, ArrayList<Triangle>> tVertList, ArrayList<Triangle> newTri)
 	{
 		Triangle.List markedTri = new Triangle.List();
 		AbstractHalfEdge ot = null;
@@ -713,7 +713,7 @@ public class Mesh implements Serializable
 		}
 	}
 
-	private final void glueNonManifoldHalfEdges(Vertex v, Vertex v2, AbstractHalfEdge ot, AbstractHalfEdge ot2, AbstractHalfEdge [] work, ArrayList<Triangle> newTri)
+	private void glueNonManifoldHalfEdges(Vertex v, Vertex v2, AbstractHalfEdge ot, AbstractHalfEdge ot2, AbstractHalfEdge [] work, ArrayList<Triangle> newTri)
 	{
 		assert v == ot.origin() && v2 == ot.destination();
 		assert (v == ot2.origin() && v2 == ot2.destination()) || (v2 == ot2.origin() && v == ot2.destination());
@@ -754,7 +754,7 @@ public class Mesh implements Serializable
 		ot2.glue(work[1]);
 	}
 	
-	private final AbstractHalfEdge bindToVirtualTriangle(AbstractHalfEdge ot, AbstractHalfEdge sym)
+	private AbstractHalfEdge bindToVirtualTriangle(AbstractHalfEdge ot, AbstractHalfEdge sym)
 	{
 		Triangle t = factory.createTriangle(outerVertex, ot.destination(), ot.origin());
 		t.setAttributes(AbstractHalfEdge.OUTER);
@@ -767,7 +767,7 @@ public class Mesh implements Serializable
 		return sym;
 	}
 
-	private final void bindSymEdgesToVirtualTriangles(AbstractHalfEdge ot, AbstractHalfEdge sym,
+	private void bindSymEdgesToVirtualTriangles(AbstractHalfEdge ot, AbstractHalfEdge sym,
 		AbstractHalfEdge temp0, AbstractHalfEdge temp1, ArrayList<Triangle> newTriangles)
 	{
 		// Link ot to a virtual triangle

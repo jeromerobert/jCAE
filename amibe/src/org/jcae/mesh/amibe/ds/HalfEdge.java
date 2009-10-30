@@ -97,7 +97,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	{
 		HEglue((HalfEdge) e);
 	}
-	private final void HEglue(HalfEdge s)
+	private void HEglue(HalfEdge s)
 	{
 		sym = s;
 		if (s != null)
@@ -224,7 +224,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * Moves counterclockwise to the following edge which has the same apex.
 	 * @return  current instance after its transformation
 	 */
-	private final HalfEdge nextApex()
+	private HalfEdge nextApex()
 	{
 		return next.sym.next;
 	}
@@ -233,7 +233,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * Moves counterclockwise to the previous edge which has the same apex.
 	 * @return  current instance after its transformation
 	 */
-	private final HalfEdge prevApex()
+	private HalfEdge prevApex()
 	{
 		return next.next.sym.prev();
 	}
@@ -460,7 +460,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	{
 		return HEswap();
 	}
-	private final HalfEdge HEswap()
+	private HalfEdge HEswap()
 	{
 		if (hasAttributes(OUTER | BOUNDARY | NONMANIFOLD))
 			throw new IllegalArgumentException("Cannot swap "+this);
@@ -627,7 +627,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * See in AbstractHalfEdgeTest.buildMeshTopo() why this
 	 * check is needed.
 	 */
-	private final boolean canCollapseTopology()
+	private boolean canCollapseTopology()
 	{
 		Collection<Vertex> neighbours = new HashSet<Vertex>();
 		AbstractHalfEdge ot = this;
@@ -685,7 +685,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		return true;
 	}
 
-	private final boolean checkNewRingNormalsSameFan(double [] newpt, Triangle t1, Triangle t2)
+	private boolean checkNewRingNormalsSameFan(double [] newpt, Triangle t1, Triangle t2)
 	{
 		// Loop around origin
 		HalfEdge f = this;
@@ -711,7 +711,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		return true;
 	}
 
-	private final boolean checkNewRingNormalsNonManifoldVertex(double [] newpt, Collection<Triangle> ignored)
+	private boolean checkNewRingNormalsNonManifoldVertex(double [] newpt, Collection<Triangle> ignored)
 	{
 		Vertex o = origin();
 		if (o.isManifold())
@@ -729,7 +729,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		}
 		return true;
 	}
-	private final boolean checkNewRingNormalsSameFanNonManifoldVertex(double [] newpt, Collection<Triangle> ignored)
+	private boolean checkNewRingNormalsSameFanNonManifoldVertex(double [] newpt, Collection<Triangle> ignored)
 	{
 		// Loop around origin
 		HalfEdge f = this;
@@ -886,7 +886,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		}
 		while (e.destination() != d);
 	}
-	private static final void replaceEndpointsNonManifold(Vertex o, Vertex n)
+	private static void replaceEndpointsNonManifold(Vertex o, Vertex n)
 	{
 		Triangle [] oList = (Triangle []) o.getLink();
 		for (Triangle t: oList)
@@ -1132,7 +1132,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		return this;
 	}
 
-	private final HalfEdge HEsplitSameFan(Mesh m, Vertex n)
+	private HalfEdge HEsplitSameFan(Mesh m, Vertex n)
 	{
 		if (hasAttributes(OUTER))
 			throw new IllegalArgumentException("Cannot split "+this);
@@ -1178,7 +1178,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		return g;
 	}
 	
-	private final void splitVertexAddOneTriangle(Mesh m, Vertex n)
+	private void splitVertexAddOneTriangle(Mesh m, Vertex n)
 	{
 		/*
 		 *            V1                             V1
@@ -1234,7 +1234,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		n1.attributes = isOuter;
 	}
 	
-	private final Iterator<AbstractHalfEdge> identityFanIterator()
+	private Iterator<AbstractHalfEdge> identityFanIterator()
 	{
 		final HalfEdge current = this;
 		return new Iterator<AbstractHalfEdge>()

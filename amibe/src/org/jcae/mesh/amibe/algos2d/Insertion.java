@@ -389,7 +389,7 @@ public class Insertion
 		LOGGER.config("Leave compute()");
 	}
 	
-	private final boolean checkNearestVertex(Metric metric, double[] uv, Vertex n)
+	private boolean checkNearestVertex(Metric metric, double[] uv, Vertex n)
 	{
 		double d1 = metric.distance2(uv, n.getUV());
 		Vertex debug = kdTree.getNearestVertexDebug(metric, uv);

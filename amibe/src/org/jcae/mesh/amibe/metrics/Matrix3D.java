@@ -140,14 +140,14 @@ public class Matrix3D implements Serializable
 		System.arraycopy(data, 0, temp, 0, 9);
 	}
 
-	private final void swap(int i, int j)
+	private void swap(int i, int j)
 	{
 		double temp = data[i+3*j];
 		data[i+3*j] = data[j+3*i];
 		data[j+3*i] = temp;
 	}
 	
-	private final void copyColumn(int i, double [] dest)
+	private void copyColumn(int i, double [] dest)
 	{
 		System.arraycopy(data, 3*i, dest, 0, 3);
 	}

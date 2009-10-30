@@ -81,7 +81,7 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 	 * Move counterclockwise to the previous edge with same origin.
 	 * @return  current instance after its transformation
 	 */
-	private final AbstractHalfEdge prevOrigin()
+	private AbstractHalfEdge prevOrigin()
 	{
 		return sym().next();
 	}
@@ -105,7 +105,7 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 	 * destination.
 	 * @return  current instance after its transformation
 	 */
-	private final AbstractHalfEdge nextDest()
+	private AbstractHalfEdge nextDest()
 	{
 		return sym().prev();
 	}
@@ -154,7 +154,7 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 	 * Move counterclockwise to the following edge with same apex.
 	 * @return  current instance after its transformation
 	 */
-	private final AbstractHalfEdge nextApex()
+	private AbstractHalfEdge nextApex()
 	{
 		return next().sym().next();
 	}
@@ -174,7 +174,7 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 	}
 	*/
 	
-	private final AbstractHalfEdge prevApex()
+	private AbstractHalfEdge prevApex()
 	{
 		return prev().sym().prev();
 	}
@@ -362,7 +362,7 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 		return totNrSwap;
 	}
 	
-	private final boolean canSwap(Mesh2D mesh, Vertex2D v, boolean smallerDiag, VirtualHalfEdge2D sym)
+	private boolean canSwap(Mesh2D mesh, Vertex2D v, boolean smallerDiag, VirtualHalfEdge2D sym)
 	{
 		if (hasAttributes(BOUNDARY | NONMANIFOLD | OUTER))
 			return false;
@@ -381,7 +381,7 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 		return !a.isSmallerDiagonale(mesh, this);
 	}
 	
-	private final void nextApexLoopNoBoundaries(Mesh2D mesh)
+	private void nextApexLoopNoBoundaries(Mesh2D mesh)
 	{
 		if (destination() == mesh.outerVertex)
 		{
@@ -514,7 +514,7 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 		return isDelaunay_anisotropic(mesh, apex2);
 	}
 	
-	private final boolean isDelaunay_isotropic(Mesh2D mesh, Vertex2D apex2)
+	private boolean isDelaunay_isotropic(Mesh2D mesh, Vertex2D apex2)
 	{
 		assert mesh.outerVertex != (Vertex2D) origin();
 		assert mesh.outerVertex != (Vertex2D) destination();
@@ -537,7 +537,7 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 		return !apex2.inCircle2D(mesh, this);
 	}
 	
-	private final boolean isDelaunay_anisotropic(Mesh2D mesh, Vertex2D apex2)
+	private boolean isDelaunay_anisotropic(Mesh2D mesh, Vertex2D apex2)
 	{
 		assert mesh.outerVertex != (Vertex2D) origin();
 		assert mesh.outerVertex != (Vertex2D) destination();

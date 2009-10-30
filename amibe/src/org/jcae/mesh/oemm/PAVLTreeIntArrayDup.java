@@ -92,7 +92,7 @@ public class PAVLTreeIntArrayDup
 	 * etc.  This has many advantages, e.g. if an octant is split,
 	 * nodes can be dispatched very efficiently.
 	 */
-	private static final void mortonCode(int [] ijk, int [] hash)
+	private static void mortonCode(int [] ijk, int [] hash)
 	{
 		int i0 = ijk[0];
 		int j0 = ijk[1];
@@ -106,7 +106,7 @@ public class PAVLTreeIntArrayDup
 		}
 	}
 
-	private static final int dilate4 (int b)
+	private static int dilate4 (int b)
 	{
 		//  byte b = b7b6b5b4b3b2b1b0
 		b &= 0xff;
@@ -153,7 +153,7 @@ public class PAVLTreeIntArrayDup
 	}
 	*/
 	
-	private static final String keyString(int [] data, int offKey)
+	private static String keyString(int [] data, int offKey)
 	{
 		StringBuilder ret = new StringBuilder();
 		for (int i = 0; i < nrInt; i++)
@@ -415,7 +415,7 @@ public class PAVLTreeIntArrayDup
 	}
 	
 	// Return sign(key1 - key2)
-	private static final int compare(int [] arr1, int off1, int [] arr2, int off2)
+	private static int compare(int [] arr1, int off1, int [] arr2, int off2)
 	{
 		int ret = 0;
 		for (int i = 0; i < nrInt; i++)

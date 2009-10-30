@@ -272,12 +272,12 @@ public class MesherTest
 		}
 	}
 
-	private static final String getGeometryFile(String type)
+	private static String getGeometryFile(String type)
 	{
 		return dir + File.separator + "input" + File.separator + type +".brep";
 	}
 
-	private static final String getOutputDirectory(String type, int cnt)
+	private static String getOutputDirectory(String type, int cnt)
 	{
 		return dir + File.separator + "output" + File.separator + "test-"+type+"."+cnt;
 	}

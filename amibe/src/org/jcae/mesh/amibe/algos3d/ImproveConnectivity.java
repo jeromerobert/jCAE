@@ -134,7 +134,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 		return before - after;
 	}
 	
-	private final double vertexQuality(Vertex v, int delta)
+	private double vertexQuality(Vertex v, int delta)
 	{
 		if (!v.isManifold())
 			return 1.0;
@@ -150,7 +150,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 		return connectivityQuality(q);
 	}
 
-	private final double connectivityQuality(int q)
+	private double connectivityQuality(int q)
 	{
 		if (q < 7)
 			return q / 6.0;
@@ -205,7 +205,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 		return current.prev();
 	}
 	
-	private final void removeAllEdgesIncidentTo(Vertex v)
+	private void removeAllEdgesIncidentTo(Vertex v)
 	{
 		Triangle t = (Triangle) v.getLink();
 		HalfEdge current = (HalfEdge) t.getAbstractHalfEdge();
@@ -230,7 +230,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 		while (current.destination() != d);
 	}
 
-	private final void addAllEdgesIncidentTo(Vertex v)
+	private void addAllEdgesIncidentTo(Vertex v)
 	{
 		Triangle t = (Triangle) v.getLink();
 		HalfEdge current = (HalfEdge) t.getAbstractHalfEdge();

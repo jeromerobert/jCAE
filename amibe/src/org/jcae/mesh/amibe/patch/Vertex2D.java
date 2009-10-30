@@ -466,7 +466,7 @@ public class Vertex2D extends Vertex
 		return mesh.getMetric(this).isPseudoIsotropic();
 	}
 	
-	private final long distance2(KdTree kdTree, Vertex2D that)
+	private long distance2(KdTree kdTree, Vertex2D that)
 	{
 		kdTree.double2int(param, i0);
 		kdTree.double2int(that.param, i1);
@@ -474,7 +474,7 @@ public class Vertex2D extends Vertex
 		long dy = i0[1] - i1[1];
 		return dx * dx + dy * dy;
 	}
-	private final long distance2cached(KdTree kdTree, Vertex2D that)
+	private long distance2cached(KdTree kdTree, Vertex2D that)
 	{
 		kdTree.double2int(that.param, i1);
 		long dx = i0[0] - i1[0];

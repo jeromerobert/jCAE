@@ -923,7 +923,7 @@ public class RawStorage
 			return processIndexExternalVerticesProcedure(oemm, current);
 		}
 
-		private final void loadVerticesFromCache(OEMM oemm, int i)
+		private void loadVerticesFromCache(OEMM oemm, int i)
 		{
 			assert vertices[i] == null;
 			if (sr[i] != null)
@@ -936,7 +936,7 @@ public class RawStorage
 			}
 		}
 
-		private final int processIndexExternalVerticesProcedure(OEMM oemm, OEMM.Node current)
+		private int processIndexExternalVerticesProcedure(OEMM oemm, OEMM.Node current)
 		{
 			loadVerticesFromCache(oemm, current.leafIndex);
 			for (int i = 0; i < current.adjLeaves.size(); i++)

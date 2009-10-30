@@ -627,7 +627,7 @@ public class OEMM implements Serializable
 	 *                 the desired octant must exist.
 	 * @return  the octant of the desired size containing this point.
 	 */
-	private final Node search(int size, int [] ijk, boolean create, Node node)
+	private Node search(int size, int [] ijk, boolean create, Node node)
 	{
 		if (root == null)
 		{

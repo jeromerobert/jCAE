@@ -142,7 +142,7 @@ public class Mesh2D extends Mesh
 		init();
 	}
 
-	private final void init()
+	private void init()
 	{
 		outerVertex = new OuterVertex2D(0.0, 0.0);
 		outerTrianglesAreConnected = true;
