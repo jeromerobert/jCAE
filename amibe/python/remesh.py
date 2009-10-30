@@ -30,6 +30,9 @@ parser.add_option("-m", "--metricsFile", metavar="STRING",
 parser.add_option("-o", "--output", metavar="STRING",
                   action="store", type="string", dest="output",
                   help="writes new mesh into this directory")
+parser.add_option("-p", "--project",
+                  action="store_true", dest="project",
+                  help="project vertices onto local surface")
 
 (options, args) = parser.parse_args(args=sys.argv[1:])
 
@@ -55,6 +58,10 @@ elif options.metricsFile:
 	opts.put("metricsFile", options.metricsFile)
 else:
 	setAnalytic = True
+if options.angle:
+	opts.put("ridgeAngle", str(options.angle))
+if options.project:
+	opts.put("project", "true")
 
 algo = Remesh(mesh, opts)
 class RemeshMetric(Remesh.AnalyticMetricInterface):
