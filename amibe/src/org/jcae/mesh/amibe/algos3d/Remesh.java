@@ -312,9 +312,7 @@ public class Remesh
 		if (Matrix3D.prodSca(temp[2], temp[3]) < 0.0)
 			return false;
 		Matrix3D.computeNormal3D(p2, p0, pos, temp[0], temp[1], temp[3]);
-		if (Matrix3D.prodSca(temp[2], temp[3]) < 0.0)
-			return false;
-		return true;
+		return Matrix3D.prodSca(temp[2], temp[3]) >= 0.0;
 	}
 
 	/**
