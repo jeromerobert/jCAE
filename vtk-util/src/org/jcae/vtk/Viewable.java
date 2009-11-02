@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import vtk.vtkActor;
-import vtk.vtkGlobalJavaHash;
 import vtk.vtkPlaneCollection;
 import vtk.vtkProperty;
 
@@ -347,7 +346,9 @@ public abstract class Viewable extends MultiCanvas
 	public void removeClippingPlanes()
 	{
 		// Send empty plane collection to removeCanvas the older planes
-		setClippingPlanes(new vtkPlaneCollection());
+		vtkPlaneCollection empty = new vtkPlaneCollection();
+		setClippingPlanes(empty);
+		empty.Delete();
 		render();
 	}
 

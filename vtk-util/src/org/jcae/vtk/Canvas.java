@@ -246,5 +246,6 @@ public class Canvas extends vtkCanvas
 			mapper = listOfActors.GetNextActor().GetMapper();
 			mapper.SetImmediateModeRendering(Utils.booleanToInt(mode));
 		}
+		listOfActors.Delete();
 	}
 }

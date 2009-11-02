@@ -405,18 +405,22 @@ public class LeafNode extends AbstractNode
 		vtkIdTypeArray arr = Utils.setValues(selection);
 		selectionNode.SetSelectionList(arr);
 		sel.AddNode(selectionNode);
+		selectionNode.Delete();
 		
 		vtkExtractSelectedPolyDataIds selFilter = new vtkExtractSelectedPolyDataIds();
 		selFilter.ReleaseDataFlagOn();
 		selFilter.SetInput(1, sel);
+		sel.Delete();
 		selFilter.SetInput(0, data);
 
 		vtkPolyData dataFiltered = selFilter.GetOutput();
-		selFilter.Update();
-
+		selFilter.Update();		
 		selectionMapper.SetInput(dataFiltered);
+		selFilter.Delete();
+		dataFiltered.Delete();
 	}
 
+	@Override
 	void setCellSelection(PickContext pickContext, int [] cellSelection)
 	{
 		selection = new int[cellSelection.length];
