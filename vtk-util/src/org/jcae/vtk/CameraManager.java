@@ -81,15 +81,15 @@ public class CameraManager
 	// Different classic cameras
 	private static final vtkCamera[] defaultCameras =
 		new vtkCamera[Orientation.values().length];
-	private Canvas canvas;
-	private vtkRenderer renderer;
-	private ArrayList<vtkCamera> cameras = new ArrayList<vtkCamera>();
-	private ArrayList<ScreenshotCamera> screenshots =
+	private final Canvas canvas;
+	private final vtkRenderer renderer;
+	private final ArrayList<vtkCamera> cameras = new ArrayList<vtkCamera>();
+	private final ArrayList<ScreenshotCamera> screenshots =
 		new ArrayList<ScreenshotCamera>();
-	private vtkAxesActor originAxes;
+	private final vtkAxesActor originAxes;
 	private boolean isVisibleRelativeAxis = true;
-	private vtkAxesActor relativeAxes;
-	private vtkOrientationMarkerWidget marker;
+	private final vtkAxesActor relativeAxes;
+	private final vtkOrientationMarkerWidget marker;
 	private double originAxesFactor = 0.2;
 	public enum Orientation
 	{
@@ -103,13 +103,23 @@ public class CameraManager
 		
 		originAxes = new vtkAxesActor();
 		originAxes.AxisLabelsOff();
-		originAxes.PickableOff();
 		renderer.AddActor(originAxes);
 		
 		// A display orientation
 		relativeAxes = new vtkAxesActor();
 		relativeAxes.AxisLabelsOn();
-		relativeAxes.PickableOff();
+		
+		// FIXME: I do not know why, but originAxes has 6
+		// pickable actors whereas relativeAxes has none.
+		// As originAxes.PickableOff() does nothing, try
+		// another way.
+		vtkActorCollection actors = new vtkActorCollection();
+		originAxes.GetActors(actors);
+		actors.InitTraversal();
+		for (vtkActor prop; (prop = actors.GetNextActor()) != null; )
+			prop.PickableOff();
+		actors.Delete();
+		actors = null;
 		
 		marker = new vtkOrientationMarkerWidget();
 		marker.SetOrientationMarker(relativeAxes);
@@ -353,6 +363,7 @@ public class CameraManager
 			actors[k].SetPickable(1);
 			k++;
 		}
+		vtkActors.Delete();
 
 		vtkCellPicker picker = new vtkCellPicker();
 		canvas.lock();

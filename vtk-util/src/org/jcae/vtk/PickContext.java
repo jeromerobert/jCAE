@@ -142,4 +142,11 @@ public abstract class PickContext
 	 * <code>false</code> otherwise.
 	 */
   	public abstract boolean intersect(BoundingBox bbox);
+
+	/**
+	 * true if this PickContext select only one cell.
+	 * It will be true for RayPicker and for FrustrumPicker built from a
+	 * RayPicker and a tolerance.
+	 */
+	public abstract boolean isOneCell();
 }

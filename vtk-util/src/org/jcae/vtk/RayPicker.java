@@ -80,6 +80,7 @@ public class RayPicker extends PickContext
 	 * 
 	 * @return the position of mouse when button was pressed
 	 */
+	@Override
 	public final int[] getPressPosition()
 	{
 		return new int[] { pickPoint.x, pickPoint.y };
@@ -90,6 +91,7 @@ public class RayPicker extends PickContext
 	 * 
 	 * @return Get the position of mouse when button was released
 	 */
+	@Override
 	public final int[] getReleasePosition()
 	{
 		return getPressPosition();
@@ -102,6 +104,7 @@ public class RayPicker extends PickContext
 	 * @return <code>true</code> if this box is intersected by current picker,
 	 * <code>false</code> otherwise.
 	 */
+	@Override
 	public boolean intersect(BoundingBox bbox)
 	{
 		return bbox.intersect(rayOrigin, rayDirection);
@@ -111,5 +114,11 @@ public class RayPicker extends PickContext
 		Point3d p=new Point3d();
 		bbox.intersect(rayOrigin, rayDirection,p);
 		return p;
+	}
+
+	@Override
+	public boolean isOneCell()
+	{
+		return true;
 	}
 }

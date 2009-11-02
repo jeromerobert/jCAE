@@ -46,10 +46,9 @@ public class Scene implements AbstractNode.ActorListener
 {
 	private final static Logger LOGGER = Logger.getLogger(Scene.class.getName());
 
-	private TLongObjectHashMap<AbstractNode> idActorToNode =
+	private final TLongObjectHashMap<AbstractNode> idActorToNode =
 		new TLongObjectHashMap<AbstractNode>();
 	private boolean actorFiltering = true;
-	private vtkPlaneCollection planes = null;
 	private boolean checkColorDepth = Boolean.parseBoolean(
 		System.getProperty("org.jcae.vtk.checkColorDepth", "true"));
 	
@@ -59,10 +58,6 @@ public class Scene implements AbstractNode.ActorListener
 	 * Boolean.FALSE means the node is not pickable
 	 */
 	private Map<AbstractNode, Boolean> pickBackup;
-
-	public Scene()
-	{
-	}
 
 	public void addNode(AbstractNode node)
 	{
@@ -74,15 +69,15 @@ public class Scene implements AbstractNode.ActorListener
 		node.removeActorListener(this);
 	}
 
+	@Override
 	public void actorCreated(AbstractNode node, vtkActor actor)
 	{
 		if (LOGGER.isLoggable(Level.FINE))
 			LOGGER.log(Level.FINE, "Create actor id="+actor.GetVTKId()+" hashcode="+Integer.toHexString(actor.hashCode()));
 		idActorToNode.put(actor.GetVTKId(), node);
-		if (planes != null)
-			actor.GetMapper().SetClippingPlanes(planes);
 	}
 
+	@Override
 	public void actorDeleted(AbstractNode node, vtkActor actor)
 	{
 		if (LOGGER.isLoggable(Level.FINE))
@@ -199,10 +194,10 @@ public class Scene implements AbstractNode.ActorListener
 				BoundingBox box = new BoundingBox();
 				box.setLower(bounds[0], bounds[2], bounds[4]);
 				box.setUpper(bounds[1], bounds[3], bounds[5]);
-
 				if (!pickContext.intersect(box))
 					actor.PickableOff();
 			}
+			actors.Delete();
 		}
 
 		vtkVisibleCellSelector selector = new vtkVisibleCellSelector();
@@ -229,6 +224,7 @@ public class Scene implements AbstractNode.ActorListener
 			int j = 0;
 			for (vtkActor actor; (actor = actors.GetNextActor()) != null; ++j)
 				actor.SetPickable(pickableActorBackup[j]);
+			actors.Delete();
 		}
 		
 		// Find the ID Selection of the actor
@@ -245,9 +241,15 @@ public class Scene implements AbstractNode.ActorListener
 				if (node != null)
 				{
 					vtkIdTypeArray ids = (vtkIdTypeArray) child.GetSelectionList();
-					node.setCellSelection(pickContext, Utils.getValues(ids));
+					int[] values = Utils.getValues(ids);
+					if(pickContext.isOneCell() && values.length > 1)
+						values = new int[]{values[0]};
+
+					node.setCellSelection(pickContext, values);
 					LOGGER.finest("Actor picked id: "+prop.GetVTKId());
 					LOGGER.finest("Picked node: "+node);
+					if(pickContext.isOneCell() && values.length > 0)
+						break;
 				}
 			}
 			else
@@ -299,6 +301,7 @@ public class Scene implements AbstractNode.ActorListener
 				}
 			}
 		}
+		actors.Delete();
 	}
 
 	public void setClippingPlanes(vtkPlaneCollection planes)
