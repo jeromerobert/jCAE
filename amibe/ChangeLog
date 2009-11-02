@@ -2,6 +2,8 @@ Mon Nov  2 22:07:26 CET 2009 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/util/UNVReader.java: Read UNV elements 92
 	(parabolic triangles) and convert them to linear triangles.
+	* src/org/jcae/mesh/amibe/util/UNVReader.java: Fix
+	NullPointerException when beam elements are listed in group list.
 
 Wed Oct  7 14:16:47 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
 

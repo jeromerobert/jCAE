@@ -44,13 +44,13 @@ import java.util.logging.Logger;
  */
 public class UNVReader
 {
-
 	private static final Logger logger=Logger.getLogger(UNVReader.class.getName());
 	
 	public static void readMesh(Mesh mesh, String file)
 	{
 		TIntObjectHashMap<Vertex> nodesmap = null;
 		TIntObjectHashMap<Triangle> facesmap = null;
+		Triangle beamPlaceHolder = mesh.createTriangle(mesh.outerVertex, mesh.outerVertex, mesh.outerVertex);
 		double unit = 1.0;
 		String line = "";
 		boolean hasGroups = false;
@@ -71,7 +71,7 @@ public class UNVReader
 					else if (line.trim().equals("2412"))
 					{
 						// read faces
-						facesmap = readFace(rd, mesh, nodesmap);
+						facesmap = readFace(rd, mesh, beamPlaceHolder, nodesmap);
 					}
 					else if (line.trim().equals("164"))
 					{
@@ -81,7 +81,7 @@ public class UNVReader
 					else if ( (line.trim().equals("2430")) || (line.trim().equals("2435")) )
 					{
 						// read groups
-						int nrGroups = readGroup(rd, line.trim(), facesmap);
+						int nrGroups = readGroup(rd, line.trim(), facesmap, beamPlaceHolder);
 						hasGroups = nrGroups > 1;
 					}
 					else if (line.trim().equals("2414"))
@@ -188,13 +188,13 @@ public class UNVReader
 		return nodesmap;
 	}
 
-	private static TIntObjectHashMap<Triangle> readFace(BufferedReader rd, Mesh mesh, TIntObjectHashMap<Vertex> nodesmap)
+	private static TIntObjectHashMap<Triangle> readFace(BufferedReader rd, Mesh mesh, Triangle beamPlaceHolder, TIntObjectHashMap<Vertex> nodesmap)
 	{
 		logger.fine("Reading triangles");
 		TIntObjectHashMap<Triangle> facesmap = new TIntObjectHashMap<Triangle>();
 		String line = "";
 		boolean quad = false;
-		boolean beam = false;
+		int beams = 0;
 		
 		try
 		{
@@ -260,9 +260,10 @@ public class UNVReader
 				}
 				else if (type.equals("11") || type.equals("21"))
 				{
-					beam = true;
+					beams++;
 					rd.readLine();
 					rd.readLine();
+					facesmap.put(ind, beamPlaceHolder);
 				}
 				else
 					throw new RuntimeException("Type "+type+" unknown");
@@ -275,9 +276,9 @@ public class UNVReader
 		logger.fine("Found "+facesmap.size()+" triangles");
 		if (quad)
 			logger.severe("Quadrangles have been detected and converted into triangles.  If errors occur, convert this UNV file to only use triangles!");
-		if (beam)
+		if (beams > 0)
 		{
-			if (facesmap.isEmpty())
+			if (facesmap.size() == beams)
 				logger.severe("Beams have been found but are discarded, and this mesh does not contain any triangle!");
 			else
 				logger.severe("Beams have been found but are discarded, only triangles are read.");
@@ -285,7 +286,7 @@ public class UNVReader
 		return facesmap;
 	}
 	
-	private static int readGroup(BufferedReader rd, String type, TIntObjectHashMap<Triangle> facesmap)
+	private static int readGroup(BufferedReader rd, String type, TIntObjectHashMap<Triangle> facesmap, Triangle beamPlaceHolder)
 	{
 		logger.fine("Reading groups");
 		String line = "";
@@ -322,8 +323,17 @@ public class UNVReader
 						if (ind != 0)
 						{
 							Triangle f = facesmap.get(ind);
-							facelist.add(f);
-							f.setGroupId(groupIdx);
+							if (f == beamPlaceHolder)
+							{
+								// Do nothing
+							}
+							else if (f != null)
+							{
+								facelist.add(f);
+								f.setGroupId(groupIdx);
+							}
+							else
+								logger.severe("In group "+groupIdx+", element number "+ind+" does not exist");
 						}
 						nbelem--;
 						if (type.equals("2435"))
