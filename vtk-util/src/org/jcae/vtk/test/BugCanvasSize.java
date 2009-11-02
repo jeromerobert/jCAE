@@ -34,6 +34,7 @@ public class BugCanvasSize
 		JSplitPane split = new JSplitPane();
 		vtkCanvas canvas = new vtkCanvas()
 		{			
+			@Override
 			public void setSize(int x, int y)
 			{
 				super.setSize(x, y);

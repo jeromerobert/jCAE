@@ -29,9 +29,9 @@ public abstract class Bounds extends Object implements Cloneable {
     static final int BOUNDING_SPHERE = 0x2;
     static final int BOUNDING_POLYTOPE = 0x4;
 
-    boolean boundsIsEmpty = false;
-    boolean boundsIsInfinite = false;
-    int  boundId = 0;
+    boolean boundsIsEmpty;
+    boolean boundsIsInfinite;
+    int  boundId;
 
     /**
      * Constructs a new Bounds object.
@@ -43,7 +43,8 @@ public abstract class Bounds extends Object implements Cloneable {
     /**
      * Makes a copy of a bounds object. 
      */
-    public abstract Object clone();
+    @Override
+	public abstract Object clone();
 
 
     /**

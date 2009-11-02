@@ -46,7 +46,7 @@ public class Node extends AbstractNode
 {
 	private static final Logger LOGGER = Logger.getLogger(Node.class.getName());
 	
-	private ArrayList<AbstractNode> children = new ArrayList<AbstractNode>();
+	private final ArrayList<AbstractNode> children = new ArrayList<AbstractNode>();
 	// Datas if the node manage
 	private TIntArrayList offsetsVertices;
 	private TIntArrayList offsetsLines;
@@ -58,7 +58,7 @@ public class Node extends AbstractNode
 	// Lookup table for color of leaves
 	private vtkLookupTable table;
 	
-	private ArrayList<ChildCreationListener> childCreationListeners = new ArrayList<ChildCreationListener>();
+	private final ArrayList<ChildCreationListener> childCreationListeners = new ArrayList<ChildCreationListener>();
 
 	private static class NodeData extends LeafNode.DataProvider
 	{
@@ -160,6 +160,7 @@ public class Node extends AbstractNode
 			child.setPickable(pickable);
 	}
 	
+	@Override
 	public List<LeafNode> getLeaves()
 	{
 		// Do not keep the leaves, just compute
@@ -641,6 +642,7 @@ public class Node extends AbstractNode
 		return dataFiltered;
 	}
 
+	@Override
 	void setCellSelection(PickContext pickContext, int [] cellSelection)
 	{
 		if (!isManager())
@@ -672,6 +674,7 @@ public class Node extends AbstractNode
 		timeStampSelected();
 	}
 	
+	@Override
 	public void clearCellSelection()
 	{
 		for (LeafNode leaf : getLeaves())

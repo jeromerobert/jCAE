@@ -88,11 +88,11 @@ public class Transform3D {
     //double[] scales = new double[3];
     // allocate the memory only when it is needed. Following three places will allocate the memory,
     // void setScaleTranslation(), void computeScales() and void computeScaleRotation()
-    double[] rot = null;
-    double[] scales = null;
+    double[] rot;
+    double[] scales;
 
     // Unknown until lazy classification is done
-    private int type = 0;
+    private int type;
 
     // Dirty bit for classification, this is used
     // for classify()
@@ -120,7 +120,7 @@ public class Transform3D {
 
     private int dirtyBits;
 
-    boolean autoNormalize = false;	// Don't auto normalize by default
+    boolean autoNormalize;	// Don't auto normalize by default
     /*
     // reused temporaries for compute_svd
     private boolean svdAllocd =false;

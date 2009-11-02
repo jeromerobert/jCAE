@@ -47,7 +47,7 @@ public class LeafNode extends AbstractNode
 		private long modifiedTime = System.nanoTime();
 		private float[] nodesTransformed = new float[0];
 		protected float[] nodes = new float[0];
-		protected float[] normals = null;
+		protected float[] normals;
 		protected int[] vertices = new int[0];
 		protected int[] lines = new int[0];
 		protected int[] polys = new int[0];
@@ -229,6 +229,7 @@ public class LeafNode extends AbstractNode
 		this.color = color;
 	}
 	
+	@Override
 	public List<LeafNode> getLeaves()
 	{
 		return Collections.singletonList(this);
@@ -272,6 +273,7 @@ public class LeafNode extends AbstractNode
 		dataProvider.setTransform(transform);
 	}
 	
+	@Override
 	public void refresh()
 	{
 		if (!isManager())
@@ -428,6 +430,7 @@ public class LeafNode extends AbstractNode
 		return selection;
 	}
 
+	@Override
 	public void clearCellSelection()
 	{
 		selection = new int[0];

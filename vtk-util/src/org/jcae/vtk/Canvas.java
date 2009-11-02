@@ -44,9 +44,7 @@ import vtk.vtkMapper;
 //the canvas. Beware to share vtkCamera. Beware of CameraClippingRange
 public class Canvas extends vtkCanvas
 {
-
-	private Thread creationWindowThread = null;
-	private static TimerTask garbageCall = new TimerTask()
+	private static final TimerTask garbageCall = new TimerTask()
 	{
 
 		@Override
@@ -79,7 +77,7 @@ public class Canvas extends vtkCanvas
 		}*/
 		}
 	};
-	private static Timer timerGC = new Timer();
+	private static final Timer timerGC = new Timer();
 	
 
 	static
@@ -127,6 +125,7 @@ public class Canvas extends vtkCanvas
 		Utils.goToAWTThread(new Runnable()
 				{
 
+					@Override
 					public void run()
 					{
 						Render();

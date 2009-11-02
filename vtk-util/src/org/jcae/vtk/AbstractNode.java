@@ -176,6 +176,7 @@ public abstract class AbstractNode
 	public static ActorCustomiser DEFAULT_ACTOR_CUSTOMISER =
 		new ActorCustomiser()
 		{
+			@Override
 			public void customiseActor(vtkActor actor) {}
 		};
 		
@@ -185,6 +186,7 @@ public abstract class AbstractNode
 	public static MapperCustomiser DEFAULT_MAPPER_CUSTOMISER =
 		new MapperCustomiser()
 		{
+			@Override
 			public void customiseMapper(vtkMapper mapper)
 			{
 				mapper.SetResolveCoincidentTopologyToPolygonOffset();
@@ -198,6 +200,7 @@ public abstract class AbstractNode
 	public static SelectionActorCustomiser DEFAULT_SELECTION_ACTOR_CUSTOMISER =
 		new SelectionActorCustomiser()
 		{
+			@Override
 			public void customiseSelectionActor(vtkActor actor) {}
 		};
 	
@@ -207,6 +210,7 @@ public abstract class AbstractNode
 	public static SelectionMapperCustomiser DEFAULT_SELECTION_MAPPER_CUSTOMISER =
 		new SelectionMapperCustomiser()
 		{
+			@Override
 			public void customiseSelectionMapper(vtkMapper mapper) {}
 		};
 	

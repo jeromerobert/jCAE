@@ -40,7 +40,7 @@ public abstract class Viewable extends MultiCanvas
 	private final static Logger LOGGER = Logger.getLogger(Viewable.class.getName());
 	/** The position of the mouse when the press event occurs */
 	private String name;
-	private ArrayList<SelectionListener> selectionListeners =
+	private final ArrayList<SelectionListener> selectionListeners =
 			new ArrayList<SelectionListener>();
 	protected final double tolerance = 0.002; // 0.2% of tolerance in function of the (far-near) distance
 	protected final Scene scene;
@@ -55,7 +55,7 @@ public abstract class Viewable extends MultiCanvas
 	/** Flag to set selection in append or replace mode */
 	protected boolean appendSelection;
 	private SelectionType selectionType = SelectionType.NODE;
-	private int pixelTolerance = 0;
+	private int pixelTolerance;
 
 	public enum SelectionType
 	{
@@ -76,6 +76,7 @@ public abstract class Viewable extends MultiCanvas
 
 	protected class SelectionActorCustomiser implements AbstractNode.SelectionActorCustomiser
 	{
+		@Override
 		public void customiseSelectionActor(vtkActor actor)
 		{
 			vtkProperty p = actor.GetProperty();

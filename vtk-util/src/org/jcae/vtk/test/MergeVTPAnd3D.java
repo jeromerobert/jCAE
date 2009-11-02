@@ -42,8 +42,8 @@ public class MergeVTPAnd3D
 		Utils.loadVTKLibraries();
 	}
 	
-	vtkPolyData data = null;
-	String[] labels = null;
+	vtkPolyData data;
+	String[] labels;
 	ArrayList< TFloatArrayList > scalars = new ArrayList< TFloatArrayList >();
 	
 	public MergeVTPAnd3D(String vtpInputPath, String threeDInputPath, String vtpOutputPath)

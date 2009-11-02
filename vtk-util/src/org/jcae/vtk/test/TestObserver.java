@@ -36,7 +36,7 @@ import vtk.vtkRenderer;
 public class TestObserver {
 	private static class EventHandler
 	{
-		private vtkGenericRenderWindowInteractor iren;
+		private final vtkGenericRenderWindowInteractor iren;
 
 		private EventHandler(vtkGenericRenderWindowInteractor iren) {
 			this.iren = iren;

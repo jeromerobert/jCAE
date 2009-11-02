@@ -40,9 +40,9 @@ import vtk.vtkRenderer;
 public class TestPropPicker {
 	private static class EventHandler
 	{
-		private vtkGenericRenderWindowInteractor iren;
-		private vtkPropPicker picker = new vtkPropPicker();
-		private Canvas canvas;
+		private final vtkGenericRenderWindowInteractor iren;
+		private final vtkPropPicker picker = new vtkPropPicker();
+		private final Canvas canvas;
 		
 		private EventHandler(Canvas canvas)
 		{

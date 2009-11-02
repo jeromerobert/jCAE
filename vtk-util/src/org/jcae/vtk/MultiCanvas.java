@@ -46,11 +46,13 @@ public abstract class MultiCanvas implements Node.ActorListener, Node.ChildCreat
 		
 	}
 
+	@Override
 	public void childCreated(AbstractNode child)
 	{
 		addNode(child);
 	}
 
+	@Override
 	public void childDeleted(AbstractNode child)
 	{
 		removeNode(child);
@@ -89,6 +91,7 @@ public abstract class MultiCanvas implements Node.ActorListener, Node.ChildCreat
 		}
 	}
 	
+	@Override
 	public void actorCreated(AbstractNode node, vtkActor actor)
 	{
 		if (LOGGER.isLoggable(Level.FINE))
@@ -96,6 +99,7 @@ public abstract class MultiCanvas implements Node.ActorListener, Node.ChildCreat
 		addProp(actor);
 	}
 
+	@Override
 	public void actorDeleted(AbstractNode node, vtkActor actor)
 	{
 		if (LOGGER.isLoggable(Level.FINE))

@@ -33,11 +33,11 @@ public class BoundingSphere extends Bounds {
     double	radius;
 	
     Point3d boxVerts[];
-    boolean allocBoxVerts = false;
+    boolean allocBoxVerts;
 
     // reusable temp objects
-    private BoundingBox tmpBox = null;
-    private BoundingPolytope tmpPolytope = null;
+    private BoundingBox tmpBox;
+    private BoundingPolytope tmpPolytope;
     
     /**
      * Constructs and initializes a BoundingSphere from a center and radius.
@@ -284,7 +284,8 @@ public class BoundingSphere extends Bounds {
      * Sets the value of this BoundingSphere.
      * @param boundsObject another bounds object
      */
-    public void set(Bounds  boundsObject){
+    @Override
+	public void set(Bounds  boundsObject){
 	int i;
 
 	if ((boundsObject == null) || boundsObject.boundsIsEmpty) {
@@ -359,7 +360,8 @@ public class BoundingSphere extends Bounds {
      * Creates a copy of the bounding sphere.
      * @return a BoundingSphere 
      */
-    public Object clone() {
+    @Override
+	public Object clone() {
 	return new BoundingSphere(this.center, this.radius);
     }
 
@@ -420,7 +422,8 @@ public class BoundingSphere extends Bounds {
      * given bounds object.
      * @param boundsObject another bounds object
      */
-    public void combine(Bounds boundsObject) {
+    @Override
+	public void combine(Bounds boundsObject) {
         double t,dis,d1,u,l,x,y,z,oldc_to_new_c;
         BoundingSphere sphere;
 
@@ -541,7 +544,8 @@ public class BoundingSphere extends Bounds {
      * given array of bounds object.
      * @param boundsObjects an array of bounds objects
      */
-    public void combine(Bounds[] boundsObjects) {
+    @Override
+	public void combine(Bounds[] boundsObjects) {
 	BoundingSphere sphere;
 	BoundingBox b;
 	BoundingPolytope polytope;
@@ -667,7 +671,8 @@ public class BoundingSphere extends Bounds {
      * Combines this bounding sphere with a point.
      * @param point a 3D point in space
      */
-    public void combine(Point3d point) {
+    @Override
+	public void combine(Point3d point) {
 	double t,dis,oldc_to_new_c;
 
 	if( boundsIsInfinite) {
@@ -700,7 +705,8 @@ public class BoundingSphere extends Bounds {
      * Combines this bounding sphere with an array of points.
      * @param points an array of 3D points in space
      */
-    public void combine(Point3d[] points) {
+    @Override
+	public void combine(Point3d[] points) {
 	int i; 
 	double dis,dis_sq,rad_sq,oldc_to_new_c;
 
@@ -743,7 +749,8 @@ public class BoundingSphere extends Bounds {
      * @param boundsObject the bounding object to be transformed 
      * @param matrix a transformation matrix
      */
-    public void transform( Bounds boundsObject, Transform3D matrix) {
+    @Override
+	public void transform( Bounds boundsObject, Transform3D matrix) {
 	double scale;
 
 	if( boundsObject == null || boundsObject.boundsIsEmpty)  {
@@ -797,7 +804,8 @@ public class BoundingSphere extends Bounds {
     /** 
      * Transforms this bounding sphere by the given matrix.
      */
-    public void transform( Transform3D trans) {
+    @Override
+	public void transform( Transform3D trans) {
 	double scale;
 
 	if(boundsIsInfinite)
@@ -822,7 +830,8 @@ public class BoundingSphere extends Bounds {
      * @param position3 a point defining the location of the pick w= distance to pick
      * @return true or false indicating if an intersection occured 
      */
-    public boolean intersect(Point3d origin, Vector3d direction, Point4d position ) {
+    @Override
+	public boolean intersect(Point3d origin, Vector3d direction, Point4d position ) {
  
 	if( boundsIsEmpty ) {
 	    return false;
@@ -888,7 +897,8 @@ public class BoundingSphere extends Bounds {
      * @param position a point defining the location  of the pick w= distance to pick
      * @return true or false indicating if an intersection occured 
      */
-    boolean intersect(Point3d point,  Point4d position ) {
+	@Override
+	boolean intersect(Point3d point,  Point4d position ) {
 	double x,y,z,dist;
  
 	if( boundsIsEmpty ) {
@@ -927,7 +937,8 @@ public class BoundingSphere extends Bounds {
      * @param position a point defining the location  of the pick w= distance to pick
      * @return true or false indicating if an intersection occured
      */
-    boolean intersect( Point3d start, Point3d end, Point4d position ) {
+	@Override
+	boolean intersect( Point3d start, Point3d end, Point4d position ) {
  
 	if( boundsIsEmpty ) {
 	    return false;
@@ -999,7 +1010,8 @@ public class BoundingSphere extends Bounds {
      * @param direction the direction of the ray
      * @return true or false indicating if an intersection occured
      */ 
-    public boolean intersect(Point3d origin, Vector3d direction ) {
+    @Override
+	public boolean intersect(Point3d origin, Vector3d direction ) {
 
 	if( boundsIsEmpty ) {
 	    return false;
@@ -1118,7 +1130,8 @@ public class BoundingSphere extends Bounds {
      * @param point a point defining a position in 3-space
      * @return true or false indicating if an intersection occured
      */ 
-    public boolean intersect(Point3d point ) {
+    @Override
+	public boolean intersect(Point3d point ) {
 	double x,y,z,dist;
 
 	if( boundsIsEmpty ) {
@@ -1148,7 +1161,8 @@ public class BoundingSphere extends Bounds {
      * @return true if the bounding sphere is empty;
      * otherwise, it returns false
      */
-    public boolean isEmpty() {
+    @Override
+	public boolean isEmpty() {
 	return boundsIsEmpty;
     }
 
@@ -1156,8 +1170,9 @@ public class BoundingSphere extends Bounds {
      * Test for intersection with another bounds object.
      * @param boundsObject another bounds object
      * @return true or false indicating if an intersection occured
-     */ 
-    boolean intersect(Bounds boundsObject, Point4d position) {
+     */
+	@Override
+	boolean intersect(Bounds boundsObject, Point4d position) {
 	return intersect(boundsObject);
     }
 
@@ -1166,7 +1181,8 @@ public class BoundingSphere extends Bounds {
      * @param boundsObject another bounds object
      * @return true or false indicating if an intersection occured
      */ 
-    public boolean intersect(Bounds boundsObject) {
+    @Override
+	public boolean intersect(Bounds boundsObject) {
 	double distsq, radsq;
 	BoundingSphere sphere;
 	boolean intersect;
@@ -1227,7 +1243,8 @@ public class BoundingSphere extends Bounds {
      * @param boundsObjects an array of bounding objects
      * @return true or false indicating if an intersection occured
      */ 
-    public boolean intersect(Bounds[] boundsObjects) {
+    @Override
+	public boolean intersect(Bounds[] boundsObjects) {
 	double distsq, radsq;
 	BoundingSphere sphere;
 	int i;
@@ -1505,7 +1522,8 @@ public class BoundingSphere extends Bounds {
      * @param boundsObjects an array of  bounds objects 
      * @return closest bounding object 
      */
-    public Bounds closestIntersection( Bounds[] boundsObjects) {
+    @Override
+	public Bounds closestIntersection( Bounds[] boundsObjects) {
 
 	if( boundsObjects == null || boundsObjects.length <= 0  ) {
 	    return null;
@@ -1723,7 +1741,8 @@ public class BoundingSphere extends Bounds {
 	}
     }
 
-    Point3d getCenter() {
+    @Override
+	Point3d getCenter() {
 	return center;
     }
     
@@ -1732,7 +1751,8 @@ public class BoundingSphere extends Bounds {
      * then do a copy, otherwise clone the Bounds  and
      * return
      */
-    Bounds copy(Bounds r) {
+	@Override
+	Bounds copy(Bounds r) {
 	if (r != null && this.boundId == r.boundId) {
 	    BoundingSphere region = (BoundingSphere)r;
 	    region.radius = radius;
