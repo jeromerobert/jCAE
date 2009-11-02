@@ -433,6 +433,7 @@ public class Utils
 		
 		Vector3d n = new Vector3d();
 		n.cross(ab, ac);
+		n.normalize();
 		
 		plane.set(n);
 		plane.w = - a.dot(n);
@@ -493,15 +494,40 @@ public class Utils
 		
 		return verts;
 	}
+
+	private final static double offsetFactor, offsetValue;
 	
+	static
+	{
+		String s = System.getProperty("org.jcae.vtk.offsetFactor");
+		double d = 1.0;
+		if(s != null)
+			try
+			{
+				d = Double.parseDouble(s);
+			}
+			catch(NumberFormatException ex){}			
+		offsetFactor = d;
+
+		s = System.getProperty("org.jcae.vtk.offsetValue");
+		d = 1.0;
+		if(s != null)
+			try
+			{
+				d = Double.parseDouble(s);
+			}
+			catch(NumberFormatException ex){}
+		offsetValue = d;
+	}
+
 	public static double getOffsetFactor()
 	{
-		return 1.;
+		return offsetFactor;
 	}
 	
 	public static double getOffsetValue()
 	{
-		return 1.;
+		return offsetValue;
 	}
 	
 	/**
@@ -526,6 +552,7 @@ public class Utils
 			writer.SetFileName(file.getAbsolutePath());
 			Utils.goToAWTThread(new Runnable() {
 
+				@Override
 				public void run()
 				{
 					canvas.lock();
