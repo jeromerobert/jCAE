@@ -1503,7 +1503,7 @@ public class Mesh implements Serializable
 			for (int i = 0; i < 3; i++)
 			{
 				ot = ot.next();
-				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
+				if (ot.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 					continue;
 				sym = ot.sym();
 				Vertex o = ot.origin();
