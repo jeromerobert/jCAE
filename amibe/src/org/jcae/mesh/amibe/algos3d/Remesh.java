@@ -280,7 +280,7 @@ public class Remesh
 		// Now cross edges to see if adjacent triangle is nearer
 		do
 		{
-			if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
+			if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 				break;
 			AbstractHalfEdge sym = ot.sym();
 			t = sym.getTri();
