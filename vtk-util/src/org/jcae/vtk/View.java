@@ -21,6 +21,7 @@
 package org.jcae.vtk;
 
 
+import java.awt.AWTEvent;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -56,8 +57,6 @@ public class View extends Canvas {
 	
 	public View()
 	{
-		super();
-		
 		// By default the translucent objects can be picked
 		GetRenderer().PickTranslucentOn();
 	}
@@ -65,11 +64,7 @@ public class View extends Canvas {
 	@Override
 	public void keyPressed(KeyEvent e)
 	{
-		super.keyPressed(e);
-		
-		if(!interactive)
-			return;
-		
+		super.keyPressed(e);		
 		switch (e.getKeyCode())
 		{
 			case KeyEvent.VK_SPACE:
@@ -90,11 +85,7 @@ public class View extends Canvas {
 	@Override
 	public void keyReleased(KeyEvent e)
 	{
-		super.keyReleased(e);
-		
-		if(!interactive)
-			return;
-		
+		super.keyReleased(e);		
 		switch (e.getKeyCode())
 		{
 			case KeyEvent.VK_CONTROL:
@@ -112,10 +103,6 @@ public class View extends Canvas {
 	public void mousePressed(MouseEvent e)
 	{
 		super.mousePressed(e);
-		
-		if(!interactive)
-			return;
-		
 		pressPosition = new Point(e.getPoint());
 		pressPosition.y = e.getComponent().getHeight() - pressPosition.y;
 	}
@@ -123,11 +110,7 @@ public class View extends Canvas {
 	@Override
 	public void mouseReleased(MouseEvent e)
 	{
-		super.mouseReleased(e);
-		
-		if(!interactive)
-			return;
-		
+		super.mouseReleased(e);		
 		if(e.getButton() != MouseEvent.BUTTON1)
 			return;
 		
@@ -150,6 +133,7 @@ public class View extends Canvas {
 					pressPosition, releasePosition);
 				for(Viewable viewable : getViewables())
 					viewable.setClippingPlanes(planes);
+				planes.Delete();
 				setMouseMode(MouseMode.POINT_SELECTION);
 				RenderSecured();
 				break;
@@ -207,6 +191,12 @@ public class View extends Canvas {
 	public void setInteractive(boolean interactive)
 	{
 		this.interactive = interactive;
+	}
+
+	@Override
+	protected void processEvent(AWTEvent e) {
+		if(interactive)
+			super.processEvent(e);
 	}
 
 	public void remove(Viewable interactor)
