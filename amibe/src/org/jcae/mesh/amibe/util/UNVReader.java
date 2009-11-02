@@ -206,14 +206,21 @@ public class UNVReader
 				String type = st.nextToken();
 				int ind = Integer.valueOf(index).intValue();
 				if (type.equals("41") || type.equals("51") || type.equals("61")
-				 || type.equals("74") || type.equals("91"))
+				 || type.equals("74") || type.equals("91") || type.equals("92"))
 				{
 					line=rd.readLine();
 					// triangle
 					st = new StringTokenizer(line);
+					boolean parabolic = type.equals("92");
 					int p1 = Integer.valueOf(st.nextToken()).intValue();
+					if (parabolic)
+						st.nextToken();
 					int p2 = Integer.valueOf(st.nextToken()).intValue();
+					if (parabolic)
+						st.nextToken();
 					int p3 = Integer.valueOf(st.nextToken()).intValue();
+					if (parabolic)
+						st.nextToken();
 					Vertex n1 = nodesmap.get(p1);
 					assert n1 != null : p1;
 					Vertex n2 = nodesmap.get(p2);
