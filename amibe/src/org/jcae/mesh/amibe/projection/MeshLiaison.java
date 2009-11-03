@@ -251,6 +251,13 @@ public class MeshLiaison
 		return updateLocation(v, target, proj);
 	}
 
+	public final Triangle getBackgroundTriangle(Vertex v)
+	{
+		ProjectedLocation location = mapCurrentVertexProjection.get(v);
+		assert location != null : "Vertex "+v+" not found";
+		return location.t;
+	}
+
 	/**
 	 * Add a Vertex.
 	 *
