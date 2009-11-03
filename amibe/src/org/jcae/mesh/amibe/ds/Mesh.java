@@ -202,7 +202,7 @@ public class Mesh implements Serializable
 	 *
 	 * @param t  triangle being removed.
 	 */
-	final void remove(Triangle t)
+	public final void remove(Triangle t)
 	{
 		triangleList.remove(t);
 		if (!(t instanceof TriangleHE))
