@@ -24,7 +24,6 @@ import org.jcae.mesh.oemm.Storage;
 import org.jcae.netbeans.Utilities;
 import org.jcae.netbeans.mesh.MeshDataObject;
 import org.jcae.vtk.MeshVisuBuilder;
-import org.netbeans.api.project.Project;
 import org.openide.filesystems.FileUtil;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;

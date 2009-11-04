@@ -117,9 +117,10 @@
             </file>
         </folder>
         <folder name="jCAE">
+            <file name="org-jcae-netbeans-cad-ConvertToBRepAction.instance"/>
             <file name="org-jcae-netbeans-cad-ExplodeAction.instance"/>
-            <file name="org-jcae-netbeans-cad-ImportAction.instance">
-                <attr name="instanceCreate" methodvalue="org.jcae.netbeans.cad.ImportAction.action"/>
+            <file name="org-jcae-netbeans-cad-ConvertToBRepAction.instance">
+                <attr name="instanceCreate" methodvalue="org.jcae.netbeans.cad.ConvertToBRepAction.action"/>
             </file>
             <file name="org-jcae-netbeans-cad-RemoveAction.instance"/>
             <file name="org-jcae-netbeans-cad-RemoveHoles.instance"/>
@@ -159,6 +160,52 @@
     </folder>
 
     <folder name="Loaders">
+        <folder name="application">
+            <folder name="vnd.jcae.geometry">
+                <folder name="Actions">
+                    <file name="org-jcae-netbeans-cad-ConvertToBRepAction.shadow">
+                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-cad-ConvertToBRepAction.instance"/>
+                        <attr name="position" intvalue="400"/>
+                    </file>
+                    <file name="Separator1.instance">
+                        <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
+                        <attr name="position" intvalue="500"/>
+                    </file>
+                    <file name="CutAction.instance">
+                        <attr name="instanceClass" stringvalue="org.openide.actions.CutAction"/>
+                        <attr name="position" intvalue="600"/>
+                    </file>
+                    <file name="CopyAction.instance">
+                        <attr name="instanceClass" stringvalue="org.openide.actions.CopyAction"/>
+                        <attr name="position" intvalue="700"/>
+                    </file>
+                    <file name="PasteAction.instance">
+                        <attr name="instanceClass" stringvalue="org.openide.actions.PasteAction"/>
+                        <attr name="position" intvalue="800"/>
+                    </file>
+                    <file name="Separator2.instance">
+                        <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
+                        <attr name="position" intvalue="900"/>
+                    </file>
+                    <file name="DeleteAction.instance">
+                        <attr name="instanceClass" stringvalue="org.openide.actions.DeleteAction"/>
+                        <attr name="position" intvalue="1000"/>
+                    </file>
+                    <file name="RenameAction.instance">
+                        <attr name="instanceClass" stringvalue="org.openide.actions.RenameAction"/>
+                        <attr name="position" intvalue="1100"/>
+                    </file>
+                    <file name="Separator0.instance">
+                        <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
+                        <attr name="position" intvalue="1130"/>
+                    </file>
+                    <file name="PropertiesAction.instance">
+                        <attr name="instanceClass" stringvalue="org.openide.actions.PropertiesAction"/>
+                        <attr name="position" intvalue="1500"/>
+                    </file>
+                </folder>
+            </folder>
+        </folder>
         <folder name="text">
             <folder name="mesh+xml">
                 <folder name="Actions">
@@ -428,10 +475,6 @@
         <folder name="RunProject_hidden"/>
 
         <folder name="File">
-            <file name="org-jcae-netbeans-cad-ImportAction.shadow">
-                <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-cad-ImportAction.instance"/>
-                <attr name="position" intvalue="2150"/>
-            </file>
             <file name="org-openide-actions-PageSetupAction.instance_hidden"/>
             <file name="org-openide-actions-PrintAction.instance_hidden"/>
         </folder>
@@ -462,38 +505,30 @@
     </folder>
 
     <folder name="Templates">
-        <folder name="Project">
-            <folder name="jCAE">
-                <file name="JCAE Project" url="templates/">
-                    <attr name="template" boolvalue="true"/>
-                    <attr name="instantiatingIterator" methodvalue="org.jcae.netbeans.ProjectWizardIterator.createIterator"/>
-                </file>
-            </folder>
-        </folder>
-        <folder name="Geometry">
-			<!-- URL is a pointer to the content for the file -->
-            <file name="Empty.brep" url="templates/empty.brep">
+        <folder name="jCAE">
+            <file name="Geometry.brep" url="templates/empty.brep">
                 <attr name="SystemFileSystem.localizingBundle" stringvalue="org.jcae.netbeans.Bundle"/>
                 <attr name="template" boolvalue="true"/>
-
-				<!-- URL to a text description to show in the new wizard -->
-				<!--attr name="instantiatingWizardURL" 
-				urlvalue="nbresloc:/org/netbeans/modules/povproject/resources/emptypov.html"/-->
-
-				<!-- Icon to use for the file -->
-				<!--attr name="SystemFileSystem.icon" 
-				urlvalue="nbresloc:org/netbeans/modules/povproject/resources/povicon.gif"/-->
-
-				<!-- A programmatic category -->
                 <attr name="templateCategory" stringvalue="brep-types"/>
-
+            </file>
+            <file name="Mesh.bora">
+                <attr name="template" boolvalue="true"/>
+                <attr name="instantiatingIterator" newvalue="org.jcae.netbeans.mesh.NewMeshWizard"/>
             </file>
         </folder>
-        <file name="XML_hidden"/>
+        <folder name="Privileged">
+            <file name="Geometry.shadow">
+                <attr name="originalFile" stringvalue="Templates/jCAE/Geometry.brep"/>
+            </file>
+            <file name="Mesh.shadow">
+                <attr name="originalFile" stringvalue="Templates/jCAE/Mesh.bora"/>
+            </file>
+        </folder>
     </folder>
 
     <folder name="Services">
         <folder name="MIMEResolver">
+            <file name="org-jcae-netbeans-MIMEResolver.instance"/>
             <file name="org-jcae-netbeans-mesh-MeshResolver.instance"/>
             <file name="UNVResolver.xml" url="mesh/UNVResolver.xml">
                 <attr name="SystemFileSystem.localizingBundle" stringvalue="org.jcae.netbeans.Bundle"/>
@@ -519,6 +554,7 @@
         <folder name="Modes">
             <folder name="explorer">
                 <file name="runtime.wstcref" url="runtimeWstcref.xml"/>
+                <file name="favorites.wstcref" url="favoritesWstcref.xml"/>
             </folder>
             <folder name="properties">
                 <file name="properties.wstcref" url="propertiesWstcref.xml"/>

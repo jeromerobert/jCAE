@@ -21,6 +21,7 @@
 
 package org.jcae.netbeans.cad;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -31,11 +32,15 @@ import org.openide.ErrorManager;
 import org.openide.cookies.SaveCookie;
 import org.openide.filesystems.FileLock;
 import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileSystem;
 import org.openide.filesystems.FileUtil;
+import org.openide.loaders.DataFolder;
+import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.MultiDataObject;
 import org.openide.loaders.MultiFileLoader;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 import org.openide.xml.XMLUtil;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -49,6 +54,26 @@ public class BrepDataObject extends MultiDataObject implements SaveCookie
 		super(arg0, arg1);
 	}
 
+	/**
+	 * Copy/past need a DataObject.
+	 * To be able to paste a TopoDS_Shape we create a dummy DataObject in memory
+	 * which wrap it.
+	 */
+	public static BrepDataObject createInMemory(NbShape shape)
+	{
+		try {
+			FileSystem fs = FileUtil.createMemoryFileSystem();
+			FileObject fob = fs.getRoot().createData(shape.getName(), ".brep");
+			BrepDataObject bdo = (BrepDataObject) DataObject.find(fob);
+			bdo.shape = shape;
+			bdo.memory = true;
+			return bdo;
+		} catch (IOException ex) {
+			//should never happen on a memory file system
+			Exceptions.printStackTrace(ex);
+			return null;
+		}
+	}
 	@Override
 	protected Node createNodeDelegate()
 	{	
@@ -56,6 +81,7 @@ public class BrepDataObject extends MultiDataObject implements SaveCookie
 	}
 
 	protected NbShape shape;	
+	private boolean memory;
 	
 	public NbShape getShape()
 	{		
@@ -63,6 +89,21 @@ public class BrepDataObject extends MultiDataObject implements SaveCookie
 			throw new IllegalStateException(
 				"BRep file not loaded. Call BrepataObject.load() first");
 		return shape;
+	}
+
+	@Override
+	protected DataObject handleCopy(DataFolder df) throws IOException {
+		if(memory)
+		{
+			FileObject f = df.getPrimaryFile();
+			String s = FileUtil.findFreeFileName(f, shape.getName(), "brep")+".brep";
+			String p = new File(FileUtil.toFile(f), s).getPath();
+			shape.saveImpl(p);
+			f.refresh(true);
+			return DataObject.find(f.getFileObject(s));
+		}
+		else
+			return super.handleCopy(df);
 	}
 
 	public void save()

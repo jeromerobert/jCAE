@@ -61,7 +61,7 @@ public abstract class CAOShapeSelection extends BooleanStateAction implements Cu
 
 	public void currentViewableChanged(Viewable interactor)
 	{	
-		if(interactor == null || interactor.getClass() != ViewableCAD.class)
+		if(interactor == null || !(interactor instanceof ViewableCAD))
 		{
 			setEnabled(false);
 		}

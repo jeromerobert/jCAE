@@ -29,6 +29,7 @@ import org.jcae.netbeans.Utilities;
 import org.jcae.opencascade.jni.*;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.openide.loaders.DataFolder;
 import org.openide.nodes.Node;
 import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
@@ -68,13 +69,7 @@ public class GeomUtils
 	 */
 	public static Collection<Node> findNode(Node where, Node n)
 	{		
-		ArrayList<Node> toReturn=new ArrayList<Node>();
-		
-		if(where.getClass().getName().equals("org.netbeans.modules.favorites.Favorites"))
-		{
-			return toReturn;
-		}
-		
+		ArrayList<Node> toReturn=new ArrayList<Node>();		
 		NbShape ws = getShape(where);
 		NbShape nsh = getShape(n);
 		if(ws!=null && nsh!=null && ws.equals(nsh))
@@ -98,7 +93,8 @@ public class GeomUtils
 		NbShape shape = getShape(node);		
 		if (shape == null)
 		{
-			FileObject objDir = Utilities.getProject(node).getProjectDirectory();
+			FileObject objDir = getParentBrep(node).getParentNode().
+				getLookup().lookup(DataFolder.class).getPrimaryFile();
 			String name = Utilities.getFreeName(objDir, newName, ".brep");			
 			String fn=new File(FileUtil.toFile(objDir),name).getPath();
 			BRepTools.write(newShape, fn);

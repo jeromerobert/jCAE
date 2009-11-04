@@ -192,7 +192,7 @@ public class OldAmibeMeshNode extends DataNode implements ViewCookie
 	 * @param the View3D in which the Groups are displayed.
 	 */
 	public static void displayGroups(Groups groups, String meshName,
-		Collection<Group> groupsToDisplay, View view)
+		Collection<Group> groupsToDisplay, View view, Node node)
 		throws ParserConfigurationException, SAXException, IOException
 	{
 		int[] idGroupsDisplayed = new int[groupsToDisplay.size()];
@@ -214,7 +214,7 @@ public class OldAmibeMeshNode extends DataNode implements ViewCookie
 			sb=sb+"...";
 
 		AmibeToMesh reader = new AmibeToMesh(groups.getMeshFile(), idGroupsDisplayed);
-		OldViewableMesh interactor = new OldViewableMesh(reader.getMesh());
+		OldViewableMesh interactor = new NOldViewableMesh(reader.getMesh(), node);
 		interactor.setName(meshName+" ["+sb+"]");
 		SelectionManager.getDefault().addInteractor(interactor, groups);
 		view.add(interactor);
@@ -228,7 +228,7 @@ public class OldAmibeMeshNode extends DataNode implements ViewCookie
 			try
 			{
 				displayGroups(groups, getName(),
-					Arrays.asList(groups.getGroups()), view);
+					Arrays.asList(groups.getGroups()), view, this);
 			}
 			catch (ParserConfigurationException ex)
 			{

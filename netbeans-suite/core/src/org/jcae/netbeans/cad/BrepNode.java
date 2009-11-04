@@ -97,7 +97,7 @@ public class BrepNode extends DataNode implements Node.Cookie, OpenCookie
 	 */
 	@Override
 	public Image getIcon(int arg0) {
-		if(isLoaded())
+		if(isLoaded() || getLookup().lookup(BrepDataObject.class).isTemplate())
 			return super.getOpenedIcon(arg0);
 		else
 			return super.getIcon(arg0);

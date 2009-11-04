@@ -108,14 +108,17 @@ public class CADSelection implements EntitySelection, SelectionListener,
 
 	public void selectionChanged(Viewable interactor)
 	{
+		if(! (interactor instanceof NViewableCAD))
+			return;
+		final NViewableCAD interac = (NViewableCAD)interactor;
 		// If it is not our interactor leave
-		if (!interactors.contains(interactor))
+		if (!interactors.contains(interac))
 			return;
 
 		if (selectionLock)
 			return;
 		selectionLock = true;
-		selection = ((ViewableCAD) interactor).getSelection();
+		selection = interac.getSelection();
 		SelectionManager.getDefault().prepareSelection();
 
 		final ArrayList<Node> nodes = new ArrayList<Node>(selection.size());
@@ -138,8 +141,7 @@ public class CADSelection implements EntitySelection, SelectionListener,
 						nnodes.addAll(Arrays.asList(exm.getSelectedNodes()));
 
 					for (Node n : nodes)
-						for (Node mn : findModuleNodes(exm))
-							nnodes.addAll(GeomUtils.findNode(mn, n));
+						nnodes.addAll(GeomUtils.findNode(interac.getNode(), n));
 
 					try
 					{
@@ -174,25 +176,6 @@ public class CADSelection implements EntitySelection, SelectionListener,
 		}
 	/*}
 	});*/
-	}
-
-	/** Return all ModuleNode
-	 * @param exm
-	 * @return*/
-	private static Collection<Node> findModuleNodes(ExplorerManager exm)
-	{
-		ArrayList<Node> toReturn = new ArrayList<Node>();
-		for (Node n : exm.getRootContext().getChildren().getNodes())
-			for (Node nn : n.getChildren().getNodes())
-			{
-				ModuleNode mn = nn.getLookup().lookup(ModuleNode.class);
-				if (mn != null)
-				{
-					toReturn.add(nn);
-					break;
-				}
-			}
-		return toReturn;
 	}
 
 	private static boolean isChildren(Node parent, Node children)

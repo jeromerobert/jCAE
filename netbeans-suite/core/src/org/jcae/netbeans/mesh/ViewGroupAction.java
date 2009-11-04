@@ -74,7 +74,7 @@ public class ViewGroupAction extends CookieAction
 				Entry<Groups, Collection<Group>> e=it.next();
 				OldAmibeMeshNode.displayGroups(e.getKey(),
 					arg0[0].getParentNode().getParentNode().getName(),
-					e.getValue(), v);
+					e.getValue(), v, arg0[0].getParentNode().getParentNode().getParentNode());
 			}
 		}
 		catch(IOException ex)

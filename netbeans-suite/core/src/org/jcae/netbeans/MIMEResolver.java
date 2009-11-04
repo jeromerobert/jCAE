@@ -15,39 +15,36 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2006-2009, by EADS France
  */
 
 package org.jcae.netbeans;
 
-import org.netbeans.spi.project.ProjectFactory;
-import org.netbeans.spi.project.ProjectState;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import org.openide.filesystems.FileObject;
 
-/**
- *
- * @author jerome
- */
-public class JCAEProjectFactory implements ProjectFactory
+public class MIMEResolver extends org.openide.filesystems.MIMEResolver
 {
-	/**
-	 * Test whether a given directory probably refers to a project recognized
-	 * by this factory without actually trying to create it.
-	 */
-	public boolean isProject(FileObject projectDirectory)
+	private final static Collection<String> EXTENSION=new HashSet<String>(
+		Arrays.asList("step", "igs", "iges", "stp", "STEP", "STP", "IGS", "IGES"));
+	
+	private final static String MESH = "text/mesh+xml";
+	public final static String CAD = "application/vnd.jcae.geometry";
+	
+	public MIMEResolver()
 	{
-		return projectDirectory.getFileObject("jcae", "xml") != null;
+		super(MESH, CAD);
 	}
-
-	/** Create a project that resides on disk. */
-	public org.netbeans.api.project.Project loadProject(
-		FileObject projectDirectory, ProjectState state)
+	
+	public String findMIMEType(FileObject fileObject)
 	{
-		return new JCAEProject(projectDirectory, state);
-	}
-
-	/** Save a project to disk. */
-	public void saveProject(org.netbeans.api.project.Project project)
-	{
-	}
+		if(EXTENSION.contains(fileObject.getExt()))
+			return CAD;
+		else if(fileObject.getNameExt().endsWith("_mesh.xml"))
+			return MESH;
+		else
+			return null;
+	}	
 }

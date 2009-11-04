@@ -26,10 +26,10 @@ import org.jcae.vtk.View;
 import org.jcae.vtk.ViewableCAD;
 import org.openide.cookies.ViewCookie;
 import org.openide.nodes.Node;
+import org.openide.util.Lookup.Result;
 
 public class ViewShapeCookie implements ViewCookie
 {
-
 	private final Node node;
 	WeakReference<ViewableCAD> viewableRef = new WeakReference<ViewableCAD>(null);
 
@@ -40,16 +40,15 @@ public class ViewShapeCookie implements ViewCookie
 
 	public void view()
 	{
+		Node realNode = getCurrentBRepNode();
 		NbShape nbShape = GeomUtils.getShape(node);
 		View v = ViewManager.getDefault().getCurrentView();
-
 		// TODO PLACE IT
 		NbShape root = GeomUtils.getShape(node).getRootShape();
-
 		ViewableCAD viewable = viewableRef.get();		
 		if(viewable == null)
 		{
-			viewable = new ViewableCAD(nbShape.getImpl());
+			viewable = new NViewableCAD(nbShape, realNode);
 			viewableRef = new WeakReference<ViewableCAD>(viewable);
 			viewable.setName(node.getName());
 			
@@ -60,5 +59,27 @@ public class ViewShapeCookie implements ViewCookie
 		v.add(viewable);
 	}
 
-
+	private Node getCurrentBRepNode()
+	{
+		//To be able to highlight the node in the tree after a picking we need
+		//the wrapped node (FilterNode)
+		Result<Node> lr = org.openide.util.Utilities.actionsGlobalContext()
+			.lookupResult(Node.class);
+		for(Node n:lr.allInstances())
+		{
+			Node cn = n;
+			NbShape s = cn.getLookup().lookup(NbShape.class);
+			BrepDataObject sf = cn.getLookup().lookup(BrepDataObject.class);
+			while(sf == null && s != null)
+			{
+				cn = cn.getParentNode();
+				s = cn.getLookup().lookup(NbShape.class);
+				sf = cn.getLookup().lookup(BrepDataObject.class);
+			}
+			if(sf != null)
+				return cn;
+		}
+		throw new IllegalStateException("Cannot find the any BRepNode associated to "+
+			lr.allInstances()+" in a cookies of "+node);
+	}
 }

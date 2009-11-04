@@ -27,7 +27,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-import org.netbeans.api.project.Project;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
@@ -60,15 +59,6 @@ public class Utilities
 		}
 		while(names.contains(name));
 		return name;
-	}
-	
-	static public Project getProject(Node n)
-	{
-		Object p = n.getLookup().lookup(Project.class);
-		if(p==null)
-			return getProject(n.getParentNode());
-		else
-			return (Project) p;
 	}
 	
 	public static boolean showEditBeanDialog(Object bean)

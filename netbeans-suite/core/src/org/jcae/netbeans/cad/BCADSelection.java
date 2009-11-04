@@ -211,24 +211,6 @@ public class BCADSelection implements EntitySelection, SelectionListener,
 	});*/
 	}
 
-	/**
-	 * return "Meshes" module node
-	 * @param exm
-	 * @return*/
-	private static Node findModuleNode(ExplorerManager exm)
-	{
-		for (Node n : exm.getRootContext().getChildren().getNodes())
-			for (Node nn : n.getChildren().getNodes())
-			{
-				org.jcae.netbeans.mesh.ModuleNode mn = nn.getLookup().lookup(org.jcae.netbeans.mesh.ModuleNode.class);
-				if (mn != null)
-				{
-					return nn;
-				}
-			}
-		return null;
-	}
-
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (evt.getPropertyName().equals(ExplorerManager.PROP_SELECTED_NODES)

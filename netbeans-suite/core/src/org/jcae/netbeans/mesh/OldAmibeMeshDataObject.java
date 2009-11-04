@@ -15,20 +15,15 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2005-2009, by EADS France
  */
 
 package org.jcae.netbeans.mesh;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.IOException;
-import java.io.InputStream;
-import org.jcae.mesh.bora.ds.BModel;
-import org.jcae.mesh.bora.xmldata.BModelReader;
-import org.jcae.netbeans.Utilities;
 import org.openide.ErrorManager;
 import org.openide.cookies.SaveCookie;
 import org.openide.filesystems.FileLock;
@@ -43,14 +38,22 @@ import org.openide.nodes.Node;
  * @author botrel
  * @deprecated Used only to maintain compatibility with old meshes
  */
-public class OldAmibeMeshDataObject extends MultiDataObject implements SaveCookie, PropertyChangeListener
+public class OldAmibeMeshDataObject extends MultiDataObject implements SaveCookie
 {
-
-	public OldAmibeMeshDataObject(FileObject arg0, MultiFileLoader arg1) throws DataObjectExistsException
+	public OldAmibeMeshDataObject(FileObject arg0, MultiFileLoader arg1, Mesh mesh)
+		throws DataObjectExistsException
 	{
 		super(arg0, arg1);
+		this.mesh = mesh;
+		mesh.addPropertyChangeListener(new PropertyChangeListener() {
+
+			public void propertyChange(PropertyChangeEvent evt) {
+				setModified(true);
+			}
+		});
 	}
 
+	@Override
 	protected Node createNodeDelegate()
 	{
 		return new OldAmibeMeshNode(this);
@@ -60,45 +63,7 @@ public class OldAmibeMeshDataObject extends MultiDataObject implements SaveCooki
 
 	public Mesh getMesh()
 	{
-		if(mesh==null)
-		{
-			mesh=initMesh();
-			mesh.addPropertyChangeListener(this);
-		}
 		return mesh;
-	}
-
-	protected Mesh initMesh()
-	{
-		InputStream in=null;
-		Mesh toReturn;
-		try
-		{
-			in=getPrimaryFile().getInputStream();
-			XMLDecoder decoder=new XMLDecoder(in);
-			toReturn=(Mesh)decoder.readObject();
-		}
-		catch (Exception ex)
-		{
-			ErrorManager.getDefault().log(ex.getMessage());
-			String name=Utilities.getFreeName(
-				getPrimaryFile().getParent(),
-				"amibe",".dir");
-			toReturn = new Mesh(name);
-		}
-		finally
-		{
-			if(in!=null)
-				try
-				{
-					in.close();
-				}
-				catch (IOException ex)
-				{
-					ErrorManager.getDefault().notify(ex);
-				}
-		}
-		return toReturn;
 	}
 
 	public void save() throws IOException
@@ -124,10 +89,5 @@ public class OldAmibeMeshDataObject extends MultiDataObject implements SaveCooki
 			if(l!=null)
 				l.releaseLock();
 		}
-	}
-
-	public void propertyChange(PropertyChangeEvent evt)
-	{
-		setModified(true);
 	}
 }

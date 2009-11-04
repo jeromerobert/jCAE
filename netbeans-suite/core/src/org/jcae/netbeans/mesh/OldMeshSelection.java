@@ -105,6 +105,8 @@ public class OldMeshSelection implements EntitySelection, SelectionListener, Cur
 
 	public void selectionChanged(Viewable interactor)
 	{
+		if(! (interactor instanceof NViewableMesh))
+			return;
 		// If it is not our interactor leave
 		if (!interactors.contains(interactor))
 			return;
@@ -114,7 +116,8 @@ public class OldMeshSelection implements EntitySelection, SelectionListener, Cur
 
 		selectionLock = true;
 
-		selection = new TIntArrayList(((OldViewableMesh) interactor).getSelection());
+		final NOldViewableMesh inter = (NOldViewableMesh) interactor;
+		selection = new TIntArrayList((inter).getSelection());
 		SelectionManager.getDefault().prepareSelection();
 
 		refreshHighlight();
@@ -126,61 +129,61 @@ public class OldMeshSelection implements EntitySelection, SelectionListener, Cur
 			{
 				// Get the mesh node
 				for (ExplorerManager exm : Utilities.getExplorerManagers())
-					for (Node moduleNode : findModuleNodes(exm))
-						for (Node meshProxy : moduleNode.getChildren().getNodes())
-						{
+				{
+					for (Node meshProxy : inter.getNode().getChildren().getNodes())
+					{
 
-							OldAmibeMeshNode meshNode = meshProxy.getLookup().lookup(OldAmibeMeshNode.class);
-							if (meshNode != null)
-								if (meshNode.hasThisGroupsNode(entity))
+						OldAmibeMeshNode meshNode = meshProxy.getLookup().lookup(OldAmibeMeshNode.class);
+						if (meshNode != null)
+							if (meshNode.hasThisGroupsNode(entity))
+							{
+								// Mesh founded now
+								// Get the groups node
+								Node groupsProxy = null;
+
+								for (Node gn : meshProxy.getChildren().getNodes())
+									if (gn.getLookup().lookup(GroupChildren.class) != null)
+									{
+										groupsProxy = gn;
+										break;
+									}
+
+								// Append to the selection explorer
+								Node[] childrenProxy = groupsProxy.getChildren().getNodes();
+								Node[] selectionExplorer = exm.getSelectedNodes();
+								ArrayList<Node> nodes = new ArrayList<Node>(childrenProxy.length + selectionExplorer.length);
+								nodes.addAll(Arrays.asList(selectionExplorer));
+								for (Node groupProxy : childrenProxy)
 								{
-									// Mesh founded now
-									// Get the groups node
-									Node groupsProxy = null;
+									GroupNode groupNode = groupProxy.getLookup().lookup(GroupNode.class);
+									if (groupNode == null)
+										throw new RuntimeException("DEBUG node is not a GroupNode but " + groupNode.getClass().getName());
 
-									for (Node gn : meshProxy.getChildren().getNodes())
-										if (gn.getLookup().lookup(GroupChildren.class) != null)
-										{
-											groupsProxy = gn;
-											break;
-										}
-
-									// Append to the selection explorer
-									Node[] childrenProxy = groupsProxy.getChildren().getNodes();
-									Node[] selectionExplorer = exm.getSelectedNodes();
-									ArrayList<Node> nodes = new ArrayList<Node>(childrenProxy.length + selectionExplorer.length);
-									nodes.addAll(Arrays.asList(selectionExplorer));
-									for (Node groupProxy : childrenProxy)
-									{
-										GroupNode groupNode = groupProxy.getLookup().lookup(GroupNode.class);
-										if (groupNode == null)
-											throw new RuntimeException("DEBUG node is not a GroupNode but " + groupNode.getClass().getName());
-
-										// Add if it's in the selection
-										if (selection.contains(groupNode.getGroup().getId()))
-											nodes.add(groupProxy);
-										// Remove from the selection if it is
-										else
-											nodes.remove(groupProxy);
-									}
-
-									try
-									{
-										SelectionManager.getDefault().setDisableListeningProperty(true);
-										exm.setSelectedNodes(nodes.toArray(
-												new Node[nodes.size()]));
-										SelectionManager.getDefault().setDisableListeningProperty(false);
-									} catch (PropertyVetoException e)
-									{
-										ErrorManager.getDefault().notify(e);
-									}
-
-									// RETURN
-									selectionLock = false;
-									return;
+									// Add if it's in the selection
+									if (selection.contains(groupNode.getGroup().getId()))
+										nodes.add(groupProxy);
+									// Remove from the selection if it is
+									else
+										nodes.remove(groupProxy);
 								}
-						}
 
+								try
+								{
+									SelectionManager.getDefault().setDisableListeningProperty(true);
+									exm.setSelectedNodes(nodes.toArray(
+											new Node[nodes.size()]));
+									SelectionManager.getDefault().setDisableListeningProperty(false);
+								} catch (PropertyVetoException e)
+								{
+									ErrorManager.getDefault().notify(e);
+								}
+
+								// RETURN
+								selectionLock = false;
+								return;
+							}
+					}
+				}
 				selectionLock = false;				
 			}
 		});
@@ -197,25 +200,6 @@ public class OldMeshSelection implements EntitySelection, SelectionListener, Cur
 			interactor.setSelection(selection.toNativeArray());
 			interactor.highlight();
 		}
-	}
-
-	/** Return all ModuleNode
-	 * @param exm
-	 * @return*/
-	private static Collection<Node> findModuleNodes(ExplorerManager exm)
-	{
-		ArrayList<Node> toReturn = new ArrayList<Node>();
-		for (Node n : exm.getRootContext().getChildren().getNodes())
-			for (Node nn : n.getChildren().getNodes())
-			{
-				ModuleNode mn = nn.getLookup().lookup(ModuleNode.class);
-				if (mn != null)
-				{
-					toReturn.add(nn);
-					break;
-				}
-			}
-		return toReturn;
 	}
 
 	public void propertyChange(PropertyChangeEvent evt)

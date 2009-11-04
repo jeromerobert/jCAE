@@ -104,6 +104,8 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 
 	public void selectionChanged(Viewable interactor)
 	{
+		if( ! (interactor instanceof NViewableMesh) )
+			return;
 		// If it is not our interactor leave
 		if (!interactors.contains(interactor))
 			return;
@@ -119,16 +121,15 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 		}
 		SelectionManager.getDefault().prepareSelection();
 		final ArrayList<Node> nodes = new ArrayList<Node>();
-		for (Node n : getFilterNodeToExplore().getChildren().getNodes(true)) {
-			if (selection.contains(n.getName())) {
-				nodes.add(n);
-//				nodes.add(n.getLookup().lookup(BGroupNode.class));
-			}
+		Node nnn = getFilterNodeToExplore(((NViewableMesh)interactor).getNode());
 
+		for (Node n : nnn.getChildren().getNodes(true)) {
+			if (selection.contains(n.getName()))
+				nodes.add(n);
 		}
 		refreshHighlight();
 
-			SwingUtilities.invokeLater(new Runnable()
+		SwingUtilities.invokeLater(new Runnable()
 		{
 
 			public void run()
@@ -158,46 +159,22 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 		});
 	};
 
-	private Node getFilterNodeToExplore() {
-		for (ExplorerManager exm : Utilities.getExplorerManagers()) {
-			for (Node n : findModuleNodes(exm)) {
-				ArrayDeque<Children> toExplore = new ArrayDeque<Children>();
-				toExplore.push(n.getChildren());
-				while (!toExplore.isEmpty()) {
-					Children c = toExplore.pop();
-					for (Node nn : c.getNodes()) {
-						if (!nn.isLeaf()) {
-							toExplore.add(nn.getChildren());
-						}
-						BGroupsNode mn = nn.getLookup().lookup(BGroupsNode.class);
-						if (mn != null && mn.equals(entity)) {
-							return nn;
-						}
-					}
+	private Node getFilterNodeToExplore(Node n) {
+		ArrayDeque<Children> toExplore = new ArrayDeque<Children>();
+		toExplore.push(n.getChildren());
+		while (!toExplore.isEmpty()) {
+			Children c = toExplore.pop();
+			for (Node nn : c.getNodes()) {
+				if (!nn.isLeaf()) {
+					toExplore.add(nn.getChildren());
+				}
+				BGroupsNode mn = nn.getLookup().lookup(BGroupsNode.class);
+				if (mn != null && mn.equals(entity)) {
+					return nn;
 				}
 			}
 		}
 		throw new IllegalStateException("Could not find node " + entity);
-	}
-
-	/** Return the Meshmodule node
-	 * @param exm
-	 * @return*/
-	private static Collection<Node> findModuleNodes(ExplorerManager exm)
-	{
-		ArrayList<Node> toReturn = new ArrayList<Node>();
-		for (Node n : exm.getRootContext().getChildren().getNodes())
-			for (Node nn : n.getChildren().getNodes())
-			{
-				org.jcae.netbeans.mesh.ModuleNode mn = nn.getLookup().lookup(org.jcae.netbeans.mesh.ModuleNode.class);
-				if (mn != null)
-				{
-					toReturn.add(nn);
-				}
-			}
-		if (toReturn.isEmpty())
-			throw new IllegalStateException("Could not find mesh module node");
-		return toReturn;
 	}
 
 	/**

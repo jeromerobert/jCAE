@@ -119,14 +119,21 @@ public class MeshNode extends DataNode implements ViewCookie
 			 getEnclosedSubMeshNode().viewMesh();
 		}
 	}
+	
+	public static void view(String vName,
+		Map<String, Collection<BDiscretization>> meshData, BGroupsNode groups) {
 
+		view(vName, meshData, groups,
+			org.openide.util.Utilities.actionsGlobalContext().lookup(Node.class));
+	}
+	
 	public static void view(String vName, Map<String, Collection<BDiscretization>> meshData,
-			BGroupsNode groups) {
+			BGroupsNode groups, Node node) {
 		if (meshData == null || meshData.isEmpty())
 			return;
 		View v = ViewManager.getDefault().getCurrentView();
 		BoraToMesh toMesh = new BoraToMesh(meshData);
-		ViewableMesh vMesh = new ViewableMesh(toMesh.getMesh());
+		ViewableMesh vMesh = new NViewableMesh(toMesh.getMesh(), node);
 		vMesh.setName(vName);
 		if (groups != null)
 			SelectionManager.getDefault().addInteractor(vMesh, groups);
@@ -149,11 +156,6 @@ public class MeshNode extends DataNode implements ViewCookie
 
 	public BModel getBModel(String geomFile) {
 		return getCookie(MeshDataObject.class).getBModel(geomFile);
-	}
-	
-	@Override
-	public String getHtmlDisplayName() {
-		return "<font color='0000FF'>" + getName() + "</font>";
 	}
 
 	@Override
@@ -178,7 +180,13 @@ public class MeshNode extends DataNode implements ViewCookie
 	@Override
 	public String getName()
 	{
-		return getDataObject().getName();
+		return getDataObject().getPrimaryFile().getName();
+	}
+
+	@Override
+	public String getDisplayName()
+	{
+		return getDataObject().getPrimaryFile().getName();
 	}
 	
 	@Override
@@ -225,12 +233,6 @@ public class MeshNode extends DataNode implements ViewCookie
 
 	private static String getCADName(String cadFile) {
 		return cadFile.substring(cadFile.lastIndexOf(File.separator) + 1, cadFile.lastIndexOf("."));
-	}
-		
-	@Override
-	public Action getPreferredAction()
-	{
-		return SystemAction.get(PropertiesAction.class);
 	}
 	
 	@Override
