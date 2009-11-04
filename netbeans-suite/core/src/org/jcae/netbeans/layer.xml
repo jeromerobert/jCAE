@@ -119,9 +119,6 @@
         <folder name="jCAE">
             <file name="org-jcae-netbeans-cad-ConvertToBRepAction.instance"/>
             <file name="org-jcae-netbeans-cad-ExplodeAction.instance"/>
-            <file name="org-jcae-netbeans-cad-ConvertToBRepAction.instance">
-                <attr name="instanceCreate" methodvalue="org.jcae.netbeans.cad.ConvertToBRepAction.action"/>
-            </file>
             <file name="org-jcae-netbeans-cad-RemoveAction.instance"/>
             <file name="org-jcae-netbeans-cad-RemoveHoles.instance"/>
             <file name="org-jcae-netbeans-cad-ReverseAction.instance"/>
