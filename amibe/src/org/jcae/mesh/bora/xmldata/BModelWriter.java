@@ -144,7 +144,8 @@ public class BModelWriter
 					if (itc.hasNext())
 					{
 						BCADGraphCell c = itc.next();
-						StringBuilder sblist = new StringBuilder(""+c.getId());
+						StringBuilder sblist = new StringBuilder();
+						sblist.append(c.getId());
 						while (itc.hasNext())
 						{
 							c = itc.next();

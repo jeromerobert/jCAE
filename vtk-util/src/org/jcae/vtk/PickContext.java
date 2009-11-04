@@ -95,6 +95,8 @@ public abstract class PickContext
 	 */
 	public boolean addToSelectedNodes(LeafNode leaf)
 	{
+		if(leaf == null)
+			throw new NullPointerException();
 		return selectionNode.add(leaf);
 	}
 	

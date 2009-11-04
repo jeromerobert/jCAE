@@ -26,6 +26,7 @@ import java.util.LinkedHashSet;
 import java.util.Iterator;
 
 import java.util.logging.Logger;
+import org.jcae.mesh.cad.CADShapeEnum;
 
 public class BDiscretization
 {
@@ -45,6 +46,10 @@ public class BDiscretization
 
 	BDiscretization(BCADGraphCell g, Constraint c)
 	{
+		assert g.getType() == CADShapeEnum.EDGE ||
+			g.getType() == CADShapeEnum.FACE ||
+			g.getType() == CADShapeEnum.VERTEX:
+			"Cannot create a BDiscretization of type "+g.getType();
 		// Store forward oriented cell
 		if (g.getOrientation() != 0 && g.getReversed() != null)
 			graphCell = g.getReversed();
