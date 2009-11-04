@@ -71,6 +71,10 @@ public class OldAmibeMeshDataLoader extends MultiFileLoader
 				return fillMaps(arg0);
 			return p;
 		}
+		else if("oemm".equals(arg0.getExt()) && arg0.isFolder())
+		{
+			return arg0.getParent().getFileObject(arg0.getName()+"_mesh.xml");
+		}
 		return null;
 	}
 
