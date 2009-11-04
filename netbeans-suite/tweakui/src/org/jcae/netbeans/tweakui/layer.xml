@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.1//EN" "http://www.netbeans.org/dtds/filesystem-1_1.dtd">
+<!--
+
+ Project Info:  http://jcae.sourceforge.net
+
+ This program is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Lesser General Public License as published by the Free
+ Software Foundation; either version 2.1 of the License, or (at your option)
+ any later version.
+
+ This program is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with this program; if not, write to the Free Software Foundation, Inc.,
+ 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+
+ (C) Copyright 2005-2009, by EADS France
+
+-->
+<filesystem>
+    <folder name="Toolbars">
+        <file name="Standard.xml" url="Standard.xml"/>
+        <folder name="Build_hidden"/>
+    </folder>
+
+    <folder name="Menu">
+        <file name="Tools_hidden"/>
+        <folder name="View">
+            <file name="org-netbeans-core-actions-HTMLViewAction.instance_hidden"/>
+        </folder>
+        <folder name="BuildProject_hidden"/>
+        <folder name="RunProject_hidden"/>
+
+        <folder name="File">
+            <file name="org-openide-actions-PageSetupAction.instance_hidden"/>
+            <file name="org-openide-actions-PrintAction.instance_hidden"/>
+        </folder>
+
+        <folder name="GoTo_hidden"/>
+        <folder name="Window">
+            <file name="CloneDocumentAction.shadow_hidden"/>
+            <file name="CloseAllButThisAction.shadow_hidden"/>
+            <file name="CloseAllDocumentsAction.shadow_hidden"/>
+            <file name="DocumentsAction.shadow_hidden"/>
+            <file name="Navigator_hidden"/>
+            <file name="Output_hidden"/>
+            <file name="ProgressListAction.shadow_hidden"/>
+            <file name="Separator4.instance_hidden"/>
+            <file name="SwitchToRecentDocumentAction.shadow_hidden"/>
+            <file name="ViewRuntimeTabAction.shadow_hidden"/>
+            <file name="org-netbeans-modules-options-OptionsWindowAction.instance">
+                <attr name="position" intvalue="0"/>
+            </file>
+            <file name="org-netbeans-core-io-ui-IOWindowAction.shadow">
+                <attr name="originalFile" stringvalue="Actions/Window/org-netbeans-core-io-ui-IOWindowAction.instance"/>
+                <attr name="position" intvalue="900"/>
+            </file>
+            <file name="org-netbeans-modules-autoupdate-ui-actions-PluginManagerAction.instance">
+                <attr name="position" intvalue="700"/>
+            </file>
+        </folder>
+    </folder>
+
+    <folder name="Windows2Local">
+        <folder name="Modes">
+            <folder name="explorer">
+                <file name="runtime.wstcref" url="runtimeWstcref.xml"/>
+                <file name="favorites.wstcref" url="favoritesWstcref.xml"/>
+            </folder>
+            <folder name="properties">
+                <file name="properties.wstcref" url="propertiesWstcref.xml"/>
+            </folder>
+            <file name="properties.wsmode" url="propertiesWsmode.xml"/>
+        </folder>
+        <file name="WindowManager.wswmgr" url="WindowManagerWswmgr.xml"/>
+    </folder>
+</filesystem>

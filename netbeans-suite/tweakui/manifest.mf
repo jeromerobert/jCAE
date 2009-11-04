@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+OpenIDE-Module: org.jcae.netbeans.tweakui
+OpenIDE-Module-Layer: org/jcae/netbeans/tweakui/layer.xml
+OpenIDE-Module-Localizing-Bundle: org/jcae/netbeans/tweakui/Bundle.properties
+OpenIDE-Module-Specification-Version: 1.0
+

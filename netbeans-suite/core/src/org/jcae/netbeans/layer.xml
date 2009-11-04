@@ -300,12 +300,9 @@
                     <attr name="org-jcae-netbeans-mesh-UNVToUNVAction.shadow/org-openide-actions-OpenAction.instance" boolvalue="true"/>
                 </folder>
             </folder>
-            <file name="xml_hidden"/>
         </folder>
     </folder>
     <folder name="Toolbars">
-        <file name="Standard.xml" url="Standard.xml"/>
-        <folder name="Build_hidden"/>
         <folder name="ShapeTypeCAO">
             <attr name="SystemFileSystem.localizingBundle" stringvalue="org.jcae.netbeans.Bundle"/>
             <attr name="position" intvalue="140"/>
@@ -415,9 +412,7 @@
     </folder>
 
     <folder name="Menu">
-        <file name="Tools_hidden"/>
         <folder name="View">
-            <file name="org-netbeans-core-actions-HTMLViewAction.instance_hidden"/>
             <file name="org-jcae-netbeans-viewer3d-actions-Action3DView.shadow">
                 <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-Action3DView.instance"/>
                 <attr name="position" intvalue="0"/>
@@ -471,37 +466,6 @@
                 <attr name="position" intvalue="210"/>
             </file>
         </folder>
-        <folder name="BuildProject_hidden"/>
-        <folder name="RunProject_hidden"/>
-
-        <folder name="File">
-            <file name="org-openide-actions-PageSetupAction.instance_hidden"/>
-            <file name="org-openide-actions-PrintAction.instance_hidden"/>
-        </folder>
-
-        <folder name="GoTo_hidden"/>
-        <folder name="Window">
-            <file name="CloneDocumentAction.shadow_hidden"/>
-            <file name="CloseAllButThisAction.shadow_hidden"/>
-            <file name="CloseAllDocumentsAction.shadow_hidden"/>
-            <file name="DocumentsAction.shadow_hidden"/>
-            <file name="Navigator_hidden"/>
-            <file name="Output_hidden"/>
-            <file name="ProgressListAction.shadow_hidden"/>
-            <file name="Separator4.instance_hidden"/>
-            <file name="SwitchToRecentDocumentAction.shadow_hidden"/>
-            <file name="ViewRuntimeTabAction.shadow_hidden"/>
-            <file name="org-netbeans-modules-options-OptionsWindowAction.instance">
-                <attr name="position" intvalue="0"/>
-            </file>
-            <file name="org-netbeans-core-io-ui-IOWindowAction.shadow">
-                <attr name="originalFile" stringvalue="Actions/Window/org-netbeans-core-io-ui-IOWindowAction.instance"/>
-                <attr name="position" intvalue="900"/>
-            </file>
-            <file name="org-netbeans-modules-autoupdate-ui-actions-PluginManagerAction.instance">
-                <attr name="position" intvalue="700"/>
-            </file>
-        </folder>
     </folder>
 
     <folder name="Templates">
@@ -549,18 +513,5 @@
                 </file>
             </folder>
         </folder>
-    </folder>
-    <folder name="Windows2Local">
-        <folder name="Modes">
-            <folder name="explorer">
-                <file name="runtime.wstcref" url="runtimeWstcref.xml"/>
-                <file name="favorites.wstcref" url="favoritesWstcref.xml"/>
-            </folder>
-            <folder name="properties">
-                <file name="properties.wstcref" url="propertiesWstcref.xml"/>
-            </folder>
-            <file name="properties.wsmode" url="propertiesWsmode.xml"/>
-        </folder>
-        <file name="WindowManager.wswmgr" url="WindowManagerWswmgr.xml"/>
     </folder>
 </filesystem>
