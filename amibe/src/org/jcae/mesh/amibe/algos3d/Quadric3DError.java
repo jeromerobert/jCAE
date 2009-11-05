@@ -180,6 +180,7 @@ public class Quadric3DError implements Serializable
 	public final void optimalPlacement(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2, Placement p, Vertex ret)
 	{
 		/* FIXME: add an option so that boundary nodes may be frozen.  */
+		double norm, norm2Row0, norm2Row1, norm2Row2;
 		switch(p)
 		{
 		case VERTEX:
@@ -195,7 +196,11 @@ public class Quadric3DError implements Serializable
 			}
 			break;
 		case OPTIMAL:
-			if (detA() > 1.e-20)
+			norm2Row0 = A[0]*A[0] + A[1]*A[1] + A[2]*A[2];
+			norm2Row1 = A[1]*A[1] + A[3]*A[3] + A[4]*A[4];
+			norm2Row2 = A[2]*A[2] + A[4]*A[4] + A[5]*A[5];
+			norm = Math.sqrt(Math.max(norm2Row0, Math.max(norm2Row1, norm2Row2)));
+			if (detA() > 1.e-10*(norm*norm*norm))
 			{
 				double cfxx = A[3] * A[5] - A[4] * A[4];
 				double cfxy = A[2] * A[4] - A[1] * A[5];
@@ -215,7 +220,11 @@ public class Quadric3DError implements Serializable
 			}
 			break;
 		case EDGE:
-			if (detA() > 1.e-20)
+			norm2Row0 = A[0]*A[0] + A[1]*A[1] + A[2]*A[2];
+			norm2Row1 = A[1]*A[1] + A[3]*A[3] + A[4]*A[4];
+			norm2Row2 = A[2]*A[2] + A[4]*A[4] + A[5]*A[5];
+			norm = Math.sqrt(Math.max(norm2Row0, Math.max(norm2Row1, norm2Row2)));
+			if (detA() > 1.e-10*(norm*norm*norm))
 			{
 				// Find M = v1 + s(v2-v1) which minimizes
 				//   q(M) = s^2 (v2-v1)A(v2-v1) + s(v1A(v2-v1)+(v2-v1)Av1+2b(v2-v1))+cte
