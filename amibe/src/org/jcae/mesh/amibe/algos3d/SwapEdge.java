@@ -66,6 +66,7 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 				throw new RuntimeException("Unknown option: "+key);
 		}
 		counter = m.getTriangles().size() * 3;
+		noSwapAfterProcessing = true;
 	}
 	
 	@Override
@@ -100,7 +101,7 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 		for (int i = 0; i < 3; i++)
 		{
 			HalfEdge h = uniqueOrientation(current);
-			if (!tree.remove(uniqueOrientation(current)))
+			if (!tree.remove(h))
 				notInTree++;
 			assert !tree.contains(h);
 			h.clearAttributes(AbstractHalfEdge.MARKED);
