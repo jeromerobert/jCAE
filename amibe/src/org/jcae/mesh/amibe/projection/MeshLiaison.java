@@ -153,8 +153,8 @@ public class MeshLiaison
 	private boolean updateLocation(Vertex v, double [] target, ProjectedLocation location)
 	{
 		Set<Triangle> visited = new HashSet<Triangle>();
-		assert location != null && location.projection != null : "No projection found at vertex " + v;
-		if (!location.projection.canProject())
+		assert location != null : "No projection found at vertex " + v;
+		if (location.projection == null || !location.projection.canProject())
 		{
 			if (LOGGER.isLoggable(Level.FINE))
 				LOGGER.log(Level.FINE, "Point can not be moved because of its quadric: "+location.projection);

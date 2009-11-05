@@ -828,7 +828,7 @@ public class Remesh
 					double[] pos = v.getUV();
 					Vertex near = neighborMap.get(v);
 					AbstractHalfEdge ot = findSurroundingTriangle(v, near);
-					if (!ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
+					if (!ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 					{
 						// Check whether edge can be split
 						sym = ot.sym(sym);
