@@ -177,6 +177,35 @@ public class Quadric3DError implements Serializable
 		return detA;
 	}
 
+	private void moveAlongSegment(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2, Vertex ret)
+	{
+		int nrSegments = 6;
+		double [] p1 = v1.getUV();
+		double [] p2 = v2.getUV();
+		ret.copy(bestCandidateV1V2Ref(v1, v2, q1, q2));
+		double [] posMin = new double[] { p1[0], p1[1], p1[2] };
+		double [] pos = new double[3];
+		double qmin = q1.value(posMin) + q2.value(posMin);
+		double dx = (p2[0] - p1[0]) / (double) nrSegments;
+		double dy = (p2[1] - p1[1]) / (double) nrSegments;
+		double dz = (p2[2] - p1[2]) / (double) nrSegments;
+		for (int i = 0; i < nrSegments; i++)
+		{
+			pos[0] = p1[0] + dx * (i + 1.0);
+			pos[1] = p1[1] + dy * (i + 1.0);
+			pos[2] = p1[2] + dz * (i + 1.0);
+			double q = q1.value(pos) + q2.value(pos);
+			if (q < qmin)
+			{
+				q = qmin;
+				posMin[0] = pos[0];
+				posMin[1] = pos[1];
+				posMin[2] = pos[2];
+			}
+		}
+		ret.moveTo(posMin[0], posMin[1], posMin[2]);
+	}
+
 	public final void optimalPlacement(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2, Placement p, Vertex ret)
 	{
 		/* FIXME: add an option so that boundary nodes may be frozen.  */
@@ -200,6 +229,7 @@ public class Quadric3DError implements Serializable
 			norm2Row1 = A[1]*A[1] + A[3]*A[3] + A[4]*A[4];
 			norm2Row2 = A[2]*A[2] + A[4]*A[4] + A[5]*A[5];
 			norm = Math.sqrt(Math.max(norm2Row0, Math.max(norm2Row1, norm2Row2)));
+			ret.copy(bestCandidateV1V2Ref(v1, v2, q1, q2));
 			if (detA() > 1.e-10*(norm*norm*norm))
 			{
 				double cfxx = A[3] * A[5] - A[4] * A[4];
@@ -211,19 +241,17 @@ public class Quadric3DError implements Serializable
 				double dx = (cfxx * b[0] + cfxy * b[1] + cfxz * b[2]) / detA;
 				double dy = (cfxy * b[0] + cfyy * b[1] + cfyz * b[2]) / detA;
 				double dz = (cfxz * b[0] + cfyz * b[1] + cfzz * b[2]) / detA;
-				ret.copy(bestCandidateV1V2Ref(v1, v2, q1, q2));
 				ret.moveTo(-dx, -dy, -dz);
 			}
 			else
-			{
-				ret.copy(bestCandidateV1V2(v1, v2, q1, q2));
-			}
+				moveAlongSegment(v1, v2, q1, q2, ret);
 			break;
 		case EDGE:
 			norm2Row0 = A[0]*A[0] + A[1]*A[1] + A[2]*A[2];
 			norm2Row1 = A[1]*A[1] + A[3]*A[3] + A[4]*A[4];
 			norm2Row2 = A[2]*A[2] + A[4]*A[4] + A[5]*A[5];
 			norm = Math.sqrt(Math.max(norm2Row0, Math.max(norm2Row1, norm2Row2)));
+			ret.copy(bestCandidateV1V2Ref(v1, v2, q1, q2));
 			if (detA() > 1.e-10*(norm*norm*norm))
 			{
 				// Find M = v1 + s(v2-v1) which minimizes
@@ -246,12 +274,13 @@ public class Quadric3DError implements Serializable
 						s = 0.0;
 					else if (s > 1.0 - 1.0e-4)
 						s = 1.0;
-					ret.copy(bestCandidateV1V2Ref(v1, v2, q1, q2));
 					ret.moveTo(p1[0]+s*dx, p1[1]+s*dy, p1[2]+s*dz);
-					return;
 				}
+				else
+					moveAlongSegment(v1, v2, q1, q2, ret);
 			}
-			ret.copy(bestCandidateV1V2(v1, v2, q1, q2));
+			else
+				moveAlongSegment(v1, v2, q1, q2, ret);
 			break;
 		default:
 			throw new IllegalArgumentException("Unknown placement strategy: "+p);
