@@ -23,11 +23,14 @@ package org.jcae.mesh.xmldata;
 import gnu.trove.TIntHashSet;
 import gnu.trove.TIntArrayList;
 import gnu.trove.TIntIntHashMap;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.DataOutputStream;
 import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
 import java.io.PrintStream;
 import java.text.FieldPosition;
 import java.text.ParsePosition;
@@ -917,6 +920,21 @@ abstract public class MeshExporter
 			super(file);
 		}
 
+		private static long computeNumberOfTriangle(File triaFile) throws IOException
+		{
+			DataInputStream in = new DataInputStream(
+				new BufferedInputStream(new FileInputStream(triaFile)));
+			long nbt = triaFile.length()/4/3;
+			long toReturn = 0;
+			for(int i=0; i<nbt; i++)
+			{
+				if(in.readInt()>=0)
+					toReturn++;
+				in.skipBytes(8);
+			}
+			return toReturn;
+		}
+
 		/**
 		 * Write VTK header file
 		 * @param out The stream to write on 
@@ -926,7 +944,7 @@ abstract public class MeshExporter
 			throws IOException
 		{
 			long numberOfNodes=getNodeFile().length()/8/3;
-			long numberOfTriangles=getTriaFile().length()/4/3;
+			long numberOfTriangles=computeNumberOfTriangle(getTriaFile());
 			//This is Java so we write in big endian		
 			out.println("<VTKFile type=\"PolyData\" version=\"0.1\" byte_order=\"BigEndian\">");
 			out.println("<PolyData>");
