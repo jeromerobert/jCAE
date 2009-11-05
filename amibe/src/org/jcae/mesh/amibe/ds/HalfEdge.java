@@ -424,6 +424,10 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		double s2 = Matrix3D.computeNormal3D(d.getUV(), o.getUV(), n.getUV(), temp[0], temp[1], temp[3]);
 		if (Matrix3D.prodSca(temp[2], temp[3]) < minCos)
 			return invalid;
+		// Mean normal so that temp[2] and temp[3] play a symmetric role
+		temp[2][0] = 0.5 * (temp[2][0] + temp[3][0]);
+		temp[2][1] = 0.5 * (temp[2][1] + temp[3][1]);
+		temp[2][2] = 0.5 * (temp[2][2] + temp[3][2]);
 		// Check for quality improvement
 		// Check for inverted triangles
 		o.outer3D(n, a, temp[1], temp[3], temp[0]);
