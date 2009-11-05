@@ -22,7 +22,7 @@ package org.jcae.netbeans.viewer3d.actions;
 import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.Storage;
 import org.jcae.netbeans.Utilities;
-import org.jcae.netbeans.mesh.MeshDataObject;
+import org.jcae.netbeans.mesh.BoraDataObject;
 import org.jcae.vtk.MeshVisuBuilder;
 import org.openide.filesystems.FileUtil;
 import org.openide.nodes.Node;
@@ -35,7 +35,7 @@ public final class BuildOEMMVisu extends CookieAction
 
 	protected void performAction(Node[] activatedNodes)
 	{
-		MeshDataObject c = activatedNodes[0].getCookie(MeshDataObject.class);
+		BoraDataObject c = activatedNodes[0].getCookie(BoraDataObject.class);
 		String reference = FileUtil.toFile(
 				c.getPrimaryFile().getParent()).getPath();
 		
@@ -89,7 +89,7 @@ public final class BuildOEMMVisu extends CookieAction
 	protected Class[] cookieClasses()
 	{
 		return new Class[] {
-			MeshDataObject.class
+			BoraDataObject.class
 		};
 	}
 

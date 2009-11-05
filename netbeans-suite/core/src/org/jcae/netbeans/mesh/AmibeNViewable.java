@@ -21,17 +21,17 @@
 
 package org.jcae.netbeans.mesh;
 
-import org.jcae.vtk.OldViewableMesh;
+import org.jcae.vtk.AmibeViewable;
 import org.openide.nodes.Node;
 
 /**
  *
  * @author Jerome Robert
  */
-public class NOldViewableMesh extends OldViewableMesh {
+public class AmibeNViewable extends AmibeViewable {
 	private final Node node;
 
-	public NOldViewableMesh(org.jcae.vtk.OldMesh mesh, Node node) {
+	public AmibeNViewable(org.jcae.vtk.OldMesh mesh, Node node) {
 		super(mesh);
 		this.node = node;
 	}

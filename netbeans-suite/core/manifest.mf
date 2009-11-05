@@ -5,12 +5,12 @@ OpenIDE-Module-Layer: org/jcae/netbeans/layer.xml
 OpenIDE-Module-Specification-Version: 0.16
 OpenIDE-Module-Install: org/jcae/netbeans/Installer.class
 
-Name: org/jcae/netbeans/mesh/MeshDataLoader.class
+Name: org/jcae/netbeans/mesh/BoraDataLoader.class
 OpenIDE-Module-Class: Loader
 Install-Before: org.openide.loaders.XMLDataObject, org.netbeans.module
  s.xml.core.XMLDataObject
 
-Name: org/jcae/netbeans/mesh/OldAmibeMeshDataLoader.class
+Name: org/jcae/netbeans/mesh/AmibeDataLoader.class
 OpenIDE-Module-Class: Loader
 Install-Before: org.openide.loaders.XMLDataObject, org.netbeans.module
  s.xml.core.XMLDataObject

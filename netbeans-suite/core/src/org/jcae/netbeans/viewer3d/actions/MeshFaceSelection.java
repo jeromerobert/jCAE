@@ -25,7 +25,7 @@
 package org.jcae.netbeans.viewer3d.actions;
 
 import org.jcae.vtk.Viewable;
-import org.jcae.vtk.OldViewableMesh;
+import org.jcae.vtk.AmibeViewable;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 
@@ -33,12 +33,12 @@ public final class MeshFaceSelection extends MeshButton
 {
 
 	@Override
-	public void actionPerformed(OldViewableMesh interactor)
+	public void actionPerformed(AmibeViewable interactor)
 	{
 		interactor.setSelectionType(Viewable.SelectionType.CELL);
 	}
 	
-	protected void updateButton(OldViewableMesh viewer)
+	protected void updateButton(AmibeViewable viewer)
 	{
 		setBooleanState(viewer.getSelectionType() == Viewable.SelectionType.CELL);
 	}

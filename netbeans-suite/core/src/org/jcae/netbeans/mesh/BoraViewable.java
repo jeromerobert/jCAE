@@ -12,10 +12,10 @@ import org.openide.nodes.Node;
  *
  * @author Jerome Robert
  */
-public class NViewableMesh extends ViewableMesh {
+public class BoraViewable extends ViewableMesh {
 	private final Node node;
 
-	public NViewableMesh(org.jcae.vtk.Mesh mesh, Node node) {
+	public BoraViewable(org.jcae.vtk.Mesh mesh, Node node) {
 		super(mesh);
 		this.node = node;
 	}

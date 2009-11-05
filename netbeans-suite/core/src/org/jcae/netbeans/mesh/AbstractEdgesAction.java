@@ -11,7 +11,7 @@ import org.jcae.vtk.AmibeOverlayProvider;
 import org.jcae.vtk.AmibeOverlayToMesh;
 import org.jcae.vtk.Palette;
 import org.jcae.vtk.View;
-import org.jcae.vtk.OldViewableMesh;
+import org.jcae.vtk.AmibeViewable;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileUtil;
 import org.openide.nodes.Node;
@@ -30,7 +30,7 @@ public abstract class AbstractEdgesAction extends CookieAction
 	{
 		try
 		{
-			OldAmibeMeshDataObject c = activatedNodes[0].getCookie(OldAmibeMeshDataObject.class);
+			AmibeDataObject c = activatedNodes[0].getCookie(AmibeDataObject.class);
 			
 			String reference = FileUtil.toFile(
 				c.getPrimaryFile().getParent()).getPath();
@@ -51,7 +51,7 @@ public abstract class AbstractEdgesAction extends CookieAction
 				palette.addColor(AmibeOverlayProvider.MULTI_EDGE_COLOR);
 
 			View view = ViewManager.getDefault().getCurrentView();
-			OldViewableMesh mesh = new OldViewableMesh(new AmibeOverlayToMesh(
+			AmibeViewable mesh = new AmibeViewable(new AmibeOverlayToMesh(
 				new AmibeOverlayProvider(new File(xmlDir), getBranchGroupLabel())).getMesh(), palette);
 			
 			mesh.setName(activatedNodes[0].getName()+" "+getViewSuffix());
@@ -98,7 +98,7 @@ public abstract class AbstractEdgesAction extends CookieAction
 	protected Class[] cookieClasses()
 	{
 		return new Class[] {
-			MeshDataObject.class
+			BoraDataObject.class
 		};
 	}
 	

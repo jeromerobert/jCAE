@@ -35,13 +35,13 @@ import org.openide.loaders.TemplateWizard;
  *
  * @author Jerome Robert
  */
-public class NewMeshWizard implements WizardDescriptor.InstantiatingIterator<WizardDescriptor> {
+public class BoraNewWizard implements WizardDescriptor.InstantiatingIterator<WizardDescriptor> {
 	private TemplateWizard wizard;
 	
-	public Set<MeshDataObject> instantiate() throws IOException {
+	public Set<BoraDataObject> instantiate() throws IOException {
 		FileObject fo = wizard.getTargetFolder().getPrimaryFile();
 		FileObject m = fo.createFolder(wizard.getTargetName()+".bora");
-		MeshDataObject mdo = (MeshDataObject) DataObject.find(m);
+		BoraDataObject mdo = (BoraDataObject) DataObject.find(m);
 		mdo.save();
 		return Collections.singleton(mdo);
 	}

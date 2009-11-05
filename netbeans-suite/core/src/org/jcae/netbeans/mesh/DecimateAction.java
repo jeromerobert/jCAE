@@ -36,8 +36,8 @@ public final class DecimateAction extends CookieAction
 		DecimateParameter bean=new DecimateParameter();
 		if(Utilities.showEditBeanDialog(bean))
 		{
-			OldAmibeMeshDataObject c =
-				activatedNodes[0].getCookie(OldAmibeMeshDataObject.class);
+			AmibeDataObject c =
+				activatedNodes[0].getCookie(AmibeDataObject.class);
 
 			String reference = FileUtil.toFile(
 				c.getPrimaryFile().getParent()).getPath();
@@ -72,7 +72,7 @@ public final class DecimateAction extends CookieAction
 			cmdLine[i++]=brepFile;
 			cmdLine[i++]=xmlDir;
 				
-			final MeshNode m = activatedNodes[0].getCookie(MeshNode.class);
+			final BoraNode m = activatedNodes[0].getCookie(BoraNode.class);
 
 			// level_max tri_max outDir brep soupDir
 			ProcessExecutor pe=new ProcessExecutor(cmdLine)
@@ -101,7 +101,7 @@ public final class DecimateAction extends CookieAction
 	protected Class[] cookieClasses()
 	{
 		return new Class[] {
-			MeshDataObject.class
+			AmibeDataObject.class
 		};
 	}
 	

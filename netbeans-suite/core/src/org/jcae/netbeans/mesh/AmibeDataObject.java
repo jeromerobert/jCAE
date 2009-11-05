@@ -35,12 +35,11 @@ import org.openide.nodes.Node;
 
 /**
  *
- * @author botrel
- * @deprecated Used only to maintain compatibility with old meshes
+ * @author Gautam Botrel
  */
-public class OldAmibeMeshDataObject extends MultiDataObject implements SaveCookie
+public class AmibeDataObject extends MultiDataObject implements SaveCookie
 {
-	public OldAmibeMeshDataObject(FileObject arg0, MultiFileLoader arg1, Mesh mesh)
+	public AmibeDataObject(FileObject arg0, MultiFileLoader arg1, Mesh mesh)
 		throws DataObjectExistsException
 	{
 		super(arg0, arg1);
@@ -56,7 +55,7 @@ public class OldAmibeMeshDataObject extends MultiDataObject implements SaveCooki
 	@Override
 	protected Node createNodeDelegate()
 	{
-		return new OldAmibeMeshNode(this);
+		return new AmibeNode(this);
 	}
 
 	private Mesh mesh;

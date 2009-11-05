@@ -32,9 +32,8 @@ import vtk.vtkActor;
  * TODO : the beams are stored in the polydata with the scalar UNVProvider.OTHERS_GROUP wich can make a bug of color. It can make a bug for the selection in jcae
  * because this group doesn't really exist. Find an example of .unv to check this feature.
  * @author Julian Ibarz
- * @deprecated kept to maintain compatibility with old meshes. @see ViewableMesh to use with Bora
  */
-public class OldViewableMesh extends Viewable
+public class AmibeViewable extends Viewable
 {
 	private ViewMode viewMode = ViewMode.WIRED;
 	private TIntObjectHashMap<LeafNode> groupIDToNode = new TIntObjectHashMap<LeafNode>();
@@ -51,12 +50,12 @@ public class OldViewableMesh extends Viewable
 		WIRED
 	}
 
-	public OldViewableMesh(OldMesh mesh)
+	public AmibeViewable(OldMesh mesh)
 	{
 		this(mesh, new Palette(Integer.MAX_VALUE));
 	}
 	
-	public OldViewableMesh(OldMesh mesh, Palette palette)
+	public AmibeViewable(OldMesh mesh, Palette palette)
 	{		
 		rootNode.setSelectionActorCustomiser(new SelectionActorCustomiser()
 		{

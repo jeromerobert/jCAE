@@ -37,7 +37,7 @@ public final class BuildSoupAction extends CookieAction
 {	
 	protected void performAction(Node[] activatedNodes)
 	{
-		OldAmibeMeshDataObject c = activatedNodes[0].getCookie(OldAmibeMeshDataObject.class);
+		AmibeDataObject c = activatedNodes[0].getCookie(AmibeDataObject.class);
 		
 		String reference = FileUtil.toFile(
 			c.getPrimaryFile().getParent()).getPath();
@@ -78,7 +78,7 @@ public final class BuildSoupAction extends CookieAction
 	protected Class[] cookieClasses()
 	{
 		return new Class[] {
-			MeshDataObject.class
+			BoraDataObject.class
 		};
 	}
 	

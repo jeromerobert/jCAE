@@ -37,22 +37,22 @@ import org.openide.loaders.MultiDataObject.Entry;
 import org.openide.loaders.MultiFileLoader;
 import org.openide.util.NbBundle;
 
-public class OldAmibeMeshDataLoader extends MultiFileLoader
+public class AmibeDataLoader extends MultiFileLoader
 {
 	public static final String REQUIRED_MIME = "text/mesh+xml";
 	private static final long serialVersionUID = 1L;
 	private static Map<FileObject, Mesh> primaryToMesh = new HashMap<FileObject, Mesh>();
 	private static Map<FileObject, FileObject> secToPrimary = new HashMap<FileObject, FileObject>();
 
-	public OldAmibeMeshDataLoader()
+	public AmibeDataLoader()
 	{
-		super("org.jcae.netbeans.mesh.OldAmibeMeshDataObject");
+		super("org.jcae.netbeans.mesh.AmibeDataObject");
 	}
 
 	@Override
 	protected String defaultDisplayName()
 	{
-		return NbBundle.getMessage(OldAmibeMeshDataLoader.class, "LBL_Mesh_loader_name");
+		return NbBundle.getMessage(AmibeDataLoader.class, "LBL_Mesh_loader_name");
 	}
 
 	@Override
@@ -82,7 +82,7 @@ public class OldAmibeMeshDataLoader extends MultiFileLoader
 	protected MultiDataObject createMultiObject(FileObject primaryFile)
 		throws DataObjectExistsException
 	{
-		return new OldAmibeMeshDataObject(primaryFile, this, primaryToMesh.get(primaryFile));
+		return new AmibeDataObject(primaryFile, this, primaryToMesh.get(primaryFile));
 	}
 
 	@Override

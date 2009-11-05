@@ -30,7 +30,7 @@ import java.util.Map;
 import javax.swing.Action;
 import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.bora.ds.BModel;
-import org.jcae.netbeans.Utilities;
+import org.jcae.netbeans.cad.BrepDataObject;
 import org.jcae.netbeans.cad.BrepNode;
 import org.jcae.netbeans.viewer3d.SelectionManager;
 import org.jcae.netbeans.viewer3d.ViewManager;
@@ -53,11 +53,11 @@ import org.openide.util.datatransfer.PasteType;
 /**
  * Contains the submeshnode(s)
  */
-public class MeshNode extends DataNode implements ViewCookie
+public class BoraNode extends DataNode implements ViewCookie
 {
 	private final Submeshes subMeshesFactory;
 
-	public MeshNode(final DataObject arg0)
+	public BoraNode(final DataObject arg0)
 	{
 		super(arg0, Children.LEAF);
 		setIconBaseWithExtension("org/jcae/netbeans/mesh/MeshNode.png");
@@ -133,7 +133,7 @@ public class MeshNode extends DataNode implements ViewCookie
 			return;
 		View v = ViewManager.getDefault().getCurrentView();
 		BoraToMesh toMesh = new BoraToMesh(meshData);
-		ViewableMesh vMesh = new NViewableMesh(toMesh.getMesh(), node);
+		ViewableMesh vMesh = new BoraViewable(toMesh.getMesh(), node);
 		vMesh.setName(vName);
 		if (groups != null)
 			SelectionManager.getDefault().addInteractor(vMesh, groups);
@@ -151,11 +151,11 @@ public class MeshNode extends DataNode implements ViewCookie
 	}
 
 	public BModel getBModel() {
-		return getCookie(MeshDataObject.class).getBModel();
+		return getCookie(BoraDataObject.class).getBModel();
 	}
 
 	public BModel getBModel(String geomFile) {
-		return getCookie(MeshDataObject.class).getBModel(geomFile);
+		return getCookie(BoraDataObject.class).getBModel(geomFile);
 	}
 
 	@Override
@@ -166,7 +166,7 @@ public class MeshNode extends DataNode implements ViewCookie
 			String o=getName();
 			getDataObject().rename(arg0);
 			if (getBModel() != null) {
-				getCookie(MeshDataObject.class).updateBModelDir();
+				getCookie(BoraDataObject.class).updateBModelDir();
 			}
 			fireDisplayNameChange(o, arg0);
 			fireNameChange(o, arg0);
@@ -201,7 +201,9 @@ public class MeshNode extends DataNode implements ViewCookie
 				ls.add(new PasteType() {
 
 					public Transferable paste() {
-						getBModel(getGeomFile(n)).newMesh();
+						File f = FileUtil.toFile(n.getLookup().lookup(
+							BrepDataObject.class).getPrimaryFile());
+						getBModel(f.getPath()).newMesh();
 						getBModel().save();
 						updateSubmeshNode();
 						firePropertyChange(null, null, null);
@@ -212,16 +214,6 @@ public class MeshNode extends DataNode implements ViewCookie
 		}
 		// Also try superclass, but give it lower priority:
 		super.createPasteTypes(t, ls);
-	}
-
-	/**
-	 * @param n the BrepNode of the geometry
-	 * @return the absolute path of a file (ex : /home/toto/Geom.brep)
-	 */
-	private static String getGeomFile(BrepNode n) {
-		String ref = FileUtil.toFile(n.getDataObject().getPrimaryFile().getParent()).getPath();
-		String nameExt = n.getDataObject().getPrimaryFile().getNameExt();
-		return Utilities.absoluteFileName(nameExt, ref);
 	}
 
 	private void updateSubmeshNode()
@@ -261,7 +253,7 @@ public class MeshNode extends DataNode implements ViewCookie
 
 		@Override
 		protected boolean createKeys(List list) {
-			MeshDataObject mObject = (MeshDataObject) dataObject;
+			BoraDataObject mObject = (BoraDataObject) dataObject;
 			if (mObject.getBModel() == null)
 				mObject.load();
 			if (mObject.getBModel() != null) {

@@ -47,7 +47,7 @@ import org.openide.nodes.Node;
  *
  * @author ibarz
  */
-public class MeshSelection implements EntitySelection, SelectionListener, CurrentViewableChangeListener, PropertyChangeListener
+public class BoraSelection implements EntitySelection, SelectionListener, CurrentViewableChangeListener, PropertyChangeListener
 {
 
 	private ArrayList<String> selection = new ArrayList<String>();
@@ -55,7 +55,7 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 	private BGroupsNode entity;
 	private Set<ViewableMesh> interactors = new HashSet<ViewableMesh>();
 
-	public MeshSelection(BGroupsNode entity)
+	public BoraSelection(BGroupsNode entity)
 	{
 		this.entity = entity;
 		ViewManager.getDefault().addViewableListener(this);
@@ -104,7 +104,7 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 
 	public void selectionChanged(Viewable interactor)
 	{
-		if( ! (interactor instanceof NViewableMesh) )
+		if( ! (interactor instanceof BoraViewable) )
 			return;
 		// If it is not our interactor leave
 		if (!interactors.contains(interactor))
@@ -121,7 +121,7 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 		}
 		SelectionManager.getDefault().prepareSelection();
 		final ArrayList<Node> nodes = new ArrayList<Node>();
-		Node nnn = getFilterNodeToExplore(((NViewableMesh)interactor).getNode());
+		Node nnn = getFilterNodeToExplore(((BoraViewable)interactor).getNode());
 
 		for (Node n : nnn.getChildren().getNodes(true)) {
 			if (selection.contains(n.getName()))

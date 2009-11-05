@@ -24,21 +24,21 @@
  */
 package org.jcae.netbeans.viewer3d.actions;
 
-import org.jcae.vtk.OldViewableMesh;
+import org.jcae.vtk.AmibeViewable;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 
 public final class MeshVertexSelection extends MeshButton
 {
 	@Override
-	public void actionPerformed(OldViewableMesh interactor)
+	public void actionPerformed(AmibeViewable interactor)
 	{
-		interactor.setSelectionType(OldViewableMesh.SelectionType.POINT);
+		interactor.setSelectionType(AmibeViewable.SelectionType.POINT);
 	}
 	
-	protected void updateButton(OldViewableMesh viewer)
+	protected void updateButton(AmibeViewable viewer)
 	{
-		setBooleanState(viewer.getSelectionType() == OldViewableMesh.SelectionType.POINT);
+		setBooleanState(viewer.getSelectionType() == AmibeViewable.SelectionType.POINT);
 	}
 	
 	/**

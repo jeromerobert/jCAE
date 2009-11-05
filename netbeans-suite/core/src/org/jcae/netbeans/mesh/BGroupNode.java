@@ -20,7 +20,7 @@ import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.netbeans.viewer3d.ViewManager;
 import org.jcae.vtk.BoraToMesh;
 import org.jcae.vtk.View;
-import org.jcae.vtk.OldViewableMesh;
+import org.jcae.vtk.AmibeViewable;
 import org.openide.actions.DeleteAction;
 import org.openide.actions.RenameAction;
 import org.openide.actions.ViewAction;
@@ -139,6 +139,6 @@ public class BGroupNode extends AbstractNode implements Node.Cookie, ViewCookie 
 		HashMap<String, Collection<BDiscretization>> meshData = new HashMap<String, Collection<BDiscretization>>();
 		meshData.put(getName(), discrs);
 
-		MeshNode.view(getName(), meshData, (BGroupsNode)getParentNode());
+		BoraNode.view(getName(), meshData, (BGroupsNode)getParentNode());
 	}
 }

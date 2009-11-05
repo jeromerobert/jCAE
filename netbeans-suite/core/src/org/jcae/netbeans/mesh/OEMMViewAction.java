@@ -47,7 +47,7 @@ public final class OEMMViewAction extends CookieAction implements SelectionListe
 	
 	protected void performAction(Node[] activatedNodes)
 	{
-		MeshDataObject c = activatedNodes[0].getCookie(MeshDataObject.class);
+		BoraDataObject c = activatedNodes[0].getCookie(BoraDataObject.class);
 		
 		String reference = FileUtil.toFile(
 			c.getPrimaryFile().getParent()).getPath();
@@ -56,7 +56,7 @@ public final class OEMMViewAction extends CookieAction implements SelectionListe
 		view(c,oemmDir, activatedNodes[0].getName()+" OEMM");
 	}
 
-	public void view(MeshDataObject c, String dir, String viewableName)
+	public void view(BoraDataObject c, String dir, String viewableName)
 	{
 		OEMM oemm = Storage.readOEMMStructure(dir);
 		
@@ -93,7 +93,7 @@ public final class OEMMViewAction extends CookieAction implements SelectionListe
 	protected Class[] cookieClasses()
 	{
 		return new Class[] {
-			MeshDataObject.class
+			BoraDataObject.class
 		};
 	}
 	

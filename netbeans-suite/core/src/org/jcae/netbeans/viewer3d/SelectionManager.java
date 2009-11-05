@@ -26,13 +26,13 @@ import org.jcae.netbeans.cad.BCADSelection;
 import org.jcae.netbeans.cad.CADSelection;
 import org.jcae.netbeans.cad.NbShape;
 import org.jcae.netbeans.mesh.BGroupsNode;
-import org.jcae.netbeans.mesh.MeshSelection;
-import org.jcae.netbeans.mesh.OldMeshSelection;
+import org.jcae.netbeans.mesh.BoraSelection;
+import org.jcae.netbeans.mesh.AmibeSelection;
 import org.jcae.netbeans.mesh.ViewBCellGeometryAction.NbBShape;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
 import org.jcae.vtk.ViewableCAD;
-import org.jcae.vtk.OldViewableMesh;
+import org.jcae.vtk.AmibeViewable;
 import org.jcae.vtk.ViewableMesh;
 import org.jcae.vtk.ViewableOEMM;
 
@@ -129,13 +129,13 @@ public class SelectionManager {
 		}
 		else if (viewable instanceof ViewableMesh) {
 			if (entity instanceof BGroupsNode)
-				return new MeshSelection((BGroupsNode)entity);
+				return new BoraSelection((BGroupsNode)entity);
 			else
 				throw new IllegalArgumentException("The entity associated with a ViewableMesh has to be a BGroupsNode");
 		}
-		else if(viewable instanceof OldViewableMesh) {
+		else if(viewable instanceof AmibeViewable) {
 			if(entity instanceof Groups)
-				return new OldMeshSelection((Groups)entity);
+				return new AmibeSelection((Groups)entity);
 			else
 				throw new IllegalArgumentException("The entity associated with a ViewableMesh has to be a Groups");
 		}

@@ -36,7 +36,7 @@ public final class BuidOEMMAction extends CookieAction
 		OEMMParameters bean=new OEMMParameters();
 		if(Utilities.showEditBeanDialog(bean))
 		{
-			OldAmibeMeshDataObject c = activatedNodes[0].getCookie(OldAmibeMeshDataObject.class);
+			AmibeDataObject c = activatedNodes[0].getCookie(AmibeDataObject.class);
 
 			String reference = FileUtil.toFile(
 				c.getPrimaryFile().getParent()).getPath();
@@ -79,7 +79,7 @@ public final class BuidOEMMAction extends CookieAction
 	protected Class[] cookieClasses()
 	{
 		return new Class[] {
-			MeshDataObject.class
+			BoraDataObject.class
 		};
 	}
 	

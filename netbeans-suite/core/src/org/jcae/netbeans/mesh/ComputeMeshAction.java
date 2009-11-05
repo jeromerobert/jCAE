@@ -46,9 +46,9 @@ public class ComputeMeshAction extends CookieAction
 	static private class MeshRun implements Runnable
 	{
 		private BModel model;
-		private MeshNode node;
+		private BoraNode node;
 
-		public MeshRun(BModel model, MeshNode node)
+		public MeshRun(BModel model, BoraNode node)
 		{
 			this.model = model;
 			this.node=node;
@@ -94,7 +94,7 @@ public class ComputeMeshAction extends CookieAction
 
 	protected Class[] cookieClasses()
 	{
-		return new Class[]{MeshNode.class};
+		return new Class[]{BoraNode.class};
 	}
 
 	private static transient int ioProviderCounter=1;
@@ -105,7 +105,7 @@ public class ComputeMeshAction extends CookieAction
 		InputOutput io=IOProvider.getDefault().getIO("jCAE Mesher "+ioProviderCounter, true);
 		ioProviderCounter++;
 		for (int i = 0; i < arg0.length; i++) {
-			final MeshNode m = arg0[i].getCookie(MeshNode.class);
+			final BoraNode m = arg0[i].getCookie(BoraNode.class);
 			if (m.getBModel() != null) {
 				final ExecutorTask task = ExecutionEngine.getDefault().execute("Bora Mesher",new MeshRun(m.getBModel(), m), io);
 				final ProgressHandle ph = ProgressHandleFactory.createHandle("Bora Mesher", new Cancellable() {

@@ -75,7 +75,7 @@ public class FuseGroupAction extends CookieAction{
 			EntitySelection meshSelection = SelectionManager.getDefault().getEntitySelection(this);
 			if(meshSelection!=null)
 				meshSelection.unselectAll();
-			MeshNode mn=arg0[0].getParentNode().getParentNode().getCookie(MeshNode.class);
+			BoraNode mn=arg0[0].getParentNode().getParentNode().getCookie(BoraNode.class);
 			mn.refreshGroups();			
 		}
 		catch(IOException ex)

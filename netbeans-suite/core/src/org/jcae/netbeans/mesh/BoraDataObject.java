@@ -34,11 +34,11 @@ import org.openide.loaders.MultiDataObject;
 import org.openide.loaders.MultiFileLoader;
 import org.openide.nodes.Node;
 
-public class MeshDataObject extends MultiDataObject implements SaveCookie, PropertyChangeListener
+public class BoraDataObject extends MultiDataObject implements SaveCookie, PropertyChangeListener
 {
-	private static final Logger LOGGER = Logger.getLogger(MeshDataObject.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(BoraDataObject.class.getName());
 
-	public MeshDataObject(FileObject arg0, MultiFileLoader arg1) throws DataObjectExistsException
+	public BoraDataObject(FileObject arg0, MultiFileLoader arg1) throws DataObjectExistsException
 	{
 		super(arg0, arg1);
 		dir = arg0;
@@ -47,7 +47,7 @@ public class MeshDataObject extends MultiDataObject implements SaveCookie, Prope
 	@Override
 	protected Node createNodeDelegate()
 	{
-		MeshNode toReturn = new MeshNode(this);
+		BoraNode toReturn = new BoraNode(this);
 		return toReturn;
 	}
 	

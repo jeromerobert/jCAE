@@ -27,19 +27,17 @@ import org.openide.loaders.MultiDataObject;
 import org.openide.loaders.UniFileLoader;
 import org.openide.util.NbBundle;
 
-public class MeshDataLoader extends UniFileLoader
+public class BoraDataLoader extends UniFileLoader
 {
-	private static final long serialVersionUID = 1L;
-	
-	public MeshDataLoader()
+	public BoraDataLoader()
 	{
-		super("org.jcae.netbeans.mesh.MeshDataObject");
+		super("org.jcae.netbeans.mesh.BoraDataObject");
 	}
 	
 	@Override
 	protected String defaultDisplayName()
 	{
-		return NbBundle.getMessage(MeshDataLoader.class, "LBL_Mesh_loader_name");
+		return NbBundle.getMessage(BoraDataLoader.class, "LBL_Mesh_loader_name");
 	}
 
 	@Override
@@ -53,6 +51,6 @@ public class MeshDataLoader extends UniFileLoader
 
 	protected MultiDataObject createMultiObject(FileObject primaryFile) throws DataObjectExistsException, IOException
 	{
-		return new MeshDataObject(primaryFile, this);
+		return new BoraDataObject(primaryFile, this);
 	}
 }

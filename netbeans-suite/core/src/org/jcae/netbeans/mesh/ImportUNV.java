@@ -20,8 +20,8 @@ public final class ImportUNV extends CookieAction
 		JFileChooser chooser=new JFileChooser();
 		if(chooser.showOpenDialog(null)==JFileChooser.APPROVE_OPTION)
 		{
-			OldAmibeMeshNode meshNode = activatedNodes[0].getCookie(OldAmibeMeshNode.class);
-			OldAmibeMeshDataObject c = activatedNodes[0].getCookie(OldAmibeMeshDataObject.class);
+			AmibeNode meshNode = activatedNodes[0].getCookie(AmibeNode.class);
+			AmibeDataObject c = activatedNodes[0].getCookie(AmibeDataObject.class);
 			
 			String reference = FileUtil.toFile(
 				c.getPrimaryFile().getParent()).getPath();
@@ -59,7 +59,7 @@ public final class ImportUNV extends CookieAction
 	protected Class[] cookieClasses()
 	{
 		return new Class[] {
-			MeshDataObject.class
+			BoraDataObject.class
 		};
 	}
 	

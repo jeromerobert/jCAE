@@ -474,7 +474,7 @@
             </file>
             <file name="Mesh.bora">
                 <attr name="template" boolvalue="true"/>
-                <attr name="instantiatingIterator" newvalue="org.jcae.netbeans.mesh.NewMeshWizard"/>
+                <attr name="instantiatingIterator" newvalue="org.jcae.netbeans.mesh.BoraNewWizard"/>
             </file>
         </folder>
         <folder name="Privileged">

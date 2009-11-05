@@ -37,7 +37,6 @@ import org.jcae.netbeans.viewer3d.CurrentViewableChangeListener;
 import org.jcae.netbeans.viewer3d.SelectionManager;
 import org.jcae.netbeans.viewer3d.ViewManager;
 import org.jcae.vtk.Viewable;
-import org.jcae.vtk.OldViewableMesh;
 import org.jcae.vtk.SelectionListener;
 import org.openide.ErrorManager;
 import org.openide.explorer.ExplorerManager;
@@ -48,15 +47,15 @@ import org.openide.nodes.Node;
  * @author ibarz
  * @deprecated kept to maintain compatibility with old meshes. @see MeshSelection to use with Bora
  */
-public class OldMeshSelection implements EntitySelection, SelectionListener, CurrentViewableChangeListener, PropertyChangeListener
+public class AmibeSelection implements EntitySelection, SelectionListener, CurrentViewableChangeListener, PropertyChangeListener
 {
 
 	private TIntArrayList selection = new TIntArrayList();
 	private boolean selectionLock = false;
 	private Groups entity;
-	private Set<OldViewableMesh> interactors = new HashSet<OldViewableMesh>();
+	private Set<AmibeNViewable> interactors = new HashSet<AmibeNViewable>();
 
-	public OldMeshSelection(Groups entity)
+	public AmibeSelection(Groups entity)
 	{
 		this.entity = entity;
 		ViewManager.getDefault().addViewableListener(this);
@@ -90,10 +89,10 @@ public class OldMeshSelection implements EntitySelection, SelectionListener, Cur
 				break;
 			}
 
-		if (newInteractor == null || !(newInteractor instanceof OldViewableMesh))
+		if (newInteractor == null || !(newInteractor instanceof AmibeNViewable))
 			return;
 
-		OldViewableMesh meshInteractor = (OldViewableMesh) newInteractor;
+		AmibeNViewable meshInteractor = (AmibeNViewable) newInteractor;
 
 		if (SelectionManager.getDefault().getEntity(meshInteractor) == entity)
 			if (interactors.add(meshInteractor))
@@ -105,7 +104,7 @@ public class OldMeshSelection implements EntitySelection, SelectionListener, Cur
 
 	public void selectionChanged(Viewable interactor)
 	{
-		if(! (interactor instanceof NViewableMesh))
+		if(! (interactor instanceof BoraViewable))
 			return;
 		// If it is not our interactor leave
 		if (!interactors.contains(interactor))
@@ -116,7 +115,7 @@ public class OldMeshSelection implements EntitySelection, SelectionListener, Cur
 
 		selectionLock = true;
 
-		final NOldViewableMesh inter = (NOldViewableMesh) interactor;
+		final AmibeNViewable inter = (AmibeNViewable) interactor;
 		selection = new TIntArrayList((inter).getSelection());
 		SelectionManager.getDefault().prepareSelection();
 
@@ -133,7 +132,7 @@ public class OldMeshSelection implements EntitySelection, SelectionListener, Cur
 					for (Node meshProxy : inter.getNode().getChildren().getNodes())
 					{
 
-						OldAmibeMeshNode meshNode = meshProxy.getLookup().lookup(OldAmibeMeshNode.class);
+						AmibeNode meshNode = meshProxy.getLookup().lookup(AmibeNode.class);
 						if (meshNode != null)
 							if (meshNode.hasThisGroupsNode(entity))
 							{
@@ -195,7 +194,7 @@ public class OldMeshSelection implements EntitySelection, SelectionListener, Cur
 	 */
 	private void refreshHighlight()
 	{
-		for (OldViewableMesh interactor : interactors)
+		for (AmibeNViewable interactor : interactors)
 		{
 			interactor.setSelection(selection.toNativeArray());
 			interactor.highlight();

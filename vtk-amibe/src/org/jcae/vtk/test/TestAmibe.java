@@ -30,7 +30,7 @@ import org.jcae.vtk.OldMesh;
 import org.jcae.vtk.SelectionListener;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
-import org.jcae.vtk.OldViewableMesh;
+import org.jcae.vtk.AmibeViewable;
 import vtk.vtkInteractorStyleTrackballCamera;
 import vtk.vtkRenderer;
 
@@ -38,7 +38,7 @@ import vtk.vtkRenderer;
  *
  * @author Julian Ibarz
  */
-public class TestAmibe extends OldViewableMesh implements SelectionListener, KeyListener
+public class TestAmibe extends AmibeViewable implements SelectionListener, KeyListener
 {
 	public Canvas canvas;
 

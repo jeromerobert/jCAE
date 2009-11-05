@@ -37,7 +37,6 @@ import org.jcae.netbeans.viewer3d.SelectionManager;
 import org.jcae.netbeans.viewer3d.ViewManager;
 import org.jcae.vtk.AmibeToMesh;
 import org.jcae.vtk.View;
-import org.jcae.vtk.OldViewableMesh;
 import org.openide.ErrorManager;
 import org.openide.actions.*;
 import org.openide.cookies.ViewCookie;
@@ -59,16 +58,14 @@ import org.xml.sax.SAXException;
  * Lookups :
  * this.
  * @author ibarz
- * @deprecated : can not be created in the GUI anymore, use only to maintain
- * compatibility with old meshes
  */
-public class OldAmibeMeshNode extends DataNode implements ViewCookie
+public class AmibeNode extends DataNode implements ViewCookie
 {
 	private Groups groups;
 	private AbstractNode groupsNode;
 	private AbstractNode geomNode;
 
-	public OldAmibeMeshNode(DataObject arg0)
+	public AmibeNode(DataObject arg0)
 	{
 		super(arg0, new Children.Array());
 		getCookieSet().add(this);
@@ -157,7 +154,7 @@ public class OldAmibeMeshNode extends DataNode implements ViewCookie
 			new PropertySet()
 			{
 				public Property[] getProperties() {
-					return OldAmibeMeshNode.this.getMeshProperties();
+					return AmibeNode.this.getMeshProperties();
 				}
 
 				public String getName()
@@ -168,7 +165,7 @@ public class OldAmibeMeshNode extends DataNode implements ViewCookie
 			new PropertySet()
 			{
 				public Property[] getProperties() {
-					return OldAmibeMeshNode.this.getExpertProperties();
+					return AmibeNode.this.getExpertProperties();
 				}
 
 				public String getName()
@@ -214,7 +211,7 @@ public class OldAmibeMeshNode extends DataNode implements ViewCookie
 			sb=sb+"...";
 
 		AmibeToMesh reader = new AmibeToMesh(groups.getMeshFile(), idGroupsDisplayed);
-		OldViewableMesh interactor = new NOldViewableMesh(reader.getMesh(), node);
+		AmibeNViewable interactor = new AmibeNViewable(reader.getMesh(), node);
 		interactor.setName(meshName+" ["+sb+"]");
 		SelectionManager.getDefault().addInteractor(interactor, groups);
 		view.add(interactor);
@@ -275,7 +272,7 @@ public class OldAmibeMeshNode extends DataNode implements ViewCookie
 	}
 
 	public Mesh getMesh() {
-		return getCookie(OldAmibeMeshDataObject.class).getMesh();
+		return getCookie(AmibeDataObject.class).getMesh();
 	}
 
 	@Override
