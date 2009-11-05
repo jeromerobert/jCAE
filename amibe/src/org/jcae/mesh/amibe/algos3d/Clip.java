@@ -43,8 +43,8 @@ public class Clip
 	 *
 	 * @param m  the <code>Mesh</code> instance to clip.
 	 * @param options  map containing key-value pairs to modify algorithm
-	 *        behaviour.  Valid keys are <code>size</code> and
-	 *        <code>maxtriangles</code>.
+	 *        behaviour.  Valid keys are <code>lower</code> and
+	 *        <code>upper</code>.
 	 */
 	public Clip(final Mesh m, final Map<String, String> options)
 	{
