@@ -278,7 +278,7 @@ public class QualityFloat
 		{
 			float val = data.get(i);
 			int cell = (int) ((val - qmin) / delta + 1.001f);
-			assert cell > 0 && cell <= layers;
+			assert cell > 0 && cell <= layers + 1: "Illegal index: "+cell+" for value "+val;
 			sorted[cell]++;
 		}
 	}
