@@ -15,13 +15,11 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2005-2009, by EADS France
  */
 
 package org.jcae.netbeans.mesh;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -29,19 +27,19 @@ import org.jcae.mesh.bora.ds.BModel;
 import org.jcae.mesh.bora.xmldata.BModelReader;
 import org.openide.cookies.SaveCookie;
 import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.MultiDataObject;
 import org.openide.loaders.MultiFileLoader;
 import org.openide.nodes.Node;
 
-public class BoraDataObject extends MultiDataObject implements SaveCookie, PropertyChangeListener
+public class BoraDataObject extends MultiDataObject implements SaveCookie
 {
 	private static final Logger LOGGER = Logger.getLogger(BoraDataObject.class.getName());
 
 	public BoraDataObject(FileObject arg0, MultiFileLoader arg1) throws DataObjectExistsException
 	{
 		super(arg0, arg1);
-		dir = arg0;
 	}
 
 	@Override
@@ -52,7 +50,6 @@ public class BoraDataObject extends MultiDataObject implements SaveCookie, Prope
 	}
 	
 	private BModel bModel;
-	private FileObject dir;
 
 	public BModel getBModel() {
 		return bModel;
@@ -86,13 +83,7 @@ public class BoraDataObject extends MultiDataObject implements SaveCookie, Prope
 
 	@Override
 	public String getName() {
-		String directory = getDirectory();
-		return directory.substring(directory.lastIndexOf(File.separator) + 1, directory.lastIndexOf("."));
-	}
-
-	public void propertyChange(PropertyChangeEvent evt)
-	{
-		setModified(true);
+		return getPrimaryFile().getName();
 	}
 
 	public void updateBModelDir() {
@@ -100,7 +91,8 @@ public class BoraDataObject extends MultiDataObject implements SaveCookie, Prope
 			bModel.setOutputDir(getDirectory());
 	}
 
-	public String getDirectory() {
-		return dir.toString();
+	private String getDirectory()
+	{
+		return FileUtil.toFile(getPrimaryFile()).getPath();
 	}
 }

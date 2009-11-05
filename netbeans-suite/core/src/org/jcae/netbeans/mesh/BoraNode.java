@@ -42,7 +42,6 @@ import org.openide.actions.*;
 import org.openide.cookies.ViewCookie;
 import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataNode;
-import org.openide.loaders.DataObject;
 import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
@@ -55,56 +54,20 @@ import org.openide.util.datatransfer.PasteType;
  */
 public class BoraNode extends DataNode implements ViewCookie
 {
-	private final Submeshes subMeshesFactory;
+	private Submeshes subMeshesFactory;
 
-	public BoraNode(final DataObject arg0)
+	public BoraNode(BoraDataObject arg0)
 	{
-		super(arg0, Children.LEAF);
+		this(arg0, new Submeshes(arg0));
+	}
+	
+	private BoraNode(BoraDataObject arg0, Submeshes subMeshesFactory)
+	{
+		super(arg0, Children.create(subMeshesFactory, true));
+		this.subMeshesFactory = subMeshesFactory;
 		setIconBaseWithExtension("org/jcae/netbeans/mesh/MeshNode.png");
 		getCookieSet().add(this);
-		subMeshesFactory = new Submeshes(arg0);
-		setChildren(Children.create(subMeshesFactory, true));
 	}
-
-
-//	protected Property[] getExpertProperties()
-//	{
-//		try
-//		{
-//			return new Property[]{
-//				new BeanProperty(getBModel(), "geometryFile"),
-//				new BeanProperty(getBModel(), "meshFile"),
-//				new BeanProperty(getBModel(), "boraFile")
-//			};
-//		}
-//		catch (Exception e)
-//		{
-//			ErrorManager.getDefault().notify(e);
-//			return new Property[0];
-//		}
-//	}
-//
-//	@Override
-//	public PropertySet[] getPropertySets() {
-//		return new PropertySet[]{
-//					new PropertySet() {
-//
-//						public Property[] getProperties() {
-//							return MeshNode.this.getExpertProperties();
-//						}
-//
-//						@Override
-//						public String getName() {
-//							return "Expert";
-//						}
-//
-//						@Override
-//						public boolean isExpert() {
-//							return true;
-//						}
-//					}
-//				};
-//	}
 
 	private SubmeshNode getEnclosedSubMeshNode() {
 		assert (getChildren().getNodes().length == 0 || getChildren().getNodes().length == 1 );
@@ -205,7 +168,7 @@ public class BoraNode extends DataNode implements ViewCookie
 							BrepDataObject.class).getPrimaryFile());
 						getBModel(f.getPath()).newMesh();
 						getBModel().save();
-						updateSubmeshNode();
+						subMeshesFactory.fireSubmeshNodeChanged();
 						firePropertyChange(null, null, null);
 						return null;
 					}
@@ -214,17 +177,6 @@ public class BoraNode extends DataNode implements ViewCookie
 		}
 		// Also try superclass, but give it lower priority:
 		super.createPasteTypes(t, ls);
-	}
-
-	private void updateSubmeshNode()
-	{
-		if (getBModel() != null) {
-			subMeshesFactory.fireSubmeshNodeChanged();
-		}
-	}
-
-	private static String getCADName(String cadFile) {
-		return cadFile.substring(cadFile.lastIndexOf(File.separator) + 1, cadFile.lastIndexOf("."));
 	}
 	
 	@Override
@@ -238,22 +190,22 @@ public class BoraNode extends DataNode implements ViewCookie
 		return l.toArray(new Action[l.size()]);
 	}
 
-	private static class Submeshes extends ChildFactory {
-		private DataObject dataObject;
-		private Submeshes(DataObject dataObject) {
-			this.dataObject = dataObject;
+	private static class Submeshes extends ChildFactory<BModel> {
+		private final BoraDataObject mObject;
+
+		public Submeshes(BoraDataObject o) {
+			this.mObject = o;
 		}
 
 		@Override
-		protected Node createNodeForKey(Object arg0) {
-			BModel bModel = (BModel) arg0;
-			return new SubmeshNode(getCADName(
-					bModel.getCADFile()), bModel);
+		protected Node createNodeForKey(BModel bModel) {
+			String f = bModel.getCADFile();
+			f = f.substring(f.lastIndexOf(File.separator) + 1, f.lastIndexOf("."));
+			return new SubmeshNode(f, bModel);
 		}
 
 		@Override
-		protected boolean createKeys(List list) {
-			BoraDataObject mObject = (BoraDataObject) dataObject;
+		protected boolean createKeys(List<BModel> list) {
 			if (mObject.getBModel() == null)
 				mObject.load();
 			if (mObject.getBModel() != null) {
@@ -263,7 +215,7 @@ public class BoraNode extends DataNode implements ViewCookie
 		}
 
 		public void fireSubmeshNodeChanged() {
-			this.createKeys(new ArrayList());
+			this.createKeys(new ArrayList<BModel>());
 			this.refresh(true);
 		}
 	}
