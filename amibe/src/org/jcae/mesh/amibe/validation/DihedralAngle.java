@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2005, by EADS CRC
-    Copyright (C) 2007, by EADS France
+    Copyright (C) 2007,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,10 +20,10 @@
 
 package org.jcae.mesh.amibe.validation;
 
-import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
-import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 
 /**
  * Compute angles between adjacent triangles.
@@ -36,8 +36,13 @@ import org.jcae.mesh.amibe.metrics.Matrix3D;
  */
 public class DihedralAngle extends QualityProcedure
 {
-	private final VirtualHalfEdge ot = new VirtualHalfEdge();
-	private final VirtualHalfEdge sym = new VirtualHalfEdge();
+	private AbstractHalfEdge ot;
+	private AbstractHalfEdge sym;
+
+	private final double[] temp1 = new double[3];
+	private final double[] temp2 = new double[3];
+	private final double[] temp3 = new double[3];
+	private final double[] temp4 = new double[3];
 	
 	@Override
 	protected void setValidationFeatures()
@@ -47,34 +52,47 @@ public class DihedralAngle extends QualityProcedure
 	}
 
 
+	/**
+	 * Returns <code>MeshTraitsBuilder</code> instance needed by this class.
+	 */
+	@Override
+	protected final MeshTraitsBuilder getMeshTraitsBuilder()
+	{
+		return MeshTraitsBuilder.getDefault3D();
+	}
+
 	@Override
 	public float quality(Object o)
 	{
-		if (!(o instanceof TriangleVH))
+		if (!(o instanceof Triangle))
 			throw new IllegalArgumentException();
-		TriangleVH t = (TriangleVH) o;
-		ot.bind(t);
+		Triangle t = (Triangle) o;
+		ot = t.getAbstractHalfEdge(ot);
+		sym = t.getAbstractHalfEdge(sym);
 		float ret = 1.0f;
 		for (int i = 0; i < 3; i++)
 		{
-			ot.next();
+			ot = ot.next();
 			if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 				continue;
 			if (!ot.hasSymmetricEdge())
 				continue;
-			sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
-			sym.sym();
+			sym = ot.sym(sym);
 			if (t.getGroupId() != sym.getTri().getGroupId())
 				continue;
-			ot.computeNormal3D();
-			double [] n1 = ot.getTempVector();
-			sym.computeNormal3D();
-			double [] n2 = sym.getTempVector();
-			float dot = (float) Matrix3D.prodSca(n1, n2);
+			double [] p0 = ot.origin().getUV();
+			double [] p1 = ot.destination().getUV();
+			double [] p2 = ot.apex().getUV();
+			double [] p3 = sym.apex().getUV();
+
+			Matrix3D.computeNormal3D(p0, p1, p2, temp1, temp2, temp3);
+			Matrix3D.computeNormal3D(p1, p0, p3, temp1, temp2, temp4);
+			float dot = (float) Matrix3D.prodSca(temp3, temp4);
 			if (dot < ret)
 				ret = dot;
 		}
 		return ret;
 	}
-	
+
 }
+
