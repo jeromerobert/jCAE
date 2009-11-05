@@ -905,7 +905,7 @@ abstract public class MeshExporter
 	 */
 	public static class VTK extends MeshExporter
 	{
-		private boolean dummyData = false;
+		private boolean dummyData = true;
 		
 		public VTK(File directory, int[] groupIds)
 		{
