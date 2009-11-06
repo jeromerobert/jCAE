@@ -22,6 +22,7 @@ package org.jcae.netbeans.viewer3d.actions;
 import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.Storage;
 import org.jcae.netbeans.Utilities;
+import org.jcae.netbeans.mesh.AmibeDataObject;
 import org.jcae.netbeans.mesh.BoraDataObject;
 import org.jcae.vtk.MeshVisuBuilder;
 import org.openide.filesystems.FileUtil;
@@ -89,7 +90,7 @@ public final class BuildOEMMVisu extends CookieAction
 	protected Class[] cookieClasses()
 	{
 		return new Class[] {
-			BoraDataObject.class
+			AmibeDataObject.class
 		};
 	}
 

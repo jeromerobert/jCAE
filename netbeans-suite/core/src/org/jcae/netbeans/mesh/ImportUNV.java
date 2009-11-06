@@ -59,7 +59,7 @@ public final class ImportUNV extends CookieAction
 	protected Class[] cookieClasses()
 	{
 		return new Class[] {
-			BoraDataObject.class
+			AmibeDataObject.class
 		};
 	}
 	

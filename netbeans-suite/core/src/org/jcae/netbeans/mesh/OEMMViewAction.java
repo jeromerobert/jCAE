@@ -93,7 +93,7 @@ public final class OEMMViewAction extends CookieAction implements SelectionListe
 	protected Class[] cookieClasses()
 	{
 		return new Class[] {
-			BoraDataObject.class
+			AmibeDataObject.class
 		};
 	}
 	

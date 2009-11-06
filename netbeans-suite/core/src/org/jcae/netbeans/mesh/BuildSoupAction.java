@@ -78,7 +78,7 @@ public final class BuildSoupAction extends CookieAction
 	protected Class[] cookieClasses()
 	{
 		return new Class[] {
-			BoraDataObject.class
+			AmibeDataObject.class
 		};
 	}
 	

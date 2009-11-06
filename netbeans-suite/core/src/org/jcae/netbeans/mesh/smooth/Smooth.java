@@ -2,7 +2,6 @@ package org.jcae.netbeans.mesh.smooth;
 
 import org.jcae.netbeans.ProcessExecutor;
 import org.jcae.netbeans.Utilities;
-import org.jcae.netbeans.mesh.BoraDataObject;
 import org.jcae.netbeans.mesh.AmibeDataObject;
 import org.jcae.netbeans.mesh.Settings;
 import org.openide.filesystems.FileUtil;
@@ -66,7 +65,7 @@ public final class Smooth extends CookieAction
 	protected Class[] cookieClasses()
 	{
 		return new Class[] {
-			BoraDataObject.class
+			AmibeDataObject.class
 		};
 	}
 	

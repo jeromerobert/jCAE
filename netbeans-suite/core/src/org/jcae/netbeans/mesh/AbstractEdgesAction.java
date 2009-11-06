@@ -98,7 +98,7 @@ public abstract class AbstractEdgesAction extends CookieAction
 	protected Class[] cookieClasses()
 	{
 		return new Class[] {
-			BoraDataObject.class
+			AmibeDataObject.class
 		};
 	}
 	
