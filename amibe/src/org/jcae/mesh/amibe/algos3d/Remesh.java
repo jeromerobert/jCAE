@@ -57,6 +57,7 @@ import java.util.logging.Logger;
 public class Remesh
 {
 	private final static Logger LOGGER = Logger.getLogger(Remesh.class.getName());
+	private int progressBarStatus = 10000;
 	private final Mesh mesh;
 	private final MeshLiaison liaison;
 	// Octree to find nearest Vertex in current mesh
@@ -889,6 +890,8 @@ public class Remesh
 						}
 					}
 					while ((edge.origin() != s || counter == 0) && counter < 20);
+					if (processed > 0 && (processed % progressBarStatus) == 0)
+						LOGGER.info("Vertices inserted: "+processed);
 				}
 				assert mesh.isValid();
 				assert mesh.checkNoInvertedTriangles();
@@ -926,6 +929,11 @@ public class Remesh
 		// Can be overridden
 	}
 	
+	public void setProgressBarStatus(int n)
+	{
+		progressBarStatus = n;
+	}
+
 	private static void usage(int rc)
 	{
 		System.out.println("Usage: Remesh [options] xmlDir outDir");
