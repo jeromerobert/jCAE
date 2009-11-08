@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2006, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -410,6 +410,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	public final double checkSwap3D(double minCos, double maxLength)
 	{
 		double invalid = -1.0;
+		// Do not swap sharp edges
+		if (hasAttributes(SHARP))
+			return invalid;
 		// Check if there is an adjacent edge
 		if (hasAttributes(OUTER | BOUNDARY | NONMANIFOLD))
 			return invalid;
@@ -466,7 +469,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	private HalfEdge HEswap()
 	{
-		if (hasAttributes(OUTER | BOUNDARY | NONMANIFOLD))
+		if (hasAttributes(SHARP | OUTER | BOUNDARY | NONMANIFOLD))
 			throw new IllegalArgumentException("Cannot swap "+this);
 		Vertex o = origin();
 		Vertex d = destination();

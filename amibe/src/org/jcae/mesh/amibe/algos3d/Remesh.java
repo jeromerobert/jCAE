@@ -878,8 +878,6 @@ public class Remesh
 					{
 						edge = edge.nextApexLoop();
 						counter++;
-						if (edge.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
-							continue;
 						if (edge.checkSwap3D(0.8) >= 0.0)
 						{
 							edge.getTri().clearAttributes(AbstractHalfEdge.MARKED);

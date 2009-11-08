@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -160,7 +160,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 	@Override
 	public boolean canProcessEdge(HalfEdge current)
 	{
-		if (current.hasAttributes(AbstractHalfEdge.OUTER | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+		if (current.hasAttributes(AbstractHalfEdge.OUTER | AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 			return false;
 		if (current.hasAttributes(AbstractHalfEdge.MARKED) && current.sym().hasAttributes(AbstractHalfEdge.MARKED))
 			return false;
@@ -243,7 +243,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 		do
 		{
 			HalfEdge h = uniqueOrientation(current);
-			if (!h.hasAttributes(AbstractHalfEdge.OUTER | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD) && !tree.contains(h))
+			if (!h.hasAttributes(AbstractHalfEdge.OUTER | AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD) && !tree.contains(h))
 			{
 				double val = cost(h);
 				if (val <= tolerance)
@@ -253,7 +253,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 				}
 			}
 			h = uniqueOrientation(current.next());
-			if (!h.hasAttributes(AbstractHalfEdge.OUTER | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD) && !tree.contains(h))
+			if (!h.hasAttributes(AbstractHalfEdge.OUTER | AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD) && !tree.contains(h))
 			{
 				double val = cost(h);
 				if (val <= tolerance)

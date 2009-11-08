@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2005, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -89,7 +89,7 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 	@Override
 	public boolean canProcessEdge(HalfEdge current)
 	{
-		return counter > 0 && !current.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD);
+		return counter > 0 && !current.hasAttributes(AbstractHalfEdge.OUTER | AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD);
 	}
 
 	@Override

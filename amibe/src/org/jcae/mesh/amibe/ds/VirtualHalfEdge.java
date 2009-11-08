@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2004,2005,2006, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -214,7 +214,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 */
 	public final boolean isMutable()
 	{
-		return !hasAttributes(BOUNDARY | NONMANIFOLD | OUTER);
+		return !hasAttributes(BOUNDARY | NONMANIFOLD | SHARP | OUTER);
 	}
 	
 	// Section: geometrical primitives
@@ -660,6 +660,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	private double checkSwap3D(double minCos, double maxLength)
 	{
 		double invalid = -1.0;
+		// Do not swap sharp edges
+		if (hasAttributes(SHARP))
+			return invalid;
 		// Check if there is an adjacent edge
 		if (hasAttributes(OUTER | BOUNDARY | NONMANIFOLD))
 			return invalid;
@@ -718,7 +721,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	private void VHswap()
 	{
-		if (hasAttributes(OUTER | BOUNDARY | NONMANIFOLD))
+		if (hasAttributes(SHARP | OUTER | BOUNDARY | NONMANIFOLD))
 			throw new IllegalArgumentException("Cannot swap "+this);
 		Vertex o = origin();
 		Vertex d = destination();
