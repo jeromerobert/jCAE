@@ -159,6 +159,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 			else
 				throw new RuntimeException("Unknown option: "+key);
 		}
+		minCos = 0.9;
 	}
 	
 	@Override
@@ -430,13 +431,24 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		q3 = qFree;
 		if (q3 == null)
 			q3 = new Quadric3DError();
-		if (current.origin().isManifold())
+		updateIncidentEdges(current);
+		checkAndSwapAroundOrigin(current);
+		return current.next();
+	}
+
+	private void updateIncidentEdges(HalfEdge current)
+	{
+		Vertex o = current.origin();
+		if (!o.isReadable())
+			return;
+		if (o.isManifold())
 		{
+			Vertex apex = current.apex();
 			do
 			{
 				current = current.nextOriginLoop();
 				assert !current.hasAttributes(AbstractHalfEdge.NONMANIFOLD);
-				if (current.destination().isReadable() && current.origin().isReadable())
+				if (current.destination().isReadable())
 				{
 					double newCost = cost(current);
 					HalfEdge h = uniqueOrientation(current);
@@ -450,9 +462,8 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 				}
 			}
 			while (current.apex() != apex);
-			return current.next();
+			return;
 		}
-		Vertex o = current.origin();
 		Triangle [] list = (Triangle []) o.getLink();
 		for (Triangle t: list)
 		{
@@ -466,7 +477,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 			do
 			{
 				f = f.nextOriginLoop();
-				if (f.destination().isReadable() && f.origin().isReadable())
+				if (f.destination().isReadable())
 				{
 					double newCost = cost(f);
 					HalfEdge h = uniqueOrientation(f);
@@ -480,11 +491,70 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 				}
 			}
 			while (f.destination() != d);
-			current = f;
 		}
-		return current.next();
 	}
-	
+
+	private void checkAndSwapAroundOrigin(HalfEdge current)
+	{
+		Vertex d = current.destination();
+		boolean redo = true;
+		while(redo)
+		{
+			redo = false;
+			while(true)
+			{
+				if (current.checkSwap3D(minCos, maxEdgeLength) >= 0.0)
+				{
+					// Swap edge
+					for (int i = 0; i < 3; i++)
+					{
+						current = current.next();
+						removeFromTree(current);
+					}
+					HalfEdge sym = current.sym();
+					for (int i = 0; i < 2; i++)
+					{
+						sym = sym.next();
+						removeFromTree(sym);
+					}
+					Vertex a = current.apex();
+					boolean updateDestination = current.destination() == d;
+					current = (HalfEdge) mesh.edgeSwap(current);
+					swapped++;
+					redo = true;
+					if (updateDestination)
+						d = current.destination();
+					assert a == current.apex();
+					for (int i = 0; i < 3; i++)
+					{
+						current = current.next();
+						for (Iterator<AbstractHalfEdge> it = current.fanIterator(); it.hasNext(); )
+						{
+							HalfEdge e = uniqueOrientation((HalfEdge) it.next());
+							addToTree(e);
+						}
+					}
+					sym = current.next().sym();
+					for (int i = 0; i < 2; i++)
+					{
+						sym = sym.next();
+						for (Iterator<AbstractHalfEdge> it = sym.fanIterator(); it.hasNext(); )
+						{
+							HalfEdge e = uniqueOrientation((HalfEdge) it.next());
+							addToTree(e);
+						}
+					}
+				}
+				else
+				{
+					current = current.nextOriginLoop();
+					if (current.destination() == d)
+						break;
+				}
+			}
+		}
+	}
+
 	@Override
 	public void postProcessAllHalfEdges()
 	{
