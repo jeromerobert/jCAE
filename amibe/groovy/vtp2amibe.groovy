@@ -17,7 +17,7 @@ import org.apache.commons.cli.*;
 void usage(int rc, Options options)
 {
 	HelpFormatter formatter = new HelpFormatter();
-	formatter.printHelp("groovy vtp2amibe.groovy [options] vtpFile", options);
+	formatter.printHelp("groovy vtp2amibe.groovy [options] vtpFile amibeDir", options);
 	System.exit(rc);
 }
 
@@ -27,22 +27,17 @@ options.addOption(
 		.withDescription("usage information")
 		.withLongOpt("help")
 		.create('h'));
-options.addOption(
-	OptionBuilder.withArgName("PATH").hasArg()
-		.withDescription("output directory (default is current directory)")
-		.withLongOpt("outputdir")
-		.create('o'));
 CommandLineParser parser = new GnuParser();
 CommandLine cmd = parser.parse(options, args, true);
 if (cmd.hasOption('h'))
 	usage(0, options);
 
 String [] remaining = cmd.getArgs();
-if (remaining.length != 1)
+if (remaining.length != 2)
 	usage(1, options);
 
 String vtpFile = remaining[0];
-String outDir = cmd.getOptionValue('o', '.');
+String outDir  = remaining[1];
 Mesh mesh = new Mesh(new MeshTraitsBuilder());
 
 Utils.loadVTKLibraries();

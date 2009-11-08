@@ -9,7 +9,7 @@ import org.apache.commons.cli.*;
 
 
 cmd=["remesh  ", "Remesh an existing mesh"]
-usage="<xmlDir>"
+usage="<inputDir> <outputDir>"
 
 void usage(int rc, Options options)
 {
@@ -40,11 +40,6 @@ options.addOption(
 		.withLongOpt("metricsFile")
 		.create('m'));
 options.addOption(
-	OptionBuilder.withArgName("DIR").hasArg()
-		.withDescription("writes new mesh into this directory")
-		.withLongOpt("output")
-		.create('o'));
-options.addOption(
 	OptionBuilder.hasArg(false)
 		.withDescription("project vertices onto local surface")
 		.withLongOpt("project")
@@ -56,7 +51,7 @@ if (cmd.hasOption('h'))
 	usage(0, options);
 
 String [] remaining = cmd.getArgs();
-if (remaining.length != 1)
+if (remaining.length != 2)
 	usage(1, options);
 if (cmd.hasOption('t') && cmd.hasOption('m'))
 {
@@ -65,7 +60,7 @@ if (cmd.hasOption('t') && cmd.hasOption('m'))
 }
 
 String xmldir = remaining[0]
-String outDir = cmd.getOptionValue('o', xmldir)
+String outDir = remaining[1]
 
 MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault3D();
 mtb.addNodeList();

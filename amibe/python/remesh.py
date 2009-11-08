@@ -17,7 +17,7 @@ from optparse import OptionParser
 Remesh an existing mesh.
 """
 
-parser = OptionParser(usage="amibebatch remesh [OPTIONS] <inputDir>\n\nRemesh an existing mesh", prog="remesh")
+parser = OptionParser(usage="amibebatch remesh [OPTIONS] <inputDir> <outputDir>\n\nRemesh an existing mesh", prog="remesh")
 parser.add_option("-a", "--ridgeAngle", metavar="FLOAT", default=-1.0,
                   action="store", type="float", dest="coplanar",
 		  help="dot product of face normals to detect feature edges")
@@ -27,23 +27,18 @@ parser.add_option("-t", "--size", metavar="FLOAT", default=0.0,
 parser.add_option("-m", "--metricsFile", metavar="STRING",
                   action="store", type="string", dest="metricsFile",
                   help="name of a file containing metrics map")
-parser.add_option("-o", "--output", metavar="STRING",
-                  action="store", type="string", dest="output",
-                  help="writes new mesh into this directory")
 parser.add_option("-p", "--project",
                   action="store_true", dest="project",
                   help="project vertices onto local surface")
 
 (options, args) = parser.parse_args(args=sys.argv[1:])
 
-if len(args) != 1:
+if len(args) != 2:
 	parser.print_usage()
 	sys.exit(1)
 
 xmlDir = args[0]
-outDir = options.output
-if not outDir:
-	outDir = xmlDir
+outDir = args[1]
 
 mtb = MeshTraitsBuilder.getDefault3D()
 mtb.addNodeList()

@@ -9,7 +9,7 @@ import java.lang.reflect.Constructor;
 import org.apache.commons.cli.*;
 
 cmd=["decimate", "Decimate a mesh"]
-usage="<xmlDir>"
+usage="<inputDir> <outputDir>"
 
 void usage(int rc, Options options)
 {
@@ -61,11 +61,6 @@ options.addOption(
 		.withDescription("lists all available decimation algorithms")
 		.withLongOpt("list-algorithm")
 		.create('A'));
-options.addOption(
-	OptionBuilder.withArgName("DIR").hasArg()
-		.withDescription("writes decimated mesh into this directory")
-		.withLongOpt("output")
-		.create('o'));
 
 CommandLineParser parser = new GnuParser();
 CommandLine cmd = parser.parse(options, args, true);
@@ -80,7 +75,7 @@ if (cmd.hasOption('A'))
 }
 
 String [] remaining = cmd.getArgs();
-if (remaining.length != 1)
+if (remaining.length != 2)
 	usage(1, options);
 if (cmd.hasOption('t') == cmd.hasOption('n'))
 {
@@ -89,7 +84,7 @@ if (cmd.hasOption('t') == cmd.hasOption('n'))
 }
 
 String xmldir = remaining[0]
-String outDir = cmd.getOptionValue('o', xmldir)
+String outDir = remaining[1]
 
 HashMap<String, String> algoOptions = new HashMap<String, String>();
 if (cmd.hasOption('t'))

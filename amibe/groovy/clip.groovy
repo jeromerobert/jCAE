@@ -6,7 +6,7 @@ import org.jcae.mesh.xmldata.MeshWriter
 import org.apache.commons.cli.*;
 
  cmd=["clip     ", "Clip a mesh by a box"]
-usage="<xmlDir> <outputDir>"
+usage="<inputDir> <outputDir>"
 
 void usage(int rc, Options options)
 {

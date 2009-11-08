@@ -18,7 +18,7 @@ Decimate a mesh.
 """
 
 defaultAlgo = "QEMDecimateHalfEdge"
-parser = OptionParser(usage="amibebatch decimate [OPTIONS] <inputDir>\n\nDecimate a mesh", prog="decimate")
+parser = OptionParser(usage="amibebatch decimate [OPTIONS] <inputDir> <outputDir>\n\nDecimate a mesh", prog="decimate")
 parser.add_option("-t", "--tolerance", metavar="FLOAT",
                   action="store", type="float", dest="tolerance",
                   help="geometry error allowed when decimating")
@@ -38,13 +38,10 @@ parser.add_option("-a", "--algorithm", metavar="STRING", default=defaultAlgo,
 		  help="decimation algorithm (default: "+defaultAlgo+")")
 parser.add_option("-A", "--list-algorithm", action="store_true", dest="listAlgorithm",
                   help="lists all available decimation algorithms")
-parser.add_option("-o", "--output", metavar="STRING",
-                  action="store", dest="output",
-                  help="writes decimated mesh into this directory")
 
 (options, args) = parser.parse_args(args=sys.argv[1:])
 
-if len(args) != 1:
+if len(args) != 2:
 	parser.print_usage()
 	sys.exit(1)
 
@@ -55,9 +52,7 @@ if options.listAlgorithm:
 	sys.exit(0)
 
 xmlDir = args[0]
-outDir = options.output
-if not outDir:
-	outDir = xmlDir
+outDir = args[1]
 
 opts = HashMap()
 if options.tolerance:
