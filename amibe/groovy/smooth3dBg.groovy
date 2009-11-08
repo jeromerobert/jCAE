@@ -53,9 +53,9 @@ options.addOption(
 		.create('N'));
 options.addOption(
 	OptionBuilder.withArgName("FLOAT").hasArg()
-		.withDescription("feature angle (in degree)")
-		.withLongOpt("angle")
-		.create('a'));
+		.withDescription("dot product of face normals to detect feature edges")
+		.withLongOpt("coplanarity")
+		.create('c'));
 options.addOption(
 	OptionBuilder.hasArg(false)
 		.withDescription("update triangle quality within loop")
@@ -103,8 +103,8 @@ opts.put("size", sSize);
 opts.put("tolerance", sTolerance);
 opts.put("relaxation", sRelaxation);
 opts.put("refresh", sRefresh);
-if (cmd.hasOption('a'))
-	opts.put("angle", cmd.getOptionValue('a'));
+if (cmd.hasOption('c'))
+	opts.put("coplanarity", cmd.getOptionValue('c'));
 
 SmoothNodes3DBg sm = new SmoothNodes3DBg(mesh, opts)
 sm.setProgressBarStatus(10000);

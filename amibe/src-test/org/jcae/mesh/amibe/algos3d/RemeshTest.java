@@ -182,7 +182,7 @@ public class RemeshTest
 
 		final Map<String, String> options = new HashMap<String, String>();
 		options.put("size", "0.05");
-		options.put("ridgeAngle", "0.9");
+		options.put("coplanarity", "0.9");
 		Mesh newMesh = new Remesh(bgMesh, options).compute().getOutputMesh();
 // try { org.jcae.mesh.xmldata.MeshWriter.writeObject3D(newMesh, "XXX", null); } catch (IOException ex) { ex.printStackTrace(); throw new RuntimeException(ex); }
 

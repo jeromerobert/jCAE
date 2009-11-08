@@ -25,17 +25,17 @@ options.addOption(
 		.withLongOpt("help")
 		.create('h'));
 options.addOption(
-	OptionBuilder.withArgName("VALUE").hasArg()
-		.withDescription("angle (in degrees) to detect feature edges")
-		.withLongOpt("ridgeAngle")
-		.create('a'));
+	OptionBuilder.withArgName("FLOAT").hasArg()
+		.withDescription("dot product of face normals to detect feature edges")
+		.withLongOpt("coplanarity")
+		.create('c'));
 options.addOption(
-	OptionBuilder.withArgName("VALUE").hasArg()
+	OptionBuilder.withArgName("FLOAT").hasArg()
 		.withDescription("target size")
 		.withLongOpt("size")
 		.create('t'));
 options.addOption(
-	OptionBuilder.withArgName("VALUE").hasArg()
+	OptionBuilder.withArgName("FILE").hasArg()
 		.withDescription("name of a file containing metrics map")
 		.withLongOpt("metricsFile")
 		.create('m'));
@@ -80,8 +80,8 @@ else if (cmd.hasOption('m'))
 	algoOptions.put("metricsFile", cmd.getOptionValue('m'));
 else
 	setAnalytic = true
-if (cmd.hasOption('a'))
-	algoOptions.put("ridgeAngle", cmd.getOptionValue('a'));
+if (cmd.hasOption('c'))
+	algoOptions.put("coplanarity", cmd.getOptionValue('c'));
 if (cmd.hasOption('p'))
 	algoOptions.put("project", "true");
 

@@ -53,6 +53,7 @@ public abstract class AbstractAlgoHalfEdge
 	int notInTree = 0;
 	private int progressBarStatus = 10000;
 	boolean noSwapAfterProcessing = false;
+	double minCos = 0.95;
 	QSortedTree<HalfEdge> tree = new PAVLSortedTree<HalfEdge>();
 	
 	protected abstract void preProcessAllHalfEdges();
@@ -234,7 +235,7 @@ public abstract class AbstractAlgoHalfEdge
 			Vertex o = current.origin();
 			while(true)
 			{
-				if (current.checkSwap3D(0.95, maxEdgeLength) >= 0.0)
+				if (current.checkSwap3D(minCos, maxEdgeLength) >= 0.0)
 				{
 					// Swap edge
 					for (int i = 0; i < 3; i++)

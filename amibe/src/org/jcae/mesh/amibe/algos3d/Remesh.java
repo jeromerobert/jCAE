@@ -125,7 +125,7 @@ public class Remesh
 				size = Double.valueOf(val).doubleValue();
 				analyticMetric = null;
 			}
-			else if (key.equals("ridgeAngle"))
+			else if (key.equals("coplanarity"))
 			{
 				mesh.buildRidges(Double.valueOf(val).doubleValue());
 				ridges = true;

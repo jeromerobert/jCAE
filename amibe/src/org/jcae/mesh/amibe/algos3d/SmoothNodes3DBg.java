@@ -113,7 +113,7 @@ public class SmoothNodes3DBg
 				checkQuality = Boolean.valueOf(val).booleanValue();
 			else if (key.equals("relaxation"))
 				relaxation = Double.valueOf(val).doubleValue();
-			else if (key.equals("angle"))
+			else if (key.equals("coplanarity"))
 				mesh.buildRidges(Double.valueOf(val).doubleValue());
 			else
 				throw new RuntimeException("Unknown option: "+key);

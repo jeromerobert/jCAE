@@ -29,8 +29,8 @@ options.addOption(
 options.addOption(
 	OptionBuilder.withArgName("FLOAT").hasArg()
 		.withDescription("Minimum dot product of face normals allowed for swapping an edge (default 0.95)")
-		.withLongOpt("angle")
-		.create('a'));
+		.withLongOpt("coplanarity")
+		.create('c'));
 CommandLineParser parser = new GnuParser();
 CommandLine cmd = parser.parse(options, args, true);
 if (cmd.hasOption('h'))
@@ -43,7 +43,7 @@ if (remaining.length != 2)
 String xmlDir = remaining[0]
 String outDir = remaining[1]
 
-String angle=cmd.getOptionValue('a', "0.95");
+String coplanar=cmd.getOptionValue('c', "0.95");
 
 MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault3D()
 mtb.addNodeList()
@@ -59,7 +59,7 @@ catch (IOException ex)
 }
 
 HashMap<String, String> opts = new HashMap<String, String>();
-opts.put("angle", angle);
+opts.put("coplanarity", coplanar);
 SwapEdge se = new SwapEdge(mesh, opts)
 se.setProgressBarStatus(10000);
 se.compute();

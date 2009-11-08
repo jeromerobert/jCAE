@@ -17,8 +17,8 @@ Swap edges to improve mesh quality.
 """
 
 parser = OptionParser(usage="amibebatch swap [OPTIONS] <inputDir> <outputDir>\n\nSwap edges to improve mesh quality", prog="swap")
-parser.add_option("-a", "--angle", metavar="FLOAT", default=0.95,
-                  action="store", type="float", dest="angle",
+parser.add_option("-c", "--coplanarity", metavar="FLOAT", default=0.95,
+                  action="store", type="float", dest="coplanarity",
 		  help="minimum dot product of face normals allowed for swapping an edge (default 0.95)")
 
 (options, args) = parser.parse_args(args=sys.argv[1:])
@@ -34,7 +34,7 @@ mesh = Mesh()
 MeshReader.readObject3D(mesh, xmlDir)
 
 opts = HashMap()
-opts.put("angle", str(options.angle))
+opts.put("coplanarity", str(options.coplanarity))
 sm = SwapEdge(mesh, opts)
 sm.setProgressBarStatus(10000)
 sm.compute()

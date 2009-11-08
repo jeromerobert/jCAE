@@ -40,7 +40,6 @@ import java.util.logging.Logger;
 public class SwapEdge extends AbstractAlgoHalfEdge
 {
 	private static final Logger LOGGER=Logger.getLogger(SwapEdge.class.getName());
-	private double planarMin = 0.95;
 	private int counter = 0;
 	
 	/**
@@ -48,7 +47,7 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 	 *
 	 * @param m  the <code>Mesh</code> instance to modify
 	 * @param options  map containing key-value pairs to modify algorithm
-	 *        behaviour.  Valid key is <code>angle</code>.
+	 *        behaviour.  Valid key is <code>coplanarity</code>.
 	 */
 	public SwapEdge(final Mesh m, final Map<String, String> options)
 	{
@@ -57,10 +56,10 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 		{
 			final String key = opt.getKey();
 			final String val = opt.getValue();
-			if (key.equals("angle"))
+			if (key.equals("coplanarity"))
 			{
-				planarMin = Double.parseDouble(val);
-				LOGGER.fine("Minimum dot product of face normals allowed for swapping an edge: "+planarMin);
+				minCos = Double.parseDouble(val);
+				LOGGER.fine("Minimum dot product of face normals allowed for swapping an edge: "+minCos);
 			}
 			else
 				throw new RuntimeException("Unknown option: "+key);
@@ -83,7 +82,7 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 	@Override
 	public double cost(final HalfEdge e)
 	{
-		return - e.checkSwap3D(planarMin);
+		return - e.checkSwap3D(minCos);
 	}
 	
 	@Override

@@ -44,7 +44,6 @@ import java.util.logging.Logger;
 public class ImproveConnectivity extends AbstractAlgoHalfEdge
 {
 	private static final Logger LOGGER=Logger.getLogger(ImproveConnectivity.class.getName());
-	private double planarMin = 0.95;
 	private TObjectIntHashMap<Vertex> map;
 	
 	/**
@@ -61,10 +60,10 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 		{
 			final String key = opt.getKey();
 			final String val = opt.getValue();
-			if (key.equals("coplanar"))
+			if (key.equals("coplanarity"))
 			{
-				planarMin = Double.parseDouble(val);
-				LOGGER.fine("Coplanar value: "+planarMin);
+				minCos = Double.parseDouble(val);
+				LOGGER.fine("Coplanar value: "+minCos);
 			}
 			else
 				throw new RuntimeException("Unknown option: "+key);
@@ -94,7 +93,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 			for (int i = 0; i < 3; i++)
 			{
 				e = e.next();
-				if (e.checkSwap3D(planarMin) <= 0.0)
+				if (e.checkSwap3D(minCos) <= 0.0)
 				{
 					e.setAttributes(AbstractHalfEdge.MARKED);
 					e.sym().setAttributes(AbstractHalfEdge.MARKED);
@@ -164,7 +163,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 			return false;
 		if (current.hasAttributes(AbstractHalfEdge.MARKED) && current.sym().hasAttributes(AbstractHalfEdge.MARKED))
 			return false;
-		return current.checkSwap3D(planarMin) > 0.0;
+		return current.checkSwap3D(minCos) > 0.0;
 	}
 
 	@Override

@@ -17,7 +17,7 @@ from optparse import OptionParser
 Smooth mesh.
 """
 
-parser = OptionParser(usage="amibebatch smooth3d [OPTIONS] <inputDir> <outputDir>\n\nPerform vertex smoothing on 3D mesh", prog="smooth3d")
+parser = OptionParser(usage="amibebatch smooth3dBg [OPTIONS] <inputDir> <outputDir>\n\nPerform vertex smoothing on 3D mesh", prog="smooth3d")
 parser.add_option("-i", "--iterations", metavar="NUMBER", default=1,
                   action="store", type="int", dest="iterations",
 		  help="number of iterations (default: 1)")
@@ -37,9 +37,9 @@ parser.add_option("-N", "--no-boundaries", action="store_false", dest="boundarie
                   help="do not try to preserve patch boundaries")
 parser.add_option("-C", "--no-check", action="store_false", dest="check",
                   help="allow moving a vertex even if this decreases its quality")
-parser.add_option("-a", "--angle", metavar="FLOAT", default=-1.0,
-                  action="store", type="float", dest="angle",
-                  help="feature angle (in degree)")
+parser.add_option("-c", "--coplanarity", metavar="FLOAT", default=-1.0,
+                  action="store", type="float", dest="coplanarity",
+                  help="dot product of face normals to detect feature edges")
 parser.add_option("-R", "--refresh",
                   action="store_true", dest="refresh",
                   help="update triangle quality within loop")
@@ -76,8 +76,8 @@ opts.put("size", str(options.size))
 opts.put("tolerance", str(options.tolerance))
 opts.put("relaxation", str(options.relaxation))
 opts.put("refresh", str(options.refresh))
-if (options.angle >= 0.0):
-	opts.put("angle", str(options.angle))
+if (options.coplanarity >= 0.0):
+	opts.put("coplanarity", str(options.coplanarity))
 MeshWriter.writeObject3D(mesh, options.prefix + "0", None)
 sm = MySmoothNodes3DBg(mesh, opts, options.prefix)
 sm.setProgressBarStatus(10000)

@@ -19,8 +19,8 @@ Remesh an existing mesh.
 
 parser = OptionParser(usage="amibebatch remesh [OPTIONS] <inputDir>\n\nRemesh an existing mesh", prog="remesh")
 parser.add_option("-a", "--ridgeAngle", metavar="FLOAT", default=-1.0,
-                  action="store", type="float", dest="angle",
-		  help="angle (in degrees) to detect feature edges")
+                  action="store", type="float", dest="coplanar",
+		  help="dot product of face normals to detect feature edges")
 parser.add_option("-t", "--size", metavar="FLOAT", default=0.0,
                   action="store", type="float", dest="size",
                   help="target size")
@@ -58,8 +58,8 @@ elif options.metricsFile:
 	opts.put("metricsFile", options.metricsFile)
 else:
 	setAnalytic = True
-if options.angle:
-	opts.put("ridgeAngle", str(options.angle))
+if options.coplanar:
+	opts.put("coplanarity", str(options.coplanar))
 if options.project:
 	opts.put("project", "true")
 
