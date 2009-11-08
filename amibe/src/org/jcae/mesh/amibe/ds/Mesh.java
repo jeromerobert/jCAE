@@ -788,17 +788,16 @@ public class Mesh implements Serializable
 	/**
 	 * Add {@link AbstractHalfEdge#SHARP} attribute to sharp edges.
 	 *
-	 * @param minAngle  when an edge has a dihedral angle greater than this value,
-	 *   it is considered as a ridge and its endpoints are treated as if they
-	 *   belong to a CAD edge.
+	 * @param coplanarity  when dot product of normals adjacent to an edge is
+	 *   lower than this value, it is considered as a ridge and its endpoints
+	 *   are treated as if they belong to a CAD edge.
 	 */
-	public final int buildRidges(double minAngle)
+	public final int buildRidges(double coplanarity)
 	{
 		int toReturn = 0;
-		if (triangleList.isEmpty())
+		if (coplanarity < -1.0 || triangleList.isEmpty())
 			return toReturn;
 
-		double cosMinAngle = Math.cos(Math.PI*minAngle/180.0);
 		double [][] temp = new double[4][3];
 
 		AbstractHalfEdge ot  = null;
@@ -819,7 +818,7 @@ public class Mesh implements Serializable
 				double [] p1 = ot.destination().getUV();
 				Matrix3D.computeNormal3D(p0, p1, ot.apex().getUV(), temp[0], temp[1], temp[2]);
 				Matrix3D.computeNormal3D(p1, p0, sym.apex().getUV(), temp[0], temp[1], temp[3]);
-				if (Matrix3D.prodSca(temp[2], temp[3]) < cosMinAngle)
+				if (Matrix3D.prodSca(temp[2], temp[3]) <= coplanarity)
 				{
 					ot.setAttributes(AbstractHalfEdge.SHARP);
 					sym.setAttributes(AbstractHalfEdge.SHARP);

@@ -1,3 +1,9 @@
+Sat Nov  7 14:55:24 CET 2009 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Mesh.java (buildRidges): Change
+	its argument, it is no more an angle in degree, but the dot product
+	of normals.
+
 Thu Nov  5 13:23:34 CET 2009 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/MeshExporter.java: Fix VTK export,
