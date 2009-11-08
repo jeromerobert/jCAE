@@ -231,54 +231,64 @@ public abstract class AbstractAlgoHalfEdge
 			if (noSwapAfterProcessing)
 				continue;
 			
-			// Check if edges can be swapped
+			// Loop around current.apex with
+			//   current = current.nextApexLoop();
+			// to check all edges which have current.apex
+			// as apical vertex and swap them if this improves
+			// mesh quality.
 			Vertex o = current.origin();
-			while(true)
+			boolean redo = true;
+			while(redo)
 			{
-				if (current.checkSwap3D(minCos, maxEdgeLength) >= 0.0)
+				redo = false;
+				while(true)
 				{
-					// Swap edge
-					for (int i = 0; i < 3; i++)
+					if (current.checkSwap3D(minCos, maxEdgeLength) >= 0.0)
 					{
-						current = current.next();
-						removeFromTree(current);
-					}
-					HalfEdge sym = current.sym();
-					for (int i = 0; i < 2; i++)
-					{
-						sym = sym.next();
-						removeFromTree(sym);
-					}
-					Vertex a = current.apex();
-					current = (HalfEdge) mesh.edgeSwap(current);
-					swapped++;
-					// Now current = (ona)
-					assert a == current.apex();
-					for (int i = 0; i < 3; i++)
-					{
-						current = current.next();
-						for (Iterator<AbstractHalfEdge> it = current.fanIterator(); it.hasNext(); )
+						// Swap edge
+						for (int i = 0; i < 3; i++)
 						{
-							HalfEdge e = uniqueOrientation((HalfEdge) it.next());
-							addToTree(e);
+							current = current.next();
+							removeFromTree(current);
+						}
+						HalfEdge sym = current.sym();
+						for (int i = 0; i < 2; i++)
+						{
+							sym = sym.next();
+							removeFromTree(sym);
+						}
+						Vertex a = current.apex();
+						current = (HalfEdge) mesh.edgeSwap(current);
+						swapped++;
+						redo = true;
+						// Now current = (ona)
+						assert a == current.apex();
+						for (int i = 0; i < 3; i++)
+						{
+							current = current.next();
+							for (Iterator<AbstractHalfEdge> it = current.fanIterator(); it.hasNext(); )
+							{
+								HalfEdge e = uniqueOrientation((HalfEdge) it.next());
+								addToTree(e);
+							}
+						}
+						sym = current.next().sym();
+						for (int i = 0; i < 2; i++)
+						{
+							sym = sym.next();
+							for (Iterator<AbstractHalfEdge> it = sym.fanIterator(); it.hasNext(); )
+							{
+								HalfEdge e = uniqueOrientation((HalfEdge) it.next());
+								addToTree(e);
+							}
 						}
 					}
-					sym = current.next().sym();
-					for (int i = 0; i < 2; i++)
+					else
 					{
-						sym = sym.next();
-						for (Iterator<AbstractHalfEdge> it = sym.fanIterator(); it.hasNext(); )
-						{
-							HalfEdge e = uniqueOrientation((HalfEdge) it.next());
-							addToTree(e);
-						}
+						current = current.nextApexLoop();
+						if (current.origin() == o)
+							break;
 					}
-				}
-				else
-				{
-					current = current.nextApexLoop();
-					if (current.origin() == o)
-						break;
 				}
 			}
 		}
