@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2003,2006 by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -212,7 +212,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		mesh.vertexSplit(current, insertedVertex);
 		assert current.destination() == insertedVertex : insertedVertex+" "+current;
 		assert mesh.isValid();
-		HalfEdge ret = current.next();
+		HalfEdge ret = current.prev();
 		// Update edge lengths
 		if (current.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 		{
