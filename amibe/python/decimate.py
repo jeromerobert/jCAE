@@ -17,6 +17,7 @@ from optparse import OptionParser
 Decimate a mesh.
 """
 
+defaultAlgo = "QEMDecimateHalfEdge"
 parser = OptionParser(usage="amibebatch decimate [OPTIONS] <inputDir>\n\nDecimate a mesh", prog="decimate")
 parser.add_option("-t", "--tolerance", metavar="FLOAT",
                   action="store", type="float", dest="tolerance",
@@ -32,9 +33,9 @@ parser.add_option("-m", "--maxlength", metavar="FLOAT",
                   help="no edges longer than this value are created")
 parser.add_option("-O", "--freeEdgeOnly", action="store_true", dest="freeEdgeOnly",
                   help="removes only free edges (for LengthDecimateHalfEdge only)")
-parser.add_option("-a", "--algorithm", metavar="STRING", default="LengthDecimateHalfEdge",
+parser.add_option("-a", "--algorithm", metavar="STRING", default=defaultAlgo,
                   action="store", type="string", dest="algorithm",
-		  help="decimation algorithm (default: LengthDecimateHalfEdge)")
+		  help="decimation algorithm (default: "+defaultAlgo+")")
 parser.add_option("-A", "--list-algorithm", action="store_true", dest="listAlgorithm",
                   help="lists all available decimation algorithms")
 parser.add_option("-o", "--output", metavar="STRING",

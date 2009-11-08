@@ -18,6 +18,7 @@ void usage(int rc, Options options)
 	System.exit(rc);
 }
 
+String defaultAlgo = "QEMDecimateHalfEdge";
 Options options = new Options();
 options.addOption(
 	OptionBuilder.hasArg(false)
@@ -52,7 +53,7 @@ options.addOption(
 		.create('O'));
 options.addOption(
 	OptionBuilder.withArgName("CLASS").hasArg()
-		.withDescription("decimation algorithm (default: LengthDecimateHalfEdge)")
+		.withDescription("decimation algorithm (default: "+defaultAlgo+")")
 		.withLongOpt("algorithm")
 		.create('a'));
 options.addOption(
@@ -101,7 +102,7 @@ if (cmd.hasOption('f'))
 	algoOptions.put("freeEdgeTol", cmd.getOptionValue('f'));
 if (cmd.hasOption('m'))
 	algoOptions.put("maxlength", cmd.getOptionValue('m'));
-String algo=cmd.getOptionValue('a', "LengthDecimateHalfEdge");
+String algo=cmd.getOptionValue('a', defaultAlgo);
 Constructor cons = Class.forName("org.jcae.mesh.amibe.algos3d."+algo).getConstructor(Mesh.class, Map.class);
 
 Mesh mesh = new Mesh()
