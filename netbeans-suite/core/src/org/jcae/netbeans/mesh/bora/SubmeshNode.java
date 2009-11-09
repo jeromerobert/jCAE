@@ -5,8 +5,13 @@
  * Copyright EADS France.
  */
 
-package org.jcae.netbeans.mesh;
+package org.jcae.netbeans.mesh.bora;
 
+import org.jcae.netbeans.mesh.*;
+import org.jcae.netbeans.mesh.bora.BCADCellNode;
+import org.jcae.netbeans.mesh.bora.BoraNode;
+import org.jcae.netbeans.mesh.bora.BCADGraphNode;
+import org.jcae.netbeans.mesh.bora.BGroupsNode;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,7 +53,7 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 			@Override
 			protected Node[] createNodes(Object arg0) {return null;}
 		});
-		setIconBaseWithExtension("org/jcae/netbeans/mesh/SubmeshNode.png");
+		setIconBaseWithExtension("org/jcae/netbeans/mesh/bora/SubmeshNode.png");
 		if (!bModel.getOutputDir().endsWith(File.separator))
 			boraFileName = bModel.getOutputDir() + File.separator + bModel.getOutputFile();
 		else
@@ -88,15 +93,15 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 
 		final AbstractNode graph = new AbstractNode(new BCADCellNode(rootCell, dataModel));
 		graph.setDisplayName("Graph");
-		graph.setIconBaseWithExtension("org/jcae/netbeans/mesh/GraphNode.png");
+		graph.setIconBaseWithExtension("org/jcae/netbeans/mesh/bora/GraphNode.png");
 
 		final AbstractNode entities = new AbstractNode(new EntitieChildrenNode(rootCell));
 		entities.setDisplayName("Entities");
-		entities.setIconBaseWithExtension("org/jcae/netbeans/mesh/EntitieNode.png");
+		entities.setIconBaseWithExtension("org/jcae/netbeans/mesh/bora/EntitieNode.png");
 
 		groupsNode = new BGroupsNode(dataModel);
 		groupsNode.setDisplayName("Groups");
-		groupsNode.setIconBaseWithExtension("org/jcae/netbeans/mesh/GroupsNode.png");
+		groupsNode.setIconBaseWithExtension("org/jcae/netbeans/mesh/bora/GroupsNode.png");
 
 		getChildren().add(new Node[] {graph, entities, groupsNode});
 		this.setDisplayName(objName);
@@ -157,7 +162,7 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 	public Action[] getActions(boolean arg0) {
 		ArrayList<Action> l = new ArrayList<Action>();
 		l.add(SystemAction.get(DeleteAction.class));
-		l.add(SystemAction.get(ExportBUNV.class));
+		l.add(SystemAction.get(ExportBUNVAction.class));
 		return l.toArray(new Action[l.size()]);
 	}
 
@@ -199,7 +204,7 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 					return null;
 				}
 			});
-			node.setIconBaseWithExtension("org/jcae/netbeans/mesh/EntitiesNode.png");
+			node.setIconBaseWithExtension("org/jcae/netbeans/mesh/bora/EntitiesNode.png");
 			ArrayList<BCADGraphNode> toAdd = new ArrayList<BCADGraphNode>();
 			Iterator<BCADGraphCell> it = root.shapesExplorer(type);
 			while (it.hasNext()) {

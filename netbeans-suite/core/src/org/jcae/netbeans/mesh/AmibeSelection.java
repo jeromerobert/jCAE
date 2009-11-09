@@ -19,6 +19,7 @@
  */
 package org.jcae.netbeans.mesh;
 
+import org.jcae.netbeans.mesh.bora.BoraViewable;
 import gnu.trove.TIntArrayList;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -45,7 +46,6 @@ import org.openide.nodes.Node;
 /**
  *
  * @author ibarz
- * @deprecated kept to maintain compatibility with old meshes. @see MeshSelection to use with Bora
  */
 public class AmibeSelection implements EntitySelection, SelectionListener, CurrentViewableChangeListener, PropertyChangeListener
 {

@@ -21,6 +21,7 @@
 
 package org.jcae.netbeans.mesh;
 
+import org.jcae.netbeans.mesh.bora.BoraDataObject;
 import org.jcae.mesh.oemm.Storage;
 import org.jcae.mesh.oemm.OEMM;
 import org.jcae.netbeans.Utilities;

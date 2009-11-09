@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package org.jcae.netbeans.mesh;
+package org.jcae.netbeans.mesh.bora;
 
 import org.jcae.vtk.ViewableMesh;
 import org.openide.nodes.Node;

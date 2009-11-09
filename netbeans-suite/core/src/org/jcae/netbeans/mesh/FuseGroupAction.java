@@ -20,6 +20,7 @@
 
 package org.jcae.netbeans.mesh;
 
+import org.jcae.netbeans.mesh.bora.BoraNode;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;

@@ -23,7 +23,7 @@ import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.Storage;
 import org.jcae.netbeans.Utilities;
 import org.jcae.netbeans.mesh.AmibeDataObject;
-import org.jcae.netbeans.mesh.BoraDataObject;
+import org.jcae.netbeans.mesh.bora.BoraDataObject;
 import org.jcae.vtk.MeshVisuBuilder;
 import org.openide.filesystems.FileUtil;
 import org.openide.nodes.Node;

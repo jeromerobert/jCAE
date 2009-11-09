@@ -18,7 +18,7 @@
  * (C) Copyright 2005-2009, by EADS France
  */
 
-package org.jcae.netbeans.mesh;
+package org.jcae.netbeans.mesh.bora;
 
 import java.io.File;
 import java.io.IOException;

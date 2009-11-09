@@ -19,8 +19,9 @@
  * (C) Copyright 2007, by EADS France
  */
 
-package org.jcae.netbeans.mesh;
+package org.jcae.netbeans.mesh.bora;
 
+import org.jcae.netbeans.mesh.*;
 import java.util.ArrayList;
 import javax.swing.Action;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
@@ -72,18 +73,18 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 	private static String getIconLocation(BCADGraphCell cell) {
 		CADShapeEnum type = cell.getType();
 		if (type.equals(CADShapeEnum.FACE)) {
-			return "org/jcae/netbeans/mesh/FaceNode.png";
+			return "org/jcae/netbeans/mesh/bora/FaceNode.png";
 		}
 		else if (type.equals(CADShapeEnum.EDGE)) {
-			return "org/jcae/netbeans/mesh/EdgeNode.png";
+			return "org/jcae/netbeans/mesh/bora/EdgeNode.png";
 		}
 		else if (type.equals(CADShapeEnum.VERTEX)) {
-			return "org/jcae/netbeans/mesh/VertexNode.png";
+			return "org/jcae/netbeans/mesh/bora/VertexNode.png";
 		}
 		else if (type.equals(CADShapeEnum.WIRE)) {
-			return "org/jcae/netbeans/mesh/WireNode.png";
+			return "org/jcae/netbeans/mesh/bora/WireNode.png";
 		}
-		return "org/jcae/netbeans/mesh/UndefShapeNode.png";
+		return "org/jcae/netbeans/mesh/bora/UndefShapeNode.png";
 
 	}
 

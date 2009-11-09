@@ -35,7 +35,7 @@ import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.cad.occ.OCCShape;
 import org.jcae.netbeans.NodeSelectionManager;
 import org.jcae.netbeans.Utilities;
-import org.jcae.netbeans.mesh.ViewBCellGeometryAction.NbBShape;
+import org.jcae.netbeans.mesh.bora.ViewBCellGeometryAction.NbBShape;
 import org.jcae.netbeans.viewer3d.CurrentViewableChangeListener;
 import org.jcae.netbeans.viewer3d.SelectionManager;
 import org.jcae.netbeans.viewer3d.ViewManager;

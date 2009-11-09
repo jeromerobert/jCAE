@@ -17,7 +17,7 @@
  *
  * (C) Copyright 2008, by EADS France
  */
-package org.jcae.netbeans.mesh;
+package org.jcae.netbeans.mesh.bora;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;

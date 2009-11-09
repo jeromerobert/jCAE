@@ -5,8 +5,9 @@
  * Copyright EADS France.
  */
 
-package org.jcae.netbeans.mesh;
+package org.jcae.netbeans.mesh.bora;
 
+import org.jcae.netbeans.mesh.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;

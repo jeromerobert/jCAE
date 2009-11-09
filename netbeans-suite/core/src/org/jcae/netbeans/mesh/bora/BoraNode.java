@@ -18,8 +18,9 @@
  * (C) Copyright 2005, by EADS CRC
  */
 
-package org.jcae.netbeans.mesh;
+package org.jcae.netbeans.mesh.bora;
 
+import org.jcae.netbeans.mesh.*;
 import java.awt.datatransfer.Transferable;
 import java.io.File;
 import java.io.IOException;
@@ -65,7 +66,7 @@ public class BoraNode extends DataNode implements ViewCookie
 	{
 		super(arg0, Children.create(subMeshesFactory, true));
 		this.subMeshesFactory = subMeshesFactory;
-		setIconBaseWithExtension("org/jcae/netbeans/mesh/MeshNode.png");
+		setIconBaseWithExtension("org/jcae/netbeans/mesh/bora/MeshNode.png");
 		getCookieSet().add(this);
 	}
 

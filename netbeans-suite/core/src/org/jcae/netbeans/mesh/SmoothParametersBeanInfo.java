@@ -4,7 +4,7 @@
  * Created on 20 fevrier 2006, 19:09
  */
 
-package org.jcae.netbeans.mesh.smooth;
+package org.jcae.netbeans.mesh;
 
 import java.beans.*;
 
@@ -17,7 +17,7 @@ public class SmoothParametersBeanInfo extends SimpleBeanInfo
     // Bean descriptor//GEN-FIRST:BeanDescriptor
     /*lazy BeanDescriptor*/
     private static BeanDescriptor getBdescriptor(){
-        BeanDescriptor beanDescriptor = new BeanDescriptor  ( org.jcae.netbeans.mesh.smooth.SmoothParameters.class , null ); // NOI18N
+        BeanDescriptor beanDescriptor = new BeanDescriptor  ( SmoothParameters.class , null ); // NOI18N
         beanDescriptor.setPreferred ( true );
         beanDescriptor.setDisplayName ( "Smoothing parameters" );
         beanDescriptor.setShortDescription ( "Smoothing parameters" );//GEN-HEADEREND:BeanDescriptor
@@ -37,10 +37,10 @@ public class SmoothParametersBeanInfo extends SimpleBeanInfo
         PropertyDescriptor[] properties = new PropertyDescriptor[2];
     
         try {
-            properties[PROPERTY_elementSize] = new PropertyDescriptor ( "elementSize", org.jcae.netbeans.mesh.smooth.SmoothParameters.class, "getElementSize", "setElementSize" ); // NOI18N
+            properties[PROPERTY_elementSize] = new PropertyDescriptor ( "elementSize", SmoothParameters.class, "getElementSize", "setElementSize" ); // NOI18N
             properties[PROPERTY_elementSize].setDisplayName ( "Size of elements" );
             properties[PROPERTY_elementSize].setShortDescription ( "The expected size of edges.Most of the time,this will be the length parameter used to generate the mesh.Will be ignored if negative." );
-            properties[PROPERTY_iterationNumber] = new PropertyDescriptor ( "iterationNumber", org.jcae.netbeans.mesh.smooth.SmoothParameters.class, "getIterationNumber", "setIterationNumber" ); // NOI18N
+            properties[PROPERTY_iterationNumber] = new PropertyDescriptor ( "iterationNumber", SmoothParameters.class, "getIterationNumber", "setIterationNumber" ); // NOI18N
             properties[PROPERTY_iterationNumber].setDisplayName ( "number of iteration" );
             properties[PROPERTY_iterationNumber].setShortDescription ( "number of iteration" );
         }

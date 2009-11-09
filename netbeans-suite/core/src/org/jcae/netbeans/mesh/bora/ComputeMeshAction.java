@@ -18,8 +18,9 @@
  * (C) Copyright 2005, by EADS CRC
  */
 
-package org.jcae.netbeans.mesh;
+package org.jcae.netbeans.mesh.bora;
 
+import org.jcae.netbeans.mesh.bora.BoraNode;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;

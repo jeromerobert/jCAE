@@ -4,14 +4,15 @@
  * authorization of EADS France, and its contents shall not be disclosed.
  * Copyright EADS France.
  */
-package org.jcae.netbeans.mesh;
+package org.jcae.netbeans.mesh.bora;
 
+import org.jcae.netbeans.mesh.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.swing.Action;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
-import org.jcae.netbeans.mesh.SubmeshNode.DataModel;
+import org.jcae.netbeans.mesh.bora.SubmeshNode.DataModel;
 import org.openide.actions.NewAction;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;

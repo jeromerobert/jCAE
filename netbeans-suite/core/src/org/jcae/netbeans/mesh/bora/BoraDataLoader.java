@@ -18,7 +18,7 @@
  * (C) Copyright 2005, by EADS CRC
  */
 
-package org.jcae.netbeans.mesh;
+package org.jcae.netbeans.mesh.bora;
 
 import java.io.IOException;
 import org.openide.filesystems.FileObject;
@@ -31,7 +31,7 @@ public class BoraDataLoader extends UniFileLoader
 {
 	public BoraDataLoader()
 	{
-		super("org.jcae.netbeans.mesh.BoraDataObject");
+		super("org.jcae.netbeans.mesh.bora.BoraDataObject");
 	}
 	
 	@Override

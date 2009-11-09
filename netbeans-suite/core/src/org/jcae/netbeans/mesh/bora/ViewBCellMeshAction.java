@@ -4,8 +4,10 @@
  * authorization of EADS France, and its contents shall not be disclosed.
  * Copyright EADS France.
  */
-package org.jcae.netbeans.mesh;
+package org.jcae.netbeans.mesh.bora;
 
+import org.jcae.netbeans.mesh.bora.BoraNode;
+import org.jcae.netbeans.mesh.bora.BCADGraphNode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;

@@ -467,14 +467,14 @@
 
     <folder name="Templates">
         <folder name="jCAE">
-            <file name="Geometry.brep" url="templates/empty.brep">
+            <file name="Geometry.brep" url="cad/empty.brep">
                 <attr name="SystemFileSystem.localizingBundle" stringvalue="org.jcae.netbeans.Bundle"/>
                 <attr name="template" boolvalue="true"/>
                 <attr name="templateCategory" stringvalue="brep-types"/>
             </file>
             <file name="Mesh.bora">
                 <attr name="template" boolvalue="true"/>
-                <attr name="instantiatingIterator" newvalue="org.jcae.netbeans.mesh.BoraNewWizard"/>
+                <attr name="instantiatingIterator" newvalue="org.jcae.netbeans.mesh.bora.BoraNewWizard"/>
             </file>
         </folder>
         <folder name="Privileged">

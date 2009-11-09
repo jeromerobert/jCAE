@@ -1,10 +1,7 @@
-package org.jcae.netbeans.mesh;
+package org.jcae.netbeans.mesh.bora;
 
 import gnu.trove.TIntArrayList;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
@@ -14,16 +11,13 @@ import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.bora.ds.BSubMesh;
 import org.jcae.mesh.bora.ds.Constraint;
 import org.jcae.mesh.bora.xmldata.BoraToUnvConvert;
-import org.jcae.mesh.xmldata.Amibe2UNV;
-import org.jcae.mesh.xmldata.MeshExporter;
 import org.jcae.netbeans.mesh.ExportGroupAction.ChooseUnitPanel;
 import org.openide.ErrorManager;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
-import org.openide.util.NbBundle;
 import org.openide.util.actions.CookieAction;
 
-public final class ExportBUNV extends CookieAction
+public final class ExportBUNVAction extends CookieAction
 {
 	
 	protected void performAction(Node[] activatedNodes)
@@ -96,7 +90,7 @@ public final class ExportBUNV extends CookieAction
 	
 	public String getName()
 	{
-		return NbBundle.getMessage(ExportBUNV.class, "CTL_ExportUNV");
+		return "Export UNV";
 	}
 	
 	protected Class[] cookieClasses()
@@ -106,18 +100,12 @@ public final class ExportBUNV extends CookieAction
 		};
 	}
 	
-	protected void initialize()
-	{
-		super.initialize();
-		// see org.openide.util.actions.SystemAction.iconResource() javadoc for more details
-		putValue("noIconInMenu", Boolean.TRUE);
-	}
-	
 	public HelpCtx getHelpCtx()
 	{
 		return HelpCtx.DEFAULT_HELP;
 	}
 	
+	@Override
 	protected boolean asynchronous()
 	{
 		return false;

@@ -5,8 +5,9 @@
  * Copyright EADS France.
  */
 
-package org.jcae.netbeans.mesh;
+package org.jcae.netbeans.mesh.bora;
 
+import org.jcae.netbeans.mesh.*;
 import java.awt.datatransfer.Transferable;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -50,7 +51,7 @@ public class BGroupNode extends AbstractNode implements Node.Cookie, ViewCookie 
 				return null;
 			}
 		});
-		setIconBaseWithExtension("org/jcae/netbeans/mesh/GroupNode.png");
+		setIconBaseWithExtension("org/jcae/netbeans/mesh/bora/GroupNode.png");
 		this.dataModel = dataModel;
 		setName(displayName);
 		getChildren().add(children.toArray(new Node[0]));

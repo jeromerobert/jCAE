@@ -20,6 +20,7 @@
 
 package org.jcae.netbeans.mesh;
 
+import org.jcae.netbeans.mesh.bora.BoraNode;
 import org.jcae.netbeans.ProcessExecutor;
 import org.jcae.netbeans.Utilities;
 import org.openide.filesystems.FileUtil;

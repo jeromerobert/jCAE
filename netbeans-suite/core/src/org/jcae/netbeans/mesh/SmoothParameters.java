@@ -18,7 +18,7 @@
  * (C) Copyright 2005, by EADS CRC
  */
 
-package org.jcae.netbeans.mesh.smooth;
+package org.jcae.netbeans.mesh;
 
 /**
  * @author Jerome Robert

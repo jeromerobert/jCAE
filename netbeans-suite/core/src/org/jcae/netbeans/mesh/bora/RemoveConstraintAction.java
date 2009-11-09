@@ -4,8 +4,9 @@
  * authorization of EADS France, and its contents shall not be disclosed.
  * Copyright EADS France.
  */
-package org.jcae.netbeans.mesh;
+package org.jcae.netbeans.mesh.bora;
 
+import org.jcae.netbeans.mesh.bora.BCADGraphNode;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CookieAction;
