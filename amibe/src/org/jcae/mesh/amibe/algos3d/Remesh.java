@@ -757,7 +757,7 @@ public class Remesh
 								last = np[ns];
 								triNodes.add(last);
 								triMetrics.add(m);
-								if (2*ns < segments - 1)
+								if (m.distance2(last.getUV(), start.getUV()) < m.distance2(last.getUV(), end.getUV()))
 									neighborMap.put(last, start);
 								else
 									neighborMap.put(last, end);
