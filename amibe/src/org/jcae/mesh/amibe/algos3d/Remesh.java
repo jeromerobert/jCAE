@@ -68,6 +68,7 @@ public class Remesh
 	private final double maxlen;
 	private final boolean project;
 	private final boolean hasRidges;
+	private final boolean hasFreeEdges;
 	private AnalyticMetricInterface analyticMetric = LATER_BINDING;
 	private final Map<Vertex, EuclidianMetric3D> metrics;
 	private static final AnalyticMetricInterface LATER_BINDING = new AnalyticMetricInterface() {
@@ -154,6 +155,7 @@ public class Remesh
 		hasRidges = ridges;
 
 		// Compute bounding box
+		boolean freeEdges = false;
 		double [] bbox = new double[6];
 		bbox[0] = bbox[1] = bbox[2] = Double.MAX_VALUE;
 		bbox[3] = bbox[4] = bbox[5] = - (Double.MAX_VALUE / 2.0);
@@ -161,6 +163,8 @@ public class Remesh
 		{
 			if (f.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
+			if (!freeEdges && f.hasAttributes(AbstractHalfEdge.BOUNDARY))
+				freeEdges = true;
 			for (Vertex v : f.vertex)
 			{
 				double[] xyz = v.getUV();
@@ -174,6 +178,7 @@ public class Remesh
 			}
 		}
 		LOGGER.fine("Bounding box: lower("+bbox[0]+", "+bbox[1]+", "+bbox[2]+"), upper("+bbox[3]+", "+bbox[4]+", "+bbox[5]+")");
+		hasFreeEdges = freeEdges;
 
 		kdTree = new KdTree<Vertex>(bbox);
 		Collection<Vertex> nodeset = mesh.getNodes();
@@ -634,7 +639,7 @@ public class Remesh
 		{
 			for (int pass=0; pass < 2; pass++)
 			{
-				if (pass == 0 && !hasRidges)
+				if (pass == 0 && !hasRidges && !hasFreeEdges)
 					continue;
 				nrIter++;
 				// Maximal number of nodes which are inserted on an edge
