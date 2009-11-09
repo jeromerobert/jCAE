@@ -134,7 +134,8 @@ public class RemeshTest
 	@Test public void testSphere()
 	{
 		bgMesh = SphereBuilder.createShuffledSphereMesh(3);
-		assertTrue("Mesh is not valid", bgMesh.isValid());
+		assertTrue("Original mesh is not valid", bgMesh.isValid());
+		assertTrue("Original mesh contains inverted triangles", bgMesh.checkNoInvertedTriangles());
 		final Map<String, String> options = new HashMap<String, String>();
 		options.put("size", "0.02");
 		Mesh newMesh = new Remesh(bgMesh, options).compute().getOutputMesh();
