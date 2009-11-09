@@ -1019,7 +1019,7 @@ public class Remesh
 		if (argc + 3 != args.length)
 			usage(1);
 		opts.put("size", args[1]);
-		opts.put("ridgeAngle", "20");
+		opts.put("coplanarity", "0.9");
 
 if(false) {
 		String metricsFile = args[0]+File.separator+"metricsMap";
