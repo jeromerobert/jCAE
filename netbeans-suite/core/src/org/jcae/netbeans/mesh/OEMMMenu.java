@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2006, by EADS CRC
+ * (C) Copyright 2006-2009, by EADS France
  */
 
 package org.jcae.netbeans.mesh;
@@ -24,7 +24,6 @@ import java.awt.event.ActionEvent;
 import javax.swing.Action;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JSeparator;
 import org.jcae.netbeans.viewer3d.actions.BuildOEMMVisu;
 import org.openide.awt.Actions;
 import org.openide.awt.Mnemonics;
@@ -33,14 +32,11 @@ import org.openide.util.actions.Presenter;
 import org.openide.util.actions.SystemAction;
 
 
-public class ExpertMenu extends SystemAction implements Presenter.Popup
-{	public ExpertMenu()
-	{			
-	}
-	
+public class OEMMMenu extends SystemAction implements Presenter.Popup
+{	
 	public String getName()
 	{
-		return "Experimental";
+		return "OEMM";
 	}
 
 	public HelpCtx getHelpCtx()
@@ -76,20 +72,7 @@ public class ExpertMenu extends SystemAction implements Presenter.Popup
 		item = new JMenuItem();
 		Mnemonics.setLocalizedText(item, item.getText());
 		Actions.connect(item, (Action)SystemAction.get(OEMMViewAction.class), true);
-		menu.add(item);
-		
-		menu.add(new JSeparator());
-		
-		item = new JMenuItem();
-		Mnemonics.setLocalizedText(item, item.getText());
-		Actions.connect(item, (Action)SystemAction.get(DecimateAction.class), true);
-		menu.add(item);
-
-		item = new JMenuItem();
-		Mnemonics.setLocalizedText(item, item.getText());
-		Actions.connect(item, (Action)SystemAction.get(SmoothAction.class), true);
-		menu.add(item);
-		
+		menu.add(item);		
 		return menu;			
 	}		
 }

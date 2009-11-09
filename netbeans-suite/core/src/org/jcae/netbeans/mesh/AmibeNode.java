@@ -327,13 +327,4 @@ public class AmibeNode extends DataNode implements ViewCookie
 	{
 		return SystemAction.get(PropertiesAction.class);
 	}
-
-	public Action[] getActions(boolean b)
-	{
-		Action[] actions=super.getActions(b);
-		Action[] toReturn=new Action[actions.length+1];
-		System.arraycopy(actions, 0, toReturn, 0, actions.length);
-		toReturn[actions.length]=SystemAction.get(ExpertMenu.class);
-		return toReturn;
-	}
 }

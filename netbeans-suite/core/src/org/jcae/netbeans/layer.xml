@@ -138,6 +138,9 @@
             <file name="org-jcae-netbeans-mesh-BuildSoupAction.instance">
                 <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.BuildSoupAction"/>
             </file>
+            <file name="org-jcae-netbeans-mesh-SmoothAction.instance">
+                <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.SmoothAction"/>
+            </file>
             <file name="org-jcae-netbeans-mesh-DecimateAction.instance">
                 <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.DecimateAction"/>
             </file>
@@ -206,53 +209,84 @@
         <folder name="text">
             <folder name="mesh+xml">
                 <folder name="Actions">
-                    <file name="org-jcae-netbeans-mesh-ComputeMeshAction.instance"/>
-                    <attr name="org-jcae-netbeans-mesh-ComputeMeshAction.instance/org-openide-actions-PropertiesAction.instance" boolvalue="true"/>
-                    <file name="org-jcae-netbeans-mesh-ExportUNV.shadow">
-                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-ExportUNV.instance"/>
+                    <file name="org-jcae-netbeans-mesh-ComputeMeshAction.instance">
+                        <attr name="position" intvalue="10"/>
+                    </file>
+                    <file name="org-openide-actions-ViewAction.instance">
+                        <attr name="position" intvalue="20"/>
                     </file>
                     <file name="org-jcae-netbeans-mesh-FreeEdgesAction.shadow">
                         <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-FreeEdgesAction.instance"/>
-                    </file>
-                    <file name="org-jcae-netbeans-mesh-ImportUNV.shadow">
-                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-ImportUNV.instance"/>
+                        <attr name="position" intvalue="30"/>
                     </file>
                     <file name="org-jcae-netbeans-mesh-MultipleEdgesAction.shadow">
                         <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-MultipleEdgesAction.instance"/>
+                        <attr name="position" intvalue="40"/>
+                    </file>
+                    <file name="Separator3.instance">
+                        <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
+                        <attr name="position" intvalue="45"/>
+                    </file>
+                    <file name="org-jcae-netbeans-mesh-ExportUNV.shadow">
+                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-ExportUNV.instance"/>
+                        <attr name="position" intvalue="50"/>
                     </file>
 
-                    <file name="org-jcae-netbeans-mesh-smooth-Smooth.shadow">
-                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-smooth-Smooth.instance"/>
+                    <file name="org-jcae-netbeans-mesh-ImportUNV.shadow">
+                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-ImportUNV.instance"/>
+                        <attr name="position" intvalue="60"/>
                     </file>
-                    <file name="org-openide-actions-PropertiesAction.instance"/>
-                    <attr name="org-openide-actions-PropertiesAction.instance/org-openide-actions-DeleteAction.instance" boolvalue="true"/>
-                    <file name="org-openide-actions-DeleteAction.instance"/>
-                    <file name="org-openide-actions-PasteAction.instance"/>
-                    <attr name="org-openide-actions-DeleteAction.instance/org-openide-actions-RenameAction.instance" boolvalue="true"/>
-                    <file name="org-openide-actions-RenameAction.instance"/>
-                    <attr name="org-openide-actions-RenameAction.instance/org-openide-actions-ViewAction.instance" boolvalue="false"/>
-                    <attr name="org-openide-actions-PropertiesAction.instance/org-openide-actions-ViewAction.instance" boolvalue="true"/>
-                    <file name="org-openide-actions-ViewAction.instance"/>
-                    <attr name="org-openide-actions-ViewAction.instance/sep-2.instance" boolvalue="true"/>
-                    <file name="sep-2.instance">
+                    <file name="Separator2.instance">
                         <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
+                        <attr name="position" intvalue="70"/>
                     </file>
-                    <attr name="org-openide-actions-ViewAction.instance/org-openide-actions-DeleteAction.instance" boolvalue="true"/>
-                    <attr name="org-openide-actions-RenameAction.instance/sep-2.instance" boolvalue="false"/>
-                    <attr name="sep-2.instance/org-openide-actions-DeleteAction.instance" boolvalue="true"/>
-                    <attr name="org-jcae-netbeans-mesh-smooth-Smooth.shadow/org-jcae-netbeans-mesh-ComputeMeshAction.instance" boolvalue="false"/>
-                    <attr name="org-openide-actions-ViewAction.instance/org-jcae-netbeans-mesh-smooth-Smooth.shadow" boolvalue="true"/>
-                    <attr name="org-jcae-netbeans-mesh-smooth-Smooth.shadow/sep-2.instance" boolvalue="true"/>
-                    <attr name="org-jcae-netbeans-mesh-smooth-Smooth.shadow/org-jcae-netbeans-mesh-FreeEdgesAction.shadow" boolvalue="true"/>
-                    <attr name="org-jcae-netbeans-mesh-FreeEdgesAction.shadow/sep-2.instance" boolvalue="true"/>
-                    <attr name="org-jcae-netbeans-mesh-FreeEdgesAction.shadow/org-jcae-netbeans-mesh-MultipleEdgesAction.shadow" boolvalue="true"/>
-                    <attr name="org-jcae-netbeans-mesh-MultipleEdgesAction.shadow/sep-2.instance" boolvalue="true"/>
-                    <attr name="org-jcae-netbeans-mesh-MultipleEdgesAction.shadow/org-jcae-netbeans-mesh-ImportUNV.shadow" boolvalue="true"/>
-                    <attr name="org-jcae-netbeans-mesh-ImportUNV.shadow/sep-2.instance" boolvalue="true"/>
-                    <attr name="org-jcae-netbeans-mesh-ImportUNV.shadow/org-jcae-netbeans-mesh-ExportUNV.shadow" boolvalue="true"/>
-                    <attr name="org-jcae-netbeans-mesh-ExportUNV.shadow/sep-2.instance" boolvalue="true"/>
-                    <attr name="sep-2.instance/org-openide-actions-PasteAction.instance" boolvalue="true"/>
-                    <attr name="org-openide-actions-PasteAction.instance/org-openide-actions-DeleteAction.instance" boolvalue="true"/>
+                    <file name="org-jcae-netbeans-mesh-SmoothAction.shadow">
+                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-SmoothAction.instance"/>
+                        <attr name="position" intvalue="80"/>
+                    </file>
+                    <file name="org-jcae-netbeans-mesh-DecimateAction.shadow">
+                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-DecimateAction.instance"/>
+                        <attr name="position" intvalue="90"/>
+                    </file>
+                    <file name="org-jcae-netbeans-mesh-OEMMMenu.instance">
+                        <attr name="position" intvalue="100"/>
+                    </file>
+                    <file name="Separator1.instance">
+                        <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
+                        <attr name="position" intvalue="500"/>
+                    </file>
+                    <file name="CutAction.instance">
+                        <attr name="instanceClass" stringvalue="org.openide.actions.CutAction"/>
+                        <attr name="position" intvalue="600"/>
+                    </file>
+                    <file name="CopyAction.instance">
+                        <attr name="instanceClass" stringvalue="org.openide.actions.CopyAction"/>
+                        <attr name="position" intvalue="700"/>
+                    </file>
+                    <file name="PasteAction.instance">
+                        <attr name="instanceClass" stringvalue="org.openide.actions.PasteAction"/>
+                        <attr name="position" intvalue="800"/>
+                    </file>
+                    <file name="Separator2.instance">
+                        <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
+                        <attr name="position" intvalue="900"/>
+                    </file>
+                    <file name="DeleteAction.instance">
+                        <attr name="instanceClass" stringvalue="org.openide.actions.DeleteAction"/>
+                        <attr name="position" intvalue="1000"/>
+                    </file>
+                    <file name="RenameAction.instance">
+                        <attr name="instanceClass" stringvalue="org.openide.actions.RenameAction"/>
+                        <attr name="position" intvalue="1100"/>
+                    </file>
+                    <file name="Separator0.instance">
+                        <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
+                        <attr name="position" intvalue="1130"/>
+                    </file>
+                    <file name="PropertiesAction.instance">
+                        <attr name="instanceClass" stringvalue="org.openide.actions.PropertiesAction"/>
+                        <attr name="position" intvalue="1500"/>
+                    </file>
                 </folder>
             </folder>
 			
