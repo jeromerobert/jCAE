@@ -139,8 +139,8 @@ public class MeshLiaison
 	 * Move Vertex on the desired location and update projection map.
 	 * @param v Vertex being moved
 	 * @param target  new location
-	 * @return <code>true</code> if a projection has been found, <code>false</code> otherwise.  In the
-	 *  latter case, vertex could have been moved, but iterative scheme did not converge to a solution.
+	 * @return <code>true</code> if a projection has been found, <code>false</code> otherwise.
+	 * In this case, vertex is not moved to the target position.
 	 */
 	public final boolean move(Vertex v, double [] target)
 	{
@@ -161,6 +161,10 @@ public class MeshLiaison
 			return false;
 		}
 		visited.add(location.t);
+		double [] oldPos = v.getUV();
+		double oldX = oldPos[0];
+		double oldY = oldPos[1];
+		double oldZ = oldPos[2];
 		int counter = 0;
 		// Coordinates of the projection of v on triangle plane
 		double [] vPlane = new double[3];
@@ -169,7 +173,12 @@ public class MeshLiaison
 			// Move v to desired location
 			v.moveTo(target[0], target[1], target[2]);
 			// Project v on surface
-			location.projection.project(v);
+			if (!location.projection.project(v))
+			{
+				LOGGER.fine("Projection failed");
+				v.moveTo(oldX, oldY, oldZ);
+				return false;
+			}
 			// Check if v crossed triangle boundary
 			location.projectOnTriangle(v.getUV(), vPlane);
 			boolean inside = location.computeBarycentricCoordinates(vPlane);
@@ -232,6 +241,7 @@ public class MeshLiaison
 				if (!location.projection.canProject())
 				{
 					LOGGER.fine("Quadric does not allow vertex projection");
+					v.moveTo(oldX, oldY, oldZ);
 					return false;
 				}
 			}
