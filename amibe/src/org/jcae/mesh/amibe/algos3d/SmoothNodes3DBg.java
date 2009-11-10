@@ -250,6 +250,7 @@ public class SmoothNodes3DBg
 			if (q.getValue() > tolerance)
 				break;
 			Vertex v = q.getData();
+			assert !immutableNodes.contains(v);
 			tree.remove(v);
 			if (smoothNode(v, ot, q.getValue()))
 			{
@@ -371,6 +372,7 @@ public class SmoothNodes3DBg
 			if (vertexQuality(ot) < quality)
 			{
 				n.moveTo(saveX, saveY, saveZ);
+				liaison.move(n, n.getUV());
 				LOGGER.finer("Point not moved, quality decreases");
 				return false;
 			}
@@ -398,6 +400,7 @@ public class SmoothNodes3DBg
 			edge = edge.nextOriginLoop();
 			if (edge.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
+			assert qualityMap.containsKey(edge.getTri());
 			double qt = qualityMap.get(edge.getTri());
 			if (qt < ret)
 				ret = qt;
