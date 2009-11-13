@@ -98,7 +98,7 @@ public class Insertion
 	{
 		mesh = m;
 		kdTree = mesh.getKdTree();
-		this.minlen = minlen;
+		this.minlen = 0.95*minlen;
 		this.maxlen = maxlen;
 	}
 	

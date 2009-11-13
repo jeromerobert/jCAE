@@ -159,7 +159,8 @@ public class Remesh
 				LOGGER.warning("Unknown option: "+key);
 		}
 		double targetSize = size;
-		minlen = 1.0 / Math.sqrt(2.0);
+		// Relax a little bit minlen to avoid large edges
+		minlen = 0.95 / Math.sqrt(2.0);
 		maxlen = Math.sqrt(2.0);
 		project = proj;
 		hasRidges = ridges;
