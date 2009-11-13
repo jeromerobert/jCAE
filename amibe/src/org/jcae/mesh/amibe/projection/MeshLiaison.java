@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2008, by EADS France
+    Copyright (C) 2008,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -277,6 +277,17 @@ public class MeshLiaison
 	public final void addVertex(Vertex v, Triangle bgT)
 	{
 		mapCurrentVertexProjection.put(v, new ProjectedLocation(v.getUV(), bgT));
+	}
+
+	/**
+	 * Remove a Vertex.
+	 *
+	 * @param v vertex in current mesh
+	 * @return  triangle in the background mesh
+	 */
+	public final Triangle removeVertex(Vertex v)
+	{
+		return mapCurrentVertexProjection.remove(v).t;
 	}
 
 	private class ProjectedLocation

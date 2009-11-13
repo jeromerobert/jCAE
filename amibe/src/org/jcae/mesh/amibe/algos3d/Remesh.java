@@ -117,6 +117,7 @@ public class Remesh
 		double size = 0.0;
 		boolean proj = false;
 		boolean ridges = false;
+		Map<String, String> decimateOptions = new HashMap<String, String>();
 		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
 			final String key = opt.getKey();
@@ -130,6 +131,14 @@ public class Remesh
 			{
 				mesh.buildRidges(Double.valueOf(val).doubleValue());
 				ridges = true;
+			}
+			else if (key.equals("decimateSize"))
+			{
+				decimateOptions.put("size", val);
+			}
+			else if (key.equals("decimateTarget"))
+			{
+				decimateOptions.put("maxtriangles", val);
 			}
 			else if (key.equals("metricsFile"))
 			{
@@ -153,6 +162,11 @@ public class Remesh
 		maxlen = Math.sqrt(2.0);
 		project = proj;
 		hasRidges = ridges;
+
+		if (!decimateOptions.isEmpty())
+		{
+			new QEMDecimateHalfEdge(liaison, decimateOptions).compute();
+		}
 
 		// Compute bounding box
 		boolean freeEdges = false;

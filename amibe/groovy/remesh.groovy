@@ -45,6 +45,18 @@ options.addOption(
 		.withLongOpt("project")
 		.create('p'));
 
+options.addOption(
+	OptionBuilder.withArgName("TOL").hasArg()
+		.withDescription("decimate mesh before remeshing, specify tolerance")
+		.withLongOpt("decimate")
+		.create('d'));
+
+options.addOption(
+	OptionBuilder.withArgName("NUMBER").hasArg()
+		.withDescription("decimate mesh before remeshing, keep only NUMBER triangles")
+		.withLongOpt("decimate-target")
+		.create('D'));
+
 CommandLineParser parser = new GnuParser();
 CommandLine cmd = parser.parse(options, args, true);
 if (cmd.hasOption('h'))
@@ -79,6 +91,10 @@ if (cmd.hasOption('c'))
 	algoOptions.put("coplanarity", cmd.getOptionValue('c'));
 if (cmd.hasOption('p'))
 	algoOptions.put("project", "true");
+if (cmd.hasOption('d'))
+	algoOptions.put("decimateSize", cmd.getOptionValue('d'));
+else if (cmd.hasOption('D'))
+	algoOptions.put("decimateTarget", cmd.getOptionValue('D'));
 
 Remesh algo = new Remesh(mesh, algoOptions)
 public static class RemeshMetric implements Remesh.AnalyticMetricInterface

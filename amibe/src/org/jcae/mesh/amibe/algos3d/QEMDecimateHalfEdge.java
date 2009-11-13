@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2003,2006 by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -27,6 +27,7 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
+import org.jcae.mesh.amibe.projection.MeshLiaison;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 import java.io.ObjectOutputStream;
@@ -109,6 +110,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 	private static final Logger LOGGER=Logger.getLogger(QEMDecimateHalfEdge.class.getName());
 	private Quadric3DError.Placement placement = Quadric3DError.Placement.OPTIMAL;
 	private HashMap<Vertex, Quadric3DError> quadricMap = null;
+	private MeshLiaison liaison;
 	private Vertex v3;
 	private Quadric3DError q3 = new Quadric3DError();
 	// vCostOpt and qCostOpt must be used only by cost() method.
@@ -161,6 +163,12 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		}
 		minCos = 0.9;
 	}
+
+	protected QEMDecimateHalfEdge(final MeshLiaison liaison, final Map<String, String> options)
+	{
+		this(liaison.getMesh(), options);
+		this.liaison = liaison;
+	}
 	
 	@Override
 	public Logger thisLogger()
@@ -187,7 +195,6 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		// Compute quadrics
 		final double [] vect1 = new double[3];
 		final double [] vect2 = new double[3];
-		final double [] vect3 = new double[3];
 		final double [] normal = new double[3];
 		for (Triangle f: mesh.getTriangles())
 		{
@@ -404,21 +411,29 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		//  By convention, collapse() returns edge (v3, apex)
 		assert (!current.hasAttributes(AbstractHalfEdge.OUTER));
 		final Vertex apex = current.apex();
+		Vertex v1 = current.origin();
+		Vertex v2 = current.destination();
 		// If v1 and v2 are manifold, they are removed from the
 		// mesh and can be reused.
 		Vertex vFree = null;
 		Quadric3DError qFree = null;
-		if (current.origin().isManifold())
+		if (v1.isManifold())
 		{
-			vFree = current.origin();
+			vFree = v1;
 			qFree = quadricMap.remove(vFree);
 		}
-		if (current.destination().isManifold())
+		if (v2.isManifold())
 		{
-			vFree = current.destination();
+			vFree = v2;
 			qFree = quadricMap.remove(vFree);
 		}
 		current = (HalfEdge) mesh.edgeCollapse(current, v3);
+		if (liaison != null)
+		{
+			Triangle bgT = liaison.removeVertex(v1);
+			liaison.removeVertex(v2);
+			liaison.addVertex(v3, bgT);
+		}
 		// Now current == (v3*a)
 		// Update edge costs
 		quadricMap.put(v3, q3);
