@@ -5,35 +5,56 @@
 <project name="jcae-netbeans-suite" basedir=".">
     <description>Builds the module suite jcae-netbeans-suite.</description>
     <import file="nbproject/build-impl.xml"/>
+	<!-- Patch launcher and/or configuration file -->
+	<target name="patch-launchers">
+		<property name="options" value=
+			"--branding jcae -J-Xmx768m -J-Dsun.java2d.ddoffscreen=false -J-Dsun.java2d.gdiblit=false"/>
+		<replaceregexp file="${build.launcher.dir}/etc/${app.name}.conf"
+			match="default_options=(.*)"
+			replace="default_options=&quot;${options}&quot;"
+			byline="true"/>
+		<replaceregexp file="${build.launcher.dir}/etc/${app.name}.conf"
+			match=".*jdkhome=&quot;.*&quot;"
+			replace="jdkhome=&quot;jre6&quot;"
+			byline="true"/>
+	</target>
 
-	<!-- From http://blogs.kiyut.com/tonny/2007/08/06/netbeans-platform-branding-and-version-info/ -->
-    <!-- override build to add update branding -->
-    <target name="build" depends="build-brand,suite.build"/>
-	
-    <target name="build-brand" depends="-init">
-        <replaceregexp file="${basedir}/branding/core/core.jar/org/netbeans/core/startup/Bundle.properties"
-            match="currentVersion=(.*)"
-            replace="currentVersion=${app.version}"
-            byline="true"/>
-        <replaceregexp file="${basedir}/branding/modules/org-netbeans-core-windows.jar/org/netbeans/core/windows/view/ui/Bundle.properties"
-            match="CTL_MainWindow_Title=(.*)"
-            replace="CTL_MainWindow_Title=${app.title} ${app.version}"
-            byline="true"/>
-        <replaceregexp file="${basedir}/branding/modules/org-netbeans-core-windows.jar/org/netbeans/core/windows/view/ui/Bundle.properties"
-            match="CTL_MainWindow_Title_No_Project=(.*)"
-            replace="CTL_MainWindow_Title_No_Project=${app.title} ${app.version}"
-            byline="true"/>
-        <replaceregexp file="${basedir}/branding/modules/org-netbeans-core.jar/org/netbeans/core/ui/Bundle.properties"
-            match="LBL_ProductInformation=(.*)"
-            replace="LBL_ProductInformation=${app.title} ${app.version}"
-            byline="true"/>
-        <replaceregexp file="core/manifest.mf"
-            match="OpenIDE-Module-Specification-Version: (.*)"
-            replace="OpenIDE-Module-Specification-Version: ${app.version}"
-            byline="true"/>
-        <replaceregexp file="occjava-nb/manifest.mf"
-            match="OpenIDE-Module-Specification-Version: (.*)"
-            replace="OpenIDE-Module-Specification-Version: ${app.version}"
-            byline="true"/>
+	<target name="-zip-linux" unless="no.arch.linux">
+		<property name="jre.path" value="${path.jre.linux}"/>
+		<property name="arch" value="linux"/>
+	</target>
+	<target name="-zip-windows" unless="no.arch.win32">
+		<property name="jre.path" value="${path.jre.win32}"/>
+		<property name="arch" value="win32"/>
+	</target>
+	<!-- From netbeans-6.7/harness/suite.xml -->
+    <target name="build-zip" depends="build,build-launchers,patch-launchers,-zip-linux,-zip-windows" description="Builds a ZIP distribution of the suite, launchers, and selected modules from the platform.">
+        <property name="zip.name" value="${app.name}-${arch}-${app.version}"/>
+		<mkdir dir="${dist.dir}"/>
+        <!-- pathfileset does not support 'prefix' and 'filemode' parameters,
+             we have to copy them to temp location -->
+        <tempfile property="temp.dir.nbexec" destdir="${basedir}/build" deleteonexit="true"/>
+        <tempfile property="temp.dir.rest" destdir="${basedir}/build" deleteonexit="delete"/>
+        <subant genericantfile="${harness.dir}/suite.xml" target="copy-cluster" inheritrefs="true">
+            <property name="dest.dir" value="${temp.dir.rest}"/>
+            <property name="nbexec.dir" value="${temp.dir.nbexec}"/>
+            <property name="build.dir" value="${basedir}/build"/>
+            <resources refid="zip.platform.clusters"/>
+        </subant>
+        <zip destfile="${dist.dir}/${zip.name}.zip">
+            <zipfileset dir="launchers/release" filemode="755" prefix="${zip.name}/bin"/>
+            <zipfileset dir="${build.launcher.dir}/etc/" prefix="${zip.name}/etc"/>
+            <zipfileset dir="${temp.dir.nbexec}" filemode="755" prefix="${zip.name}"/>
+            <zipfileset dir="${temp.dir.rest}" prefix="${zip.name}"/>
+
+            <!-- Yes, the doubled app.name is a bit ugly, but better than the alternative; cf. #66441: -->
+            <zipfileset dir="${cluster}" prefix="${zip.name}/${app.name}">
+                <exclude name="config/Modules/*.xml_hidden"/>
+            </zipfileset>
+			<zipfileset dir="${jre.path}" prefix="${zip.name}/jre6">
+				<exclude name="bin/**"/>
+			</zipfileset>
+			<zipfileset dir="${jre.path}/bin" prefix="${zip.name}/jre6/bin" filemode="755"/>
+        </zip>
     </target>
 </project>

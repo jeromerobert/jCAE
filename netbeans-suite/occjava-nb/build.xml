@@ -11,22 +11,46 @@
 	<property name="original.project.so" value="../../occjava/src/.libs/libOccJava.so"/>
 	<property name="original.project.dll" value="../../occjava/Release/OccJava.dll"/>
 
-	<target name="release">
-		<echo message="Building ${original.project.dir}"/>
-		<ant dir="${original.project.dir}"
-			 target="jar" inheritall="false" inheritrefs="false"/>
-		<echo message="Done building ${original.project.dir}"/>
+	<property file="../nbproject/private/private.properties"/>
+	<property file="../nbproject/project.properties"/>
+	<patternset id="occ.unix.files">
+		<include name="libTK*-*.so"/>
+	</patternset>
 
-		<copy todir="${cluster}/modules/ext" file="${original.project.jar}"/>
-		<copy todir="${cluster}/modules/lib" failonerror="false" file="${original.project.so}"/>
-		<copy todir="${cluster}/modules/lib" failonerror="false" file="${original.project.dll}"/>
+	<patternset id="occ.windows.files">
+		<include name="TK*.dll"/>
+	</patternset>
+
+	<target name="-release.files.linux" if="arch.linux">
+		<copy todir="${cluster}/modules/lib">
+			<fileset dir="${path.occ.linux}">
+				<patternset refid="occ.unix.files"/>
+			</fileset>
+		</copy>
+		<copy file="${original.project.so}" todir="${cluster}/modules/lib"/>
 	</target>
 
+	<target name="-release.files.win32" if="arch.win32">
+		<copy todir="${cluster}/modules/lib">
+			<fileset dir="${path.occ.win32}">
+				<patternset refid="occ.windows.files"/>
+			</fileset>
+		</copy>
+		<copy file="${original.project.dll}" todir="${cluster}/modules/lib"/>
+	</target>
+
+	<target name="-release.files" depends="-release.files.linux,-release.files.win32">
+		<copy file="${original.project.jar}" todir="${cluster}/modules/ext"/>
+	</target>
 
 	<target name="clean" depends="projectized-common.clean">
-		<echo message="Cleaning ${original.project.dir}"/>
-		<ant dir="${original.project.dir}"
-			 target="clean" inheritall="false" inheritrefs="false"/>
-		<echo message="Done cleaning ${original.project.dir}"/>
+		<delete failonerror="false">
+			<fileset dir="${cluster}/modules/lib">
+				<patternset refid="occ.unix.files"/>
+			</fileset>
+			<fileset dir="${cluster}/modules/lib">
+				<patternset refid="occ.windows.files"/>
+			</fileset>
+		</delete>
 	</target>
 </project>

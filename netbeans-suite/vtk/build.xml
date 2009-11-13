@@ -4,9 +4,12 @@
 <!-- If you delete this file and reopen the project it will be recreated. -->
 <project name="vtk" default="netbeans" basedir=".">
     <description>Builds, tests, and runs the project vtk.</description>
+	<property file="../../depends.properties"/>
     <import file="nbproject/build-impl.xml"/>
-	<!-- from http://wiki.netbeans.org/DevFaqWrapperModules -->	
+	<!-- from http://wiki.netbeans.org/DevFaqWrapperModules -->
 
+	<property file="../nbproject/private/private.properties"/>
+	<property file="../nbproject/project.properties"/>
 	<patternset id="vtk.unix.files">
 		<include name="libvtk*Java.so"/>
 		<include name="libvtk*.so.?.?"/>
@@ -14,25 +17,44 @@
 		<exclude name="libvtk*Java.so.?.?"/>
 	</patternset>
 
-	<target name="-release.files">
-		<copy file="${vtk.dir}/vtk.jar" todir="${cluster}/modules/ext" />
-		<copy todir="${cluster}/modules/lib" failonerror="false">
+	<patternset id="vtk.windows.files">
+		<include name="vtk*.dll"/>
+		<include name="msvcr*.dll"/>
+		<include name="Microsoft.VC*.CRT/*"/>
+		<include name="mingwm10.dll"/>
+	</patternset>
+
+	<target name="-release.files.linux" if="arch.linux">
+		<copy todir="${cluster}/modules/lib">
 			<fileset dir="${vtk.dir}">
 				<patternset refid="vtk.unix.files"/>
 			</fileset>
-			<fileset dir="${vtk.dir}/Release" includes="vtk*.dll"/>
 		</copy>
 	</target>
-	
+
+	<target name="-release.files.win32" if="arch.win32">
+		<copy todir="${cluster}/modules/lib">
+			<fileset dir="${vtk.dir}/Release">
+				<patternset refid="vtk.windows.files"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="-release.files" depends="-release.files.linux,-release.files.win32">
+		<copy file="${vtk.dir}/vtk.jar" todir="${cluster}/modules/ext" />
+	</target>
+
 	<target name="clean" depends="projectized-common.clean">
 		<delete failonerror="false">
 			<fileset dir="${cluster}/modules/lib">
 				<patternset refid="vtk.unix.files"/>
 			</fileset>
-			<fileset dir="${cluster}/modules/lib" includes="vtk*.dll"/>
+			<fileset dir="${cluster}/modules/lib">
+				<patternset refid="vtk.windows.files"/>
+			</fileset>
 		</delete>
 	</target>
-	
+
 	<!-- Disable the module by default -->
     <target name="module-xml-regular" if="is.regular">
         <mkdir dir="${cluster}/config/Modules"/>
@@ -40,10 +62,10 @@
             <enabled dir="${cluster}">
                 <include name="${module.jar}"/>
             </enabled>
-        </createmodulexml>	
+        </createmodulexml>
 		<!--replaceregexp file="${cluster}/config/Modules/vtk.xml"
 			match='&lt;param name="enabled"&gt;true&lt;/param&gt;'
 			replace='&lt;param name="enabled"&gt;false&lt;/param&gt;'
-			byline="true"/-->		
+			byline="true"/-->
     </target>	
 </project>
