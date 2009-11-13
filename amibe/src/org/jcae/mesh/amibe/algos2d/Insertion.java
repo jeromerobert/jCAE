@@ -82,6 +82,7 @@ import java.util.logging.Logger;
 public class Insertion
 {
 	private static final Logger LOGGER=Logger.getLogger(Insertion.class.getName());
+	private static final double ONE_PLUS_SQRT2 = 1.0 + Math.sqrt(2.0);
 	private final Mesh2D mesh;
 	private final KdTree<Vertex> kdTree;
 	
@@ -195,7 +196,7 @@ public class Insertion
 					// Tag symmetric edge so that edges are checked only once
 					sym.setAttributes(AbstractHalfEdge.MARKED);
 					double lcrit = 1.0;
-					if (l < 2.0)
+					if (l < ONE_PLUS_SQRT2)
 						//  Add middle point; otherwise point would be too near from end point
 						lcrit = l / 2.0;
 					else if (l > 4.0)

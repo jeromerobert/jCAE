@@ -57,6 +57,7 @@ import java.util.logging.Logger;
 public class Remesh
 {
 	private final static Logger LOGGER = Logger.getLogger(Remesh.class.getName());
+	private static final double ONE_PLUS_SQRT2 = 1.0 + Math.sqrt(2.0);
 	private int progressBarStatus = 10000;
 	private final Mesh mesh;
 	private final MeshLiaison liaison;
@@ -705,7 +706,7 @@ public class Remesh
 							continue;
 						}
 						double lcrit = 1.0;
-						if (l < 2.0)
+						if (l < ONE_PLUS_SQRT2)
 							//  Add middle point; otherwise point would be too near from end point
 							lcrit = l / 2.0;
 						else if (l > (3.0 - pass))
