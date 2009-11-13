@@ -664,8 +664,6 @@ public class Remesh
 				int checked = 0;
 				// Number of nodes which are too near from existing vertices
 				int tooNearNodes = 0;
-				// Number of quadtree cells split
-				int kdtreeSplit = 0;
 				nodes.clear();
 				neighborMap.clear();
 				skippedNodes = 0;
@@ -706,13 +704,6 @@ public class Remesh
 							h.setAttributes(AbstractHalfEdge.MARKED);
 							continue;
 						}
-						double lcrit = 1.0;
-						if (l < ONE_PLUS_SQRT2)
-							//  Add middle point; otherwise point would be too near from end point
-							lcrit = l / 2.0;
-						else if (l > (3.0 - pass))
-							//  Long edges are discretized, but do not create more than 2 subsegments
-							lcrit = l / (3.0 - pass);
 						//  Ensure that start point has the lowest edge size
 						double [] xs = start.getUV();
 						double [] xe = end.getUV();
@@ -726,7 +717,29 @@ public class Remesh
 							mS = mE;
 							mE = metrics.get(end);
 						}
-						int segments = (int) (2.0*l/lcrit) + 10;
+						int segments;
+						double lcrit = 1.0;
+						double hS = mS.getUnitBallBBox()[0];
+						double hE = mE.getUnitBallBBox()[0];
+						double logRatio = Math.log(hE/hS);
+						if (l < ONE_PLUS_SQRT2)
+						{
+							//  Add middle point; otherwise point would be too near from end point
+							lcrit = l / 2.0;
+							if (analyticMetric == null && hS == hE)
+								segments = 2;
+							else
+								// Middle point has to be computed accurately!
+								segments = 100;
+						}
+						else if (l > (3.0 - pass))
+						{
+							//  Long edges are discretized, but do not create more than 2 subsegments
+							lcrit = l / (3.0 - pass);
+							segments = (int) (2.0*l/lcrit) + 10;
+						}
+						else
+							segments = (int) (2.0*l/lcrit) + 20;
 						Vertex [] np = new Vertex[segments-1];
 						double[] pos = new double[3];
 						double delta = 1.0 / (double) segments;
@@ -756,10 +769,6 @@ public class Remesh
 						Metric lastMetric = mS;
 						int nrNodes = 0;
 
-						l = 0.0;
-						double hS = mS.getUnitBallBBox()[0];
-						double hE = mE.getUnitBallBBox()[0];
-						double logRatio = Math.log(hE/hS);
 						for (int ns = 0; ns < segments-1; ns++)
 						{
 							EuclidianMetric3D m;
@@ -770,8 +779,7 @@ public class Remesh
 							}
 							else
 								m = new EuclidianMetric3D(hS*Math.exp((ns+1.0)*delta*logRatio));
-							l = interpolatedDistance(last, lastMetric, np[ns], m);
-							if (l > lcrit)
+							if (segments == 2 || interpolatedDistance(last, lastMetric, np[ns], m) > lcrit)
 							{
 								last = np[ns];
 								triNodes.add(last);
@@ -780,7 +788,6 @@ public class Remesh
 									neighborMap.put(last, start);
 								else
 									neighborMap.put(last, end);
-								l = 0.0;
 								nrNodes++;
 							}
 						}
@@ -816,7 +823,9 @@ public class Remesh
 								nodes.add(v);
 							}
 							else
+							{
 								tooNearNodes++;
+							}
 							index += prime;
 							if (index >= imax)
 								index -= imax;
@@ -932,8 +941,6 @@ public class Remesh
 						LOGGER.fine(skippedNodes+" nodes are skipped");
 					if (totNrSwap > 0)
 						LOGGER.fine(totNrSwap+" edges have been swapped during processing");
-					if (kdtreeSplit > 0)
-						LOGGER.fine(kdtreeSplit+" quadtree cells split");
 				}
 			}
 			if (nodes.size() == skippedNodes)
