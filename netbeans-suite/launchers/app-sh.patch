@@ -1,0 +1,14 @@
+--- /tmp/app.sh	2008-06-27 14:22:04.000000000 +0200
++++ release/zebra	2008-06-27 14:48:26.000000000 +0200
+@@ -72,6 +72,11 @@
+     clusters="$clusters:$extraclusters"
+ fi
+ 
++LD_LIBRARY_PATH="$progdir/../$APPNAME/modules/lib:$LD_LIBRARY_PATH"
++export LD_LIBRARY_PATH
++MMGT_OPT=0
++export MMGT_OPT
++
+ nbexec=`echo "$progdir"/../platform*/lib/nbexec`
+ 
+ case "`uname`" in
