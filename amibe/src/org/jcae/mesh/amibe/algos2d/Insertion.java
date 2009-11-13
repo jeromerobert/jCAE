@@ -194,9 +194,12 @@ public class Insertion
 					}
 					// Tag symmetric edge so that edges are checked only once
 					sym.setAttributes(AbstractHalfEdge.MARKED);
-					//  Long edges are discretized, but do not create more than 4 subsegments
 					double lcrit = 1.0;
-					if (l > 4.0)
+					if (l < 2.0)
+						//  Add middle point; otherwise point would be too near from end point
+						lcrit = l / 2.0;
+					else if (l > 4.0)
+						//  Long edges are discretized, but do not create more than 4 subsegments
 						lcrit = l / 4.0;
 					Vertex2D start = (Vertex2D) ot.origin();
 					Vertex2D end = (Vertex2D) ot.destination();
