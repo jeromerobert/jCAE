@@ -318,7 +318,7 @@ public class MesherTest
 
 	@Test public void sphere_0_05()
 	{
-		runSingleTest("sphere", 0.05, 10000, 10.0);
+		runSingleTest("sphere", 0.05, 12000, 10.0);
 	}
 
 	@Test public void timer_sphere_0_05()
@@ -328,7 +328,7 @@ public class MesherTest
 
 	@Test public void sphere_0_01()
 	{
-		runSingleTest("sphere", 0.01, 250000, 10.0);
+		runSingleTest("sphere", 0.01, 300000, 10.0);
 	}
 
 	@Test public void timer_sphere_0_01()
@@ -338,7 +338,7 @@ public class MesherTest
 
 	@Test public void sphere_0_005()
 	{
-		runSingleTest("sphere", 0.005, 1000000, 10.0);
+		runSingleTest("sphere", 0.005, 1200000, 10.0);
 	}
 
 	@Test public void timer_sphere_0_005()
@@ -349,7 +349,7 @@ public class MesherTest
 	// Results should be similar with sphere1000
 	@Test public void sphere1000_50()
 	{
-		runSingleTest("sphere1000", 50.0, 10000, 10.0);
+		runSingleTest("sphere1000", 50.0, 12000, 10.0);
 	}
 
 	@Test public void timer_sphere1000_50()
@@ -359,7 +359,7 @@ public class MesherTest
 
 	@Test public void sphere1000_10()
 	{
-		runSingleTest("sphere1000", 10.0, 250000, 10.0);
+		runSingleTest("sphere1000", 10.0, 300000, 10.0);
 	}
 
 	@Test public void timer_sphere1000_10()
@@ -369,7 +369,7 @@ public class MesherTest
 
 	@Test public void sphere1000_5()
 	{
-		runSingleTest("sphere1000", 5, 1000000, 10.0);
+		runSingleTest("sphere1000", 5, 1200000, 10.0);
 	}
 	
 	@Test public void timer_sphere1000_5()
@@ -379,7 +379,7 @@ public class MesherTest
 	
 	@Test public void cylinder_0_05()
 	{
-		runSingleTest("cylinder", 0.05, 30000, 20.0);
+		runSingleTest("cylinder", 0.05, 36000, 20.0);
 	}
 
 	@Test public void timer_cylinder_0_05()
@@ -389,7 +389,7 @@ public class MesherTest
 
 	@Test public void cylinder_0_01()
 	{
-		runSingleTest("cylinder", 0.01, 800000, 20.0);
+		runSingleTest("cylinder", 0.01, 900000, 20.0);
 	}
 
 	@Test public void timer_cylinder_0_01()
@@ -400,7 +400,7 @@ public class MesherTest
 	// cylinder1000 is different, radius is multiplied by 1000 but height by 600
 	@Test public void cylinder1000_50()
 	{
-		runSingleTest("cylinder1000", 50.0, 3000, 20.0);
+		runSingleTest("cylinder1000", 50.0, 3600, 20.0);
 	}
 
 	@Test public void timer_cylinder1000_50()
@@ -410,7 +410,7 @@ public class MesherTest
 
 	@Test public void cylinder1000_10()
 	{
-		runSingleTest("cylinder1000", 10.0, 80000, 20.0);
+		runSingleTest("cylinder1000", 10.0, 90000, 20.0);
 	}
 
 	@Test public void timer_cylinder1000_10()
@@ -420,7 +420,7 @@ public class MesherTest
 
 	@Test public void cylinder1000_5()
 	{
-		runSingleTest("cylinder1000", 5.0, 320000, 20.0);
+		runSingleTest("cylinder1000", 5.0, 360000, 20.0);
 	}
 
 	@Test public void timer_cylinder1000_5()
@@ -430,7 +430,7 @@ public class MesherTest
 
 	@Test public void cone_0_01()
 	{
-		runSingleTest("cone", 0.01, 150000, 10.0);
+		runSingleTest("cone", 0.01, 168000, 10.0);
 	}
 
 	@Test public void timer_cone_0_01()
@@ -440,7 +440,7 @@ public class MesherTest
 
 	@Test public void torus_0_01()
 	{
-		runSingleTest("torus", 0.01, 250000, 20.0);
+		runSingleTest("torus", 0.01, 280000, 20.0);
 	}
 
 	@Test public void timer_torus_0_01()
@@ -450,7 +450,7 @@ public class MesherTest
 
 	@Test public void shellHole()
 	{
-		runSingleTest("shell_hole", 0.5, 250000, 20.0);
+		runSingleTest("shell_hole", 0.5, 300000, 20.0);
 	}
 
 	@Test public void timer_shellHole()
@@ -466,9 +466,9 @@ public class MesherTest
 			throw new RuntimeException("Missing brep file; you must download, uncompress http://www.opencascade.org/ex/att/15_cylinder_head.brep.gz and copy it into "+geoFile);
 		}
 		System.setProperty("org.jcae.mesh.Mesher.triangleSoup", "true");
-		String coarseDir = runSingleTest("15_cylinder_head", 5.0, 37000 , 0.0);
+		String coarseDir = runSingleTest("15_cylinder_head", 5.0, 41000 , 0.0);
 		runSingleTestTimer("15_cylinder_head", 30L);
-		String fineDir = runSingleTest("15_cylinder_head", 1.2, 460000 , 0.0);
+		String fineDir = runSingleTest("15_cylinder_head", 1.2, 530000 , 0.0);
 		runSingleTestTimer("15_cylinder_head", 100L);
 		System.setProperty("org.jcae.mesh.Mesher.triangleSoup", "false");
 

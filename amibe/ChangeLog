@@ -5,6 +5,7 @@ Fri Nov 13 16:34:26 CET 2009 Denis Barbier <barbier@users.sourceforge.net>
 	were designed to cut edges longer than 2 (in a unit mesh).  But
 	there was a bug, edges smaller than 1+sqrt(2) could not be split,
 	and thus final mesh could contain edges longer than 2.
+	With these changes, the number of nodes is increased by 10%-20%.
 	* src/org/jcae/mesh/amibe/algos2d/Insertion.java
 	  src/org/jcae/mesh/amibe/algos3d/Remesh.java: Set minlen to
 	0.95/sqrt(2) instead of 1/sqrt(2), this helps avoiding edges larger
