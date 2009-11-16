@@ -1,6 +1,11 @@
 Mon Nov 16 18:45:43 CET 2009 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos2d/Insertion.java
+	  src/org/jcae/mesh/amibe/algos3d/Remesh.java: Nodes cannot be
+	inserted if they would be too near of an existing point.  But
+	some long edges can then not be split.  When this happens,
+	lower minlen to try harder to split long edges.
+	* src/org/jcae/mesh/amibe/algos2d/Insertion.java
 	  src/org/jcae/mesh/amibe/algos3d/Remesh.java: Compute
 	position of split points by dichotomy.  Edge was previously
 	discretized by a fixed number of segments, and each point was
@@ -32,7 +37,7 @@ Fri Nov 13 16:34:26 CET 2009 Denis Barbier <barbier@users.sourceforge.net>
 	With these changes, the number of nodes is increased by 10%-20%.
 	* src/org/jcae/mesh/amibe/algos2d/Insertion.java
 	  src/org/jcae/mesh/amibe/algos3d/Remesh.java: Set minlen to
-	0.95/sqrt(2) instead of 1/sqrt(2), this helps avoiding edges larger
+	0.95/sqrt(2) instead of 1/sqrt(2), this helps avoiding edges longer
 	than sqrt(2).
 
 Sat Nov  7 14:55:24 CET 2009 Denis Barbier <barbier@users.sourceforge.net>

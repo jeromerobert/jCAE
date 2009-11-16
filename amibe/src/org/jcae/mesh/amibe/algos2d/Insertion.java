@@ -102,7 +102,7 @@ public class Insertion
 	{
 		mesh = m;
 		kdTree = mesh.getKdTree();
-		this.minlen = 0.95*minlen;
+		this.minlen = minlen;
 		this.maxlen = maxlen;
 	}
 	
@@ -119,6 +119,7 @@ public class Insertion
 		VirtualHalfEdge2D sym = new VirtualHalfEdge2D();
 		VirtualHalfEdge2D ot = new VirtualHalfEdge2D();
 		HashSet<Triangle> trianglesToCheck = new HashSet<Triangle>(mesh.getTriangles().size());
+		double curMinlen = minlen;
 		// We use a LinkedHashSet instance below to keep triangle order
 		LinkedHashSet<Triangle> oldTrianglesToCheck = new LinkedHashSet<Triangle>(mesh.getTriangles().size());
 		// We do not want to split boundary edges.
@@ -229,7 +230,7 @@ public class Insertion
 						double[] uv = v.getUV();
 						Vertex2D n = (Vertex2D) kdTree.getNearestVertex(metric, uv);
 						assert checkNearestVertex(metric, uv, n);
-						if (mesh.interpolatedDistance(v, n) > minlen)
+						if (mesh.interpolatedDistance(v, n) > curMinlen)
 						{
 							kdTree.add(v);
 							nodes.add(v);
@@ -282,18 +283,33 @@ public class Insertion
 				Metric metric = mesh.getMetric(c);
 				Vertex2D n = (Vertex2D) kdTree.getNearestVertex(metric, c.getUV());
 				assert checkNearestVertex(metric, c.getUV(), n);
-				if (mesh.interpolatedDistance(c, n) > minlen)
+				if (mesh.interpolatedDistance(c, n) > curMinlen)
 				{
 					kdTree.add(c);
 					nodes.add(c);
 					trianglesToCheck.add(t);
 					c = null;
 				}
-				else
-					tooNearNodes++;
 			}
 			if (nodes.isEmpty())
+			{
+				if (checked > 0)
+				{
+					LOGGER.fine("No candidate found after checking "+checked+" edges");
+					if (tooNearNodes > 0)
+						LOGGER.fine(tooNearNodes+" nodes are too near to be inserted");
+					if (curMinlen > 0.5*minlen && tooNearNodes > checked / 2)
+					{
+						curMinlen *= 0.9;
+						LOGGER.fine("Lower minlen to "+curMinlen);
+						continue;
+					}
+				}
 				break;
+			}
+			// Reset curMinlen to minlen
+			curMinlen = minlen;
+
 			for (Vertex2D v : nodes)
 			{
 				//  These vertices are not bound to any triangles, so

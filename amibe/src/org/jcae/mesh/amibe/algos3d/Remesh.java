@@ -163,8 +163,7 @@ public class Remesh
 				LOGGER.warning("Unknown option: "+key);
 		}
 		double targetSize = size;
-		// Relax a little bit minlen to avoid large edges
-		minlen = 0.95 / Math.sqrt(2.0);
+		minlen = 1.0 / Math.sqrt(2.0);
 		maxlen = Math.sqrt(2.0);
 		project = proj;
 		hasRidges = ridges;
@@ -636,12 +635,12 @@ public class Remesh
 		Map<Vertex, Vertex> neighborMap = new HashMap<Vertex, Vertex>();
 		int nrIter = 0;
 		int processed = 0;
+		double curMinlen = minlen;
 		// Number of nodes which were skipped
 		int skippedNodes = 0;
 		AbstractHalfEdge h = null;
 		AbstractHalfEdge sym = null;
 
-		EuclidianMetric3D euclid = new EuclidianMetric3D();
 		double[][] temp = new double[4][3];
 		// We try to insert new nodes by splitting large edges.  As edge collapse
 		// is costful, nodes are inserted only if it does not create small edges,
@@ -734,7 +733,7 @@ public class Remesh
 							assert metric != null;
 							double[] uv = v.getUV();
 							Vertex n = kdTree.getNearestVertex(metric, uv);
-							if (interpolatedDistance(v, metric, n, metrics.get(n)) > minlen)
+							if (interpolatedDistance(v, metric, n, metrics.get(n)) > curMinlen)
 							{
 								kdTree.add(v);
 								metrics.put(v, metric);
@@ -751,7 +750,24 @@ public class Remesh
 					}
 				}
 				if (nodes.isEmpty())
+				{
+					if (checked > 0)
+					{
+						LOGGER.fine("No candidate found after checking "+checked+" edges");
+						if (tooNearNodes > 0)
+							LOGGER.fine(tooNearNodes+" nodes are too near to be inserted");
+						if (curMinlen > 0.5*minlen && tooNearNodes > checked / 2)
+						{
+							curMinlen *= 0.9;
+							LOGGER.fine("Lower minlen to "+curMinlen);
+							pass--;
+						}
+					}
 					continue;
+				}
+				// Reset curMinlen to minlen
+				curMinlen = minlen;
+
 				for (Vertex v : nodes)
 				{
 					//  These vertices are not bound to any triangles, so
