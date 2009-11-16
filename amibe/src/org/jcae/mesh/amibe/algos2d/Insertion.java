@@ -183,23 +183,17 @@ public class Insertion
 						// This edge has already been checked and cannot be split
 						continue;
 					}
+					// Tag symmetric edge so that edges are checked only once
 					sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
 					sym.sym();
-					if (sym.hasAttributes(AbstractHalfEdge.MARKED))
-					{
-						// This edge has already been checked and cannot be split
-						continue;
-					}
+					sym.setAttributes(AbstractHalfEdge.MARKED);
 					double l = mesh.interpolatedDistance((Vertex2D) ot.origin(), (Vertex2D) ot.destination());
 					if (l < maxlen)
 					{
 						// This edge is smaller than target size and is not split
 						ot.setAttributes(AbstractHalfEdge.MARKED);
-						sym.setAttributes(AbstractHalfEdge.MARKED);
 						continue;
 					}
-					// Tag symmetric edge so that edges are checked only once
-					sym.setAttributes(AbstractHalfEdge.MARKED);
 					int nrNodes = addCandidatePoints(ot, sym, l, triNodes);
 					if (nrNodes > nrTriNodes)
 					{
