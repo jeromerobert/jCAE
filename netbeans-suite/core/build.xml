@@ -53,6 +53,9 @@
 		<copy todir="${cluster}/modules/ext" file="${vtk-amibe.project.dir}/dist/jcae-vtk-amibe.jar"/>
 
 		<copy file="../../amibe/logging.properties" tofile="${cluster}/etc/logging.properties"/>
+		<copy todir="${cluster}/amibe-python">
+			<fileset dir="../../amibe/python"/>
+		</copy>
 	</target>
 	<target name="clean" depends="projectized-common.clean">
 		<echo message="Cleaning ${amibe.project.dir}"/>

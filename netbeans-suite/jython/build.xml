@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- You may freely edit this file. See harness/README in the NetBeans platform -->
+<!-- for some information on what you could do (e.g. targets to override). -->
+<!-- If you delete this file and reopen the project it will be recreated. -->
+<project name="org.jython" default="netbeans" basedir=".">
+    <description>Builds, tests, and runs the project org.jython.</description>
+    <import file="nbproject/build-impl.xml"/>
+	<property file="../nbproject/private/private.properties"/>
+	<property file="../nbproject/project.properties"/>
+	<target name="-release.files.linux" if="arch.linux">
+		<copy todir="${cluster}/jython">
+			<fileset dir="${path.jython.linux}"/>
+		</copy>
+		<chmod file="${cluster}/jython/bin/jython" perm="755"/>
+		<chmod file="${cluster}/jython/jython" perm="755"/>
+	</target>
+
+	<target name="-release.files.win32" if="arch.win32">
+		<copy todir="${cluster}/jython">
+			<fileset dir="${path.jython.win32}"/>
+		</copy>
+	</target>
+
+	<target name="-release.files" depends="-release.files.linux,-release.files.win32"/>
+</project>

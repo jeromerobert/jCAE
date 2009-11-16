@@ -1,0 +1,152 @@
+#! /bin/sh
+
+reldir=$(dirname $0)
+dir=$(cd $reldir && pwd)
+parentdir=$(dirname $dir)
+memory=500m
+jcaehome=
+javahome=
+jython=
+jythonhome=
+logproperties=
+scriptdir=$parentdir/jcae/amibe-python
+cmd=
+
+usage()
+{
+	echo "usage: amibebatch [GLOBAL_OPTIONS] COMMAND [OPTIONS]" >&2
+	echo "Global options:" >&2
+	echo "  -h,--help                    Print this help message" >&2
+	echo "  -j,--javahome=PATH           Path to JVM" >&2
+	echo "  -c,--jcaehome=PATH           Path to jCAE" >&2
+	echo "     --jython=PATH             Path to external jython executable" >&2
+	echo "  -l,--logging-properties=FILE Path to logging.properties file" >&2
+	echo "  -m,--memory=MEM              Set maximum Java memory via -Xmx flag" >&2
+	echo "Available list of commands:" >&2
+	for f in $scriptdir/*.py
+	do
+    		grep ^cmd= $f | sed -e 's/cmd=\[/	/' -e 's/,/	/' -e 's/[]"]//g' >&2
+	done
+	echo "Run" >&2
+	echo "  amibebatch COMMAND -h" >&2
+	echo "for help about a specific command" >&2
+	exit $1
+}
+
+prev=
+rc=1
+for option
+do
+  if test -n "$prev"; then
+    eval $prev=\$option
+    prev=
+    shift
+    continue
+  fi
+
+  optarg=
+  case $option in
+    *=*)
+	optarg=$(expr "X$option" : '[^=]*=\(.*\)') ;;
+  esac
+
+  case $option in
+  "-?" | -h | -help | --help )
+	rc=0
+	break ;;
+
+  -m | -memory | --memory )
+	prev=memory
+	shift ;;
+  -memory=* | --memory=* )
+	memory=$optarg
+	shift ;;
+
+  -j | -javahome | --javahome )
+	prev=javahome
+	shift ;;
+  -javahome=* | --javahome=* )
+	javahome=$optarg
+	shift ;;
+
+  -jython | --jython )
+	prev=jython
+	shift ;;
+  -jython=* | --jython=* )
+	jython=$optarg
+	shift ;;
+
+  -g | -jythonhome | --jythonhome )
+	prev=jythonhome
+	shift ;;
+  -jythonhome=* | --jythonhome=* )
+	jythonhome=$optarg
+	shift ;;
+
+  -c | -jcaehome | --jcaehome )
+	prev=jcaehome
+	shift ;;
+  -jcaehome=* | --jcaehome=* )
+	jcaehome=$optarg
+	shift ;;
+
+  -l | -logging-properties )
+	prev=logproperties
+	shift ;;
+  -logging-properties=* | --logging-properties=* )
+	logproperties=$optarg
+	shift ;;
+
+  -* )
+	echo "ERROR: unknown option: $option" >&2
+	echo "ERROR: Please run 'amibebatch -h'" >&2
+	exit 1 ;;
+  * )
+	cmd=$option
+	shift
+	if ! test -f $scriptdir/$cmd && ! test -f $scriptdir/$cmd.py
+	then
+		echo "ERROR: unknown command: $cmd" >&2
+		echo "ERROR: Please run 'amibebatch -h'" >&2
+		exit 1
+	fi
+	break ;;
+  esac
+done
+
+test -n "$jcaehome" || jcaehome=${JCAE_HOME:-$parentdir}
+test -n "$javahome" || javahome=${JAVA_HOME:-$jcaehome/jre6}
+test -n "$jythonhome" || jythonhome=${JYTHON_HOME:-$jcaehome/jcae/jython}
+test -n "$cmd" || usage $rc
+if test -n "$logproperties"
+then
+	case $logproperties in
+	  /* ) ;;
+	  * )  logproperties="$(pwd)/$logproperties" ;;
+	esac
+else
+	logproperties=$jcaehome/jcae/etc/logging.properties
+fi
+
+# Run command
+
+export MMGT_OPT=0
+JAVA_OPTS="-J-Xmx$memory -Djava.util.logging.config.file=$logproperties"
+
+export LD_LIBRARY_PATH=\
+$jcaehome/jcae/modules/lib\
+${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+
+jardir="$jcaehome/jcae/modules/ext/"
+jcae="$jardir/amibe.jar:$jardir/jcae-vtk-amibe.jar:$jardir/vtk-util.jar:$jardir/vtk.jar:$jardir/vecmath.jar"
+
+export PYTHONPATH="$jcae"
+export JAVA_HOME=$javahome
+
+if test -n "$jython"; then
+	export JAVA_OPTS
+	$jython -J-cp "$jcae" "$scriptdir/$cmd.py" "$@"
+else
+	"$jythonhome/bin/jython" $JAVA_OPTS -J-cp "$jcae" "$scriptdir/$cmd.py" "$@"
+fi
+exit 0
