@@ -416,7 +416,7 @@ public class Insertion
 					Metric metric = mesh.getMetric(last);
 					// Link to surrounding triangle to speed up
 					// kdTree.getNearestVertex()
-					if (metric.distance2(last.getUV(), sym.apex().getUV()) < metric.distance2(last.getUV(), ot.apex().getUV()))
+					if (!sym.hasAttributes(AbstractHalfEdge.OUTER) && metric.distance2(last.getUV(), sym.apex().getUV()) < metric.distance2(last.getUV(), ot.apex().getUV()))
 						last.setLink(sym.getTri());
 					else
 						last.setLink(ot.getTri());
