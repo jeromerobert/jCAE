@@ -67,6 +67,10 @@ public class Remesh
 	private DoubleFileReader dfrMetrics;
 	private final double minlen;
 	private final double maxlen;
+	// useful to see if addCandidatePoints() does its job
+	private int nrInterpolations;
+	private int nrFailedInterpolations;
+
 	private final boolean project;
 	private final boolean hasRidges;
 	private final boolean hasFreeEdges;
@@ -704,94 +708,7 @@ public class Remesh
 							h.setAttributes(AbstractHalfEdge.MARKED);
 							continue;
 						}
-						//  Ensure that start point has the lowest edge size
-						double [] xs = start.getUV();
-						double [] xe = end.getUV();
-						if (mS.distance2(xs, xe) < mE.distance2(xs, xe))
-						{
-							Vertex tempV = start;
-							start = end;
-							end = tempV;
-							xs = xe;
-							xe = end.getUV();
-							mS = mE;
-							mE = metrics.get(end);
-						}
-						int segments;
-						double lcrit = 1.0;
-						double hS = mS.getUnitBallBBox()[0];
-						double hE = mE.getUnitBallBBox()[0];
-						double logRatio = Math.log(hE/hS);
-						if (l < ONE_PLUS_SQRT2)
-						{
-							//  Add middle point; otherwise point would be too near from end point
-							lcrit = l / 2.0;
-							if (analyticMetric == null && hS == hE)
-								segments = 2;
-							else
-								// Middle point has to be computed accurately!
-								segments = 100;
-						}
-						else if (l > (3.0 - pass))
-						{
-							//  Long edges are discretized, but do not create more than 2 subsegments
-							lcrit = l / (3.0 - pass);
-							segments = (int) (2.0*l/lcrit) + 10;
-						}
-						else
-							segments = (int) (2.0*l/lcrit) + 20;
-						Vertex [] np = new Vertex[segments-1];
-						double[] pos = new double[3];
-						double delta = 1.0 / (double) segments;
-						for (int ns = 1; ns < segments; ns++)
-						{
-							pos[0] = xs[0]+ns*(xe[0]-xs[0])*delta;
-							pos[1] = xs[1]+ns*(xe[1]-xs[1])*delta;
-							pos[2] = xs[2]+ns*(xe[2]-xs[2])*delta;
-							np[ns-1] = mesh.createVertex(pos);
-						}
-						if (project && !h.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
-						{
-							int mid = (segments + 1) / 2;
-							for (int ns = 0; ns < mid; ns++)
-							{
-								pos = np[ns].getUV();
-								liaison.project(np[ns], pos, start);
-							}
-							for (int ns = mid; ns < segments - 1; ns++)
-							{
-								pos = np[ns].getUV();
-								liaison.project(np[ns], pos, end);
-							}
-						}
-
-						Vertex last = start;
-						Metric lastMetric = mS;
-						int nrNodes = 0;
-
-						for (int ns = 0; ns < segments-1; ns++)
-						{
-							EuclidianMetric3D m;
-							if (analyticMetric != null)
-							{
-								pos = np[ns].getUV();
-								m = new EuclidianMetric3D(analyticMetric.getTargetSize(pos[0], pos[1], pos[2]));
-							}
-							else
-								m = new EuclidianMetric3D(hS*Math.exp((ns+1.0)*delta*logRatio));
-							if (segments == 2 || interpolatedDistance(last, lastMetric, np[ns], m) > lcrit)
-							{
-								last = np[ns];
-								lastMetric = m;
-								triNodes.add(last);
-								triMetrics.add(m);
-								if (m.distance2(last.getUV(), start.getUV()) < m.distance2(last.getUV(), end.getUV()))
-									neighborMap.put(last, start);
-								else
-									neighborMap.put(last, end);
-								nrNodes++;
-							}
-						}
+						int nrNodes = addCandidatePoints(h, l, pass, triNodes, triMetrics, neighborMap);
 						if (nrNodes > nrTriNodes)
 						{
 							nrTriNodes = nrNodes;
@@ -949,9 +866,139 @@ public class Remesh
 		}
 		LOGGER.info("Number of inserted vertices: "+processed);
 		LOGGER.fine("Number of iterations to insert all nodes: "+nrIter);
+		if (nrFailedInterpolations > 0)
+			LOGGER.info("Number of failed interpolations: "+nrFailedInterpolations);
 		LOGGER.config("Leave compute()");
 
 		return this;
+	}
+
+	private int addCandidatePoints(AbstractHalfEdge ot, double edgeLength, int pass,
+		ArrayList<Vertex> triNodes, ArrayList<EuclidianMetric3D> triMetrics,
+		Map<Vertex, Vertex> neighborMap)
+	{
+		int nrNodes = 0;
+		Vertex start = ot.origin();
+		Vertex end = ot.destination();
+		EuclidianMetric3D mS = metrics.get(start);
+		EuclidianMetric3D mE = metrics.get(end);
+		//  Ensure that start point has the lowest edge size
+		double [] xs = start.getUV();
+		double [] xe = end.getUV();
+		if (mS.distance2(xs, xe) < mE.distance2(xs, xe))
+		{
+			Vertex tempV = start;
+			start = end;
+			end = tempV;
+			xs = xe;
+			xe = end.getUV();
+			EuclidianMetric3D tempM = mS;
+			mS = mE;
+			mE = tempM;
+		}
+		double hS = mS.getUnitBallBBox()[0];
+		double hE = mE.getUnitBallBBox()[0];
+		double logRatio = Math.log(hE/hS);
+		double [] lower = new double[3];
+		double [] upper = new double[3];
+		int nr;
+		double maxError, target;
+		if (edgeLength < ONE_PLUS_SQRT2)
+		{
+			//  Add middle point; otherwise point would be too near from end point
+			nr = 1;
+			target = 0.5*edgeLength;
+			maxError = Math.min(0.02, 0.9*Math.abs(target - 0.5*Math.sqrt(2)));
+		}
+		else if (edgeLength > 3.0 - pass)
+		{
+			//  Long edges are discretized, but do not create more than 4 subsegments
+			nr = 3 - pass;
+			target = edgeLength / nr;
+			maxError = 0.1;
+		}
+		else
+		{
+			nr = (int) edgeLength;
+			target = 1.0;
+			maxError = 0.05;
+		}
+		// One could take nrDichotomy = 1-log(maxError)/log(2), but this
+		// value may not work when surface parameters have a large
+		// gradient, so take a larger value to be safe.
+		int nrDichotomy = 20;
+		int r = nr;
+		Vertex last = start;
+		Metric lastMetric = metrics.get(last);
+		while (r > 0)
+		{
+			System.arraycopy(last.getUV(), 0, lower, 0, 3);
+			System.arraycopy(end.getUV(), 0, upper, 0, 3);
+			// 1-d coordinate between lower and upper points
+			double alpha = 0.5;
+			double delta = 0.5;
+			Vertex np = mesh.createVertex(
+				0.5*(lower[0]+upper[0]),
+				0.5*(lower[1]+upper[1]),
+				0.5*(lower[2]+upper[2]));
+			int cnt = nrDichotomy;
+			while(cnt >= 0)
+			{
+				cnt--;
+				nrInterpolations++;
+				// Update vertex position if 'project' flag was set
+				double [] pos = np.getUV();
+				if (project && !ot.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+				{
+					liaison.project(np, pos, start);
+				}
+				// Compute metrics at this position
+				EuclidianMetric3D m;
+				if (analyticMetric != null)
+					m = new EuclidianMetric3D(analyticMetric.getTargetSize(pos[0], pos[1], pos[2]));
+				else
+					m = new EuclidianMetric3D(hS*Math.exp(alpha*logRatio));
+				double l = interpolatedDistance(last, lastMetric, np, m);
+				if (Math.abs(l - target) < maxError)
+				{
+					last = np;
+					lastMetric = m;
+					triNodes.add(last);
+					triMetrics.add(m);
+					if (m.distance2(pos, start.getUV()) < m.distance2(pos, end.getUV()))
+						neighborMap.put(last, start);
+					else
+						neighborMap.put(last, end);
+					nrNodes++;
+					r--;
+					break;
+				}
+				else if (l > target)
+				{
+					delta *= 0.5;
+					alpha -= delta;
+					System.arraycopy(pos, 0, upper, 0, 3);
+					np.moveTo(
+						0.5*(lower[0] + pos[0]),
+						0.5*(lower[1] + pos[1]),
+						0.5*(lower[2] + pos[2]));
+				}
+				else
+				{
+					delta *= 0.5;
+					alpha += delta;
+					System.arraycopy(pos, 0, lower, 0, 3);
+					np.moveTo(
+						0.5*(upper[0] + pos[0]),
+						0.5*(upper[1] + pos[1]),
+						0.5*(upper[2] + pos[2]));
+				}
+			}
+			if (cnt < 0)
+				nrFailedInterpolations++;
+			return nrNodes;
+		}
+		return nrNodes;
 	}
 
 	protected void postProcessIteration(Mesh mesh, int i)

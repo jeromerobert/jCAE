@@ -1,6 +1,7 @@
 Mon Nov 16 18:45:43 CET 2009 Denis Barbier <barbier@users.sourceforge.net>
 
-	* src/org/jcae/mesh/amibe/algos2d/Insertion.java: Compute
+	* src/org/jcae/mesh/amibe/algos2d/Insertion.java
+	  src/org/jcae/mesh/amibe/algos3d/Remesh.java: Compute
 	position of split points by dichotomy.  Edge was previously
 	discretized by a fixed number of segments, and each point was
 	tested to find a point at a distance 1 of start point.
