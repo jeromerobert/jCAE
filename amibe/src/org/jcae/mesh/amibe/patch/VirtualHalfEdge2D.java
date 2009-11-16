@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2005,2006, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,6 @@ package org.jcae.mesh.amibe.patch;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
-import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,7 +39,6 @@ import org.jcae.mesh.amibe.metrics.KdTree;
 public class VirtualHalfEdge2D extends VirtualHalfEdge
 {
 	private static final Logger logger=Logger.getLogger(VirtualHalfEdge2D.class.getName());
-	private static final Random rand = new Random(139L);
 	private static final VirtualHalfEdge2D [] work = new VirtualHalfEdge2D[4];
 	static {
 		for (int i = 0; i < 4; i++)
@@ -450,7 +448,7 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 					//  a stands to the left of (start,end).
 					swap();              // = (ona)
 				}
-				else if (rand.nextBoolean())
+				else if (mesh.rand.nextBoolean())
 					swap();              // = (ona)
 				else
 					prevOrigin();        // = (ond)
@@ -467,7 +465,7 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 					next();              // = (nao)
 					prevOrigin();        // = (nda)
 				}
-				else if (rand.nextBoolean())
+				else if (mesh.rand.nextBoolean())
 				{
 					swap();              // = (ona)
 					next();              // = (nao)

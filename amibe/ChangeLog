@@ -1,3 +1,12 @@
+Mon Nov 16 16:44:29 CET 2009 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/patch/Mesh2D.java
+	  src/org/jcae/mesh/amibe/patch/Vertex2D.java
+	  src/org/jcae/mesh/amibe/patch/VirtualHalfEdge2D.java: Meshes were
+	different when run interactively and from MesherTest because the
+	pseudorandom numbers generators were initialized by static code.
+	They have been replaced by a non-static member in Mesh2D.
+
 Fri Nov 13 16:34:26 CET 2009 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos2d/Insertion.java

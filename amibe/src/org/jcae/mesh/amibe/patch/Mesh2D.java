@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2004,2005,2006, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -35,6 +35,7 @@ import org.jcae.mesh.cad.CADShape;
 
 import java.util.Stack;
 import java.util.Collection;
+import java.util.Random;
 import java.util.logging.Logger;
 
 /**
@@ -63,6 +64,11 @@ public class Mesh2D extends Mesh
 
 	// 2D euclidian metric
 	private transient final EuclidianMetric2D euclidian_metric2d = new EuclidianMetric2D();
+
+	// Few methods in Vertex2D and VirtualHalfEdge2D require a pseudo-random generator.
+	// Define it in Mesh2D so that this generator gives the same value when
+	// performing several meshes in the same run.
+	transient final Random rand = new Random(139L);
 
 	private static final double delta_max = 0.5;
 	private static final int level_max = 10;

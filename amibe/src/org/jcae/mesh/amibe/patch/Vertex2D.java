@@ -31,7 +31,6 @@ import org.jcae.mesh.cad.CADFace;
 import org.jcae.mesh.cad.CADGeomCurve2D;
 import org.jcae.mesh.cad.CADGeomSurface;
 
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,7 +47,6 @@ public class Vertex2D extends Vertex
 {
 	private static final long serialVersionUID = -6099275818186028566L;
 	private static final Logger logger=Logger.getLogger(Vertex2D.class.getName());
-	private static final Random rand = new Random(139L);
 	private static final Vertex2D circumcenter = new Vertex2D(null, 0.0, 0.0);
 	
 	//  These 2 integer arrays are temporary workspaces
@@ -231,7 +229,7 @@ public class Vertex2D extends Vertex
 			//  points cannot be outerVertex.
 			if (d1 < 0L && d2 < 0L)
 			{
-				if (rand.nextBoolean())
+				if (mesh.rand.nextBoolean())
 				{
 					current.next();         // (dao)
 					current.sym();          // (ad*)
