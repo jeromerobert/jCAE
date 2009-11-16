@@ -30,6 +30,12 @@ parser.add_option("-m", "--metricsFile", metavar="STRING",
 parser.add_option("-p", "--project",
                   action="store_true", dest="project",
                   help="project vertices onto local surface")
+parser.add_option("-d", "--decimate", metavar="FLOAT",
+                  action="store", type="float", dest="decimateSize",
+                  help="decimate mesh before remeshing, specify tolerance")
+parser.add_option("-D", "--decimate-target", metavar="NUMBER",
+                  action="store", type="int", dest="decimateTarget",
+                  help="decimate mesh before remeshing, keep only NUMBER triangles")
 
 (options, args) = parser.parse_args(args=sys.argv[1:])
 
@@ -57,6 +63,10 @@ if options.coplanarity:
 	opts.put("coplanarity", str(options.coplanarity))
 if options.project:
 	opts.put("project", "true")
+if options.decimateSize:
+	opts.put("decimateSize", str(options.decimateSize))
+elif options.decimateTarget:
+	opts.put("decimateTarget", str(options.decimateTarget))
 
 algo = Remesh(mesh, opts)
 class RemeshMetric(Remesh.AnalyticMetricInterface):
