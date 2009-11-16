@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2003,2004,2005,2006, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -29,8 +29,8 @@ import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.logging.Logger;
 
 /**
@@ -89,7 +89,7 @@ public class CheckDelaunay
 			redo = false;
 			cnt = 0;
 			ArrayList<FakeEdge> toSwap = new ArrayList<FakeEdge>();
-			HashSet<Triangle> newList = new HashSet<Triangle>();
+			Collection<Triangle> newList = new LinkedHashSet<Triangle>();
 			niter--;
 			for (Triangle at: oldList)
 			{
