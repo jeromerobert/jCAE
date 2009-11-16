@@ -290,12 +290,10 @@ public class Insertion
 				if (checked > 0)
 				{
 					LOGGER.fine("No candidate found after checking "+checked+" edges");
-					if (tooNearNodes > 0)
-						LOGGER.fine(tooNearNodes+" nodes are too near to be inserted");
-					if (curMinlen > 0.5*minlen && tooNearNodes > checked / 2)
+					if (curMinlen > 0.7*minlen && tooNearNodes > 0)
 					{
 						curMinlen *= 0.9;
-						LOGGER.fine("Lower minlen to "+curMinlen);
+						LOGGER.fine(tooNearNodes+" nodes are too near to be inserted, lower minlen to "+curMinlen);
 						continue;
 					}
 				}
