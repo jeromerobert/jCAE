@@ -21,7 +21,6 @@
 package org.jcae.netbeans.viewer3d.actions;
 
 import java.io.File;
-import javax.imageio.ImageIO;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
@@ -65,21 +64,16 @@ public class SnapshotAction extends ViewAction
 		return false;
 	}
 	
-	
+	@Override
 	public void actionPerformed(View view)
 	{
-			final JFileChooser fc = new JFileChooser();
+		JFileChooser fc = new JFileChooser();
 
-			fc.setFileFilter(PNG_FILE_FILTER);
-			if (fc.showSaveDialog(WindowManager.getDefault().getMainWindow())
-					 == JFileChooser.APPROVE_OPTION)
-			{	
-				try {
-				ImageIO.write(Utils.takeScreenshot(view), "png", fc.getSelectedFile());
-				} catch(Exception e)
-				{
-					System.err.println("Exception : " + e.getLocalizedMessage());
-				}
-			}	
+		fc.setFileFilter(PNG_FILE_FILTER);
+		if (fc.showSaveDialog(WindowManager.getDefault().getMainWindow())
+				 == JFileChooser.APPROVE_OPTION)
+		{
+			Utils.takeScreenshot(view, fc.getSelectedFile().getPath());
+		}
 	}
 }

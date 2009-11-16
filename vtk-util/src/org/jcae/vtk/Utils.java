@@ -28,6 +28,8 @@ import java.awt.Point;
 import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.logging.Level;
@@ -529,45 +531,41 @@ public class Utils
 	{
 		return offsetValue;
 	}
-	
-	/**
-	 * Take a screenshot of the canvas.
-	 * @param canvas
-	 */
-	public static BufferedImage takeScreenshot(final vtkCanvas canvas)
+
+	public static BufferedImage takeScreenshot(final vtkCanvas canvas) throws IOException
 	{
-		if (!canvas.isWindowSet())
-			System.err.println("Attention : Lors de la prise de screenshot le windows n'?tait pas set !");
-		
-		final vtkWindowToImageFilter w2i = new vtkWindowToImageFilter();
-		final vtkPNGWriter writer = new vtkPNGWriter();
-		w2i.SetInput(canvas.getIren().GetRenderWindow());
-		writer.SetInputConnection(w2i.GetOutputPort());
-
-		BufferedImage buffer = null;
-		File file = null;
-		try
-		{
-			file = File.createTempFile("screen", "png");
-			writer.SetFileName(file.getAbsolutePath());
-			Utils.goToAWTThread(new Runnable() {
-
-				@Override
-				public void run()
-				{
-					canvas.lock();
-					w2i.Update();
-					canvas.unlock();
-				}
-			});
-			writer.Write();
-			buffer = ImageIO.read(file);
-		} catch (Exception e)
-		{
-			System.err.println("Error writing the screenshot : " + e.getLocalizedMessage());
-		}
-
-		return buffer;
+		File f = File.createTempFile("screen", ".png");
+		f.deleteOnExit();
+		takeScreenshot(canvas, f.getPath());
+		f.delete();
+		return ImageIO.read(f);
+	}
+	/**
+	 * Synchronously take a snapshot of a 3D view
+	 * @param canvas
+	 * @param onDone something to be executed when the screenshot has been taken
+	 */
+	public static void takeScreenshot(final vtkCanvas canvas, final String fileName)
+	{
+		goToAWTThread(new Runnable() {
+			@Override
+			public void run()
+			{				
+				final vtkWindowToImageFilter w2i = new vtkWindowToImageFilter();
+				final vtkPNGWriter writer = new vtkPNGWriter();
+				w2i.SetInput(canvas.getIren().GetRenderWindow());
+				writer.SetInputConnection(w2i.GetOutputPort());
+				writer.SetFileName(fileName);
+				if (!canvas.isWindowSet())
+					canvas.Render();
+				canvas.lock();
+				w2i.Update();
+				canvas.unlock();
+				writer.Write();
+				writer.Delete();
+				w2i.Delete();
+			}
+		});
 	}
 
 	/**
@@ -581,18 +579,22 @@ public class Utils
 	public static void goToAWTThread(Runnable runnable)
 	{
 		if (!SwingUtilities.isEventDispatchThread())
+		{
 			//Thread.dumpStack();
 			/*System.err.println(
 			"WARNING ! : you try to render on a different thread than the"+
 			"thread that creates the renderView. Making an invokeLater to"+
 			" render on the thread that creates the renderView");*/
-			try
-			{
+			try {
 				SwingUtilities.invokeAndWait(runnable);
-			} catch (Exception e)
-			{
-				System.out.println("Exception invokeAndWait : " + e.getLocalizedMessage());
+			} catch (InterruptedException ex) {
+				ex.printStackTrace();
+				LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+			} catch (InvocationTargetException ex) {
+				ex.printStackTrace();
+				LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
 			}
+		}
 		else
 			runnable.run();
 	}

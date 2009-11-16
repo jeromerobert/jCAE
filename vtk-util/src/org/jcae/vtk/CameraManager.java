@@ -25,7 +25,10 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import vtk.vtkActor;
 import vtk.vtkActorCollection;
@@ -282,11 +285,14 @@ public class CameraManager
 	 */
 	public void saveCurrentCamera()
 	{
-		cameras.add(copy(renderer.GetActiveCamera()));
-		ScreenshotCamera screenshot = new ScreenshotCamera();
-		
-		screenshot.shot(Utils.takeScreenshot(canvas));
-		screenshots.add(screenshot);
+		try {
+			cameras.add(copy(renderer.GetActiveCamera()));
+			ScreenshotCamera screenshot = new ScreenshotCamera();
+			screenshot.shot(Utils.takeScreenshot(canvas));
+			screenshots.add(screenshot);
+		} catch (IOException ex) {
+			Logger.getLogger(CameraManager.class.getName()).log(Level.SEVERE, null, ex);
+		}
 	}
 
 	public ImageIcon getScreenshotCamera(int index)

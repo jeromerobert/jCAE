@@ -1,7 +1,7 @@
 
 # jCAE
 from org.jcae.mesh.oemm import OEMM, Storage
-from org.jcae.vtk import Palette, AmibeToMesh, Canvas, UNVToMesh, PickContext, View, Viewable, ViewableCAD, OldViewableMesh, ViewableOEMM
+from org.jcae.vtk import Palette, AmibeToMesh, Canvas, UNVToMesh, PickContext, View, Viewable, ViewableCAD, AmibeViewable, ViewableOEMM
 
 # Swing
 from java.awt import BorderLayout, Color
@@ -29,9 +29,9 @@ xmlDir = args[0]
 palette = Palette()
 palette.addColor(Color.lightGray)
 
-class MyViewableMesh(OldViewableMesh):
+class MyViewableMesh(AmibeViewable):
 	def __init__(self, mesh):
-		OldViewableMesh.__init__(self, mesh, palette)
+		AmibeViewable.__init__(self, mesh, palette)
 		self.setSelectionType(Viewable.SelectionType.CELL)
 	def manageSelection(self, pickContext):
 		self.super__manageSelection(pickContext)
