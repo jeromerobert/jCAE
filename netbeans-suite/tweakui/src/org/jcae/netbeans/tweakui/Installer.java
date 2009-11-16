@@ -15,11 +15,14 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2005-2009, by EADS France
  */
 package org.jcae.netbeans.tweakui;
 
+import java.io.IOException;
+import java.util.Properties;
 import org.openide.modules.ModuleInstall;
+import org.openide.util.Exceptions;
 
 /**
  * Manages a module's lifecycle. Remember that an installer is optional and
@@ -29,6 +32,12 @@ public class Installer extends ModuleInstall {
 
 	@Override
 	public void restored() {
-		System.setProperty("netbeans.buildnumber", "0.17a");
+		try {
+			Properties p = new Properties();
+			p.load(getClass().getResourceAsStream("version.properties"));
+			System.setProperty("netbeans.buildnumber", p.getProperty("version"));
+		} catch (IOException ex) {
+			Exceptions.printStackTrace(ex);
+		}
 	}
 }

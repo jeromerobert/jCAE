@@ -5,4 +5,13 @@
 <project name="org.jcae.netbeans.tweakui" default="netbeans" basedir=".">
     <description>Builds, tests, and runs the project org.jcae.netbeans.tweakui.</description>
     <import file="nbproject/build-impl.xml"/>
+	<property file="../nbproject/private/private.properties"/>
+	<property file="../nbproject/project.properties"/>
+	<!-- OpenIDE-Module-Build-Version -->
+	<target name="init" depends="basic-init,files-init,build-init,-javac-init">
+		<mkdir dir="${build.classes.dir}/org/jcae/netbeans/tweakui/"/>
+		<propertyfile file="${build.classes.dir}/org/jcae/netbeans/tweakui/version.properties">
+		  <entry  key="version" value="${app.version}"/>
+		</propertyfile>
+	</target>
 </project>
