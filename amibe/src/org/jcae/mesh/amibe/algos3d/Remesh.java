@@ -782,6 +782,7 @@ public class Remesh
 							if (segments == 2 || interpolatedDistance(last, lastMetric, np[ns], m) > lcrit)
 							{
 								last = np[ns];
+								lastMetric = m;
 								triNodes.add(last);
 								triMetrics.add(m);
 								if (m.distance2(last.getUV(), start.getUV()) < m.distance2(last.getUV(), end.getUV()))
