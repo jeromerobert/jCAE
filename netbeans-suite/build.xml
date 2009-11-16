@@ -27,8 +27,16 @@
 		<property name="jre.path" value="${path.jre.win32}"/>
 		<property name="arch" value="win32"/>
 	</target>
+
+	<!-- When we switch from win32 to linux, arch specific files will stay in
+	in the cluster directory, so we need to clean it.
+	-->
+	<target name="clean-cluster">
+		<delete dir="${cluster}"/>
+	</target>
+
 	<!-- From netbeans-6.7/harness/suite.xml -->
-    <target name="build-zip" depends="build,build-launchers,patch-launchers,-zip-linux,-zip-windows" description="Builds a ZIP distribution of the suite, launchers, and selected modules from the platform.">
+    <target name="build-zip" depends="clean-cluster,build,build-launchers,patch-launchers,-zip-linux,-zip-windows" description="Builds a ZIP distribution of the suite, launchers, and selected modules from the platform.">
         <property name="zip.name" value="${app.name}-${arch}-${app.version}"/>
 		<mkdir dir="${dist.dir}"/>
         <!-- pathfileset does not support 'prefix' and 'filemode' parameters,
