@@ -88,6 +88,10 @@ public class Insertion
 	
 	private final double minlen;
 	private final double maxlen;
+
+	// useful to see if addCandidatePoints() does its job
+	private int nrInterpolations;
+	private int nrFailedInterpolations;
 	
 	/**
 	 * Creates a <code>Insertion</code> instance.
@@ -195,44 +199,7 @@ public class Insertion
 					}
 					// Tag symmetric edge so that edges are checked only once
 					sym.setAttributes(AbstractHalfEdge.MARKED);
-					double lcrit = 1.0;
-					if (l < ONE_PLUS_SQRT2)
-						//  Add middle point; otherwise point would be too near from end point
-						lcrit = l / 2.0;
-					else if (l > 4.0)
-						//  Long edges are discretized, but do not create more than 4 subsegments
-						lcrit = l / 4.0;
-					Vertex2D start = (Vertex2D) ot.origin();
-					Vertex2D end = (Vertex2D) ot.destination();
-					double [] xs = start.getUV();
-					double [] xe = end.getUV();
-					int segments = (int) (2.0*l/lcrit) + 10;
-					Vertex [] np = new Vertex[segments-1];
-					for (int ns = 1; ns < segments; ns++)
-						np[ns-1] = mesh.createVertex(xs[0]+ns*(xe[0]-xs[0])/segments, xs[1]+ns*(xe[1]-xs[1])/segments);
-					
-					Vertex2D last = start;
-					int nrNodes = 0;
-					
-					l = 0.0;
-					for (int ns = 0; ns < segments-1; ns++)
-					{
-						l = mesh.interpolatedDistance(last, (Vertex2D) np[ns]);
-						if (l > lcrit)
-						{
-							last = (Vertex2D) np[ns];
-							Metric metric = mesh.getMetric(last);
-							// Link to surrounding triangle to speed up
-							// kdTree.getNearestVertex()
-							if (metric.distance2(last.getUV(), sym.apex().getUV()) < metric.distance2(last.getUV(), ot.apex().getUV()))
-								last.setLink(sym.getTri());
-							else
-								last.setLink(t);
-							triNodes.add(last);
-							l = 0.0;
-							nrNodes++;
-						}
-					}
+					int nrNodes = addCandidatePoints(ot, sym, l, triNodes);
 					if (nrNodes > nrTriNodes)
 					{
 						nrTriNodes = nrNodes;
@@ -390,7 +357,92 @@ public class Insertion
 			}
 		}
 		LOGGER.fine("Number of iterations to insert all nodes: "+nrIter);
+		LOGGER.fine("Number of lengths computed: "+nrInterpolations);
+		if (nrFailedInterpolations > 0)
+			LOGGER.info("Number of failed interpolations: "+nrFailedInterpolations);
 		LOGGER.config("Leave compute()");
+	}
+	
+	private int addCandidatePoints(VirtualHalfEdge2D ot, VirtualHalfEdge2D sym,
+		double edgeLength, ArrayList<Vertex2D> triNodes)
+	{
+		int nrNodes = 0;
+		Vertex2D start = (Vertex2D) ot.origin();
+		Vertex2D end = (Vertex2D) ot.destination();
+		double [] lower = new double[2];
+		double [] upper = new double[2];
+		int nr;
+		double delta, target;
+		if (edgeLength < ONE_PLUS_SQRT2)
+		{
+			//  Add middle point; otherwise point would be too near from end point
+			nr = 1;
+			target = 0.5*edgeLength;
+			delta = Math.min(0.02, 0.9*Math.abs(target - 0.5*Math.sqrt(2)));
+		}
+		else if (edgeLength > 4.0)
+		{
+			//  Long edges are discretized, but do not create more than 4 subsegments
+			nr = 3;
+			target = edgeLength  / 4.0;
+			delta = 0.1;
+		}
+		else
+		{
+			nr = (int) edgeLength;
+			target = 1.0;
+			delta = 0.05;
+		}
+		// One could take nrDichotomy = 1-log(delta)/log(2), but this
+		// value may not work when surface parameters have a large
+		// gradient, so take a larger value to be safe.
+		int nrDichotomy = 20;
+		int r = nr;
+		Vertex2D last = start;
+		while (r > 0)
+		{
+			System.arraycopy(last.getUV(), 0, lower, 0, 2);
+			System.arraycopy(end.getUV(), 0, upper, 0, 2);
+			Vertex2D np = (Vertex2D) mesh.createVertex(0.5*(lower[0]+upper[0]), 0.5*(lower[1]+upper[1]));
+			int cnt = nrDichotomy;
+			while(cnt >= 0)
+			{
+				cnt--;
+				nrInterpolations++;
+				double l = mesh.interpolatedDistance(last, np);
+				if (Math.abs(l - target) < delta)
+				{
+					last = np;
+					Metric metric = mesh.getMetric(last);
+					// Link to surrounding triangle to speed up
+					// kdTree.getNearestVertex()
+					if (metric.distance2(last.getUV(), sym.apex().getUV()) < metric.distance2(last.getUV(), ot.apex().getUV()))
+						last.setLink(sym.getTri());
+					else
+						last.setLink(ot.getTri());
+					triNodes.add(last);
+					nrNodes++;
+					r--;
+					break;
+				}
+				else if (l > target)
+				{
+					double [] current = np.getUV();
+					System.arraycopy(current, 0, upper, 0, 2);
+					np.moveTo(0.5*(lower[0] + current[0]), 0.5*(lower[1] + current[1]));
+				}
+				else
+				{
+					double [] current = np.getUV();
+					System.arraycopy(current, 0, lower, 0, 2);
+					np.moveTo(0.5*(upper[0] + current[0]), 0.5*(upper[1] + current[1]));
+				}
+			}
+			if (cnt < 0)
+				nrFailedInterpolations++;
+			return nrNodes;
+		}
+		return nrNodes;
 	}
 	
 	private boolean checkNearestVertex(Metric metric, double[] uv, Vertex n)

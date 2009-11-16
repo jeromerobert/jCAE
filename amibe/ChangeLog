@@ -1,3 +1,17 @@
+Mon Nov 16 18:45:43 CET 2009 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos2d/Insertion.java: Compute
+	position of split points by dichotomy.  Edge was previously
+	discretized by a fixed number of segments, and each point was
+	tested to find a point at a distance 1 of start point.
+	This was inaccurate, candidate point may be at a distance >> 1
+	from start point, it could then be too near from end point, and
+	as a result no point was inserted on this edge and edges longer
+	than sqrt(2) were found in final mesh.
+	Now we use dichotomy to find a point at a distance 1 of start
+	point, this gives much accurate results and moreover requires
+	less computations.
+
 Mon Nov 16 16:44:29 CET 2009 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/patch/Mesh2D.java
