@@ -54,7 +54,9 @@
 
 		<copy file="../../amibe/logging.properties" tofile="${cluster}/etc/logging.properties"/>
 		<copy todir="${cluster}/amibe-python">
-			<fileset dir="../../amibe/python"/>
+			<fileset dir="../../amibe/python">
+				<exclude name="amibebatch"/>
+			</fileset>
 		</copy>
 	</target>
 	<target name="clean" depends="projectized-common.clean">
