@@ -6,7 +6,14 @@
             <code-name-base>org.jython</code-name-base>
             <suite-component/>
             <module-dependencies/>
-            <public-packages/>
+            <public-packages>
+                <package>org.python.core</package>
+                <package>org.python.util</package>
+            </public-packages>
+			<class-path-extension>
+                <runtime-relative-path>../jython/jython.jar</runtime-relative-path>
+                <binary-origin>${cluster}/jython/jython.jar</binary-origin>
+            </class-path-extension>
         </data>
     </configuration>
 </project>
