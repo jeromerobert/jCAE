@@ -23,6 +23,7 @@ package org.jcae.netbeans.mesh;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import org.openide.modules.InstalledFileLocator;
 import org.openide.options.SystemOption;
 import org.openide.util.Lookup;
@@ -63,37 +64,26 @@ public class Settings extends SystemOption
 	}
 
 	/**
-	 * Return a command line to execute the mesher
-	 */
-	public String[] getCommandLine()
-	{		
-		String javaExe=new File(new File(javaVirtualMachine, "bin"), "java").getPath();
-		ArrayList<String> toReturn=new ArrayList<String>();
-		toReturn.add(javaExe);
-		toReturn.add("-Xmx"+maximumMemory);
-		toReturn.add("-Djava.util.logging.config.file="+System.getProperty("java.util.logging.config.file"));
-		toReturn.addAll(Arrays.asList(getCustomJVMParameters()));
-		toReturn.add("-jar");
-		toReturn.add(mesherJar);
-		return toReturn.toArray(new String[toReturn.size()]);
-	}
-
-	/**
 	 * Return a command line to execute other algo in the jcae.jar archive
 	 */
 	public String[] getCommandLineAlgo()
 	{		
 		String javaExe=new File(new File(javaVirtualMachine, "bin"), "java").getPath();
+		List<String> toReturn=getJVMParams();
+		toReturn.add(0, javaExe);
+		return toReturn.toArray(new String[toReturn.size()]);
+	}
+	
+	public List<String> getJVMParams()
+	{
 		ArrayList<String> toReturn=new ArrayList<String>();
-		toReturn.add(javaExe);
 		toReturn.add("-Xmx"+maximumMemory);
 		toReturn.add("-Djava.util.logging.config.file="+System.getProperty("java.util.logging.config.file"));
 		toReturn.addAll(Arrays.asList(getCustomJVMParameters()));
 		toReturn.add("-classpath");
 		toReturn.add(mesherJar);
-		return toReturn.toArray(new String[toReturn.size()]);
+		return toReturn;
 	}
-	
 	
 	public String getJavaVirtualMachine()
 	{
