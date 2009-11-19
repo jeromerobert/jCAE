@@ -301,7 +301,7 @@ public class Remesh
 			{
 				dmin = dist;
 				t = ot.getTri();
-				i = (index[1] - 1)/ 2;
+				i = index[0];
 			}
 		}
 		while (ot.destination() != d);
@@ -324,7 +324,7 @@ public class Remesh
 				break;
 			dmin = dist;
 			ot = sym;
-			i = (index[1] - 1)/ 2;
+			i = index[0];
 			if (ot.origin() == t.vertex[i])
 				ot = ot.next();
 			else if (ot.destination() == t.vertex[i])
@@ -392,6 +392,7 @@ public class Remesh
 					if (d < 0.0)
 					{
 						t = 0.0;
+						index[0] = 2;
 						if (-d >= a)
 						{
 							index[1] = 6;
@@ -406,6 +407,7 @@ public class Remesh
 					else
 					{
 						s = 0.0;
+						index[0] = 1;
 						if (e >= 0.0)
 						{
 							index[1] = 4;
@@ -427,6 +429,7 @@ public class Remesh
 				{
 					// region 3
 					s = 0.0;
+					index[0] = 1;
 					if (e >= 0.0)
 					{
 						index[1] = 4;
@@ -448,6 +451,7 @@ public class Remesh
 			{
 				// region 5
 				t = 0.0;
+				index[0] = 2;
 				if (d >= 0.0)
 				{
 					index[1] = 4;
@@ -478,6 +482,7 @@ public class Remesh
 					index[1] = 1;
 				else
 					throw new RuntimeException("Illegal arguments: s="+s+" t="+t+" "+det+"\n"+tri);
+				index[0] = index[1] / 2;
 			}
 		}
 		else
@@ -490,6 +495,7 @@ public class Remesh
 					// minimum on edge s+t = 1
 					double numer = (c+e) - (b+d);
 					double denom = (a-b) + (c-b);
+					index[0] = 0;
 					if (numer >= denom)
 					{
 						index[1] = 6;
@@ -506,6 +512,7 @@ public class Remesh
 				{
 					// minimum on edge s = 0
 					s = 0.0;
+					index[0] = 1;
 					if (e >= 0.0)
 					{
 						index[1] = 4;
@@ -531,6 +538,7 @@ public class Remesh
 					// minimum on edge s+t = 1
 					double numer = (a+d) - (b+e);
 					double denom = (a-b) + (c-b);
+					index[0] = 0;
 					if (numer >= denom)
 					{
 						index[1] = 2;
@@ -547,6 +555,7 @@ public class Remesh
 				{
 					// minimum on edge t=0
 					t = 0.0;
+					index[0] = 2;
 					if (d >= 0.0)
 					{
 						index[1] = 4;
@@ -568,6 +577,7 @@ public class Remesh
 			{
 				// region 1
 				double numer = (c+e) - (b+d);
+				index[0] = 0;
 				if (numer <= 0.0)
 				{
 					index[1] = 2;
