@@ -664,11 +664,13 @@ public class Remesh
 		for (Triangle f : mesh.getTriangles())
 			f.clearAttributes(AbstractHalfEdge.MARKED);
 
+		int[] passes = new int[] { 2, 1 };
+
 		while (true)
 		{
-			for (int pass=0; pass < 2; pass++)
+			for (int pass=0, maxPasses = passes[0]+passes[1]; pass < maxPasses ; pass++)
 			{
-				if (pass == 0 && !hasRidges && !hasFreeEdges)
+				if (pass < passes[0] && !hasRidges && !hasFreeEdges)
 					continue;
 				nrIter++;
 				// Maximal number of nodes which are inserted on an edge
@@ -694,7 +696,7 @@ public class Remesh
 					for (int i = 0; i < 3; i++)
 					{
 						h = h.next(h);
-						if ((pass == 0) != (h.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD)))
+						if ((pass < passes[0]) != (h.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD)))
 							continue;
 						if (h.hasAttributes(AbstractHalfEdge.MARKED))
 						{
@@ -717,7 +719,7 @@ public class Remesh
 							h.setAttributes(AbstractHalfEdge.MARKED);
 							continue;
 						}
-						int nrNodes = addCandidatePoints(h, l, pass, triNodes, triMetrics, neighborMap);
+						int nrNodes = addCandidatePoints(h, l, (pass < passes[0] ? 0 : 1), triNodes, triMetrics, neighborMap);
 						if (nrNodes > nrTriNodes)
 						{
 							nrTriNodes = nrNodes;
@@ -822,7 +824,7 @@ public class Remesh
 							continue;
 						}
 					}
-					if (pass == 1 && ot.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+					if (pass > passes[0] && ot.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 					{
 						// Vertex is not inserted
 						skippedNodes++;
