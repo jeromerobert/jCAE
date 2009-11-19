@@ -533,7 +533,7 @@ public class Remesh
 					double denom = (a-b) + (c-b);
 					if (numer >= denom)
 					{
-						index[1] = 6;
+						index[1] = 2;
 						t = 1.0;
 					}
 					else
