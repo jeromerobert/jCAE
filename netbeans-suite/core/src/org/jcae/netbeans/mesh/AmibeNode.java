@@ -20,12 +20,14 @@
 
 package org.jcae.netbeans.mesh;
 
+import java.awt.datatransfer.Transferable;
 import java.beans.IntrospectionException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import javax.swing.Action;
 import javax.xml.parsers.ParserConfigurationException;
 import org.jcae.mesh.xmldata.Group;
@@ -33,6 +35,8 @@ import org.jcae.mesh.xmldata.Groups;
 import org.jcae.mesh.xmldata.GroupsReader;
 import org.jcae.netbeans.BeanProperty;
 import org.jcae.netbeans.Utilities;
+import org.jcae.netbeans.cad.BrepDataObject;
+import org.jcae.netbeans.cad.BrepNode;
 import org.jcae.netbeans.viewer3d.SelectionManager;
 import org.jcae.netbeans.viewer3d.ViewManager;
 import org.jcae.vtk.AmibeToMesh;
@@ -48,8 +52,10 @@ import org.openide.nodes.Children;
 import org.openide.nodes.Node;
 import org.openide.nodes.Node.Property;
 import org.openide.nodes.Node.PropertySet;
+import org.openide.nodes.NodeTransfer;
 import org.openide.util.Exceptions;
 import org.openide.util.actions.SystemAction;
+import org.openide.util.datatransfer.PasteType;
 import org.openide.util.lookup.Lookups;
 import org.xml.sax.SAXException;
 
@@ -326,5 +332,29 @@ public class AmibeNode extends DataNode implements ViewCookie
 	public Action getPreferredAction()
 	{
 		return SystemAction.get(PropertiesAction.class);
+	}
+
+	@Override
+	protected void createPasteTypes(Transferable t, List<PasteType> ls)
+	{
+		final Node[] ns = NodeTransfer.nodes(t, NodeTransfer.COPY|NodeTransfer.MOVE);
+		if (ns != null && ns.length==1) {
+			final BrepNode n=ns[0].getLookup().lookup(BrepNode.class);
+			if (n != null) {
+				final String path = FileUtil.getRelativePath(
+					getDataObject().getPrimaryFile().getParent(),
+					n.getLookup().lookup(BrepDataObject.class).getPrimaryFile());
+				ls.add(new PasteType() {
+
+					public Transferable paste() {
+						getMesh().setGeometryFile(path);
+						updateGeomNode();
+						return null;
+					}
+				});
+			}
+		}
+		// Also try superclass, but give it lower priority:
+		super.createPasteTypes(t, ls);
 	}
 }
