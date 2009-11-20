@@ -120,19 +120,10 @@ public abstract class AlgoAction extends CookieAction {
 					"org.jcae.netbeans", false);
 			InputOutput io = IOProvider.getDefault().getIO(getName(), true);
 			if (Settings.getDefault().isRunInSameJVM())
-				runInBackground(args, pyFile, io);
+				runInSameVM(args, pyFile, io);
 			else
 				runInOtherVM(activatedNodes[0], args, pyFile, io);
-		}
-	}
-
-	private void runInBackground(final List<String> args, final File pyFile, final InputOutput io) {
-		
-		
-		try {
-			runInSameVM(args, pyFile, io);
-		} finally {
-			
+			activatedNodes[0].getLookup().lookup(AmibeNode.class).refreshGroups();
 		}
 	}
 
