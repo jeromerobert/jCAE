@@ -123,7 +123,7 @@
             <file name="org-jcae-netbeans-cad-RemoveHoles.instance"/>
             <file name="org-jcae-netbeans-cad-ReverseAction.instance"/>
             <file name="org-jcae-netbeans-cad-SplitFaces.instance"/>
-            <file name="org-jcae-netbeans-mesh-ComputeMeshAction.instance"/>
+            <file name="org-jcae-netbeans-mesh-bora-ComputeMeshAction.instance"/>
             <file name="org-jcae-netbeans-mesh-ExportUNV.instance"/>
             <file name="org-jcae-netbeans-mesh-FreeEdgesAction.instance"/>
             <file name="org-jcae-netbeans-mesh-ImportUNV.instance"/>
@@ -147,14 +147,14 @@
             <file name="org-jcae-netbeans-mesh-OEMMViewAction.instance">
                 <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.OEMMViewAction"/>
             </file>
-            <file name="org-jcae-netbeans-mesh-ViewBCellGeometryAction.instance">
-                <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.ViewBCellGeometryAction"/>
+            <file name="org-jcae-netbeans-mesh-bora-ViewBCellGeometryAction.instance">
+                <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.bora.ViewBCellGeometryAction"/>
             </file>
-            <file name="org-jcae-netbeans-mesh-RemoveConstraintAction.instance">
-                <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.RemoveConstraintAction"/>
+            <file name="org-jcae-netbeans-mesh-bora-RemoveConstraintAction.instance">
+                <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.bora.RemoveConstraintAction"/>
             </file>
-            <file name="org-jcae-netbeans-mesh-ViewBCellMeshAction.instance">
-                <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.ViewBCellMeshAction"/>
+            <file name="org-jcae-netbeans-mesh-bora-ViewBCellMeshAction.instance">
+                <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.bora.ViewBCellMeshAction"/>
             </file>
         </folder>
     </folder>
@@ -209,7 +209,7 @@
         <folder name="text">
             <folder name="mesh+xml">
                 <folder name="Actions">
-                    <file name="org-jcae-netbeans-mesh-ComputeMeshAction.instance">
+                    <file name="org-jcae-netbeans-mesh-MeshAction.instance">
                         <attr name="position" intvalue="10"/>
                     </file>
                     <file name="org-jcae-netbeans-mesh-RemeshAction.instance">

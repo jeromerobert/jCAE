@@ -31,33 +31,26 @@ import org.openide.nodes.Node;
  *
  * @author Jerome Robert
  */
-public class RemeshAction extends AlgoAction {
+public class MeshAction extends AlgoAction {
 
 	@Override
 	public String getName() {
-		return "Remesh";
+		return "Mesh";
 	}
-
+	
 	@Override
 	protected String getCommand() {
-		return "remesh";
+		return "mesh";
 	}
 
 	@Override
 	protected List<String> getArguments(Node node) {
-		String meshDirectory = node.getLookup().lookup(AmibeNode.class).getMeshDirectory();
-		RemeshPanel p = new RemeshPanel();
-		if(p.showDialog())
-		{
-			ArrayList<String> l = new ArrayList<String>();
-			l.add("--coplanarity");
-			l.add(Double.toString(p.getCoplanarity()));
-			l.add("--size");
-			l.add(Double.toString(p.getTargetSize()));
-			l.add(meshDirectory);
-			l.add(meshDirectory);
-			return l;
-		}
-		else return null;
+		Mesh m = node.getLookup().lookup(AmibeNode.class).getMesh();
+		ArrayList<String> l = new ArrayList<String>();
+		l.add(m.getGeometryFile());
+		l.add(m.getMeshFile());
+		l.add(Double.toString(m.getEdgeLength()));
+		l.add(Double.toString(m.getDeflection()));
+		return l;
 	}
 }

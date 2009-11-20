@@ -138,7 +138,7 @@ $jcaehome/jcae/modules/lib\
 ${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
 jardir="$jcaehome/jcae/modules/ext/"
-jcae="$jardir/amibe.jar:$jardir/jcae-vtk-amibe.jar:$jardir/vtk-util.jar:$jardir/vtk.jar:$jardir/vecmath.jar"
+jcae="$jardir/amibe.jar:$jardir/jcae-vtk-amibe.jar:$jardir/vtk-util.jar:$jardir/vtk.jar:$jardir/vecmath.jar:$jardir/jcae-mesherocc.jar"
 
 export PYTHONPATH="$jcae"
 export JAVA_HOME=$javahome

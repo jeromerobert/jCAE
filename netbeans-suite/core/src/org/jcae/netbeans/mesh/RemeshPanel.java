@@ -28,6 +28,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import org.jcae.netbeans.DoubleFormatter;
 
 /**
  *
@@ -38,6 +39,8 @@ public class RemeshPanel extends JPanel {
     /** Creates new form RemeshPanel */
     public RemeshPanel() {
         initComponents();
+		coplField.setFormatterFactory(DoubleFormatter.FACTORY);
+		sizeField.setFormatterFactory(DoubleFormatter.FACTORY);
 		coplField.setValue(0.9);
 		sizeField.setValue(100.0);
     }
@@ -55,7 +58,7 @@ public class RemeshPanel extends JPanel {
 	public boolean showDialog()
 	{
 		return JOptionPane.showConfirmDialog(null, this, "Remesh options",
-			JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_CANCEL_OPTION;
+			JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION;
 	}
     /** This method is called from within the constructor to
      * initialize the form.

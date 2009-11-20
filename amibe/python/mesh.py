@@ -18,6 +18,7 @@ from java.util.logging import Logger
 # Python
 import sys, os
 from optparse import OptionParser, SUPPRESS_HELP
+from array import array
 
 """
 Sample class to show how to call amibe algorithms.
@@ -216,23 +217,23 @@ if phases[3]:
 		logger.warn("Geometry shape is instead read from "+brepfile)
 
 	expl = factory.newExplorer()
-	m2dto3d = MeshToMMesh3DConvert(outputDir, brepfile)
+	m2dto3d = MeshToMMesh3DConvert(outputDir, brepfile, shape)
 	m2dto3d.exportUNV(unvName != None, unvName)
 	
 	iface = 0
 	expl.init(shape, CADShapeEnum.FACE)
 	while expl.more():
 		iface += 1
-		m2dto3d.computeRefs(iface)
 		expl.next()
 
-	m2dto3d.initialize(False)
+	m2dto3d.collectBoundaryNodes(array('i', xrange(1, iface+1)))
+	m2dto3d.beforeProcessingAllShapes(False)
 	iface = 0
 	expl.init(shape, CADShapeEnum.FACE)
 	while expl.more():
 		face = expl.current()
 		iface += 1
-		m2dto3d.convert(iface, face)
+		m2dto3d.processOneShape(iface, str(iface), iface)
 		expl.next()
-	m2dto3d.finish()
+	m2dto3d.afterProcessingAllShapes()
 

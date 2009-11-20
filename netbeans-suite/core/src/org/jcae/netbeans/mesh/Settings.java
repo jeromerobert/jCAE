@@ -69,19 +69,22 @@ public class Settings extends SystemOption
 	public String[] getCommandLineAlgo()
 	{		
 		String javaExe=new File(new File(javaVirtualMachine, "bin"), "java").getPath();
-		List<String> toReturn=getJVMParams();
+		List<String> toReturn=parameters();
 		toReturn.add(0, javaExe);
 		return toReturn.toArray(new String[toReturn.size()]);
 	}
 	
-	public List<String> getJVMParams()
+	public List<String> parameters()
 	{
 		ArrayList<String> toReturn=new ArrayList<String>();
 		toReturn.add("-Xmx"+maximumMemory);
 		toReturn.add("-Djava.util.logging.config.file="+System.getProperty("java.util.logging.config.file"));
 		toReturn.addAll(Arrays.asList(getCustomJVMParameters()));
 		toReturn.add("-classpath");
-		toReturn.add(mesherJar);
+		String occmJar = InstalledFileLocator.getDefault().
+			locate("modules/ext/jcae-mesherocc.jar", "org.jcae.netbeans", false).
+			getPath();
+		toReturn.add(mesherJar+File.pathSeparatorChar+occmJar);
 		return toReturn;
 	}
 	
