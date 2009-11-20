@@ -24,7 +24,14 @@ import gnu.trove.TIntHashSet;
 import gnu.trove.TIntIntHashMap;
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.logging.Logger;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import org.jcae.mesh.xmldata.DoubleFileReader;
 import org.jcae.mesh.xmldata.IntFileReader;
 import org.jcae.mesh.xmldata.PrimitiveFileReaderFactory;
@@ -179,9 +186,23 @@ public class AmibeDomain
 		return toReturn;
 	}
 
+	private static String domToString(Document documment)
+	{
+		try {
+			TransformerFactory tf = TransformerFactory.newInstance();
+			Transformer t = tf.newTransformer();
+			StringWriter sw = new StringWriter();
+			t.transform(new DOMSource(documment), new StreamResult(sw));
+			return sw.toString();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return ex.getMessage();
+		}
+	}
 	private int[] readTria3() throws IOException
 	{
 		Element e = getXmlGroup((Element) document.getElementsByTagName("groups").item(0), id);
+		assert e != null: "Group "+id+" not found in "+domToString(document);
 		Element numberNode = (Element) e.getElementsByTagName("number").item(0);
 		String v = numberNode.getChildNodes().item(0).getNodeValue();
 		int number = Integer.parseInt(v);
