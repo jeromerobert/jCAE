@@ -871,9 +871,13 @@ public class Vertex implements Location, Serializable
 		else if (link instanceof Triangle[])
 		{
 			Triangle [] list = (Triangle []) link;
-			r.append(" link: [").append(list[0].hashCode());
-			for (int i = 1; i < list.length; i++)
-				r.append(",").append(list[i].hashCode());
+			r.append(" link: [");
+			if (list.length > 0)
+			{
+				r.append(list[0].hashCode());
+				for (int i = 1; i < list.length; i++)
+					r.append(",").append(list[i].hashCode());
+			}
 			r.append("]");
 		}
 		if (!readable)
