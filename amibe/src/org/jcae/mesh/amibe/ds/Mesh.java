@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.HashSet;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
 import java.io.Serializable;
@@ -445,27 +444,22 @@ public class Mesh implements Serializable
 	 */
 	public final void buildAdjacency()
 	{
-		Collection<Vertex> vertices;
-		if (nodeList == null)
-		{
-			vertices = new LinkedHashSet<Vertex>(triangleList.size()/2);
-			for (Triangle t: triangleList)
-				for (Vertex v: t.vertex)
-					vertices.add(v);
-		}
-		else
-		{
-			vertices = nodeList;
-		}
-
 		//  Connect all edges together
 		logger.fine("Connect triangles");
 		ArrayList<Triangle> newTri = new ArrayList<Triangle>();
-		connectTriangles(vertices, newTri);
+		//  For each vertex, build the list of triangles
+		//  connected to this vertex.
+		Map<Vertex, ArrayList<Triangle>> tVertList = getMapVertexLinks();
+		//  Connect all edges together
+		glueSymmetricHalfEdges(tVertList, newTri);
 
 		//  Mark boundary edges and bind them to virtual triangles.
 		logger.fine("Connect boundary triangles");
 		connectBoundaryTriangles(newTri);
+
+		//  Fix links for junctions
+		logger.fine("Fix vertex links");
+		rebuildVertexLinks(tVertList);
 		
 		//  Find the list of vertices which are on mesh boundary
 		logger.fine("Build the list of nodes on boundaries and non-manifold edges");
@@ -495,69 +489,8 @@ public class Mesh implements Serializable
 				setRefVertexOnBoundary(v);
 		}
 
-		//  Build links for non-manifold vertices
-		logger.fine("Compute links for non-manifold vertices");
-		Vertex [] endpoints = new Vertex[2];
-		LinkedHashMap<Vertex, LinkedHashSet<Triangle>> mapNMVertexLinks = new LinkedHashMap<Vertex, LinkedHashSet<Triangle>>();
-		int nrNME = 0;
-		int nrFE = 0;
-		for (Triangle t: triangleList)
-		{
-			ot = t.getAbstractHalfEdge(ot);
-			for (int i = 0; i < 3; i++)
-			{
-				ot = ot.next();
-				if (ot.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
-				{
-					nrNME++;
-					endpoints[0] = ot.origin();
-					endpoints[1] = ot.destination();
-					for (int j = 0; j < 2; j++)
-					{
-						if (!mapNMVertexLinks.containsKey(endpoints[j]))
-						{
-							LinkedHashSet<Triangle> link = new LinkedHashSet<Triangle>();
-							link.add((Triangle) endpoints[j].getLink());
-							mapNMVertexLinks.put(endpoints[j], link);
-						}
-					}
-					for (Iterator<AbstractHalfEdge> it = ot.fanIterator(); it.hasNext(); )
-					{
-						Triangle t2 = it.next().getTri();
-						for (int j = 0; j < 2; j++)
-						{
-							LinkedHashSet<Triangle> link = mapNMVertexLinks.get(endpoints[j]);
-							link.add(t2);
-						}
-					}
-				}
-				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
-					nrFE++;
-			}
-		}
-		int nrNMV = mapNMVertexLinks.size();
-		// Replace LinkedHashSet by Triangle[], and keep only one
-		// Triangle by fan. As mapNMVertexLinks is no more needed
-		// after this loop, remove all references to help the
-		// garbage collector.
-		for (Vertex v: mapNMVertexLinks.keySet())
-		{
-			nrNMV++;
-			LinkedHashSet<Triangle> link = mapNMVertexLinks.get(v);
-			v.setLinkFan(link);
-			link.clear();
-			mapNMVertexLinks.put(v, null);
-		}
-		mapNMVertexLinks.clear();
-		if (nrNMV > 0)
-			logger.fine("Found "+nrNMV+" non manifold vertices");
-		if (nrNME > 0)
-			logger.fine("Found "+nrNME+" non manifold edges");
-		if (nrFE > 0)
-			logger.fine("Found "+nrFE+" free edges");
-
 		int nrJunctionPoints = 0;
-		for (Vertex v: vertices)
+		for (Vertex v: tVertList.keySet())
 		{
 			if (bndNodes.contains(v))
 				continue;
@@ -573,19 +506,38 @@ public class Mesh implements Serializable
 		}
 		if (nrJunctionPoints > 0)
 			logger.info("Found "+nrJunctionPoints+" junction points");
+		//  Remove all references to help the garbage collector.
+		for (ArrayList<Triangle> list : tVertList.values())
+			list.clear();
 		// Add outer triangles
 		triangleList.addAll(newTri);
 	}
-	
-	private void connectTriangles(Collection<Vertex> vertices, ArrayList<Triangle> newTri)
+
+	private Map<Vertex, ArrayList<Triangle>> getMapVertexLinks()
 	{
-		//  For each vertex, build the list of triangles
-		//  connected to this vertex.
-		HashMap<Vertex, ArrayList<Triangle>> tVertList = new HashMap<Vertex, ArrayList<Triangle>>(vertices.size());
+		Collection<Vertex> vertices;
+		if (nodeList == null)
+		{
+			vertices = new LinkedHashSet<Vertex>(triangleList.size()/2);
+			for (Triangle t: triangleList)
+			{
+				if (!t.isWritable())
+					continue;
+				for (Vertex v: t.vertex)
+					vertices.add(v);
+			}
+		}
+		else
+		{
+			vertices = nodeList;
+		}
+		Map<Vertex, ArrayList<Triangle>> tVertList = new LinkedHashMap<Vertex, ArrayList<Triangle>>(vertices.size());
 		for (Vertex v: vertices)
 			tVertList.put(v, new ArrayList<Triangle>(10));
 		for (Triangle t: triangleList)
 		{
+			if (t.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
 			for (Vertex v: t.vertex)
 			{
 				if (v.isReadable())
@@ -595,18 +547,57 @@ public class Mesh implements Serializable
 				}
 				v.setLink(t);
 			}
-		}
-		//  Connect all edges together
-		glueIncidentHalfEdges(tVertList, newTri);
-		//  Remove all references to help the garbage collector.
-		for (Vertex v: vertices)
+ 		}
+		return tVertList;
+	}
+
+	private void rebuildVertexLinks()
+	{
+		rebuildVertexLinks(getMapVertexLinks());
+	}
+
+	private void rebuildVertexLinks(Map<Vertex, ArrayList<Triangle>> tVertList)
+	{
+		for (Map.Entry<Vertex, ArrayList<Triangle>> entry : tVertList.entrySet())
 		{
-			ArrayList<Triangle> list = tVertList.get(v);
-			list.clear();
-			tVertList.put(v, null);
+			Vertex v = entry.getKey();
+			ArrayList<Triangle> list = entry.getValue();
+			int cnt = 0;
+			AbstractHalfEdge ot = null;
+			ot = v.getIncidentAbstractHalfEdge((Triangle) v.getLink(), ot);
+			Vertex d = ot.destination();
+			do
+			{
+				if (!ot.hasAttributes(AbstractHalfEdge.OUTER))
+					cnt++;
+				ot = ot.nextOriginLoop();
+			}
+			while (ot.destination() != d);
+			if (cnt == list.size())
+				continue;
+			// Non-manifold vertex
+			HashSet<Triangle> neighbours = new HashSet<Triangle>(list);
+			ArrayList<Triangle> fans = new ArrayList<Triangle>();
+			while (!neighbours.isEmpty())
+			{
+				ot = v.getIncidentAbstractHalfEdge(neighbours.iterator().next(), ot);
+				d = ot.destination();
+				fans.add(ot.getTri());
+				do
+				{
+					if (!ot.hasAttributes(AbstractHalfEdge.OUTER))
+						neighbours.remove(ot.getTri());
+					ot = ot.nextOriginLoop();
+				}
+				while (ot.destination() != d);
+			}
+			Triangle[] links = new Triangle[fans.size()];
+			fans.toArray(links);
+			v.setLink(links);
+			logger.fine("Non-manifold vertex has "+fans.size()+" fans");
 		}
 	}
-	
+
 	private void connectBoundaryTriangles(ArrayList<Triangle> newTri)
 	{
 		AbstractHalfEdge ot = null;
@@ -644,7 +635,7 @@ public class Mesh implements Serializable
 		}
 	}
 
-	private void glueIncidentHalfEdges(HashMap<Vertex, ArrayList<Triangle>> tVertList, ArrayList<Triangle> newTri)
+	private void glueSymmetricHalfEdges(Map<Vertex, ArrayList<Triangle>> tVertList, ArrayList<Triangle> newTri)
 	{
 		Triangle.List markedTri = new Triangle.List();
 		AbstractHalfEdge ot = null;
@@ -831,35 +822,6 @@ public class Mesh implements Serializable
 		return toReturn;
 	}
 
-	private void makeNonManifoldVertices(Collection<Triangle> newTriangles)
-	{
-		if (newTriangles.isEmpty())
-			return;
-		AbstractHalfEdge ot = null;
-		AbstractHalfEdge sym = newTriangles.iterator().next().getAbstractHalfEdge();
-		Collection<Triangle> triangles = new ArrayList<Triangle>();
-		for (Triangle t : newTriangles)
-		{
-			ot = t.getAbstractHalfEdge(ot);
-			sym = ot.next(sym);
-			sym = sym.sym();
-			sym = sym.next();
-			// Move to non-outer triangles
-			sym = sym.sym();
-			ot = ot.sym();
-			Vertex o = ot.origin();
-			triangles.clear();
-			triangles.add(ot.getTri());
-			triangles.add(sym.getTri());
-			if (!o.isManifold())
-			{
-				for (Triangle other : (Triangle[]) o.getLink())
-					triangles.add(other);
-			}
-			o.setLinkFan(triangles);
-		}
-	}
-
 	/**
 	 * Build group boundaries.
 	 */
@@ -890,11 +852,11 @@ public class Mesh implements Serializable
 					bindSymEdgesToVirtualTriangles(ot, sym, temp0, temp1, newTriangles);
 			}
 		}
-		makeNonManifoldVertices(newTriangles);
 		int toReturn = newTriangles.size() / 2;
 		triangleList.addAll(newTriangles);
 		if (toReturn > 0 && logger.isLoggable(Level.CONFIG))
 			logger.log(Level.CONFIG, "Add virtual boundaries for "+toReturn+" edges");
+		rebuildVertexLinks();
 		return toReturn;
 	}
 
@@ -944,54 +906,53 @@ public class Mesh implements Serializable
 				sym.clearAttributes(AbstractHalfEdge.NONMANIFOLD);
 			}
 		}
+		if (removedTriangles.isEmpty())
+			return 0;
 		int toReturn = removedTriangles.size() / 2;
-		if (toReturn > 0)
+		if (triangleList instanceof Set)
+			triangleList.removeAll(removedTriangles);
+		else
 		{
-			if (triangleList instanceof Set)
-				triangleList.removeAll(removedTriangles);
-			else
+			// removeAll may be very slow on large lists
+			ArrayList<Triangle> savedList = new ArrayList<Triangle>(triangleList);
+			HashSet<Triangle> removedSet = new HashSet<Triangle>(removedTriangles);
+			triangleList.clear();
+			for (Triangle t : savedList)
 			{
-				// removeAll may be very slow on large lists
-				ArrayList<Triangle> savedList = new ArrayList<Triangle>(triangleList);
-				HashSet<Triangle> removedSet = new HashSet<Triangle>(removedTriangles);
-				triangleList.clear();
-				for (Triangle t : savedList)
-				{
-					if (!removedSet.contains(t))
-						triangleList.add(t);
-				}
+				if (!removedSet.contains(t))
+					triangleList.add(t);
 			}
-			if (logger.isLoggable(Level.CONFIG))
-				logger.log(Level.CONFIG, "Remove virtual boundaries for "+toReturn+" edges");
-			// Rebuild list of vertex links
-			makeNonManifoldVertices(removedTriangles);
-			// Make vertex manifold
-			for (Triangle t : removedTriangles)
+		}
+		if (logger.isLoggable(Level.CONFIG))
+			logger.log(Level.CONFIG, "Remove virtual boundaries for "+toReturn+" edges");
+		// Rebuild list of vertex links
+		rebuildVertexLinks();
+		// Make vertex manifold
+		for (Triangle t : removedTriangles)
+		{
+			ot = t.getAbstractHalfEdge(ot);
+			Vertex o = ot.origin();
+			if (o.isManifold())
+				continue;
+			Triangle [] list = (Triangle[]) o.getLink();
+			if (list.length == 1)
 			{
-				ot = t.getAbstractHalfEdge(ot);
-				Vertex o = ot.origin();
-				if (o.isManifold())
-					continue;
-				Triangle [] list = (Triangle[]) o.getLink();
-				if (list.length == 1)
+				// Check that there is no non-manifold
+				// incident edge
+				Vertex d = ot.destination();
+				boolean manifold = true;
+				do
 				{
-					// Check that there is no non-manifold
-					// incident edge
-					Vertex d = ot.destination();
-					boolean manifold = true;
-					do
+					if (ot.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 					{
-						if (ot.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
-						{
-							manifold = false;
-							break;
-						}
-						ot = ot.nextOriginLoop();
+						manifold = false;
+						break;
 					}
-					while (ot.destination() != d);
-					if (manifold)
-						o.setLink(list[0]);
+					ot = ot.nextOriginLoop();
 				}
+				while (ot.destination() != d);
+				if (manifold)
+					o.setLink(list[0]);
 			}
 		}
 		return toReturn;
