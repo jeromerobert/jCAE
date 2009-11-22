@@ -4,7 +4,10 @@
  *  amibebatch report -c MinAngleFace -s .0174532925199432957 -b 6,12,18,24,30,36,42,48,54
  */
 import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshExporter;
 import org.jcae.mesh.amibe.validation.*;
@@ -44,6 +47,11 @@ options.addOption(
 		.withDescription("reports statistics by face")
 		.withLongOpt("detailed")
 		.create('d'));
+options.addOption(
+	OptionBuilder.hasArg(false)
+		.withDescription("give details about mesh (number of vertices, triangles, etc)")
+		.withLongOpt("mesh")
+		.create('m'));
 options.addOption(
 	OptionBuilder.withArgName("NUMBER").hasArg()
 		.withDescription("meshing had been started from this patch number")
@@ -107,7 +115,13 @@ if (qproc.getType() != QualityProcedure.FACE)
 
 float scaleFactor=Float.parseFloat(cmd.getOptionValue('s', "1.0")).floatValue();
 
-Mesh mesh = new Mesh(qproc.getMeshTraitsBuilder());
+MeshTraitsBuilder mtb = qproc.getMeshTraitsBuilder();
+if ( cmd.hasOption('m') && !mtb.hasNodes())
+{
+	mtb.addNodeList();
+	mtb.getTriangleTraitsBuilder().addHalfEdge();
+}
+Mesh mesh = new Mesh(mtb);
 try
 {
 	MeshReader.readObject3D(mesh, xmlDir);
@@ -116,6 +130,56 @@ catch (IOException ex)
 {
 	println("File "+xmlDir+File.separator+"jcae3d does not exist!");
 	usage(0, options);
+}
+if (cmd.hasOption('m'))
+{
+	int nrVertices = 0;
+	int nrNMVertices = 0;
+	int nrEdges = 0;
+	int nrNMEdges = 0;
+	int nrFreeEdges = 0;
+	int nrTriangles = 0;
+	AbstractHalfEdge ot = null;
+	for (Triangle t : mesh.getTriangles())
+	{
+		if (!t.isWritable())
+			continue;
+		ot = t.getAbstractHalfEdge(ot);
+		nrTriangles++;
+		for (int i = 0; i < 3; i++)
+		{
+			ot = ot.next();
+			nrEdges++;
+			if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
+			{
+				nrFreeEdges++;
+				nrEdges++;
+			}
+			if (ot.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+			{
+				nrNMEdges++;
+			}
+		}
+	}
+	nrEdges /= 2;
+
+	for (Vertex v : mesh.getNodes())
+	{
+		if (!v.isWritable())
+			continue;
+		nrVertices++;
+		if (!v.isManifold())
+			nrNMVertices++;
+	}
+	System.out.println("Number of triangles: "+nrTriangles);
+	System.out.println("Total number of edges: "+nrEdges);
+	if (nrFreeEdges > 0)
+		System.out.println("Number of free edges: "+nrFreeEdges);
+	if (nrNMEdges > 0)
+		System.out.println("Number of non-manifold edges: "+nrNMEdges);
+	System.out.println("Total number of vertices: "+nrVertices);
+	if (nrNMVertices > 0)
+		System.out.println("Number of non-manifold vertices: "+nrNMVertices);
 }
 // Compute mesh quality
 int nrFaces = 1;
