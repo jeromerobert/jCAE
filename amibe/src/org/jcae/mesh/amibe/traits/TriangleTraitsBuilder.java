@@ -54,6 +54,30 @@ public class TriangleTraitsBuilder extends TraitsBuilder
 		return this;
 	}
 
+	/**
+	 * Tells whether adjacency relations are created with {@link
+	 * org.jcae.mesh.amibe.ds.HalfEdge} instances.
+	 *
+	 * @return <code>true</code> if {@link #addHalfEdge}
+	 * was called, <code>false</code> otherwise.
+	 */
+	public final boolean hasHalfEdge()
+	{
+		return hasCapability(HALFEDGE);
+	}
+
+	/**
+	 * Tells whether adjacency relations are created with {@link
+	 * org.jcae.mesh.amibe.ds.VirtualHalfEdge} instances.
+	 *
+	 * @return <code>true</code> if {@link #addVirtualHalfEdge}
+	 * was called, <code>false</code> otherwise.
+	 */
+	public final boolean hasVirtualHalfEdge()
+	{
+		return hasCapability(VIRTUALHALFEDGE);
+	}
+
 	// For performance reasons, adjacency relations are not stored in
 	// traits, but directly in Triangle subclass.
 
