@@ -31,7 +31,7 @@ import org.openide.util.actions.CallableSystemAction;
 public class Action3DView extends CallableSystemAction {
     
     public void performAction() {
-    	ViewManager.getDefault().createView();
+    	ViewManager.getDefault().getCurrentView();
     }
     
     public String getName() {

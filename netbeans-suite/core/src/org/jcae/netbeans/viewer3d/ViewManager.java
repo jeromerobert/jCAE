@@ -89,6 +89,11 @@ public class ViewManager
 		{
 			return this.getName();
 		}
+
+		@Override
+		public boolean canClose() {
+			return false;
+		}
 	}
 	/**
 	 * Make the stuff to connect the CurrentViewable notifications to add and remove viewables of View.
