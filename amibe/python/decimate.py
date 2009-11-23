@@ -33,6 +33,8 @@ parser.add_option("-m", "--maxlength", metavar="FLOAT",
                   help="no edges longer than this value are created")
 parser.add_option("-O", "--freeEdgeOnly", action="store_true", dest="freeEdgeOnly",
                   help="removes only free edges (for LengthDecimateHalfEdge only)")
+parser.add_option("-g", "--preserveGroups", action="store_true", dest="preserveGroups",
+                  help="edges adjacent to two different groups are handled like free edges")
 parser.add_option("-a", "--algorithm", metavar="STRING", default=defaultAlgo,
                   action="store", type="string", dest="algorithm",
 		  help="decimation algorithm (default: "+defaultAlgo+")")
@@ -68,6 +70,8 @@ if options.maxlength:
 
 mesh = Mesh()
 MeshReader.readObject3D(mesh, xmlDir)
+if options.preserveGroups:
+	mesh.buildGroupBoundaries()
 
 cons = Class.forName("org.jcae.mesh.amibe.algos3d."+options.algorithm).getConstructor([ Mesh, Map ])
 cons.newInstance([ mesh, opts ]).compute()

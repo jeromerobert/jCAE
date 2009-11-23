@@ -52,6 +52,11 @@ options.addOption(
 		.withLongOpt("freeEdgeOnly")
 		.create('O'));
 options.addOption(
+	OptionBuilder.hasArg(false)
+		.withDescription("edges adjacent to two different groups are handled like free edges")
+		.withLongOpt("preserveGroups")
+		.create('g'));
+options.addOption(
 	OptionBuilder.withArgName("CLASS").hasArg()
 		.withDescription("decimation algorithm (default: "+defaultAlgo+")")
 		.withLongOpt("algorithm")
@@ -102,6 +107,8 @@ Constructor cons = Class.forName("org.jcae.mesh.amibe.algos3d."+algo).getConstru
 
 Mesh mesh = new Mesh()
 MeshReader.readObject3D(mesh, xmldir)
+if (cmd.hasOption('g'))
+	mesh.buildGroupBoundaries()
 
 try
 {
