@@ -24,7 +24,7 @@ void usage(int rc, Options options)
 Options options = new Options();
 options.addOption(
 	OptionBuilder.hasArg(false)
-		.withDescription("usage information")
+		.withDescription("show this help message and exit")
 		.withLongOpt("help")
 		.create('h'));
 CommandLineParser parser = new GnuParser();

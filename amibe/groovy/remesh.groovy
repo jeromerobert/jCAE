@@ -21,7 +21,7 @@ void usage(int rc, Options options)
 Options options = new Options();
 options.addOption(
 	OptionBuilder.hasArg(false)
-		.withDescription("usage information")
+		.withDescription("show this help message and exit")
 		.withLongOpt("help")
 		.create('h'));
 options.addOption(
@@ -30,10 +30,15 @@ options.addOption(
 		.withLongOpt("coplanarity")
 		.create('c'));
 options.addOption(
-	OptionBuilder.withArgName("FLOAT").hasArg()
-		.withDescription("target size")
-		.withLongOpt("size")
-		.create('t'));
+	OptionBuilder.withArgName("TOL").hasArg()
+		.withDescription("decimate mesh before remeshing, specify tolerance")
+		.withLongOpt("decimate")
+		.create('d'));
+options.addOption(
+	OptionBuilder.withArgName("NUMBER").hasArg()
+		.withDescription("decimate mesh before remeshing, keep only NUMBER triangles")
+		.withLongOpt("decimate-target")
+		.create('D'));
 options.addOption(
 	OptionBuilder.withArgName("FILE").hasArg()
 		.withDescription("name of a file containing metrics map")
@@ -44,18 +49,11 @@ options.addOption(
 		.withDescription("project vertices onto local surface")
 		.withLongOpt("project")
 		.create('p'));
-
 options.addOption(
-	OptionBuilder.withArgName("TOL").hasArg()
-		.withDescription("decimate mesh before remeshing, specify tolerance")
-		.withLongOpt("decimate")
-		.create('d'));
-
-options.addOption(
-	OptionBuilder.withArgName("NUMBER").hasArg()
-		.withDescription("decimate mesh before remeshing, keep only NUMBER triangles")
-		.withLongOpt("decimate-target")
-		.create('D'));
+	OptionBuilder.withArgName("FLOAT").hasArg()
+		.withDescription("target size")
+		.withLongOpt("size")
+		.create('t'));
 
 CommandLineParser parser = new GnuParser();
 CommandLine cmd = parser.parse(options, args, true);

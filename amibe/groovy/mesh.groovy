@@ -32,7 +32,7 @@ void usage(int rc, Options options)
 Options options = new Options();
 options.addOption(
 	OptionBuilder.hasArg(false)
-		.withDescription("usage information")
+		.withDescription("show this help message and exit")
 		.withLongOpt("help")
 		.create('h'));
 /* This options is for experts only!
@@ -50,6 +50,11 @@ options.addOption(
 		.create('E'));
 */
 options.addOption(
+	OptionBuilder.withArgName("NUMBER").hasArg()
+		.withDescription("start meshing from this patch number")
+		.withLongOpt("from-face")
+		.create('f'));
+options.addOption(
 	OptionBuilder.withArgName("FILE").hasArg()
 		.withDescription("exports UNV file (for phase 3)")
 		.withLongOpt("output")
@@ -60,25 +65,20 @@ options.addOption(
 		.withLongOpt("phase")
 		.create('p'));
 options.addOption(
-	OptionBuilder.hasArg(false)
-		.withDescription("writes face.<i>.brep file before meshing each patch")
-		.withLongOpt("explodeBrep")
-		.create('x'));
-options.addOption(
-	OptionBuilder.withArgName("NUMBER").hasArg()
-		.withDescription("start meshing from this patch number")
-		.withLongOpt("from-face")
-		.create('f'));
+	OptionBuilder.withArgName("STRING").hasArg()
+		.withDescription("comma separated list of options passed to 2D smoother (available options are: iterations=N,relaxation=N,tolerance=N; run smooth2d -h for details)")
+		.withLongOpt("smooth2d")
+		.create('s'));
 options.addOption(
 	OptionBuilder.withArgName("NUMBER").hasArg()
 		.withDescription("mesh up to this patch number")
 		.withLongOpt("to-face")
 		.create('t'));
 options.addOption(
-	OptionBuilder.withArgName("STRING").hasArg()
-		.withDescription("comma separated list of options passed to 2D smoother (available options are: iterations=N,relaxation=N,tolerance=N; run smooth2d -h for details)")
-		.withLongOpt("smooth2d")
-		.create('s'));
+	OptionBuilder.hasArg(false)
+		.withDescription("writes face.<i>.brep file before meshing each patch")
+		.withLongOpt("explodeBrep")
+		.create('x'));
 
 CommandLineParser parser = new GnuParser();
 CommandLine cmd = parser.parse(options, args, true);

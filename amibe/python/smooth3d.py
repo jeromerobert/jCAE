@@ -18,28 +18,28 @@ Smooth mesh.
 """
 
 parser = OptionParser(usage="amibebatch smooth3d [OPTIONS] <inputDir> <outputDir>\n\nPerform vertex smoothing on 3D mesh", prog="smooth3d")
+parser.add_option("-C", "--no-check", action="store_false", dest="check",
+                  help="allow moving a vertex even if this decreases its quality")
 parser.add_option("-i", "--iterations", metavar="NUMBER", default=1,
                   action="store", type="int", dest="iterations",
 		  help="number of iterations (default: 1)")
+parser.add_option("-N", "--no-boundaries", action="store_false", dest="boundaries",
+                  help="do not try to preserve patch boundaries")
 parser.add_option("-P", "--prefix", metavar="DIR",
                   action="store", type="string", dest="prefix",
                   help="store mesh after each iteration into <DIR>0, <DIR>1, etc")
+parser.add_option("-r", "--relaxation", metavar="FLOAT", default=0.6,
+                  action="store", type="string", dest="relaxation",
+                  help="new position = old + r * (new - old)")
+parser.add_option("-R", "--refresh",
+                  action="store_true", dest="refresh",
+                  help="update triangle quality within loop")
 parser.add_option("-s", "--size", metavar="FLOAT", default=-1.0,
                   action="store", type="float", dest="size",
                   help="target size")
 parser.add_option("-t", "--tolerance", metavar="FLOAT", default=2.0,
                   action="store", type="float", dest="tolerance",
                   help="process only nodes with quality lower than this value")
-parser.add_option("-r", "--relaxation", metavar="FLOAT", default=0.6,
-                  action="store", type="string", dest="relaxation",
-                  help="new position = old + r * (new - old)")
-parser.add_option("-N", "--no-boundaries", action="store_false", dest="boundaries",
-                  help="do not try to preserve patch boundaries")
-parser.add_option("-C", "--no-check", action="store_false", dest="check",
-                  help="allow moving a vertex even if this decreases its quality")
-parser.add_option("-R", "--refresh",
-                  action="store_true", dest="refresh",
-                  help="update triangle quality within loop")
 
 (options, args) = parser.parse_args(args=sys.argv[1:])
 

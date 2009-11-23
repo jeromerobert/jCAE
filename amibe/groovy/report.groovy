@@ -30,7 +30,7 @@ void usage(int rc, Options options)
 Options options = new Options();
 options.addOption(
 	OptionBuilder.hasArg(false)
-		.withDescription("usage information")
+		.withDescription("show this help message and exit")
 		.withLongOpt("help")
 		.create('h'));
 options.addOption(
@@ -38,31 +38,6 @@ options.addOption(
 		.withDescription("comma separated list of values, implies -H")
 		.withLongOpt("bounds")
 		.create('b'));
-options.addOption(
-	OptionBuilder.hasArg(false)
-		.withDescription("prints histogram")
-		.withLongOpt("histogram")
-		.create('H'));
-options.addOption(
-	OptionBuilder.hasArg(false)
-		.withDescription("reports statistics by face")
-		.withLongOpt("detailed")
-		.create('d'));
-options.addOption(
-	OptionBuilder.hasArg(false)
-		.withDescription("give details about mesh (number of vertices, triangles, etc)")
-		.withLongOpt("mesh")
-		.create('m'));
-options.addOption(
-	OptionBuilder.withArgName("NUMBER").hasArg()
-		.withDescription("meshing had been started from this patch number")
-		.withLongOpt("from-face")
-		.create('f'));
-options.addOption(
-	OptionBuilder.withArgName("BASE").hasArg()
-		.withDescription("creates <BASE>.mesh and <BASE>.bb MEDIT files")
-		.withLongOpt("output")
-		.create('o'));
 options.addOption(
 	OptionBuilder.withArgName("CLASS").hasArg()
 		.withDescription("criterion (default: MinAngleFace)")
@@ -73,6 +48,31 @@ options.addOption(
 		.withDescription("lists all available criteria")
 		.withLongOpt("list-criteria")
 		.create('C'));
+options.addOption(
+	OptionBuilder.hasArg(false)
+		.withDescription("reports statistics by face")
+		.withLongOpt("detailed")
+		.create('d'));
+options.addOption(
+	OptionBuilder.withArgName("NUMBER").hasArg()
+		.withDescription("meshing had been started from this patch number")
+		.withLongOpt("from-face")
+		.create('f'));
+options.addOption(
+	OptionBuilder.hasArg(false)
+		.withDescription("prints histogram")
+		.withLongOpt("histogram")
+		.create('H'));
+options.addOption(
+	OptionBuilder.hasArg(false)
+		.withDescription("give details about mesh (number of vertices, triangles, etc)")
+		.withLongOpt("mesh")
+		.create('m'));
+options.addOption(
+	OptionBuilder.withArgName("BASE").hasArg()
+		.withDescription("creates <BASE>.mesh and <BASE>.bb MEDIT files")
+		.withLongOpt("output")
+		.create('o'));
 options.addOption(
 	OptionBuilder.withArgName("NUMBER").hasArg()
 		.withDescription("scale factor (default: 1.0)")

@@ -25,31 +25,31 @@ Sample class to show how to call amibe algorithms.
 """
 
 parser = OptionParser(usage="amibebatch mesh [OPTIONS] <cadFile> <outputDir> <edgeLength> <deflection>\n\nMesh a CAD file", prog="mesh")
-#  tries to eliminate edges smaller than this value (default: patch size/1000)
-parser.add_option("-e", "--epsilon", metavar="NUMBER", default=-1.0,
-                  action="store", type="float", dest="epsilon",
-                  help=SUPPRESS_HELP)
-#  tries to merge small edges together
-parser.add_option("-E", "--cumulativeEpsilon", action="store_true", dest="cumulativeEpsilon",
-                  help=SUPPRESS_HELP)
+##  tries to eliminate edges smaller than this value (default: patch size/1000)
+#parser.add_option("-e", "--epsilon", metavar="NUMBER", default=-1.0,
+#                  action="store", type="float", dest="epsilon",
+#                  help=SUPPRESS_HELP)
+##  tries to merge small edges together
+#parser.add_option("-E", "--cumulativeEpsilon", action="store_true", dest="cumulativeEpsilon",
+#                  help=SUPPRESS_HELP)
+parser.add_option("-f", "--from-face", metavar="NUMBER", default=1,
+                  action="store", type="int", dest="ifacemin",
+                  help="start meshing from this patch number")
 parser.add_option("-o", "--output", metavar="FILE",
                   action="store", type="string", dest="output",
                   help="exports UNV file (for phase 3)")
 parser.add_option("-p", "--phase", metavar="LIST", default="1,2,3",
                   action="store", type="string", dest="phases",
                   help="comma separated list of phases (Default: 1,2,3)")
-parser.add_option("-x", "--explodeBrep",
-                  action="store_true", dest="explodeBrep",
-                  help="writes face.<i>.brep file before meshing each patch")
-parser.add_option("-f", "--from-face", metavar="NUMBER", default=1,
-                  action="store", type="int", dest="ifacemin",
-                  help="start meshing from this patch number")
-parser.add_option("-t", "--to-face", metavar="NUMBER", default=0,
-                  action="store", type="int", dest="ifacemax",
-                  help="mesh up to this patch number")
 parser.add_option("-s", "--smooth2d", metavar="LIST",
                   action="store", type="float", dest="smooth2d",
                   help="comma separated list of options passed to 2D smoother (available options are: iterations=N,relaxation=N,tolerance=N; run smooth2d -h for details)")
+parser.add_option("-t", "--to-face", metavar="NUMBER", default=0,
+                  action="store", type="int", dest="ifacemax",
+                  help="mesh up to this patch number")
+parser.add_option("-x", "--explodeBrep",
+                  action="store_true", dest="explodeBrep",
+                  help="writes face.<i>.brep file before meshing each patch")
 parser.set_defaults(crit="MinAngleFace", scaleFactor=1.0, ifacemin=0, ifacemax=0)
 
 (options, args) = parser.parse_args(args=sys.argv[1:])
@@ -76,8 +76,8 @@ for s in options.phases.split(","):
 		sys.exit(1)
 	phases[p] = True
 
-System.setProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon", str(options.epsilon))
-System.setProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon", str(options.cumulativeEpsilon))
+#System.setProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon", str(options.epsilon))
+#System.setProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon", str(options.cumulativeEpsilon))
 
 unvName = options.output
 

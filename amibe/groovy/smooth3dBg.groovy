@@ -23,14 +23,34 @@ void usage(int rc, Options options)
 Options options = new Options();
 options.addOption(
 	OptionBuilder.hasArg(false)
-		.withDescription("usage information")
+		.withDescription("show this help message and exit")
 		.withLongOpt("help")
 		.create('h'));
+options.addOption(
+	OptionBuilder.withArgName("FLOAT").hasArg()
+		.withDescription("dot product of face normals to detect feature edges")
+		.withLongOpt("coplanarity")
+		.create('c'));
 options.addOption(
 	OptionBuilder.withArgName("NUMBER").hasArg()
 		.withDescription("number of iterations (default: 1)")
 		.withLongOpt("iterations")
 		.create('i'));
+options.addOption(
+	OptionBuilder.hasArg(false)
+		.withDescription("do not try to preserve patch boundaries")
+		.withLongOpt("no-boundaries")
+		.create('N'));
+options.addOption(
+	OptionBuilder.withArgName("FLOAT").hasArg()
+		.withDescription("new position = old + r * (new - old)")
+		.withLongOpt("relaxation")
+		.create('r'));
+options.addOption(
+	OptionBuilder.hasArg(false)
+		.withDescription("update triangle quality within loop")
+		.withLongOpt("refresh")
+		.create('R'));
 options.addOption(
 	OptionBuilder.withArgName("FLOAT").hasArg()
 		.withDescription("target size")
@@ -41,26 +61,6 @@ options.addOption(
 		.withDescription("process only nodes with quality lower than this value")
 		.withLongOpt("tolerance")
 		.create('t'));
-options.addOption(
-	OptionBuilder.withArgName("FLOAT").hasArg()
-		.withDescription("new position = old + r * (new - old)")
-		.withLongOpt("relaxation")
-		.create('r'));
-options.addOption(
-	OptionBuilder.hasArg(false)
-		.withDescription("do not try to preserve patch boundaries")
-		.withLongOpt("no-boundaries")
-		.create('N'));
-options.addOption(
-	OptionBuilder.withArgName("FLOAT").hasArg()
-		.withDescription("dot product of face normals to detect feature edges")
-		.withLongOpt("coplanarity")
-		.create('c'));
-options.addOption(
-	OptionBuilder.hasArg(false)
-		.withDescription("update triangle quality within loop")
-		.withLongOpt("refresh")
-		.create('R'));
 CommandLineParser parser = new GnuParser();
 CommandLine cmd = parser.parse(options, args, true);
 if (cmd.hasOption('h'))

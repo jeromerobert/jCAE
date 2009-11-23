@@ -31,23 +31,23 @@ parser = OptionParser(usage="amibebatch report [OPTIONS] <dir>\n\nPrint statisti
 parser.add_option("-b", "--bounds", metavar="LIST",
                   action="store", type="string", dest="bounds",
                   help="comma separated list of values, implies -H")
-parser.add_option("-H", "--histogram", action="store_true", dest="histogram",
-                  help="prints histogram")
-parser.add_option("-d", "--detailed", action="store_true", dest="detailed",
-                  help="reports statistics by face")
-parser.add_option("-f", "--from-face", metavar="NUMBER",
-                  action="store", type="int", dest="ifacemin",
-                  help="meshing had been started from this patch number")
-parser.add_option("-m", "--mesh", action="store_true", dest="verboseMesh",
-                  help="give details about mesh (number of vertices, triangles, etc)")
-parser.add_option("-o", "--output", metavar="BASE",
-                  action="store", type="string", dest="outBasename",
-                  help="creates <BASE>.mesh and <BASE>.bb MEDIT files")
 parser.add_option("-c", "--criterion", metavar="CLASS",
                   action="store", type="string", dest="crit",
                   help="criterion (default: MinAngleFace)")
 parser.add_option("-C", "--list-criteria", action="callback", callback=list_criteria,
                   help="lists all available criteria")
+parser.add_option("-d", "--detailed", action="store_true", dest="detailed",
+                  help="reports statistics by face")
+parser.add_option("-f", "--from-face", metavar="NUMBER",
+                  action="store", type="int", dest="ifacemin",
+                  help="meshing had been started from this patch number")
+parser.add_option("-H", "--histogram", action="store_true", dest="histogram",
+                  help="prints histogram")
+parser.add_option("-m", "--mesh", action="store_true", dest="verboseMesh",
+                  help="give details about mesh (number of vertices, triangles, etc)")
+parser.add_option("-o", "--output", metavar="BASE",
+                  action="store", type="string", dest="outBasename",
+                  help="creates <BASE>.mesh and <BASE>.bb MEDIT files")
 parser.add_option("-s", "--scale", metavar="NUMBER",
                   action="store", type="float", dest="scaleFactor",
                   help="scale factor (default: 1.0)")

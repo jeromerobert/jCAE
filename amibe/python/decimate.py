@@ -19,27 +19,27 @@ Decimate a mesh.
 
 defaultAlgo = "QEMDecimateHalfEdge"
 parser = OptionParser(usage="amibebatch decimate [OPTIONS] <inputDir> <outputDir>\n\nDecimate a mesh", prog="decimate")
-parser.add_option("-t", "--tolerance", metavar="FLOAT",
-                  action="store", type="float", dest="tolerance",
-                  help="geometry error allowed when decimating")
-parser.add_option("-f", "--freeEdgeTol", metavar="FLOAT",
-                  action="store", type="float", dest="freeEdgeTol",
-                  help="Decimate free edges whose length is smaller than tolerance.  -t value is used if not specified. (for LengthDecimateHalfEdge only)")
-parser.add_option("-n", "--targetTriangles", metavar="NUMBER",
-                  action="store", type="int", dest="targetTriangles",
-                  help="stops iterations when mesh contains this number of triangles")
-parser.add_option("-m", "--maxlength", metavar="FLOAT",
-                  action="store", type="float", dest="maxlength",
-                  help="no edges longer than this value are created")
-parser.add_option("-O", "--freeEdgeOnly", action="store_true", dest="freeEdgeOnly",
-                  help="removes only free edges (for LengthDecimateHalfEdge only)")
-parser.add_option("-g", "--preserveGroups", action="store_true", dest="preserveGroups",
-                  help="edges adjacent to two different groups are handled like free edges")
+parser.add_option("-A", "--list-algorithm", action="store_true", dest="listAlgorithm",
+                  help="lists all available decimation algorithms")
 parser.add_option("-a", "--algorithm", metavar="STRING", default=defaultAlgo,
                   action="store", type="string", dest="algorithm",
 		  help="decimation algorithm (default: "+defaultAlgo+")")
-parser.add_option("-A", "--list-algorithm", action="store_true", dest="listAlgorithm",
-                  help="lists all available decimation algorithms")
+parser.add_option("-f", "--freeEdgeTol", metavar="FLOAT",
+                  action="store", type="float", dest="freeEdgeTol",
+                  help="Decimate free edges whose length is smaller than tolerance.  -t value is used if not specified. (for LengthDecimateHalfEdge only)")
+parser.add_option("-g", "--preserveGroups", action="store_true", dest="preserveGroups",
+                  help="edges adjacent to two different groups are handled like free edges")
+parser.add_option("-m", "--maxlength", metavar="FLOAT",
+                  action="store", type="float", dest="maxlength",
+                  help="no edges longer than this value are created")
+parser.add_option("-n", "--targetTriangles", metavar="NUMBER",
+                  action="store", type="int", dest="targetTriangles",
+                  help="stops iterations when mesh contains this number of triangles")
+parser.add_option("-O", "--freeEdgeOnly", action="store_true", dest="freeEdgeOnly",
+                  help="removes only free edges (for LengthDecimateHalfEdge only)")
+parser.add_option("-t", "--tolerance", metavar="FLOAT",
+                  action="store", type="float", dest="tolerance",
+                  help="geometry error allowed when decimating")
 
 (options, args) = parser.parse_args(args=sys.argv[1:])
 

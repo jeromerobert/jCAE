@@ -21,21 +21,21 @@ parser = OptionParser(usage="amibebatch remesh [OPTIONS] <inputDir> <outputDir>\
 parser.add_option("-c", "--coplanarity", metavar="FLOAT", default=-1.0,
                   action="store", type="float", dest="coplanarity",
 		  help="dot product of face normals to detect feature edges")
-parser.add_option("-t", "--size", metavar="FLOAT", default=0.0,
-                  action="store", type="float", dest="size",
-                  help="target size")
+parser.add_option("-D", "--decimate-target", metavar="NUMBER",
+                  action="store", type="int", dest="decimateTarget",
+                  help="decimate mesh before remeshing, keep only NUMBER triangles")
+parser.add_option("-d", "--decimate", metavar="FLOAT",
+                  action="store", type="float", dest="decimateSize",
+                  help="decimate mesh before remeshing, specify tolerance")
 parser.add_option("-m", "--metricsFile", metavar="STRING",
                   action="store", type="string", dest="metricsFile",
                   help="name of a file containing metrics map")
 parser.add_option("-p", "--project",
                   action="store_true", dest="project",
                   help="project vertices onto local surface")
-parser.add_option("-d", "--decimate", metavar="FLOAT",
-                  action="store", type="float", dest="decimateSize",
-                  help="decimate mesh before remeshing, specify tolerance")
-parser.add_option("-D", "--decimate-target", metavar="NUMBER",
-                  action="store", type="int", dest="decimateTarget",
-                  help="decimate mesh before remeshing, keep only NUMBER triangles")
+parser.add_option("-t", "--size", metavar="FLOAT", default=0.0,
+                  action="store", type="float", dest="size",
+                  help="target size")
 
 (options, args) = parser.parse_args(args=sys.argv[1:])
 

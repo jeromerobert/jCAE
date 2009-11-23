@@ -22,14 +22,19 @@ String defaultAlgo = "QEMDecimateHalfEdge";
 Options options = new Options();
 options.addOption(
 	OptionBuilder.hasArg(false)
-		.withDescription("usage information")
+		.withDescription("show this help message and exit")
 		.withLongOpt("help")
 		.create('h'));
 options.addOption(
-	OptionBuilder.withArgName("VALUE").hasArg()
-		.withDescription("geometry error allowed when decimating")
-		.withLongOpt("tolerance")
-		.create('t'));
+	OptionBuilder.hasArg(false)
+		.withDescription("lists all available decimation algorithms")
+		.withLongOpt("list-algorithm")
+		.create('A'));
+options.addOption(
+	OptionBuilder.withArgName("CLASS").hasArg()
+		.withDescription("decimation algorithm (default: "+defaultAlgo+")")
+		.withLongOpt("algorithm")
+		.create('a'));
 options.addOption(
 	OptionBuilder.withArgName("VALUE").hasArg()
 		.withDescription("Decimate free edges whose length is smaller than tolerance."+
@@ -37,35 +42,30 @@ options.addOption(
 		.withLongOpt("freeEdgeTol")
 		.create('f'));
 options.addOption(
-	OptionBuilder.withArgName("NUMBER").hasArg()
-		.withDescription("stops iterations when mesh contains this number of triangles")
-		.withLongOpt("targetTriangles")
-		.create('n'));
+	OptionBuilder.hasArg(false)
+		.withDescription("edges adjacent to two different groups are handled like free edges")
+		.withLongOpt("preserveGroups")
+		.create('g'));
 options.addOption(
 	OptionBuilder.withArgName("VALUE").hasArg()
 		.withDescription("no edges longer than this value are created")
 		.withLongOpt("maxlength")
 		.create('m'));
 options.addOption(
+	OptionBuilder.withArgName("NUMBER").hasArg()
+		.withDescription("stops iterations when mesh contains this number of triangles")
+		.withLongOpt("targetTriangles")
+		.create('n'));
+options.addOption(
 	OptionBuilder.hasArg(false)
 		.withDescription("removes only free edges (for LengthDecimateHalfEdge only)")
 		.withLongOpt("freeEdgeOnly")
 		.create('O'));
 options.addOption(
-	OptionBuilder.hasArg(false)
-		.withDescription("edges adjacent to two different groups are handled like free edges")
-		.withLongOpt("preserveGroups")
-		.create('g'));
-options.addOption(
-	OptionBuilder.withArgName("CLASS").hasArg()
-		.withDescription("decimation algorithm (default: "+defaultAlgo+")")
-		.withLongOpt("algorithm")
-		.create('a'));
-options.addOption(
-	OptionBuilder.hasArg(false)
-		.withDescription("lists all available decimation algorithms")
-		.withLongOpt("list-algorithm")
-		.create('A'));
+	OptionBuilder.withArgName("VALUE").hasArg()
+		.withDescription("geometry error allowed when decimating")
+		.withLongOpt("tolerance")
+		.create('t'));
 
 CommandLineParser parser = new GnuParser();
 CommandLine cmd = parser.parse(options, args, true);
