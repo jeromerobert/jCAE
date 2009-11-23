@@ -26,8 +26,10 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import org.jcae.netbeans.cad.modeler.WireAction;
 import org.jcae.opencascade.jni.TopAbs_ShapeEnum;
 import org.openide.ErrorManager;
 import org.openide.actions.*;
@@ -154,7 +156,10 @@ public class BrepNode extends DataNode implements Node.Cookie, OpenCookie
 
 	public NewType[] getNewTypes()
 	{
-		return PrimitiveNewType.getNewType(this);
+		List<NewType> types = new ArrayList<NewType>();
+		types.add(new WireAction.NewType());
+		PrimitiveNewType.getNewType(this, types);
+		return types.toArray(new NewType[types.size()]);
 	}
 	
 	public boolean canRename()

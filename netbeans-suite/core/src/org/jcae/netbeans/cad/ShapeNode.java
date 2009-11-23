@@ -142,7 +142,9 @@ public class ShapeNode extends AbstractNode
 	@Override
 	public NewType[] getNewTypes()
 	{
-		return PrimitiveNewType.getNewType(this);		
+		ArrayList<NewType> a = new ArrayList<NewType>();
+		PrimitiveNewType.getNewType(this, a);
+		return a.toArray(new NewType[a.size()]);
 	}
 
 	@Override
