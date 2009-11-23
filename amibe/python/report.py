@@ -1,6 +1,6 @@
 
 # jCAE
-from org.jcae.mesh.amibe.ds import Mesh, Triangle
+from org.jcae.mesh.amibe.ds import Mesh, AbstractHalfEdge
 from org.jcae.mesh.amibe.validation import *
 from org.jcae.mesh.xmldata import MeshReader, MeshExporter
 from gnu.trove import TIntHashSet
@@ -38,6 +38,8 @@ parser.add_option("-d", "--detailed", action="store_true", dest="detailed",
 parser.add_option("-f", "--from-face", metavar="NUMBER",
                   action="store", type="int", dest="ifacemin",
                   help="meshing had been started from this patch number")
+parser.add_option("-m", "--mesh", action="store_true", dest="verboseMesh",
+                  help="give details about mesh (number of vertices, triangles, etc)")
 parser.add_option("-o", "--output", metavar="BASE",
                   action="store", type="string", dest="outBasename",
                   help="creates <BASE>.mesh and <BASE>.bb MEDIT files")
@@ -66,9 +68,56 @@ else:
 
 qprocFactory = QualityProcedureFactory("org.jcae.mesh.amibe.validation."+options.crit)
 qproc = qprocFactory.buildQualityProcedure()
-mesh = qprocFactory.buildMesh()
+mtb = qproc.getMeshTraitsBuilder()
+if options.verboseMesh:
+	if not  mtb.hasNodes():
+		mtb.addNodeList()
+	ttb = mtb.getTriangleTraitsBuilder()
+	if not ttb.hasHalfEdge() and not ttb.hasVirtualHalfEdge():
+		ttb.addHalfEdge()
+
+mesh = Mesh(mtb);
 MeshReader.readObject3D(mesh, xmlDir)
 # Compute mesh quality
+if options.verboseMesh:
+	nrVertices = 0
+	nrNMVertices = 0
+	nrEdges = 0
+	nrNMEdges = 0
+	nrFreeEdges = 0
+	nrTriangles = 0
+	ot = None
+	for t in mesh.getTriangles():
+		if not t.isWritable():
+			continue
+		ot = t.getAbstractHalfEdge(ot)
+		nrTriangles += 1
+		for i in range(3):
+			ot = ot.next()
+			nrEdges += 1
+			if ot.hasAttributes(AbstractHalfEdge.BOUNDARY):
+				nrFreeEdges += 1
+				nrEdges += 1
+			if ot.hasAttributes(AbstractHalfEdge.NONMANIFOLD):
+				nrNMEdges += 1
+	nrEdges /= 2
+
+	for v in mesh.getNodes():
+		if not v.isWritable():
+			continue
+		nrVertices += 1
+		if not v.isManifold():
+			nrNMVertices += 1
+	print("Number of triangles: "+str(nrTriangles))
+	print("Total number of edges: "+str(nrEdges))
+	if nrFreeEdges > 0:
+		print("Number of free edges: "+str(nrFreeEdges))
+	if nrNMEdges > 0:
+		print("Number of non-manifold edges: "+str(nrNMEdges))
+	print("Total number of vertices: "+str(nrVertices))
+	if nrNMVertices > 0:
+		print("Number of non-manifold vertices: "+str(nrNMVertices))
+
 nrFaces = 1
 if options.detailed:
 	groups = TIntHashSet(mesh.getTriangles().size())
