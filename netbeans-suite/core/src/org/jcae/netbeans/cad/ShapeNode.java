@@ -20,6 +20,7 @@
 
 package org.jcae.netbeans.cad;
 
+import org.jcae.netbeans.cad.modeler.PrimitiveNewType;
 import java.util.ArrayList;
 import javax.swing.Action;
 import javax.swing.JMenu;

@@ -17,55 +17,55 @@
  *
  * (C) Copyright 2005, by EADS CRC
  */
-package org.jcae.netbeans.cad;
 
-import org.jcae.opencascade.jni.BRepPrimAPI_MakeSphere;
+package org.jcae.netbeans.cad.modeler;
+
+import org.jcae.opencascade.jni.BRepPrimAPI_MakeBox;
 import org.jcae.opencascade.jni.TopoDS_Shape;
 
 /**
  * @author Jerome Robert
  *
  */
-public class Sphere extends Primitive
+public class Cube extends Primitive
 {
-    private double radius = 1;
-	private double x = 0;
-    private double y = 0;
-    private double z = 0;
+	private double x1 = -1;
+	private double x2 = 1;
+	private double y1 = -1;
+	private double y2 = 1;
+	private double z1 = -1;
+	private double z2 = 1;
     /**
 	 * @param name
 	 */
-	public Sphere()
+	public Cube()
 	{
-		setName("sphere");
+		setName("Cube");
 	}
-	/**
-	 * @return Returns the radius.
-	 */
-	public double getRadius()
+
+	public double getX1()
 	{
-		return radius;
+		return x1;
 	}
-	/**
-	 * @return Returns the x.
-	 */
-	public double getX()
+	public double getX2()
 	{
-		return x;
+		return x2;
 	}
-	/**
-	 * @return Returns the y.
-	 */
-	public double getY()
+	public double getY1()
 	{
-		return y;
+		return y1;
 	}
-	/**
-	 * @return Returns the z.
-	 */
-	public double getZ()
+	public double getY2()
 	{
-		return z;
+		return y2;
+	}
+	public double getZ1()
+	{
+		return z1;
+	}
+	public double getZ2()
+	{
+		return z2;
 	}
     
 	/* (non-Javadoc)
@@ -73,47 +73,56 @@ public class Sphere extends Primitive
 	 */
 	public TopoDS_Shape rebuild()
 	{
-		return new BRepPrimAPI_MakeSphere(new double[]{x, y, z}, radius).shape();
+		double[] p1=new double[]{x1, y1, z1};
+		double[] p2=new double[]{x2, y2, z2};
+		return new BRepPrimAPI_MakeBox(p1, p2).shape();
 	}
-	/**
-	 * @param radius The radius to set.
-	 */
-	public void setRadius(double radius)
+	
+	public void setX1(double x1)
 	{
-		if(this.radius!=radius)
+		if(this.x1!=x1)
 		{
-			this.radius = radius;
-		}		
+			this.x1 = x1;
+		}
 	}
-	/**
-	 * @param x The x to set.
-	 */
-	public void setX(double x)
+	
+	public void setX2(double x2)
 	{
-		if(this.x!=x)
+		if(this.x2!=x2)
 		{
-			this.x = x;
+			this.x2 = x2;		
+		}
+	}
+	
+	public void setY1(double y1)
+	{
+		if(this.y1!=y1)
+		{
+			this.y1 = y1;
+		}
+	}
+	
+	public void setY2(double y2)
+	{
+		if(this.y2!=y2)
+		{
+			this.y2 = y2;
 		}		
 	}
 	
-	/**
-	 * @param y The y to set.
-	 */
-	public void setY(double y)
+	public void setZ1(double z1)
 	{
-		if(this.y!=y)
+		if(this.z1!=z1)
 		{
-			this.y = y;
-		}	
+			this.z1 = z1;
+		}		
 	}
-	/**
-	 * @param z The z to set.
-	 */
-	public void setZ(double z)
+	
+	public void setZ2(double z2)
 	{
-		if(this.z!=z)
+		if(this.z2!=z2)
 		{
-			this.z = z;
-		}	
+			this.z2 = z2;		
+		}
 	}
 }

@@ -21,6 +21,7 @@
 
 package org.jcae.netbeans.cad;
 
+import org.jcae.netbeans.cad.modeler.PrimitiveNewType;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.io.IOException;

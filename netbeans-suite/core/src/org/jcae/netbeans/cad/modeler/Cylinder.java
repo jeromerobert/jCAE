@@ -18,7 +18,7 @@
  * (C) Copyright 2005, by EADS CRC
  */
 
-package org.jcae.netbeans.cad;
+package org.jcae.netbeans.cad.modeler;
 
 import org.jcae.opencascade.jni.BRepPrimAPI_MakeCylinder;
 import org.jcae.opencascade.jni.TopoDS_Shape;

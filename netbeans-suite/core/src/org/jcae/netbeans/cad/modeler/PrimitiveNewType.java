@@ -19,9 +19,11 @@
  * (C) Copyright 2009, by EADS France
  */
 
-package org.jcae.netbeans.cad;
+package org.jcae.netbeans.cad.modeler;
 
+import org.jcae.netbeans.cad.*;
 import java.util.Collections;
+import java.util.List;
 import org.jcae.netbeans.Utilities;
 import org.jcae.opencascade.jni.TopAbs_ShapeEnum;
 import org.openide.nodes.Node;
@@ -65,20 +67,16 @@ public class PrimitiveNewType extends NewType
 		}
 	}
 	
-	public static NewType[] getNewType(Node node)
+	public static void getNewType(Node node, List<NewType> list)
 	{
 		if(GeomUtils.getShape(node).getType().compareTo(TopAbs_ShapeEnum.COMPSOLID) <= 0)
 		{
-			return new NewType[]{
-				new PrimitiveNewType(node, Cone.class),
-				new PrimitiveNewType(node, Cube.class),
-				new PrimitiveNewType(node, Cylinder.class),
-				new PrimitiveNewType(node, Torus.class),
-				new PrimitiveNewType(node, Sphere.class),
-			};
+			list.add(new PrimitiveNewType(node, Cone.class));
+			list.add(new PrimitiveNewType(node, Cube.class));
+			list.add(new PrimitiveNewType(node, Cylinder.class));
+			list.add(new PrimitiveNewType(node, Torus.class));
+			list.add(new PrimitiveNewType(node, Sphere.class));
 		}
-		else
-			return new NewType[0];
 	}
 	
 	@Override
