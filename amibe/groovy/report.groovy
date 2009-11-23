@@ -8,6 +8,7 @@ import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
+import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshExporter;
 import org.jcae.mesh.amibe.validation.*;
@@ -116,10 +117,13 @@ if (qproc.getType() != QualityProcedure.FACE)
 float scaleFactor=Float.parseFloat(cmd.getOptionValue('s', "1.0")).floatValue();
 
 MeshTraitsBuilder mtb = qproc.getMeshTraitsBuilder();
-if ( cmd.hasOption('m') && !mtb.hasNodes())
+if (cmd.hasOption('m'))
 {
-	mtb.addNodeList();
-	mtb.getTriangleTraitsBuilder().addHalfEdge();
+	if (!mtb.hasNodes())
+		mtb.addNodeList();
+	TriangleTraitsBuilder ttb = mtb.getTriangleTraitsBuilder();
+	if (!ttb.hasHalfEdge() && !ttb.hasVirtualHalfEdge())
+		ttb.addHalfEdge();
 }
 Mesh mesh = new Mesh(mtb);
 try
