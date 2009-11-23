@@ -53,7 +53,7 @@ public class QualityProcedureFactory
 		}
 	}
 
-	final QualityProcedure buildQualityProcedure()
+	public final QualityProcedure buildQualityProcedure()
 	{
 		if (cons == null)
 			return null;

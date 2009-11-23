@@ -56,7 +56,7 @@ public class DihedralAngle extends QualityProcedure
 	 * Returns <code>MeshTraitsBuilder</code> instance needed by this class.
 	 */
 	@Override
-	protected final MeshTraitsBuilder getMeshTraitsBuilder()
+	public final MeshTraitsBuilder getMeshTraitsBuilder()
 	{
 		return MeshTraitsBuilder.getDefault3D();
 	}

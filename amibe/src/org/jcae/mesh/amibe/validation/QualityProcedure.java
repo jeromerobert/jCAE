@@ -125,7 +125,7 @@ public abstract class QualityProcedure
 	/**
 	 * Returns <code>MeshTraitsBuilder</code> instance needed by this class.
 	 */
-	protected MeshTraitsBuilder getMeshTraitsBuilder()
+	public MeshTraitsBuilder getMeshTraitsBuilder()
 	{
 		return new MeshTraitsBuilder();
 	}
