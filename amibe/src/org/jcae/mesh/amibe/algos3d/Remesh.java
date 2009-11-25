@@ -74,6 +74,7 @@ public class Remesh
 	private final boolean project;
 	private final boolean hasRidges;
 	private final boolean hasFreeEdges;
+	private final double coplanarity;
 	private AnalyticMetricInterface analyticMetric = LATER_BINDING;
 	private final Map<Vertex, EuclidianMetric3D> metrics;
 	private static final AnalyticMetricInterface LATER_BINDING = new AnalyticMetricInterface() {
@@ -122,6 +123,7 @@ public class Remesh
 		double size = 0.0;
 		boolean proj = false;
 		boolean ridges = false;
+		double copl = 0.8;
 		Map<String, String> decimateOptions = new HashMap<String, String>();
 		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
@@ -134,7 +136,8 @@ public class Remesh
 			}
 			else if (key.equals("coplanarity"))
 			{
-				mesh.buildRidges(Double.valueOf(val).doubleValue());
+				copl = Double.valueOf(val).doubleValue();
+				mesh.buildRidges(copl);
 				ridges = true;
 			}
 			else if (key.equals("decimateSize"))
@@ -167,6 +170,7 @@ public class Remesh
 		maxlen = Math.sqrt(2.0);
 		project = proj;
 		hasRidges = ridges;
+		coplanarity = copl;
 
 		if (!decimateOptions.isEmpty())
 		{
@@ -857,7 +861,7 @@ public class Remesh
 					{
 						edge = edge.nextApexLoop();
 						counter++;
-						if (edge.checkSwap3D(0.8) >= 0.0)
+						if (edge.checkSwap3D(coplanarity) >= 0.0)
 						{
 							edge.getTri().clearAttributes(AbstractHalfEdge.MARKED);
 							edge.sym().getTri().clearAttributes(AbstractHalfEdge.MARKED);
