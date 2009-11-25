@@ -1,3 +1,9 @@
+Wed Nov 25 22:34:35 CET 2009 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos3d/Remesh.java (findSurroundingTriangle):
+	If a triangle cannot be found at a distance lower than a threshold,
+	look for all triangles.
+
 Sun Nov 22 22:47:08 CET 2009 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Mesh.java (buildRidges): Junctions

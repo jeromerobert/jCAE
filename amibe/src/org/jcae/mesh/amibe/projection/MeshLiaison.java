@@ -134,7 +134,12 @@ public class MeshLiaison
 	{
 		return currentMesh;
 	}
-	
+
+	public final Mesh getBackgroundMesh()
+	{
+		return backgroundMesh;
+	}
+
 	/**
 	 * Move Vertex on the desired location and update projection map.
 	 * @param v Vertex being moved

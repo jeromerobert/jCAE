@@ -265,7 +265,7 @@ public class Remesh
 		return mesh;
 	}
 
-	private static AbstractHalfEdge findSurroundingTriangle(Vertex v, Vertex start)
+	private static AbstractHalfEdge findSurroundingTriangle(Vertex v, Vertex start, double maxError, Mesh mesh)
 	{
 		Triangle t = start.getNeighbourIteratorTriangle().next();
 		AbstractHalfEdge ot = t.getAbstractHalfEdge();
@@ -302,7 +302,6 @@ public class Remesh
 			ot = ot.next();
 		else if (ot.destination() == t.vertex[i])
 			ot = ot.prev();
-
 		// Now cross edges to see if adjacent triangle is nearer
 		do
 		{
@@ -321,6 +320,31 @@ public class Remesh
 			else if (ot.destination() == t.vertex[i])
 				ot = ot.prev();
 		} while (true);
+
+		if (dmin < maxError)
+			return ot;
+		// We were not able to find a valid triangle.
+		// Iterate over all triangles to find the right one.
+		// FIXME: This is obviously very slow!
+		LOGGER.fine("Maximum error reached, search into the whole mesh for vertex "+v);
+		for (Triangle f : mesh.getTriangles())
+		{
+			if (f.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
+			double dist = sqrDistanceVertexTriangle(pos, f, index);
+			if (dist < dmin)
+			{
+				dmin = dist;
+				t = f;
+				i = index[0];
+			}
+
+		}
+		ot = t.getAbstractHalfEdge(ot);
+		if (ot.origin() == t.vertex[i])
+			ot = ot.next();
+		else if (ot.destination() == t.vertex[i])
+			ot = ot.prev();
 		return ot;
 	}
 
@@ -798,7 +822,9 @@ public class Remesh
 					Vertex v = nodes.get(index);
 					double[] pos = v.getUV();
 					Vertex near = neighborMap.get(v);
-					AbstractHalfEdge ot = findSurroundingTriangle(v, near);
+					double localSize = 0.5 * metrics.get(v).getUnitBallBBox()[0];
+					double localSize2 = localSize * localSize;
+					AbstractHalfEdge ot = findSurroundingTriangle(v, near, localSize2, mesh);
 					if (!ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 					{
 						// Check whether edge can be split
@@ -827,7 +853,7 @@ public class Remesh
 					assert ot.destination() == v : v+" "+ot;
 					kdTree.add(v);
 					Vertex bgNear = neighborBgMap.get(neighborMap.get(v));
-					Triangle bgT = findSurroundingTriangle(v, bgNear).getTri();
+					Triangle bgT = findSurroundingTriangle(v, bgNear, localSize2, liaison.getBackgroundMesh()).getTri();
 					liaison.addVertex(v, bgT);
 					double d0 = v.sqrDistance3D(bgT.vertex[0]);
 					double d1 = v.sqrDistance3D(bgT.vertex[1]);
@@ -984,7 +1010,11 @@ public class Remesh
 					lastMetric = m;
 					triNodes.add(last);
 					triMetrics.add(m);
-					if (m.distance2(pos, start.getUV()) < m.distance2(pos, end.getUV()))
+					if (start.getRef() == 0 && end.getRef() != 0)
+						neighborMap.put(last, start);
+					else if (start.getRef() != 0 && end.getRef() == 0)
+							neighborMap.put(last, end);
+					else if (m.distance2(pos, start.getUV()) < m.distance2(pos, end.getUV()))
 						neighborMap.put(last, start);
 					else
 						neighborMap.put(last, end);
