@@ -217,19 +217,6 @@ public class Remesh
 			}
 		}
 
-		Collection<Vertex> bgNodeset = bgMesh.getNodes();
-		if (bgNodeset == null)
-		{
-			bgNodeset = new LinkedHashSet<Vertex>(bgMesh.getTriangles().size() / 2);
-			for (Triangle f : bgMesh.getTriangles())
-			{
-				if (f.hasAttributes(AbstractHalfEdge.OUTER))
-					continue;
-				for (Vertex v: f.vertex)
-					bgNodeset.add(v);
-			}
-		}
-
 		for (Vertex v : nodeset)
 			kdTree.add(v);
 
