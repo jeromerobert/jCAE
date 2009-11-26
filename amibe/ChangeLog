@@ -1,3 +1,9 @@
+Thu Nov 26 11:12:41 CET 2009 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/VirtualHalfEdge.java
+	  src/org/jcae/mesh/amibe/ds/HalfEdge.java (split): Add a reference
+	on the new vertex if edge is tagged as a boundary or a sharp edge.
+
 Wed Nov 25 22:34:35 CET 2009 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos3d/Remesh.java (findSurroundingTriangle):

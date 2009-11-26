@@ -813,6 +813,10 @@ public class Mesh implements Serializable
 				{
 					ot.setAttributes(AbstractHalfEdge.SHARP);
 					sym.setAttributes(AbstractHalfEdge.SHARP);
+					if (ot.origin().getRef() == 0)
+						setRefVertexOnInnerBoundary(ot.origin());
+					if (ot.destination().getRef() == 0)
+						setRefVertexOnInnerBoundary(ot.destination());
 					toReturn++;
 				}
 			}
@@ -966,6 +970,16 @@ public class Mesh implements Serializable
 	{
 		maxLabel++;
 		v.setRef(maxLabel);
+	}
+
+	/**
+	 * }
+	 * Sets an unused boundary reference on a vertex.
+	 */
+	public final void setRefVertexOnInnerBoundary(Vertex v)
+	{
+		maxLabel++;
+		v.setRef(-maxLabel);
 	}
 
 	public Metric getMetric(Location pt)

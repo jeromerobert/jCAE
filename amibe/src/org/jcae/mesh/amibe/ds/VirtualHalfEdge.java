@@ -1347,6 +1347,13 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			logger.fine("split edge ("+origin()+" "+destination()+") by adding vertex "+v);
 		if (m.hasNodes())
 			m.add(v);
+		if (v.getRef() == 0)
+		{
+			if (hasAttributes(BOUNDARY | NONMANIFOLD))
+				m.setRefVertexOnBoundary(v);
+			else if (hasAttributes(SHARP))
+				m.setRefVertexOnInnerBoundary(v);
+		}
 		if (!hasAttributes(NONMANIFOLD))
 		{
 			v.setLink(tri);
