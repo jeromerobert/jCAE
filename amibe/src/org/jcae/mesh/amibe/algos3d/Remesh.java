@@ -45,6 +45,8 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -267,66 +269,39 @@ public class Remesh
 
 	private static AbstractHalfEdge findSurroundingTriangle(Vertex v, Vertex start, double maxError, Mesh mesh)
 	{
-		Triangle t = start.getNeighbourIteratorTriangle().next();
-		AbstractHalfEdge ot = t.getAbstractHalfEdge();
-		if (start == ot.destination())
-			ot = ot.next(ot);
-		else if (start == ot.apex())
-			ot = ot.prev(ot);
-		assert start == ot.origin();
+		Triangle t = null;
+		for (Iterator<Triangle> itf = start.getNeighbourIteratorTriangle(); itf.hasNext(); )
+		{
+			Triangle f = itf.next();
+			if (!f.hasAttributes(AbstractHalfEdge.OUTER))
+			{
+				t = f;
+				break;
+			}
+		}
+		if (t != null)
+		{
+			AbstractHalfEdge ot = t.getAbstractHalfEdge();
+			if (start == ot.destination())
+				ot = ot.next(ot);
+			else if (start == ot.apex())
+				ot = ot.prev(ot);
+			assert start == ot.origin();
 
-		double[] pos = v.getUV();
+			AbstractHalfEdge ret = findSurroundingTriangle(v, ot, maxError);
+			if (ret != null)
+				return ret;
+		}
+
+		// We were not able to find a valid triangle.
+		// Iterate over all triangles to find the best one.
+		// FIXME: This is obviously very slow!
+		LOGGER.fine("Maximum error reached, search into the whole mesh for vertex "+v);
 		double dmin = Double.MAX_VALUE;
 		int[] index = new int[2];
 		int i = -1;
-		Vertex d = ot.destination();
-		t = null;
-		// First, find the best triangle in the neighborhood of 'start' vertex
-		do
-		{
-			ot = ot.nextOriginLoop();
-			if (ot.hasAttributes(AbstractHalfEdge.OUTER))
-				continue;
-			double dist = sqrDistanceVertexTriangle(pos, ot.getTri(), index);
-			if (dist < dmin)
-			{
-				dmin = dist;
-				t = ot.getTri();
-				i = index[0];
-			}
-		}
-		while (ot.destination() != d);
-		assert i >= 0 && t != null;
-		ot = t.getAbstractHalfEdge(ot);
-		if (ot.origin() == t.vertex[i])
-			ot = ot.next();
-		else if (ot.destination() == t.vertex[i])
-			ot = ot.prev();
-		// Now cross edges to see if adjacent triangle is nearer
-		do
-		{
-			if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
-				break;
-			AbstractHalfEdge sym = ot.sym();
-			t = sym.getTri();
-			double dist = sqrDistanceVertexTriangle(pos, t, index);
-			if (dist >= dmin)
-				break;
-			dmin = dist;
-			ot = sym;
-			i = index[0];
-			if (ot.origin() == t.vertex[i])
-				ot = ot.next();
-			else if (ot.destination() == t.vertex[i])
-				ot = ot.prev();
-		} while (true);
-
-		if (dmin < maxError)
-			return ot;
-		// We were not able to find a valid triangle.
-		// Iterate over all triangles to find the right one.
-		// FIXME: This is obviously very slow!
-		LOGGER.fine("Maximum error reached, search into the whole mesh for vertex "+v);
+		double[] pos = v.getUV();
+		AbstractHalfEdge ret = null;
 		for (Triangle f : mesh.getTriangles())
 		{
 			if (f.hasAttributes(AbstractHalfEdge.OUTER))
@@ -340,12 +315,115 @@ public class Remesh
 			}
 
 		}
-		ot = t.getAbstractHalfEdge(ot);
-		if (ot.origin() == t.vertex[i])
-			ot = ot.next();
-		else if (ot.destination() == t.vertex[i])
-			ot = ot.prev();
-		return ot;
+		ret = t.getAbstractHalfEdge(ret);
+		if (ret.origin() == t.vertex[i])
+			ret = ret.next();
+		else if (ret.destination() == t.vertex[i])
+			ret = ret.prev();
+		return ret;
+	}
+
+	private static AbstractHalfEdge findSurroundingTriangle(Vertex v, AbstractHalfEdge ot, double maxError)
+	{
+		double[] pos = v.getUV();
+		double dmin = Double.MAX_VALUE;
+		int[] index = new int[2];
+		Vertex d = ot.destination();
+		AbstractHalfEdge ret = null;
+		// First, find the best triangle in the neighborhood of origin vertex
+		do
+		{
+			if (ot.hasAttributes(AbstractHalfEdge.OUTER))
+			{
+				ot = ot.nextOriginLoop();
+				continue;
+			}
+			Triangle t = ot.getTri();
+			double dist = sqrDistanceVertexTriangle(pos, t, index);
+			if (dist < dmin)
+			{
+				dmin = dist;
+				int i = index[0];
+				ret = t.getAbstractHalfEdge(ret);
+				if (ret.origin() == t.vertex[i])
+					ret = ret.next();
+				else if (ret.destination() == t.vertex[i])
+					ret = ret.prev();
+			}
+			ot = ot.nextOriginLoop();
+		}
+		while (ot.destination() != d);
+		assert ret != null;
+		// Now cross edges to see if adjacent triangle is nearer
+		do
+		{
+			if (ret.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+				break;
+			AbstractHalfEdge sym = ret.sym();
+			Triangle t = sym.getTri();
+			double dist = sqrDistanceVertexTriangle(pos, t, index);
+			if (dist >= dmin)
+				break;
+			dmin = dist;
+			ret = sym;
+			int i = index[0];
+			if (ret.origin() == t.vertex[i])
+				ret = ret.next();
+			else if (ret.destination() == t.vertex[i])
+				ret = ret.prev();
+		} while (true);
+
+		if (dmin < maxError)
+			return ret;
+
+		// Check a better start edge in neighborhood
+		Triangle.List seen = new Triangle.List();
+		LinkedList<Triangle> queue = new LinkedList<Triangle>();
+		queue.add(ot.origin().getNeighbourIteratorTriangle().next());
+		while (!queue.isEmpty())
+		{
+			Triangle t = queue.poll();
+			if (seen.contains(t) || t.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
+			if (sqrDistanceVertexTriangle(pos, t, index) < maxError)
+			{
+				seen.clear();
+				int i = index[0];
+				ret = t.getAbstractHalfEdge(ret);
+				if (ret.origin() == t.vertex[i])
+					ret = ret.next();
+				else if (ret.destination() == t.vertex[i])
+					ret = ret.prev();
+				return ret;
+			}
+			seen.add(t);
+			// Add symmetric triangles
+			ret = t.getAbstractHalfEdge(ret);
+			for (int i = 0; i < 3; i++)
+			{
+				ret = ret.next();
+				if (ret.hasAttributes(AbstractHalfEdge.BOUNDARY))
+					continue;
+				if (ret.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+				{
+					for (Iterator<AbstractHalfEdge> it = ret.fanIterator(); it.hasNext(); )
+						queue.add(it.next().getTri());
+				}
+				else
+					queue.add(ret.sym().getTri());
+			}
+			// Add links to non-manifold vertices
+			for (Vertex n : t.vertex)
+			{
+				if (!n.isManifold())
+				{
+					Triangle[] links = (Triangle[]) n.getLink();
+					for (Triangle f : links)
+						queue.add(f);
+				}
+			}
+		}
+		return null;
 	}
 
 	private static boolean isInside(double[] pos, Triangle t)
