@@ -423,6 +423,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		Vertex n = sym.apex();
 		if (maxLength > 0.0 && a.sqrDistance3D(n) > maxLength)
 			return invalid;
+		// Do not create an edge which will be difficult to modify later
+		if (a.getRef() != 0 && n.getRef() != 0 && (o.getRef() == 0 || d.getRef() == 0))
+			return invalid;
 		double s1 = Matrix3D.computeNormal3D(o.getUV(), d.getUV(), a.getUV(), temp[0], temp[1], temp[2]);
 		double s2 = Matrix3D.computeNormal3D(d.getUV(), o.getUV(), n.getUV(), temp[0], temp[1], temp[3]);
 		if (Matrix3D.prodSca(temp[2], temp[3]) < minCos)
@@ -450,6 +453,10 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		double p4 = d.distance3D(a) + a.distance3D(n) + n.distance3D(d);
 		double Qafter = Math.min(s3/p3/p3, s4/p4/p4);
 		if (Qafter > Qbefore)
+			return Qafter;
+		// If both configurations are almost identical, prefer the one
+		// which does not link two vertices on inner boundaries
+		if (Qafter > 2.0*Qbefore && (a.getRef() == 0 || n.getRef() == 0) && o.getRef() != 0 && d.getRef() != 0)
 			return Qafter;
 		return invalid;
 	}

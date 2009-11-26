@@ -681,6 +681,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		Vertex n = work[0].apex();
 		if (maxLength > 0.0 && a.sqrDistance3D(n) > maxLength)
 			return invalid;
+		// Do not create an edge which will be difficult to modify later
+		if (a.getRef() != 0 && n.getRef() != 0 && (o.getRef() == 0 || d.getRef() == 0))
+			return invalid;
 		// Check for inverted triangles
 		o.outer3D(n, a, tempD1, tempD2, n2);
 		double s3 = 0.5 * Matrix3D.prodSca(n1, n2);
@@ -701,6 +704,10 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		double p4 = d.distance3D(a) + a.distance3D(n) + n.distance3D(d);
 		double Qafter = Math.min(s3/p3/p3, s4/p4/p4);
 		if (Qafter > Qbefore)
+			return Qafter;
+		// If both configurations are almost identical, prefer the one
+		// which does not link two vertices on inner boundaries
+		if (Qafter > 2.0*Qbefore && (a.getRef() == 0 || n.getRef() == 0) && o.getRef() != 0 && d.getRef() != 0)
 			return Qafter;
 		return invalid;
 	}
