@@ -175,6 +175,7 @@ public class UNVReader
 				y = Double.parseDouble(y1) /unit;
 				z = Double.parseDouble(z1) /unit;
 				Vertex n = m.createVertex(x,y,z);
+				n.setLabel(index);
 				nodesmap.put(index, n);
 				if (m.hasNodes())
 					m.add(n);
