@@ -27,7 +27,6 @@ import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 import java.io.IOException;
-import java.io.File;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -64,6 +63,7 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 			else
 				throw new RuntimeException("Unknown option: "+key);
 		}
+		mesh.buildRidges(minCos);
 		counter = m.getTriangles().size() * 3;
 		noSwapAfterProcessing = true;
 	}
@@ -139,7 +139,7 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 		LOGGER.info("Number of edges still present in the binary tree: "+tree.size());
 	}
 
-	private final static String usageString = "<xmlDir> <brepFile> <outputDir>";
+	private final static String usageString = "<xmlDir> <coplanarity> <outputDir>";
 
 	/**
 	 * 
@@ -147,13 +147,12 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 	 */
 	public static void main(final String[] args)
 	{
-		final HashMap<String, String> options = new HashMap<String, String>();
 		if(args.length != 3)
 		{
 			System.out.println(usageString);
 			return;
 		}
-		LOGGER.info("Load geometry file");
+		LOGGER.info("Load mesh");
 		final Mesh mesh = new Mesh();
 		try
 		{
@@ -164,11 +163,12 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
+		final HashMap<String, String> options = new HashMap<String, String>();
+		options.put("coplanarity", args[1]);
 		new SwapEdge(mesh, options).compute();
-		final File brepFile=new File(args[1]);
 		try
 		{
-			MeshWriter.writeObject3D(mesh, args[2], brepFile.getName());
+			MeshWriter.writeObject3D(mesh, args[2], null);
 		}
 		catch (IOException ex)
 		{
