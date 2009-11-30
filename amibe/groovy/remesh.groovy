@@ -3,6 +3,8 @@
  */
 import org.jcae.mesh.amibe.ds.Mesh
 import org.jcae.mesh.amibe.algos3d.Remesh
+import org.jcae.mesh.amibe.algos3d.QEMDecimateHalfEdge
+import org.jcae.mesh.amibe.algos3d.SwapEdge
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder
 import org.jcae.mesh.amibe.projection.MeshLiaison
 import org.jcae.mesh.xmldata.*
@@ -92,11 +94,25 @@ else
 if (cmd.hasOption('c'))
 	algoOptions.put("coplanarity", cmd.getOptionValue('c'));
 if (cmd.hasOption('p'))
-	algoOptions.put("project", "true");
-if (cmd.hasOption('d'))
-	algoOptions.put("decimateSize", cmd.getOptionValue('d'));
-else if (cmd.hasOption('D'))
-	algoOptions.put("decimateTarget", cmd.getOptionValue('D'));
+{
+	print("remesh: Option -p has been discarded")
+}
+
+if (cmd.hasOption('d') || cmd.hasOption('D'))
+{
+	HashMap<String, String> decimateOptions = new HashMap<String, String>();
+	if (cmd.hasOption('d'))
+		decimateOptions.put("size", cmd.getOptionValue('d'));
+	else if (cmd.hasOption('D'))
+		decimateOptions.put("maxtriangles", cmd.getOptionValue('D'));
+	if (cmd.hasOption('c'))
+		decimateOptions.put("coplanarity", cmd.getOptionValue('c'));
+	new QEMDecimateHalfEdge(liaison, decimateOptions).compute()
+	HashMap<String, String> swapOptions = new HashMap<String, String>();
+	if (cmd.hasOption('c'))
+		swapOptions.put("coplanarity", cmd.getOptionValue('c'));
+	new SwapEdge(liaison, swapOptions).compute()
+}
 
 Remesh algo = new Remesh(liaison, algoOptions)
 public static class RemeshMetric implements Remesh.AnalyticMetricInterface

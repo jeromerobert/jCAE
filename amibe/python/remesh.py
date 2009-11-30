@@ -1,7 +1,7 @@
 
 # jCAE
 from org.jcae.mesh.amibe.ds import Mesh
-from org.jcae.mesh.amibe.algos3d import Remesh
+from org.jcae.mesh.amibe.algos3d import Remesh, QEMDecimateHalfEdge, SwapEdge
 from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.projection import MeshLiaison
 from org.jcae.mesh.xmldata import MeshReader, MeshWriter
@@ -67,10 +67,20 @@ if options.coplanarity:
 	opts.put("coplanarity", str(options.coplanarity))
 if options.project:
 	opts.put("project", "true")
-if options.decimateSize:
-	opts.put("decimateSize", str(options.decimateSize))
-elif options.decimateTarget:
-	opts.put("decimateTarget", str(options.decimateTarget))
+
+if options.decimateSize or options.decimateTarget:
+	decimateOptions = HashMap()
+	if options.decimateSize:
+		decimateOptions.put("size", str(options.decimateSize))
+	elif options.decimateTarget:
+		decimateOptions.put("maxtriangles", str(options.decimateTarget))
+	if options.coplanarity:
+		decimateOptions.put("coplanarity", str(options.coplanarity))
+	QEMDecimateHalfEdge(liaison, decimateOptions).compute()
+	swapOptions = HashMap()
+	if options.coplanarity:
+		swapOptions.put("coplanarity", str(options.coplanarity))
+	SwapEdge(liaison, swapOptions).compute()
 
 algo = Remesh(liaison, opts)
 class RemeshMetric(Remesh.AnalyticMetricInterface):
