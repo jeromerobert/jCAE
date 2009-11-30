@@ -1,3 +1,11 @@
+Sun Nov 29 22:09:38 CET 2009 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos3d/Remesh.java
+	  src/org/jcae/mesh/amibe/projection/MeshLiaison.java: Move Vertex
+	locator from Remesh into MeshLiaison.  In MeshLiaison, drop quadrics
+	for now, vertices are projected onto background mesh.  Quadrics did
+	not work well with sharp edges.
+
 Thu Nov 26 11:12:41 CET 2009 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/VirtualHalfEdge.java

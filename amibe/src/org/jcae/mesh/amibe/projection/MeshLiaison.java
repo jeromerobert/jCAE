@@ -19,6 +19,7 @@
 
 package org.jcae.mesh.amibe.projection;
 
+import java.io.FileNotFoundException;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.Triangle;
@@ -27,10 +28,10 @@ import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,8 +41,6 @@ public class MeshLiaison
 	
 	private final Mesh backgroundMesh;
 	private final Mesh currentMesh;
-	// Local surface definition on background mesh
-	private final Map<Vertex, LocalSurfaceProjection> localSurface;
 	// Map between vertices of currentMesh and their projection on backgroundMesh
 	private final Map<Vertex, ProjectedLocation> mapCurrentVertexProjection;
 	
@@ -110,14 +109,6 @@ public class MeshLiaison
 				mapBgToCurrent.get(t.vertex[2])));
 		}
 		this.currentMesh.buildAdjacency();
-
-		// Compute discrete surface on backgroundMesh.
-		// localSurface is computed on every point, canProject()
-		// is used during processing to check that surface
-		// approximation can really be performed.
-		this.localSurface = new HashMap<Vertex, LocalSurfaceProjection>(backgroundNodeset.size());
-		for (Vertex v: backgroundNodeset)
-			this.localSurface.put(v, new QuadricProjection(v));
 		
 		// Compute projections of vertices from currentMesh
 		this.mapCurrentVertexProjection = new HashMap<Vertex, ProjectedLocation>(backgroundNodeset.size());
@@ -135,13 +126,9 @@ public class MeshLiaison
 		return currentMesh;
 	}
 
-	public final Mesh getBackgroundMesh()
-	{
-		return backgroundMesh;
-	}
-
 	/**
-	 * Move Vertex on the desired location and update projection map.
+	 * Move Vertex on the desired location, project onto background mesh
+	 * and update projection map.
 	 * @param v Vertex being moved
 	 * @param target  new location
 	 * @return <code>true</code> if a projection has been found, <code>false</code> otherwise.
@@ -151,119 +138,57 @@ public class MeshLiaison
 	{
 		if (LOGGER.isLoggable(Level.FINER))
 			LOGGER.log(Level.FINER, "Trying to move vertex "+v+" to ("+target[0]+", "+target[1]+", "+target[2]+")");
+		// Old projection
 		ProjectedLocation location = mapCurrentVertexProjection.get(v);
-		return updateLocation(v, target, location);
-	}
-
-	private boolean updateLocation(Vertex v, double [] target, ProjectedLocation location)
-	{
-		Set<Triangle> visited = new HashSet<Triangle>();
-		assert location != null : "No projection found at vertex " + v;
-		if (location.projection == null || !location.projection.canProject())
+		if (LOGGER.isLoggable(Level.FINEST))
+			LOGGER.log(Level.FINEST, "Old projection: "+location);
+		LocationFinder lf = new LocationFinder(target);
+		AbstractHalfEdge ot = location.t.getAbstractHalfEdge();
+		if (ot.apex() == location.t.vertex[location.vIndex])
+			ot = ot.prev();
+		else if (ot.destination() == location.t.vertex[location.vIndex])
+			ot = ot.next();
+		lf.walkAroundOrigin(ot);
+		lf.walkByAdjacency();
+		// Now lf contains the new location.
+		// Update location
+		location.updateTriangle(lf.current);
+		location.updateVertexIndex(target);
+		if (LOGGER.isLoggable(Level.FINEST))
+			LOGGER.log(Level.FINEST, "New projection: "+location);
+		double [] newPosition = new double[3];
+		location.projectOnTriangle(target, newPosition);
+		if (!location.computeBarycentricCoordinates(newPosition))
 		{
-			if (LOGGER.isLoggable(Level.FINE))
-				LOGGER.log(Level.FINE, "Point can not be moved because of its quadric: "+location.projection);
-			return false;
-		}
-		visited.add(location.t);
-		double [] oldPos = v.getUV();
-		double oldX = oldPos[0];
-		double oldY = oldPos[1];
-		double oldZ = oldPos[2];
-		int counter = 0;
-		// Coordinates of the projection of v on triangle plane
-		double [] vPlane = new double[3];
-		while(true)
-		{
-			// Move v to desired location
-			v.moveTo(target[0], target[1], target[2]);
-			// Project v on surface
-			if (!location.projection.project(v))
-			{
-				LOGGER.fine("Projection failed");
-				v.moveTo(oldX, oldY, oldZ);
-				return false;
-			}
-			// Check if v crossed triangle boundary
-			location.projectOnTriangle(v.getUV(), vPlane);
-			boolean inside = location.computeBarycentricCoordinates(vPlane);
-			
 			double [] p0 = location.t.vertex[0].getUV();
 			double [] p1 = location.t.vertex[1].getUV();
 			double [] p2 = location.t.vertex[2].getUV();
-			// Constrain move within triangle boundary
-			if (!inside)
+			for (int i = 0; i < 3; i++)
 			{
-				for (int i = 0; i < 3; i++)
-				{
-					if (location.b[i] < 0.0)
-						location.b[i] = 0.0;
-				}
-				// Values have been truncated
-				double invSum = 1.0 / (location.b[0] + location.b[1] + location.b[2]);
-				for (int i = 0; i < 3; i++)
-					location.b[i] *= invSum;
-				// Move vertex on boundary
-				vPlane[0] = location.b[0]*p0[0] + location.b[1]*p1[0] + location.b[2]*p2[0];
-				vPlane[1] = location.b[0]*p0[1] + location.b[1]*p1[1] + location.b[2]*p2[1];
-				vPlane[2] = location.b[0]*p0[2] + location.b[1]*p1[2] + location.b[2]*p2[2];
-
-				AbstractHalfEdge edge = location.t.getAbstractHalfEdge();
-				AbstractHalfEdge sym = location.t.getAbstractHalfEdge();
-				if (location.b[1] == 0.0)
-					edge = edge.next();
-				else if (location.b[2] == 0.0)
-					edge = edge.prev();
-				if (LOGGER.isLoggable(Level.FINER))
-					LOGGER.log(Level.FINER, "Point is moved out of triangle by edge "+edge);
-
-				if (edge.hasAttributes(AbstractHalfEdge.BOUNDARY))
-				{
-					LOGGER.log(Level.FINER, "Boundary edge "+edge);
-					return true;
-				}
-				sym = edge.sym(sym);
-				if (visited.contains(sym.getTri()))
-				{
-					LOGGER.fine("Loop detected when moving vertex");
-					return true;
-				}
-				visited.add(sym.getTri());
-				location.updateTriangle(sym.getTri());
-				counter = 0;
+				if (location.b[i] < 0.0)
+					location.b[i] = 0.0;
 			}
-			counter++;
-			if (counter > 2)
-			{
-				LOGGER.fine("Loop in triangle detected when moving vertex");
-				return true;
-			}
-			// Compute barycentric coordinates in the new triangle
-			location.computeBarycentricCoordinates(vPlane);
-			if (location.updateProjection(v.getUV()))
-			{
-				// Projection has changed, check if projection can still be performed
-				if (!location.projection.canProject())
-				{
-					LOGGER.fine("Quadric does not allow vertex projection");
-					v.moveTo(oldX, oldY, oldZ);
-					return false;
-				}
-			}
-			else
-			{
-				// Projection has not changed, we found the projected point
-				return true;
-			}
+			// Values have been truncated
+			double invSum = 1.0 / (location.b[0] + location.b[1] + location.b[2]);
+			for (int i = 0; i < 3; i++)
+				location.b[i] *= invSum;
+			// Move vertex on boundary
+			if (LOGGER.isLoggable(Level.FINER))
+				LOGGER.log(Level.FINER, "Position found outside triangle: "+newPosition[0]+" "+newPosition[1]+" "+newPosition[2]);
+			newPosition[0] = location.b[0]*p0[0] + location.b[1]*p1[0] + location.b[2]*p2[0];
+			newPosition[1] = location.b[0]*p0[1] + location.b[1]*p1[1] + location.b[2]*p2[1];
+			newPosition[2] = location.b[0]*p0[2] + location.b[1]*p1[2] + location.b[2]*p2[2];
 		}
+		v.moveTo(newPosition[0], newPosition[1], newPosition[2]);
+		if (LOGGER.isLoggable(Level.FINER))
+			LOGGER.log(Level.FINER, "Final position: "+v);
+		return true;
 	}
 
 	public final boolean project(Vertex v, double[] target, Vertex start)
 	{
-		ProjectedLocation location = mapCurrentVertexProjection.get(start);
-		assert location != null : "Vertex "+start+" not found";
-		ProjectedLocation proj = new ProjectedLocation(target, location.t);
-		return updateLocation(v, target, proj);
+		throw new RuntimeException("Not implemented yet");
+
 	}
 
 	public final Triangle getBackgroundTriangle(Vertex v)
@@ -295,9 +220,452 @@ public class MeshLiaison
 		return mapCurrentVertexProjection.remove(v).t;
 	}
 
+	public AbstractHalfEdge findSurroundingTriangle(Vertex v, Vertex start, double maxError, boolean background)
+	{
+		Triangle t = null;
+		for (Iterator<Triangle> itf = start.getNeighbourIteratorTriangle(); itf.hasNext(); )
+		{
+			Triangle f = itf.next();
+			if (!f.hasAttributes(AbstractHalfEdge.OUTER))
+			{
+				t = f;
+				break;
+			}
+		}
+		if (t != null)
+		{
+			AbstractHalfEdge ot = t.getAbstractHalfEdge();
+			if (start == ot.destination())
+				ot = ot.next(ot);
+			else if (start == ot.apex())
+				ot = ot.prev(ot);
+			assert start == ot.origin();
+
+			AbstractHalfEdge ret = findSurroundingTriangle(v, ot, maxError);
+			if (ret != null)
+				return ret;
+		}
+
+		// We were not able to find a valid triangle.
+		// Iterate over all triangles to find the best one.
+		// FIXME: This is obviously very slow!
+		LOGGER.fine("Maximum error reached, search into the whole mesh for vertex "+v);
+		double dmin = Double.MAX_VALUE;
+		int[] index = new int[2];
+		int i = -1;
+		double[] pos = v.getUV();
+		AbstractHalfEdge ret = null;
+		Mesh mesh = background ? backgroundMesh : currentMesh;
+		for (Triangle f : mesh.getTriangles())
+		{
+			if (f.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
+			double dist = sqrDistanceVertexTriangle(pos, f, index);
+			if (dist < dmin)
+			{
+				dmin = dist;
+				t = f;
+				i = index[0];
+			}
+
+		}
+		ret = t.getAbstractHalfEdge(ret);
+		if (ret.origin() == t.vertex[i])
+			ret = ret.next();
+		else if (ret.destination() == t.vertex[i])
+			ret = ret.prev();
+		return ret;
+	}
+
+	private static AbstractHalfEdge findSurroundingTriangle(Vertex v, AbstractHalfEdge ot, double maxError)
+	{
+		double[] pos = v.getUV();
+		LocationFinder lf = new LocationFinder(pos);
+		lf.walkAroundOrigin(ot);
+		lf.walkByAdjacency();
+
+		if (lf.dmin < maxError)
+		{
+			AbstractHalfEdge ret = lf.current.getAbstractHalfEdge();
+			if (ret.origin() == lf.current.vertex[lf.localEdgeIndex])
+				ret = ret.next();
+			else if (ret.destination() == lf.current.vertex[lf.localEdgeIndex])
+				ret = ret.prev();
+			return ret;
+		}
+
+		// Check a better start edge in neighborhood
+		int[] index = new int[2];
+		Triangle.List seen = new Triangle.List();
+		LinkedList<Triangle> queue = new LinkedList<Triangle>();
+		queue.add(ot.origin().getNeighbourIteratorTriangle().next());
+		while (!queue.isEmpty())
+		{
+			Triangle t = queue.poll();
+			if (seen.contains(t) || t.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
+			if (sqrDistanceVertexTriangle(pos, t, index) < maxError)
+			{
+				seen.clear();
+				int i = index[0];
+				ot = t.getAbstractHalfEdge(ot);
+				if (ot.origin() == t.vertex[i])
+					ot = ot.next();
+				else if (ot.destination() == t.vertex[i])
+					ot = ot.prev();
+				return ot;
+			}
+			seen.add(t);
+			// Add symmetric triangles
+			ot = t.getAbstractHalfEdge(ot);
+			for (int i = 0; i < 3; i++)
+			{
+				ot = ot.next();
+				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
+					continue;
+				if (ot.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+				{
+					for (Iterator<AbstractHalfEdge> it = ot.fanIterator(); it.hasNext(); )
+						queue.add(it.next().getTri());
+				}
+				else
+					queue.add(ot.sym().getTri());
+			}
+			// Add links to non-manifold vertices
+			for (Vertex n : t.vertex)
+			{
+				if (!n.isManifold())
+				{
+					Triangle[] links = (Triangle[]) n.getLink();
+					for (Triangle f : links)
+						queue.add(f);
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Compute squared distance between a point and a triangle.  See
+	 *   http://www.geometrictools.com/Documentation/DistancePoint3Triangle3.pdf
+	 */
+	private static double sqrDistanceVertexTriangle(double[] pos, Triangle tri, int[] index)
+	{
+		double[] t0 = tri.vertex[0].getUV();
+		double[] t1 = tri.vertex[1].getUV();
+		double[] t2 = tri.vertex[2].getUV();
+		double a = tri.vertex[0].sqrDistance3D(tri.vertex[1]);
+		double b =
+			(t1[0] - t0[0]) * (t2[0] - t0[0]) +
+			(t1[1] - t0[1]) * (t2[1] - t0[1]) +
+			(t1[2] - t0[2]) * (t2[2] - t0[2]);
+		double c = tri.vertex[0].sqrDistance3D(tri.vertex[2]);
+		double d =
+			(t1[0] - t0[0]) * (t0[0] - pos[0]) +
+			(t1[1] - t0[1]) * (t0[1] - pos[1]) +
+			(t1[2] - t0[2]) * (t0[2] - pos[2]);
+		double e =
+			(t2[0] - t0[0]) * (t0[0] - pos[0]) +
+			(t2[1] - t0[1]) * (t0[1] - pos[1]) +
+			(t2[2] - t0[2]) * (t0[2] - pos[2]);
+		double f =
+			(pos[0] - t0[0]) * (pos[0] - t0[0]) +
+			(pos[1] - t0[1]) * (pos[1] - t0[1]) +
+			(pos[2] - t0[2]) * (pos[2] - t0[2]);
+		// Minimize Q(s,t) = a*s*s + 2.0*b*s*t + c*t*t + 2.0*d*s + 2.0*e*t + f
+		double det = a*c - b*b;
+		double s = b*e - c*d;
+		double t = b*d - a*e;
+		index[0] = index[1] = -1;
+		if ( s+t <= det )
+		{
+			if ( s < 0.0 )
+			{
+				if ( t < 0.0 )
+				{
+					// region 4
+					if (d < 0.0)
+					{
+						t = 0.0;
+						index[0] = 2;
+						if (-d >= a)
+						{
+							index[1] = 6;
+							s = 1.0;
+						}
+						else
+						{
+							index[1] = 5;
+							s = -d/a;
+						}
+					}
+					else
+					{
+						s = 0.0;
+						index[0] = 1;
+						if (e >= 0.0)
+						{
+							index[1] = 4;
+							t = 0.0;
+						}
+						else if (-e >= c)
+						{
+							index[1] = 2;
+							t = 1.0;
+						}
+						else
+						{
+							index[1] = 3;
+							t = -e/c;
+						}
+					}
+				}
+				else
+				{
+					// region 3
+					s = 0.0;
+					index[0] = 1;
+					if (e >= 0.0)
+					{
+						index[1] = 4;
+						t = 0.0;
+					}
+					else if (-e >= c)
+					{
+						index[1] = 2;
+						t = 1.0;
+					}
+					else
+					{
+						index[1] = 3;
+						t = -e/c;
+					}
+				}
+			}
+			else if ( t < 0.0 )
+			{
+				// region 5
+				t = 0.0;
+				index[0] = 2;
+				if (d >= 0.0)
+				{
+					index[1] = 4;
+					s = 0.0;
+				}
+				else if (-d >= a)
+				{
+					index[1] = 6;
+					s = 1.0;
+				}
+				else
+				{
+					index[1] = 5;
+					s = -d/a;
+				}
+			}
+			else
+			{
+				// region 0
+				double invDet = 1.0 / det;
+				s *= invDet;
+				t *= invDet;
+				if (t <= s && t <= 1.0 - s - t)
+					index[1] = 5;
+				else if (s <= t && s <= 1.0 - s - t)
+					index[1] = 3;
+				else if (s >= 1.0 - s - t && t >= 1.0 - s -t)
+					index[1] = 1;
+				else
+					throw new RuntimeException("Illegal arguments: s="+s+" t="+t+" "+det+"\n"+tri);
+				index[0] = index[1] / 2;
+			}
+		}
+		else
+		{
+			if ( s < 0.0 )
+			{
+				// region 2
+				if (c+e > b+d)
+				{
+					// minimum on edge s+t = 1
+					double numer = (c+e) - (b+d);
+					double denom = (a-b) + (c-b);
+					index[0] = 0;
+					if (numer >= denom)
+					{
+						index[1] = 6;
+						s = 1.0;
+					}
+					else
+					{
+						index[1] = 1;
+						s = numer / denom;
+					}
+					t = 1.0 - s;
+				}
+				else
+				{
+					// minimum on edge s = 0
+					s = 0.0;
+					index[0] = 1;
+					if (e >= 0.0)
+					{
+						index[1] = 4;
+						t = 0.0;
+					}
+					else if (-e >= c)
+					{
+						index[1] = 2;
+						t = 1.0;
+					}
+					else
+					{
+						index[1] = 3;
+						t = -e/c;
+					}
+				}
+			}
+			else if ( t < 0.0 )
+			{
+				// region 6
+				if (a+d > b+e)
+				{
+					// minimum on edge s+t = 1
+					double numer = (a+d) - (b+e);
+					double denom = (a-b) + (c-b);
+					index[0] = 0;
+					if (numer >= denom)
+					{
+						index[1] = 2;
+						t = 1.0;
+					}
+					else
+					{
+						index[1] = 1;
+						t = numer / denom;
+					}
+					s = 1.0 - t;
+				}
+				else
+				{
+					// minimum on edge t=0
+					t = 0.0;
+					index[0] = 2;
+					if (d >= 0.0)
+					{
+						index[1] = 4;
+						s = 0.0;
+					}
+					else if (-d >= a)
+					{
+						index[1] = 6;
+						s = 1.0;
+					}
+					else
+					{
+						index[1] = 5;
+						s = -d/a;
+					}
+				}
+			}
+			else
+			{
+				// region 1
+				double numer = (c+e) - (b+d);
+				index[0] = 0;
+				if (numer <= 0.0)
+				{
+					index[1] = 2;
+					s = 0.0;
+				}
+				else
+				{
+					double denom = (a-b)+(c-b);
+					if (numer >= denom)
+					{
+						index[1] = 6;
+						s = 1.0;
+					}
+					else
+					{
+						index[1] = 1;
+						s = numer/denom;
+					}
+				}
+				t = 1.0 - s;
+			}
+		}
+		double ret = a*s*s + 2.0*b*s*t + c*t*t + 2.0*d*s + 2.0*e*t + f;
+		// Fix possible numerical errors
+		if (ret < 0.0)
+			ret = 0.0;
+		return ret;
+	}
+
+	public static void checkFindSurroundingTriangle(String[] args) throws FileNotFoundException
+	{
+		org.jcae.mesh.amibe.traits.MeshTraitsBuilder mtb = org.jcae.mesh.amibe.traits.MeshTraitsBuilder.getDefault3D();
+		mtb.addNodeList();
+		Mesh mesh = new Mesh(mtb);
+		Vertex v0 = mesh.createVertex(10.0, 20.0, 30.0);
+		Vertex v1 = mesh.createVertex(16.0, 20.0, 30.0);
+		Vertex v2 = mesh.createVertex(12.0, 26.0, 30.0);
+		Triangle t = mesh.createTriangle(v0, v1, v2);
+		int [] index = new int[2];
+		int nGrid = 128;
+		double[] pos = new double[3];
+		java.io.PrintStream outMesh = new java.io.PrintStream("test.mesh");
+		java.io.PrintStream outBB = new java.io.PrintStream("region.bb");
+		java.io.PrintStream distBB = new java.io.PrintStream("test.bb");
+		outMesh.println("MeshVersionFormatted 1\n\nDimension\n3\n\nGeometry\n\"test.mesh\"\n\nVertices");
+		outMesh.println(nGrid*nGrid+3);
+		outBB.println("3 1 "+(nGrid*nGrid+3)+" 2");
+		distBB.println("3 1 "+(nGrid*nGrid+3)+" 2");
+		for (int j = 0; j < nGrid; j++)
+		{
+			pos[1] = 15.0 + (j * 16) / (double)nGrid;
+			pos[2] = 30.05;
+			for (int i = 0; i < nGrid; i++)
+			{
+				pos[0] =  5.0 + (i * 16) / (double)nGrid;
+				double d = sqrDistanceVertexTriangle(pos, t, index);
+				outMesh.println(pos[0]+" "+pos[1]+" "+pos[2]+" 0");
+				outBB.println((double)index[1]);
+				distBB.println(d);
+			}
+		}
+		index[1] = 0;
+		pos = v0.getUV();
+		outMesh.println(pos[0]+" "+pos[1]+" "+pos[2]+" "+index[1]);
+		outBB.println("0.0");
+		distBB.println(sqrDistanceVertexTriangle(pos, t, index));
+		pos = v1.getUV();
+		outMesh.println(pos[0]+" "+pos[1]+" "+pos[2]+" "+index[1]);
+		outBB.println("0.0");
+		distBB.println(sqrDistanceVertexTriangle(pos, t, index));
+		pos = v2.getUV();
+		outMesh.println(pos[0]+" "+pos[1]+" "+pos[2]+" "+index[1]);
+		outBB.println("0.0");
+		distBB.println(sqrDistanceVertexTriangle(pos, t, index));
+
+		outMesh.println("\n\nQuadrilaterals\n"+((nGrid-1)*(nGrid-1)));
+		for (int j = 0; j < nGrid - 1; j++)
+		{
+			for (int i = 0; i < nGrid - 1; i++)
+			{
+				outMesh.println(""+(j*nGrid+i+1)+" "+(j*nGrid+i+2)+" "+((j+1)*nGrid+i+2)+" "+((j+1)*nGrid+i+1)+" 0");
+			}
+		}
+		int o = nGrid*nGrid;
+		outMesh.println("\n\nTriangles\n1\n"+(o+1)+" "+(o+2)+" "+(o+3)+" 0");
+		outMesh.println("\n\nEnd");
+		outMesh.close();
+		outBB.close();
+		distBB.close();
+	}
+
 	private class ProjectedLocation
 	{
-		private LocalSurfaceProjection projection;
 		// triangle where vertex is projected into
 		private Triangle t;
 		// inverse of triangle area
@@ -318,7 +686,7 @@ public class MeshLiaison
 		{
 			updateTriangle(t);
 			computeBarycentricCoordinates(xyz);
-			updateProjection(xyz);
+			updateVertexIndex(xyz);
 		}
 		
 		private boolean updateTriangle(Triangle newT)
@@ -333,6 +701,22 @@ public class MeshLiaison
 			return true;
 		}
 		
+		private boolean updateVertexIndex(double [] xyz)
+		{
+			int oldIndex = vIndex;
+			double d0 = backgroundMesh.distance2(t.vertex[0].getUV(), xyz);
+			double d1 = backgroundMesh.distance2(t.vertex[1].getUV(), xyz);
+			double d2 = backgroundMesh.distance2(t.vertex[2].getUV(), xyz);
+			if (d0 <= d1 && d0 <= d2)
+				vIndex = 0;
+			else if (d1 <= d0 && d1 <= d2)
+				vIndex = 1;
+			else
+				vIndex = 2;
+
+			return vIndex != oldIndex;
+		}
+
 		private boolean computeBarycentricCoordinates(double [] coord)
 		{
 			b[0] = Matrix3D.computeNormal3D(coord,
@@ -350,28 +734,6 @@ public class MeshLiaison
 			return b[0] >= 0.0 && b[1] >= 0.0 && b[2] >= 0.0;
 		}
 		
-		private boolean updateProjection(double [] xyz)
-		{
-			int oldIndex = vIndex;
-			double d0 = backgroundMesh.distance2(t.vertex[0].getUV(), xyz);
-			double d1 = backgroundMesh.distance2(t.vertex[1].getUV(), xyz);
-			double d2 = backgroundMesh.distance2(t.vertex[2].getUV(), xyz);
-			if (d0 <= d1 && d0 <= d2)
-				vIndex = 0;
-			else if (d1 <= d0 && d1 <= d2)
-				vIndex = 1;
-			else
-				vIndex = 2;
-			
-			if (vIndex == oldIndex)
-				return false;
-			LocalSurfaceProjection newProjection = MeshLiaison.this.localSurface.get(t.vertex[vIndex]);
-			if (!newProjection.canProject())
-				return false;
-			projection = newProjection;
-			return true;
-		}
-		
 		private void projectOnTriangle(double [] xyz, double [] proj)
 		{
 			double [] o = t.vertex[vIndex].getUV();
@@ -382,5 +744,136 @@ public class MeshLiaison
 			for (int i = 0; i < 3; i++)
 				proj[i] = xyz[i] - dist * normal[i];
 		}
+
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder("Vertex index: ");
+			sb.append(vIndex);
+			sb.append("\n");
+			sb.append(t);
+			sb.append("\nLocal coordinates: ")
+				.append(b[0]).append(" ")
+				.append(b[1]).append(" ")
+				.append(b[2]);
+			return sb.toString();
+		}
+
 	}
+
+	private static class LocationFinder
+	{
+		private double[] target = new double[3];
+		double dmin = Double.MAX_VALUE;
+		Triangle current;
+		int localEdgeIndex = -1;
+		int region = -1;
+		int[] index = new int[2];
+		private final Collection<Triangle> triangles;
+
+		LocationFinder(double[] pos)
+		{
+			this(pos, null);
+		}
+
+		LocationFinder(double[] pos, Collection<Triangle> triangles)
+		{
+			System.arraycopy(pos, 0, target, 0, 3);
+			this.triangles = triangles;
+		}
+
+		void walkAroundOrigin(AbstractHalfEdge ot)
+		{
+			AbstractHalfEdge loop = ot.getTri().getAbstractHalfEdge();
+			if (loop.origin() == ot.destination())
+				loop = loop.prev();
+			else if (loop.origin() == ot.apex())
+				loop = loop.next();
+			Vertex d = loop.destination();
+			do
+			{
+				if (loop.hasAttributes(AbstractHalfEdge.OUTER))
+				{
+					loop = loop.nextOriginLoop();
+					continue;
+				}
+				Triangle t = loop.getTri();
+				double dist = sqrDistanceVertexTriangle(target, t, index);
+				if (dist < dmin)
+				{
+					dmin = dist;
+					current = t;
+					localEdgeIndex = index[0];
+					region = index[1];
+				}
+				loop = loop.nextOriginLoop();
+			}
+			while (loop.destination() != d);
+		}
+
+		// Cross edges to see if adjacent triangle is nearer
+		void walkByAdjacency()
+		{
+			AbstractHalfEdge ot = current.getAbstractHalfEdge();
+			do
+			{
+				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+					break;
+				AbstractHalfEdge sym = ot.sym();
+				Triangle t = sym.getTri();
+				double dist = sqrDistanceVertexTriangle(target, t, index);
+				if (dist >= dmin)
+					break;
+				dmin = dist;
+				ot = sym;
+				current = t;
+				localEdgeIndex = index[0];
+				if (index[1] % 2 == 0)
+				{
+					int i = ((index[1] / 2) + 1) % 3;
+					if (ot.apex() == current.vertex[i])
+						ot = ot.prev();
+					else if (ot.destination() == current.vertex[i])
+						ot = ot.next();
+					walkAroundOrigin(ot);
+				}
+				else
+				{
+					if (ot.origin() == current.vertex[localEdgeIndex])
+						ot = ot.next();
+					else if (ot.destination() == current.vertex[localEdgeIndex])
+						ot = ot.prev();
+				}
+			} while (true);
+		}
+
+		void walkDebug()
+		{
+			for (Triangle f : triangles)
+			{
+				if (f.hasAttributes(AbstractHalfEdge.OUTER))
+					continue;
+				double dist = sqrDistanceVertexTriangle(target, f, index);
+				if (dist < dmin)
+				{
+					dmin = dist;
+					current = f;
+					localEdgeIndex = index[0];
+				}
+			}
+		}
+
+		@Override
+		public String toString()
+		{
+			StringBuilder sb = new StringBuilder("Distance: ");
+			sb.append(dmin);
+			sb.append("\nEdge index: ");
+			sb.append(localEdgeIndex);
+			sb.append("\n");
+			sb.append(current);
+			return sb.toString();
+		}
+
+	}
+
 }
