@@ -20,10 +20,17 @@
 
 package org.jcae.mesh.xmldata;
 
-import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.util.*;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.StringTokenizer;
+import java.util.TreeSet;
 import java.util.logging.Logger;
 
 
@@ -110,22 +117,11 @@ public class UNV2Amibe
 			return l1;
 		}		
 	}	
-	/**
-	 * Contains informations about groups, which will be written to the
-	 * XML file
-	 */
-	private static class Group
-	{
-		String name;
-		long offset;
-		int nbElement;
-	}
 	
-	private static final Logger logger=Logger.getLogger(UNV2Amibe.class.getName());
+	private static final Logger LOGGER=Logger.getLogger(UNV2Amibe.class.getName());
 	private String unitBlock;
 		
 	private int numberOfNodes, numberOfTriangles;
-	private final ArrayList<Group> groups=new ArrayList<Group>();
 	private String stripedUnvFile;
 	
 	/** a list of 2412 elements which won't be store in the amibe file */
@@ -139,86 +135,19 @@ public class UNV2Amibe
 	public final void importMesh(File input, String output) throws IOException
 	{
 		BufferedReader br=new BufferedReader(new FileReader(input));
-		importMesh(br, new File(output));
+		importMesh(br, output);
 		br.close();
 	}
 
-	public final void importMesh(BufferedReader in, File outputDir) throws IOException
+	public final void importMesh(BufferedReader in, String outputDir) throws IOException
 	{
-		outputDir.mkdirs();
-		File dir3d=new File(outputDir, JCAEXMLData.xml3dFilename+".files");
-		dir3d.mkdirs();
-		File fnode=new File(dir3d, "nodes3d.bin");
-		File ftria=new File(dir3d, "triangles3d.bin");
-		File fgrp=new File(dir3d, "groups.bin");
-		FileChannel cnode=new RandomAccessFile(fnode, "rw").getChannel();
-		FileChannel ctria=new FileOutputStream(ftria).getChannel();
-		FileChannel cgroups=new FileOutputStream(fgrp).getChannel();
-		importMesh(in, cnode, ctria, cgroups);
-		checkNoGroup(cgroups);
-		cnode.close();
-		ctria.close();
-		cgroups.close();
-		PrintWriter xml=new PrintWriter(new File(outputDir,JCAEXMLData.xml3dFilename));
-		writeXML(xml);		
-		xml.close();
+		AmibeWriter.Dim3 out = new AmibeWriter.Dim3(outputDir);
+		out.setFixNoGroup(true);
+		importMesh(in, out);
+		out.finish();
 	}
 	
-	/**
-	 * If the unv do not contains any groups, create one with all
-	 * elements 
-	 */
-	private void checkNoGroup(FileChannel cgroups) throws IOException
-	{
-		if(groups.size()==0)
-		{
-			Group g=new Group();
-			g.name="EXT";
-			g.nbElement=numberOfTriangles;
-			g.offset=0;
-			groups.add(g);
-			ByteBuffer bb=ByteBuffer.allocate(4);
-			for(int i=0; i<numberOfTriangles; i++)
-			{
-				bb.putInt(i);
-				bb.rewind();
-				cgroups.write(bb);
-				bb.rewind();
-			}
-		}
-	}
-	
-	private void writeXML(PrintWriter writer)
-	{
-		writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-		writer.println("<!DOCTYPE jcae SYSTEM \"classpath:///org/jcae/mesh/xmldata/jcae.dtd\">");
-		writer.println("<jcae><mesh><submesh><nodes>");
-		writer.println("<number>"+numberOfNodes+"</number>");
-		writer.println("<file format=\"doublestream\" location=\""+JCAEXMLData.xml3dFilename+".files/nodes3d.bin\"/>");
-		writer.println("</nodes><triangles>");
-		writer.println("<number>"+numberOfTriangles+"</number>");
-		writer.println("<file format=\"integerstream\" location=\""+JCAEXMLData.xml3dFilename+".files/triangles3d.bin\"/>");
-		writer.println("</triangles><groups>");
-		
-		for(int i=0; i<groups.size(); i++)
-		{
-			Group g=groups.get(i);
-			writer.println("<group id=\""+i+"\">");
-			writer.println("<name>"+g.name+"</name>");
-			writer.println("<number>"+g.nbElement+"</number>");			
-			writer.println(
-				"<file format=\"integerstream\" location=\""+JCAEXMLData.xml3dFilename+".files/groups.bin\" offset=\""+
-				g.offset+"\"/>");
-			writer.println("</group>");	
-		}
-		
-		writer.println("</groups></submesh></mesh></jcae>");
-	}
-	
-	private void importMesh(BufferedReader in,
-		FileChannel nodeChannel,
-		FileChannel faceChannel,
-		FileChannel groupChannel) throws IOException
+	private void importMesh(BufferedReader in, AmibeWriter.Dim3 out) throws IOException
 	{
 		double unit = 1.0;
 		String line;
@@ -230,12 +159,12 @@ public class UNV2Amibe
 				if (line.trim().equals("2411") || line.trim().equals("781"))
 				{
 					// read nodes
-					convertNodes(in, unit, nodeChannel);
+					convertNodes(in, unit, out);
 				}
 				else if (line.trim().equals("2412"))
 				{
 					// read faces
-					convertFaces(in, faceChannel);
+					convertFaces(in, out);
 				}
 				else if (line.trim().equals("164"))
 				{
@@ -245,7 +174,7 @@ public class UNV2Amibe
 				else if ( (line.trim().equals("2430")) || (line.trim().equals("2435")) )
 				{
 					// read groups
-					convertGroups(in, line.trim(), groupChannel);
+					convertGroups(in, line.trim(), out);
 				}
 				/*else if (line.trim().equals("2414"))
 				{
@@ -260,7 +189,7 @@ public class UNV2Amibe
 			}
 		}
 		if(stripedUnvFile!=null)
-			writeStripedUnv(nodeChannel);
+			writeStripedUnv(out);
 	}
 
 	/** List of nodes used in elements which are not written in the amibe file */
@@ -284,7 +213,7 @@ public class UNV2Amibe
 		return toReturn;
 	}
 	
-	private void writeStripedUnv(FileChannel nodeChannel) throws IOException
+	private void writeStripedUnv(AmibeWriter out) throws IOException
 	{
 		if(elements.size()==0)
 			return;
@@ -297,14 +226,11 @@ public class UNV2Amibe
 		stripedUnv.println("  2411");
 		//write nodes
 		int[] nodes=computeListOfNodes();
-		ByteBuffer bb=ByteBuffer.allocate(3*8);
+		double[] nc = new double[3];
 		for(int i=0; i<nodes.length; i++)
 		{
-			nodeChannel.read(bb, 3*8*(nodes[i]-1));
-			bb.rewind();
-			MeshExporter.UNV.writeSingleNode(stripedUnv, nodes[i],
-				bb.getDouble(), bb.getDouble(), bb.getDouble());
-			bb.rewind();
+			out.getNode(nodes[i]-1, nc);
+			MeshExporter.UNV.writeSingleNode(stripedUnv, nodes[i], nc[0], nc[1], nc[2]);
 		}
 		stripedUnv.println("    -1");
 		stripedUnv.println("    -1");
@@ -326,11 +252,9 @@ public class UNV2Amibe
 	 * @return ArrayList of Group
 	 * @throws IOException
 	 */
-	private void convertGroups(BufferedReader in, String type, FileChannel gChannel) throws IOException
+	private void convertGroups(BufferedReader in, String type, AmibeWriter out) throws IOException
 	{
 		String line = in.readLine();
-		long offset=0;
-		ByteBuffer bb=ByteBuffer.allocate(4);
 		while(!line.trim().equals("-1"))
 		{
 			// read the number of elements to read in the last number of the line
@@ -344,11 +268,8 @@ public class UNV2Amibe
 			}
 			// Number of elements
 			int nbelem = Integer.valueOf(snb).intValue();
-			Group g=new Group();
 			// Read group name
-			g.name = in.readLine().trim();
-			g.offset=offset;
-			// read the group
+			out.nextGroup(in.readLine().trim());
 			while ((line= in.readLine().trim()).startsWith("8"))
 			{
 				st = new StringTokenizer(line);
@@ -358,14 +279,8 @@ public class UNV2Amibe
 					st.nextToken();
 					int ind = Integer.parseInt(st.nextToken());
 					if (ind != 0)
-					{
-						g.nbElement++;
-						offset++;
-						bb.putInt(ind-1);
-						bb.rewind();
-						gChannel.write(bb);
-						bb.rewind();
-					}
+						out.addElementToGroup(ind-1);
+					
 					nbelem--;
 					if (type.equals("2435"))
 					{
@@ -379,7 +294,6 @@ public class UNV2Amibe
 					break;
 				}
 			}
-			groups.add(g);
 		}
 	}
 
@@ -404,12 +318,11 @@ public class UNV2Amibe
 		return unit;
 	}
 
-	private void convertNodes(BufferedReader rd, double unit, FileChannel nodeChannel)
+	private void convertNodes(BufferedReader rd, double unit, AmibeWriter.Dim3 out)
 		throws IOException
 	{
 		double x,y,z;
-		String line = "";
-		ByteBuffer bb=ByteBuffer.allocate(3*8);
+		String line = "";		
 		while(!(line=rd.readLine().trim()).equals("-1"))
 		{
 			StringTokenizer st = new StringTokenizer(line);
@@ -436,22 +349,16 @@ public class UNV2Amibe
 			x = Double.parseDouble(x1)/unit;
 			y = Double.parseDouble(y1)/unit;
 			z = Double.parseDouble(z1)/unit;
-			bb.putDouble(x);
-			bb.putDouble(y);
-			bb.putDouble(z);
-			bb.rewind();
-			nodeChannel.write(bb);
-			bb.rewind();
+			out.addNode(x, y, z);
 			numberOfNodes++;
 		}
 	}
 
-	private void convertFaces(BufferedReader rd, FileChannel faceChannel) throws IOException
+	private void convertFaces(BufferedReader rd, AmibeWriter.Dim3 out) throws IOException
 	{
-		logger.fine("Reading triangles");
+		LOGGER.fine("Reading triangles");
 		String line = "";
 
-		ByteBuffer bb=ByteBuffer.allocate(3*4);
 		int p1, p2, p3;
 		while (!(line=rd.readLine()).trim().equals("-1"))
 		{
@@ -491,12 +398,7 @@ public class UNV2Amibe
 				default:
 					System.out.println("Warning: Section 2412, type "+type+" unknown");
 			}
-			bb.putInt(p1-1);
-			bb.putInt(p2-1);
-			bb.putInt(p3-1);
-			bb.rewind();
-			faceChannel.write(bb);
-			bb.rewind();
+			out.addTriangle(p1-1, p2-1, p3-1);
 			numberOfTriangles++;
 		}
 	}
@@ -511,8 +413,8 @@ public class UNV2Amibe
 		try
 		{
 			UNV2Amibe u=new UNV2Amibe();
-			u.setStripedUnv("/home/jerome/JCAEProject/FlightSMALL1-strp.unv");
-			u.importMesh("/home/jerome/Models/unv/FlightSMALL.unv", "/tmp");
+			u.setStripedUnv("/tmp/FlightSMALL1-strp.unv");
+			u.importMesh("/home/jerome/Models/unv/FlightSMALL.unv", "/tmp/pouet");
 		}
 		catch (IOException e)
 		{

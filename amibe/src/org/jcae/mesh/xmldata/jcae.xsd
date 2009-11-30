@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="nodes">
+    <xs:annotation>
+      <xs:documentation> Nodes of submesh
+They are read from a "doublestream" file as {x1, y1, z1, x2, y2, z2...}
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="number" />
+        <xs:element ref="file" />
+        <xs:element minOccurs="0" ref="references" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="references">
+    <xs:annotation>
+      <xs:documentation> References to match boundary nodes between 2D submeshes </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="number" />
+        <xs:element ref="file" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="beams">
+    <xs:annotation>
+      <xs:documentation> 1D finite elements of the submesh
+They are read from an "integerstream" file as {n1_1, n1_2, n2_1, n2_2...}
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="number" />
+        <xs:element ref="file" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="shape">
+    <xs:annotation>
+      <xs:documentation> Geometry used to create the mesh </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:choice>
+        <xs:element ref="file" />
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="group">
+    <xs:annotation>
+      <xs:documentation> A group of triangles
+It is read from an integerstream containing triangles IDs.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="name" type="xs:string" />
+        <xs:element ref="number" />
+        <xs:element ref="file" />
+      </xs:sequence>
+      <xs:attribute name="id" use="required" />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="normals">
+    <xs:annotation>
+      <xs:documentation> Normals at nodes </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:choice>
+        <xs:element ref="file" />
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="jcae">
+    <xs:annotation>
+      <xs:documentation> Root element of a jCAE mesh file</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:choice>
+        <xs:element name="mesh">
+          <xs:annotation>
+            <xs:documentation> Root element of a mesh </xs:documentation>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element maxOccurs="1" ref="shape" minOccurs="0" />
+              <xs:element maxOccurs="unbounded" ref="submesh" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="submesh">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="subshape" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation> A number identifying a face within shape </xs:documentation>
+          </xs:annotation>
+          <xs:simpleType>
+            <xs:restriction base="xs:positiveInteger"/>
+          </xs:simpleType>
+        </xs:element>
+        <xs:element ref="nodes" />
+        <xs:element minOccurs="0" ref="beams" />
+        <xs:element minOccurs="0" ref="triangles" />
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="result" />
+        <xs:element minOccurs="0" ref="groups" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="groups">
+    <xs:annotation>
+      <xs:documentation> List of groups </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:choice>
+        <xs:element maxOccurs="unbounded" ref="group" />
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="number">
+    <xs:annotation>
+      <xs:documentation> Number of entities in a nodes, beams, group or references element </xs:documentation>
+    </xs:annotation>
+    <xs:simpleType>
+      <xs:restriction base="xs:positiveInteger"/>
+    </xs:simpleType>
+  </xs:element>
+  <xs:element name="triangles">
+    <xs:annotation>
+      <xs:documentation> Indices of triangle nodes </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="number" />
+        <xs:element ref="file" />
+        <xs:element minOccurs="0" ref="normals" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="result">
+    <xs:complexType>
+      <xs:choice>
+        <xs:element ref="file" />
+      </xs:choice>
+      <xs:attribute name="id" use="required" />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="file">
+    <xs:annotation>
+      <xs:documentation> A file.
+Allowed values for "format" are doublestream, integerstream, brep.
+The offset attribute is only allowed for doublestream and integerstream.
+ + doublestream are raw file containing float values written by java.io.DataOutput.writeDouble.
+ + integerstream are raw file containing int values written by java.io.DataOutput.writeInt.
+ + brep are http://www.opencascade.org files.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:attribute name="format" use="required" >
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="integerstream"/>
+            <xs:enumeration value="doublestream"/>
+            <xs:enumeration value="brep"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="location" use="required" type="xs:anyURI" />
+      <xs:attribute name="offset" use="optional" type="xs:positiveInteger" />
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
