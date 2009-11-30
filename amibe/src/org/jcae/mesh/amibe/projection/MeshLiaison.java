@@ -342,6 +342,7 @@ public class MeshLiaison
 				}
 			}
 		}
+		seen.clear();
 		return null;
 	}
 
