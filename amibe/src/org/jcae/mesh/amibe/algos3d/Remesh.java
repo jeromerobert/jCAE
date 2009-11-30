@@ -548,7 +548,10 @@ public class Remesh
 						LOGGER.info("Vertices inserted: "+processed);
 				}
 				assert mesh.isValid();
-				assert mesh.checkNoInvertedTriangles();
+				if (hasRidges)
+				{
+					assert mesh.checkNoInvertedTriangles();
+				}
 				assert mesh.checkNoDegeneratedTriangles();
 
 				if (LOGGER.isLoggable(Level.FINE))
