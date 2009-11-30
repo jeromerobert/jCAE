@@ -94,19 +94,16 @@ public class Remesh
 	 *
 	 * @param m  the <code>Mesh</code> instance to refine.
 	 */
+	@Deprecated
 	public Remesh(Mesh m)
 	{
-		this(m, MeshTraitsBuilder.getDefault3D());
+		this(m, MeshTraitsBuilder.getDefault3D(), new HashMap<String, String>());
 	}
 
+	@Deprecated
 	public Remesh(Mesh m, Map<String, String> opts)
 	{
 		this(m, MeshTraitsBuilder.getDefault3D(), opts);
-	}
-
-	private Remesh(Mesh m, MeshTraitsBuilder mtb)
-	{
-		this(m, mtb, new HashMap<String, String>());
 	}
 
 	/**
@@ -121,10 +118,15 @@ public class Remesh
 		this(new MeshLiaison(bgMesh, mtb), options);
 	}
 
-	private Remesh(final MeshLiaison meshLiaison, final Map<String, String> options)
+	public Remesh(final MeshLiaison liaison, final Map<String, String> options)
+	{
+		this(liaison.getMesh(), liaison, options);
+	}
+
+	private Remesh(final Mesh m, final MeshLiaison meshLiaison, final Map<String, String> options)
 	{
 		liaison = meshLiaison;
-		mesh = liaison.getMesh();
+		mesh = m;
 		double size = 0.0;
 		boolean proj = false;
 		boolean ridges = false;

@@ -77,6 +77,7 @@ public class SmoothNodes3DBg
 	 *
 	 * @param m  the <code>Mesh</code> instance to refine.
 	 */
+	@Deprecated
 	public SmoothNodes3DBg(Mesh m)
 	{
 		this(m, new HashMap<String, String>());
@@ -92,6 +93,7 @@ public class SmoothNodes3DBg
 	 *        <code>tolerance</code>, <code>refresh</code> and
 	 *        <code>relaxation</code>.
 	 */
+	@Deprecated
 	public SmoothNodes3DBg(final Mesh bgMesh, final Map<String, String> options)
 	{
 		this(new MeshLiaison(bgMesh), options);
