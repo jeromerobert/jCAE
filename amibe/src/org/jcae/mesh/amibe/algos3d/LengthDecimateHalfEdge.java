@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2003,2006 by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -26,6 +26,7 @@ import org.jcae.mesh.amibe.ds.HalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
+import org.jcae.mesh.amibe.projection.MeshLiaison;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 import java.io.IOException;
@@ -39,6 +40,7 @@ import java.util.logging.Logger;
 public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 {
 	private static final Logger LOGGER=Logger.getLogger(LengthDecimateHalfEdge.class.getName());
+	private final MeshLiaison liaison;
 	private Vertex v3;
 	private boolean freeEdgeOnly = false;
 	private final double freeEdgeFactor;
@@ -51,9 +53,20 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	 *        behaviour.  Valid keys are <code>size</code>,
 	 *        <code>placement</code> and <code>maxtriangles</code>.
 	 */
-	private LengthDecimateHalfEdge(final Mesh m, final Map<String, String> options)
+	public LengthDecimateHalfEdge(final Mesh m, final Map<String, String> options)
+	{
+		this(m, null, options);
+	}
+
+	public LengthDecimateHalfEdge(final MeshLiaison meshLiaison, final Map<String, String> options)
+	{
+		this(meshLiaison.getMesh(), meshLiaison, options);
+	}
+
+	private LengthDecimateHalfEdge(final Mesh m, final MeshLiaison meshLiaison, final Map<String, String> options)
 	{
 		super(m);
+		liaison = meshLiaison;
 		v3 = null;
 		m.createVertex(0.0, 0.0, 0.0);
 		double freeEdgeTol = Double.NaN;
@@ -223,8 +236,16 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 		//  By convention, collapse() returns edge (v3, apex)
 		assert (!current.hasAttributes(AbstractHalfEdge.OUTER));
 		Vertex apex = current.apex();
+		Vertex v1 = current.origin();
+		Vertex v2 = current.destination();
 		current = (HalfEdge) mesh.edgeCollapse(current, v3);
 		// Now current == (v3*a)
+		if (liaison != null)
+		{
+			Triangle bgT = liaison.removeVertex(v1);
+			liaison.removeVertex(v2);
+			liaison.addVertex(v3, bgT);
+		}
 		// Update edge costs
 		assert current != null : v3+" not connected to "+apex;
 		assert current.origin() == v3 : ""+current+"\n"+v3+"\n"+apex;

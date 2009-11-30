@@ -110,7 +110,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 	private static final Logger LOGGER=Logger.getLogger(QEMDecimateHalfEdge.class.getName());
 	private Quadric3DError.Placement placement = Quadric3DError.Placement.OPTIMAL;
 	private HashMap<Vertex, Quadric3DError> quadricMap = null;
-	private MeshLiaison liaison;
+	private final MeshLiaison liaison;
 	private Vertex v3;
 	private Quadric3DError q3 = new Quadric3DError();
 	// vCostOpt and qCostOpt must be used only by cost() method.
@@ -129,7 +129,18 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 	 */
 	public QEMDecimateHalfEdge(final Mesh m, final Map<String, String> options)
 	{
+		this(m, null, options);
+	}
+
+	public QEMDecimateHalfEdge(final MeshLiaison liaison, final Map<String, String> options)
+	{
+		this(liaison.getMesh(), liaison, options);
+	}
+
+	private QEMDecimateHalfEdge(final Mesh m, final MeshLiaison meshLiaison, final Map<String, String> options)
+	{
 		super(m);
+		liaison = meshLiaison;
 		v3 = m.createVertex(0.0, 0.0, 0.0);
 		vCostOpt = m.createVertex(0.0, 0.0, 0.0);
 		for (final Map.Entry<String, String> opt: options.entrySet())
@@ -164,12 +175,6 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		minCos = 0.9;
 	}
 
-	protected QEMDecimateHalfEdge(final MeshLiaison liaison, final Map<String, String> options)
-	{
-		this(liaison.getMesh(), options);
-		this.liaison = liaison;
-	}
-	
 	@Override
 	public Logger thisLogger()
 	{

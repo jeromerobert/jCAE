@@ -5,6 +5,9 @@ Sun Nov 29 22:09:38 CET 2009 Denis Barbier <barbier@users.sourceforge.net>
 	locator from Remesh into MeshLiaison.  In MeshLiaison, drop quadrics
 	for now, vertices are projected onto background mesh.  Quadrics did
 	not work well with sharp edges.
+	* src/org/jcae/mesh/amibe/algos3d/*.java: Add a MeshLiaison argument
+	to most 3d algos.  This way, algos can be chained and retain original
+	mesh.
 
 Thu Nov 26 11:12:41 CET 2009 Denis Barbier <barbier@users.sourceforge.net>
 

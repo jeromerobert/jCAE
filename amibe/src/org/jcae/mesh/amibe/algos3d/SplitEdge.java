@@ -26,6 +26,7 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.HalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.projection.QuadricProjection;
+import org.jcae.mesh.amibe.projection.MeshLiaison;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 import java.io.File;
@@ -65,6 +66,7 @@ import java.util.logging.Logger;
 public class SplitEdge extends AbstractAlgoHalfEdge
 {
 	private static final Logger LOGGER=Logger.getLogger(SplitEdge.class.getName());
+	private final MeshLiaison liaison;
 	private final double [] newXYZ = new double[3];
 	private Vertex insertedVertex = null;
 	
@@ -78,7 +80,18 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 	 */
 	public SplitEdge(final Mesh m, final Map<String, String> options)
 	{
+		this(m, null, options);
+	}
+
+	public SplitEdge(final MeshLiaison liaison, final Map<String, String> options)
+	{
+		this(liaison.getMesh(), liaison, options);
+	}
+
+	public SplitEdge(final Mesh m, final MeshLiaison meshLiaison, final Map<String, String> options)
+	{
 		super(m);
+		liaison = meshLiaison;
 		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
 			final String key = opt.getKey();
@@ -211,6 +224,11 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		mesh.vertexSplit(current, insertedVertex);
 		assert current.destination() == insertedVertex : insertedVertex+" "+current;
 		assert mesh.isValid();
+		if (liaison != null)
+		{
+			liaison.addVertex(insertedVertex, liaison.getBackgroundTriangle(current.origin()));
+		}
+
 		HalfEdge ret = current.prev();
 		// Update edge lengths
 		if (current.hasAttributes(AbstractHalfEdge.NONMANIFOLD))

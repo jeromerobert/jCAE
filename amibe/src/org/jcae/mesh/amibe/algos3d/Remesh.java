@@ -118,7 +118,12 @@ public class Remesh
 	 */
 	private Remesh(final Mesh bgMesh, final MeshTraitsBuilder mtb, final Map<String, String> options)
 	{
-		liaison = new MeshLiaison(bgMesh, mtb);
+		this(new MeshLiaison(bgMesh, mtb), options);
+	}
+
+	private Remesh(final MeshLiaison meshLiaison, final Map<String, String> options)
+	{
+		liaison = meshLiaison;
 		mesh = liaison.getMesh();
 		double size = 0.0;
 		boolean proj = false;
@@ -182,7 +187,7 @@ public class Remesh
 		double [] bbox = new double[6];
 		bbox[0] = bbox[1] = bbox[2] = Double.MAX_VALUE;
 		bbox[3] = bbox[4] = bbox[5] = - (Double.MAX_VALUE / 2.0);
-		for (Triangle f: bgMesh.getTriangles())
+		for (Triangle f: mesh.getTriangles())
 		{
 			if (f.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;

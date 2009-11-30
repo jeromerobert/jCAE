@@ -24,6 +24,7 @@ package org.jcae.mesh.amibe.algos3d;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.HalfEdge;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
+import org.jcae.mesh.amibe.projection.MeshLiaison;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 import java.io.IOException;
@@ -50,6 +51,16 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 	 */
 	public SwapEdge(final Mesh m, final Map<String, String> options)
 	{
+		this(m, null, options);
+	}
+
+	public SwapEdge(final MeshLiaison liaison, final Map<String, String> options)
+	{
+		this(liaison.getMesh(), liaison, options);
+	}
+
+	private SwapEdge(final Mesh m, final MeshLiaison meshLiaison, final Map<String, String> options)
+	{
 		super(m);
 		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
@@ -67,7 +78,7 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 		counter = m.getTriangles().size() * 3;
 		noSwapAfterProcessing = true;
 	}
-	
+
 	@Override
 	public Logger thisLogger()
 	{

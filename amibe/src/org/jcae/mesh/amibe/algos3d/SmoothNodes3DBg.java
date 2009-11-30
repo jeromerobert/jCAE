@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2008, by EADS France
+    Copyright (C) 2008,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -24,6 +24,7 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.projection.MeshLiaison;
 import org.jcae.mesh.amibe.util.QSortedTree;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import org.jcae.mesh.xmldata.MeshReader;
@@ -38,7 +39,6 @@ import java.io.IOException;
 import gnu.trove.TObjectDoubleHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jcae.mesh.amibe.projection.MeshLiaison;
 
 /**
  * Node smoothing.  Triangle quality is computed for all triangles,
@@ -93,7 +93,12 @@ public class SmoothNodes3DBg
 	 */
 	public SmoothNodes3DBg(final Mesh bgMesh, final Map<String, String> options)
 	{
-		liaison = new MeshLiaison(bgMesh);
+		this(new MeshLiaison(bgMesh), options);
+	}
+
+	public SmoothNodes3DBg(final MeshLiaison meshLiaison, final Map<String, String> options)
+	{
+		liaison = meshLiaison;
 		mesh = liaison.getMesh();
 		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
