@@ -6,6 +6,7 @@ import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 import org.jcae.mesh.amibe.algos3d.SmoothNodes3DBg;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
+import org.jcae.mesh.amibe.projection.MeshLiaison
 import java.io.File;
 import java.io.IOException;
 import org.apache.commons.cli.*;
@@ -92,9 +93,9 @@ catch (IOException ex)
 	println("File "+xmlDir+File.separator+"jcae3d does not exist!");
 	usage(1, options);
 }
-//HashMap<String, String> decOptions = new HashMap<String, String>();
-//decOptions.put("size", "1");
-//new LengthDecimateHalfEdge(mesh, decOptions).compute();
+MeshLiaison liaison = new MeshLiaison(mesh, mtb)
+if (cmd.hasOption('c'))
+	liaison.getMesh().buildRidges(Double.parseDouble(cmd.getOptionValue('c')));
 
 HashMap<String, String> opts = new HashMap<String, String>();
 opts.put("iterations", sIter);
@@ -106,7 +107,7 @@ opts.put("refresh", sRefresh);
 if (cmd.hasOption('c'))
 	opts.put("coplanarity", cmd.getOptionValue('c'));
 
-SmoothNodes3DBg sm = new SmoothNodes3DBg(mesh, opts)
+SmoothNodes3DBg sm = new SmoothNodes3DBg(liaison, opts)
 sm.setProgressBarStatus(10000);
 sm.compute();
 

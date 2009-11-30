@@ -3,6 +3,7 @@
 from org.jcae.mesh.amibe.ds import Mesh
 from org.jcae.mesh.amibe.algos3d import Remesh
 from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
+from org.jcae.mesh.amibe.projection import MeshLiaison
 from org.jcae.mesh.xmldata import MeshReader, MeshWriter
 
 # Java
@@ -50,6 +51,9 @@ mtb = MeshTraitsBuilder.getDefault3D()
 mtb.addNodeList()
 mesh = Mesh(mtb)
 MeshReader.readObject3D(mesh, xmlDir)
+liaison = MeshLiaison(mesh, mtb)
+if options.coplanarity:
+	liaison.getMesh().buildRidges(options.coplanarity)
 
 opts = HashMap()
 setAnalytic = False
@@ -68,7 +72,7 @@ if options.decimateSize:
 elif options.decimateTarget:
 	opts.put("decimateTarget", str(options.decimateTarget))
 
-algo = Remesh(mesh, opts)
+algo = Remesh(liaison, opts)
 class RemeshMetric(Remesh.AnalyticMetricInterface):
 	def getTargetSize(self, x, y, z):
 		return min(200.0, (x - 9000.0)*(x - 9000.0) / 2250.0)

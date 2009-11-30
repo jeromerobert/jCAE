@@ -4,6 +4,7 @@
 import org.jcae.mesh.amibe.ds.Mesh
 import org.jcae.mesh.amibe.algos3d.Remesh
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder
+import org.jcae.mesh.amibe.projection.MeshLiaison
 import org.jcae.mesh.xmldata.*
 import org.apache.commons.cli.*;
 
@@ -76,6 +77,9 @@ MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault3D();
 mtb.addNodeList();
 Mesh mesh = new Mesh(mtb)
 MeshReader.readObject3D(mesh, xmldir)
+MeshLiaison liaison = new MeshLiaison(mesh, mtb)
+if (cmd.hasOption('c'))
+	liaison.getMesh().buildRidges(Double.parseDouble(cmd.getOptionValue('c')));
 
 boolean setAnalytic = false
 HashMap<String, String> algoOptions = new HashMap<String, String>();
@@ -94,7 +98,7 @@ if (cmd.hasOption('d'))
 else if (cmd.hasOption('D'))
 	algoOptions.put("decimateTarget", cmd.getOptionValue('D'));
 
-Remesh algo = new Remesh(mesh, algoOptions)
+Remesh algo = new Remesh(liaison, algoOptions)
 public static class RemeshMetric implements Remesh.AnalyticMetricInterface
 {
 	public double getTargetSize(double x, double y, double z)

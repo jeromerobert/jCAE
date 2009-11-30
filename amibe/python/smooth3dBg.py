@@ -3,6 +3,7 @@
 from org.jcae.mesh.amibe.ds import Mesh, Triangle
 from org.jcae.mesh.amibe.algos3d import SmoothNodes3DBg
 from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
+from org.jcae.mesh.amibe.projection import MeshLiaison
 from org.jcae.mesh.xmldata import MeshReader, MeshWriter
 
 # Java
@@ -52,13 +53,15 @@ if len(args) != 2:
 
 class MySmoothNodes3DBg(SmoothNodes3DBg):
 	prefix = None
-	def __init__(self, mesh, opts, prefix):
-		SmoothNodes3DBg.__init__(self, mesh, opts)
+	def __init__(self, liaison, opts, prefix):
+		SmoothNodes3DBg.__init__(self, liaison, opts)
 		self.prefix = prefix
-		self.mesh = mesh
-	def postProcessIteration(self, mesh, counter, *args):
+		self.liaison = liaison
 		if self.prefix:
-			MeshWriter.writeObject3D(mesh, self.prefix + str(counter+1), None)
+			MeshWriter.writeObject3D(liaison.getOutputMesh(), self.prefix + "0", None)
+	def postProcessIteration(self, liaison, counter, *args):
+		if self.prefix:
+			MeshWriter.writeObject3D(liaison.getOutputMesh(), self.prefix + str(counter+1), None)
 
 xmlDir = args[0]
 outDir = args[1]
@@ -67,6 +70,9 @@ mtb = MeshTraitsBuilder.getDefault3D()
 mtb.addNodeList()
 mesh = Mesh(mtb)
 MeshReader.readObject3D(mesh, xmlDir)
+liaison = MeshLiaison(mesh, mtb)
+if options.coplanarity:
+	liaison.getMesh().buildRidges(options.coplanarity)
 
 opts = HashMap()
 opts.put("iterations", str(options.iterations))
@@ -78,8 +84,7 @@ opts.put("relaxation", str(options.relaxation))
 opts.put("refresh", str(options.refresh))
 if (options.coplanarity >= 0.0):
 	opts.put("coplanarity", str(options.coplanarity))
-MeshWriter.writeObject3D(mesh, options.prefix + "0", None)
-sm = MySmoothNodes3DBg(mesh, opts, options.prefix)
+sm = MySmoothNodes3DBg(liaison, opts, options.prefix)
 sm.setProgressBarStatus(10000)
 sm.compute()
 
