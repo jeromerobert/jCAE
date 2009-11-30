@@ -188,6 +188,7 @@ public class BoraNode extends DataNode implements ViewCookie
 		l.add(SystemAction.get(ViewAction.class));
 		l.add(SystemAction.get(DeleteAction.class));
 		l.add(SystemAction.get(RenameAction.class));
+		l.add(SystemAction.get(ToAmibeAction.class));
 		return l.toArray(new Action[l.size()]);
 	}
 
