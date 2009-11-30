@@ -58,6 +58,7 @@ public class SmoothNodes3DBg
 	private double sizeTarget = -1.0;
 	private int nloop = 10;
 	private double tolerance = Double.MAX_VALUE / 2.0;
+	private double minCos = 0.95;
 	private boolean preserveBoundaries = false;
 	private boolean checkQuality = true;
 	private int progressBarStatus = 10000;
@@ -119,10 +120,15 @@ public class SmoothNodes3DBg
 			else if (key.equals("relaxation"))
 				relaxation = Double.valueOf(val).doubleValue();
 			else if (key.equals("coplanarity"))
-				mesh.buildRidges(Double.valueOf(val).doubleValue());
+			{
+				minCos = Double.parseDouble(val);
+				LOGGER.fine("Minimum dot product of face normals allowed for swapping an edge: "+minCos);
+			}
 			else
 				throw new RuntimeException("Unknown option: "+key);
 		}
+		if (meshLiaison == null)
+			mesh.buildRidges(minCos);
 		if (LOGGER.isLoggable(Level.FINE))
 		{
 			if (sizeTarget > 0.0)

@@ -25,6 +25,7 @@ import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.HalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.projection.MeshLiaison;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 import java.io.IOException;
@@ -44,6 +45,7 @@ import java.util.logging.Logger;
 public class ImproveConnectivity extends AbstractAlgoHalfEdge
 {
 	private static final Logger LOGGER=Logger.getLogger(ImproveConnectivity.class.getName());
+	private final MeshLiaison liaison;
 	private TObjectIntHashMap<Vertex> map;
 	
 	/**
@@ -53,9 +55,20 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 	 * @param options  map containing key-value pairs to modify algorithm
 	 *        behaviour.  Valid key is <code>coplanar</code>.
 	 */
-	private ImproveConnectivity(final Mesh m, final Map<String, String> options)
+	public ImproveConnectivity(final Mesh m, final Map<String, String> options)
+	{
+		this(m, null, options);
+	}
+
+	public ImproveConnectivity(final MeshLiaison liaison, final Map<String, String> options)
+	{
+		this(liaison.getMesh(), liaison, options);
+	}
+
+	private ImproveConnectivity(final Mesh m, final MeshLiaison meshLiaison, final Map<String, String> options)
 	{
 		super(m);
+		liaison = meshLiaison;
 		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
 			final String key = opt.getKey();
@@ -71,6 +84,8 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 		tolerance = - 0.01;
 		// Do not let AbstractAlgoHalfEdge swap edges
 		noSwapAfterProcessing = true;
+		if (meshLiaison == null)
+			mesh.buildRidges(minCos);
 	}
 	
 	@Override

@@ -103,9 +103,16 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 			}
 			else if (key.equals("maxtriangles"))
 				nrFinal = Integer.valueOf(val).intValue();
+			else if (key.equals("coplanarity"))
+			{
+				minCos = Double.parseDouble(val);
+				LOGGER.fine("Minimum dot product of face normals allowed for swapping an edge: "+minCos);
+			}
 			else
 				throw new RuntimeException("Unknown option: "+key);
 		}
+		if (meshLiaison == null)
+			mesh.buildRidges(minCos);
 	}
 	
 	@Override

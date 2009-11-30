@@ -101,6 +101,11 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 				freeEdgeTol = Double.parseDouble(val);
 				freeEdgeTol = freeEdgeTol*freeEdgeTol;
 			}
+			else if (key.equals("coplanarity"))
+			{
+				minCos = Double.parseDouble(val);
+				LOGGER.fine("Minimum dot product of face normals allowed for swapping an edge: "+minCos);
+			}
 			else
 				throw new IllegalArgumentException("Unknown option: "+key);
 		}
@@ -108,6 +113,8 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 			freeEdgeFactor = 1.0;
 		else
 			freeEdgeFactor = tolerance / freeEdgeTol;
+		if (meshLiaison == null)
+			mesh.buildRidges(minCos);
 	}
 	
 	@Override

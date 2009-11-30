@@ -169,10 +169,16 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 				LOGGER.fine("Max edge length: "+maxEdgeLength);
 				maxEdgeLength = maxEdgeLength*maxEdgeLength;
 			}
+			else if (key.equals("coplanarity"))
+			{
+				minCos = Double.parseDouble(val);
+				LOGGER.fine("Minimum dot product of face normals allowed for swapping an edge: "+minCos);
+			}
 			else
 				throw new RuntimeException("Unknown option: "+key);
 		}
-		minCos = 0.9;
+		if (meshLiaison == null)
+			mesh.buildRidges(minCos);
 	}
 
 	@Override

@@ -142,8 +142,6 @@ public class Remesh
 			else if (key.equals("coplanarity"))
 			{
 				copl = Double.valueOf(val).doubleValue();
-				mesh.buildRidges(copl);
-				ridges = true;
 			}
 			else if (key.equals("decimateSize"))
 			{
@@ -170,6 +168,23 @@ public class Remesh
 			else
 				LOGGER.warning("Unknown option: "+key);
 		}
+		if (meshLiaison == null)
+		{
+			ridges = true;
+			mesh.buildRidges(copl);
+		}
+		else
+		{
+			for (Triangle f: mesh.getTriangles())
+			{
+				if (f.hasAttributes(AbstractHalfEdge.SHARP))
+				{
+					ridges = true;
+					break;
+				}
+			}
+		}
+
 		double targetSize = size;
 		minlen = 1.0 / Math.sqrt(2.0);
 		maxlen = Math.sqrt(2.0);
