@@ -249,7 +249,8 @@ public class MeshLiaison
 		// We were not able to find a valid triangle.
 		// Iterate over all triangles to find the best one.
 		// FIXME: This is obviously very slow!
-		LOGGER.fine("Maximum error reached, search into the whole mesh for vertex "+v);
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, "Maximum error reached, search into the whole mesh for vertex "+v);
 		double dmin = Double.MAX_VALUE;
 		int[] index = new int[2];
 		int i = -1;
@@ -295,6 +296,8 @@ public class MeshLiaison
 		}
 
 		// Check a better start edge in neighborhood
+		if (LOGGER.isLoggable(Level.FINER))
+			LOGGER.log(Level.FINER, "Error too large: "+lf.dmin+" > "+maxError);
 		int[] index = new int[2];
 		Triangle.List seen = new Triangle.List();
 		LinkedList<Triangle> queue = new LinkedList<Triangle>();
@@ -304,7 +307,8 @@ public class MeshLiaison
 			Triangle t = queue.poll();
 			if (seen.contains(t) || t.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
-			if (sqrDistanceVertexTriangle(pos, t, index) < maxError)
+			double dist = sqrDistanceVertexTriangle(pos, t, index);
+			if (dist < maxError)
 			{
 				seen.clear();
 				int i = index[0];
@@ -313,6 +317,8 @@ public class MeshLiaison
 					ot = ot.next();
 				else if (ot.destination() == t.vertex[i])
 					ot = ot.prev();
+				if (LOGGER.isLoggable(Level.FINER))
+					LOGGER.log(Level.FINER, "Found better edge: error="+dist+" "+ot);
 				return ot;
 			}
 			seen.add(t);
