@@ -52,7 +52,6 @@ public class XMLHelper
 		throws ParserConfigurationException, SAXException, IOException
 	{
 		DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
-		factory.setValidating(true);
 		DocumentBuilder builder=factory.newDocumentBuilder();
 		builder.setEntityResolver(new ClassPathEntityResolver());
 		Document document=builder.parse(file);

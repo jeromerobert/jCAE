@@ -32,7 +32,9 @@ public class JCAEXMLWriter
 {
 	/** 
 	 * Creates a jcae XML document.
-	 */	
+	 * @Deprecated use AmibeWriter
+	 */
+	@Deprecated
 	public static Document createJcaeDocument()
 		throws ParserConfigurationException
 	{

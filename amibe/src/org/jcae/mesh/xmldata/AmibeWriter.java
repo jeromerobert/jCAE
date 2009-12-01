@@ -44,7 +44,7 @@ public abstract class AmibeWriter {
 	public static class Dim1 extends AmibeWriter {
 
 		public Dim1(String name) throws IOException {
-			super(name);
+			init(name);
 		}
 
 		public void addNode(double x) throws IOException
@@ -52,7 +52,7 @@ public abstract class AmibeWriter {
 			nodeBuffer.rewind();
 			nodeBuffer.putDouble(x);
 			nodeBuffer.rewind();
-			cnode.write(nodeBuffer);
+			nodeChan.write(nodeBuffer);
 			numberOfNodes ++;
 		}
 
@@ -63,9 +63,11 @@ public abstract class AmibeWriter {
 	}
 
 	public static class Dim2 extends AmibeWriter {
-
-		public Dim2(String name) throws IOException {
-			super(name);
+		private final String binDirectory, xmlFile;
+		public Dim2(String name, int index) throws IOException {			
+			binDirectory = "jcae2d."+ index +".files";
+			xmlFile = "jcae2d."+index;
+			init(name);
 		}
 
 		public void addNode(double x, double y) throws IOException
@@ -74,19 +76,29 @@ public abstract class AmibeWriter {
 			nodeBuffer.putDouble(x);
 			nodeBuffer.putDouble(y);
 			nodeBuffer.rewind();
-			cnode.write(nodeBuffer);
+			nodeChan.write(nodeBuffer);
 			numberOfNodes ++;
 		}
 		@Override
 		protected int dim() {
 			return 2;
 		}
+
+		@Override
+		protected String binDirectory() {
+			return binDirectory;
+		}
+
+		@Override
+		protected String xmlFile() {
+			return xmlFile;
+		}
 	}
 
 	public static class Dim3 extends AmibeWriter {
 
 		public Dim3(String name) throws IOException {
-			super(name);
+			init(name);
 		}
 
 		public void addNode(double x, double y, double z) throws IOException
@@ -96,7 +108,7 @@ public abstract class AmibeWriter {
 			nodeBuffer.putDouble(y);
 			nodeBuffer.putDouble(z);
 			nodeBuffer.rewind();
-			cnode.write(nodeBuffer);
+			nodeChan.write(nodeBuffer);
 			numberOfNodes ++;
 		}
 
@@ -117,26 +129,68 @@ public abstract class AmibeWriter {
 		int nbElement;
 	}
 	
-	protected FileChannel cnode, ctria, cgroups;
-	protected ByteBuffer nodeBuffer, triangleBufer;
+	protected FileChannel nodeChan, triaChan, groupChan, refChan;
+	protected ByteBuffer nodeBuffer, triaBuffer, refBuffer;
 	private XMLWriter xmlWriter;
-	protected int numberOfNodes, numberOfTriangles;
+	protected int numberOfNodes, numberOfTriangles, numberOfRef;
 	private List<Group> groups = new ArrayList<Group>();
 	private long groupOffset;
 	private Group currentGroup;
 	private boolean checkNoGroup;
-	public void addNodeRef(int n)
+	private String shape;
+	private boolean shapeWritten;
+	private int subShape;
+	private boolean haveSubShape;
+
+	/** Set the subShape */
+	public void setSubShape(int i)
 	{
-		
+		haveSubShape = true;
+		subShape = i;
+	}
+	public void setShape(String shape)
+	{
+		if(shapeWritten)
+			//only one shape by file
+			throw new IllegalStateException();
+		this.shape = shape;
+	}
+	public void addNodeRef(int n) throws IOException
+	{
+		refBuffer.rewind();
+		refBuffer.putInt(0, n);
+		refChan.write(refBuffer);
+		numberOfRef++;
+	}
+
+	public void addNode(double[] coords) throws IOException
+	{
+		assert coords.length == dim();
+		nodeBuffer.rewind();
+		for(int i = 0; i<coords.length; i++)
+			nodeBuffer.putDouble(i*8, coords[i]);
+		nodeChan.write(nodeBuffer);
+		numberOfNodes ++;
+
 	}
 	public void addTriangle(int i, int j, int k) throws IOException
 	{
-		triangleBufer.rewind();
-		triangleBufer.putInt(i);
-		triangleBufer.putInt(j);
-		triangleBufer.putInt(k);		
-		triangleBufer.rewind();
-		ctria.write(triangleBufer);
+		triaBuffer.rewind();
+		triaBuffer.putInt(i);
+		triaBuffer.putInt(j);
+		triaBuffer.putInt(k);
+		triaBuffer.rewind();
+		triaChan.write(triaBuffer);
+		numberOfTriangles ++;
+	}
+
+	public void addTriangle(int[] indices) throws IOException
+	{
+		triaBuffer.rewind();
+		triaBuffer.putInt(0, indices[0]);
+		triaBuffer.putInt(4, indices[1]);
+		triaBuffer.putInt(8, indices[2]);
+		triaChan.write(triaBuffer);
 		numberOfTriangles ++;
 	}
 
@@ -152,6 +206,8 @@ public abstract class AmibeWriter {
 		numberOfTriangles = 0;
 		groups.clear();
 		groupOffset = 0;
+		numberOfRef = 0;
+		haveSubShape = false;
 	}
 
 	public void nextGroup(String name)
@@ -176,9 +232,11 @@ public abstract class AmibeWriter {
 			xmlWriter.out.writeEndElement();
 			xmlWriter.out.writeEndElement();
 			xmlWriter.close();
-			cnode.close();
-			ctria.close();
-			cgroups.close();
+			nodeChan.close();
+			triaChan.close();
+			groupChan.close();
+			if(refChan != null)
+				refChan.close();
 		} catch (SAXException ex) {
 			LOGGER.log(Level.SEVERE, null, ex);
 		} catch (XMLStreamException ex) {
@@ -186,21 +244,31 @@ public abstract class AmibeWriter {
 		}
 	}
 
-	public AmibeWriter(String path) throws IOException
+	private String nodeFName, triaFName, refFName;
+	protected final void init(String path) throws IOException
 	{
 		try {
 			new File(path).mkdirs();
-			File dir3d = new File(path, "jcae" + dim() + "d.files");
+			nodeFName = "nodes" + dim() + "d.bin";
+			triaFName = "triangles" + dim() + "d.bin";
+			File dir3d = new File(path, binDirectory());
 			dir3d.mkdirs();
-			File fnode = new File(dir3d, "nodes" + dim() + "d.bin");
-			File ftria = new File(dir3d, "triangles" + dim() + "d.bin");
+			File fnode = new File(dir3d, nodeFName );
+			File ftria = new File(dir3d, triaFName );
 			File fgrp = new File(dir3d, "groups.bin");
-			cnode = new RandomAccessFile(fnode, "rw").getChannel();
-			ctria = new FileOutputStream(ftria).getChannel();
-			cgroups = new FileOutputStream(fgrp).getChannel();
+			if(hasRef())
+			{
+				refFName = "nodes1dref.bin";
+				File ref = new File(dir3d, refFName);
+				refChan = new FileOutputStream(ref).getChannel();
+			}
+			nodeChan = new RandomAccessFile(fnode, "rw").getChannel();
+			triaChan = new FileOutputStream(ftria).getChannel();
+			groupChan = new FileOutputStream(fgrp).getChannel();
 			nodeBuffer = ByteBuffer.allocate(dim() * 8);
-			triangleBufer = ByteBuffer.allocate(3 * 4);
-			xmlWriter = new XMLWriter(new File(path, "jcae" + dim() + "d").getPath(),
+			triaBuffer = ByteBuffer.allocate(3 * 4);
+			refBuffer = ByteBuffer.allocate(4);
+			xmlWriter = new XMLWriter(new File(path, xmlFile()).getPath(),
 				getClass().getResource("jcae.xsd"));
 			xmlWriter.out.writeStartElement("jcae");
 			xmlWriter.out.writeStartElement("mesh");
@@ -210,10 +278,19 @@ public abstract class AmibeWriter {
 	}
 
 	protected abstract int dim();
+	protected String binDirectory()
+	{
+		return "jcae" + dim() + "d.files";
+	}
 
+	protected String xmlFile()
+	{
+		return "jcae" + dim() + "d";
+	}
+	
 	public void getNode(int i, double[] nc) throws IOException {
 		nodeBuffer.rewind();
-		cnode.read(nodeBuffer, dim() * 8 * i);
+		nodeChan.read(nodeBuffer, dim() * 8 * i);
 		nodeBuffer.rewind();
 		nodeBuffer.asDoubleBuffer().get(nc);
 	}
@@ -237,28 +314,67 @@ public abstract class AmibeWriter {
 		o.writeEndElement();
 	}
 
+	private boolean hasRef()
+	{
+		return dim() < 3;
+	}
+
 	private void writeSubMesh() throws IOException
 	{	
 		try
 		{
 			XMLStreamWriter o = xmlWriter.out;
-			String dir = "jcae" + dim() + "d.file/";
+			if(shape != null && !shapeWritten)
+			{
+				o.writeStartElement("shape");
+				writeFile("brep", shape, 0);
+				o.writeEndElement();
+				shapeWritten = true;
+			}
+			
+			String dir = binDirectory()+"/";
 			o.writeStartElement("submesh");
+
+			if(haveSubShape)
+			{
+				o.writeStartElement("subshape");
+				o.writeCharacters(Integer.toString(subShape));
+				o.writeEndElement();
+			}
 			o.writeStartElement("nodes");
 			writeNumber(numberOfNodes);
-			writeFile("doublestream", dir + "nodes" + dim() + "d.bin",
-				numberOfNodes);
+			writeFile("doublestream", dir + nodeFName, 0);
+			if(hasRef())
+			{
+				o.writeStartElement("references");
+				writeNumber(numberOfRef);
+				writeFile("integerstream", dir + refFName, 0);
+				o.writeEndElement();
+			}
 			o.writeEndElement(); //nodes
+
 			o.writeStartElement("triangles");
-			writeNumber(numberOfNodes);
-			writeFile("integerstream", dir + "triangles" + dim() + "d.bin",
-				numberOfNodes);
+			writeNumber(numberOfTriangles);
+			writeFile("integerstream", dir + triaFName, 0);
 			o.writeEndElement(); //triangles
+			writeGroups();
+			o.writeEndElement(); //submesh
+		} catch (XMLStreamException ex) {
+			Logger.getLogger(AmibeWriter.class.getName()).log(Level.SEVERE, null,
+				ex);
+		}
+	}
+
+	private void writeGroups() throws XMLStreamException, IOException
+	{
+		if (checkNoGroup) {
+			checkNoGroup();
+		}
+		if(!groups.isEmpty())
+		{
+			XMLStreamWriter o = xmlWriter.out;
 			o.writeStartElement("groups");
 			int id = 1;
-			if (checkNoGroup) {
-				checkNoGroup();
-			}
 			for (Group g : groups) {
 				o.writeStartElement("group");
 				o.writeAttribute("id", Integer.toString(id++));
@@ -266,14 +382,10 @@ public abstract class AmibeWriter {
 				o.writeCharacters(g.name);
 				o.writeEndElement();
 				writeNumber(g.nbElement);
-				writeFile("integerstream", dir + "groups.bin", g.offset);
+				writeFile("integerstream", binDirectory() + "/groups.bin", g.offset);
 				o.writeEndElement();
 			}
 			o.writeEndElement(); //groups
-			o.writeEndElement(); //submesh
-		} catch (XMLStreamException ex) {
-			Logger.getLogger(AmibeWriter.class.getName()).log(Level.SEVERE, null,
-				ex);
 		}
 	}
 
@@ -299,7 +411,7 @@ public abstract class AmibeWriter {
 			{
 				bb.putInt(i);
 				bb.rewind();
-				cgroups.write(bb);
+				groupChan.write(bb);
 				bb.rewind();
 			}
 		}
