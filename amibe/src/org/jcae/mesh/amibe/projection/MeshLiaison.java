@@ -220,6 +220,13 @@ public class MeshLiaison
 		return mapCurrentVertexProjection.remove(v).t;
 	}
 
+	public final void updateAll()
+	{
+		LOGGER.config("Update projections");
+		for (Vertex v : mapCurrentVertexProjection.keySet())
+			move(v, v.getUV());
+	}
+
 	public AbstractHalfEdge findSurroundingTriangle(Vertex v, Vertex start, double maxError, boolean background)
 	{
 		Triangle t = null;
