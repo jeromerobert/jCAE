@@ -50,7 +50,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 
 	private static final int [] next3 = { 1, 2, 0 };
 	private static final int [] prev3 = { 2, 0, 1 };
-	private static final double [][] temp = new double[4][3];
+	private static final double [][] temp = new double[5][3];
 	
 	HalfEdge (HalfEdgeTraitsBuilder htb, TriangleHE tri, byte localNumber, byte attributes)
 	{
@@ -428,22 +428,21 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			return invalid;
 		double s1 = Matrix3D.computeNormal3D(o.getUV(), d.getUV(), a.getUV(), temp[0], temp[1], temp[2]);
 		double s2 = Matrix3D.computeNormal3D(d.getUV(), o.getUV(), n.getUV(), temp[0], temp[1], temp[3]);
+		// Make sure that edge swap does not create inverted triangles
+		double s3 = Matrix3D.computeNormal3D(o.getUV(), n.getUV(), a.getUV(), temp[0], temp[1], temp[2]);
+		double s4 = Matrix3D.computeNormal3D(d.getUV(), a.getUV(), n.getUV(), temp[0], temp[1], temp[3]);
 		if (Matrix3D.prodSca(temp[2], temp[3]) < minCos)
 			return invalid;
-		// Mean normal so that temp[2] and temp[3] play a symmetric role
-		temp[2][0] = 0.5 * (temp[2][0] + temp[3][0]);
-		temp[2][1] = 0.5 * (temp[2][1] + temp[3][1]);
-		temp[2][2] = 0.5 * (temp[2][2] + temp[3][2]);
-		// Check for quality improvement
-		// Check for inverted triangles
-		o.outer3D(n, a, temp[1], temp[3], temp[0]);
-		double s3 = 0.5 * Matrix3D.prodSca(temp[2], temp[0]);
-		if (s3 <= 0.0)
-			return invalid;
-		d.outer3D(a, n, temp[1], temp[3], temp[0]);
-		double s4 = 0.5 * Matrix3D.prodSca(temp[2], temp[0]);
-		if (s4 <= 0.0)
-			return invalid;
+		for (int i = 0; i < 4; i++)
+		{
+			HalfEdge h = (i == 0 ? next.next : (i == 1 ? sym.next : (i == 2 ? next : sym.next.next)));
+			if (h.hasAttributes(SHARP | OUTER | BOUNDARY | NONMANIFOLD))
+				continue;
+			Matrix3D.computeNormal3D(h.destination().getUV(), h.origin().getUV(), h.sym().apex().getUV(), temp[0], temp[1], temp[4]);
+			if (Matrix3D.prodSca(temp[2+i/2], temp[4]) < minCos)
+				return invalid;
+		}
+
 		double p1 = o.distance3D(d) + d.distance3D(a) + a.distance3D(o);
 		double p2 = d.distance3D(o) + o.distance3D(n) + n.distance3D(d);
 		// No need to multiply by 12.0 * Math.sqrt(3.0)
