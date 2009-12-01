@@ -113,6 +113,7 @@
 			</manifest>
 			<fileset dir="${src.dir}" includes="**/*.properties"/>
 			<fileset dir="${src.dir}" includes="**/*.dtd"/>
+			<fileset dir="${src.dir}" includes="**/*.xsd"/>
 		</jar>
 		<jar basedir="${classes.dir}" includes="**/occ/*" compress="true" jarfile="${mesherocc.jar}">
 			<manifest>
