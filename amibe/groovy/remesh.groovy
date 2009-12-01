@@ -76,7 +76,10 @@ String xmldir = remaining[0]
 String outDir = remaining[1]
 
 MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault3D();
-mtb.addNodeList();
+if (cmd.hasOption('d') || cmd.hasOption('D'))
+	mtb.addNodeSet();
+else
+	mtb.addNodeList();
 Mesh mesh = new Mesh(mtb)
 MeshReader.readObject3D(mesh, xmldir)
 MeshLiaison liaison = new MeshLiaison(mesh, mtb)

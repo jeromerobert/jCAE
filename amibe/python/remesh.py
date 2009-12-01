@@ -48,7 +48,10 @@ xmlDir = args[0]
 outDir = args[1]
 
 mtb = MeshTraitsBuilder.getDefault3D()
-mtb.addNodeList()
+if options.decimateSize or options.decimateTarget:
+	mtb.addNodeSet()
+else:
+	mtb.addNodeList()
 mesh = Mesh(mtb)
 MeshReader.readObject3D(mesh, xmlDir)
 liaison = MeshLiaison(mesh, mtb)
