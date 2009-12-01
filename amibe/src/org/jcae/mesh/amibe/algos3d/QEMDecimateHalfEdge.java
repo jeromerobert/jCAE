@@ -458,7 +458,8 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		if (q3 == null)
 			q3 = new Quadric3DError();
 		updateIncidentEdges(current);
-		checkAndSwapAroundOrigin(current);
+		if (minCos >= -1.0)
+			checkAndSwapAroundOrigin(current);
 		return current.next();
 	}
 

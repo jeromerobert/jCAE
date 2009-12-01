@@ -228,7 +228,7 @@ public abstract class AbstractAlgoHalfEdge
 			current = processEdge(current, cost);
 			processed++;
 
-			if (noSwapAfterProcessing)
+			if (noSwapAfterProcessing || minCos < -1.0)
 				continue;
 			
 			// Loop around current.apex with
