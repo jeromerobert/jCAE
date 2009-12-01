@@ -116,6 +116,9 @@ public abstract class AmibeWriter {
 		protected int dim() {
 			return 3;
 		}
+
+		@Override
+		public void addNodeRef(int n) {}
 	}
 
 	/**
