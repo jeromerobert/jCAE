@@ -21,22 +21,21 @@
 
 package org.jcae.mesh.xmldata;
 
-public class JCAEXMLData
+public interface JCAEXMLData
 {
-	final static String xml1dFilename = "jcae1d";
-	final static String xml2dFilename = "jcae2d.";  // Face number is appended to this string
-	final static String xml3dFilename = "jcae3d";
+	String xml1dFilename = "jcae1d";
+	String xml2dFilename = "jcae2d.";  // Face number is appended to this string
+	String xml3dFilename = "jcae3d";
 
-	final static String nodes1dFilename = "nodes1d.bin";
-	final static String ref1dFilename = "nodes1dref.bin";
-	final static String beams1dFilename = "beams1d.bin";
+	String nodes1dFilename = "nodes1d.bin";
+	String ref1dFilename = "nodes1dref.bin";
+	String beams1dFilename = "beams1d.bin";
 	
-	final static String nodes2dFilename = "nodes2d.bin";
-	final static String ref2dFilename = "nodes2dref.bin";
-	final static String triangles2dFilename = "triangles2d.bin";
+	String nodes2dFilename = "nodes2d.bin";
+	String triangles2dFilename = "triangles2d.bin";
 	
-	final static String nodes3dFilename = "nodes3d.bin";
-	final static String normals3dFilename = "normals3d.bin";
-	final static String triangles3dFilename = "triangles3d.bin";
-	final static String groupsFilename = "groups.bin";
+	String nodes3dFilename = "nodes3d.bin";
+	String normals3dFilename = "normals3d.bin";
+	String triangles3dFilename = "triangles3d.bin";
+	String groupsFilename = "groups.bin";
 }

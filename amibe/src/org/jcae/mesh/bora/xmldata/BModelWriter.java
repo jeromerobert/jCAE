@@ -27,7 +27,6 @@ import org.jcae.mesh.bora.ds.BModel;
 import org.jcae.mesh.bora.ds.BSubMesh;
 import org.jcae.mesh.bora.ds.Constraint;
 import org.jcae.mesh.bora.ds.Hypothesis;
-import org.jcae.mesh.xmldata.JCAEXMLWriter;
 import org.jcae.mesh.xmldata.XMLHelper;
 import org.jcae.mesh.cad.CADShapeEnum;
 
@@ -38,11 +37,31 @@ import java.util.Iterator;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.jcae.mesh.xmldata.ClassPathEntityResolver;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.DocumentType;
 
 public class BModelWriter
 {
 	private static final Logger LOGGER = Logger.getLogger(BModelWriter.class.getName());
-
+	/**
+	 * Creates a jcae XML document.
+	 */
+	private static Document createJcaeBoraDocument()
+		throws ParserConfigurationException
+	{
+		DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
+		factory.setValidating(true);
+		DocumentBuilder builder=factory.newDocumentBuilder();
+		builder.setEntityResolver(new ClassPathEntityResolver());
+		DOMImplementation domImpl=builder.getDOMImplementation();
+		DocumentType docType=domImpl.createDocumentType("jcae", null,
+			"classpath:///org/jcae/mesh/xmldata/jcaebora.dtd");
+		return domImpl.createDocument(null, "jcae", docType);
+	}
 	/**
 	 * Write the current object to a XML file and binary files. The XML file
 	 * have links to the binary files.
@@ -57,7 +76,7 @@ public class BModelWriter
 				LOGGER.log(Level.FINE, "Writing file "+file);
 
 			// Create and fill the DOM
-			Document document=JCAEXMLWriter.createJcaeBoraDocument();
+			Document document=createJcaeBoraDocument();
 			
 			Element jcaeElement=document.getDocumentElement();
 			Element modelElement=document.createElement("model");

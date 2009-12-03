@@ -19,11 +19,13 @@
  */
 
 package org.jcae.mesh.xmldata;
-
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
@@ -41,6 +43,7 @@ import org.xml.sax.SAXException;
 public abstract class AmibeWriter {
 
 	private final static Logger LOGGER = Logger.getLogger(AmibeWriter.class.getName());
+	
 	public static class Dim1 extends AmibeWriter {
 
 		public Dim1(String name) throws IOException {
@@ -49,10 +52,7 @@ public abstract class AmibeWriter {
 
 		public void addNode(double x) throws IOException
 		{
-			nodeBuffer.rewind();
-			nodeBuffer.putDouble(x);
-			nodeBuffer.rewind();
-			nodeChan.write(nodeBuffer);
+			nodeChan.writeDouble(x);
 			numberOfNodes ++;
 		}
 
@@ -72,11 +72,8 @@ public abstract class AmibeWriter {
 
 		public void addNode(double x, double y) throws IOException
 		{
-			nodeBuffer.rewind();
-			nodeBuffer.putDouble(x);
-			nodeBuffer.putDouble(y);
-			nodeBuffer.rewind();
-			nodeChan.write(nodeBuffer);
+			nodeChan.writeDouble(x);
+			nodeChan.writeDouble(y);
 			numberOfNodes ++;
 		}
 		@Override
@@ -96,19 +93,27 @@ public abstract class AmibeWriter {
 	}
 
 	public static class Dim3 extends AmibeWriter {
+		protected DataOutputStream normalChan;
+		public Dim3(String name, boolean normal) throws IOException {
+			init(name);
+			haveNormal = normal;
+			if(normal)
+			{
+				File dir3d = new File(name, binDirectory());
+				File f = new File(dir3d, JCAEXMLData.normals3dFilename);
+				normalChan = createDOS(f);
+			}
+		}
 
 		public Dim3(String name) throws IOException {
-			init(name);
+			this(name, false);
 		}
 
 		public void addNode(double x, double y, double z) throws IOException
 		{
-			nodeBuffer.rewind();
-			nodeBuffer.putDouble(x);
-			nodeBuffer.putDouble(y);
-			nodeBuffer.putDouble(z);
-			nodeBuffer.rewind();
-			nodeChan.write(nodeBuffer);
+			nodeChan.writeDouble(x);
+			nodeChan.writeDouble(y);
+			nodeChan.writeDouble(z);
 			numberOfNodes ++;
 		}
 
@@ -119,6 +124,13 @@ public abstract class AmibeWriter {
 
 		@Override
 		public void addNodeRef(int n) {}
+
+		public void addNormal(double x, double y, double z) throws IOException
+		{
+			normalChan.writeDouble(x);
+			normalChan.writeDouble(y);
+			normalChan.writeDouble(z);
+		}
 	}
 
 	/**
@@ -131,11 +143,51 @@ public abstract class AmibeWriter {
 		long offset;
 		int nbElement;
 	}
+
+	private static class NIOutputStream extends OutputStream
+	{
+		private ByteBuffer bb = ByteBuffer.allocate(1);
+		private ByteBuffer bb2;
+		private final FileChannel channel;
+
+		public NIOutputStream(FileChannel c) {
+			this.channel = c;
+		}
+
+		@Override
+		public void write(int b) throws IOException {
+			bb.put(0, (byte)b);
+			bb.rewind();
+			channel.write(bb);
+		}
+
+		@Override
+		public void write(byte[] b, int off, int len) throws IOException {
+			if(bb2 == null || bb2.capacity() != len)
+				bb2 = ByteBuffer.allocate(len);
+			else
+				bb2.rewind();
+			bb2.put(b, off, len);
+			bb2.rewind();
+			channel.write(bb2);
+		}
+
+		@Override
+		public void close() throws IOException {
+			channel.close();
+		}
+	}
+
+	private static DataOutputStream createDOS(File f) throws FileNotFoundException
+	{
+		FileOutputStream fos = new FileOutputStream(f);
+		return new DataOutputStream(new BufferedOutputStream(
+			new NIOutputStream(fos.getChannel()), 1024*64));
+	}
 	
-	protected FileChannel nodeChan, triaChan, groupChan, refChan;
-	protected ByteBuffer nodeBuffer, triaBuffer, refBuffer;
+	protected DataOutputStream nodeChan, triaChan, groupChan, refChan, beamChan;
 	private XMLWriter xmlWriter;
-	protected int numberOfNodes, numberOfTriangles, numberOfRef;
+	protected int numberOfNodes, numberOfTriangles, numberOfRef, numberOfBeams;
 	private List<Group> groups = new ArrayList<Group>();
 	private long groupOffset;
 	private Group currentGroup;
@@ -144,7 +196,8 @@ public abstract class AmibeWriter {
 	private boolean shapeWritten;
 	private int subShape;
 	private boolean haveSubShape;
-
+	protected boolean haveNormal;
+	
 	/** Set the subShape */
 	public void setSubShape(int i)
 	{
@@ -160,56 +213,52 @@ public abstract class AmibeWriter {
 	}
 	public void addNodeRef(int n) throws IOException
 	{
-		refBuffer.rewind();
-		refBuffer.putInt(0, n);
-		refChan.write(refBuffer);
+		refChan.writeInt(n);
 		numberOfRef++;
 	}
 
 	public void addNode(double[] coords) throws IOException
 	{
 		assert coords.length == dim();
-		nodeBuffer.rewind();
 		for(int i = 0; i<coords.length; i++)
-			nodeBuffer.putDouble(i*8, coords[i]);
-		nodeChan.write(nodeBuffer);
+			nodeChan.writeDouble(coords[i]);
 		numberOfNodes ++;
 
 	}
 	public void addTriangle(int i, int j, int k) throws IOException
 	{
-		triaBuffer.rewind();
-		triaBuffer.putInt(i);
-		triaBuffer.putInt(j);
-		triaBuffer.putInt(k);
-		triaBuffer.rewind();
-		triaChan.write(triaBuffer);
+		triaChan.writeInt(i);
+		triaChan.writeInt(j);
+		triaChan.writeInt(k);
 		numberOfTriangles ++;
 	}
 
 	public void addTriangle(int[] indices) throws IOException
 	{
-		triaBuffer.rewind();
-		triaBuffer.putInt(0, indices[0]);
-		triaBuffer.putInt(4, indices[1]);
-		triaBuffer.putInt(8, indices[2]);
-		triaChan.write(triaBuffer);
+		triaChan.writeInt(indices[0]);
+		triaChan.writeInt(indices[1]);
+		triaChan.writeInt(indices[2]);
 		numberOfTriangles ++;
 	}
 
-	public void addBeam(int i, int j)
+	public void addBeam(int i, int j) throws IOException
 	{
-
+		beamChan.writeInt(i);
+		beamChan.writeInt(j);
+		numberOfBeams ++;
 	}
 
 	public void nextSubMesh() throws IOException
 	{
 		writeSubMesh();
+		nodesOffset = numberOfNodes;
+		triaOffset = numberOfTriangles;
+		beamsOffset = numberOfBeams;
 		numberOfNodes = 0;
 		numberOfTriangles = 0;
-		groups.clear();
-		groupOffset = 0;
 		numberOfRef = 0;
+		numberOfBeams = 0;
+		groups.clear();
 		haveSubShape = false;
 	}
 
@@ -222,8 +271,9 @@ public abstract class AmibeWriter {
 		currentGroup = g;
 	}
 
-	public void addElementToGroup(int id)
+	public void addElementToGroup(int id) throws IOException
 	{
+		groupChan.writeInt(id);
 		groupOffset ++;
 		currentGroup.nbElement ++;
 	}
@@ -247,30 +297,33 @@ public abstract class AmibeWriter {
 		}
 	}
 
-	private String nodeFName, triaFName, refFName;
+	private String nodeFName, triaFName, refFName, beamsFName;
+	private int nodesOffset, beamsOffset, triaOffset;
+	private DoubleFileReader nodesReader;
+	private File fnode;
 	protected final void init(String path) throws IOException
 	{
 		try {
 			new File(path).mkdirs();
 			nodeFName = "nodes" + dim() + "d.bin";
 			triaFName = "triangles" + dim() + "d.bin";
+			beamsFName = "beams" + dim() + "d.bin";
 			File dir3d = new File(path, binDirectory());
-			dir3d.mkdirs();
-			File fnode = new File(dir3d, nodeFName );
+			dir3d.mkdirs();	
+			fnode = new File(dir3d, nodeFName );
 			File ftria = new File(dir3d, triaFName );
 			File fgrp = new File(dir3d, "groups.bin");
+			File fbeams = new File(dir3d, beamsFName);
 			if(hasRef())
 			{
 				refFName = "nodes1dref.bin";
 				File ref = new File(dir3d, refFName);
-				refChan = new FileOutputStream(ref).getChannel();
+				refChan = createDOS(ref);
 			}
-			nodeChan = new RandomAccessFile(fnode, "rw").getChannel();
-			triaChan = new FileOutputStream(ftria).getChannel();
-			groupChan = new FileOutputStream(fgrp).getChannel();
-			nodeBuffer = ByteBuffer.allocate(dim() * 8);
-			triaBuffer = ByteBuffer.allocate(3 * 4);
-			refBuffer = ByteBuffer.allocate(4);
+			nodeChan = createDOS(fnode);
+			triaChan = createDOS(ftria);
+			groupChan = createDOS(fgrp);
+			beamChan = createDOS(fbeams);
 			xmlWriter = new XMLWriter(new File(path, xmlFile()).getPath(),
 				getClass().getResource("jcae.xsd"));
 			xmlWriter.out.writeStartElement("jcae");
@@ -292,10 +345,11 @@ public abstract class AmibeWriter {
 	}
 	
 	public void getNode(int i, double[] nc) throws IOException {
-		nodeBuffer.rewind();
-		nodeChan.read(nodeBuffer, dim() * 8 * i);
-		nodeBuffer.rewind();
-		nodeBuffer.asDoubleBuffer().get(nc);
+		if(nodesReader == null)
+		{
+			nodesReader = new DoubleFileReaderByDirectBuffer(fnode);
+		}
+		nodesReader.get(i * dim(), nc);
 	}
 
 	private void writeNumber(int i) throws XMLStreamException
@@ -324,6 +378,8 @@ public abstract class AmibeWriter {
 
 	private void writeSubMesh() throws IOException
 	{	
+		if(numberOfNodes == 0)
+			return;
 		try
 		{
 			XMLStreamWriter o = xmlWriter.out;
@@ -346,7 +402,7 @@ public abstract class AmibeWriter {
 			}
 			o.writeStartElement("nodes");
 			writeNumber(numberOfNodes);
-			writeFile("doublestream", dir + nodeFName, 0);
+			writeFile("doublestream", dir + nodeFName, nodesOffset);
 			if(hasRef())
 			{
 				o.writeStartElement("references");
@@ -356,10 +412,28 @@ public abstract class AmibeWriter {
 			}
 			o.writeEndElement(); //nodes
 
-			o.writeStartElement("triangles");
-			writeNumber(numberOfTriangles);
-			writeFile("integerstream", dir + triaFName, 0);
-			o.writeEndElement(); //triangles
+			if(numberOfTriangles > 0)
+			{
+				o.writeStartElement("triangles");
+				writeNumber(numberOfTriangles);
+				writeFile("integerstream", dir + triaFName, triaOffset);
+				if(haveNormal)
+				{
+					o.writeStartElement("normals");
+					writeFile("doublestream", dir + JCAEXMLData.normals3dFilename, 0);
+					o.writeEndElement();
+				}
+				o.writeEndElement(); //triangles
+			}
+			
+			if(numberOfBeams > 0)
+			{
+				o.writeStartElement("beams");
+				writeNumber(numberOfBeams);
+				writeFile("integerstream", dir + beamsFName, beamsOffset);
+				o.writeEndElement();
+			}
+
 			writeGroups();
 			o.writeEndElement(); //submesh
 		} catch (XMLStreamException ex) {
@@ -409,14 +483,8 @@ public abstract class AmibeWriter {
 			g.nbElement=numberOfTriangles;
 			g.offset=0;
 			groups.add(g);
-			ByteBuffer bb=ByteBuffer.allocate(4);
 			for(int i=0; i<numberOfTriangles; i++)
-			{
-				bb.putInt(i);
-				bb.rewind();
-				groupChan.write(bb);
-				bb.rewind();
-			}
+				groupChan.writeInt(i);
 		}
 	}
 }

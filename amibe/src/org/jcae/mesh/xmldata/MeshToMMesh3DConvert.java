@@ -21,6 +21,8 @@
 
 package org.jcae.mesh.xmldata;
 
+import java.io.IOException;
+import java.util.logging.Level;
 import org.jcae.mesh.cad.CADExplorer;
 import org.jcae.mesh.cad.CADFace;
 import org.jcae.mesh.cad.CADGeomSurface;
@@ -28,9 +30,6 @@ import org.jcae.mesh.cad.CADShape;
 import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.mesh.cad.CADShapeFactory;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
@@ -38,14 +37,13 @@ import javax.xml.xpath.XPathFactory;
 import gnu.trove.TIntIntHashMap;
 import gnu.trove.TIntObjectHashMap;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import java.util.logging.Logger;
 
 
-public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
+public class MeshToMMesh3DConvert implements FilterInterface, JCAEXMLData
 {
-	private static final Logger logger=Logger.getLogger(MeshToMMesh3DConvert.class.getName());
+	private static final Logger LOGGER=Logger.getLogger(MeshToMMesh3DConvert.class.getName());
 	private int nrRefs = 0;
 	private int nrIntNodes = 0;
 	private int nrTriangles = 0;
@@ -54,15 +52,12 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 	private TIntIntHashMap xrefs;
 	private final TIntObjectHashMap<CADFace> mapFaces = new TIntObjectHashMap<CADFace>();
 	private double [] coordRefs = null;
-	private DataOutputStream nodesOut, refsOut, normalsOut, trianglesOut, groupsOut;
 	private final String xmlDir;
 	private final String brepFile;
-	private File xmlFile3d;
-	private File nodesFile, refFile, normalsFile, trianglesFile, groupsFile;
-	private Document documentOut;
-	private Element groupsElement;
 	private UNVGenericWriter unvWriter;
-
+	private AmibeWriter.Dim3 amibeWriter;
+	private boolean writeNormal;
+	
 	public MeshToMMesh3DConvert(String dir, String bFile, CADShape shape)
 	{
 		xmlDir = dir;
@@ -125,46 +120,20 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 				ex.printStackTrace();
 				throw new RuntimeException(ex);
 			}
-			logger.fine("Total: "+nrRefs+" references");
+			LOGGER.fine("Total: "+nrRefs+" references");
 		}
 	}
 	
 	public final void beforeProcessingAllShapes(boolean writeNormal)
 	{
-		coordRefs = new double[3*nrRefs];
-		xrefs = new TIntIntHashMap(nrRefs);
-		
-		xmlFile3d = new File(xmlDir, JCAEXMLData.xml3dFilename);
-		File dir = new File(xmlDir, JCAEXMLData.xml3dFilename+".files");
-		//create the directory if it does not exiswriteInit(PrintStream arg0)t
-		if(!dir.exists())
-			dir.mkdirs();
-		
-		nodesFile = new File(dir, JCAEXMLData.nodes3dFilename);
-		refFile = new File(dir, JCAEXMLData.ref1dFilename);
-		normalsFile = new File(dir, JCAEXMLData.normals3dFilename);
-		trianglesFile = new File(dir, JCAEXMLData.triangles3dFilename);
-		groupsFile = new File(dir, JCAEXMLData.groupsFilename);
-		
-		try
-		{
-			documentOut = JCAEXMLWriter.createJcaeDocument();
-			groupsElement = documentOut.createElement("groups");
-		
-			nodesOut = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile)));
-			refsOut = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile, true)));
-			if (writeNormal)
-				normalsOut = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(normalsFile)));
-			trianglesOut = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(trianglesFile)));
-			groupsOut = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(groupsFile)));
-		}
-		catch(FileNotFoundException ex)
-		{
-		}
-		catch(Exception ex)
-		{
-			ex.printStackTrace();
-			throw new RuntimeException(ex);
+		try {
+			coordRefs = new double[3 * nrRefs];
+			xrefs = new TIntIntHashMap(nrRefs);
+			amibeWriter = new AmibeWriter.Dim3(xmlDir, writeNormal);
+			amibeWriter.setShape(brepFile);
+			this.writeNormal = writeNormal;
+		} catch (IOException ex) {
+			LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
 		}
 	}
 	
@@ -175,54 +144,17 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 		//  of duplicates
 		nrRefs = offsetBnd;
 		int nrNodes = nrIntNodes + nrRefs;
-		logger.fine("Append coordinates of "+nrRefs+" nodes");
+		LOGGER.fine("Append coordinates of "+nrRefs+" nodes");
 		try
 		{
-			for (int i = 0; i < 3*nrRefs; i++)
-				nodesOut.writeDouble(coordRefs[i]);
-			nodesOut.close();
-			refsOut.close();
-			if (normalsOut != null)
-				normalsOut.close();
-			trianglesOut.close();
-			groupsOut.close();
+			for (int i = 0; i < 3*nrRefs; i+=3)
+				amibeWriter.addNode(coordRefs[i], coordRefs[i+1], coordRefs[i+2]);
 			if (unvWriter != null)
 				unvWriter.finish(nrRefs, nrIntNodes, nrTriangles, coordRefs);
-			
-			// Write 3d files
-			Element jcaeElement = documentOut.getDocumentElement();
-			Element meshElement = documentOut.createElement("mesh");
-			Element shapeElement=XMLHelper.parseXMLString(documentOut, "<shape>"+
-				"<file format=\"brep\" location=\""+brepFile+"\"/>"+"</shape>");
-			meshElement.appendChild(shapeElement);
-			Element subMeshElement = documentOut.createElement("submesh");
-			Element nodesElement = XMLHelper.parseXMLString(documentOut,
-				"<nodes>"+
-				"<number>"+nrNodes+"</number>"+
-				"<file format=\"doublestream\" location=\""+XMLHelper.canonicalize(xmlDir, nodesFile.toString())+"\"/>"+
-				"<references>"+
-				"<number>"+nrRefs+"</number>"+
-				"<file format=\"integerstream\" location=\""+XMLHelper.canonicalize(xmlDir, refFile.toString())+"\"/>"+
-				"</references>"+
-				"</nodes>");
-			subMeshElement.appendChild(nodesElement);
-			Element trianglesElement = XMLHelper.parseXMLString(documentOut,
-				"<triangles>"+
-				"<number>"+nrTriangles+"</number>"+
-				"<file format=\"integerstream\" location=\""+XMLHelper.canonicalize(xmlDir, trianglesFile.toString())+"\"/>"+
-				"<normals>"+
-				"<file format=\"doublestream\" location=\""+XMLHelper.canonicalize(xmlDir, normalsFile.toString())+"\"/>"+
-				"</normals>"+
-				"</triangles>");
-			subMeshElement.appendChild(trianglesElement);
-			subMeshElement.appendChild(groupsElement);
-			
-			meshElement.appendChild(subMeshElement);
-			jcaeElement.appendChild(meshElement);
 
-			XMLHelper.writeXML(documentOut, xmlFile3d);
-			logger.info("Total number of nodes: "+nrNodes);
-			logger.info("Total number of triangles: "+nrTriangles);
+			amibeWriter.finish();
+			LOGGER.info("Total number of nodes: "+nrNodes);
+			LOGGER.info("Total number of triangles: "+nrTriangles);			
 		}
 		catch(Exception ex)
 		{
@@ -286,10 +218,10 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 			int numberOfReferences = Integer.parseInt(
 				xpath.evaluate("references/number/text()", submeshNodes));
 			int [] refs = new int[numberOfReferences];
-			logger.fine("Reading "+numberOfReferences+" references");
+			LOGGER.fine("Reading "+numberOfReferences+" references");
 			int numberOfNodes = Integer.parseInt(
 				xpath.evaluate("number/text()", submeshNodes));
-			logger.fine("Reading "+numberOfNodes+" nodes");
+			LOGGER.fine("Reading "+numberOfNodes+" nodes");
 			double [] normals = new double[3*numberOfNodes];
 			//  Interior nodes
 			for (int i = 0; i < numberOfNodes - numberOfReferences; i++)
@@ -297,8 +229,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 				double u = dfrN.get();
 				double v = dfrN.get();
 				double [] p3 = surface.value(u, v);
-				for (int j = 0; j < 3; j++)
-					nodesOut.writeDouble(p3[j]);
+				amibeWriter.addNode(p3);
 				if (unvWriter != null)
 					unvWriter.writeNode(i+nodeOffset+1, p3);
 				surface.setParameter(u, v);
@@ -320,7 +251,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 					xrefs.put(refs[i], offsetBnd);
 					System.arraycopy(p3, 0, coordRefs, 3 * offsetBnd, 3);
 					offsetBnd++;
-					refsOut.writeInt(refs[i]);
+					amibeWriter.addNodeRef(refs[i]);
 				}
 			}
 			
@@ -328,7 +259,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 				submeshElement, XPathConstants.NODE);
 			int numberOfFaces = Integer.parseInt(xpath.evaluate(
 				"number/text()", submeshFaces));
-			logger.fine("Reading "+numberOfFaces+" faces");
+			LOGGER.fine("Reading "+numberOfFaces+" faces");
 			int ind [] = new int[4];
 			int indLoc [] = new int[3];
 			int cntTriangles = 0;
@@ -354,24 +285,19 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 				}
 				if (ind[1] == ind[2] || ind[2] == ind[3] || ind[3] == ind[1])
 				{
-					logger.fine("Triangle bound from a degenerated edge skipped");
+					LOGGER.fine("Triangle bound from a degenerated edge skipped");
 					continue;
 				}
-				if (normalsOut != null)
+				if (writeNormal)
 				{
 					for (int j = 0; j < 3; j++)
 					{
+						int u = 3*indLoc[j];
 						// Write normals
 						if (F.isOrientationForward())
-						{
-							for (int k = 0; k < 3; k++)
-								normalsOut.writeDouble(normals[3*indLoc[j]+k]);
-						}
+							amibeWriter.addNormal(normals[u], normals[u+1], normals[u+2]);
 						else
-						{
-							for (int k = 0; k < 3; k++)
-								normalsOut.writeDouble(- normals[3*indLoc[j]+k]);
-						}
+							amibeWriter.addNormal(-normals[u], -normals[u+1], -normals[u+2]);
 					}
 				}
 				if (F.isOrientationForward())
@@ -380,8 +306,8 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 					ind[1] = ind[2];
 					ind[2] = temp;
 				}
-				for (int j = 1; j < 4; j++)
-					trianglesOut.writeInt(ind[j]);
+
+				amibeWriter.addTriangle(ind[1], ind[2], ind[3]);
 				if (unvWriter != null)
 				{
 					ind[0] = 3;
@@ -391,10 +317,12 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 				}
 				cntTriangles++;
 			}
-			logger.fine("End reading");
+			LOGGER.fine("End reading");
 			
+			amibeWriter.nextGroup(groupName);
 			for (int i=0; i < cntTriangles; i++)
-				groupsOut.writeInt(i+nrTriangles);
+				amibeWriter.addElementToGroup(i+nrTriangles);
+
 			if (unvWriter != null)
 			{
 				int [] ids = new int[cntTriangles];
@@ -402,13 +330,6 @@ public class MeshToMMesh3DConvert extends JCAEXMLData implements FilterInterface
 					ids[i] = i + nrTriangles + 1;
 				unvWriter.writeGroup(groupId, groupName, ids);
 			}
-			groupsElement.appendChild(XMLHelper.parseXMLString(documentOut,
-				"<group id=\""+(groupId-1)+"\">"+
-				"<name>"+groupName+"</name>"+
-				"<number>"+cntTriangles+"</number>"+ 
-				"<file format=\"integerstream\" location=\""+
-				XMLHelper.canonicalize(xmlDir, groupsFile.toString())+"\""+
-				" offset=\""+nrTriangles+"\"/></group>"));
 			
 			nodeOffset += numberOfNodes - numberOfReferences;
 			nrTriangles += cntTriangles;

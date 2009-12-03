@@ -46,7 +46,7 @@ import gnu.trove.TIntArrayList;
 import java.util.logging.Logger;
 
 
-public class MeshToSoupConvert extends JCAEXMLData implements FilterInterface
+public class MeshToSoupConvert implements FilterInterface, JCAEXMLData
 {
 	private static final Logger logger=Logger.getLogger(MeshToSoupConvert.class.getName());
 	private int nrTriangles = 0;

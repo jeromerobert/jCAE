@@ -211,7 +211,7 @@ public class AmibeDomain
 		String groupFileN = ((Element) e.getElementsByTagName("file").item(0)).getAttribute("location");
 		String os = ((Element) e.getElementsByTagName("file").item(0)).getAttribute("offset");
 		File groupFile = new File(directory, groupFileN);
-		int offset = Integer.parseInt(os);
+		int offset = os.isEmpty() ? 0 : Integer.parseInt(os);
 		PrimitiveFileReaderFactory pfrf = new PrimitiveFileReaderFactory();
 		IntFileReader ifrG = pfrf.getIntReader(groupFile);
 

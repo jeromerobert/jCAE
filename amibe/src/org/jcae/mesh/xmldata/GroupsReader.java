@@ -103,8 +103,10 @@ public class GroupsReader
 					 */
 					Element fichier = (Element) 
 						(elt.getElementsByTagName("file").item(0));
-					group.setOffset(Integer.valueOf(
-						fichier.getAttribute("offset")).intValue());
+					
+					String os = fichier.getAttribute("offset");
+					if(!os.isEmpty())
+						group.setOffset(Integer.parseInt(os));
 					/* Puis on ajoute le nouveau groupe a la liste de groupes : */
 					groupList.addGroup(group);
                                         //groupList.addGroupReference(group);
