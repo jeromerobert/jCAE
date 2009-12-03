@@ -22,6 +22,7 @@ package org.jcae.vtk.test;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.logging.Level;
@@ -39,10 +40,10 @@ import javax.swing.JToolBar;
 import javax.swing.ToolTipManager;
 import org.jcae.vtk.ViewableCAD;
 import org.jcae.vtk.Utils;
-import vtk.vtkActor;
 import org.jcae.vtk.Canvas;
 import org.jcae.vtk.UNVToMesh;
 import org.jcae.vtk.AmibeViewable;
+import vtk.vtkActor;
 import vtk.vtkCanvas;
 import vtk.vtkFileOutputWindow;
 
@@ -164,7 +165,7 @@ public class TestGUI implements KeyListener
 		//c3.GetRenderer().DebugOn();
 		} catch (Exception ex)
 		{
-			Logger.getLogger(TestVTK.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(TestGUI.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
 
@@ -179,7 +180,11 @@ public class TestGUI implements KeyListener
 
 		if (e.getKeyCode() == KeyEvent.VK_C)
 		{
+			try {
 				Utils.takeScreenshot(canvas);
+			} catch (IOException ex) {
+				Logger.getLogger(TestGUI.class.getName()).log(Level.SEVERE, null, ex);
+			}
 		}
 	}
 
