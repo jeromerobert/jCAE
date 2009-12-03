@@ -369,7 +369,7 @@ public abstract class QSortedTree<E> implements Serializable
 		// update map.
 		if (r != p)
 		{
-			map.remove(r.getData());
+			map.put(r.getData(), r);
 			map.put(p.getData(), p);
 		}
 		r.reset(value);
