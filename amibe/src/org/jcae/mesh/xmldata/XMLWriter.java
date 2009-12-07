@@ -86,11 +86,11 @@ public class XMLWriter {
 				XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema(validator);
 			this.validator = xsd.newValidator();
 		} catch (SAXException ex) {
-			LOGGER.log(Level.SEVERE, null, ex);
+			LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
 		} catch (ParserConfigurationException ex) {
-			LOGGER.log(Level.SEVERE, null, ex);
+			LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
 		} catch (XMLStreamException ex) {
-			LOGGER.log(Level.SEVERE, null, ex);			
+			LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
 		}
 		out = o;
 	}
@@ -109,9 +109,9 @@ public class XMLWriter {
 			//We validate after writting the file to be able to debug it.
 			validator.validate(source);
 		} catch (TransformerException ex) {
-			LOGGER.log(Level.SEVERE, null, ex);
+			LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
 		} catch (XMLStreamException ex) {
-			LOGGER.log(Level.SEVERE, null, ex);
+			LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
 		}
 	}
 }
