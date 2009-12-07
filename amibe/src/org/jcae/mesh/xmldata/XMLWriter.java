@@ -100,13 +100,14 @@ public class XMLWriter {
 		try {
 			out.flush();
 			DOMSource source = new DOMSource(document);
-			validator.validate(source);
 			TransformerFactory tf = TransformerFactory.newInstance();
 			tf.setAttribute("indent-number", 2);
 			Transformer t = tf.newTransformer();
 			t.setOutputProperty(OutputKeys.INDENT, "yes");
 			t.transform(source, streamResult);
 			streamResult.getWriter().close();
+			//We validate after writting the file to be able to debug it.
+			validator.validate(source);
 		} catch (TransformerException ex) {
 			LOGGER.log(Level.SEVERE, null, ex);
 		} catch (XMLStreamException ex) {

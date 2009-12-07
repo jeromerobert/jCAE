@@ -21,6 +21,7 @@
 
 package org.jcae.mesh.bora.xmldata;
 
+import gnu.trove.TIntArrayList;
 import org.jcae.mesh.amibe.ds.MEdge1D;
 import org.jcae.mesh.amibe.ds.MNode1D;
 import org.jcae.mesh.amibe.ds.Mesh;
@@ -51,13 +52,17 @@ import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.PrintStream;
 import java.io.IOException;
-import java.io.FileNotFoundException;
 import java.util.Collection;
 import java.util.Iterator;
 import gnu.trove.TObjectIntHashMap;
 import gnu.trove.TIntObjectHashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jcae.mesh.bora.ds.Constraint;
 
 public class Storage
 {
@@ -161,18 +166,34 @@ public class Storage
 	}
 
 	/**
-	 * Populates a Mesh instance by reading all faces.
+	 * Populates a Mesh instance by reading all faces and edges which have
+	 * constraints.
 	 * @param m       <code>Mesh</code> instance
 	 * @param root    root shape
 	 * @throws  RuntimeException if an error occurred
 	 */
-	public static void readAllFaces(Mesh m, BCADGraphCell root)
+	public static void readAll(Mesh m, BCADGraphCell root) throws IOException
 	{
 		TIntObjectHashMap<Vertex> vertMap = new TIntObjectHashMap<Vertex>();
 		for (BSubMesh s : root.getGraph().getModel().getSubMeshes())
 		{
-			for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
-				readFace(m, it.next(), s, vertMap);
+			int cid = 1;
+			Map<String, Integer> groups = new HashMap<String, Integer>();
+			for (Constraint c : s.getConstraints()) {
+				Integer id = groups.get(c.getGroup());
+				if(id == null)
+				{
+					groups.put(c.getGroup(), cid);
+					m.setGroupName(cid++, c.getGroup());
+				}
+			}
+			for (Constraint c : s.getConstraints()) {
+				BCADGraphCell cell = c.getGraphCell();
+				if(CADShapeEnum.EDGE.equals(cell.getType()))
+					readEdge(m, cell, s, vertMap, c.getGroup(), groups.get(c.getGroup()));
+				else if(CADShapeEnum.FACE.equals(cell.getType()))
+					readFace(m, cell, s, vertMap);
+			}
 		}
 	}
 
@@ -190,6 +211,33 @@ public class Storage
 			readFace(m, it.next(), s, vertMap);
 	}
 
+	public static void readEdge(Mesh mesh, BCADGraphCell edge, BSubMesh s,
+		TIntObjectHashMap<Vertex> mapRefVertex, String groupName, int groupId)
+		throws IOException
+	{
+		assert edge.getShape() instanceof CADEdge;
+		BModel model = edge.getGraph().getModel();
+		boolean reversed = false;
+		if (edge.getOrientation() != 0)
+		{
+			reversed = true;
+			if (edge.getReversed() != null)
+				edge = edge.getReversed();
+		}
+		BDiscretization d = edge.getDiscretizationSubMesh(s);
+		if (null == d) 
+			return;
+		int id = edge.getId();
+		File dir = new File(model.getOutputDir(d));
+		// Read vertex references
+		int [] refs = readNodeReferences(d);
+		// Create a Vertex array, and insert new references
+		// into mapRefVertex.
+		Vertex [] nodelist = read2dCoordinates(dir, mesh, refs, mapRefVertex);
+		int[] indices = readConnectivity(d);
+		for(int i = 0; i<indices.length; i+=2)
+			mesh.addBeam(nodelist[indices[i] - 1], nodelist[indices[i+1] - 1], groupId);
+	}
 	/**
 	 * Append a discretized face into a Mesh instance.
 	 * @param mesh    original mesh
@@ -590,6 +638,53 @@ public class Storage
 		for (int i = 0; i < numberOfTriangles; i++)
 		{
 			for (int j = 0; j < nr; j++)
+				pts[j] = nodelist[ifr.get()-1];
+			// Remove triangles incident to degenerated edges.
+			// These triangles are only useful in parameter space.
+			boolean degenerated = false;
+			for (int j = 0; j < nr; j++)
+			{
+				if (pts[j].getRef() == 0)
+					continue;
+				for (int k = j + 1; k < nr; k++)
+				{
+					if (pts[j] == pts[k])
+					{
+						j = nr;
+						k = nr;
+						degenerated = true;
+					}
+				}
+			}
+			if (degenerated)
+				continue;
+			if (reversed)
+			{
+				Vertex temp = pts[1];
+				pts[1] = pts[2];
+				pts[2] = temp;
+			}
+			face = mesh.createTriangle(pts);
+			mesh.add(face);
+			face.setGroupId(id);
+		}
+		ifr.close();
+	}
+
+	private static void read2dEdges(File dir, int id, int nr, Mesh mesh, boolean reversed, Vertex [] nodelist)
+		throws IOException
+	{
+		File edgesFile = new File(dir, "f");
+		IntFileReader ifr = new PrimitiveFileReaderFactory().getIntReader(edgesFile);
+
+		int numberOfBeams = (int) edgesFile.length() / (4*2);
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, "Reading "+numberOfBeams+" elements");
+		Triangle face;
+		Vertex [] pts = new Vertex[nr];
+		for (int i = 0; i < numberOfBeams; i++)
+		{
+			for (int j = 0; j < 2; j++)
 				pts[j] = nodelist[ifr.get()-1];
 			// Remove triangles incident to degenerated edges.
 			// These triangles are only useful in parameter space.

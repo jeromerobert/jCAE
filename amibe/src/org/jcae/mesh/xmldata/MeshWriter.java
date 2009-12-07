@@ -21,19 +21,20 @@
 
 package org.jcae.mesh.xmldata;
 
+import java.util.List;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import gnu.trove.TObjectIntHashMap;
-import gnu.trove.TIntObjectHashMap;
 import gnu.trove.TIntArrayList;
 import gnu.trove.TIntHashSet;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.TreeSet;
 import java.util.logging.Logger;
 
 
@@ -139,12 +140,13 @@ public class MeshWriter
 		}
 	}
 
-	private static void writeObjectGroups(Collection<Triangle> trianglelist, AmibeWriter aw)
+	private static void writeObjectGroups(Mesh mesh, AmibeWriter aw)
 		throws IOException
 	{
 		int cnt=0;
-		TIntObjectHashMap<TIntArrayList> groupMap = new TIntObjectHashMap<TIntArrayList>();
-		for(Triangle f: trianglelist)
+		HashMap<Integer, TIntArrayList> groupMap = new HashMap<Integer, TIntArrayList>();
+		HashMap<Integer, TIntArrayList> bgroupMap = new HashMap<Integer, TIntArrayList>();
+		for(Triangle f: mesh.getTriangles())
 		{
 			if (!f.isWritable())
 				continue;
@@ -159,17 +161,37 @@ public class MeshWriter
 			cnt++;
 		}
 
+		List<Vertex> beams = mesh.getBeams();
+		for(int i = 0 ; i < beams.size(); i+=2)
+		{
+			int id = mesh.getBeamGroup(i/2);
+			TIntArrayList list = bgroupMap.get(id);
+			if (list == null)
+			{
+				list = new TIntArrayList(100);
+				bgroupMap.put(id, list);
+			}
+			list.add(i/2);
+		}
+
 		// Sort group ids
-		int [] sortedKeys = new int[groupMap.size()];
-		System.arraycopy(groupMap.keys(), 0, sortedKeys, 0, sortedKeys.length);
-		Arrays.sort(sortedKeys);
+		TreeSet<Integer> sortedKeys = new TreeSet<Integer>();
+		sortedKeys.addAll(groupMap.keySet());
+		sortedKeys.addAll(bgroupMap.keySet());
 		
 		for (int id: sortedKeys)
 		{
+			String name = mesh.getGroupName(id);
+			aw.nextGroup(name == null ? Integer.toString(id) : name);
 			TIntArrayList list = groupMap.get(id);
-			aw.nextGroup(Integer.toString(id+1));
-			for(int i = 0, n = list.size(); i < n; i++)
-				aw.addElementToGroup(list.get(i));
+			if(list != null)
+				for(int i = 0, n = list.size(); i < n; i++)
+					aw.addTriaToGroup(list.get(i));
+
+			list = bgroupMap.get(id);
+			if(list != null)
+				for(int i = 0, n = list.size(); i < n; i++)
+					aw.addBeamToGroup(list.get(i));
 		}
 	}
 	
@@ -234,6 +256,7 @@ public class MeshWriter
 						nodelist.add(t.vertex[j]);
 				}
 			}
+			nodelist.addAll(submesh.getBeams());
 		}
 		TObjectIntHashMap<Vertex> nodeIndex=new TObjectIntHashMap<Vertex>(nodelist.size());
 		AmibeWriter.Dim3 aw = new AmibeWriter.Dim3(xmlDir);
@@ -242,8 +265,12 @@ public class MeshWriter
 
 		writeObjectNodes(nodelist, submesh.outerVertex, aw, nodeIndex);
 		writeObjectTriangles(trianglelist, nodeIndex, aw);
-		writeObjectGroups(trianglelist, aw);
-
+		writeObjectGroups(submesh, aw);
+		List<Vertex> beams = submesh.getBeams();
+		for(int i = 0; i<beams.size(); i+=2)
+			aw.addBeam(
+				nodeIndex.get(beams.get(i)),
+				nodeIndex.get(beams.get(i+1)));
 		aw.finish();
 	}
 }

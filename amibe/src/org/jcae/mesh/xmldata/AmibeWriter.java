@@ -43,6 +43,7 @@ import org.xml.sax.SAXException;
 public abstract class AmibeWriter {
 
 	private final static Logger LOGGER = Logger.getLogger(AmibeWriter.class.getName());
+	private DataOutputStream bGroupChan;
 	
 	public static class Dim1 extends AmibeWriter {
 
@@ -142,6 +143,8 @@ public abstract class AmibeWriter {
 		String name;
 		long offset;
 		int nbElement;
+		long bOffset;
+		int bNbElement;
 	}
 
 	private static class NIOutputStream extends OutputStream
@@ -189,7 +192,7 @@ public abstract class AmibeWriter {
 	private XMLWriter xmlWriter;
 	protected int numberOfNodes, numberOfTriangles, numberOfRef, numberOfBeams;
 	private List<Group> groups = new ArrayList<Group>();
-	private long groupOffset;
+	private long groupOffset, bGroupOffset;
 	private Group currentGroup;
 	private boolean checkNoGroup;
 	private String shape;
@@ -264,18 +267,28 @@ public abstract class AmibeWriter {
 
 	public void nextGroup(String name)
 	{
+		if(name == null)
+			throw new NullPointerException();
 		Group g=new Group();
 		g.name = name;
 		g.offset= groupOffset;
+		g.bOffset= bGroupOffset;
 		groups.add(g);
 		currentGroup = g;
 	}
 
-	public void addElementToGroup(int id) throws IOException
+	public void addTriaToGroup(int id) throws IOException
 	{
 		groupChan.writeInt(id);
 		groupOffset ++;
 		currentGroup.nbElement ++;
+	}
+
+	public void addBeamToGroup(int id) throws IOException
+	{
+		bGroupChan.writeInt(id);
+		bGroupOffset ++;
+		currentGroup.bNbElement ++;
 	}
 	
 	public void finish() throws IOException
@@ -314,6 +327,7 @@ public abstract class AmibeWriter {
 			File ftria = new File(dir3d, triaFName );
 			File fgrp = new File(dir3d, "groups.bin");
 			File fbeams = new File(dir3d, beamsFName);
+			File bgroups = new File(dir3d, "bgroups.bin");
 			if(hasRef())
 			{
 				refFName = "nodes1dref.bin";
@@ -323,6 +337,7 @@ public abstract class AmibeWriter {
 			nodeChan = createDOS(fnode);
 			triaChan = createDOS(ftria);
 			groupChan = createDOS(fgrp);
+			bGroupChan = createDOS(bgroups);
 			beamChan = createDOS(fbeams);
 			xmlWriter = new XMLWriter(new File(path, xmlFile()).getPath(),
 				getClass().getResource("jcae.xsd"));
@@ -458,8 +473,18 @@ public abstract class AmibeWriter {
 				o.writeStartElement("name");
 				o.writeCharacters(g.name);
 				o.writeEndElement();
-				writeNumber(g.nbElement);
-				writeFile("integerstream", binDirectory() + "/groups.bin", g.offset);
+				if(g.nbElement > 0)
+				{
+					writeNumber(g.nbElement);
+					writeFile("integerstream", binDirectory() + "/groups.bin", g.offset);
+				}
+				if(g.bNbElement > 0)
+				{
+					o.writeStartElement("beams");
+					writeNumber(g.bNbElement);
+					writeFile("integerstream", binDirectory() + "/bgroups.bin", g.bOffset);
+					o.writeEndElement();
+				}
 				o.writeEndElement();
 			}
 			o.writeEndElement(); //groups

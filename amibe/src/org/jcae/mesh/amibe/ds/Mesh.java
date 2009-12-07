@@ -20,6 +20,7 @@
 
 package org.jcae.mesh.amibe.ds;
 
+import gnu.trove.TIntArrayList;
 import org.jcae.mesh.amibe.traits.Traits;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
@@ -31,12 +32,15 @@ import org.jcae.mesh.amibe.metrics.Location;
 
 import java.util.Collection;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Iterator;
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -128,6 +132,10 @@ public class Mesh implements Serializable
 
 	// 3D euclidian metric
 	private final Metric euclidian_metric3d = new EuclidianMetric3D();
+
+	private List<Vertex> beams = new ArrayList<Vertex>();
+	private TIntArrayList beamGroups = new TIntArrayList();
+	private Map<Integer, String> groupNames = new HashMap<Integer, String>();
 
 	// Utility class to improve debugging output
 	private static class OuterVertex extends Vertex
@@ -389,6 +397,56 @@ public class Mesh implements Serializable
 	public final Vertex createVertex(double x, double y, double z)
 	{
 		return factory.createVertex(x, y, z);
+	}
+
+
+	public void addBeam(Vertex v1, Vertex v2, int group)
+	{
+		beams.add(v1);
+		beams.add(v2);
+		forceNonManifold(v1);
+		forceNonManifold(v2);
+		beamGroups.add(group);
+	}
+
+	public List<Vertex> getBeams()
+	{
+		return Collections.unmodifiableList(beams);
+	}
+
+	public int getBeamGroup(int i)
+	{
+		return beamGroups.get(i);
+	}
+
+	public void setGroupName(int id, String name)
+	{
+		groupNames.put(id, name);
+	}
+
+	public String getGroupName(int id)
+	{
+		return groupNames.get(id);
+	}
+
+	/**
+	 * Create and connect a dummy triangle to a vertex to make artificially
+	 * non manifold
+	 * @return the created dummy triangle or null if the vertex was already non
+	 * manifold
+	 */
+	public Triangle forceNonManifold(Vertex v)
+	{
+		if(v.isManifold())
+		{
+			Triangle t1 = (Triangle) v.getLink();
+			Triangle t2 = createTriangle(v, null, null);
+			t2.setReadable(false);
+			t2.setWritable(false);
+			t2.setAttributes(AbstractHalfEdge.OUTER);
+			v.setLink(new Triangle[]{t1, t2});
+		}
+		return null;
 	}
 
 	/**

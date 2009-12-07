@@ -321,7 +321,7 @@ public class MeshToMMesh3DConvert implements FilterInterface, JCAEXMLData
 			
 			amibeWriter.nextGroup(groupName);
 			for (int i=0; i < cntTriangles; i++)
-				amibeWriter.addElementToGroup(i+nrTriangles);
+				amibeWriter.addTriaToGroup(i+nrTriangles);
 
 			if (unvWriter != null)
 			{

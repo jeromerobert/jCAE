@@ -279,7 +279,7 @@ public class UNV2Amibe
 					st.nextToken();
 					int ind = Integer.parseInt(st.nextToken());
 					if (ind != 0)
-						out.addElementToGroup(ind-1);
+						out.addTriaToGroup(ind-1);
 					
 					nbelem--;
 					if (type.equals("2435"))

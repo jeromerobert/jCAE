@@ -57,10 +57,39 @@ It is read from an integerstream containing triangles IDs.
     <xs:complexType>
       <xs:sequence>
         <xs:element name="name" type="xs:string" />
-        <xs:element ref="number" />
-        <xs:element ref="file" />
+        <xs:element ref="number" minOccurs="0" >
+          <xs:annotation>
+            <xs:documentation>The number of triangles in the group</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element ref="file" minOccurs="0" >
+          <xs:annotation>
+            <xs:documentation>The list of triangles in the group</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="beams" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+			  <xs:element ref="number" >
+				<xs:annotation>
+				  <xs:documentation>The number of beams in the group</xs:documentation>
+				</xs:annotation>
+			  </xs:element>
+			  <xs:element ref="file" >
+				<xs:annotation>
+				  <xs:documentation>The list of beams in the group</xs:documentation>
+				</xs:annotation>
+			  </xs:element>
+			</xs:sequence>
+          </xs:complexType>
+        </xs:element>
       </xs:sequence>
-      <xs:attribute name="id" use="required" />
+      <xs:attribute name="id" use="optional" >
+        <xs:annotation>
+          <xs:documentation>Deprecated. It's allowed in the file for compatibility but should not be used
+anymore</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
   <xs:element name="normals">
@@ -175,3 +204,6 @@ The offset attribute is only allowed for doublestream and integerstream.
     </xs:complexType>
   </xs:element>
 </xs:schema>
+
+
+

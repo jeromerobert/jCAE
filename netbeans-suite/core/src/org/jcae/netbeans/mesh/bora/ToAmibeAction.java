@@ -24,10 +24,14 @@ import java.io.IOException;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.bora.xmldata.Storage;
 import org.jcae.mesh.xmldata.MeshWriter;
+import org.jcae.netbeans.mesh.AmibeDataObject;
 import org.jcae.netbeans.mesh.Mesh;
 import org.openide.filesystems.FileLock;
 import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileStateInvalidException;
+import org.openide.filesystems.FileSystem.AtomicAction;
 import org.openide.filesystems.FileUtil;
+import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 import org.openide.util.HelpCtx;
@@ -51,12 +55,25 @@ public class ToAmibeAction extends CookieAction {
 
 	@Override
 	protected void performAction(Node[] activatedNodes) {
-		BoraDataObject o = activatedNodes[0].getLookup().lookup(BoraDataObject.class);
+		final BoraDataObject o = activatedNodes[0].getLookup().lookup(BoraDataObject.class);
 		if(o.getBModel() == null)
 			o.load();
-		BCADGraphCell root = o.getBModel().getGraph().getRootCell();
+		final BCADGraphCell root = o.getBModel().getGraph().getRootCell();
+		try {
+			o.getPrimaryFile().getFileSystem().runAtomicAction(new AtomicAction() {
+				public void run() throws IOException {
+					ToAmibeAction.this.run(root, o);
+				}
+			});
+		} catch (IOException ex) {
+			Exceptions.printStackTrace(ex);
+		}
+	}
+
+	private void run(BCADGraphCell root, BoraDataObject o) throws IOException
+	{
 		org.jcae.mesh.amibe.ds.Mesh m = new org.jcae.mesh.amibe.ds.Mesh();
-		Storage.readAllFaces(m, root);
+		Storage.readAll(m, root);
 		String n = o.getName();
 		FileObject dir = o.getPrimaryFile().getParent();
 		FileObject xmlFile;
@@ -65,24 +82,18 @@ public class ToAmibeAction extends CookieAction {
 		do {
 			i++;
 			xmlFile = dir.getFileObject(n + i + "_mesh.xml");
-			mDir = dir.getFileObject(n + i + ".amibe");			
+			mDir = dir.getFileObject(n + i + ".amibe");
 		} while (xmlFile != null || mDir != null);
-		
-		try {
-			mDir = dir.createFolder(n + i + ".amibe");
-			xmlFile = dir.createData(n + i + "_mesh.xml");
-			MeshWriter.writeObject3D(m, FileUtil.toFile(mDir).getPath(), "");
-			Mesh mesh = new Mesh();
-			mesh.setMeshFile(FileUtil.toFile(mDir).getName());
-			XMLEncoder encoder = new XMLEncoder(xmlFile.getOutputStream());
-			encoder.writeObject(mesh);
-			encoder.close();
-			dir.refresh(true);
-		} catch (IOException ex) {
-			Exceptions.printStackTrace(ex);
-		}
+		mDir = dir.createFolder(n + i + ".amibe");
+		xmlFile = dir.createData(n + i + "_mesh.xml");
+		MeshWriter.writeObject3D(m, FileUtil.toFile(mDir).getPath(), "");
+		Mesh mesh = new Mesh();
+		mesh.setMeshFile(FileUtil.toFile(mDir).getName());
+		XMLEncoder encoder = new XMLEncoder(xmlFile.getOutputStream());
+		encoder.writeObject(mesh);
+		encoder.close();
 	}
-
+	
 	@Override
 	public String getName() {
 		return "Convert to Amibe";
