@@ -66,6 +66,7 @@ public class Triangle implements Serializable
 		System.arraycopy(src.vertex, 0, vertex, 0, 3);
 		readable = src.readable;
 		writable = src.writable;
+		groupId = src.groupId;
 	}
 	
 	/**
