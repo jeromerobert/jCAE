@@ -75,8 +75,12 @@ public class AmibeNode extends DataNode implements ViewCookie
 	{
 		super(arg0, new Children.Array());
 		getCookieSet().add(this);
-		updateGeomNode();
-		refreshGroups();
+		if(!arg0.isTemplate())
+		{
+			updateGeomNode();
+			refreshGroups();
+		}
+		setIconBaseWithExtension("org/jcae/netbeans/mesh/amibe.png");
 	}
 
 	public AbstractNode getGroupsNode()
@@ -282,8 +286,8 @@ public class AmibeNode extends DataNode implements ViewCookie
 	}
 
 	@Override
-	public String getHtmlDisplayName() {
-		return "<i>" + getName() + "</i>";
+	public String getDisplayName() {
+		return getName();
 	}
 
 	@Override

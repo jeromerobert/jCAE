@@ -506,18 +506,29 @@
                 <attr name="template" boolvalue="true"/>
                 <attr name="templateCategory" stringvalue="brep-types"/>
             </file>
-            <file name="Mesh.bora">
+            <file name="Bora mesh.bora">
                 <attr name="template" boolvalue="true"/>
                 <attr name="instantiatingIterator" newvalue="org.jcae.netbeans.mesh.bora.BoraNewWizard"/>
+            </file>
+            <file name="Amibe mesh_mesh.xml">
+                <attr name="template" boolvalue="true"/>
+                <attr name="instantiatingIterator" newvalue="org.jcae.netbeans.mesh.AmibeNewWizard"/>
             </file>
         </folder>
         <folder name="Privileged">
             <file name="Geometry.shadow">
                 <attr name="originalFile" stringvalue="Templates/jCAE/Geometry.brep"/>
+                <attr name="position" intvalue="0"/>
             </file>
-            <file name="Mesh.shadow">
-                <attr name="originalFile" stringvalue="Templates/jCAE/Mesh.bora"/>
+            <file name="Amibe mesh.shadow">
+                <attr name="originalFile" stringvalue="Templates/jCAE/Amibe mesh_mesh.xml"/>
+                <attr name="position" intvalue="100"/>
             </file>
+			<file name="Bora mesh.shadow">
+                <attr name="originalFile" stringvalue="Templates/jCAE/Bora mesh.bora"/>
+                <attr name="position" intvalue="200"/>
+            </file>
+
         </folder>
     </folder>
 

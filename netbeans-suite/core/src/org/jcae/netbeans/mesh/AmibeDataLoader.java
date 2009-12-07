@@ -30,6 +30,7 @@ import org.jcae.netbeans.Utilities;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.FileEntry;
 import org.openide.loaders.MultiDataObject;
@@ -126,7 +127,11 @@ public class AmibeDataLoader extends MultiFileLoader
 	{
 		Mesh m = createMesh(arg0);
 		primaryToMesh.put(arg0, m);
-		String reference = FileUtil.toFile(arg0.getParent()).getPath();
+		File fp = FileUtil.toFile(arg0.getParent());
+		if(fp == null)
+			//will happen if the FileObject is a template
+			return null;
+		String reference = fp.getPath();
 		FileObject sec = FileUtil.toFileObject(
 			new File(Utilities.absoluteFileName(m.getMeshFile(), reference)));
 		secToPrimary.put(sec, arg0);
