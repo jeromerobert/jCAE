@@ -1,7 +1,6 @@
 #! /bin/sh
 
 # change this
-sfuser=$USER
-
-rsync -avz build/site/ $sfuser@shell.sf.net:/home/groups/j/jc/jcae/htdocs/
+sfuser=jeromerobert
+rsync -avz build/site/ $sfuser,jcae@web.sf.net:htdocs/
 
