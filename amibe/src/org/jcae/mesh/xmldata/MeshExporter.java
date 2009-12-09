@@ -331,7 +331,7 @@ abstract public class MeshExporter
 				continue;
 			
 			String os=((Element)e.getElementsByTagName("file").item(0)).getAttribute("offset");
-			int offset=Integer.parseInt(os);
+			int offset=os.isEmpty() ? 0 : Integer.parseInt(os);
 			
 			ifrG.get(offset, groups[i]);
 		}
