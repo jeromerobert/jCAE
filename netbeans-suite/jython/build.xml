@@ -7,19 +7,25 @@
     <import file="nbproject/build-impl.xml"/>
 	<property file="../nbproject/private/private.properties"/>
 	<property file="../nbproject/project.properties"/>
+
 	<target name="-release.files.linux" if="arch.linux">
-		<copy todir="${cluster}/jython">
-			<fileset dir="${path.jython.linux}"/>
-		</copy>
-		<chmod file="${cluster}/jython/bin/jython" perm="755"/>
-		<chmod file="${cluster}/jython/jython" perm="755"/>
+	    <property name="jython.path" value="${path.jython.linux}"/>
+		<property name="script.ext" value=""/>
 	</target>
 
 	<target name="-release.files.win32" if="arch.win32">
-		<copy todir="${cluster}/jython">
-			<fileset dir="${path.jython.win32}"/>
-		</copy>
+	    <property name="jython.path" value="${path.jython.win32}"/>
+		<property name="script.ext" value=".bat"/>
 	</target>
 
-	<target name="-release.files" depends="-release.files.linux,-release.files.win32"/>
+	<target name="-release.files" depends="-release.files.linux,-release.files.win32">
+		<copy todir="${cluster}/jython">
+			<fileset dir="${jython.path}">
+				<exclude name="tests/**"/>
+				<exclude name="Lib/tests/**"/>
+			</fileset>
+		</copy>
+		<chmod file="${cluster}/jython/bin/jython${script.ext}" perm="755"/>
+		<chmod file="${cluster}/jython/jython${script.ext}" perm="755"/>
+	</target>
 </project>
