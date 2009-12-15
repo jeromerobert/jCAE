@@ -20,6 +20,9 @@
 
 package org.jcae.vtk;
 
+import gnu.trove.TIntArrayList;
+import gnu.trove.TIntHashSet;
+import gnu.trove.TIntIntHashMap;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
@@ -27,6 +30,7 @@ import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 import org.jcae.mesh.xmldata.AmibeReader;
 import org.jcae.mesh.xmldata.AmibeReader.Group;
+import org.jcae.mesh.xmldata.AmibeReader.SubMesh;
 import org.xml.sax.SAXException;
 
 /**
@@ -42,6 +46,30 @@ public class AmibeToMesh
 	public Mesh getMesh()
 	{
 		return mesh;
+	}
+	/**
+	 * Create the list of needed nodes for a triangle array
+	 * @param trias the triangles which require nodes
+	 * @return the nodes id
+	 */
+	private static int[] makeNodeIDArray(int[] trias)
+	{
+		TIntHashSet set = new TIntHashSet(trias.length / 2);
+		for (int index : trias)
+			set.add(index);
+		TIntArrayList list = new TIntArrayList(set.size());
+		list.add(set.toArray());
+		list.sort();
+		return list.toNativeArray();
+	}
+
+	private static  void renumberArray(int[] arrayToRenumber, int[] newIndices)
+	{
+		TIntIntHashMap map = new TIntIntHashMap(newIndices.length);
+		for (int i = 0; i < newIndices.length; i++)
+			map.put(newIndices[i], i);
+		for (int i = 0; i < arrayToRenumber.length; i++)
+			arrayToRenumber[i] = map.get(arrayToRenumber[i]);
 	}
 	
 	private static class GroupData extends LeafNode.DataProvider
@@ -59,27 +87,20 @@ public class AmibeToMesh
 		public void load()
 		{
 			try {
-				AmibeDomain domain = new AmibeDomain(provider, id);
-				// Nodes
-				setNodes(domain.getNodes());
+				SubMesh sm = provider.getSubmeshes().get(0);
+				int[] triangles = sm.getGroup(id).readTria3();
+				int[] nodesID = makeNodeIDArray(triangles);
+				setNodes(sm.readNodes(nodesID));
+				renumberArray(triangles, nodesID);
 				// Polys
-				nbrOfPolys = domain.getTria3().length / 3 + domain.getQuad4().length / 4;
-				int[] quads = domain.getQuad4();
-				int[] triangles = domain.getTria3();
-				this.polys = new int[4 * (triangles.length / 3) + 5 * (quads.length / 4)];
+				nbrOfPolys = triangles.length / 3;
+				this.polys = new int[4 * nbrOfPolys];
 				int offset = 0;
 				for (int i = 0; i < triangles.length;) {
 					polys[offset++] = 3;
 					polys[offset++] = triangles[i++];
 					polys[offset++] = triangles[i++];
 					polys[offset++] = triangles[i++];
-				}
-				for (int i = 0; i < quads.length;) {
-					polys[offset++] = 4;
-					polys[offset++] = quads[i++];
-					polys[offset++] = quads[i++];
-					polys[offset++] = quads[i++];
-					polys[offset++] = quads[i++];
 				}
 			} catch (IOException ex) {
 				LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
