@@ -81,9 +81,6 @@ public class XMLHelper
 		{
 			Transformer transformer = transFactory.newTransformer();
 			transformer.setOutputProperty("indent", "yes");
-			// hack from http://java.sun.com/xml/jaxp/dist/1.1/docs/tutorial/xslt/2_write.html
-			// to keep DOCTYPE field			
-			transformer.setOutputProperty(javax.xml.transform.OutputKeys.DOCTYPE_SYSTEM, document.getDoctype().getSystemId());
 			transformer.transform(new DOMSource(document), result);
 		}
 		catch (TransformerConfigurationException ex)

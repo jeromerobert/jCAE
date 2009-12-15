@@ -125,6 +125,11 @@ anymore</xs:documentation>
   <xs:element name="submesh">
     <xs:complexType>
       <xs:sequence>
+		<xs:element name="flag" minOccurs="0">
+		    <xs:complexType>
+		     <xs:attribute name="value" type="xs:string"/>
+		    </xs:complexType>
+		</xs:element>
         <xs:element name="subshape" minOccurs="0">
           <xs:annotation>
             <xs:documentation> A number identifying a face within shape </xs:documentation>
@@ -151,13 +156,10 @@ anymore</xs:documentation>
       </xs:choice>
     </xs:complexType>
   </xs:element>
-  <xs:element name="number">
+  <xs:element name="number" type="xs:nonNegativeInteger">
     <xs:annotation>
       <xs:documentation> Number of entities in a nodes, beams, group or references element </xs:documentation>
     </xs:annotation>
-    <xs:simpleType>
-      <xs:restriction base="xs:positiveInteger"/>
-    </xs:simpleType>
   </xs:element>
   <xs:element name="triangles">
     <xs:annotation>
@@ -204,6 +206,7 @@ The offset attribute is only allowed for doublestream and integerstream.
     </xs:complexType>
   </xs:element>
 </xs:schema>
+
 
 
 
