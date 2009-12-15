@@ -30,6 +30,7 @@ import org.w3c.dom.Element;
 public class Group
 {
 	private static final Logger LOGGER = Logger.getLogger(Group.class.getCanonicalName());
+	@Deprecated
 	private int id;
 	private String name;
 	private int number;
@@ -49,6 +50,7 @@ public class Group
 	/**
 	 * @return Returns the id of the group
 	 */
+	@Deprecated
 	public final int getId()
 	{
 		return id;
@@ -73,6 +75,7 @@ public class Group
 	/**
 	 * @param newId The new id to set
 	 */
+	@Deprecated
 	public final void setId(int newId)
 	{
 		this.id = newId;

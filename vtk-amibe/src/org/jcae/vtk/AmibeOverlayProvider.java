@@ -3,6 +3,8 @@ package org.jcae.vtk;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -23,7 +25,18 @@ public class AmibeOverlayProvider
 	private final File directory;
 	private final String flag;
 	private final Element subMesh;
+	private static Document parseXML(File file)
+		throws ParserConfigurationException, SAXException, IOException
+	{
+		DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
+		DocumentBuilder builder=factory.newDocumentBuilder();
 
+		builder.setEntityResolver(new ClassPathEntityResolver());
+		Document document=builder.parse(file);
+		document.normalize();
+
+		return document;
+	}
 	/**
 	 * @param directory The directory containing the jcae3d file
 	 * @param flag 
@@ -37,7 +50,7 @@ public class AmibeOverlayProvider
 		this.directory = directory;
 		this.flag = flag;
 		File jcae3d = new File(directory, "jcae3d");
-		Document document = AmibeProvider.parseXML(jcae3d);
+		Document document = parseXML(jcae3d);
 		subMesh = getSubMeshElement(document);
 	}
 

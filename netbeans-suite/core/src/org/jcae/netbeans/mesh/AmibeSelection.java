@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.swing.SwingUtilities;
 import org.jcae.mesh.xmldata.Groups;
@@ -50,7 +51,7 @@ import org.openide.nodes.Node;
 public class AmibeSelection implements EntitySelection, SelectionListener, CurrentViewableChangeListener, PropertyChangeListener
 {
 
-	private TIntArrayList selection = new TIntArrayList();
+	private List<String> selection = new ArrayList<String>();
 	private boolean selectionLock = false;
 	private Groups entity;
 	private Set<AmibeNViewable> interactors = new HashSet<AmibeNViewable>();
@@ -67,7 +68,7 @@ public class AmibeSelection implements EntitySelection, SelectionListener, Curre
 		if(!selectionLock)
 		{
 			selectionLock = true;
-			selection = new TIntArrayList();
+			selection = new ArrayList<String>();
 			refreshHighlight();
 			selectionLock = false;
 		}
@@ -116,7 +117,7 @@ public class AmibeSelection implements EntitySelection, SelectionListener, Curre
 		selectionLock = true;
 
 		final AmibeNViewable inter = (AmibeNViewable) interactor;
-		selection = new TIntArrayList((inter).getSelection());
+		selection = new ArrayList<String>(Arrays.asList(inter.getSelection()));
 		SelectionManager.getDefault().prepareSelection();
 
 		refreshHighlight();
@@ -196,7 +197,8 @@ public class AmibeSelection implements EntitySelection, SelectionListener, Curre
 	{
 		for (AmibeNViewable interactor : interactors)
 		{
-			interactor.setSelection(selection.toNativeArray());
+			interactor.setSelection(selection.toArray(
+				new String[selection.size()]));
 			interactor.highlight();
 		}
 	}
@@ -208,7 +210,7 @@ public class AmibeSelection implements EntitySelection, SelectionListener, Curre
 			selectionLock = true;		
 			Node[] nodes = (Node[]) evt.getNewValue();
 
-			selection = new TIntArrayList(nodes.length);
+			selection = new ArrayList<String>(nodes.length);
 			for (Node node : nodes)
 			{
 				GroupNode groupNode = node.getLookup().lookup(GroupNode.class);
@@ -217,7 +219,7 @@ public class AmibeSelection implements EntitySelection, SelectionListener, Curre
 
 				// If it is a group of our mesh
 				if (groupNode.getGroups() == entity)
-					selection.add(groupNode.getGroup().getId());
+					selection.add(groupNode.getGroup().getName());
 			}
 
 			refreshHighlight();

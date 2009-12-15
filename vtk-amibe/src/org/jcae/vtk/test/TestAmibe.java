@@ -26,7 +26,7 @@ import java.awt.event.KeyListener;
 import javax.swing.JFrame;
 import org.jcae.vtk.AmibeToMesh;
 import org.jcae.vtk.Canvas;
-import org.jcae.vtk.OldMesh;
+import org.jcae.vtk.Mesh;
 import org.jcae.vtk.SelectionListener;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
@@ -42,7 +42,7 @@ public class TestAmibe extends AmibeViewable implements SelectionListener, KeyLi
 {
 	public Canvas canvas;
 
-	public TestAmibe(OldMesh mesh)
+	public TestAmibe(Mesh mesh)
 	{
 		super(mesh);
 	}

@@ -20,12 +20,13 @@
 
 package org.jcae.vtk;
 
-import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import org.jcae.mesh.xmldata.AmibeReader;
+import org.jcae.mesh.xmldata.AmibeReader.Group;
 import org.xml.sax.SAXException;
 
 /**
@@ -36,19 +37,19 @@ public class AmibeToMesh
 {
 	private final static Logger LOGGER=Logger.getLogger(AmibeToMesh.class.getName());
 
-	private final OldMesh mesh;
+	private final Mesh mesh;
 
-	public OldMesh getMesh()
+	public Mesh getMesh()
 	{
 		return mesh;
 	}
 	
 	private static class GroupData extends LeafNode.DataProvider
 	{
-		private final AmibeProvider provider;
-		private final int id;
+		private final AmibeReader.Dim3 provider;
+		private final String id;
 		
-		GroupData(AmibeProvider provider, int id)
+		GroupData(AmibeReader.Dim3  provider, String id)
 		{
 			this.provider = provider;
 			this.id = id;
@@ -57,41 +58,31 @@ public class AmibeToMesh
 		@Override
 		public void load()
 		{
-			AmibeDomain domain = null;
 			try {
-				domain = new AmibeDomain(provider.getDirectory(), provider.getDocument(), id/*, Color.BLACK*/);
-			}
-			catch(IOException e)
-			{
-				LOGGER.severe("Cannot load node " + id + 
-					" from file " + provider.getDocument().getDocumentURI()
-					+ e.getLocalizedMessage());
-			}
-			// Nodes
-			setNodes(domain.getNodes());
-			
-			// Polys
-			nbrOfPolys = domain.getTria3().length / 3 + domain.getQuad4().length / 4;
-			int[] quads = domain.getQuad4();
-			int[] triangles = domain.getTria3();
-			
-			this.polys = new int[4 * (triangles.length / 3) +  5 * (quads.length / 4)];
-			int offset = 0;
-			for(int i = 0 ; i < triangles.length ; )
-			{
-				polys[offset++] = 3;
-				polys[offset++] = triangles[i++];
-				polys[offset++] = triangles[i++];
-				polys[offset++] = triangles[i++];
-			}
-			
-			for(int i = 0 ; i < quads.length ; )
-			{
-				polys[offset++] = 4;
-				polys[offset++] = quads[i++];
-				polys[offset++] = quads[i++];
-				polys[offset++] = quads[i++];
-				polys[offset++] = quads[i++];
+				AmibeDomain domain = new AmibeDomain(provider, id);
+				// Nodes
+				setNodes(domain.getNodes());
+				// Polys
+				nbrOfPolys = domain.getTria3().length / 3 + domain.getQuad4().length / 4;
+				int[] quads = domain.getQuad4();
+				int[] triangles = domain.getTria3();
+				this.polys = new int[4 * (triangles.length / 3) + 5 * (quads.length / 4)];
+				int offset = 0;
+				for (int i = 0; i < triangles.length;) {
+					polys[offset++] = 3;
+					polys[offset++] = triangles[i++];
+					polys[offset++] = triangles[i++];
+					polys[offset++] = triangles[i++];
+				}
+				for (int i = 0; i < quads.length;) {
+					polys[offset++] = 4;
+					polys[offset++] = quads[i++];
+					polys[offset++] = quads[i++];
+					polys[offset++] = quads[i++];
+					polys[offset++] = quads[i++];
+				}
+			} catch (IOException ex) {
+				LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
 			}
 		}
 	}
@@ -99,29 +90,24 @@ public class AmibeToMesh
 	public AmibeToMesh(String filePath)
 		throws ParserConfigurationException, SAXException, IOException
 	{
-		AmibeProvider provider = new AmibeProvider(new File(filePath));
-		Element xmlGroups = (Element) provider.getDocument().getElementsByTagName("groups").item(0);
-		NodeList nodeList=xmlGroups.getElementsByTagName("group");
-		int [] groupExtraction = new int[nodeList.getLength()];
-		for(int i=0; i<groupExtraction.length; i++)
-		{
-			Element e=(Element) nodeList.item(i);
-			groupExtraction[i]=Integer.parseInt(e.getAttribute("id"));
-		}
-
-		mesh = new OldMesh(groupExtraction.length);
-
-		for(int id : groupExtraction)
-			mesh.setGroup(id, new GroupData(provider, id));
+		this(filePath, null);
 	}
 
-	public AmibeToMesh(String filePath, int[] groupExtraction)
+	public AmibeToMesh(String filePath, String[] groupExtraction)
 		throws ParserConfigurationException, SAXException, IOException
-	{
-		AmibeProvider provider = new AmibeProvider(new File(filePath));
-		mesh = new OldMesh(groupExtraction.length);
+	{		
+		AmibeReader.Dim3 reader = new AmibeReader.Dim3(filePath);
+		if(groupExtraction == null)
+		{
+			List<Group> grps = reader.getSubmeshes().get(0).getGroups();
+			groupExtraction = new String[grps.size()];
+			for(int i=0; i<groupExtraction.length; i++)
+				groupExtraction[i]=grps.get(i).getName();
+		}
 
-		for(int id : groupExtraction)
-			mesh.setGroup(id, new GroupData(provider, id));
+		mesh = new Mesh(groupExtraction.length);
+
+		for(String id : groupExtraction)
+			mesh.setGroup(id, new GroupData(reader, id));
 	}
 }

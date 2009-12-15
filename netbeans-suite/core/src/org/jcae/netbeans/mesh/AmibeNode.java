@@ -202,7 +202,7 @@ public class AmibeNode extends DataNode implements ViewCookie
 		Collection<Group> groupsToDisplay, View view, Node node)
 		throws ParserConfigurationException, SAXException, IOException
 	{
-		int[] idGroupsDisplayed = new int[groupsToDisplay.size()];
+		String[] idGroupsDisplayed = new String[groupsToDisplay.size()];
 		Iterator<Group> iter = groupsToDisplay.iterator();
 		String sb="";
 		boolean full=false;
@@ -210,7 +210,7 @@ public class AmibeNode extends DataNode implements ViewCookie
 		{
 			Group g = iter.next();
 
-			idGroupsDisplayed[i] = g.getId();
+			idGroupsDisplayed[i] = g.getName();
 			if(sb.length()<20)
 				sb=sb+" "+g.getName();
 			else

@@ -19,9 +19,10 @@
  */
 package org.jcae.vtk;
 
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntObjectHashMap;
-import gnu.trove.TObjectIntHashMap;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
@@ -36,9 +37,9 @@ import vtk.vtkActor;
 public class AmibeViewable extends Viewable
 {
 	private ViewMode viewMode = ViewMode.WIRED;
-	private TIntObjectHashMap<LeafNode> groupIDToNode = new TIntObjectHashMap<LeafNode>();
-	private TObjectIntHashMap<LeafNode> groupNodeToID = new TObjectIntHashMap<LeafNode>();
-	private TIntHashSet groupsLoaded;
+	private Map<String, LeafNode> groupIDToNode = new HashMap<String, LeafNode>();
+	private Map<LeafNode, String> groupNodeToID = new HashMap<LeafNode, String>();
+	private Collection<String> groupsLoaded;
 	/**
 	 * It explain how the mesh is displayed :
 	 * _ FILLED means the mesh is not in wired mode but the selection remains filled ;
@@ -50,12 +51,12 @@ public class AmibeViewable extends Viewable
 		WIRED
 	}
 
-	public AmibeViewable(OldMesh mesh)
+	public AmibeViewable(Mesh mesh)
 	{
 		this(mesh, new Palette(Integer.MAX_VALUE));
 	}
 	
-	public AmibeViewable(OldMesh mesh, Palette palette)
+	public AmibeViewable(Mesh mesh, Palette palette)
 	{		
 		rootNode.setSelectionActorCustomiser(new SelectionActorCustomiser()
 		{
@@ -89,14 +90,14 @@ public class AmibeViewable extends Viewable
 		});
 		setViewMode(viewMode);
 
-		Set<Entry<Integer, LeafNode.DataProvider>> groupSet = mesh.getGroupSet();
-		groupsLoaded = new TIntHashSet(groupSet.size());
-		for (Entry<Integer, LeafNode.DataProvider> entry : groupSet)
+		Set<Entry<String, LeafNode.DataProvider>> groupSet = mesh.getGroupSet();
+		groupsLoaded = new HashSet<String>(groupSet.size());
+		for (Entry<String, LeafNode.DataProvider> entry : groupSet)
 			groupsLoaded.add(entry.getKey());
 
 		int cID = new Random().nextInt();
 
-		for (Entry<Integer, LeafNode.DataProvider> group : groupSet)
+		for (Entry<String, LeafNode.DataProvider> group : groupSet)
 		{
 			// Warning: Do *not* replace colorManager.getColor() by
 			// selectionColor here, some ColorManager may have a
@@ -138,9 +139,9 @@ public class AmibeViewable extends Viewable
 	 * Return the selection of the different ids groups
 	 * @return
 	 */
-	public int[] getSelection()
+	public String[] getSelection()
 	{
-		int[] selectionGroups = new int[selectionNode.size()];
+		String[] selectionGroups = new String[selectionNode.size()];
 
 		int i = 0;
 		for (LeafNode leaf : selectionNode)
@@ -160,10 +161,10 @@ public class AmibeViewable extends Viewable
 	 * 
 	 * @param selection 
 	 */
-	public void setSelection(int[] selection)
+	public void setSelection(String[] selection)
 	{
 		selectionNode.clear();
-		for (int id : selection)
+		for (String id : selection)
 		{
 			if (groupsLoaded.contains(id))
 				selectionNode.add(groupIDToNode.get(id));

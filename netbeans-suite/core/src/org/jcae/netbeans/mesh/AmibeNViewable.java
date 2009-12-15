@@ -31,7 +31,7 @@ import org.openide.nodes.Node;
 public class AmibeNViewable extends AmibeViewable {
 	private final Node node;
 
-	public AmibeNViewable(org.jcae.vtk.OldMesh mesh, Node node) {
+	public AmibeNViewable(org.jcae.vtk.Mesh mesh, Node node) {
 		super(mesh);
 		this.node = node;
 	}

@@ -33,15 +33,15 @@ public class AmibeOverlayToMesh
 {
 	private final static Logger LOGGER=Logger.getLogger(AmibeOverlayToMesh.class.getName());
 
-	private final OldMesh mesh;
+	private final Mesh mesh;
 
 	public AmibeOverlayToMesh(AmibeOverlayProvider provider)
 	{
-		mesh = new OldMesh(1);
-		mesh.setGroup(0, new BeamData(provider, 0));
+		mesh = new Mesh(1);
+		mesh.setGroup("DUMMY", new BeamData(provider, 0));
 	}
 
-	public OldMesh getMesh()
+	public Mesh getMesh()
 	{
 		return mesh;
 	}
