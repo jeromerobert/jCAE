@@ -107,6 +107,24 @@ public abstract class AmibeReader extends XMLReader implements JCAEXMLData {
 			ifrT.close();
 			return toReturn;
 		}
+
+		public int[] readBeams() throws IOException
+		{
+			if (numberOfBeams == 0)
+				return new int[0];
+			PrimitiveFileReaderFactory pfrf = new PrimitiveFileReaderFactory();
+			IntFileReader ifrG = pfrf.getIntReader(getBinFile("bgroups.bin"));
+			IntFileReader ifrT = pfrf.getIntReader(getBinFile("beams"+dim()+"d.bin"));
+
+			int[] toReturn = new int[numberOfBeams * 2];
+
+			for (int i = 0; i < numberOfBeams; i++)
+				ifrT.get(ifrG.get(beamsOffset+i) * 2, toReturn, i * 2, 2);
+
+			ifrG.close();
+			ifrT.close();
+			return toReturn;
+		}
 	}
 
 	public class SubMesh

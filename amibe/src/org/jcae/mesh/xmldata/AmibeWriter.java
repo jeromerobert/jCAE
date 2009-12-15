@@ -301,6 +301,8 @@ public abstract class AmibeWriter {
 			nodeChan.close();
 			triaChan.close();
 			groupChan.close();
+			beamChan.close();
+			bGroupChan.close();
 			if(refChan != null)
 				refChan.close();
 		} catch (SAXException ex) {

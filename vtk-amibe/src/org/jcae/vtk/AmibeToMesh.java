@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2008, by EADS France
+ * (C) Copyright 2009, by EADS France
  */
 
 package org.jcae.vtk;
@@ -35,7 +35,7 @@ import org.xml.sax.SAXException;
 
 /**
  *
- * @author Julian Ibarz
+ * @author Jerome Robert
  */
 public class AmibeToMesh
 {
@@ -52,24 +52,28 @@ public class AmibeToMesh
 	 * @param trias the triangles which require nodes
 	 * @return the nodes id
 	 */
-	private static int[] makeNodeIDArray(int[] trias)
+	private static int[] makeNodeIDArray(int[] ... ids)
 	{
-		TIntHashSet set = new TIntHashSet(trias.length / 2);
-		for (int index : trias)
-			set.add(index);
+		int n = 0;
+		for(int[] id:ids)
+			n += id.length;
+		TIntHashSet set = new TIntHashSet(n/2);
+		for(int[] id:ids)
+			set.addAll(id);
 		TIntArrayList list = new TIntArrayList(set.size());
 		list.add(set.toArray());
 		list.sort();
 		return list.toNativeArray();
 	}
 
-	private static  void renumberArray(int[] arrayToRenumber, int[] newIndices)
+	private static  void renumberArray(int[] newIndices, int[] ... arraysToRenumber)
 	{
 		TIntIntHashMap map = new TIntIntHashMap(newIndices.length);
 		for (int i = 0; i < newIndices.length; i++)
 			map.put(newIndices[i], i);
-		for (int i = 0; i < arrayToRenumber.length; i++)
-			arrayToRenumber[i] = map.get(arrayToRenumber[i]);
+		for(int[] arrayToRenumber:arraysToRenumber)
+			for (int i = 0; i < arrayToRenumber.length; i++)
+				arrayToRenumber[i] = map.get(arrayToRenumber[i]);
 	}
 	
 	private static class GroupData extends LeafNode.DataProvider
@@ -88,20 +92,14 @@ public class AmibeToMesh
 		{
 			try {
 				SubMesh sm = provider.getSubmeshes().get(0);
-				int[] triangles = sm.getGroup(id).readTria3();
-				int[] nodesID = makeNodeIDArray(triangles);
+				Group g = sm.getGroup(id);
+				int[] triangles = g.readTria3();
+				int[] beams = g.readBeams();
+				int[] nodesID = makeNodeIDArray(triangles, beams);
 				setNodes(sm.readNodes(nodesID));
-				renumberArray(triangles, nodesID);
-				// Polys
-				nbrOfPolys = triangles.length / 3;
-				this.polys = new int[4 * nbrOfPolys];
-				int offset = 0;
-				for (int i = 0; i < triangles.length;) {
-					polys[offset++] = 3;
-					polys[offset++] = triangles[i++];
-					polys[offset++] = triangles[i++];
-					polys[offset++] = triangles[i++];
-				}
+				renumberArray(nodesID, triangles, beams);
+				setPolys(triangles.length/3, Utils.createTriangleCells(triangles, 0));
+				setLines(Utils.createBeamCells(beams));
 			} catch (IOException ex) {
 				LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
 			}
