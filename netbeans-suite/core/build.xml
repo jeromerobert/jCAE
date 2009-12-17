@@ -9,35 +9,28 @@
 	<property name="amibe.project.dir" value="../amibe"/>
 	<property name="vtk-util.project.dir" value="../../vtk-util"/>
 	<property name="vtk-amibe.project.dir" value="../vtk-amibe"/>
-	<property name="viewer3d.project.dir" value="../viewer3d"/>
-	<property name="va.project.dir" value="../viewer3d-amibe"/>
-	<target name="-release.files">
-
-		<!-- external dependencies -->
-		<copy file="${libs.trove.classpath}" tofile="${cluster}/modules/ext/trove.jar"/>
-		<copy file="${libs.vecmath.classpath}" tofile="${cluster}/modules/ext/vecmath.jar"/>
-				
+	<target name="-build.deps" unless="no.dependencies">
 		<!-- build amibe -->
 		<echo message="Building ${amibe.project.dir}"/>
 		<ant dir="${amibe.project.dir}" target="jar" inheritall="false" inheritrefs="false"/>
 		<echo message="Done building ${amibe.project.dir}"/>
-
-		<copy todir="${cluster}/modules/ext" file="${amibe.project.dir}/dist/amibe.jar"/>
-		<copy todir="${cluster}/modules/ext" file="${amibe.project.dir}/dist/jcae-mesherocc.jar"/>
-		
 		<!-- build vtk-util -->
 		<echo message="Building ${vtk-util.project.dir}"/>
 		<ant dir="${vtk-util.project.dir}" target="jar" inheritall="false" inheritrefs="false"/>
 		<echo message="Done building ${vtk-util.project.dir}"/>
-		<copy file="${vtk-util.project.dir}/dist/vtk-util.jar" todir="${cluster}/modules/ext"/>
-		
 		<!-- build vtk-amibe -->
 		<echo message="Building ${vtk-amibe.project.dir}"/>
 		<ant dir="${vtk-amibe.project.dir}" target="jar" inheritall="false" inheritrefs="false"/>
 		<echo message="Done building ${vtk-amibe.project.dir}"/>
-
+	</target>
+	<target name="-release.files" depends="-build.deps">
+		<!-- external dependencies -->
+		<copy file="${libs.trove.classpath}" tofile="${cluster}/modules/ext/trove.jar"/>
+		<copy file="${libs.vecmath.classpath}" tofile="${cluster}/modules/ext/vecmath.jar"/>			
+		<copy todir="${cluster}/modules/ext" file="${amibe.project.dir}/dist/amibe.jar"/>
+		<copy todir="${cluster}/modules/ext" file="${amibe.project.dir}/dist/jcae-mesherocc.jar"/>		
+		<copy file="${vtk-util.project.dir}/dist/vtk-util.jar" todir="${cluster}/modules/ext"/>
 		<copy todir="${cluster}/modules/ext" file="${vtk-amibe.project.dir}/dist/jcae-vtk-amibe.jar"/>
-
 		<copy file="../../amibe/logging.properties" tofile="${cluster}/etc/logging.properties"/>
 		<copy todir="${cluster}/amibe-python">
 			<fileset dir="../../amibe/python">
@@ -45,14 +38,10 @@
 			</fileset>
 		</copy>
 	</target>
-	<target name="clean" depends="projectized-common.clean">
+	<target name="clean" depends="projectized-common.clean" unless="no.dependencies">
 		<echo message="Cleaning ${amibe.project.dir}"/>
 		<ant dir="${amibe.project.dir}" target="clean" inheritall="false" inheritrefs="false"/>
 		<echo message="Done cleaning ${amibe.project.dir}"/>
-
-		<echo message="Cleaning ${va.project.dir}"/>
-		<ant dir="${va.project.dir}" target="clean" inheritall="false" inheritrefs="false"/>
-		<echo message="Done cleaning ${va.project.dir}"/>
 
 		<echo message="Cleaning ${vtk-amibe.project.dir}"/>
 		<ant dir="${vtk-amibe.project.dir}" target="clean" inheritall="false" inheritrefs="false"/>
