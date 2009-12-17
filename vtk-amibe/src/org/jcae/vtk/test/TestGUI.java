@@ -24,7 +24,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BoxLayout;
@@ -42,7 +41,7 @@ import org.jcae.vtk.ViewableCAD;
 import org.jcae.vtk.Utils;
 import org.jcae.vtk.Canvas;
 import org.jcae.vtk.UNVToMesh;
-import org.jcae.vtk.AmibeViewable;
+import org.jcae.vtk.ViewableMesh;
 import vtk.vtkActor;
 import vtk.vtkCanvas;
 import vtk.vtkFileOutputWindow;
@@ -95,7 +94,7 @@ public class TestGUI implements KeyListener
 				//actors.add(cascadeActorManager.getVerticesActor());
 			} else if (args[0].equalsIgnoreCase("mailleur"))
 			{
-				AmibeViewable viewer = new AmibeViewable(new UNVToMesh(args[1],Collections.EMPTY_SET).getMesh());
+				ViewableMesh viewer = new ViewableMesh(new UNVToMesh(args[1], null).getMesh());
 				viewer.addCanvas(c1);
 				//actors.add(viewer.computeActor());
 			} else

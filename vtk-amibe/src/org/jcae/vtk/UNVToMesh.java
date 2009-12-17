@@ -27,6 +27,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -35,7 +37,7 @@ import java.util.zip.GZIPInputStream;
  */
 public class UNVToMesh
 {
-	private Mesh mesh;
+	private Map<String, LeafNode.DataProvider> mesh;
 
 	private static class GroupData extends LeafNode.DataProvider
 	{
@@ -69,7 +71,7 @@ public class UNVToMesh
 	/**
 	 * 
 	 * @param filePath
-	 * @param groupExtraction indicate wish groups will be extracted. if groupExtraction == Collections.EMPTY_LIST
+	 * @param groupExtraction indicate wish groups will be extracted. if groupExtraction == null
 	 * all the groups are extracted
 	 */
 	public UNVToMesh(String filePath, Collection<Integer> groupExtraction)
@@ -90,7 +92,7 @@ public class UNVToMesh
 
 		String[] groupNames = parser.getGroupNames();
 		// If the set is empty it means that all the groups have to be extracted
-		if(groupExtraction == Collections.EMPTY_LIST)
+		if(groupExtraction == null)
 		{
 			int nbOfGroups = groupNames.length;
 			groupExtraction = new ArrayList<Integer>(nbOfGroups);
@@ -99,7 +101,7 @@ public class UNVToMesh
 		}
 		
 		float[] nodes = parser.getNodesCoordinates();
-		mesh = new Mesh(groupExtraction.size());
+		mesh = new HashMap<String, LeafNode.DataProvider>();
 		//mesh.setBeams(parser.getBeam2FromGroup(UNVProvider.OTHERS_GROUP));
 		
 		for(Integer id : groupExtraction)
@@ -142,11 +144,11 @@ public class UNVToMesh
 			}
 			
 			GroupData groupData = new GroupData(nodes, beams, indices, triangles.length / 3 + quads.length / 4);
-			mesh.setGroup(groupNames[id], groupData);
+			mesh.put(groupNames[id], groupData);
 		}
 	}
 
-	public Mesh getMesh()
+	public Map<String, LeafNode.DataProvider> getMesh()
 	{
 		return mesh;
 	}

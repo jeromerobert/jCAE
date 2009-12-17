@@ -50,12 +50,12 @@ public class ViewableMesh extends Viewable
 		WIRED
 	}
 
-	public ViewableMesh(Mesh mesh)
+	public ViewableMesh(Map<String, LeafNode.DataProvider> mesh)
 	{
 		this(mesh, new Palette(Integer.MAX_VALUE));
 	}
 	
-	public ViewableMesh(Mesh mesh, Palette palette)
+	public ViewableMesh(Map<String, LeafNode.DataProvider> mesh, Palette palette)
 	{		
 		rootNode.setSelectionActorCustomiser(new SelectionActorCustomiser()
 		{
@@ -89,14 +89,11 @@ public class ViewableMesh extends Viewable
 		});
 		setViewMode(viewMode);
 
-		Set<Entry<String, LeafNode.DataProvider>> groupSet = mesh.getGroupSet();
-		groupsLoaded = new HashSet<String>(groupSet.size());
-		for (Entry<String, LeafNode.DataProvider> entry : groupSet)
-			groupsLoaded.add(entry.getKey());
+		groupsLoaded = new HashSet<String>(mesh.keySet());
 
 		int cID = new Random().nextInt();
 
-		for (Entry<String, LeafNode.DataProvider> group : groupSet)
+		for (Entry<String, LeafNode.DataProvider> group : mesh.entrySet())
 		{
 			// Warning: Do *not* replace colorManager.getColor() by
 			// selectionColor here, some ColorManager may have a

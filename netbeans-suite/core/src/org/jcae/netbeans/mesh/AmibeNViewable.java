@@ -21,17 +21,19 @@
 
 package org.jcae.netbeans.mesh;
 
-import org.jcae.vtk.AmibeViewable;
+import java.util.Map;
+import org.jcae.vtk.LeafNode;
+import org.jcae.vtk.ViewableMesh;
 import org.openide.nodes.Node;
 
 /**
  *
  * @author Jerome Robert
  */
-public class AmibeNViewable extends AmibeViewable {
+public class AmibeNViewable extends ViewableMesh {
 	private final Node node;
 
-	public AmibeNViewable(org.jcae.vtk.Mesh mesh, Node node) {
+	public AmibeNViewable(Map<String, LeafNode.DataProvider> mesh, Node node) {
 		super(mesh);
 		this.node = node;
 	}

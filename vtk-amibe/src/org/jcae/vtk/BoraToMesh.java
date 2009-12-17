@@ -43,16 +43,16 @@ import java.util.logging.Logger;
  */
 public class BoraToMesh {
 	private final static Logger LOGGER=Logger.getLogger(BoraToMesh.class.getName());
-	private final Mesh mesh;
+	private final  Map<String, LeafNode.DataProvider> mesh;
 
 	public BoraToMesh(String xmlBoraDir) {
 		this(buildMeshData(xmlBoraDir));
 	}
 
 	public BoraToMesh(Map<String, Collection<BDiscretization>> meshData) {
-		mesh = new Mesh(meshData.keySet().size());
+		mesh = new  HashMap<String, LeafNode.DataProvider>(meshData.keySet().size());
 		for (String group : meshData.keySet()) {
-			mesh.setGroup(group, new GroupData(meshData.get(group)));
+			mesh.put(group, new GroupData(meshData.get(group)));
 		}
 	}
 
@@ -173,7 +173,7 @@ public class BoraToMesh {
 	}
 
 
-	public Mesh getMesh()
+	public Map<String, LeafNode.DataProvider> getMesh()
 	{
 		return mesh;
 	}

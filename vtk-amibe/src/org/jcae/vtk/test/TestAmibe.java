@@ -23,14 +23,15 @@ package org.jcae.vtk.test;
 import java.awt.BorderLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.Map;
 import javax.swing.JFrame;
 import org.jcae.vtk.AmibeToMesh;
 import org.jcae.vtk.Canvas;
-import org.jcae.vtk.Mesh;
 import org.jcae.vtk.SelectionListener;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
-import org.jcae.vtk.AmibeViewable;
+import org.jcae.vtk.LeafNode;
+import org.jcae.vtk.ViewableMesh;
 import vtk.vtkInteractorStyleTrackballCamera;
 import vtk.vtkRenderer;
 
@@ -38,12 +39,11 @@ import vtk.vtkRenderer;
  *
  * @author Julian Ibarz
  */
-public class TestAmibe extends AmibeViewable implements SelectionListener, KeyListener
+public class TestAmibe extends ViewableMesh implements SelectionListener, KeyListener
 {
 	public Canvas canvas;
 
-	public TestAmibe(Mesh mesh)
-	{
+	public TestAmibe(Map<String, LeafNode.DataProvider> mesh) {
 		super(mesh);
 	}
 	

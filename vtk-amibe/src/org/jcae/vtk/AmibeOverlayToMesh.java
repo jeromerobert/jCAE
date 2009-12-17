@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2008, by EADS France
+ * (C) Copyright 2009, by EADS France
  */
 
 package org.jcae.vtk;
@@ -23,55 +23,35 @@ package org.jcae.vtk;
 
 import java.awt.Color;
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jcae.vtk.LeafNode.DataProvider;
 
 /**
  *
- * @author Julian Ibarz
+ * @author Jerome Robert
  */
-public class AmibeOverlayToMesh
+public class AmibeOverlayToMesh extends Viewable
 {
-	private final static Logger LOGGER=Logger.getLogger(AmibeOverlayToMesh.class.getName());
-
-	private final Mesh mesh;
-
-	public AmibeOverlayToMesh(AmibeOverlayProvider provider)
-	{
-		mesh = new Mesh(1);
-		mesh.setGroup("DUMMY", new BeamData(provider, 0));
-	}
-
-	public Mesh getMesh()
-	{
-		return mesh;
-	}
+	private final static Logger LOGGER = Logger.getLogger(
+		AmibeOverlayToMesh.class.getName());
 	
-	private static class BeamData extends LeafNode.DataProvider
+	public AmibeOverlayToMesh(final AmibeOverlayProvider provider, Color color)
 	{
-		private final AmibeOverlayProvider provider;
-		private final int id;
-		
-		BeamData(AmibeOverlayProvider provider, int id)
-		{
-			this.provider = provider;
-			this.id = id;
-		}
-
-		@Override
-		public void load()
-		{
-			AmibeBeanDomain domain = null;
-			try {
-				domain = new AmibeBeanDomain(provider.getDirectory(), provider.getSubMesh(), Color.BLACK);
-			}
-			catch(IOException e)
+		DataProvider dataProvider = new LeafNode.DataProvider(){
+			@Override
+			public void load()
 			{
-				LOGGER.severe("Cannot load node " + id + 
-					" from file " + provider.getDirectory()
-					+ e.getLocalizedMessage());
+				try {
+					AmibeBeanDomain domain = new AmibeBeanDomain(provider.getDirectory(),
+						provider.getSubMesh(), Color.BLACK);
+					setNodes(domain.getNodes());
+					setLines(Utils.createBeamCells(domain.getBeam2()));
+				} catch (IOException ex) {
+					LOGGER.log(Level.SEVERE, null, ex);
+				}
 			}
-			setNodes(domain.getNodes());
-			setLines(Utils.createBeamCells(domain.getBeam2()));
-		}
+		};
+		new LeafNode(rootNode, dataProvider, color);
 	}
 }

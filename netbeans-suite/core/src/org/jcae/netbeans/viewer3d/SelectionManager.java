@@ -25,15 +25,15 @@ import org.jcae.mesh.xmldata.Groups;
 import org.jcae.netbeans.cad.BCADSelection;
 import org.jcae.netbeans.cad.CADSelection;
 import org.jcae.netbeans.cad.NbShape;
+import org.jcae.netbeans.mesh.AmibeNViewable;
 import org.jcae.netbeans.mesh.bora.BGroupsNode;
 import org.jcae.netbeans.mesh.bora.BoraSelection;
 import org.jcae.netbeans.mesh.AmibeSelection;
+import org.jcae.netbeans.mesh.bora.BoraViewable;
 import org.jcae.netbeans.mesh.bora.ViewBCellGeometryAction.NbBShape;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
 import org.jcae.vtk.ViewableCAD;
-import org.jcae.vtk.AmibeViewable;
-import org.jcae.vtk.ViewableMesh;
 import org.jcae.vtk.ViewableOEMM;
 
 /**
@@ -125,10 +125,10 @@ public class SelectionManager {
 			else
 				throw new IllegalArgumentException("The entity associated wit ha ViewableCAD has to be a NbShape");
 		}
-		else if (viewable instanceof ViewableMesh) {
+		else if (viewable instanceof BoraViewable) {
 			return new BoraSelection((BGroupsNode)entity);
 		}
-		else if(viewable instanceof AmibeViewable) {
+		else if(viewable instanceof AmibeNViewable) {
 			return new AmibeSelection((Groups)entity);
 		}
 		else if(viewable instanceof ViewableOEMM)

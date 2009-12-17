@@ -1,5 +1,6 @@
 package org.jcae.netbeans.mesh;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
@@ -9,9 +10,8 @@ import org.jcae.netbeans.Utilities;
 import org.jcae.netbeans.viewer3d.ViewManager;
 import org.jcae.vtk.AmibeOverlayProvider;
 import org.jcae.vtk.AmibeOverlayToMesh;
-import org.jcae.vtk.Palette;
 import org.jcae.vtk.View;
-import org.jcae.vtk.AmibeViewable;
+import org.jcae.vtk.Viewable;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileUtil;
 import org.openide.nodes.Node;
@@ -42,18 +42,16 @@ public abstract class AbstractEdgesAction extends CookieAction
 				new ComputeEdgesConnectivity(xmlDir, xmlFile);
 
 			computeEdgesConnectivity.compute();	
-
-			Palette palette = new Palette();
 			String beanType = getBranchGroupLabel();
+			Color color;
 			if(beanType.equals(AmibeOverlayProvider.FREE_EDGE))
-				palette.addColor(AmibeOverlayProvider.FREE_EDGE_COLOR);
+				color = AmibeOverlayProvider.FREE_EDGE_COLOR;
 			else
-				palette.addColor(AmibeOverlayProvider.MULTI_EDGE_COLOR);
+				color = AmibeOverlayProvider.MULTI_EDGE_COLOR;
 
 			View view = ViewManager.getDefault().getCurrentView();
-			AmibeViewable mesh = new AmibeViewable(new AmibeOverlayToMesh(
-				new AmibeOverlayProvider(new File(xmlDir), getBranchGroupLabel())).getMesh(), palette);
-			
+			Viewable mesh = new AmibeOverlayToMesh(new AmibeOverlayProvider(
+				new File(xmlDir), getBranchGroupLabel()), color);
 			mesh.setName(activatedNodes[0].getName()+" "+getViewSuffix());
 			view.add(mesh);
 			

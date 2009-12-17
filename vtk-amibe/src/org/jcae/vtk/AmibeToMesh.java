@@ -24,7 +24,10 @@ import gnu.trove.TIntArrayList;
 import gnu.trove.TIntHashSet;
 import gnu.trove.TIntIntHashMap;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
@@ -41,11 +44,11 @@ public class AmibeToMesh
 {
 	private final static Logger LOGGER=Logger.getLogger(AmibeToMesh.class.getName());
 
-	private final Mesh mesh;
+	private Map<String, LeafNode.DataProvider> nodes;
 
-	public Mesh getMesh()
+	public Map<String, LeafNode.DataProvider> getMesh()
 	{
-		return mesh;
+		return Collections.unmodifiableMap(nodes);
 	}
 	/**
 	 * Create the list of needed nodes for a triangle array
@@ -124,9 +127,8 @@ public class AmibeToMesh
 				groupExtraction[i]=grps.get(i).getName();
 		}
 
-		mesh = new Mesh(groupExtraction.length);
-
+		nodes = new HashMap<String, LeafNode.DataProvider>(groupExtraction.length);
 		for(String id : groupExtraction)
-			mesh.setGroup(id, new GroupData(reader, id));
+			nodes.put(id, new GroupData(reader, id));
 	}
 }

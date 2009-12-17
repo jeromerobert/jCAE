@@ -22,14 +22,13 @@ package org.jcae.vtk.test;
 import java.awt.BorderLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Collections;
 import javax.swing.JFrame;
 import org.jcae.vtk.Canvas;
 import org.jcae.vtk.SelectionListener;
 import org.jcae.vtk.UNVToMesh;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
-import org.jcae.vtk.AmibeViewable;
+import org.jcae.vtk.ViewableMesh;
 import vtk.vtkInteractorStyleTrackballCamera;
 import vtk.vtkRenderer;
 
@@ -39,10 +38,10 @@ import vtk.vtkRenderer;
  */
 public class TestUNV implements SelectionListener, KeyListener
 {
-	AmibeViewable viewable;
+	ViewableMesh viewable;
 	public Canvas canvas;
 
-	public TestUNV(AmibeViewable viewable)
+	public TestUNV(ViewableMesh viewable)
 	{
 		this.viewable = viewable;
 	}
@@ -82,10 +81,10 @@ public class TestUNV implements SelectionListener, KeyListener
 				canvas.unlock();
 				break;
 				case KeyEvent.VK_O:
-					viewable.setViewMode(AmibeViewable.ViewMode.FILLED);
+					viewable.setViewMode(ViewableMesh.ViewMode.FILLED);
 					break;
 			case KeyEvent.VK_I:
-					viewable.setViewMode(AmibeViewable.ViewMode.WIRED);
+					viewable.setViewMode(ViewableMesh.ViewMode.WIRED);
 				break;
 				
 		}
@@ -98,7 +97,7 @@ public class TestUNV implements SelectionListener, KeyListener
 		View canvas = new View();
 		frame.add(canvas, BorderLayout.CENTER);
 		vtkRenderer renderer = canvas.GetRenderer();
-		AmibeViewable rbh = new AmibeViewable(new UNVToMesh(args[0], Collections.EMPTY_LIST).getMesh());
+		ViewableMesh rbh = new ViewableMesh(new UNVToMesh(args[0], null).getMesh());
 		canvas.add(rbh);
 		frame.setSize(800, 600);
 		frame.setVisible(true);
