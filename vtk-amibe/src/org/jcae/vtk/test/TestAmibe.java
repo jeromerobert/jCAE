@@ -115,7 +115,7 @@ public class TestAmibe extends ViewableMesh implements SelectionListener, KeyLis
 		frame.add(canvas, BorderLayout.CENTER);
 		vtkRenderer renderer = canvas.GetRenderer();
 		AmibeToMesh reader = new AmibeToMesh(args[0]);
-		TestAmibe test = new TestAmibe(reader.getMesh());
+		TestAmibe test = new TestAmibe(reader.getTriangles());
 		canvas.add(test);
 		frame.setSize(800, 600);
 		frame.setVisible(true);

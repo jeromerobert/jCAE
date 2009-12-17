@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.xml.parsers.ParserConfigurationException;
 import org.jcae.mesh.xmldata.AmibeReader;
 import org.jcae.mesh.xmldata.AmibeReader.Group;
 import org.jcae.mesh.xmldata.AmibeReader.SubMesh;
@@ -44,11 +43,19 @@ public class AmibeToMesh
 {
 	private final static Logger LOGGER=Logger.getLogger(AmibeToMesh.class.getName());
 
-	private Map<String, LeafNode.DataProvider> nodes;
+	private Map<String, LeafNode.DataProvider> triangles =
+		new HashMap<String, LeafNode.DataProvider>();
+	private Map<String, LeafNode.DataProvider> beams =
+		new HashMap<String, LeafNode.DataProvider>();
 
-	public Map<String, LeafNode.DataProvider> getMesh()
+	public Map<String, LeafNode.DataProvider> getTriangles()
 	{
-		return Collections.unmodifiableMap(nodes);
+		return Collections.unmodifiableMap(triangles);
+	}
+
+	public Map<String, LeafNode.DataProvider> getBeams()
+	{
+		return Collections.unmodifiableMap(beams);
 	}
 	/**
 	 * Create the list of needed nodes for a triangle array
@@ -79,12 +86,12 @@ public class AmibeToMesh
 				arrayToRenumber[i] = map.get(arrayToRenumber[i]);
 	}
 	
-	private static class GroupData extends LeafNode.DataProvider
+	private static class TriaData extends LeafNode.DataProvider
 	{
 		private final AmibeReader.Dim3 provider;
 		private final String id;
 		
-		GroupData(AmibeReader.Dim3  provider, String id)
+		TriaData(AmibeReader.Dim3  provider, String id)
 		{
 			this.provider = provider;
 			this.id = id;
@@ -97,11 +104,37 @@ public class AmibeToMesh
 				SubMesh sm = provider.getSubmeshes().get(0);
 				Group g = sm.getGroup(id);
 				int[] triangles = g.readTria3();
-				int[] beams = g.readBeams();
-				int[] nodesID = makeNodeIDArray(triangles, beams);
+				int[] nodesID = makeNodeIDArray(triangles);
 				setNodes(sm.readNodes(nodesID));
-				renumberArray(nodesID, triangles, beams);
+				renumberArray(nodesID, triangles);
 				setPolys(triangles.length/3, Utils.createTriangleCells(triangles, 0));
+			} catch (IOException ex) {
+				LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+			}
+		}
+	}
+
+	private static class BeamData extends LeafNode.DataProvider
+	{
+		private final AmibeReader.Dim3 provider;
+		private final String id;
+
+		BeamData(AmibeReader.Dim3  provider, String id)
+		{
+			this.provider = provider;
+			this.id = id;
+		}
+
+		@Override
+		public void load()
+		{
+			try {
+				SubMesh sm = provider.getSubmeshes().get(0);
+				Group g = sm.getGroup(id);
+				int[] beams = g.readBeams();
+				int[] nodesID = makeNodeIDArray(beams);
+				setNodes(sm.readNodes(nodesID));
+				renumberArray(nodesID, beams);
 				setLines(Utils.createBeamCells(beams));
 			} catch (IOException ex) {
 				LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
@@ -109,26 +142,31 @@ public class AmibeToMesh
 		}
 	}
 	
-	public AmibeToMesh(String filePath)
-		throws ParserConfigurationException, SAXException, IOException
+	public AmibeToMesh(String filePath) throws SAXException, IOException
 	{
 		this(filePath, null);
 	}
 
 	public AmibeToMesh(String filePath, String[] groupExtraction)
-		throws ParserConfigurationException, SAXException, IOException
+		throws SAXException, IOException
 	{		
 		AmibeReader.Dim3 reader = new AmibeReader.Dim3(filePath);
+		SubMesh sm = reader.getSubmeshes().get(0);
+		List<Group> grps = sm.getGroups();
 		if(groupExtraction == null)
-		{
-			List<Group> grps = reader.getSubmeshes().get(0).getGroups();
+		{			
 			groupExtraction = new String[grps.size()];
 			for(int i=0; i<groupExtraction.length; i++)
 				groupExtraction[i]=grps.get(i).getName();
 		}
 
-		nodes = new HashMap<String, LeafNode.DataProvider>(groupExtraction.length);
 		for(String id : groupExtraction)
-			nodes.put(id, new GroupData(reader, id));
+		{
+			Group g = sm.getGroup(id);
+			if(g.getNumberOfTrias() > 0)
+				triangles.put(id, new TriaData(reader, id));
+			if(g.getNumberOfBeams() > 0)
+				beams.put(id, new BeamData(reader, id));
+		}
 	}
 }

@@ -221,7 +221,8 @@ public class AmibeNode extends DataNode implements ViewCookie
 			sb=sb+"...";
 
 		AmibeToMesh reader = new AmibeToMesh(groups.getMeshFile(), idGroupsDisplayed);
-		AmibeNViewable interactor = new AmibeNViewable(reader.getMesh(), node);
+		AmibeNViewable interactor = new AmibeNViewable(reader.getTriangles(), node);
+		interactor.addBeams(reader.getBeams());
 		interactor.setName(meshName+" ["+sb+"]");
 		SelectionManager.getDefault().addInteractor(interactor, groups);
 		view.add(interactor);
