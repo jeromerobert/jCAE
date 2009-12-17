@@ -177,7 +177,7 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 	 * (BCADGraphCell are represented by types :
 	 * eg : a folder for faces, a folder for edges... etc)
 	 */
-	private class EntitieChildrenNode extends Children.Keys {
+	private class EntitieChildrenNode extends Children.Keys<CADShapeEnum> {
 
 		private final BCADGraphCell root;
 		private final ArrayList<CADShapeEnum> shapesToDisplay;
@@ -192,18 +192,12 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 
 		@Override
 		protected void addNotify() {
-			setKeys(shapesToDisplay.toArray());
+			setKeys(shapesToDisplay.toArray(
+				new CADShapeEnum[shapesToDisplay.size()]));
 		}
 
-		protected Node[] createNodes(Object key) {
-			CADShapeEnum type = (CADShapeEnum)key;
-			
-			AbstractNode node = new AbstractNode(new Children.Keys() {
-				@Override
-				protected Node[] createNodes(Object arg0) {
-					return null;
-				}
-			});
+		protected Node[] createNodes(CADShapeEnum type) {		
+			AbstractNode node = new AbstractNode(Children.LEAF);
 			node.setIconBaseWithExtension("org/jcae/netbeans/mesh/bora/EntitiesNode.png");
 			ArrayList<BCADGraphNode> toAdd = new ArrayList<BCADGraphNode>();
 			Iterator<BCADGraphCell> it = root.shapesExplorer(type);
@@ -211,7 +205,6 @@ public class SubmeshNode extends AbstractNode implements Node.Cookie {
 				BCADGraphCell cell = it.next();
 				toAdd.add(new BCADGraphNode(true,cell, dataModel));
 			}
-			node.getChildren().add(toAdd.toArray(new Node[0]));
 			node.setName(type.toString());
 			return new Node[] {node};
 		}

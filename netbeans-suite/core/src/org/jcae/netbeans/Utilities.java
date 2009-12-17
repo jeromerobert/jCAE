@@ -61,13 +61,14 @@ public class Utilities
 		return name;
 	}
 	
-	public static boolean showEditBeanDialog(Object bean)
+	public static <T> boolean showEditBeanDialog(T bean)
 	{
 		try
 		{
-			BeanNode bn = new BeanNode(bean)
+			BeanNode<T> bn = new BeanNode<T>(bean)
 			{
-				protected void createProperties(Object bean, BeanInfo info)				
+				@Override
+				protected void createProperties(T bean, BeanInfo info)
 				{
 					super.createProperties(bean, info);
 					getSheet().get(Sheet.PROPERTIES).remove("class");				

@@ -118,18 +118,17 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 		
 		try {
 			//mesh constraints
-			Property deflectionProp = new PropertySupport.Reflection(
+			Property<Double> deflectionProp = new PropertySupport.Reflection<Double>(
 					this.attributes,
 					Double.class, "getDeflection", "setDeflection");
 			deflectionProp.setName("Deflection");
 
-			Property edgeProp = new PropertySupport.Reflection(this.attributes,
-					Double.class, "getEdgeLength", "setEdgeLength");
+			Property<Double> edgeProp = new PropertySupport.Reflection<Double>(
+				this.attributes, Double.class, "getEdgeLength", "setEdgeLength");
 			edgeProp.setName("Edge length");
 
-			Property elementProp = new PropertySupport.Reflection(
-					this.attributes,
-					String.class, "getElement", "setElement");
+			Property<String> elementProp = new PropertySupport.Reflection<String>(
+				this.attributes, String.class, "getElement", "setElement");
 			elementProp.setName("Element");
 			elementProp.setValue("suppressCustomEditor", true);
 
@@ -138,9 +137,8 @@ public class BCADGraphNode extends AbstractNode implements Node.Cookie
 //			meshSet.put(elementProp);
 
 			//group constraint
-			Property groupProp = new PropertySupport.Reflection(
-					this.attributes,
-					String.class, "getGroup", "setGroup");
+			Property<String> groupProp = new PropertySupport.Reflection<String>(
+				this.attributes, String.class, "getGroup", "setGroup");
 			groupProp.setName("Group name");
 			groupProp.setValue("suppressCustomEditor", true);
 			groupsSet.put(groupProp);

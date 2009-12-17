@@ -7,13 +7,9 @@
 
 package org.jcae.netbeans.mesh.bora;
 
-import org.jcae.netbeans.mesh.*;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
-import org.jcae.mesh.bora.ds.BSubMesh;
-import org.jcae.mesh.bora.ds.Constraint;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
 
@@ -22,7 +18,7 @@ import org.openide.nodes.Node;
  * @author Gautam Botrel
  *
  */
-public class BCADCellNode extends Children.Keys implements Node.Cookie {
+public class BCADCellNode extends Children.Keys<BCADGraphCell> {
 
 	protected final BCADGraphCell cell;
 	protected final SubmeshNode.DataModel dataModel;
@@ -46,11 +42,10 @@ public class BCADCellNode extends Children.Keys implements Node.Cookie {
 						toReturn.add(c);
 			}
 		}
-		setKeys(toReturn.toArray());
+		setKeys(toReturn.toArray(new BCADGraphCell[toReturn.size()]));
 	}
 
-	protected Node[] createNodes(Object o) {
-		BCADGraphCell obj = (BCADGraphCell) o;
+	protected Node[] createNodes(BCADGraphCell obj) {
 		return new Node[]{new BCADGraphNode(obj, dataModel)};
 	}
 }

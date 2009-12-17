@@ -39,7 +39,7 @@ public class BGroupsNode extends AbstractNode {
 		groupNode.fireModelChanged();
 	}
 
-	public class BGroupsNodeKeys extends Children.Keys {
+	public class BGroupsNodeKeys extends Children.Keys<String> {
 
 		private final SubmeshNode.DataModel dataModel;
 
@@ -72,7 +72,7 @@ public class BGroupsNode extends AbstractNode {
 		}
 
 		@Override
-		protected Node[] createNodes(Object arg0) {
+		protected Node[] createNodes(String arg0) {
 			ArrayList<Node> toCreate = new ArrayList<Node>();
 			final String group = arg0.toString();
 			for (BCADGraphCell cell : dataModel.getCellsInGroup(group)) {
