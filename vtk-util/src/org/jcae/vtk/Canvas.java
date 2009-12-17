@@ -21,7 +21,11 @@ package org.jcae.vtk;
 
 
 import java.awt.Dimension;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.util.Timer;
 import java.util.TimerTask;
 import vtk.vtkActorCollection;
@@ -87,6 +91,16 @@ public class Canvas extends vtkCanvas
 
 	public Canvas()
 	{
+		addMouseWheelListener(new MouseWheelListener() {
+			public void mouseWheelMoved(MouseWheelEvent e) {
+				Lock();
+				if(e.getWheelRotation() > 0)
+					iren.MouseWheelForwardEvent();
+				else
+					iren.MouseWheelBackwardEvent();
+				UnLock();
+			}
+		});
 		setMinimumSize(new Dimension(0, 0));
 		setPreferredSize(new Dimension(0, 0));
 		vtkInteractorStyleTrackballCamera style =
@@ -247,5 +261,63 @@ public class Canvas extends vtkCanvas
 			mapper.SetImmediateModeRendering(Utils.booleanToInt(mode));
 		}
 		listOfActors.Delete();
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		if (ren.VisibleActorCount() == 0)
+			return;
+		
+		Lock();
+		rw.SetDesiredUpdateRate(5.0);
+		lastX = e.getX();
+		lastY = e.getY();
+
+		ctrlPressed = (e.getModifiers() & InputEvent.CTRL_MASK) == InputEvent.CTRL_MASK ? 1 : 0;
+		shiftPressed = (e.getModifiers() & InputEvent.SHIFT_MASK) == InputEvent.SHIFT_MASK ? 1 : 0;
+
+		iren.SetEventInformationFlipY(e.getX(), e.getY(),
+			ctrlPressed, shiftPressed, '0', 0, "0");
+
+		if ((e.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK)
+			iren.LeftButtonPressEvent();
+		else if ((e.getModifiers() & InputEvent.BUTTON2_MASK) == InputEvent.BUTTON2_MASK)
+			iren.RightButtonPressEvent();
+		else if ((e.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK)
+			iren.MiddleButtonPressEvent();
+		
+		UnLock();
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		rw.SetDesiredUpdateRate(0.01);
+
+		ctrlPressed = (e.getModifiers() & InputEvent.CTRL_MASK) == InputEvent.CTRL_MASK ? 1 : 0;
+		shiftPressed = (e.getModifiers() & InputEvent.SHIFT_MASK) == InputEvent.SHIFT_MASK ? 1 : 0;
+
+		iren.SetEventInformationFlipY(e.getX(), e.getY(),
+			ctrlPressed, shiftPressed, '0', 0, "0");
+
+		if ((e.getModifiers() & InputEvent.BUTTON1_MASK) ==
+			InputEvent.BUTTON1_MASK) {
+			Lock();
+			iren.LeftButtonReleaseEvent();
+			UnLock();
+		}
+
+		if ((e.getModifiers() & InputEvent.BUTTON2_MASK) ==
+			InputEvent.BUTTON2_MASK) {
+			Lock();
+			iren.RightButtonReleaseEvent();
+			UnLock();
+		}
+
+		if ((e.getModifiers() & InputEvent.BUTTON3_MASK) ==
+			InputEvent.BUTTON3_MASK) {
+			Lock();
+			iren.MiddleButtonReleaseEvent();
+			UnLock();
+		}
 	}
 }
