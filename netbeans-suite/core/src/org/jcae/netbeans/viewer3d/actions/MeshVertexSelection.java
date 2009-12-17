@@ -18,27 +18,23 @@
  * (C) Copyright 2008, by EADS France
  */
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jcae.netbeans.viewer3d.actions;
 
-import org.jcae.vtk.AmibeViewable;
+import org.jcae.netbeans.mesh.AmibeNViewable;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 
 public final class MeshVertexSelection extends MeshButton
 {
 	@Override
-	public void actionPerformed(AmibeViewable interactor)
+	public void actionPerformed(AmibeNViewable interactor)
 	{
-		interactor.setSelectionType(AmibeViewable.SelectionType.POINT);
+		interactor.setSelectionType(AmibeNViewable.SelectionType.POINT);
 	}
 	
-	protected void updateButton(AmibeViewable viewer)
+	protected void updateButton(AmibeNViewable viewer)
 	{
-		setBooleanState(viewer.getSelectionType() == AmibeViewable.SelectionType.POINT);
+		setBooleanState(viewer.getSelectionType() == AmibeNViewable.SelectionType.POINT);
 	}
 	
 	/**

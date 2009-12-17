@@ -19,19 +19,19 @@
  */
 package org.jcae.netbeans.viewer3d.actions;
 
+import org.jcae.netbeans.mesh.AmibeNViewable;
 import org.jcae.vtk.Viewable;
-import org.jcae.vtk.AmibeViewable;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 
 public final class MeshGroupSelection extends MeshButton
 {
-	public void actionPerformed(AmibeViewable interactor)
+	public void actionPerformed(AmibeNViewable interactor)
 	{
 		interactor.setSelectionType(Viewable.SelectionType.NODE);
 	}
 	
-	protected void updateButton(AmibeViewable viewer)
+	protected void updateButton(AmibeNViewable viewer)
 	{
 		setBooleanState(viewer.getSelectionType() == Viewable.SelectionType.NODE);
 	}

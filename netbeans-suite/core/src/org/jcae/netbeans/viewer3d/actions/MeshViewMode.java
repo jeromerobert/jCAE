@@ -19,22 +19,22 @@
  */
 package org.jcae.netbeans.viewer3d.actions;
 
-import org.jcae.vtk.AmibeViewable;
+import org.jcae.netbeans.mesh.AmibeNViewable;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 
 public final class MeshViewMode extends MeshButton
 {
 @Override
-	public void actionPerformed(AmibeViewable viewable)
+	public void actionPerformed(AmibeNViewable viewable)
 	{
 		switch(viewable.getViewMode())
 		{
 			case FILLED:
-				viewable.setViewMode(AmibeViewable.ViewMode.WIRED);
+				viewable.setViewMode(AmibeNViewable.ViewMode.WIRED);
 				break;
 			case WIRED:
-				viewable.setViewMode(AmibeViewable.ViewMode.FILLED);
+				viewable.setViewMode(AmibeNViewable.ViewMode.FILLED);
 				break;
 			default:
 				throw new IllegalArgumentException("Mesh view mode not supported !");
@@ -42,9 +42,9 @@ public final class MeshViewMode extends MeshButton
 		viewable.render();
 	}
 	
-	protected void updateButton(AmibeViewable viewer)
+	protected void updateButton(AmibeNViewable viewer)
 	{
-		setBooleanState(viewer.getViewMode() == AmibeViewable.ViewMode.WIRED);
+		setBooleanState(viewer.getViewMode() == AmibeNViewable.ViewMode.WIRED);
 	}
 
 	public String getName()

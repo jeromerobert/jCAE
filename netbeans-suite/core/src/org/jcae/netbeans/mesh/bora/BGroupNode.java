@@ -7,21 +7,15 @@
 
 package org.jcae.netbeans.mesh.bora;
 
-import org.jcae.netbeans.mesh.*;
 import java.awt.datatransfer.Transferable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import javax.swing.Action;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.bora.ds.BDiscretization;
-import org.jcae.netbeans.viewer3d.ViewManager;
-import org.jcae.vtk.BoraToMesh;
-import org.jcae.vtk.View;
-import org.jcae.vtk.AmibeViewable;
 import org.openide.actions.DeleteAction;
 import org.openide.actions.RenameAction;
 import org.openide.actions.ViewAction;

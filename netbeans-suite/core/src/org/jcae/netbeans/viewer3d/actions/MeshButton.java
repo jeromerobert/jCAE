@@ -21,11 +21,11 @@
 package org.jcae.netbeans.viewer3d.actions;
 
 import java.awt.event.ActionEvent;
+import org.jcae.netbeans.mesh.AmibeNViewable;
 import org.jcae.netbeans.viewer3d.CurrentViewableChangeListener;
 import org.jcae.netbeans.viewer3d.ViewManager;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
-import org.jcae.vtk.AmibeViewable;
 import org.openide.util.actions.BooleanStateAction;
 import org.openide.util.actions.SystemAction;
 
@@ -50,7 +50,7 @@ public abstract class MeshButton extends BooleanStateAction implements CurrentVi
 		View v = ViewManager.getDefault().getCurrentView();
 		if(v!=null)
 		{
-			AmibeViewable interactor = (AmibeViewable)v.getCurrentViewable();
+			AmibeNViewable interactor = (AmibeNViewable)v.getCurrentViewable();
 			if(interactor == null)
 				throw new RuntimeException("A InteractorMesh is expected");
 			actionPerformed(interactor);
@@ -63,13 +63,13 @@ public abstract class MeshButton extends BooleanStateAction implements CurrentVi
 	public void currentViewableChanged(Viewable interactor)
 	{	
 		
-		if(interactor == null || interactor.getClass() != AmibeViewable.class)
+		if(!(interactor instanceof AmibeNViewable))
 		{
 			setEnabled(false);
 		}
 		else
 		{
-			AmibeViewable meshInteractor = (AmibeViewable)interactor;
+			AmibeNViewable meshInteractor = (AmibeNViewable)interactor;
 		
 			setEnabled(true);
 			
@@ -77,12 +77,12 @@ public abstract class MeshButton extends BooleanStateAction implements CurrentVi
 		}
 	}
 	
-	protected abstract void updateButton(AmibeViewable viewer);
+	protected abstract void updateButton(AmibeNViewable viewer);
 
 	/**
 	 * When the selection was maded update all the buttons selection to be to the correct value
 	 */
-	protected void updateButtons(AmibeViewable viewer)
+	protected void updateButtons(AmibeNViewable viewer)
 	{
 		SystemAction.get(MeshGroupSelection.class).updateButton(viewer);
 		SystemAction.get(MeshVertexSelection.class).updateButton(viewer);
@@ -90,5 +90,5 @@ public abstract class MeshButton extends BooleanStateAction implements CurrentVi
 		SystemAction.get(MeshViewMode.class).updateButton(viewer);
 	}
 
-	public abstract void actionPerformed(AmibeViewable interactor);
+	public abstract void actionPerformed(AmibeNViewable interactor);
 }
