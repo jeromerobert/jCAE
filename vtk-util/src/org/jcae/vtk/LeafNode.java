@@ -353,8 +353,8 @@ public class LeafNode extends AbstractNode
 		if (selected)
 		{
 			// Highlight actor
-			getSelectionActorCustomiser().customiseSelectionActor(actor);
-			getSelectionMapperCustomiser().customiseSelectionMapper(mapper);
+			getSelectionActorCustomiser().customiseActor(actor);
+			getSelectionMapperCustomiser().customiseMapper(mapper);
 			
 			deleteSelectionActor();
 		}
@@ -385,12 +385,12 @@ public class LeafNode extends AbstractNode
 			// to not take clipping planes into account
 			fireActorCreated(selectionActor);
 		}
-		getSelectionActorCustomiser().customiseSelectionActor(selectionActor);
+		getSelectionActorCustomiser().customiseActor(selectionActor);
 
 		if(selectionMapper == null)
 			selectionMapper = new vtkPolyDataMapper();
 		selectionActor.SetMapper(selectionMapper);
-		getSelectionMapperCustomiser().customiseSelectionMapper(selectionMapper);
+		getSelectionMapperCustomiser().customiseMapper(selectionMapper);
 
 		vtkSelection sel = new vtkSelection();
 		vtkSelectionNode selectionNode = new vtkSelectionNode();

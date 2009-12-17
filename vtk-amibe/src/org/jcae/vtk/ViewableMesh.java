@@ -24,7 +24,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
-import java.util.Set;
 import vtk.vtkMapper;
 import vtk.vtkActor;
 
@@ -61,9 +60,9 @@ public class ViewableMesh extends Viewable
 		{
 
 			@Override
-			public void customiseSelectionActor(vtkActor actor)
+			public void customiseActor(vtkActor actor)
 			{
-				super.customiseSelectionActor(actor);
+				super.customiseActor(actor);
 				actor.GetProperty().EdgeVisibilityOn();
 				actor.GetProperty().LightingOff();
 				actor.GetProperty().SetEdgeColor(0.4, 0.4, 0.4);
@@ -78,10 +77,10 @@ public class ViewableMesh extends Viewable
 				mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(Utils.getOffsetFactor(), Utils.getOffsetValue()*2.);
 			}
 		});
-		rootNode.setSelectionMapperCustomiser(new AbstractNode.SelectionMapperCustomiser() {
+		rootNode.setSelectionMapperCustomiser(new AbstractNode.MapperCustomiser() {
 
 			@Override
-			public void customiseSelectionMapper(vtkMapper mapper)
+			public void customiseMapper(vtkMapper mapper)
 			{
 				mapper.SetResolveCoincidentTopologyToPolygonOffset();
 				mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(Utils.getOffsetFactor(), Utils.getOffsetValue());

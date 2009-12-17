@@ -486,8 +486,8 @@ public class Node extends AbstractNode
 			// The whole actor is selected, so display it
 			// as highlighted.
 			mapper.ScalarVisibilityOff();
-			getSelectionActorCustomiser().customiseSelectionActor(actor);
-			getSelectionMapperCustomiser().customiseSelectionMapper(mapper);
+			getSelectionActorCustomiser().customiseActor(actor);
+			getSelectionMapperCustomiser().customiseMapper(mapper);
 
 			deleteSelectionActor();
 		}
@@ -560,7 +560,7 @@ public class Node extends AbstractNode
 			selectionActor = new vtkActor();
 			selectionActor.PickableOff();
 		}
-		getSelectionActorCustomiser().customiseSelectionActor(selectionActor);
+		getSelectionActorCustomiser().customiseActor(selectionActor);
 
 		if(selectionMapper == null)
 			selectionMapper = new vtkPolyDataMapper();
@@ -569,7 +569,7 @@ public class Node extends AbstractNode
 		selectionMapper.SetInput(d);
 		d.Delete();
 		selectionActor.SetMapper(selectionMapper);
-		getSelectionMapperCustomiser().customiseSelectionMapper(selectionMapper);
+		getSelectionMapperCustomiser().customiseMapper(selectionMapper);
 		
 		if (actorCreated)
 			fireActorCreated(selectionActor);

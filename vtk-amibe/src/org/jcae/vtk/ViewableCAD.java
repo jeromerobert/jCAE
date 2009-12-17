@@ -158,10 +158,9 @@ public class ViewableCAD extends Viewable
 		vertices.setSelectionActorCustomiser(new Viewable.SelectionActorCustomiser()
 		{
 			@Override
-			public void customiseSelectionActor(vtkActor actor)
+			public void customiseActor(vtkActor actor)
 			{
-				super.customiseSelectionActor(actor);
-				
+				super.customiseActor(actor);				
 				actor.GetProperty().SetPointSize(vertexSize*2);
 			}
 		});

@@ -155,22 +155,6 @@ public abstract class AbstractNode
 	}
 	
 	/**
-	 * Customise actor when this node is selected (partially or as a whole).
-	 */
-	public interface SelectionActorCustomiser
-	{
-		void customiseSelectionActor(vtkActor actor);
-	}
-	
-	/**
-	 * Customise mapper when this node is selected (partially or as a whole).
-	 */
-	public interface SelectionMapperCustomiser
-	{
-		void customiseSelectionMapper(vtkMapper mapper);
-	}
-	
-	/**
 	 * Default actor customiser, it does nothing.
 	 */
 	public static ActorCustomiser DEFAULT_ACTOR_CUSTOMISER =
@@ -197,28 +181,28 @@ public abstract class AbstractNode
 	/**
 	 * Default actor customiser when cells of this node are selected, it does nothing.
 	 */
-	public static SelectionActorCustomiser DEFAULT_SELECTION_ACTOR_CUSTOMISER =
-		new SelectionActorCustomiser()
+	public static ActorCustomiser DEFAULT_SELECTION_ACTOR_CUSTOMISER =
+		new ActorCustomiser()
 		{
 			@Override
-			public void customiseSelectionActor(vtkActor actor) {}
+			public void customiseActor(vtkActor actor) {}
 		};
 	
 	/**
 	 * Default mapper customiser when cells of this node are selected, it does nothing.
 	 */
-	public static SelectionMapperCustomiser DEFAULT_SELECTION_MAPPER_CUSTOMISER =
-		new SelectionMapperCustomiser()
+	public static MapperCustomiser DEFAULT_SELECTION_MAPPER_CUSTOMISER =
+		new MapperCustomiser()
 		{
 			@Override
-			public void customiseSelectionMapper(vtkMapper mapper) {}
+			public void customiseMapper(vtkMapper mapper) {}
 		};
 	
 	protected ActorCustomiser actorCustomiser;
 	protected MapperCustomiser mapperCustomiser;
 	
-	protected SelectionActorCustomiser selectionActorCustomiser;
-	protected SelectionMapperCustomiser selectionMapperCustomiser;
+	protected ActorCustomiser selectionActorCustomiser;
+	protected MapperCustomiser selectionMapperCustomiser;
 
 	/**
 	 * Constructor.  It must not be called directly, only by subclasses.
@@ -299,7 +283,7 @@ public abstract class AbstractNode
 		timeStampModified();
 	}
 
-	public SelectionActorCustomiser getSelectionActorCustomiser()
+	public ActorCustomiser getSelectionActorCustomiser()
 	{
 		if(selectionActorCustomiser != null)
 			return selectionActorCustomiser;
@@ -312,14 +296,14 @@ public abstract class AbstractNode
 		return selectionActorCustomiser;
 	}
 
-	public void setSelectionActorCustomiser(SelectionActorCustomiser selectionActorCustomiser)
+	public void setSelectionActorCustomiser(ActorCustomiser selectionActorCustomiser)
 	{
 		this.selectionActorCustomiser = selectionActorCustomiser;
 		timeStampSelected();
 	}
 
 
-	public SelectionMapperCustomiser getSelectionMapperCustomiser()
+	public MapperCustomiser getSelectionMapperCustomiser()
 	{
 		if(selectionMapperCustomiser != null)
 			return selectionMapperCustomiser;
@@ -332,7 +316,7 @@ public abstract class AbstractNode
 		return selectionMapperCustomiser;
 	}
 
-	public void setSelectionMapperCustomiser(SelectionMapperCustomiser selectionMapperCustomiser)
+	public void setSelectionMapperCustomiser(MapperCustomiser selectionMapperCustomiser)
 	{
 		this.selectionMapperCustomiser = selectionMapperCustomiser;
 		timeStampSelected();

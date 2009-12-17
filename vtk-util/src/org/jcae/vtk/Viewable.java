@@ -73,10 +73,10 @@ public abstract class Viewable extends MultiCanvas
 		rootNode.setSelectionActorCustomiser(new SelectionActorCustomiser());
 	}
 
-	protected class SelectionActorCustomiser implements AbstractNode.SelectionActorCustomiser
+	protected class SelectionActorCustomiser implements AbstractNode.ActorCustomiser
 	{
 		@Override
-		public void customiseSelectionActor(vtkActor actor)
+		public void customiseActor(vtkActor actor)
 		{
 			vtkProperty p = actor.GetProperty();
 			Utils.vtkPropertySetColor(p, selectionColor);
