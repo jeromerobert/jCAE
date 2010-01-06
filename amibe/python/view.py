@@ -7,6 +7,7 @@ from org.jcae.vtk import AmibeToMesh, Canvas, UNVToMesh, View, Viewable, Viewabl
 from java.awt import BorderLayout
 from java.awt.event import KeyEvent, KeyListener
 from javax.swing import JFrame
+from java.util import Collections
 
 # VTK
 from vtk import vtkRenderer, vtkInteractorStyleTrackballCamera
