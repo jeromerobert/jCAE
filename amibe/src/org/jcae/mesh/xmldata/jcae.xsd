@@ -202,7 +202,7 @@ The offset attribute is only allowed for doublestream and integerstream.
         </xs:simpleType>
       </xs:attribute>
       <xs:attribute name="location" use="required" type="xs:anyURI" />
-      <xs:attribute name="offset" use="optional" type="xs:positiveInteger" />
+      <xs:attribute name="offset" use="optional" type="xs:nonNegativeInteger" />
     </xs:complexType>
   </xs:element>
 </xs:schema>
