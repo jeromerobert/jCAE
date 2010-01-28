@@ -69,7 +69,9 @@
     -->
 	
 	<!-- Netbeans update the manifest in the init target so we must write it before -->
-	<target name="-pre-init">
+	<!-- disabled as we are no longer using subversion. Kept in case we want to
+    do the same thing with git -->
+	<target name="-disabled-pre-init">
 		<exec executable="/bin/sh" failifexecutionfails="false"
 		outputproperty="tmprevision" errorproperty="dummy" logError="true">
 			<arg line="-c &quot;unset LANG;svnversion&quot;"/>
