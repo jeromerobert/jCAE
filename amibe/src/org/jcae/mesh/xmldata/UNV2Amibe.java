@@ -389,11 +389,15 @@ public class UNV2Amibe
 					elements.add(new Element21(line, rd));
 					break;
 				case 92: //parabolic triangles
-					Element92 e=new Element92(line, rd);
-					elements.add(e);
+					Element92 e=new Element92(line, rd);					
 					p1=e.getNode(0);
 					p2=e.getNode(2);
 					p3=e.getNode(4);					
+					break;
+				case 118: //tetra
+					//skip it
+					rd.readLine();
+					rd.readLine();
 					break;
 				default:
 					System.out.println("Warning: Section 2412, type "+type+" unknown");
