@@ -13,14 +13,14 @@
 		<propertyfile file="${classes.dir}/timestamp.properties">
 			<entry key="build.time" type="date" pattern="yyyy-MM-dd HH:mm:ss" value="now" />
 		</propertyfile>
-		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}">
+		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}" encoding="UTF-8">
 			<compilerarg line="${compiler.arg}"/>
 			<classpath>
 				<pathelement location="${trove.jar}"/>
 				<pathelement location="${xml-apis.jar}"/>
 			</classpath>
 		</javac>
-		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.mesherocc.dir}">
+		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.mesherocc.dir}" encoding="UTF-8">
 			<compilerarg line="${compiler.arg}"/>
 			<classpath>
 				<pathelement location="${occjava.jar}"/>
@@ -31,7 +31,7 @@
 
 	<target name="compile-junit" depends="init,jar" description="Compile junit tests">
 		<mkdir dir="${classes.test.dir}"/>
-		<javac debug="true" deprecation="true" destdir="${classes.test.dir}" srcdir="${src.test.dir}">
+		<javac debug="true" deprecation="true" destdir="${classes.test.dir}" srcdir="${src.test.dir}" encoding="UTF-8">
 			<compilerarg line="${compiler.arg}"/>
 			<classpath>
 				<pathelement location="${jcae-viewer3d.jar}"/>
