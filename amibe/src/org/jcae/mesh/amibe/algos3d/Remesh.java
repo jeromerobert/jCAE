@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2009, by EADS France
+    Copyright (C) 2009,2010, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -75,6 +75,7 @@ public class Remesh
 	private final boolean hasRidges;
 	private final boolean hasFreeEdges;
 	private final double coplanarity;
+	private final boolean allowNearNodes;
 	private AnalyticMetricInterface analyticMetric = LATER_BINDING;
 	private final Map<Vertex, EuclidianMetric3D> metrics;
 	private static final AnalyticMetricInterface LATER_BINDING = new AnalyticMetricInterface() {
@@ -130,6 +131,7 @@ public class Remesh
 		double size = 0.0;
 		boolean proj = false;
 		boolean ridges = false;
+		boolean nearNodes = false;
 		double copl = 0.8;
 		Map<String, String> decimateOptions = new HashMap<String, String>();
 		for (final Map.Entry<String, String> opt: options.entrySet())
@@ -167,6 +169,8 @@ public class Remesh
 			}
 			else if (key.equals("project"))
 				proj = Boolean.valueOf(val).booleanValue();
+			else if (key.equals("allowNearNodes"))
+				nearNodes = Boolean.valueOf(val).booleanValue();
 			else
 				LOGGER.warning("Unknown option: "+key);
 		}
@@ -193,6 +197,7 @@ public class Remesh
 		project = proj;
 		hasRidges = ridges;
 		coplanarity = copl;
+		allowNearNodes = nearNodes;
 
 		if (!decimateOptions.isEmpty())
 		{
@@ -442,7 +447,7 @@ public class Remesh
 							assert metric != null;
 							double[] uv = v.getUV();
 							Vertex n = kdTree.getNearestVertex(metric, uv);
-							if (interpolatedDistance(v, metric, n, metrics.get(n)) > curMinlen)
+							if (allowNearNodes || interpolatedDistance(v, metric, n, metrics.get(n)) > curMinlen)
 							{
 								kdTree.add(v);
 								metrics.put(v, metric);
