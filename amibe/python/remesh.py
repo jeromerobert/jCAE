@@ -34,6 +34,9 @@ parser.add_option("-m", "--metricsFile", metavar="STRING",
 parser.add_option("-p", "--project",
                   action="store_true", dest="project",
                   help="project vertices onto local surface")
+parser.add_option("-n", "--allowNearNodes",
+                  action="store_true", dest="allowNearNodes",
+                  help="insert vertices even if this creates a small edge")
 parser.add_option("-t", "--size", metavar="FLOAT", default=0.0,
                   action="store", type="float", dest="size",
                   help="target size")
@@ -70,6 +73,8 @@ if options.coplanarity:
 	opts.put("coplanarity", str(options.coplanarity))
 if options.project:
 	opts.put("project", "true")
+if options.allowNearNodes:
+	opts.put("allowNearNodes", "true")
 
 if options.decimateSize or options.decimateTarget:
 	decimateOptions = HashMap()

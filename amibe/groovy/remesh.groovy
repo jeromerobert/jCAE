@@ -49,6 +49,11 @@ options.addOption(
 		.create('m'));
 options.addOption(
 	OptionBuilder.hasArg(false)
+		.withDescription("insert vertices even if this creates a small edge")
+		.withLongOpt("allowNearNodes")
+		.create('n'));
+options.addOption(
+	OptionBuilder.hasArg(false)
 		.withDescription("project vertices onto local surface")
 		.withLongOpt("project")
 		.create('p'));
@@ -96,6 +101,9 @@ else
 	setAnalytic = true
 if (cmd.hasOption('c'))
 	algoOptions.put("coplanarity", cmd.getOptionValue('c'));
+if (cmd.hasOption('n'))
+	algoOptions.put("allowNearNodes", "true");
+
 if (cmd.hasOption('p'))
 {
 	print("remesh: Option -p has been discarded")
