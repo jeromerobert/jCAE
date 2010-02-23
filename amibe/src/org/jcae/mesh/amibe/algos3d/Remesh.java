@@ -292,6 +292,16 @@ public class Remesh
 		return mesh;
 	}
 
+        // Can be extended by subclasses
+	protected void afterSplitHook()
+	{
+	}
+
+	// Can be extended by subclasses
+	protected void afterSwapHook()
+	{
+	}
+
 	private static boolean isInside(double[] pos, Triangle t)
 	{
 		double [][] temp = new double[4][3];
@@ -552,6 +562,7 @@ public class Remesh
 					else
 						neighborBgMap.put(v, bgT.vertex[2]);
 					processed++;
+					afterSplitHook();
 					// Swap edges
 					HalfEdge edge = (HalfEdge) ot;
 					edge = edge.prev();
@@ -571,6 +582,7 @@ public class Remesh
 						}
 					}
 					while ((edge.origin() != s || counter == 0) && counter < 20);
+					afterSwapHook();
 					if (processed > 0 && (processed % progressBarStatus) == 0)
 						LOGGER.info("Vertices inserted: "+processed);
 				}
