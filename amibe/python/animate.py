@@ -1,7 +1,7 @@
 
 # jCAE
 from org.jcae.mesh.oemm import OEMM, Storage
-from org.jcae.vtk import Palette, AmibeToMesh, Canvas, UNVToMesh, PickContext, View, Viewable, ViewableCAD, AmibeViewable, ViewableOEMM
+from org.jcae.vtk import Palette, AmibeToMesh, Canvas, UNVToMesh, PickContext, View, Viewable, ViewableCAD, ViewableMesh, ViewableOEMM
 
 # Swing
 from java.awt import BorderLayout, Color
@@ -29,9 +29,10 @@ xmlDir = args[0]
 palette = Palette()
 palette.addColor(Color.lightGray)
 
-class MyViewableMesh(AmibeViewable):
-	def __init__(self, mesh):
-		AmibeViewable.__init__(self, mesh, palette)
+class MyViewableMesh(ViewableMesh):
+	def __init__(self, triangles):
+		ViewableMesh.__init__(self, palette)
+		self.addTriangles(triangles)
 		self.setSelectionType(Viewable.SelectionType.CELL)
 	def manageSelection(self, pickContext):
 		self.super__manageSelection(pickContext)
@@ -61,7 +62,7 @@ def load(dir):
 	if (os.path.isdir(dir) and os.path.exists(os.path.join(dir, "jcae3d"))):
 		reader = AmibeToMesh(dir)
 		print("Loading "+dir)
-		return MyViewableMesh(reader.getMesh())
+		return MyViewableMesh(reader.getTriangles())
 	return None
 
 class MyView(View):
