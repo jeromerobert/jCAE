@@ -217,6 +217,8 @@ public class AmibeDomain extends FEDomainAdaptor
 			return new int[0];
 		String groupFileN=((Element)e.getElementsByTagName("file").item(0)).getAttribute("location");
 		String os=((Element)e.getElementsByTagName("file").item(0)).getAttribute("offset");
+		if (os.isEmpty())
+			os = "0";
 		File groupFile=new File(directory, groupFileN);		
 		long offset=Long.parseLong(os);
 		

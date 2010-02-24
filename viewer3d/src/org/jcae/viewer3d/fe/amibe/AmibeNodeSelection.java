@@ -36,6 +36,8 @@ public class AmibeNodeSelection implements NodeSelection
 				getElementsByTagName("file").item(0)).getAttribute("location");
 			
 			String os=((Element)groupElement.getElementsByTagName("file").item(0)).getAttribute("offset");
+			if (os.isEmpty())
+				os = "0";
 			File groupFile=new File(provider.getDirectory(), groupFileN);		
 			long offset=Long.parseLong(os);
 			System.out.println(groupFile);
