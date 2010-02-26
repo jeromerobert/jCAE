@@ -302,6 +302,11 @@ public class Remesh
 	{
 	}
 
+	// Can be extended by subclasses
+	protected void afterIterationHook()
+	{
+	}
+
 	private static boolean isInside(double[] pos, Triangle t)
 	{
 		double [][] temp = new double[4][3];
@@ -586,6 +591,7 @@ public class Remesh
 					if (processed > 0 && (processed % progressBarStatus) == 0)
 						LOGGER.info("Vertices inserted: "+processed);
 				}
+				afterIterationHook();
 				assert mesh.isValid();
 				if (hasRidges)
 				{
