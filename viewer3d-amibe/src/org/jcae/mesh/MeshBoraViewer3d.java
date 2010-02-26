@@ -52,9 +52,9 @@ public class MeshBoraViewer3d
 		MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault3D();
 		mtb.addNodeList();
 		Mesh m = new Mesh(mtb);
-		Storage.readAllFaces(m, model.getGraph().getRootCell());
 		try
 		{
+			Storage.readAll(m, model.getGraph().getRootCell());
 			MeshWriter.writeObject3D(m, tmpDir, "dummy.brep");
 		}
 		catch (java.io.IOException ex)
