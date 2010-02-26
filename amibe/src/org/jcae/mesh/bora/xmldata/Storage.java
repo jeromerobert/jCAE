@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2006, by EADS CRC
-    Copyright (C) 2007,2008,2009, by EADS France
+    Copyright (C) 2007,2008,2009,2010, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -21,7 +21,6 @@
 
 package org.jcae.mesh.bora.xmldata;
 
-import gnu.trove.TIntArrayList;
 import org.jcae.mesh.amibe.ds.MEdge1D;
 import org.jcae.mesh.amibe.ds.MNode1D;
 import org.jcae.mesh.amibe.ds.Mesh;
@@ -34,6 +33,7 @@ import org.jcae.mesh.bora.ds.BModel;
 import org.jcae.mesh.bora.ds.BSubMesh;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.bora.ds.BDiscretization;
+import org.jcae.mesh.bora.ds.Constraint;
 import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADFace;
@@ -52,17 +52,17 @@ import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.PrintStream;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Iterator;
 import gnu.trove.TObjectIntHashMap;
 import gnu.trove.TIntObjectHashMap;
+import gnu.trove.TIntArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jcae.mesh.bora.ds.Constraint;
 
 public class Storage
 {
