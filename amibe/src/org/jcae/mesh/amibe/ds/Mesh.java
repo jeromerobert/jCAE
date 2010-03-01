@@ -884,6 +884,52 @@ public class Mesh implements Serializable
 		return toReturn;
 	}
 
+	public void createRidgesGroup(String groupName)
+	{
+		int ridgeGroup = 0;
+		if (!beamGroups.isEmpty())
+			ridgeGroup = beamGroups.max() + 1;
+		boolean found = false;
+		for (Map.Entry<Integer, String> entry : groupNames.entrySet())
+		{
+			if (entry.getValue().compareTo(groupName) == 0)
+			{
+				ridgeGroup = entry.getKey();
+				found = true;
+				break;
+			}
+		}
+		if (found)
+		{
+			// FIXME: We cannot remove previous ridges from beams and
+			//        beamGroups, so clear them.
+			beams.clear();
+			beamGroups.clear();
+		}
+		else
+		{
+			groupNames.put(ridgeGroup, groupName);
+		}
+		AbstractHalfEdge ot  = null;
+
+		for (Triangle t: triangleList)
+		{
+			ot = t.getAbstractHalfEdge(ot);
+			if (t.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
+			for (int i = 0; i < 3; i++)
+			{
+				ot = ot.next();
+				if (ot.hasAttributes(AbstractHalfEdge.SHARP))
+				{
+					beams.add(ot.origin());
+					beams.add(ot.destination());
+					beamGroups.add(ridgeGroup);
+				}
+			}
+		}
+	}
+
 	/**
 	 * Build group boundaries.
 	 */
