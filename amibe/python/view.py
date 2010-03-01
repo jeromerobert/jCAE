@@ -1,7 +1,7 @@
 
 # jCAE
 from org.jcae.mesh.oemm import OEMM, Storage
-from org.jcae.vtk import AmibeToMesh, Canvas, UNVToMesh, View, Viewable, ViewableCAD, ViewableMesh, ViewableOEMM, Utils
+from org.jcae.vtk import AmibeToMesh, Canvas, Palette, UNVToMesh, View, Viewable, ViewableCAD, ViewableMesh, ViewableOEMM, Utils
 
 # Swing
 from java.awt import BorderLayout
@@ -35,7 +35,9 @@ frame.add(canvas, BorderLayout.CENTER)
 if (os.path.isdir(xmlDir)):
 	if (os.path.exists(os.path.join(xmlDir, "jcae3d"))):
 		reader = AmibeToMesh(xmlDir)
-		viewable = ViewableMesh(reader.getTriangles())
+		viewable = ViewableMesh(Palette(32))
+		viewable.addTriangles(reader.getTriangles())
+		viewable.addBeams(reader.getBeams())
 	elif (os.path.exists(os.path.join(xmlDir, "oemm"))):
 		oemm = Storage.readOEMMStructure(xmlDir)
 		viewable = ViewableOEMM(oemm)

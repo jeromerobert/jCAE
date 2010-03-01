@@ -12,6 +12,7 @@ import javax.swing.JFrame;
 import org.jcae.vtk.AmibeToMesh;
 import org.jcae.vtk.BoraToMesh;
 import org.jcae.vtk.Canvas;
+import org.jcae.vtk.Palette;
 import org.jcae.vtk.UNVToMesh;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
@@ -64,7 +65,9 @@ if (handle.isDirectory())
 	if (new File(handle, "jcae3d").exists())
 	{
 		AmibeToMesh reader = new AmibeToMesh(xmlDir);
-		viewable = new ViewableMesh(reader.getTriangles())
+		viewable = new ViewableMesh(new Palette(32));
+		viewable.addTriangles(reader.getTriangles());
+		viewable.addBeams(reader.getBeams());
 	}
 	else if (new File(handle, "model").exists())
 	{
