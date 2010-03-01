@@ -429,6 +429,14 @@ public abstract class AmibeWriter {
 			}
 			o.writeEndElement(); //nodes
 
+			if(numberOfBeams > 0)
+			{
+				o.writeStartElement("beams");
+				writeNumber(numberOfBeams);
+				writeFile("integerstream", dir + beamsFName, beamsOffset);
+				o.writeEndElement();
+			}
+
 			if(numberOfTriangles > 0)
 			{
 				o.writeStartElement("triangles");
@@ -443,14 +451,6 @@ public abstract class AmibeWriter {
 				o.writeEndElement(); //triangles
 			}
 			
-			if(numberOfBeams > 0)
-			{
-				o.writeStartElement("beams");
-				writeNumber(numberOfBeams);
-				writeFile("integerstream", dir + beamsFName, beamsOffset);
-				o.writeEndElement();
-			}
-
 			writeGroups();
 			o.writeEndElement(); //submesh
 		} catch (XMLStreamException ex) {

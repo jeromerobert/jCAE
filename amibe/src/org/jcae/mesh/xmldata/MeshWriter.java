@@ -264,13 +264,13 @@ public class MeshWriter
 			aw.setShape(brepFile);
 
 		writeObjectNodes(nodelist, submesh.outerVertex, aw, nodeIndex);
+		writeObjectTriangles(trianglelist, nodeIndex, aw);
+		writeObjectGroups(submesh, aw);
 		List<Vertex> beams = submesh.getBeams();
 		for(int i = 0; i<beams.size(); i+=2)
 			aw.addBeam(
 				nodeIndex.get(beams.get(i)),
 				nodeIndex.get(beams.get(i+1)));
-		writeObjectTriangles(trianglelist, nodeIndex, aw);
-		writeObjectGroups(submesh, aw);
 		aw.finish();
 	}
 }
