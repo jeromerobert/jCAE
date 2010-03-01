@@ -124,7 +124,7 @@ anymore</xs:documentation>
   </xs:element>
   <xs:element name="submesh">
     <xs:complexType>
-      <xs:sequence>
+      <xs:all>
 		<xs:element name="flag" minOccurs="0">
 		    <xs:complexType>
 		     <xs:attribute name="value" type="xs:string"/>
@@ -143,7 +143,7 @@ anymore</xs:documentation>
         <xs:element minOccurs="0" ref="triangles" />
         <xs:element minOccurs="0" maxOccurs="unbounded" ref="result" />
         <xs:element minOccurs="0" ref="groups" />
-      </xs:sequence>
+      </xs:all>
     </xs:complexType>
   </xs:element>
   <xs:element name="groups">
