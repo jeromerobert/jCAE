@@ -28,11 +28,11 @@ index = 0
 xmlDir = args[0]
 palette = Palette()
 palette.addColor(Color.lightGray)
+palette.addColor(Color.red)
 
 class MyViewableMesh(ViewableMesh):
-	def __init__(self, triangles):
+	def __init__(self):
 		ViewableMesh.__init__(self, palette)
-		self.addTriangles(triangles)
 		self.setSelectionType(Viewable.SelectionType.CELL)
 	def manageSelection(self, pickContext):
 		self.super__manageSelection(pickContext)
@@ -62,7 +62,10 @@ def load(dir):
 	if (os.path.isdir(dir) and os.path.exists(os.path.join(dir, "jcae3d"))):
 		reader = AmibeToMesh(dir)
 		print("Loading "+dir)
-		return MyViewableMesh(reader.getTriangles())
+		viewable = MyViewableMesh()
+		viewable.addTriangles(reader.getTriangles())
+		viewable.addBeams(reader.getBeams())
+		return viewable
 	return None
 
 class MyView(View):
