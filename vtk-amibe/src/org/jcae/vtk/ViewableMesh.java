@@ -97,7 +97,7 @@ public class ViewableMesh extends Viewable
 		rootNode.setMapperCustomiser(MAPPER_CUSTOMIZER);
 		rootNode.setSelectionMapperCustomiser(MAPPER_CUSTOMIZER_S);
 		setViewMode(viewMode);
-		currentColorID = new Random().nextInt();
+		currentColorID = 0;
 		this.palette = palette;
 	}
 
@@ -111,7 +111,6 @@ public class ViewableMesh extends Viewable
 			LeafNode groupNode = new LeafNode(rootNode, group.getValue(),
 				getColor(group.getKey()));
 			groupNode.setManager(true);
-
 			groupToTrias.put(group.getKey(), groupNode);
 			triasToNode.put(groupNode, group.getKey());
 		}
