@@ -25,7 +25,6 @@ import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.HalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.projection.QuadricProjection;
 import org.jcae.mesh.amibe.projection.MeshLiaison;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
@@ -142,45 +141,12 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		// New point
 		double [] p0 = current.origin().getUV();
 		double [] p1 = current.destination().getUV();
+		
 		for (int i = 0; i < 3; i++)
 			newXYZ[i] = 0.5*(p0[i]+p1[i]);
+		
 		insertedVertex = mesh.createVertex(newXYZ);
-		if (current.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
-		{
-			// FIXME: Check deflection
-			return true;
-		}
-		// Discrete differential operators, and thus
-		// discreteProject, does not work on boundary
-		// nodes.
-		Vertex vm = current.origin();
-		if (vm.getRef() != 0)
-			vm = current.destination();
-		if (vm.getRef() == 0)
-		{
-			QuadricProjection qP = new QuadricProjection(vm, true);
-			if (!qP.canProject())
-			{
-				if (LOGGER.isLoggable(Level.FINE))
-					LOGGER.fine("Point "+vm+" cannot be projected onto discrete surface!");
-				return false;
-			}
-			qP.project(insertedVertex);
-		}
-
-		if (tolerance <= 0.0)
-			return true;
-		double dapex2 = insertedVertex.sqrDistance3D(current.apex());
-		if (!current.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
-		{
-			current = current.sym();
-			dapex2 = Math.min(dapex2, insertedVertex.sqrDistance3D(current.apex()));
-		}
-		if (dapex2 * tolerance * 16.0 > 1.0)
-			return true;
-		if (LOGGER.isLoggable(Level.FINE))
-			LOGGER.fine("Point "+vm+" too near from apical vertex");
-		return false;
+		return true;
 	}
 
 	private void updateTree(HalfEdge current)
