@@ -226,6 +226,7 @@ public abstract class AbstractAlgoHalfEdge
 				tree.update(f, newCost);
 			}
 			current = processEdge(current, cost);
+			afterProcessHook();
 			processed++;
 
 			if (noSwapAfterProcessing || minCos < -1.0)
@@ -291,6 +292,7 @@ public abstract class AbstractAlgoHalfEdge
 					}
 				}
 			}
+			afterSwapHook();
 		}
 		postProcessAllHalfEdges();
 		return processed > 0;
@@ -348,6 +350,14 @@ public abstract class AbstractAlgoHalfEdge
 
 	void appendRestoreState(ObjectInputStream q)
 		throws IOException
+	{
+	}
+
+	protected void afterProcessHook()
+	{
+	}
+
+	protected void afterSwapHook()
 	{
 	}
 
