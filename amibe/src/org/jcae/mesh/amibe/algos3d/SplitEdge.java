@@ -98,7 +98,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 			if (key.equals("size"))
 			{
 				double sizeTarget = Double.valueOf(val).doubleValue();
-				tolerance = 1.0 / (sizeTarget * sizeTarget);
+				tolerance = - (sizeTarget * sizeTarget);
 			}
 			else if (key.equals("maxtriangles"))
 				nrFinal = Integer.valueOf(val).intValue();
@@ -110,6 +110,8 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 			else
 				throw new RuntimeException("Unknown option: "+key);
 		}
+		if (tolerance == 0.0)
+			throw new RuntimeException("A size target must be specified");
 		if (meshLiaison == null)
 			mesh.buildRidges(minCos);
 	}
@@ -128,10 +130,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 	@Override
 	protected final double cost(final HalfEdge e)
 	{
-		double l2 = e.origin().sqrDistance3D(e.destination());
-		if (l2 == 0.0)
-			return Double.MAX_VALUE;
-		return 1.0 / l2;
+		return - e.origin().sqrDistance3D(e.destination());
 	}
 
 	@Override
