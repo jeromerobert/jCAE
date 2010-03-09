@@ -47,7 +47,7 @@
          logErr(false, true, "Cannot find valid 'platform*' folder!");
          return false;
      }
-+    initEnvironment(baseDir.c_str(), fd.cFileName); 
++    initEnvironment(baseDir.c_str(), getAppName()); 
      return true;
  }
  
