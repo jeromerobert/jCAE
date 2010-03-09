@@ -19,11 +19,11 @@
 			byline="true"/>
 	</target>
 
-	<target name="-zip-linux" unless="no.arch.linux">
+	<target name="-zip-linux" if="arch.linux">
 		<property name="jre.path" value="${path.jre.linux}"/>
 		<property name="arch" value="linux"/>
 	</target>
-	<target name="-zip-windows" unless="no.arch.win32">
+	<target name="-zip-windows" if="arch.win32">
 		<property name="jre.path" value="${path.jre.win32}"/>
 		<property name="arch" value="win32"/>
 	</target>
