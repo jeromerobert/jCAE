@@ -21,7 +21,8 @@ LDFLAGS := -shared -Wl,--enable-auto-import -Wl,--enable-runtime-pseudo-reloc -W
 CPPFLAGS := -I$(JAVA)/include -I$(JAVA)/include/win32 -I$(CASROOT)/inc -DWNT -D__MATH_WNT_H -DHAVE_NO_DLL
 JAVAGENSRCDIR := src-java/org/jcae/opencascade/jni/
 
-src/OccJava.dll : src/OccJava_wrap.o src/jnistream.o
+Release/OccJava.dll : src/OccJava_wrap.o src/jnistream.o
+	mkdir Release
 	$(CXX) $(LDFLAGS) -o $@ $^ $(LIBS) 
 
 src/jnistream.o : src/jnistream.cxx
