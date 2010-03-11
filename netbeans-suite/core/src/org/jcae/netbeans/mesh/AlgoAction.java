@@ -172,6 +172,12 @@ public abstract class AlgoAction extends CookieAction {
 		}
 	}
 
+	private String getClassPath()
+	{
+		return InstalledFileLocator.getDefault().locate(
+			"modules/ext/amibe.jar", "org.jcae.netbeans", false).getPath();
+	}
+	
 	private void runInOtherVM(Node node, List<String> args, File pyFile, InputOutput io) {
 		try {
 			ProcessBuilder pb = new ProcessBuilder();
@@ -185,9 +191,10 @@ public abstract class AlgoAction extends CookieAction {
 				}
 				pb.command().add(s);
 			}
+			pb.environment().put("CLASSPATH", getClassPath());			
 			pb.command().add(pyFile.getPath());
 			pb.command().addAll(args);
-			pb.environment().put("JAVA_HOME", Settings.getDefault().getJavaVirtualMachine());
+			pb.environment().put("JAVA_HOME", System.getProperty("java.home"));
 			customizeProcessBuilder(node, pb);
 			runProcess(pb, io);
 		} catch (IOException ex) {

@@ -24,7 +24,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.openide.modules.InstalledFileLocator;
 import org.openide.options.SystemOption;
 import org.openide.util.Lookup;
 
@@ -39,21 +38,12 @@ public class Settings extends SystemOption
 	{
 		return Lookup.getDefault().lookup(Settings.class);
 	}
-	private String javaVirtualMachine;
+
 	private String maximumMemory="1000m";	
-	private String mesherJar;
 	private String[] customJVMParameters=new String[0];
 	private String[] customMesherParameters=new String[0];
 	private boolean runInSameJVM=Boolean.getBoolean("jcae.netbeans.mesh.samejvm"); 
-	
-	public Settings()
-	{
-		mesherJar = InstalledFileLocator.getDefault().
-			locate("modules/ext/amibe.jar", "org.jcae.netbeans", false).
-			getAbsolutePath();
-		javaVirtualMachine=System.getProperty("java.home");
-		
-	}
+
 	
 	/* (non-Javadoc)
 	 * @see org.openide.options.SystemOption#displayName()
@@ -62,35 +52,25 @@ public class Settings extends SystemOption
 	{
 		return "Mesher settings";
 	}
-
+	
 	/**
 	 * Return a command line to execute other algo in the jcae.jar archive
 	 */
 	public String[] getCommandLineAlgo()
-	{		
-		String javaExe=new File(new File(javaVirtualMachine, "bin"), "java").getPath();
+	{
+		String javaExe=new File(new File(System.getProperty("java.home"), "bin"), "java").getPath();
 		List<String> toReturn=parameters();
 		toReturn.add(0, javaExe);
 		return toReturn.toArray(new String[toReturn.size()]);
 	}
-	
+
 	public List<String> parameters()
 	{
 		ArrayList<String> toReturn=new ArrayList<String>();
 		toReturn.add("-Xmx"+maximumMemory);
 		toReturn.add("-Djava.util.logging.config.file="+System.getProperty("java.util.logging.config.file"));
 		toReturn.addAll(Arrays.asList(getCustomJVMParameters()));
-		toReturn.add("-classpath");
-		String occmJar = InstalledFileLocator.getDefault().
-			locate("modules/ext/jcae-mesherocc.jar", "org.jcae.netbeans", false).
-			getPath();
-		toReturn.add(mesherJar+File.pathSeparatorChar+occmJar);
 		return toReturn;
-	}
-	
-	public String getJavaVirtualMachine()
-	{
-		return javaVirtualMachine;
 	}
 	
 	public String getMaximumMemory()
@@ -98,26 +78,11 @@ public class Settings extends SystemOption
 		return maximumMemory;
 	}
 	
-	public File getMesherJar()
-	{
-		return new File(mesherJar);
-	}
-	
-	
-	public void setJavaVirtualMachine(String javaVirtualMachine)
-	{
-		this.javaVirtualMachine = javaVirtualMachine;
-	}
-	
 	public void setMaximumMemory(String maximumMemory)
 	{
 		this.maximumMemory = maximumMemory;
 	}
 	
-	public void setMesherJar(File mesherJar)
-	{
-		this.mesherJar = mesherJar.getPath();
-	}
 	public boolean isRunInSameJVM()
 	{
 		return runInSameJVM;
