@@ -543,7 +543,7 @@ public class Remesh
 							continue;
 						}
 					}
-					if (pass > passes[0] && ot.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+					if (pass >= passes[0] && ot.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 					{
 						// Vertex is not inserted
 						skippedNodes++;
