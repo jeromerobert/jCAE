@@ -83,7 +83,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 		}
 		tolerance = - 0.01;
 		// Do not let AbstractAlgoHalfEdge swap edges
-		noSwapAfterProcessing = true;
+		setNoSwapAfterProcessing(true);
 		if (meshLiaison == null)
 			mesh.buildRidges(minCos);
 	}

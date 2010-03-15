@@ -52,7 +52,7 @@ public abstract class AbstractAlgoHalfEdge
 	int notProcessed = 0;
 	int notInTree = 0;
 	private int progressBarStatus = 10000;
-	boolean noSwapAfterProcessing = false;
+	private boolean noSwapAfterProcessing = false;
 	double minCos = 0.95;
 	QSortedTree<HalfEdge> tree = new PAVLSortedTree<HalfEdge>();
 	
@@ -296,6 +296,11 @@ public abstract class AbstractAlgoHalfEdge
 		}
 		postProcessAllHalfEdges();
 		return processed > 0;
+	}
+
+	public void setNoSwapAfterProcessing(boolean noSwapAfterProcessing)
+	{
+		this.noSwapAfterProcessing = noSwapAfterProcessing;
 	}
 
 	final void dumpState()

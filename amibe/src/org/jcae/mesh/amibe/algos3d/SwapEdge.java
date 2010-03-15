@@ -77,7 +77,7 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 		if (meshLiaison == null)
 			mesh.buildRidges(minCos);
 		counter = m.getTriangles().size() * 3;
-		noSwapAfterProcessing = true;
+		setNoSwapAfterProcessing(true);
 	}
 
 	@Override
