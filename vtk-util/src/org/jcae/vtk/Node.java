@@ -29,7 +29,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import vtk.vtkActor;
 import vtk.vtkExtractSelectedPolyDataIds;
-import vtk.vtkGlobalJavaHash;
 import vtk.vtkIdTypeArray;
 import vtk.vtkIntArray;
 import vtk.vtkLookupTable;
@@ -102,18 +101,6 @@ public class Node extends AbstractNode
 		public float[] getNodes()
 		{
 			return nodes;
-		}
-
-		@Override
-		public void load()
-		{
-			// Do nothing
-		}
-
-		@Override
-		public void unLoad()
-		{
-			// Do nothing
 		}
 	}
 

@@ -81,12 +81,6 @@ public class LeafNode extends AbstractNode
 			{
 				throw new RuntimeException("DataProvider.EMPTY is immutable");
 			}
-
-			@Override
-			public void unLoad()
-			{
-				// Do not call modified()
-			}
 		};
 
 		public void setVertices(int[] vertices)
@@ -165,11 +159,6 @@ public class LeafNode extends AbstractNode
 			return nbrOfVertices;
 		}
 
-		public void load()
-		{
-			// Do nothing
-		}
-
 		public float[] getNodes()
 		{
 			return nodesTransformed;
@@ -195,7 +184,18 @@ public class LeafNode extends AbstractNode
 			return normals;
 		}
 		
+
+		public void load()
+		{
+			// Do nothing
+		}
+
 		public void unLoad()
+		{
+			// Do nothing
+		}
+
+		protected void clean()
 		{
 			nodes = new float[0];
 			nodesTransformed = new float[0];
@@ -203,6 +203,9 @@ public class LeafNode extends AbstractNode
 			vertices = new int[0];
 			lines = new int[0];
 			polys = new int[0];
+			nbrOfVertices = 0;
+			nbrOfLines = 0;
+			nbrOfPolys = 0;
 			modified();
 		}
 
