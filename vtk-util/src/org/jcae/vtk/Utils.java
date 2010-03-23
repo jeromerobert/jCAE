@@ -350,7 +350,7 @@ public class Utils
 			n.cross(v1, v2);
 			n.normalize();
 
-			plane.SetNormal(n.getX(), n.getY(), n.getZ());
+			plane.SetNormal(n.x, n.y, n.z);
 			plane.SetOrigin(p1);
 			planes.AddItem(plane);
 			plane.Delete();
