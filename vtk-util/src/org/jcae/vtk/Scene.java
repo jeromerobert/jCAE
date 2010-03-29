@@ -21,7 +21,10 @@ package org.jcae.vtk;
 
 
 import gnu.trove.TLongObjectHashMap;
+import gnu.trove.TLongObjectIterator;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -85,35 +88,38 @@ public class Scene implements AbstractNode.ActorListener
 		idActorToNode.remove(actor.GetVTKId());
 	}
 
-	private AbstractNode[] getNodes()
+	private Collection<AbstractNode> getNodes()
 	{
-		AbstractNode[] nodes = new AbstractNode[idActorToNode.size()];
-		idActorToNode.getValues(nodes);
-		
+		//there may be more than one actor by node (selection actor) so we need
+		//a set to remove duplicate entries.
+		HashSet<AbstractNode> nodes = new HashSet<AbstractNode>(idActorToNode.size());
+		TLongObjectIterator<AbstractNode> it = idActorToNode.iterator();
+		while(it.hasNext())
+		{
+			it.advance();
+			nodes.add(it.value());
+		}
 		return nodes;
 	}
 	
 	public void setPickable(boolean pickable)
 	{
-		AbstractNode[] nodes = getNodes();
-		
+		Collection<AbstractNode> nodes = getNodes();
 		if (pickable)
 		{
-			for (AbstractNode node : nodes)
+			for (AbstractNode node : getNodes())
 			{
-				boolean isPickable = pickable;
-				if (pickBackup != null && pickBackup.containsKey(node))
-					isPickable = pickBackup.get(node).booleanValue();
-				node.setPickable(isPickable);
+				Boolean p = pickBackup == null ? null : pickBackup.get(node);
+				node.setPickable( p == null ? pickable : p);
 			}
 		}
 		else
 		{
-			pickBackup = new HashMap<AbstractNode, Boolean>(nodes.length);
+			pickBackup = new HashMap<AbstractNode, Boolean>(nodes.size());
 
 			for (AbstractNode node : nodes)
 			{
-				pickBackup.put(node, Boolean.valueOf(node.isPickable()));
+				pickBackup.put(node, node.isPickable());
 				node.setPickable(false);
 			}
 		}
