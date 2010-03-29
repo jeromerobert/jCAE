@@ -103,10 +103,12 @@ public class MeshLiaison
 		{
 			if (t.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
-			this.currentMesh.add(this.currentMesh.createTriangle(
+			Triangle newT = this.currentMesh.createTriangle(
 				mapBgToCurrent.get(t.vertex[0]),
 				mapBgToCurrent.get(t.vertex[1]),
-				mapBgToCurrent.get(t.vertex[2])));
+				mapBgToCurrent.get(t.vertex[2]));
+			newT.setGroupId(t.getGroupId());
+			this.currentMesh.add(newT);
 		}
 		this.currentMesh.buildAdjacency();
 		
