@@ -16,7 +16,9 @@ from vtk import vtkRenderer, vtkInteractorStyleTrackballCamera
 import sys, os
 from optparse import OptionParser
 
-parser = OptionParser(usage="amibebatch view [OPTIONS] <dir|file>\n\nDisplay CAD (brep, stp or iges files) or mesh (Amibe or UNV format)", prog="view")
+cmd=("view    ", "<dir|file>", "Display CAD (brep, stp or iges files) or mesh (Amibe or UNV format)")
+parser = OptionParser(usage="amibebatch %s [OPTIONS] %s\n\n%s" % cmd,
+	prog="view")
 parser.add_option("-b", "--batch", metavar="<PNG file name>", action="store",
 	type="string", dest="batch", help="Take a screenshot and exit")
 (options, args) = parser.parse_args(args=sys.argv[1:])

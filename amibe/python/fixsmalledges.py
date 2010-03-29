@@ -10,7 +10,9 @@ from optparse import OptionParser
 Removes small edges from a CAO
 """
 
-parser = OptionParser(usage="amibebatch fixsmalledges [OPTIONS] <input CAD file> <tolerance> <output BRep file>\n\nRemoves small edges from a CAD file", prog="fixsmalledges")
+cmd=("fixsmalledges", "<input CAD file> <tolerance> <output BRep file>", "Remove small edges from a CAD file")
+parser = OptionParser(usage="amibebatch %s [OPTIONS] %s\n\n%s" % cmd,
+	prog="fixsmalledges")
 (options, args) = parser.parse_args(args=sys.argv[1:])
 
 if len(args) != 3:

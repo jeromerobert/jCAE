@@ -18,7 +18,9 @@ from optparse import OptionParser
 Smooth mesh.
 """
 
-parser = OptionParser(usage="amibebatch smooth3dBg [OPTIONS] <inputDir> <outputDir>\n\nPerform vertex smoothing on 3D mesh", prog="smooth3d")
+cmd=("smooth3dBg", "<inputDir> <outputDir>", "Perform vertex smoothing on 3D mesh")
+parser = OptionParser(usage="amibebatch %s [OPTIONS] %s\n\n%s" % cmd,
+	prog="smooth3dBg")
 parser.add_option("-C", "--no-check", action="store_false", dest="check",
                   help="allow moving a vertex even if this decreases its quality")
 parser.add_option("-c", "--coplanarity", metavar="FLOAT", default=-1.0,
@@ -88,7 +90,10 @@ opts.put("relaxation", str(options.relaxation))
 opts.put("refresh", str(options.refresh))
 if (options.coplanarity >= 0.0):
 	opts.put("coplanarity", str(options.coplanarity))
-sm = MySmoothNodes3DBg(liaison, opts, options.prefix)
+if options.prefix:
+	sm = MySmoothNodes3DBg(liaison, opts, options.prefix)
+else:
+	sm = SmoothNodes3DBg(liaison, opts)
 sm.setProgressBarStatus(10000)
 sm.compute()
 

@@ -10,7 +10,9 @@ from optparse import OptionParser
 Count faces in CAD file
 """
 
-parser = OptionParser(usage="amibebatch countf [OPTIONS] <cadFile>\n\nCount faces found in CAD file", prog="countf")
+cmd=("countf  ", "<cadFile>", "Count faces found in CAD file")
+parser = OptionParser(usage="amibebatch %s [OPTIONS] %s\n\n%s" % cmd,
+	prog="countf")
 
 (options, args) = parser.parse_args(args=sys.argv[1:])
 

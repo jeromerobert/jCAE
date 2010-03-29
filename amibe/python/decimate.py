@@ -18,7 +18,9 @@ Decimate a mesh.
 """
 
 defaultAlgo = "QEMDecimateHalfEdge"
-parser = OptionParser(usage="amibebatch decimate [OPTIONS] <inputDir> <outputDir>\n\nDecimate a mesh", prog="decimate")
+cmd=("decimate", "<inputDir> <outputDir>", "Decimate a mesh")
+parser = OptionParser(usage="amibebatch %s [OPTIONS] %s\n\n%s" % cmd,
+	prog="decimate")
 parser.add_option("-A", "--list-algorithm", action="store_true", dest="listAlgorithm",
                   help="lists all available decimation algorithms")
 parser.add_option("-a", "--algorithm", metavar="STRING", default=defaultAlgo,

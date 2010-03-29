@@ -18,7 +18,9 @@ from optparse import OptionParser
 Remesh an existing mesh.
 """
 
-parser = OptionParser(usage="amibebatch remesh [OPTIONS] <inputDir> <outputDir>\n\nRemesh an existing mesh", prog="remesh")
+cmd=("remesh  ", "<inputDir> <outputDir>", "Remesh an existing mesh")
+parser = OptionParser(usage="amibebatch %s [OPTIONS] %s\n\n%s" % cmd,
+	prog="remesh")
 parser.add_option("-c", "--coplanarity", metavar="FLOAT", default=-1.0,
                   action="store", type="float", dest="coplanarity",
 		  help="dot product of face normals to detect feature edges")

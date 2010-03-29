@@ -24,7 +24,9 @@ from array import array
 Sample class to show how to call amibe algorithms.
 """
 
-parser = OptionParser(usage="amibebatch mesh [OPTIONS] <cadFile> <outputDir> <edgeLength> <deflection>\n\nMesh a CAD file", prog="mesh")
+cmd=("mesh    ", "<cadFile> <outputDir> <edgeLength> <deflection>", "Mesh a CAD file")
+parser = OptionParser(usage="amibebatch %s [OPTIONS] %s\n\n%s" % cmd,
+	prog="mesh")
 ##  tries to eliminate edges smaller than this value (default: patch size/1000)
 #parser.add_option("-e", "--epsilon", metavar="NUMBER", default=-1.0,
 #                  action="store", type="float", dest="epsilon",

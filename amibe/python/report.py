@@ -27,7 +27,9 @@ def list_criteria(option, opt, value, parser):
 		print "   ", listStr.pop(0)
 	sys.exit(0)
 
-parser = OptionParser(usage="amibebatch report [OPTIONS] <dir>\n\nPrint statistics about mesh quality", prog="report")
+cmd=("report  ", "<dir>", "Print statistics about mesh quality")
+parser = OptionParser(usage="amibebatch %s [OPTIONS] %s\n\n%s" % cmd,
+	prog="report")
 parser.add_option("-b", "--bounds", metavar="LIST",
                   action="store", type="string", dest="bounds",
                   help="comma separated list of values, implies -H")

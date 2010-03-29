@@ -17,7 +17,9 @@ from optparse import OptionParser
 Smooth mesh.
 """
 
-parser = OptionParser(usage="amibebatch smooth3d [OPTIONS] <inputDir> <outputDir>\n\nPerform vertex smoothing on 3D mesh", prog="smooth3d")
+cmd=("smooth3d", "<inputDir> <outputDir>", "Perform vertex smoothing on 3D mesh")
+parser = OptionParser(usage="amibebatch %s [OPTIONS] %s\n\n%s" % cmd,
+	prog="smooth3d")
 parser.add_option("-C", "--no-check", action="store_false", dest="check",
                   help="allow moving a vertex even if this decreases its quality")
 parser.add_option("-i", "--iterations", metavar="NUMBER", default=1,

@@ -13,7 +13,9 @@ from optparse import OptionParser
 Read 3d file and export mesh into another format.
 """
 
-parser = OptionParser(usage="amibebatch export [OPTIONS] <xmlDir> <filename>\n\nExport Amibe mesh into other file format", prog="export")
+cmd=("export  ", "<xmlDir> <filename>", "Export Amibe mesh into other file format")
+parser = OptionParser(usage="amibebatch %s [OPTIONS] %s\n\n%s" % cmd,
+	prog="export")
 parser.add_option("-f", "--format", metavar="STRING",
                   action="store", type="string", dest="format",
                   help="output file format")

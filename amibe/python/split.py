@@ -18,7 +18,9 @@ from optparse import OptionParser
 Splits large edges.
 """
 
-parser = OptionParser(usage="amibebatch split [OPTIONS] <inputDir> <outputDir>\n\nSplit large edges", prog="split")
+cmd=("split   ", "<inputDir> <outputDir>", "Split large edges")
+parser = OptionParser(usage="amibebatch %s [OPTIONS] %s\n\n%s" % cmd,
+	prog="split")
 parser.add_option("-c", "--coplanarity", metavar="FLOAT",
                   action="store", type="float", dest="coplanarity",
 		  help="dot product of face normals to detect feature edges")
