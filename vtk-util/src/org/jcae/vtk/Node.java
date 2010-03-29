@@ -221,10 +221,20 @@ public class Node extends AbstractNode
 			lastUpdate = System.nanoTime();
 			return;
 		}
+		
+		List<LeafNode> leaves = null;
+		if(lastUpdate <= dataTime || lastUpdate <= selectionTime)
+		{
+			//Loaded data provider are needed in refreshData and
+			//refreshHighlight
+			leaves = getLeaves();
+			for (LeafNode leaf : leaves)
+				leaf.getDataProvider().load();
+		}
 
 		// Were data modified?
 		if (lastUpdate <= dataTime)
-			refreshData();
+			refreshData(leaves);
 
 		// Was actor modified?
 		if (lastUpdate <= modificationTime)
@@ -234,10 +244,14 @@ public class Node extends AbstractNode
 		if (lastUpdate <= selectionTime)
 			refreshHighlight();
 
+		if(leaves != null)
+			for (LeafNode leaf : leaves)
+				leaf.getDataProvider().unLoad();
+
 		lastUpdate = System.nanoTime();
 	}
 
-	private void refreshData()
+	private void refreshData(List<LeafNode> leaves)
 	{
 		if (LOGGER.isLoggable(Level.FINEST))
 			LOGGER.finest("Refresh data for "+this);
@@ -250,8 +264,7 @@ public class Node extends AbstractNode
 		nbrOfLines = 0;
 		nbrOfPolys = 0;
 		boolean buildNormals = true;
-
-		List<LeafNode> leaves = getLeaves();
+		
 		int numberOfLeaves = leaves.size();
 		offsetsVertices = new TIntArrayList(numberOfLeaves + 1);
 		offsetsLines    = new TIntArrayList(numberOfLeaves + 1);
@@ -267,9 +280,6 @@ public class Node extends AbstractNode
 				continue;
 
 			LeafNode.DataProvider dataProvider = leaf.getDataProvider();
-
-			dataProvider.load();
-
 			nodesSize += dataProvider.getNodes().length;
 			verticesSize += dataProvider.getVertices().length;
 			linesSize += dataProvider.getLines().length;
@@ -364,8 +374,6 @@ public class Node extends AbstractNode
 					polys[j++] += numberOfNode;
 			}
 			offsetPoly += polysNode.length;
-
-			dataProvider.unLoad();
 		}
 
 		// Compute the id association array
