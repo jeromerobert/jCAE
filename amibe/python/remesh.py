@@ -28,6 +28,8 @@ parser.add_option("-D", "--decimate-target", metavar="NUMBER",
 parser.add_option("-d", "--decimate", metavar="FLOAT",
                   action="store", type="float", dest="decimateSize",
                   help="decimate mesh before remeshing, specify tolerance")
+parser.add_option("-g", "--preserveGroups", action="store_true", dest="preserveGroups",
+                  help="edges adjacent to two different groups are handled like free edges")
 parser.add_option("-m", "--metricsFile", metavar="STRING",
                   action="store", type="string", dest="metricsFile",
                   help="name of a file containing metrics map")
@@ -60,6 +62,8 @@ MeshReader.readObject3D(mesh, xmlDir)
 liaison = MeshLiaison(mesh, mtb)
 if options.coplanarity:
 	liaison.getMesh().buildRidges(options.coplanarity)
+if options.preserveGroups:
+	liaison.getMesh().buildGroupBoundaries()
 
 opts = HashMap()
 setAnalytic = False

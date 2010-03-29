@@ -20,6 +20,8 @@ parser = OptionParser(usage="amibebatch swap [OPTIONS] <inputDir> <outputDir>\n\
 parser.add_option("-c", "--coplanarity", metavar="FLOAT", default=0.95,
                   action="store", type="float", dest="coplanarity",
 		  help="minimum dot product of face normals allowed for swapping an edge (default 0.95)")
+parser.add_option("-g", "--preserveGroups", action="store_true", dest="preserveGroups",
+                  help="edges adjacent to two different groups are handled like free edges")
 
 (options, args) = parser.parse_args(args=sys.argv[1:])
 
@@ -32,6 +34,8 @@ outDir = args[1]
 
 mesh = Mesh()
 MeshReader.readObject3D(mesh, xmlDir)
+if options.preserveGroups:
+	mesh.buildGroupBoundaries()
 
 opts = HashMap()
 opts.put("coplanarity", str(options.coplanarity))

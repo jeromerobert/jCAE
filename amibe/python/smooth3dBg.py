@@ -24,6 +24,8 @@ parser.add_option("-C", "--no-check", action="store_false", dest="check",
 parser.add_option("-c", "--coplanarity", metavar="FLOAT", default=-1.0,
                   action="store", type="float", dest="coplanarity",
                   help="dot product of face normals to detect feature edges")
+parser.add_option("-g", "--preserveGroups", action="store_true", dest="preserveGroups",
+                  help="edges adjacent to two different groups are handled like free edges")
 parser.add_option("-i", "--iterations", metavar="NUMBER", default=1,
                   action="store", type="int", dest="iterations",
 		  help="number of iterations (default: 1)")
@@ -73,6 +75,8 @@ MeshReader.readObject3D(mesh, xmlDir)
 liaison = MeshLiaison(mesh, mtb)
 if options.coplanarity:
 	liaison.getMesh().buildRidges(options.coplanarity)
+if options.preserveGroups:
+	liaison.getMesh().buildGroupBoundaries()
 
 opts = HashMap()
 opts.put("iterations", str(options.iterations))
