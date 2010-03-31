@@ -49,8 +49,11 @@ import vtk.vtkDataArray;
 import vtk.vtkDoubleArray;
 import vtk.vtkFloatArray;
 import vtk.vtkIdTypeArray;
+import vtk.vtkInformationIntegerKey;
+import vtk.vtkInformationKey;
 import vtk.vtkIntArray;
 import vtk.vtkPNGWriter;
+import vtk.vtkPainter;
 import vtk.vtkPlane;
 import vtk.vtkPlaneCollection;
 import vtk.vtkPoints;
@@ -70,7 +73,15 @@ import vtk.vtkWindowToImageFilter;
 public class Utils
 {	
 	private final static Logger LOGGER = Logger.getLogger(Utils.class.getName());
-
+	public final static vtkInformationIntegerKey CONSERVE_MEMORY;
+	public final static vtkInformationIntegerKey HIGH_QUALITY;
+	static
+	{
+		vtkPainter p = new vtkPainter();
+		CONSERVE_MEMORY = p.CONSERVE_MEMORY();
+		HIGH_QUALITY = p.CONSERVE_MEMORY();
+		p.Delete();
+	}
 	public static Canvas retrieveCanvas(ComponentEvent e)
 	{
 		Component c = e.getComponent();

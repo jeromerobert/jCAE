@@ -29,6 +29,7 @@ import org.jcae.geometry.Transform3D;
 import vtk.vtkActor;
 import vtk.vtkExtractSelectedPolyDataIds;
 import vtk.vtkIdTypeArray;
+import vtk.vtkPainterPolyDataMapper;
 import vtk.vtkPolyData;
 import vtk.vtkPolyDataMapper;
 import vtk.vtkSelection;
@@ -315,7 +316,7 @@ public class LeafNode extends AbstractNode
 		timeStampData();
 
 		if(mapper == null)
-			mapper = new vtkPolyDataMapper();
+			mapper = new vtkPainterPolyDataMapper();
 		getMapperCustomiser().customiseMapper(mapper);
 		mapper.SetInput(data);
 		mapper.Update();

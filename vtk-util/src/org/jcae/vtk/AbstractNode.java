@@ -28,6 +28,7 @@ import vtk.vtkActor;
 import vtk.vtkCellArray;
 import vtk.vtkFloatArray;
 import vtk.vtkMapper;
+import vtk.vtkPainterPolyDataMapper;
 import vtk.vtkPoints;
 import vtk.vtkPolyData;
 import vtk.vtkPolyDataMapper;
@@ -109,7 +110,7 @@ public abstract class AbstractNode
 	/** Actor of this node, if it is a manager */
 	protected vtkActor actor;
 	/** Geometry of this actor */
-	protected vtkPolyDataMapper mapper;
+	protected vtkPainterPolyDataMapper mapper;
 	protected vtkPolyData data;
 
 	/** Actor used for selection */

@@ -28,10 +28,15 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import vtk.vtkActor;
+import vtk.vtkDefaultPainter;
+import vtk.vtkDisplayListPainter;
 import vtk.vtkExtractSelectedPolyDataIds;
 import vtk.vtkIdTypeArray;
+import vtk.vtkInformation;
 import vtk.vtkIntArray;
 import vtk.vtkLookupTable;
+import vtk.vtkPainter;
+import vtk.vtkPainterPolyDataMapper;
 import vtk.vtkPolyData;
 import vtk.vtkPolyDataMapper;
 import vtk.vtkSelection;
@@ -408,7 +413,17 @@ public class Node extends AbstractNode
 		timeStampData();
 
 		if(mapper == null)
-			mapper = new vtkPolyDataMapper();
+		{
+			mapper = new vtkPainterPolyDataMapper();
+			//This should help reducing the memory footprint of display list
+			//but it don't. Must be kept for further investigations.
+			/*vtkInformation i = mapper.GetInformation();
+			i.Set(Utils.CONSERVE_MEMORY, 1);
+			i.Set(Utils.HIGH_QUALITY, 0);
+			i.Delete();
+			vtkDefaultPainter vdp = (vtkDefaultPainter) mapper.GetPainter();
+			System.out.println(vdp.GetDisplayListPainter().GetInformation());*/
+		}
 		getMapperCustomiser().customiseMapper(mapper);
 		mapper.SetInput(data);
 		mapper.Update();		
