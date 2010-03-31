@@ -253,7 +253,7 @@ index 0000000..ab77cb8
 +SRC := $(CASROOT)/src
 +BIN := $(CASROOT)/mingw/bin
 +LIB := $(CASROOT)/mingw/lib
-+CPPFLAGS := -I$(CASROOT)/inc/ -DWNT -D__MATH_WNT_H -DHAVE_NO_DLL
++CPPFLAGS := -I$(CASROOT)/inc/ -DWNT -D__MATH_WNT_H -DHAVE_NO_DLL -DNo_TopoDS_FrozenShape
 +CXXFLAGS := -O2 -march=pentium3 -fno-strict-aliasing
 +LDFLAGS := -shared -Wl,--enable-auto-import -Wl,--enable-runtime-pseudo-reloc -Wl,-export-all-symbols
 +TKernelFLAGS := -lwinspool -lws2_32 -lgdi32
