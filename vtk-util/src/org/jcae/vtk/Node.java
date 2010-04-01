@@ -185,6 +185,7 @@ public class Node extends AbstractNode
 		if (children.remove(child))
 		{
 			child.deleteData();
+			child.deleteSelectionActor();
 			for(ChildCreationListener listener : childCreationListeners)
 				listener.childDeleted(child);
 			timeStampData();
