@@ -194,6 +194,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		current.clearAttributes(AbstractHalfEdge.MARKED);
 		assert !tree.contains(current);
 		mesh.vertexSplit(current, insertedVertex);
+		nrTriangles += 2;
 		assert current.destination() == insertedVertex : insertedVertex+" "+current;
 		assert mesh.isValid();
 		if (liaison != null)
