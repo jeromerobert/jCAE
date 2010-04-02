@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2006, by EADS CRC
-    Copyright (C) 2007,2008,2009, by EADS France
+    Copyright (C) 2007,2008,2009,2010, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -54,6 +54,7 @@ public abstract class AbstractAlgoHalfEdge
 	private int progressBarStatus = 10000;
 	private boolean noSwapAfterProcessing = false;
 	double minCos = 0.95;
+	boolean moreTriangles = false;
 	QSortedTree<HalfEdge> tree = new PAVLSortedTree<HalfEdge>();
 	
 	protected abstract void preProcessAllHalfEdges();
@@ -174,7 +175,7 @@ public abstract class AbstractAlgoHalfEdge
 		Stack<HalfEdge> stackNotProcessedObject = new Stack<HalfEdge>();
 		Stack<Double> stackNotProcessedValue = new Stack<Double>();
 		double cost = -1.0;
-		while (!tree.isEmpty() && nrTriangles > nrFinal)
+		while (!tree.isEmpty() && ((moreTriangles && nrTriangles < nrFinal) || (!moreTriangles && nrTriangles > nrFinal)))
 		{
 			preProcessEdge();
 			HalfEdge current = null;
