@@ -145,8 +145,8 @@ export JAVA_HOME=$javahome
 
 if test -n "$jython"; then
 	export JAVA_OPTS
-	$jython -J-cp "$jcae" "$scriptdir/$cmd.py" "$@"
+	$jython -J-classpath "$jcae" "$scriptdir/$cmd.py" "$@"
 else
-	"$jythonhome/bin/jython" $JAVA_OPTS -J-cp "$jcae" "$scriptdir/$cmd.py" "$@"
+	"$jythonhome/bin/jython" $JAVA_OPTS -J-classpath "$jcae" "$scriptdir/$cmd.py" "$@"
 fi
 exit 0
