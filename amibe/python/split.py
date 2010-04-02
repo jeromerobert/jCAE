@@ -52,6 +52,8 @@ if options.size:
 	opts.put("size", str(options.size))
 if options.coplanarity:
 	opts.put("coplanarity", str(options.coplanarity))
+if options.maxtriangles:
+	opts.put("maxtriangles", str(options.maxtriangles))
 
 class SplitDebug(SplitEdge):
 	cnt = 0
