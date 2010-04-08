@@ -21,17 +21,17 @@ package org.jcae.vtk;
 
 
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.util.Timer;
-import java.util.TimerTask;
 import vtk.vtkActorCollection;
 import vtk.vtkCanvas;
 import vtk.vtkInteractorStyleTrackballCamera;
 import vtk.vtkMapper;
+import vtk.vtkUnsignedCharArray;
 
 /**
  * This class is temporary. It permits to correct bugs on VTK.
@@ -48,47 +48,8 @@ import vtk.vtkMapper;
 //the canvas. Beware to share vtkCamera. Beware of CameraClippingRange
 public class Canvas extends vtkCanvas
 {
-	private static final TimerTask garbageCall = new TimerTask()
-	{
-
-		@Override
-		public void run()
-		{
-			System.gc();
-		/*System.out.println("GC ! NUMBER OF VTK OBJECTS : " + vtkGlobalJavaHash.PointerToReference.size());
-		Map map = vtkGlobalJavaHash.PointerToReference;
-		
-		TObjectIntHashMap<String> mapper = new TObjectIntHashMap<String>();
-		for(Object ob : map.values())
-		{
-		Object obj= ((WeakReference)ob).get();
-		
-		String name = "null";
-		if(obj != null)
-		{
-		name = obj.getClass().getSimpleName();		
-		int count = mapper.get(name);
-		mapper.put(name, ++count);
-		}
-		// If the object was removed remove its entry from the global hash
-		else map.remove(ob);
-		}
-		TObjectIntIterator<String> iter = mapper.iterator();
-		while(iter.hasNext())
-		{
-		iter.advance();
-		System.out.println(iter.key() + " : " + iter.value());
-		}*/
-		}
-	};
-	private static final Timer timerGC = new Timer();
-	
-
-	static
-	{
-		timerGC.schedule(garbageCall, 1000, 30000);
-	}
-
+	private vtkUnsignedCharArray buffer = new vtkUnsignedCharArray();
+	private int bufferWidth, bufferHeight = 0;
 	public Canvas()
 	{
 		addMouseWheelListener(new MouseWheelListener() {
@@ -108,6 +69,19 @@ public class Canvas extends vtkCanvas
 		style.AutoAdjustCameraClippingRangeOn();
 		getIren().SetInteractorStyle(style);
 		style.Delete();
+		rw.AddObserver("EndEvent", this, "endEvent");
+	}
+
+	/**
+	 * Save the current image to reuse it when no 3D rendering is necessary.
+	 * Called by VTK when vtkRendererWindow fire EndEvent.
+	 */
+	private void endEvent()
+	{
+		buffer.SetNumberOfValues(getWidth()*getHeight());
+		rw.GetPixelData(0, 0, getWidth()-1, getHeight()-1, 1, buffer);
+		bufferWidth = getWidth();
+		bufferHeight = getHeight();
 	}
 
 	/**
@@ -241,6 +215,14 @@ public class Canvas extends vtkCanvas
 	@Override
 	public void keyPressed(KeyEvent e)
 	{
+	}
+
+	@Override
+	public void paint(Graphics g) {
+		if(windowset == 0 || bufferWidth != getWidth() || bufferHeight != getHeight())
+			Render();
+		else
+			rw.SetPixelData(0, 0, getWidth()-1, getHeight()-1, buffer, 1);
 	}
 
 	/**

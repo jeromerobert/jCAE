@@ -28,14 +28,10 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import vtk.vtkActor;
-import vtk.vtkDefaultPainter;
-import vtk.vtkDisplayListPainter;
 import vtk.vtkExtractSelectedPolyDataIds;
 import vtk.vtkIdTypeArray;
-import vtk.vtkInformation;
 import vtk.vtkIntArray;
 import vtk.vtkLookupTable;
-import vtk.vtkPainter;
 import vtk.vtkPainterPolyDataMapper;
 import vtk.vtkPolyData;
 import vtk.vtkPolyDataMapper;
@@ -438,7 +434,7 @@ public class Node extends AbstractNode
 
 		boolean actorCreated = (actor == null);
 		if(actorCreated)
-			actor = new vtkActor();
+			actor = createActor();
 		getActorCustomiser().customiseActor(actor);	
 		actor.SetMapper(mapper);
 		actor.SetVisibility(Utils.booleanToInt(visible));

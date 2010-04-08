@@ -330,7 +330,7 @@ public class LeafNode extends AbstractNode
 
 		boolean actorCreated = (actor == null);
 		if(actorCreated)
-			actor = new vtkActor();
+			actor = createActor();
 		getActorCustomiser().customiseActor(actor);
 		actor.SetMapper(mapper);
 		actor.SetVisibility(Utils.booleanToInt(visible));

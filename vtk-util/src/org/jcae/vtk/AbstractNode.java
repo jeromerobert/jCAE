@@ -220,6 +220,11 @@ public abstract class AbstractNode
 		}
 	}
 
+	protected vtkActor createActor()
+	{
+		return new vtkActor();
+	}
+	
 	public Node getParent()
 	{
 		return parent;
