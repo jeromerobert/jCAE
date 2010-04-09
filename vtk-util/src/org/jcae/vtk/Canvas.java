@@ -54,12 +54,15 @@ public class Canvas extends vtkCanvas
 	{
 		addMouseWheelListener(new MouseWheelListener() {
 			public void mouseWheelMoved(MouseWheelEvent e) {
-				Lock();
-				if(e.getWheelRotation() > 0)
-					iren.MouseWheelForwardEvent();
-				else
-					iren.MouseWheelBackwardEvent();
-				UnLock();
+				if(System.currentTimeMillis()-e.getWhen() < 500)
+				{
+					Lock();
+					if(e.getWheelRotation() > 0)
+						iren.MouseWheelForwardEvent();
+					else
+						iren.MouseWheelBackwardEvent();
+					UnLock();
+				}
 			}
 		});
 		setMinimumSize(new Dimension(0, 0));
@@ -222,7 +225,11 @@ public class Canvas extends vtkCanvas
 		if(windowset == 0 || bufferWidth != getWidth() || bufferHeight != getHeight())
 			Render();
 		else
+		{
+			Lock();
 			rw.SetPixelData(0, 0, getWidth()-1, getHeight()-1, buffer, 1);
+			UnLock();
+		}
 	}
 
 	/**
