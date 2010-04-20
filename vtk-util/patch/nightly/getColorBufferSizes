@@ -6,17 +6,16 @@ When color depth is lower than 24, vtkVisibleCellSelector::Select()
 silently fails.  We want to detect this case to provide
 a software alternative, or at least tell user why picking
 does not work.
----
 
+---
  Rendering/vtkMesaRenderWindow.h     |    1 +
  Rendering/vtkOpenGLRenderWindow.cxx |   17 +++++++++++++++++
  Rendering/vtkOpenGLRenderWindow.h   |    1 +
  Rendering/vtkRenderWindow.h         |    2 ++
  4 files changed, 21 insertions(+), 0 deletions(-)
 
-
 diff --git a/Rendering/vtkMesaRenderWindow.h b/Rendering/vtkMesaRenderWindow.h
-index 6c5c9ad..790f570 100644
+index e4d061b..2711757 100644
 --- a/Rendering/vtkMesaRenderWindow.h
 +++ b/Rendering/vtkMesaRenderWindow.h
 @@ -108,6 +108,7 @@ public:
@@ -28,7 +27,7 @@ index 6c5c9ad..790f570 100644
    // Description:
    // Initialize OpenGL for this window.
 diff --git a/Rendering/vtkOpenGLRenderWindow.cxx b/Rendering/vtkOpenGLRenderWindow.cxx
-index 5b494d7..a18a198 100644
+index f944fff..89f5de9 100644
 --- a/Rendering/vtkOpenGLRenderWindow.cxx
 +++ b/Rendering/vtkOpenGLRenderWindow.cxx
 @@ -17,6 +17,7 @@
@@ -63,19 +62,19 @@ index 5b494d7..a18a198 100644
                                                     int x2, int y2,
                                                     int front)
 diff --git a/Rendering/vtkOpenGLRenderWindow.h b/Rendering/vtkOpenGLRenderWindow.h
-index 69f1f6b..2ef8a9d 100644
+index bf09680..6af8841 100644
 --- a/Rendering/vtkOpenGLRenderWindow.h
 +++ b/Rendering/vtkOpenGLRenderWindow.h
-@@ -110,6 +110,7 @@ public:
+@@ -102,6 +102,7 @@ public:
    // Get the size of the color buffer.
    // Returns 0 if not able to determine otherwise sets R G B and A into buffer.
    int GetColorBufferSizes(int *rgba);
 +  int GetColorBufferSizes(vtkIntArray *rgba);
-   
+ 
    // Description:
    // Initialize OpenGL for this window.
 diff --git a/Rendering/vtkRenderWindow.h b/Rendering/vtkRenderWindow.h
-index 20f1b75..1e344b3 100644
+index 1cc138c..a9b80dc 100644
 --- a/Rendering/vtkRenderWindow.h
 +++ b/Rendering/vtkRenderWindow.h
 @@ -41,6 +41,7 @@
@@ -86,7 +85,7 @@ index 20f1b75..1e344b3 100644
  class vtkPainterDeviceAdapter;
  class vtkRenderWindowInteractor;
  class vtkRenderer;
-@@ -501,6 +502,7 @@ public:
+@@ -512,6 +513,7 @@ public:
    // Get the size of the color buffer.
    // Returns 0 if not able to determine otherwise sets R G B and A into buffer.
    virtual int GetColorBufferSizes(int *rgba) = 0;

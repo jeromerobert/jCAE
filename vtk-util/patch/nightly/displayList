@@ -1,8 +1,8 @@
 Gain many time in pick color.
 
 Additionnal information at http://www.vtk.org/Bug/view.php?id=7111
----
 
+---
  Rendering/vtkOpenGLDisplayListPainter.cxx |   15 +++++++++++----
  Rendering/vtkPainter.cxx                  |    5 +++++
  Rendering/vtkPainter.h                    |   17 +++++++++++++++++
@@ -10,12 +10,11 @@ Additionnal information at http://www.vtk.org/Bug/view.php?id=7111
  Rendering/vtkRenderer.h                   |    4 ++++
  5 files changed, 39 insertions(+), 4 deletions(-)
 
-
 diff --git a/Rendering/vtkOpenGLDisplayListPainter.cxx b/Rendering/vtkOpenGLDisplayListPainter.cxx
-index fe33f58..81fb9a0 100644
+index 3b35dd0..f9d76ec 100644
 --- a/Rendering/vtkOpenGLDisplayListPainter.cxx
 +++ b/Rendering/vtkOpenGLDisplayListPainter.cxx
-@@ -109,7 +109,13 @@ void vtkOpenGLDisplayListPainter::RenderInternal(vtkRenderer *renderer,
+@@ -114,7 +114,13 @@ void vtkOpenGLDisplayListPainter::RenderInternal(vtkRenderer *renderer,
                                                   unsigned long typeflags,
                                                   bool forceCompileOnly)
  {
@@ -30,7 +29,7 @@ index fe33f58..81fb9a0 100644
      (this->LastWindow && (renderer->GetRenderWindow() != this->LastWindow.GetPointer())))
      {
      // MTime changes when input changes or someother iVar changes, so display
-@@ -138,11 +144,12 @@ void vtkOpenGLDisplayListPainter::RenderInternal(vtkRenderer *renderer,
+@@ -143,11 +149,12 @@ void vtkOpenGLDisplayListPainter::RenderInternal(vtkRenderer *renderer,
    // typeflags are obsolete.
    if (
      // Since input changed
@@ -44,10 +43,10 @@ index fe33f58..81fb9a0 100644
 +    //this->Information->GetMTime() > this->Internals->BuildTime
 +    false)
      {
-     this->Internals->ReleaseAllLists();
-     }
+     this->Internals->ReleaseAllLists(this->LastWindow);
+     this->LastWindow = 0;
 diff --git a/Rendering/vtkPainter.cxx b/Rendering/vtkPainter.cxx
-index 0e24142..d1cd945 100644
+index 6971965..00f6d14 100644
 --- a/Rendering/vtkPainter.cxx
 +++ b/Rendering/vtkPainter.cxx
 @@ -85,6 +85,8 @@ vtkPainter::vtkPainter()
@@ -70,7 +69,7 @@ index 0e24142..d1cd945 100644
  
  //-----------------------------------------------------------------------------
 diff --git a/Rendering/vtkPainter.h b/Rendering/vtkPainter.h
-index f22a2de..859d86e 100644
+index 0d2d002..660e243 100644
 --- a/Rendering/vtkPainter.h
 +++ b/Rendering/vtkPainter.h
 @@ -149,6 +149,21 @@ public:
@@ -105,10 +104,10 @@ index f22a2de..859d86e 100644
    vtkWeakPointer<vtkWindow> LastWindow; // Window used for previous render.
                           // This is not reference counted.
 diff --git a/Rendering/vtkRenderer.cxx b/Rendering/vtkRenderer.cxx
-index 5cd44ff..a0a0930 100644
+index d5be160..337de1f 100644
 --- a/Rendering/vtkRenderer.cxx
 +++ b/Rendering/vtkRenderer.cxx
-@@ -1946,6 +1946,8 @@ void vtkRenderer::SwapOutSelectablePainter(
+@@ -2017,6 +2017,8 @@ void vtkRenderer::SwapOutSelectablePainter(
        {
        orig_mapper->SetPainter(orig_painter);
        orig_painter->UnRegister(this);
@@ -118,12 +117,12 @@ index 5cd44ff..a0a0930 100644
      }
    if (!orig_painter)
 diff --git a/Rendering/vtkRenderer.h b/Rendering/vtkRenderer.h
-index 352e12e..3e1e726 100644
+index 42c0e4a..a93e43d 100644
 --- a/Rendering/vtkRenderer.h
 +++ b/Rendering/vtkRenderer.h
-@@ -441,6 +441,10 @@ public:
+@@ -452,6 +452,10 @@ public:
    vtkGetMacro(LastRenderingUsedDepthPeeling,int);
-   
+ 
    // Description:
 +  // Last render time
 +  vtkGetMacro(RenderTime,int);

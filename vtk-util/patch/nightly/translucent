@@ -1,18 +1,17 @@
 Allow picking translucent objects
 
 See http://www.vtk.org/Bug/view.php?id=7295
----
 
+---
  Rendering/vtkRenderer.cxx |   23 +++++++++++++++++++++++
  Rendering/vtkRenderer.h   |    9 +++++++++
  2 files changed, 32 insertions(+), 0 deletions(-)
 
-
 diff --git a/Rendering/vtkRenderer.cxx b/Rendering/vtkRenderer.cxx
-index a0a0930..cee73e0 100644
+index 337de1f..a63230e 100644
 --- a/Rendering/vtkRenderer.cxx
 +++ b/Rendering/vtkRenderer.cxx
-@@ -129,6 +129,8 @@ vtkRenderer::vtkRenderer()
+@@ -131,6 +131,8 @@ vtkRenderer::vtkRenderer()
    this->MaximumNumberOfPeels=4;
    this->LastRenderingUsedDepthPeeling=0;
  
@@ -21,9 +20,9 @@ index a0a0930..cee73e0 100644
    this->Selector = 0;
    this->Delegate=0;
    this->Pass=0;
-@@ -1842,6 +1844,25 @@ int vtkRenderer::UpdateGeometryForSelection()
-       return 0; 
-     }        
+@@ -1913,6 +1915,25 @@ int vtkRenderer::UpdateGeometryForSelection()
+       return 0;
+     }
  
 +  // Check if there is translucent geometry
 +  // do the render library specific stuff about translucent polygonal geometry.
@@ -44,12 +43,12 @@ index a0a0930..cee73e0 100644
 +      this->LastRenderingUsedDepthPeeling=0;
 +  }
 +
-   // loop through props and give them a chance to 
+   // loop through props and give them a chance to
    // render themselves as opaque geometry
    for ( i = 0; i < this->PropArrayCount; i++ )
-@@ -1869,6 +1890,8 @@ int vtkRenderer::UpdateGeometryForSelection()
+@@ -1940,6 +1961,8 @@ int vtkRenderer::UpdateGeometryForSelection()
        {
-       this->NumberOfPropsRendered += 
+       this->NumberOfPropsRendered +=
          this->PropArray[i]->RenderOpaqueGeometry(this);
 +      if(hasTranslucentPolygonalGeometry != 0 && this->PropArray[i]->HasTranslucentPolygonalGeometry())
 +        this->PropArray[i]->RenderTranslucentPolygonalGeometry(this);
@@ -57,29 +56,29 @@ index a0a0930..cee73e0 100644
  
      //restore the prop's original settings
 diff --git a/Rendering/vtkRenderer.h b/Rendering/vtkRenderer.h
-index 3e1e726..03dc185 100644
+index a93e43d..79f3ad5 100644
 --- a/Rendering/vtkRenderer.h
 +++ b/Rendering/vtkRenderer.h
-@@ -439,6 +439,12 @@ public:
-   // actually used depth peeling.
-   // Initial value is false.
+@@ -452,6 +452,12 @@ public:
    vtkGetMacro(LastRenderingUsedDepthPeeling,int);
-+
-+  // Description:
+ 
+   // Description:
 +  // Turn on/off the selection of translucents actors.
 +  vtkSetMacro(PickTranslucent,int);
 +  vtkGetMacro(PickTranslucent,int);
 +  vtkBooleanMacro(PickTranslucent,int);
-   
-   // Description:
++  
++  // Description:
    // Last render time
-@@ -612,6 +618,9 @@ protected:
-   // actually used depth peeling.
+   vtkGetMacro(RenderTime,int);
+ 
+@@ -636,6 +642,9 @@ protected:
    // Initial value is false.
    int LastRenderingUsedDepthPeeling;
-+
+ 
 +  // Tells if the translucent actors can be picked.
 +  int PickTranslucent;
-   
++  
  #if !defined(VTK_LEGACY_REMOVE)
    // VISIBLE CELL SELECTION ----------------------------------------
+   friend class vtkVisibleCellSelector;

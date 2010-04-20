@@ -1,8 +1,7 @@
-# This series applies on GIT commit 81f05c24bd153cd57d62b6fab9bbb26a47333c8d
+# This series applies on GIT commit 93840f2c347f41078da98306f52a24b7e6ef8c3
 displayList
 offset
 translucent
 warning
 getColorBufferSizes
 parseJava
-javaFixWeakRef
