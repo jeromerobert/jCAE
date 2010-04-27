@@ -175,7 +175,7 @@ public abstract class AbstractAlgoHalfEdge
 		Stack<HalfEdge> stackNotProcessedObject = new Stack<HalfEdge>();
 		Stack<Double> stackNotProcessedValue = new Stack<Double>();
 		double cost = -1.0;
-		while (!tree.isEmpty() && ((moreTriangles && nrTriangles < nrFinal) || (!moreTriangles && nrTriangles > nrFinal)))
+		while (!tree.isEmpty() && (nrFinal == 0 || (moreTriangles && nrTriangles < nrFinal) || (!moreTriangles && nrTriangles > nrFinal)))
 		{
 			preProcessEdge();
 			HalfEdge current = null;
