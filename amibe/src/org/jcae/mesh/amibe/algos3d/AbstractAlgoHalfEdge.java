@@ -201,7 +201,7 @@ public abstract class AbstractAlgoHalfEdge
 				if (nrFinal == 0)
 				{
 					stackNotProcessedObject.push(current);
-					if (tolerance > 0.0)
+					if (tolerance != 0.0)
 						stackNotProcessedValue.push(Double.valueOf(cost+0.7*(tolerance - cost)));
 					else
 						// tolerance = cost = 0
