@@ -111,8 +111,8 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 			else
 				throw new RuntimeException("Unknown option: "+key);
 		}
-		if (tolerance == 0.0)
-			throw new RuntimeException("A size target must be specified");
+		if (tolerance == 0.0 && nrFinal == 0)
+			throw new RuntimeException("Either 'size' or 'maxtriangles' must be specified");
 		if (meshLiaison == null)
 			mesh.buildRidges(minCos);
 	}
