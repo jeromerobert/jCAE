@@ -176,7 +176,13 @@ public class Scene implements AbstractNode.ActorListener
 			if (canvas.GetRenderWindow().GetColorBufferSizes(tmp) < 24)
 			{
 				canvas.unlock();
-				throw new RuntimeException("Color depth is lower than 24 bits, picking does not work");
+				throw new RuntimeException(){
+					//set localized message for better report in netbeans
+					@Override
+					public String getLocalizedMessage() {
+						return "Color depth is lower than 24 bits, picking does not work";
+					}
+				};
 			}
 			tmp.Delete();
 			canvas.unlock();
