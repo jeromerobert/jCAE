@@ -1104,6 +1104,80 @@ public class Mesh implements Serializable
 	}
 
 	/**
+	 * Perform an automatic partitioning based on festure edges.
+	 *
+	 * @return number of partitions.
+	 */
+	public final int buildPartition()
+	{
+		int countPart = 0;
+		if (!hasAdjacency())
+		{
+			logger.severe("Mesh data structure does not contain adjacency relations");
+			return countPart;
+		}
+
+		Set<Triangle> unprocessedTriangles = new LinkedHashSet<Triangle>(triangleList);
+		Set<Triangle> partTriangles = new LinkedHashSet<Triangle>();
+		Triangle.List processedTriangles = new Triangle.List();
+
+		if (unprocessedTriangles.isEmpty())
+			return countPart;
+
+		for (Triangle t : triangleList)
+			t.setGroupId(0);
+
+		AbstractHalfEdge ot  = unprocessedTriangles.iterator().next().getAbstractHalfEdge();
+		AbstractHalfEdge sym = unprocessedTriangles.iterator().next().getAbstractHalfEdge();
+
+		while(!unprocessedTriangles.isEmpty())
+		{
+			Triangle t1 = unprocessedTriangles.iterator().next();
+			unprocessedTriangles.remove(t1);
+			if (t1.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
+
+			partTriangles.clear();
+			partTriangles.add(t1);
+			countPart++;
+			while(!partTriangles.isEmpty())
+			{
+				Triangle t2 = partTriangles.iterator().next();
+				partTriangles.remove(t2);
+				if (t2.getGroupId() != 0 && countPart != t2.getGroupId())
+				{
+					logger.severe("Unexpected error");
+				}
+				if (processedTriangles.contains(t2))
+					continue;
+
+				t2.setGroupId(countPart);
+				unprocessedTriangles.remove(t2);
+				processedTriangles.add(t2);
+
+				ot = t2.getAbstractHalfEdge(ot);
+				if (t2.hasAttributes(AbstractHalfEdge.OUTER))
+					continue;
+				for (int i = 0; i < 3; i++)
+				{
+					ot = ot.next();
+					if (!(ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD | AbstractHalfEdge.SHARP)))
+					{
+						sym = ot.sym(sym);
+						Triangle symTri = sym.getTri();
+						if (!processedTriangles.contains(symTri))
+							partTriangles.add(symTri);
+					}
+				}
+			}
+		}
+		if (countPart > 0 && logger.isLoggable(Level.CONFIG))
+			logger.log(Level.CONFIG, "Found "+countPart+" part components");
+
+		return countPart;
+	}
+
+	/**
 	 * Checks whether an edge can be contracted.
 	 *
 	 * @param e   edge to be checked
