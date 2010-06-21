@@ -60,31 +60,33 @@ public class UNVReader
 			BufferedReader rd=new BufferedReader(new InputStreamReader(in));
 			while ((line=rd.readLine())!=null)
 			{
-				if (line.trim().equals("-1"))
+				line = line.trim();
+				if (line.equals("-1"))
 				{
 					line = rd.readLine();
-					if (line.trim().equals("2411") || line.trim().equals("781"))
+					line = line.trim();
+					if (line.equals("2411") || line.equals("781"))
 					{
 						// read nodes
 						nodesmap = readNodes(mesh, rd, unit);
 					}
-					else if (line.trim().equals("2412"))
+					else if (line.equals("2412"))
 					{
 						// read faces
 						facesmap = readFace(rd, mesh, beamPlaceHolder, nodesmap);
 					}
-					else if (line.trim().equals("164"))
+					else if (line.equals("164"))
 					{
 						// read unit
 						unit = readUnit(rd);
 					}
-					else if ( (line.trim().equals("2430")) || (line.trim().equals("2435")) )
+					else if ( (line.equals("2430")) || (line.equals("2435")) | (line.equals("2477")) )
 					{
 						// read groups
-						int nrGroups = readGroup(rd, line.trim(), facesmap, beamPlaceHolder);
+						int nrGroups = readGroup(rd, line, facesmap, beamPlaceHolder);
 						hasGroups = nrGroups > 1;
 					}
-					else if (line.trim().equals("2414"))
+					else if (line.equals("2414"))
 					{
 						// read colors
 					}
