@@ -37,6 +37,7 @@ import org.jcae.mesh.xmldata.DoubleFileReader;
 import org.jcae.mesh.xmldata.PrimitiveFileReaderFactory;
 
 import gnu.trove.PrimeFinder;
+import gnu.trove.TIntObjectHashMap;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -84,6 +85,7 @@ public class Remesh
 			throw new RuntimeException();
 		}
 	};
+	private TIntObjectHashMap<AnalyticMetricInterface> metricsPartitionMap = new TIntObjectHashMap<AnalyticMetricInterface>();
 
 	public interface AnalyticMetricInterface
 	{
@@ -287,6 +289,11 @@ public class Remesh
 		analyticMetric = m;
 	}
 
+	public void setAnalyticMetric(int groupId, AnalyticMetricInterface m)
+	{
+		metricsPartitionMap.put(groupId, m);
+	}
+
 	public final Mesh getOutputMesh()
 	{
 		return mesh;
@@ -344,14 +351,25 @@ public class Remesh
 	{
 		LOGGER.info("Run "+getClass().getName());
 
-		if (analyticMetric != null)
+		if (analyticMetric != null || !metricsPartitionMap.isEmpty())
 		{
-			if (analyticMetric.equals(LATER_BINDING))
-				throw new RuntimeException("Cannot determine metrics, either set 'size' or 'metricsMap' arguments, or call Remesh.setAnalyticMetric()");
-			for (Vertex v : kdTree.getAllVertices(metrics.size()))
+			for (Triangle t : mesh.getTriangles())
 			{
-				double[] pos = v.getUV();
-				metrics.put(v, new EuclidianMetric3D(analyticMetric.getTargetSize(pos[0], pos[1], pos[2])));
+				if (!t.isReadable())
+					continue;
+				AnalyticMetricInterface metric = metricsPartitionMap.get(t.getGroupId());
+				if (metric == null)
+					metric = analyticMetric;
+				if (metric.equals(LATER_BINDING))
+					throw new RuntimeException("Cannot determine metrics, either set 'size' or 'metricsMap' arguments, or call Remesh.setAnalyticMetric()");
+				for (Vertex v : t.vertex)
+				{
+					double[] pos = v.getUV();
+					EuclidianMetric3D curMetric = metrics.get(v);
+					EuclidianMetric3D newMetric = new EuclidianMetric3D(metric.getTargetSize(pos[0], pos[1], pos[2]));
+					if (curMetric == null || curMetric.getUnitBallBBox()[0] > newMetric.getUnitBallBBox()[0])
+						metrics.put(v, newMetric);
+				}
 			}
 		}
 
@@ -707,8 +725,11 @@ public class Remesh
 				}
 				// Compute metrics at this position
 				EuclidianMetric3D m;
-				if (analyticMetric != null)
-					m = new EuclidianMetric3D(analyticMetric.getTargetSize(pos[0], pos[1], pos[2]));
+				AnalyticMetricInterface metric = metricsPartitionMap.get(ot.getTri().getGroupId());
+				if (metric == null)
+					metric = analyticMetric;
+				if (metric != null)
+					m = new EuclidianMetric3D(metric.getTargetSize(pos[0], pos[1], pos[2]));
 				else
 					m = new EuclidianMetric3D(hS*Math.exp(alpha*logRatio));
 				double l = interpolatedDistance(last, lastMetric, np, m);
