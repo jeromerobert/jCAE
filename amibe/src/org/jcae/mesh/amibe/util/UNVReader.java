@@ -337,7 +337,7 @@ public class UNVReader
 								logger.severe("In group "+groupIdx+", element number "+ind+" does not exist");
 						}
 						nbelem--;
-						if (type.equals("2435"))
+						if (type.equals("2435") || type.equals("2477"))
 						{
 							st.nextToken();
 							st.nextToken();
