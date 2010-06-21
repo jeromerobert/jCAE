@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2008, by EADS France
+    Copyright (C) 2008,2010, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,19 +20,21 @@
 
 package org.jcae.mesh.amibe.algos3d;
 
-import java.io.File;
-import java.io.IOException;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.jcae.mesh.amibe.projection.MeshLiaison;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.validation.MinAngleFace;
 import org.jcae.mesh.amibe.validation.QualityFloat;
 import org.jcae.mesh.xmldata.MeshReader;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -124,7 +126,7 @@ public class SmoothNodes3DBgTest
 		createMxNShell(m, n);
 		mesh.buildAdjacency();
 		assertTrue("Mesh is not valid", mesh.isValid());
-		Mesh smoothedMesh = new SmoothNodes3DBg(mesh, options).compute().getOutputMesh();
+		Mesh smoothedMesh = new SmoothNodes3DBg(new MeshLiaison(mesh), options).compute().getOutputMesh();
 		assertTrue("Mesh is not valid", smoothedMesh.isValid());
 	}
 
@@ -142,7 +144,7 @@ public class SmoothNodes3DBgTest
 		options.put("check", "false");
 		options.put("refresh", "true");
 		options.put("relaxation", "1.0");
-		Mesh smoothedMesh = new SmoothNodes3DBg(mesh, options).compute().getOutputMesh();
+		Mesh smoothedMesh = new SmoothNodes3DBg(new MeshLiaison(mesh), options).compute().getOutputMesh();
 		assertTrue("Mesh is not valid", smoothedMesh.isValid());
 		MinAngleFace qproc = new MinAngleFace();
 		QualityFloat data = new QualityFloat(1000);
@@ -177,7 +179,7 @@ public class SmoothNodes3DBgTest
 		final Map<String, String> options = new HashMap<String, String>();
 		options.put("iterations", "1");
 		options.put("relaxation", "1.0");
-		Mesh smoothedMesh = new SmoothNodes3DBg(mesh, options).compute().getOutputMesh();
+		Mesh smoothedMesh = new SmoothNodes3DBg(new MeshLiaison(mesh), options).compute().getOutputMesh();
 		assertTrue("Mesh is not valid", smoothedMesh.isValid());
 
 		MinAngleFace qproc = new MinAngleFace();
@@ -198,9 +200,9 @@ public class SmoothNodes3DBgTest
 	private static class CheckSmoothNodes3DBg extends SmoothNodes3DBg
 	{
 
-		public CheckSmoothNodes3DBg(Mesh bgMesh, Map<String, String> options)
+		public CheckSmoothNodes3DBg(MeshLiaison liaison, Map<String, String> options)
 		{
-			super(bgMesh, options);
+			super(liaison, options);
 		}
 		public final boolean hasMoved()
 		{
@@ -237,7 +239,7 @@ public class SmoothNodes3DBgTest
 		final Map<String, String> options = new HashMap<String, String>();
 		options.put("iterations", "1");
 		options.put("relaxation", "1.0");
-		CheckSmoothNodes3DBg algo = new CheckSmoothNodes3DBg(mesh, options);
+		CheckSmoothNodes3DBg algo = new CheckSmoothNodes3DBg(new MeshLiaison(mesh), options);
 		Mesh smoothedMesh = algo.compute().getOutputMesh();
 		assertTrue("Mesh is not valid", smoothedMesh.isValid());
 		assertTrue("Singular quadric detected", algo.hasMoved());
@@ -262,7 +264,7 @@ public class SmoothNodes3DBgTest
 		options.put("check", "false");
 		options.put("refresh", "true");
 		options.put("relaxation", "0.9");
-		Mesh smoothedMesh = new SmoothNodes3DBg(mesh, options).compute().getOutputMesh();
+		Mesh smoothedMesh = new SmoothNodes3DBg(new MeshLiaison(mesh, mtb), options).compute().getOutputMesh();
 		assertTrue("Mesh is not valid", smoothedMesh.isValid());
 		MinAngleFace qproc = new MinAngleFace();
 		QualityFloat data = new QualityFloat(1000);
