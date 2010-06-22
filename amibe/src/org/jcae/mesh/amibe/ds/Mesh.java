@@ -21,6 +21,7 @@
 package org.jcae.mesh.amibe.ds;
 
 import gnu.trove.TIntArrayList;
+import gnu.trove.TIntIntHashMap;
 import org.jcae.mesh.amibe.traits.Traits;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
@@ -1127,6 +1128,7 @@ public class Mesh implements Serializable
 		for (Triangle t : triangleList)
 			t.setGroupId(0);
 
+		TIntIntHashMap countTrianglesByPart = new TIntIntHashMap();
 		AbstractHalfEdge ot  = unprocessedTriangles.iterator().next().getAbstractHalfEdge();
 		AbstractHalfEdge sym = unprocessedTriangles.iterator().next().getAbstractHalfEdge();
 
@@ -1140,6 +1142,7 @@ public class Mesh implements Serializable
 			partTriangles.clear();
 			partTriangles.add(t1);
 			countPart++;
+			countTrianglesByPart.put(countPart, 0);
 			while(!partTriangles.isEmpty())
 			{
 				Triangle t2 = partTriangles.iterator().next();
@@ -1152,6 +1155,7 @@ public class Mesh implements Serializable
 					continue;
 
 				t2.setGroupId(countPart);
+				countTrianglesByPart.increment(countPart);
 				unprocessedTriangles.remove(t2);
 				processedTriangles.add(t2);
 
@@ -1171,8 +1175,16 @@ public class Mesh implements Serializable
 				}
 			}
 		}
-		if (countPart > 0 && logger.isLoggable(Level.CONFIG))
-			logger.log(Level.CONFIG, "Found "+countPart+" part components");
+		if (countPart > 0 && logger.isLoggable(Level.INFO))
+		{
+			logger.log(Level.INFO, "Found "+countPart+" part components");
+			if (logger.isLoggable(Level.CONFIG))
+			{
+				for (int key : countTrianglesByPart.keys())
+					logger.log(Level.CONFIG, " * Part id "+key+": "+countTrianglesByPart.get(key)+" triangles");
+			}
+		}
+
 
 		return countPart;
 	}
