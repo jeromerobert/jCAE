@@ -334,8 +334,8 @@ public class MeshReader extends Storage
 						}
 					}
 					// group number
-					bbI.get();
-					createTriangle(current.leafIndex, vert, readable, writable, mesh);
+					int groupId = bbI.get();
+					createTriangle(groupId, vert, readable, writable, mesh);
 					// When called from buildMeshes(), cross boundary triangles are put into
 					// all crossed octants.
 					if (mapNodeToMesh != null && mapNodeToNonReadVertexList != null)
@@ -347,7 +347,7 @@ public class MeshReader extends Storage
 								int leafIndex = fnrVertex.getOEMMIndex();
 								if (!processedNode.contains(leafIndex)) {
 									Mesh altMesh = mapNodeToMesh.get(leafIndex);
-									createTriangle(leafIndex, vert, false, false, altMesh);
+									createTriangle(-leafIndex, vert, false, false, altMesh);
 									processedNode.add(leafIndex);
 								}
 							}

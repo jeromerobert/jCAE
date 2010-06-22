@@ -733,7 +733,6 @@ public class Storage
 				
 				for (Triangle triangle: triangleList)
 				{
-					triangle.setGroupId(node.leafIndex);
 					for (int i = 0; i < 3; i++)
 					{
 						Vertex v = triangle.vertex[i];
