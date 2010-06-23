@@ -398,6 +398,14 @@ public abstract class AbstractHalfEdge
 	public static final int SHARP       = 1 << 6;
 
 	/**
+	 * Numeric constants for edge attributes.  Set if edge is immutable.
+	 * @see #setAttributes
+	 * @see #hasAttributes
+	 * @see #clearAttributes
+	 */
+	public static final int IMMUTABLE   = 1 << 7;
+
+	/**
 	 * <code>Integer</code> array to store values for 0, 1 and 2.  These objects
 	 * may be useful when edge local numbers are put into <code>HashSet</code> or
 	 * <code>HashMap</code> structures.
