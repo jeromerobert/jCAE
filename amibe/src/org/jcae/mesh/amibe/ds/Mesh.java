@@ -1087,6 +1087,80 @@ public class Mesh implements Serializable
 		v.setRef(-maxLabel);
 	}
 
+	/**
+	 * Tag all edges on group boundaries with a given attribute.
+	 */
+	public final int tagGroupBoundaries(int attr)
+	{
+		if (triangleList.isEmpty())
+			return 0;
+
+		if (!hasAdjacency())
+			throw new RuntimeException("tagGroupBoundaries called on a mesh without adjacency relations");
+
+		AbstractHalfEdge ot  = null;
+		AbstractHalfEdge sym = triangleList.iterator().next().getAbstractHalfEdge();
+
+		int toReturn = 0;
+		for (Triangle t: triangleList)
+		{
+			ot = t.getAbstractHalfEdge(ot);
+			if (t.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
+			int groupId = t.getGroupId();
+			for (int i = 0; i < 3; i++)
+			{
+				ot = ot.next();
+				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+					continue;
+				sym = ot.sym(sym);
+				if (groupId != sym.getTri().getGroupId())
+				{
+					ot.setAttributes(attr);
+					toReturn++;
+				}
+			}
+		}
+		toReturn /= 2;
+		if (toReturn > 0 && logger.isLoggable(Level.CONFIG))
+			logger.log(Level.CONFIG, "Number of edges on group boundaries: "+toReturn);
+		return toReturn;
+	}
+
+	/**
+	 * Tag all free edges with a given attribute.
+	 */
+	public final int tagFreeEdges(int attr)
+	{
+		if (triangleList.isEmpty())
+			return 0;
+
+		if (!hasAdjacency())
+			throw new RuntimeException("tagFreeEdges called on a mesh without adjacency relations");
+
+		AbstractHalfEdge ot = null;
+
+		int toReturn = 0;
+		for (Triangle t: triangleList)
+		{
+			ot = t.getAbstractHalfEdge(ot);
+			if (t.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
+			for (int i = 0; i < 3; i++)
+			{
+				ot = ot.next();
+				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
+				{
+					ot.setAttributes(attr);
+					toReturn++;
+				}
+			}
+		}
+		if (toReturn > 0 && logger.isLoggable(Level.CONFIG))
+			logger.log(Level.CONFIG, "Number of free edges: "+toReturn);
+		return toReturn;
+	}
+
 	public Metric getMetric(Location pt)
 	{
 		return euclidian_metric3d;
