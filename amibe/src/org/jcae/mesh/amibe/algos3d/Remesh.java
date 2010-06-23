@@ -144,6 +144,7 @@ public class Remesh
 			{
 				size = Double.valueOf(val).doubleValue();
 				analyticMetric = null;
+				dfrMetrics = null;
 			}
 			else if (key.equals("coplanarity"))
 			{
