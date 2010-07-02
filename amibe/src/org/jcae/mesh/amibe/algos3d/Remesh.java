@@ -432,6 +432,8 @@ public class Remesh
 					for (int i = 0; i < 3; i++)
 					{
 						h = h.next(h);
+						if (h.hasAttributes(AbstractHalfEdge.IMMUTABLE))
+							continue;
 						if ((pass < passes[0]) != (h.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD)))
 							continue;
 						if (h.hasAttributes(AbstractHalfEdge.MARKED))
@@ -546,6 +548,12 @@ public class Remesh
 					double localSize = 0.5 * metrics.get(v).getUnitBallBBox()[0];
 					double localSize2 = localSize * localSize;
 					AbstractHalfEdge ot = liaison.findSurroundingTriangle(v, near, localSize2, false);
+					if (ot.hasAttributes(AbstractHalfEdge.IMMUTABLE))
+					{
+						// Vertex is not inserted
+						skippedNodes++;
+						continue;
+					}
 					if (!ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 					{
 						// Check whether edge can be split

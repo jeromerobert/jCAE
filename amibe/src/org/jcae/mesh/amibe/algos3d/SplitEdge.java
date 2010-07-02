@@ -138,6 +138,8 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 	public boolean canProcessEdge(HalfEdge current)
 	{
 		current = uniqueOrientation(current);
+		if (current.hasAttributes(AbstractHalfEdge.IMMUTABLE))
+			return false;
 		// New point
 		double [] p0 = current.origin().getUV();
 		double [] p1 = current.destination().getUV();

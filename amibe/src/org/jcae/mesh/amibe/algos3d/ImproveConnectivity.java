@@ -174,7 +174,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 	@Override
 	public boolean canProcessEdge(HalfEdge current)
 	{
-		if (current.hasAttributes(AbstractHalfEdge.OUTER | AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+		if (current.hasAttributes(AbstractHalfEdge.IMMUTABLE | AbstractHalfEdge.OUTER | AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 			return false;
 		if (current.hasAttributes(AbstractHalfEdge.MARKED) && current.sym().hasAttributes(AbstractHalfEdge.MARKED))
 			return false;
@@ -257,7 +257,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 		do
 		{
 			HalfEdge h = uniqueOrientation(current);
-			if (!h.hasAttributes(AbstractHalfEdge.OUTER | AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD) && !tree.contains(h))
+			if (!h.hasAttributes(AbstractHalfEdge.IMMUTABLE | AbstractHalfEdge.OUTER | AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD) && !tree.contains(h))
 			{
 				double val = cost(h);
 				if (val <= tolerance)
@@ -267,7 +267,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 				}
 			}
 			h = uniqueOrientation(current.next());
-			if (!h.hasAttributes(AbstractHalfEdge.OUTER | AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD) && !tree.contains(h))
+			if (!h.hasAttributes(AbstractHalfEdge.IMMUTABLE | AbstractHalfEdge.OUTER | AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD) && !tree.contains(h))
 			{
 				double val = cost(h);
 				if (val <= tolerance)

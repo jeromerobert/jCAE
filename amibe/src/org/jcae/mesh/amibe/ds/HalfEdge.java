@@ -410,6 +410,8 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	public final double checkSwap3D(double minCos, double maxLength)
 	{
 		double invalid = -1.0;
+		if (hasAttributes(IMMUTABLE))
+			return invalid;
 		// Do not swap sharp edges
 		if (hasAttributes(SHARP))
 			return invalid;
@@ -582,7 +584,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	final boolean canCollapse(Vertex v)
 	{
 		// Be consistent with collapse()
-		if (hasAttributes(OUTER))
+		if (hasAttributes(IMMUTABLE | OUTER))
 			return false;
 		double [] xn = v.getUV();
 		if (origin().isManifold() && destination().isManifold())
@@ -681,6 +683,8 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	@Override
 	final boolean checkNewRingNormals(double [] newpt)
 	{
+		if (hasAttributes(IMMUTABLE))
+			return false;
 		Vertex o = origin();
 		if (o.isManifold())
 			return checkNewRingNormalsSameFan(newpt, null, null);
@@ -782,7 +786,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	@Override
 	final HalfEdge collapse(Mesh m, Vertex v)
 	{
-		if (hasAttributes(OUTER))
+		if (hasAttributes(IMMUTABLE | OUTER))
 			throw new IllegalArgumentException("Cannot contract "+this);
 		Vertex o = origin();
 		Vertex d = destination();

@@ -132,8 +132,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	protected final double cost(final HalfEdge e)
 	{
 		//Ensure that boundary and non manifold edges are never processed
-		if (freeEdgeOnly && !e.hasAttributes(AbstractHalfEdge.BOUNDARY |
-			AbstractHalfEdge.NONMANIFOLD))
+		if (freeEdgeOnly && !e.hasAttributes(AbstractHalfEdge.IMMUTABLE | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 			return 4.0 * tolerance;
 		
 		double toReturn = e.origin().sqrDistance3D(e.destination());
@@ -149,8 +148,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	@Override
 	public boolean canProcessEdge(HalfEdge current)
 	{
-		if (freeEdgeOnly && !current.hasAttributes(AbstractHalfEdge.BOUNDARY |
-			AbstractHalfEdge.NONMANIFOLD))
+		if (freeEdgeOnly && !current.hasAttributes(AbstractHalfEdge.IMMUTABLE | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 			return false;
 		current = uniqueOrientation(current);
 		Vertex v1 = current.origin();

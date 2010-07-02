@@ -328,6 +328,8 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 	public boolean canProcessEdge(HalfEdge current)
 	{
 		current = uniqueOrientation(current);
+		if (current.hasAttributes(AbstractHalfEdge.IMMUTABLE))
+			return false;
 		final Vertex v1 = current.origin();
 		final Vertex v2 = current.destination();
 		assert v1 != v2 : current;
