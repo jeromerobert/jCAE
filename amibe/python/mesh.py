@@ -6,6 +6,7 @@ from org.jcae.mesh.amibe.algos1d import *
 from org.jcae.mesh.amibe.algos2d import *
 from org.jcae.mesh.amibe import *
 from org.jcae.mesh.amibe.patch import Mesh2D
+from org.jcae.mesh.amibe.patch import InvalidFaceException
 from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.xmldata import *
 from org.jcae.opencascade.jni import BRepTools
@@ -88,7 +89,7 @@ try:
 except:
 	pass
 if not os.path.exists(outputDir) or not os.path.isdir(outputDir):
-	logger.error("Cannot write to "+outputDir)
+	logger.severe("Cannot write to "+outputDir)
 	sys.exit(1)
 
 """
@@ -189,15 +190,15 @@ if phases[2]:
 			try:
 				Initial(mesh, mtb, mesh1d).compute()
 			except InvalidFaceException:
-				logger.error("Face "+str(iface)+" is invalid. Skipping ...")
+				logger.severe("Face "+str(iface)+" is invalid. Skipping ...")
 				success = False
-			except:
-				logger.error("Unexpected error when triangulating face "+str(iface)+". Skipping ...")
+			except Exception:
+				logger.severe("Unexpected error when triangulating face "+str(iface)+". Skipping ...")
 				success = False
 			if not success:
 				bads[iface] = True
 				BRepTools.write(face.getShape(), "error.brep")
-				logger.error("Bogus face has been written into error.brep file")
+				logger.severe("Bogus face has been written into error.brep file")
 				mesh = Mesh2D(mtb, mp, face)
 			else:
 				BasicMesh(mesh).compute()
