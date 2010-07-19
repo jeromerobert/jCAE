@@ -1,0 +1,26 @@
+diff --git a/ros/src/BRepMesh/BRepMesh_FastDiscret.cxx b/ros/src/BRepMesh/BRepMesh_FastDiscret.cxx
+index 9ec6e90..ba9d348 100644
+--- a/ros/src/BRepMesh/BRepMesh_FastDiscret.cxx
++++ b/ros/src/BRepMesh/BRepMesh_FastDiscret.cxx
+@@ -79,6 +79,7 @@
+ #include <TColStd_MapOfInteger.hxx>
+ #include <SortTools_ShellSortOfReal.hxx>
+ #include <TCollection_CompareOfReal.hxx>
++#include <vector>
+ 
+ static Standard_Integer LIMITE_TRIANGULATION = 1048576;
+ 
+@@ -443,8 +444,12 @@ void BRepMesh_FastDiscret::Add(const TopoDS_Face& theface)
+         
+         //clear the structure of links
+         const MeshDS_MapOfInteger& aLinks = structure->LinkOfDomain(nbDomains);
++        std::vector<int> toRemove;
+         for(MeshDS_MapOfInteger::Iterator anIter(aLinks);anIter.More();anIter.Next())
+-          structure->ForseRemoveLink(anIter.Key());
++            toRemove.push_back(anIter.Key());
++        for(i = 0; i < toRemove.size(); i++)
++            structure->ForseRemoveLink(toRemove[i]);
++
+         for (i = 1; i <= myvemap.Extent(); i++)
+            structure->ForseRemoveNode(myvemap.FindKey(i));
+         
