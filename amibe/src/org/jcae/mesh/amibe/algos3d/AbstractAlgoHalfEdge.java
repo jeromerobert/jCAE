@@ -112,6 +112,17 @@ public abstract class AbstractAlgoHalfEdge
 
 	private void computeTree()
 	{
+		//  Remove all MARKED attributes
+		for (Triangle af: mesh.getTriangles())
+		{
+			TriangleHE f = (TriangleHE) af;
+			HalfEdge e = f.getAbstractHalfEdge();
+			for (int i = 0; i < 3; i++)
+			{
+				e = e.next();
+				e.clearAttributes(AbstractHalfEdge.MARKED);
+			}
+		}
 		//  Compute edge cost
 		nrTriangles = 0;
 		for (Triangle af: mesh.getTriangles())
