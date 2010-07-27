@@ -2,6 +2,7 @@
 # jCAE
 from org.jcae.mesh.amibe.ds import Mesh
 from org.jcae.mesh.amibe.algos3d import SwapEdge
+from org.jcae.mesh.amibe.projection import MeshLiaison
 from org.jcae.mesh.xmldata import MeshReader, MeshWriter
 
 # Java
@@ -36,14 +37,17 @@ outDir = args[1]
 
 mesh = Mesh()
 MeshReader.readObject3D(mesh, xmlDir)
+liaison = MeshLiaison(mesh)
+if options.coplanarity:
+	liaison.getMesh().buildRidges(options.coplanarity)
 if options.preserveGroups:
-	mesh.buildGroupBoundaries()
+	liaison.getMesh().buildGroupBoundaries()
 
 opts = HashMap()
 opts.put("coplanarity", str(options.coplanarity))
-sm = SwapEdge(mesh, opts)
+sm = SwapEdge(liaison, opts)
 sm.setProgressBarStatus(10000)
 sm.compute()
 
-MeshWriter.writeObject3D(mesh, outDir, String())
+MeshWriter.writeObject3D(liaison.getMesh(), outDir, String())
 
