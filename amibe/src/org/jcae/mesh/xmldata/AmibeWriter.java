@@ -37,7 +37,9 @@ import javax.xml.stream.XMLStreamWriter;
 import org.xml.sax.SAXException;
 
 /**
- *
+ * Helper class to write amibe files.
+ * The format description can be found at
+ * http://jcae.sourceforge.net/amibe.html#Amibe+file+format
  * @author Jerome Robert
  */
 public abstract class AmibeWriter {
@@ -228,6 +230,8 @@ public abstract class AmibeWriter {
 		numberOfNodes ++;
 
 	}
+
+	/** Add a triangle to the current submesh */
 	public void addTriangle(int i, int j, int k) throws IOException
 	{
 		triaChan.writeInt(i);
@@ -236,6 +240,7 @@ public abstract class AmibeWriter {
 		numberOfTriangles ++;
 	}
 
+	/** Add a triangle to the current submesh */
 	public void addTriangle(int[] indices) throws IOException
 	{
 		triaChan.writeInt(indices[0]);
@@ -251,6 +256,12 @@ public abstract class AmibeWriter {
 		numberOfBeams ++;
 	}
 
+	/**
+	 * create a new sub mesh and make it current.
+	 * There is no need to call this method to create the first submesh.
+	 * submesh are currently only used when exporting the 1D mesh during the
+	 * meshing process (see http://jcae.sourceforge.net/amibe.html#Algorithm)
+	 */
 	public void nextSubMesh() throws IOException
 	{
 		writeSubMesh();
@@ -265,6 +276,7 @@ public abstract class AmibeWriter {
 		haveSubShape = false;
 	}
 
+	/** Create a new group and make it the current group */
 	public void nextGroup(String name)
 	{
 		if(name == null)
@@ -277,6 +289,11 @@ public abstract class AmibeWriter {
 		currentGroup = g;
 	}
 
+	/** 
+	 * Add a triangle to the current group
+	 * nextGroup must have been called before calling this method
+	 * @param id the ID of the triangle to add
+	 */
 	public void addTriaToGroup(int id) throws IOException
 	{
 		groupChan.writeInt(id);
@@ -284,6 +301,11 @@ public abstract class AmibeWriter {
 		currentGroup.nbElement ++;
 	}
 
+	/**
+	 * Add a beam to the current group
+	 * nextGroup must have been called before calling this method
+	 * @param id the ID of the beam to add
+	 */
 	public void addBeamToGroup(int id) throws IOException
 	{
 		bGroupChan.writeInt(id);
@@ -493,6 +515,11 @@ public abstract class AmibeWriter {
 		}
 	}
 
+	/**
+	 * Enable the fix group property.
+	 * When the fix group property is enabled and no group has been added to
+	 * the mesh, a default group containing all elements is created.
+	 */
 	public void setFixNoGroup(boolean b)
 	{
 		checkNoGroup = b;
