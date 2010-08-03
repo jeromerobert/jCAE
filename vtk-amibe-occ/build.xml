@@ -2,10 +2,14 @@
 <!-- You may freely edit this file. See commented blocks below for -->
 <!-- some examples of how to customize the build. -->
 <!-- (If you delete it and reopen the project it will be recreated.) -->
-<project name="vtk-util" default="default" basedir=".">
-    <description>Builds, tests, and runs the project TestVTK.</description>
+<!-- By default, only the Clean and Build commands use this build script. -->
+<!-- Commands such as Run, Debug, and Test only use this build script if -->
+<!-- the Compile on Save feature is turned off for the project. -->
+<!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
+<!-- in the project's Project Properties dialog box.-->
+<project name="vtk-amibe-occ" default="default" basedir=".">
+    <description>Builds, tests, and runs the project vtk-amibe-occ.</description>
     <import file="nbproject/build-impl.xml"/>
-
     <!--
 
     There exist several targets which are by default empty and which can be 
@@ -55,7 +59,7 @@
 
     An example of overriding the target for project execution could look like this:
 
-        <target name="run" depends="TestVTK-impl.jar">
+        <target name="run" depends="vtk-amibe-occ-impl.jar">
             <exec dir="bin" executable="launcher.exe">
                 <arg file="${dist.jar}"/>
             </exec>
@@ -67,23 +71,10 @@
     nbproject/build-impl.xml file. 
 
     -->
-	
-	<!-- Netbeans update the manifest in the init target so we must write it before -->
-	<!-- disabled as we are no longer using subversion. Kept in case we want to
-    do the same thing with git -->
-	<target name="-disabled-pre-init">
-		<exec executable="/bin/sh" failifexecutionfails="false"
-		outputproperty="tmprevision" errorproperty="dummy" logError="true">
-			<arg line="-c &quot;unset LANG;svnversion&quot;"/>
-		</exec>
-		<condition property="revision" value="exported" else="${tmprevision}">
-			<equals arg1="${tmprevision}" arg2=""/>
-		</condition>
-		<!-- default value if svnversion cannot be run -->
-		<property name="revision" value="exported"/>
-		<!-- from http://ant.apache.org/manual/CoreTasks/manifest.html -->
-		<manifest file="manifest.mf">
-			<attribute name="SCM-Revision" value="${revision}"/> 
-		</manifest>		
-	</target>
+    <target depends="init" name="deps-jar" unless="no.deps">
+        <ant dir="${project.occjava}" inheritall="false" target="jar"/>
+    </target>
+    <target depends="init" name="deps-clean" unless="no.deps">
+        <ant dir="${project.occjava}" inheritall="false" target="clean"/>
+    </target>	
 </project>

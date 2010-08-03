@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+OpenIDE-Module: org.jcae.mesh.cad.occ
+OpenIDE-Module-Install: org/jcae/mesh/cad/occ/Installer.class
+OpenIDE-Module-Localizing-Bundle: org/jcae/mesh/cad/occ/Bundle.properties
+OpenIDE-Module-Specification-Version: 1.0
+

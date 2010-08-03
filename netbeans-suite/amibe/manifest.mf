@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+OpenIDE-Module: org.jcae.mesh.amibe
+OpenIDE-Module-Localizing-Bundle: org/jcae/mesh/amibe/Bundle.properties
+OpenIDE-Module-Specification-Version: 1.0
+

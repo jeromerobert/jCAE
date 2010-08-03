@@ -139,4 +139,9 @@ amibe/dist/
 amibe/nbproject/build-impl.xml
 amibe/nbproject/genfiles.properties
 amibe/nbproject/private/
+vtk-amibe-occ/build/
+vtk-amibe-occ/dist/
+vtk-amibe-occ/nbproject/build-impl.xml
+vtk-amibe-occ/nbproject/genfiles.properties
+vtk-amibe-occ/nbproject/private/
 

@@ -37,7 +37,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import javax.swing.ToolTipManager;
-import org.jcae.vtk.ViewableCAD;
+//import org.jcae.vtk.ViewableCAD;
 import org.jcae.vtk.Utils;
 import org.jcae.vtk.Canvas;
 import org.jcae.vtk.UNVToMesh;
@@ -85,8 +85,8 @@ public class TestGUI implements KeyListener
 
 			if (args[0].equalsIgnoreCase("cao"))
 			{
-				ViewableCAD cascadeActorManager = new ViewableCAD(args[1]);
-				cascadeActorManager.addCanvas(c1);
+				//ViewableCAD cascadeActorManager = new ViewableCAD(args[1]);
+				//cascadeActorManager.addCanvas(c1);
 
 				//actors.add(cascadeActorManager.getBackFaces());
 				//actors.add(cascadeActorManager.getEdgesActor());

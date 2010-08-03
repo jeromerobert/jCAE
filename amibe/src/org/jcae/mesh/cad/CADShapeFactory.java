@@ -21,6 +21,7 @@
 package org.jcae.mesh.cad;
 
 import java.util.Iterator;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -28,39 +29,46 @@ import java.util.logging.Logger;
  */
 public abstract class CADShapeFactory
 {
-	private static final Logger logger=Logger.getLogger(CADShapeFactory.class.getName());
-	private static final CADShapeFactory factory;
-	static
-	{
-		String cadType = System.getProperty("org.jcae.mesh.cad");
-		CADShapeFactory b = null;
-		if (cadType == null)
-		{
-			cadType = "org.jcae.mesh.cad.occ.OCCShapeFactory";
-			System.setProperty("org.jcae.mesh.cad", cadType);
-		}
-		try
-		{
-			b = (CADShapeFactory) Class.forName(cadType).newInstance();
-		}
-		catch (Exception e)
-		{
-			logger.severe("Class "+cadType+" not found");
-			System.exit(1);
-		}
-		factory = b;
-	}
+	private static final Logger LOGGER=Logger.getLogger(CADShapeFactory.class.getName());
+	private static CADShapeFactory factory;
 	
 	protected CADShapeFactory()
 	{
 	}
-	
+
+	public static void setFactory(CADShapeFactory f)
+	{
+		if(factory == null)
+			factory = f;
+		else
+			throw new IllegalStateException("Factory already set to "+factory+".");
+	}
+
 	/**
 	 * Return factory instance
 	 * @return factory instance
 	 */
 	public static CADShapeFactory getFactory()
 	{
+		if(factory == null)
+		{
+			String cadType = System.getProperty("org.jcae.mesh.cad");
+			if (cadType == null)
+			{
+				cadType = "org.jcae.mesh.cad.occ.OCCShapeFactory";
+				System.setProperty("org.jcae.mesh.cad", cadType);
+			}
+			try
+			{
+				factory = (CADShapeFactory) Class.forName(cadType).newInstance();
+			}
+			catch (Exception e)
+			{
+				LOGGER.severe("Class "+cadType+" not found");
+				LOGGER.log(Level.SEVERE, null, e);
+				System.exit(1);
+			}
+		}
 		return factory;
 	}
 	

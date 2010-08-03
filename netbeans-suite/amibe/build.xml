@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- You may freely edit this file. See harness/README in the NetBeans platform -->
+<!-- for some information on what you could do (e.g. targets to override). -->
+<!-- If you delete this file and reopen the project it will be recreated. -->
+<project name="org.jcae.mesh.amibe" default="netbeans" basedir=".">
+    <description>Builds, tests, and runs the project org.jcae.mesh.amibe.</description>
+    <import file="nbproject/build-impl.xml"/>
+	<!-- from http://wiki.netbeans.org/DevFaqWrapperModules -->
+	<property name="amibe.project.dir" value="../../amibe"/>
+	<property name="vtk-util.project.dir" value="../../vtk-util"/>
+	<property name="vtk-amibe.project.dir" value="../vtk-amibe"/>
+	<target name="-release.files">
+		<!-- external dependencies -->
+		<copy file="${libs.trove.classpath}" tofile="${cluster}/modules/ext/trove.jar"/>
+		<copy file="${libs.vecmath.classpath}" tofile="${cluster}/modules/ext/vecmath.jar"/>
+		<copy todir="${cluster}/modules/ext" file="${amibe.project.dir}/dist/amibe.jar"/>
+		<copy file="${vtk-util.project.dir}/dist/vtk-util.jar" todir="${cluster}/modules/ext"/>
+		<copy todir="${cluster}/modules/ext" file="${vtk-amibe.project.dir}/dist/jcae-vtk-amibe.jar"/>
+		<copy file="../../amibe/logging.properties" tofile="${cluster}/etc/logging.properties"/>
+		<copy todir="${cluster}/amibe-python">
+			<fileset dir="../../amibe/python">
+				<exclude name="amibebatch"/>
+			</fileset>
+		</copy>
+	</target>
+</project>
