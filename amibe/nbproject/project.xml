@@ -6,11 +6,11 @@
             <name>amibe</name>
             <minimum-ant-version>1.6.5</minimum-ant-version>
             <source-roots>
-                <root id="src.src.dir" name="src"/>
-                <root id="src.src-occ.dir" name="src-occ"/>
+                <root id="src.src.dir"/>
+                <root id="src.src-occ.dir"/>
             </source-roots>
             <test-roots>
-                <root id="test.src-test.dir" name="src-test"/>
+                <root id="test.src-test.dir"/>
             </test-roots>
         </data>
         <references xmlns="http://www.netbeans.org/ns/ant-project-references/1">

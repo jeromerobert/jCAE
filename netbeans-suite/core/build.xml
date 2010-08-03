@@ -6,7 +6,7 @@
     <description>Builds, tests, and runs the project org.jcae.netbeans.</description>
     <import file="nbproject/build-impl.xml"/>
 	<!-- from http://wiki.netbeans.org/DevFaqWrapperModules -->
-	<property name="amibe.project.dir" value="../amibe"/>
+	<property name="amibe.project.dir" value="../../amibe"/>
 	<property name="vtk-util.project.dir" value="../../vtk-util"/>
 	<property name="vtk-amibe.project.dir" value="../vtk-amibe"/>
 	<property name="jython.project.dir" value="../jython"/>

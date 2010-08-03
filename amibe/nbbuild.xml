@@ -92,6 +92,5 @@
 				<attribute name="Class-Path" value="occjava.jar"/>
 			</manifest>
 		</jar>
-		<jar basedir="${build.classes.dir}" includes="**/*Test*" compress="true" jarfile="${dist.jar.dir}/amibe-junit.jar"/>
 	</target>
 </project>
