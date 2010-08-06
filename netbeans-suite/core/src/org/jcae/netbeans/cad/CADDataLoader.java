@@ -20,10 +20,6 @@
 
 package org.jcae.netbeans.cad;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import org.jcae.netbeans.MIMEResolver;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataNode;
 import org.openide.loaders.DataObjectExistsException;
