@@ -541,4 +541,24 @@ public abstract class AmibeWriter {
 				groupChan.writeInt(i);
 		}
 	}
+
+	/** Create a new group and make it the current node group */
+	public void nextNodeGroup(String name)
+	{
+		//TODO Implement in the same way as nextGroup
+		//TODO also implement a writeNodeGroups() methods in the same way as
+		//writeGroups() and call it in writeSubMesh()
+	}
+
+	/**
+	 * Add a node to the current node group
+	 * nextNodeGroup must have been called before calling this method
+	 * @param id the ID of the node to add
+	 */
+	public void addNodeToGroup(int nodeID)
+	{
+		//TODO Implement in the same way as addTriaToGroup
+		//TODO also implement a writeNodeGroups() methods in the same way as
+		//writeGroups() and call it in writeSubMesh()
+	}
 }
