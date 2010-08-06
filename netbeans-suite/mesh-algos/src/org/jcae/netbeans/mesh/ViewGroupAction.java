@@ -20,25 +20,24 @@
 
 package org.jcae.netbeans.mesh;
 
-import org.jcae.netbeans.mesh.bora.BoraNode;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import javax.swing.JOptionPane;
+import java.util.*;
+import java.util.Map.Entry;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
 import org.jcae.mesh.xmldata.Group;
 import org.jcae.mesh.xmldata.Groups;
-import org.jcae.netbeans.viewer3d.EntitySelection;
-import org.jcae.netbeans.viewer3d.SelectionManager;
-import org.openide.ErrorManager;
+import org.jcae.netbeans.mesh.AmibeNode;
+import org.jcae.netbeans.mesh.GroupNode;
+import org.jcae.netbeans.viewer3d.ViewManager;
+import org.jcae.vtk.View;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CookieAction;
 import org.xml.sax.SAXException;
 
-public class FuseGroupAction extends CookieAction{
+public class ViewGroupAction extends CookieAction
+{
 
 	protected int mode()
 	{
@@ -54,48 +53,49 @@ public class FuseGroupAction extends CookieAction{
 	{
 		try
 		{
-			//A set to ensure all nodes are from the same mesh
-			HashSet<Groups> set=new HashSet<Groups>();
-			ArrayList<Group> list=new ArrayList<Group>();
+			HashMap<Groups, Collection<Group>> groups2Group =
+				new HashMap<Groups, Collection<Group>>();
 			for(int i=0; i<arg0.length; i++)
 			{
-				GroupNode n=arg0[i].getCookie(GroupNode.class);
-				set.add(n.getGroups());
-				list.add(n.getGroup());
+				GroupNode gn=arg0[i].getCookie(GroupNode.class);
+				Collection<Group> c=groups2Group.get(gn.getGroups());
+				if(c==null)
+				{
+					c=new ArrayList<Group>();
+					groups2Group.put(gn.getGroups(), c);
+				}
+				c.add(gn.getGroup());
 			}
-					
-			if(set.size()>1)
+
+			View v = ViewManager.getDefault().getCurrentView();
+			Iterator<Entry<Groups, Collection<Group>>> it =
+				groups2Group.entrySet().iterator();
+
+			while(it.hasNext())
 			{
-				JOptionPane.showMessageDialog(null,
-					"Fuse can only work with groups from the same mesh");
-				return;
+				Entry<Groups, Collection<Group>> e=it.next();
+				AmibeNode.displayGroups(e.getKey(),
+					arg0[0].getParentNode().getParentNode().getName(),
+					e.getValue(), v, arg0[0].getParentNode().getParentNode().getParentNode());
 			}
-			
-			Groups groups=(Groups) set.toArray()[0];
-			groups.fuse(list);
-			EntitySelection meshSelection = SelectionManager.getDefault().getEntitySelection(this);
-			if(meshSelection!=null)
-				meshSelection.unselectAll();
-			BoraNode mn=arg0[0].getParentNode().getParentNode().getCookie(BoraNode.class);
-			mn.refreshGroups();			
 		}
 		catch(IOException ex)
 		{
-			ErrorManager.getDefault().notify(ex);
-		} catch (TransformerConfigurationException e) {
-			ErrorManager.getDefault().notify(e);
-		} catch (TransformerException e) {
-			ErrorManager.getDefault().notify(e);
-		} catch (ParserConfigurationException e) {
-			ErrorManager.getDefault().notify(e);
-		} catch (SAXException e) {
-			ErrorManager.getDefault().notify(e);
+			Exceptions.printStackTrace(ex);
 		}
+		catch(ParserConfigurationException ex)
+		{
+			Exceptions.printStackTrace(ex);
+		}
+		catch(SAXException ex)
+		{
+			Exceptions.printStackTrace(ex);
+		}			
 	}
 
 	public String getName()
 	{
-		return "Fuse";
+		return "view";
 	}
 
 	public HelpCtx getHelpCtx()
@@ -103,4 +103,9 @@ public class FuseGroupAction extends CookieAction{
 		return null;
 	}
 
+	@Override
+	protected boolean asynchronous()
+	{
+		return false;
+	}
 }

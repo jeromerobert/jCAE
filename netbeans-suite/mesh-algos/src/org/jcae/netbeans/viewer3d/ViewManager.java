@@ -26,6 +26,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
+import org.jcae.netbeans.viewer3d.CurrentViewChangeListener;
+import org.jcae.netbeans.viewer3d.CurrentViewableChangeListener;
 import org.jcae.netbeans.viewer3d.actions.SelectViewable;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;

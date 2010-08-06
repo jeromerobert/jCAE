@@ -7,6 +7,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 import org.jcae.mesh.xmldata.ComputeEdgesConnectivity;
 import org.jcae.netbeans.Utilities;
+import org.jcae.netbeans.mesh.AmibeDataObject;
 import org.jcae.netbeans.viewer3d.ViewManager;
 import org.jcae.vtk.AmibeOverlayProvider;
 import org.jcae.vtk.AmibeOverlayToMesh;

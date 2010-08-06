@@ -1,6 +1,6 @@
 /*
  * Project Info:  http://jcae.sourceforge.net
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
  * Software Foundation; either version 2.1 of the License, or (at your option)
@@ -15,40 +15,34 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2010 by EADS France
  */
-
 package org.jcae.netbeans.mesh;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import org.jcae.mesh.xmldata.Group;
 import org.jcae.mesh.xmldata.Groups;
-import org.openide.nodes.Children.Array;
-import org.openide.nodes.Node;
+import org.jcae.netbeans.viewer3d.EntitySelection;
+import org.jcae.netbeans.viewer3d.SelectionManager;
+import org.jcae.vtk.Viewable;
+import org.openide.modules.ModuleInstall;
 
 /**
- * Children class. His associated node has a lookup to it.
- * @author ibarz
+ * Manages a module's lifecycle. Remember that an installer is optional and
+ * often not needed at all.
  */
-public class GroupChildren extends Array {
-
-	private final Groups groups;
-
-	public GroupChildren(Groups groups)
-	{
-		this.groups=groups;
-	}
+public class Installer extends ModuleInstall {
 
 	@Override
-	protected Collection<Node> initCollection()
-	{
-		Group[] gps=groups.getGroups();
-		ArrayList<Node> toReturn = new ArrayList<Node>(gps.length);
-		for(int i=0; i<gps.length; i++)
+	public void restored() {
+		SelectionManager.getDefault().addSelectionFactory(
+			new SelectionManager.SelectionFactory()
 		{
-			toReturn.add(new GroupNode(gps[i], groups));
-		}
-		return toReturn;
+			public EntitySelection create(Object entity) {
+				return new AmibeSelection((Groups)entity);
+			}
+
+			public boolean canCreate(Viewable viewable, Object entity) {
+				return viewable instanceof AmibeNViewable && entity instanceof Groups;
+			}
+		});
 	}
 }

@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import org.jcae.netbeans.Utilities;
+import org.jcae.netbeans.mesh.Mesh;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;

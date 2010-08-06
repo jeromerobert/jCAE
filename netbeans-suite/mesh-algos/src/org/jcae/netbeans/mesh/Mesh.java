@@ -22,8 +22,6 @@ package org.jcae.netbeans.mesh;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import org.jcae.mesh.bora.ds.BModel;
-
 
 public class Mesh 
 {
@@ -32,8 +30,6 @@ public class Mesh
 	private String meshFile;
 	private String geometryFile;
 	private String boraFile;
-
-	private BModel boraModel;
 	
 	public Mesh(String name) {
 		meshFile=name;
@@ -41,14 +37,6 @@ public class Mesh
 	
 	public Mesh()
 	{		
-	}
-
-	public void setBoraModel(BModel model) {
-		this.boraModel = model;
-	}
-
-	public BModel getBoraModel() {
-		return boraModel;
 	}
 
 	public String getBoraFile() {

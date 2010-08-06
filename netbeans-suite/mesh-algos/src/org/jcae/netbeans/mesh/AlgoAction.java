@@ -32,6 +32,7 @@ import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import javax.swing.SwingUtilities;
 import org.jcae.mesh.JCAEFormatter;
+import org.jcae.netbeans.mesh.AmibeNode;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.filesystems.FileUtil;

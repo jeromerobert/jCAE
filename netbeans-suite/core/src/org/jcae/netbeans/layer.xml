@@ -125,9 +125,7 @@
             <file name="org-jcae-netbeans-cad-SplitFaces.instance"/>
             <file name="org-jcae-netbeans-mesh-bora-ComputeMeshAction.instance"/>
             <file name="org-jcae-netbeans-mesh-ExportUNV.instance"/>
-            <file name="org-jcae-netbeans-mesh-FreeEdgesAction.instance"/>
             <file name="org-jcae-netbeans-mesh-ImportUNV.instance"/>
-            <file name="org-jcae-netbeans-mesh-MultipleEdgesAction.instance"/>
             <file name="org-jcae-netbeans-mesh-UNVToUNVAction.instance">
                 <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.UNVToUNVAction"/>
             </file>
@@ -137,12 +135,6 @@
             </file>
             <file name="org-jcae-netbeans-mesh-BuildSoupAction.instance">
                 <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.BuildSoupAction"/>
-            </file>
-            <file name="org-jcae-netbeans-mesh-SmoothAction.instance">
-                <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.SmoothAction"/>
-            </file>
-            <file name="org-jcae-netbeans-mesh-DecimateAction.instance">
-                <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.DecimateAction"/>
             </file>
             <file name="org-jcae-netbeans-mesh-OEMMViewAction.instance">
                 <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.OEMMViewAction"/>
@@ -212,32 +204,6 @@
                     <file name="org-jcae-netbeans-mesh-MeshAction.instance">
                         <attr name="position" intvalue="10"/>
                     </file>
-                    <file name="org-jcae-netbeans-mesh-RemeshAction.instance">
-                        <attr name="position" intvalue="20"/>
-                    </file>
-                    <file name="org-jcae-netbeans-mesh-SmoothAction.shadow">
-                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-SmoothAction.instance"/>
-                        <attr name="position" intvalue="30"/>
-                    </file>
-                    <file name="org-jcae-netbeans-mesh-DecimateAction.shadow">
-                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-DecimateAction.instance"/>
-                        <attr name="position" intvalue="40"/>
-                    </file>
-                    <file name="Separator1.instance">
-                        <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
-                        <attr name="position" intvalue="50"/>
-                    </file>
-                    <file name="org-openide-actions-ViewAction.instance">
-                        <attr name="position" intvalue="60"/>
-                    </file>
-                    <file name="org-jcae-netbeans-mesh-FreeEdgesAction.shadow">
-                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-FreeEdgesAction.instance"/>
-                        <attr name="position" intvalue="70"/>
-                    </file>
-                    <file name="org-jcae-netbeans-mesh-MultipleEdgesAction.shadow">
-                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-MultipleEdgesAction.instance"/>
-                        <attr name="position" intvalue="80"/>
-                    </file>
                     <file name="org-jcae-netbeans-mesh-OEMMMenu.instance">
                         <attr name="position" intvalue="90"/>
                     </file>
@@ -252,42 +218,6 @@
                     <file name="org-jcae-netbeans-mesh-ImportUNV.shadow">
                         <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-ImportUNV.instance"/>
                         <attr name="position" intvalue="120"/>
-                    </file>
-                    <file name="Separator3.instance">
-                        <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
-                        <attr name="position" intvalue="500"/>
-                    </file>
-                    <file name="CutAction.instance">
-                        <attr name="instanceClass" stringvalue="org.openide.actions.CutAction"/>
-                        <attr name="position" intvalue="600"/>
-                    </file>
-                    <file name="CopyAction.instance">
-                        <attr name="instanceClass" stringvalue="org.openide.actions.CopyAction"/>
-                        <attr name="position" intvalue="700"/>
-                    </file>
-                    <file name="PasteAction.instance">
-                        <attr name="instanceClass" stringvalue="org.openide.actions.PasteAction"/>
-                        <attr name="position" intvalue="800"/>
-                    </file>
-                    <file name="Separator4.instance">
-                        <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
-                        <attr name="position" intvalue="900"/>
-                    </file>
-                    <file name="DeleteAction.instance">
-                        <attr name="instanceClass" stringvalue="org.openide.actions.DeleteAction"/>
-                        <attr name="position" intvalue="1000"/>
-                    </file>
-                    <file name="RenameAction.instance">
-                        <attr name="instanceClass" stringvalue="org.openide.actions.RenameAction"/>
-                        <attr name="position" intvalue="1100"/>
-                    </file>
-                    <file name="Separator5.instance">
-                        <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
-                        <attr name="position" intvalue="1130"/>
-                    </file>
-                    <file name="PropertiesAction.instance">
-                        <attr name="instanceClass" stringvalue="org.openide.actions.PropertiesAction"/>
-                        <attr name="position" intvalue="1500"/>
                     </file>
                 </folder>
             </folder>
@@ -534,13 +464,11 @@
 
     <folder name="Services">
         <folder name="MIMEResolver">
-            <file name="org-jcae-netbeans-MIMEResolver.instance"/>
-            <file name="org-jcae-netbeans-mesh-MeshResolver.instance"/>
+            <file name="org-jcae-netbeans-cad-MIMEResolver.instance"/>
             <file name="UNVResolver.xml" url="mesh/UNVResolver.xml">
                 <attr name="SystemFileSystem.localizingBundle" stringvalue="org.jcae.netbeans.Bundle"/>
             </file>
-        </folder>
-        <file name="org-jcae-netbeans-mesh-Settings.settings" url="mesh/Settings.settings"/>
+        </folder>        
         <file name="org-jcae-netbeans-Settings.settings" url="Settings.settings"/>
     </folder>
 
@@ -549,9 +477,6 @@
             <folder name="jCAE">
                 <file name="org-jcae-netbeans-Settings.shadow">
                     <attr name="originalFile" stringvalue="Services/org-jcae-netbeans-Settings.settings"/>
-                </file>
-                <file name="org-jcae-netbeans-mesh-Settings.shadow">
-                    <attr name="originalFile" stringvalue="Services/org-jcae-netbeans-mesh-Settings.settings"/>
                 </file>
             </folder>
         </folder>

@@ -19,8 +19,6 @@
  */
 package org.jcae.netbeans.mesh;
 
-import org.jcae.netbeans.mesh.bora.BoraViewable;
-import gnu.trove.TIntArrayList;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
@@ -105,7 +103,7 @@ public class AmibeSelection implements EntitySelection, SelectionListener, Curre
 
 	public void selectionChanged(Viewable interactor)
 	{
-		if(! (interactor instanceof BoraViewable))
+		if(! (interactor instanceof AmibeNViewable))
 			return;
 		// If it is not our interactor leave
 		if (!interactors.contains(interactor))

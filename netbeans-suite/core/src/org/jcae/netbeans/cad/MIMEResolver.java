@@ -18,7 +18,7 @@
  * (C) Copyright 2006-2009, by EADS France
  */
 
-package org.jcae.netbeans;
+package org.jcae.netbeans.cad;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,20 +30,17 @@ public class MIMEResolver extends org.openide.filesystems.MIMEResolver
 	private final static Collection<String> EXTENSION=new HashSet<String>(
 		Arrays.asList("step", "igs", "iges", "stp", "STEP", "STP", "IGS", "IGES"));
 	
-	private final static String MESH = "text/mesh+xml";
 	public final static String CAD = "application/vnd.jcae.geometry";
 	
 	public MIMEResolver()
 	{
-		super(MESH, CAD);
+		super(CAD);
 	}
 	
 	public String findMIMEType(FileObject fileObject)
 	{
 		if(EXTENSION.contains(fileObject.getExt()))
 			return CAD;
-		else if(fileObject.getNameExt().endsWith("_mesh.xml"))
-			return MESH;
 		else
 			return null;
 	}	

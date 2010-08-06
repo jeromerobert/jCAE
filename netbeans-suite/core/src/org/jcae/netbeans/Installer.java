@@ -25,6 +25,18 @@ import java.io.File;
 import java.util.prefs.Preferences;
 import org.jcae.opencascade.jni.BRep_Builder;
 import javax.swing.filechooser.FileSystemView;
+import org.jcae.netbeans.cad.BCADSelection;
+import org.jcae.netbeans.cad.CADSelection;
+import org.jcae.netbeans.cad.NbShape;
+import org.jcae.netbeans.mesh.bora.BGroupsNode;
+import org.jcae.netbeans.mesh.bora.BoraSelection;
+import org.jcae.netbeans.mesh.bora.BoraViewable;
+import org.jcae.netbeans.mesh.bora.ViewBCellGeometryAction.NbBShape;
+import org.jcae.netbeans.viewer3d.EntitySelection;
+import org.jcae.netbeans.viewer3d.SelectionManager;
+import org.jcae.vtk.Viewable;
+import org.jcae.vtk.ViewableCAD;
+import org.jcae.vtk.ViewableOEMM;
 import org.openide.explorer.ExplorerManager;
 import org.openide.modules.InstalledFileLocator;
 import org.openide.modules.ModuleInstall;
@@ -77,6 +89,45 @@ public class Installer extends ModuleInstall
 		Preferences p = NbPreferences.root().node("org/openide/explorer");
 		if(p.get("showDescriptionArea", null) == null)
 			p.putBoolean("showDescriptionArea", false);
-		
+
+		SelectionManager.getDefault().addSelectionFactory(
+			new SelectionManager.SelectionFactory()
+		{
+			public EntitySelection create(Object entity) {
+				return null;
+			}
+
+			public boolean canCreate(Viewable viewable, Object entity) {
+				return viewable instanceof ViewableOEMM;
+			}
+		});
+		SelectionManager.getDefault().addSelectionFactory(
+			new SelectionManager.SelectionFactory()
+		{
+			public EntitySelection create(Object entity) {
+				return new BoraSelection((BGroupsNode)entity);
+			}
+
+			public boolean canCreate(Viewable viewable, Object entity) {
+				return viewable instanceof BoraViewable &&
+					entity instanceof BGroupsNode;
+			}
+		});
+		SelectionManager.getDefault().addSelectionFactory(
+			new SelectionManager.SelectionFactory()
+		{
+			public EntitySelection create(Object entity) {
+				if (entity instanceof NbBShape)
+					return new BCADSelection((NbBShape)entity);
+				else if(entity instanceof NbShape)
+					return new CADSelection((NbShape)entity);
+				else
+					throw new IllegalArgumentException("The entity associated wit ha ViewableCAD has to be a NbShape");
+			}
+
+			public boolean canCreate(Viewable viewable, Object entity) {
+				return viewable instanceof ViewableCAD;
+			}
+		});
 	}
 }

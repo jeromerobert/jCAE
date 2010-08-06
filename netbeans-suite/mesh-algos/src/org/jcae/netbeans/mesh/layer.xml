@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.1//EN" "http://www.netbeans.org/dtds/filesystem-1_1.dtd">
+<!--
+
+ Project Info:  http://jcae.sourceforge.net
+ 
+ This program is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Lesser General Public License as published by the Free
+ Software Foundation; either version 2.1 of the License, or (at your option)
+ any later version.
+ 
+ This program is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ details.
+ 
+ You should have received a copy of the GNU Lesser General Public License
+ along with this program; if not, write to the Free Software Foundation, Inc.,
+ 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+ 
+ (C) Copyright 2005-2009, by EADS France
+
+-->
+<filesystem>
+    <folder name="Actions">
+        <folder name="jCAE">
+            <file name="org-jcae-netbeans-mesh-FreeEdgesAction.instance"/>
+            <file name="org-jcae-netbeans-mesh-MultipleEdgesAction.instance"/>
+            <file name="org-jcae-netbeans-mesh-SmoothAction.instance">
+                <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.SmoothAction"/>
+            </file>
+            <file name="org-jcae-netbeans-mesh-DecimateAction.instance">
+                <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.DecimateAction"/>
+            </file>
+            <file name="org-jcae-netbeans-mesh-RemeshAction.instance">
+                <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.RemeshAction"/>
+            </file>
+        </folder>
+    </folder>
+
+    <folder name="Loaders">
+        <folder name="text">
+            <folder name="mesh+xml">
+                <folder name="Actions">
+                    <file name="org-jcae-netbeans-mesh-RemeshAction.instance">
+                        <attr name="position" intvalue="20"/>
+                    </file>
+                    <file name="org-jcae-netbeans-mesh-SmoothAction.shadow">
+                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-SmoothAction.instance"/>
+                        <attr name="position" intvalue="30"/>
+                    </file>
+                    <file name="org-jcae-netbeans-mesh-DecimateAction.shadow">
+                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-DecimateAction.instance"/>
+                        <attr name="position" intvalue="40"/>
+                    </file>
+                    <file name="Separator1.instance">
+                        <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
+                        <attr name="position" intvalue="50"/>
+                    </file>
+                    <file name="org-openide-actions-ViewAction.instance">
+                        <attr name="position" intvalue="60"/>
+                    </file>
+                    <file name="org-jcae-netbeans-mesh-FreeEdgesAction.shadow">
+                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-FreeEdgesAction.instance"/>
+                        <attr name="position" intvalue="70"/>
+                    </file>
+                    <file name="org-jcae-netbeans-mesh-MultipleEdgesAction.shadow">
+                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-MultipleEdgesAction.instance"/>
+                        <attr name="position" intvalue="80"/>
+                    </file>
+                    <file name="Separator3.instance">
+                        <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
+                        <attr name="position" intvalue="500"/>
+                    </file>
+                    <file name="CutAction.instance">
+                        <attr name="instanceClass" stringvalue="org.openide.actions.CutAction"/>
+                        <attr name="position" intvalue="600"/>
+                    </file>
+                    <file name="CopyAction.instance">
+                        <attr name="instanceClass" stringvalue="org.openide.actions.CopyAction"/>
+                        <attr name="position" intvalue="700"/>
+                    </file>
+                    <file name="PasteAction.instance">
+                        <attr name="instanceClass" stringvalue="org.openide.actions.PasteAction"/>
+                        <attr name="position" intvalue="800"/>
+                    </file>
+                    <file name="Separator4.instance">
+                        <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
+                        <attr name="position" intvalue="900"/>
+                    </file>
+                    <file name="DeleteAction.instance">
+                        <attr name="instanceClass" stringvalue="org.openide.actions.DeleteAction"/>
+                        <attr name="position" intvalue="1000"/>
+                    </file>
+                    <file name="RenameAction.instance">
+                        <attr name="instanceClass" stringvalue="org.openide.actions.RenameAction"/>
+                        <attr name="position" intvalue="1100"/>
+                    </file>
+                    <file name="Separator5.instance">
+                        <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
+                        <attr name="position" intvalue="1130"/>
+                    </file>
+                    <file name="PropertiesAction.instance">
+                        <attr name="instanceClass" stringvalue="org.openide.actions.PropertiesAction"/>
+                        <attr name="position" intvalue="1500"/>
+                    </file>
+                </folder>
+            </folder>			
+        </folder>
+    </folder>
+
+    <folder name="Services">
+        <folder name="MIMEResolver">
+            <file name="org-jcae-netbeans-mesh-MIMEResolver.instance"/>
+        </folder>
+        <file name="org-jcae-netbeans-mesh-Settings.settings" url="Settings.settings"/>
+    </folder>
+
+    <folder name="UI">
+        <folder name="Services">
+            <folder name="jCAE">
+                <file name="org-jcae-netbeans-mesh-Settings.shadow">
+                    <attr name="originalFile" stringvalue="Services/org-jcae-netbeans-mesh-Settings.settings"/>
+                </file>
+            </folder>
+        </folder>
+    </folder>
+</filesystem>

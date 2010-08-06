@@ -20,39 +20,34 @@
 
 package org.jcae.netbeans.viewer3d;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import org.jcae.mesh.xmldata.Groups;
-import org.jcae.netbeans.cad.BCADSelection;
-import org.jcae.netbeans.cad.CADSelection;
-import org.jcae.netbeans.cad.NbShape;
-import org.jcae.netbeans.mesh.AmibeNViewable;
-import org.jcae.netbeans.mesh.bora.BGroupsNode;
-import org.jcae.netbeans.mesh.bora.BoraSelection;
-import org.jcae.netbeans.mesh.AmibeSelection;
-import org.jcae.netbeans.mesh.bora.BoraViewable;
-import org.jcae.netbeans.mesh.bora.ViewBCellGeometryAction.NbBShape;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
-import org.jcae.vtk.ViewableCAD;
-import org.jcae.vtk.ViewableOEMM;
 
 /**
- * Patterns : Singleton
- * This class manage the connection between the netbeans tree and the viewables and control the appending mode.
- * Because an entity (mesh or CAD for example)
- * can be represented by many viewables in many views we have to link the different viewable with the entity. It's the role
- * of the map<Viewable,Object>. And the real link between the netbeans tree and the viewables is managed by an EntitySelection.
- * See CADSelection for an example. So if the viewable does not have to be linked with the tree you can not create a EntitySelection for
- * your type of entity. For example the OEMM viewable is not connected with the tree and no OEMMSelection is needed, only adding the viewable
- * in the SelectionManager is needed.
+ * This singleton manage the connection between the netbeans tree and the
+ * viewables and control the appending mode.
+ * Because an entity (mesh or CAD for example) can be represented by many
+ * viewables in many views we have to link the different viewable with the
+ * entity. It's the role of the map&lt;Viewable,Object&gt;. And the real link
+ * between the netbeans tree and the viewables is managed by an EntitySelection.
+ * See CADSelection for an example. So if the viewable does not have to be
+ * linked with the tree you can not create a EntitySelection for your type of
+ * entity. For example the OEMM viewable is not connected with the tree and no
+ * OEMMSelection is needed, only adding the viewable in the SelectionManager is
+ * needed.
  * @author Julian Ibarz
  */
 public class SelectionManager {
 	private HashMap<Object,EntitySelection> selections = new HashMap<Object,EntitySelection>();
 	private HashMap<Viewable,Object> interactors = new HashMap<Viewable,Object>();
-	private static SelectionManager instance = null;
-	private boolean appendSelection = false;
-	private boolean disableListeningProperty = false;
+	private static SelectionManager instance;
+	private boolean appendSelection;
+	private boolean disableListeningProperty;
+	private Collection<SelectionFactory> selectionFactories =
+		new ArrayList<SelectionFactory>();
 	
 	private SelectionManager()
 	{
@@ -109,38 +104,21 @@ public class SelectionManager {
 		
 		return instance;
 	}
-	
-	/**
-	 * Construct the good entity selection un function of the type of the viewable
-	 * @param viewable
-	 * @param entity
-	 * @return
-	 */
-	private EntitySelection createEntitySelection(Viewable viewable, Object entity) {
-		if(viewable instanceof ViewableCAD) {
-			if (entity instanceof NbBShape) 
-				return new BCADSelection((NbBShape)entity);			
-			else if(entity instanceof NbShape)
-				return new CADSelection((NbShape)entity);			
-			else
-				throw new IllegalArgumentException("The entity associated wit ha ViewableCAD has to be a NbShape");
-		}
-		else if (viewable instanceof BoraViewable) {
-			return new BoraSelection((BGroupsNode)entity);
-		}
-		else if(viewable instanceof AmibeNViewable) {
-			return new AmibeSelection((Groups)entity);
-		}
-		else if(viewable instanceof ViewableOEMM)
-			return null;
-		else
-			throw new IllegalArgumentException("The type of the viewable is unknown !");
-	}
-	
-	/*private void addEntitySelection(Object entity, EntitySelection entitySelection)
+
+	public interface SelectionFactory
 	{
-		selections.put(entity, entitySelection);
-	}*/
+		EntitySelection create(Object entity);
+		/**
+		 * As create may return null (like for ViewableOEMM) we need to tell if
+		 * this factory can create objects for the required configuration
+		 */
+		boolean canCreate(Viewable viewable, Object entity);
+	}
+
+	public void addSelectionFactory(SelectionFactory sf)
+	{
+		selectionFactories.add(sf);
+	}
 	
 	public void addInteractor(Viewable interactor, Object entity)
 	{
@@ -149,7 +127,20 @@ public class SelectionManager {
 		
 		// If we don't have the EntitySelection create it
 		if(selections.get(entity) == null)
-			selections.put(entity, createEntitySelection(interactor, entity));
+		{
+			boolean found = false;
+			for(SelectionFactory s:selectionFactories)
+			{
+				if(s.canCreate(interactor, entity))
+				{
+					selections.put(entity, s.create(entity));
+					found = true;
+					break;
+				}
+			}
+			if(!found)
+				throw new IllegalArgumentException("Cannot add "+entity+" to "+interactor);
+		}
 	}
 	
 	public void removeInteractor(Viewable interactor)

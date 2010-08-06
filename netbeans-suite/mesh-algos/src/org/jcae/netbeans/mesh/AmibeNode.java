@@ -20,7 +20,9 @@
 
 package org.jcae.netbeans.mesh;
 
+import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.beans.IntrospectionException;
 import java.io.File;
 import java.io.IOException;
@@ -35,14 +37,13 @@ import org.jcae.mesh.xmldata.Groups;
 import org.jcae.mesh.xmldata.GroupsReader;
 import org.jcae.netbeans.BeanProperty;
 import org.jcae.netbeans.Utilities;
-import org.jcae.netbeans.cad.BrepDataObject;
-import org.jcae.netbeans.cad.BrepNode;
 import org.jcae.netbeans.viewer3d.SelectionManager;
 import org.jcae.netbeans.viewer3d.ViewManager;
 import org.jcae.vtk.AmibeToMesh;
 import org.jcae.vtk.View;
 import org.openide.ErrorManager;
-import org.openide.actions.*;
+import org.openide.actions.DeleteAction;
+import org.openide.actions.PropertiesAction;
 import org.openide.cookies.ViewCookie;
 import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataNode;
@@ -52,7 +53,6 @@ import org.openide.nodes.Children;
 import org.openide.nodes.Node;
 import org.openide.nodes.Node.Property;
 import org.openide.nodes.Node.PropertySet;
-import org.openide.nodes.NodeTransfer;
 import org.openide.util.Exceptions;
 import org.openide.util.actions.SystemAction;
 import org.openide.util.datatransfer.PasteType;
@@ -342,22 +342,33 @@ public class AmibeNode extends DataNode implements ViewCookie
 	@Override
 	protected void createPasteTypes(Transferable t, List<PasteType> ls)
 	{
-		final Node[] ns = NodeTransfer.nodes(t, NodeTransfer.COPY|NodeTransfer.MOVE);
-		if (ns != null && ns.length==1) {
-			final BrepNode n=ns[0].getLookup().lookup(BrepNode.class);
-			if (n != null) {
-				final String path = FileUtil.getRelativePath(
-					getDataObject().getPrimaryFile().getParent(),
-					n.getLookup().lookup(BrepDataObject.class).getPrimaryFile());
-				ls.add(new PasteType() {
+		try {			
+			if(t.isDataFlavorSupported(DataFlavor.javaFileListFlavor))
+			{
+				@SuppressWarnings("unchecked")
+				List<File> x = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
+				if(x != null && !x.isEmpty())
+				{
+					final String path = FileUtil.getRelativePath(
+						getDataObject().getPrimaryFile().getParent(),
+						FileUtil.toFileObject(x.get(0)));
+					if(path != null)
+					{
+						ls.add(new PasteType() {
 
-					public Transferable paste() {
-						getMesh().setGeometryFile(path);
-						updateGeomNode();
-						return null;
+							public Transferable paste() {
+								getMesh().setGeometryFile(path);
+								updateGeomNode();
+								return null;
+							}
+						});
 					}
-				});
+				}
 			}
+		} catch (UnsupportedFlavorException ex) {
+			Exceptions.printStackTrace(ex);
+		} catch (IOException ex) {
+			Exceptions.printStackTrace(ex);
 		}
 		// Also try superclass, but give it lower priority:
 		super.createPasteTypes(t, ls);

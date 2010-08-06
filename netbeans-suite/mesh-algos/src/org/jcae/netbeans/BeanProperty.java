@@ -23,6 +23,7 @@ package org.jcae.netbeans;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import org.jcae.netbeans.Utilities;
 import org.openide.nodes.PropertySupport;
 
 public class BeanProperty extends PropertySupport.Reflection

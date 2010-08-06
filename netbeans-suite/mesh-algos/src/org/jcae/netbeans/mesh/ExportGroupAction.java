@@ -31,6 +31,8 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.xml.parsers.ParserConfigurationException;
 import org.jcae.mesh.xmldata.MeshExporter;
+import org.jcae.netbeans.mesh.AmibeNode;
+import org.jcae.netbeans.mesh.GroupNode;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
