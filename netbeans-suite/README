@@ -1,6 +1,45 @@
-This suite requires Gnu Trove (http://trove4j.sourceforge.net)
+Source tree description
+-----------------------
 
-It must be declared as library in netbeans under the name "trove".
-This can be done either by using the IDE (menu Tools, Libraries) or by setting this property:
-- libs.trove.classpath
-in $HOME/.netbeans/6.0/build.properties
+- branding: Logo, splash screen
+- core: Main jCAE Netbeans module
+- mesh-algos: Netbeans module for Amibe features which doesn't rely on Opencascade
+- jython: Jython wrapping module
+- launchers: Netbeans launcher patches for jCAE
+- tweakui: Customize Netbeans platform GUI
+
+Netbeans wrapper (no Java code, just packaging):
+- vtk: VTK Netbeans wrapper
+- occjava-nb: Netbeans wrapper for occjava (should be renamed to occjava)
+- amibe: Amibe Netbeans wrapper
+- amibe-occ: Netbeans wrapper for amibe classes depending on Opencascade
+
+Netbeans project (no Java code, should be merged with matching real project):
+- occjava: Netbeans project for occjava
+- viewer3d: Netbeans project for the legacy viewer
+- viewer3d-amibe: Netbeans project for viewer3d-amibe
+- vtk-amibe: Netbeans project for vtk-amibe
+
+Dependencies
+------------
+
+Some dependencies (jython, opencascade, java) have to be filled in
+nbproject/private/private.properties. See nbproject/project.properties for a template.
+
+vtk directory must be specified in vtk/nbproject/private/private.properties. See
+vtk/nbproject/project.properties for a template.
+
+Other dependencies (.jar) must be set as Netbeans library in the library
+manager or in $HOME/.netbeans/6.x/build.propertie or in nbproject/private/private.properties
+using the variable libs.<lib name>.classpath.
+
+The spelling for library names must be:
+- Gnu Trove (http://trove4j.sourceforge.net): trove
+- VTK (http://www.vtk.org): VTK
+- vecmath (https://vecmath.dev.java.net/): vecmath
+
+Building
+--------
+
+Run ant -p in this directory to get available Ant targets.
+
