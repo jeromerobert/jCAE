@@ -23,11 +23,8 @@ Netbeans project (no Java code, should be merged with matching real project):
 Dependencies
 ------------
 
-Some dependencies (jython, opencascade, java) have to be filled in
+Some dependencies (jython, opencascade, java, VTK) have to be filled in
 nbproject/private/private.properties. See nbproject/project.properties for a template.
-
-vtk directory must be specified in vtk/nbproject/private/private.properties. See
-vtk/nbproject/project.properties for a template.
 
 Other dependencies (.jar) must be set as Netbeans library in the library
 manager or in $HOME/.netbeans/6.x/build.propertie or in nbproject/private/private.properties

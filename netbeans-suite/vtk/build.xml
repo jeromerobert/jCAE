@@ -4,7 +4,6 @@
 <!-- If you delete this file and reopen the project it will be recreated. -->
 <project name="vtk" default="netbeans" basedir=".">
     <description>Builds, tests, and runs the project vtk.</description>
-	<property file="../../depends.properties"/>
     <import file="nbproject/build-impl.xml"/>
 	<!-- from http://wiki.netbeans.org/DevFaqWrapperModules -->
 
@@ -26,7 +25,7 @@
 
 	<target name="-release.files.linux" if="arch.linux">
 		<copy todir="${cluster}/modules/lib">
-			<fileset dir="${vtk.dir}">
+			<fileset dir="${vtk.dir.linux}">
 				<patternset refid="vtk.unix.files"/>
 			</fileset>
 		</copy>
@@ -34,14 +33,14 @@
 
 	<target name="-release.files.win32" if="arch.win32">
 		<copy todir="${cluster}/modules/lib">
-			<fileset dir="${vtk.dir}/Release">
+			<fileset dir="${vtk.dir.win32}">
 				<patternset refid="vtk.windows.files"/>
 			</fileset>
 		</copy>
 	</target>
 
 	<target name="-release.files" depends="-release.files.linux,-release.files.win32">
-		<copy file="${vtk.dir}/vtk.jar" todir="${cluster}/modules/ext" />
+		<copy file="${libs.VTK.classpath}" todir="${cluster}/modules/ext" />
 	</target>
 
 	<target name="clean" depends="projectized-common.clean">

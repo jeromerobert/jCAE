@@ -5,38 +5,13 @@
         <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
             <code-name-base>vtk</code-name-base>
             <suite-component/>
-            <module-dependencies>
-                <dependency>
-                    <code-name-base>org.openide.modules</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <specification-version>7.6</specification-version>
-                    </run-dependency>
-                </dependency>
-                <dependency>
-                    <code-name-base>org.openide.util</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <specification-version>7.12.0.1</specification-version>
-                    </run-dependency>
-                </dependency>
-                <dependency>
-                    <code-name-base>org.openide.windows</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <specification-version>6.20</specification-version>
-                    </run-dependency>
-                </dependency>
-            </module-dependencies>
+            <module-dependencies/>
             <public-packages>
                 <package>vtk</package>
             </public-packages>
             <class-path-extension>
                 <runtime-relative-path>ext/vtk.jar</runtime-relative-path>
-                <binary-origin>${vtk.dir}/vtk.jar</binary-origin>
+                <binary-origin>${cluster}/modules/ext/vtk.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>
