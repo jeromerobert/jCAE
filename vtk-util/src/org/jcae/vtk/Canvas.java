@@ -50,6 +50,7 @@ public class Canvas extends vtkCanvas
 {
 	private vtkUnsignedCharArray buffer = new vtkUnsignedCharArray();
 	private int bufferWidth, bufferHeight = 0;
+	private final static boolean DISABLE_2D_OPT=Boolean.getBoolean("org.jcae.vtk.disable2dopt");
 	public Canvas()
 	{
 		addMouseWheelListener(new MouseWheelListener() {
@@ -72,7 +73,8 @@ public class Canvas extends vtkCanvas
 		style.AutoAdjustCameraClippingRangeOn();
 		getIren().SetInteractorStyle(style);
 		style.Delete();
-		rw.AddObserver("EndEvent", this, "endEvent");
+		if(!DISABLE_2D_OPT)
+			rw.AddObserver("EndEvent", this, "endEvent");
 	}
 
 	/**
@@ -222,8 +224,11 @@ public class Canvas extends vtkCanvas
 
 	@Override
 	public void paint(Graphics g) {
-		if(windowset == 0 || bufferWidth != getWidth() || bufferHeight != getHeight())
+		if(DISABLE_2D_OPT || windowset == 0 || 
+			bufferWidth != getWidth() || bufferHeight != getHeight())
+		{
 			Render();
+		}
 		else
 		{
 			Lock();

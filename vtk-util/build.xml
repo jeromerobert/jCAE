@@ -5,7 +5,7 @@
 <project name="vtk-util" default="default" basedir=".">
     <description>Builds, tests, and runs the project TestVTK.</description>
     <import file="nbproject/build-impl.xml"/>
-
+	<property file="../zebra-netbeans/nbproject/private/private.properties"/>
     <!--
 
     There exist several targets which are by default empty and which can be 
