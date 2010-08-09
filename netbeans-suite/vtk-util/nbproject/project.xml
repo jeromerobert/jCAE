@@ -3,7 +3,7 @@
     <type>org.netbeans.modules.apisupport.project</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
-            <code-name-base>org.jcae.mesh.amibe</code-name-base>
+            <code-name-base>org.jcae.vtk</code-name-base>
             <suite-component/>
             <module-dependencies>
                 <dependency>
@@ -15,7 +15,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.jcae.vtk</code-name-base>
+                    <code-name-base>javax.vecmath</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -32,24 +32,12 @@
                 </dependency>
             </module-dependencies>
             <public-packages>
-                <package>org.jcae.mesh</package>
-                <package>org.jcae.mesh.amibe.algos3d</package>
-                <package>org.jcae.mesh.amibe.ds</package>
-                <package>org.jcae.mesh.amibe.util</package>
-                <package>org.jcae.mesh.bora.ds</package>
-                <package>org.jcae.mesh.bora.xmldata</package>
-                <package>org.jcae.mesh.cad</package>
-                <package>org.jcae.mesh.oemm</package>
-                <package>org.jcae.mesh.xmldata</package>
                 <package>org.jcae.vtk</package>
+                <package>org.jcae.geometry</package>
             </public-packages>
             <class-path-extension>
-                <runtime-relative-path>ext/amibe.jar</runtime-relative-path>
-                <binary-origin>${cluster}/modules/ext/amibe.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/jcae-vtk-amibe.jar</runtime-relative-path>
-                <binary-origin>${cluster}/modules/ext/jcae-vtk-amibe.jar</binary-origin>
+                <runtime-relative-path>ext/vtk-util.jar</runtime-relative-path>
+                <binary-origin>${cluster}/modules/ext/vtk-util.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>

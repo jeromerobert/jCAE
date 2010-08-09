@@ -10,6 +10,9 @@ Source tree description
 
 Netbeans wrapper (no Java code, just packaging):
 - vtk: VTK Netbeans wrapper
+- vtk-util: Netbeans wrapper for ../vtk-util
+- vecmath: Netbeans wrapper for https://vecmath.dev.java.net
+- trove: Netbeans wrapper for http://trove4j.sourceforge.net
 - occjava-nb: Netbeans wrapper for occjava (should be renamed to occjava)
 - amibe: Amibe Netbeans wrapper
 - amibe-occ: Netbeans wrapper for amibe classes depending on Opencascade

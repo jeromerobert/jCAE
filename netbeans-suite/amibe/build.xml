@@ -7,14 +7,12 @@
     <import file="nbproject/build-impl.xml"/>
 	<!-- from http://wiki.netbeans.org/DevFaqWrapperModules -->
 	<property name="amibe.project.dir" value="../../amibe"/>
-	<property name="vtk-util.project.dir" value="../../vtk-util"/>
 	<property name="vtk-amibe.project.dir" value="../vtk-amibe"/>
 	<target name="-release.files">
 		<!-- external dependencies -->
 		<copy file="${libs.trove.classpath}" tofile="${cluster}/modules/ext/trove.jar"/>
 		<copy file="${libs.vecmath.classpath}" tofile="${cluster}/modules/ext/vecmath.jar"/>
 		<copy todir="${cluster}/modules/ext" file="${amibe.project.dir}/dist/amibe.jar"/>
-		<copy file="${vtk-util.project.dir}/dist/vtk-util.jar" todir="${cluster}/modules/ext"/>
 		<copy todir="${cluster}/modules/ext" file="${vtk-amibe.project.dir}/dist/jcae-vtk-amibe.jar"/>
 		<copy file="../../amibe/logging.properties" tofile="${cluster}/etc/logging.properties"/>
 		<copy todir="${cluster}/amibe-python">
