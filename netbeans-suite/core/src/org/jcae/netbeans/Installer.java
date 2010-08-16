@@ -54,18 +54,6 @@ public class Installer extends ModuleInstall
 	{
 		//load opencascade libraries
 		new BRep_Builder();
-		//Load default log configuration
-		String logp = System.getProperty("java.util.logging.config.file");
-		if(logp == null || logp.isEmpty())
-		{
-			String logPath =
-				InstalledFileLocator.getDefault().
-				locate("etc/logging.properties", "org.jcae.netbeans", false).
-				getAbsolutePath();
-			System.setProperty("java.util.logging.config.file", logPath);
-			// We are using VTK
-			//System.setProperty("org.jcae.vtk.enable","true");
-		}
 		
 		//Set default project directory
 		File defaultDir = FileSystemView.getFileSystemView().getDefaultDirectory();

@@ -24,6 +24,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.openide.modules.InstalledFileLocator;
 import org.openide.options.SystemOption;
 import org.openide.util.Lookup;
 
@@ -68,7 +69,10 @@ public class Settings extends SystemOption
 	{
 		ArrayList<String> toReturn=new ArrayList<String>();
 		toReturn.add("-Xmx"+maximumMemory);
-		toReturn.add("-Djava.util.logging.config.file="+System.getProperty("java.util.logging.config.file"));
+		String logPath = InstalledFileLocator.getDefault().
+			locate("etc/logging.properties", "org.jcae.netbeans.mesh", false).
+			getAbsolutePath();
+		toReturn.add("-Djava.util.logging.config.file="+logPath);
 		toReturn.addAll(Arrays.asList(getCustomJVMParameters()));
 		return toReturn;
 	}
