@@ -33,6 +33,7 @@ import vtk.vtkPoints;
 import vtk.vtkPolyData;
 import vtk.vtkPolyDataMapper;
 import vtk.vtkPolyDataNormals;
+import vtk.vtkProperty;
 
 /**
  * Nodes of scene graph.
@@ -597,5 +598,15 @@ public abstract class AbstractNode
 				sb.append(" pickable");
 		}
 		return sb.toString();
+	}
+
+	public void setEdgeVisible(boolean b)
+	{
+		if(actor != null)
+		{
+			vtkProperty p = actor.GetProperty();
+			p.SetEdgeVisibility(Utils.booleanToInt(b));
+			p.Delete();
+		}
 	}
 }

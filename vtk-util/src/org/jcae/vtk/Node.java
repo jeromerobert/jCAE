@@ -24,6 +24,7 @@ import gnu.trove.TIntArrayList;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -690,4 +691,16 @@ public class Node extends AbstractNode
 		timeStampSelected();
 	}
 
+	public List<AbstractNode> getChildren()
+	{
+		return Collections.unmodifiableList(children);
+	}
+
+	@Override
+	public void setEdgeVisible(boolean b)
+	{
+		super.setEdgeVisible(b);
+		for(AbstractNode f:getChildren())
+			f.setEdgeVisible(b);
+	}
 }
