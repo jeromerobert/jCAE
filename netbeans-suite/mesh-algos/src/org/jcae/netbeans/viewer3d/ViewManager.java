@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2006-2008, by EADS France
+ * (C) Copyright 2006-2010, by EADS France
  */
 package org.jcae.netbeans.viewer3d;
 
@@ -26,13 +26,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
-import org.jcae.netbeans.viewer3d.CurrentViewChangeListener;
-import org.jcae.netbeans.viewer3d.CurrentViewableChangeListener;
 import org.jcae.netbeans.viewer3d.actions.SelectViewable;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
 import org.openide.ErrorManager;
+import org.openide.util.Lookup;
 import org.openide.util.actions.SystemAction;
+import org.openide.util.lookup.ServiceProvider;
 import org.openide.windows.Mode;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
@@ -43,6 +43,7 @@ import org.openide.windows.WindowManager;
  * or current viewable has changed.
  * @author Jerome Robert and Julian Ibarz
  */
+@ServiceProvider(service=ViewManager.class)
 public class ViewManager
 {
 	private class View3D extends TopComponent
@@ -128,14 +129,16 @@ public class ViewManager
 	}
 	
 	private int counter = 0;
-	private View currentView = null;
-	private static ViewManager singleton = new ViewManager();
+	protected View currentView = null;
 	private ArrayList<CurrentViewChangeListener> viewChangeListeners = new ArrayList<CurrentViewChangeListener>();
 	private ArrayList<CurrentViewableChangeListener> viewableChangeListeners = new ArrayList<CurrentViewableChangeListener>();
 
+	/**
+	 * Shortcut for Lookup.getDefault().lookup(ViewManager.class)
+	 */
 	public static ViewManager getDefault()
 	{
-		return singleton;
+		return Lookup.getDefault().lookup(ViewManager.class);
 	}
 
 	public ViewManager()
