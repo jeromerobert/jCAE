@@ -184,7 +184,7 @@ public abstract class AlgoAction extends CookieAction {
 			ProcessBuilder pb = new ProcessBuilder();
 			String ext = Utilities.isWindows() ? ".bat" : "";
 			File f = InstalledFileLocator.getDefault().locate(
-					"jython/bin/jython" + ext, "org.jcae.netbeans", false);
+					"jython/bin/jython" + ext, "org.jcae.netbeans.mesh", false);
 			pb.command().add(f.getPath());
 			for (String s : Settings.getDefault().parameters()) {
 				if (s.startsWith("-")) {
