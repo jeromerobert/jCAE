@@ -1,6 +1,5 @@
 Manifest-Version: 1.0
 OpenIDE-Module: org.jcae.netbeans.mesh
-OpenIDE-Module-Install: org/jcae/netbeans/mesh/Installer.class
 OpenIDE-Module-Localizing-Bundle: org/jcae/netbeans/mesh/Bundle.properties
 OpenIDE-Module-Layer: org/jcae/netbeans/mesh/layer.xml
 OpenIDE-Module-Specification-Version: 1.0

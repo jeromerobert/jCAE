@@ -81,12 +81,12 @@ public class ExportGroupAction extends CookieAction
 		try
 		{
 			HashSet<String> set=new HashSet<String>();
-			AmibeNode meshNode=null;
+			AmibeDataObject amibeDataObject=null;
 			for(int i=0; i<arg0.length; i++)
 			{
-				meshNode=arg0[i].getParentNode().getParentNode()
-					.getCookie(AmibeNode.class);
-				set.add(meshNode.getMeshDirectory());
+				amibeDataObject=arg0[i].getParentNode().getParentNode()
+					.getLookup().lookup(AmibeDataObject.class);
+				set.add(amibeDataObject.getMeshDirectory());
 			}
 			
 			if(set.size()>1)
@@ -98,7 +98,7 @@ public class ExportGroupAction extends CookieAction
 			
 			String meshDir=set.toArray()[0].toString();
 			FileObject meshDirFile=
-				meshNode.getDataObject().getPrimaryFile().getParent();
+				amibeDataObject.getPrimaryFile().getParent();
 			
 			JFileChooser jfc=new JFileChooser();
 			ChooseUnitPanel unitPanel=new ChooseUnitPanel();

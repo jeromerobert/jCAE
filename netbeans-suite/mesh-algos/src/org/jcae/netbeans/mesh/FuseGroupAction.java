@@ -75,8 +75,8 @@ public class FuseGroupAction extends CookieAction{
 			EntitySelection meshSelection = SelectionManager.getDefault().getEntitySelection(this);
 			if(meshSelection!=null)
 				meshSelection.unselectAll();
-			AmibeNode mn=arg0[0].getParentNode().getParentNode().getCookie(AmibeNode.class);
-			mn.refreshGroups();			
+			arg0[0].getParentNode().getParentNode().getLookup().lookup(
+				AmibeDataObject.class).refreshGroups();
 		}
 		catch(IOException ex)
 		{

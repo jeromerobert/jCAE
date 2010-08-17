@@ -39,7 +39,7 @@ public final class SmoothAction extends AlgoAction
 
 	@Override
 	protected List<String> getArguments(Node node) {
-		String meshDirectory = node.getLookup().lookup(AmibeNode.class).getMeshDirectory();
+		String meshDirectory = node.getLookup().lookup(AmibeDataObject.class).getMeshDirectory();
 		SmoothParameters bean=new SmoothParameters();
 		if(Utilities.showEditBeanDialog(bean))
 		{

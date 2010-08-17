@@ -24,7 +24,7 @@ public final class ExportUNV extends CookieAction
 			JFileChooser jfc=new JFileChooser();
 			ChooseUnitPanel unitPanel=new ChooseUnitPanel();
 						
-			AmibeNode meshNode=activatedNodes[0].getCookie(AmibeNode.class);
+			AmibeDataObject meshNode=activatedNodes[0].getLookup().lookup(AmibeDataObject.class);
 			File meshDir=new File(meshNode.getMeshDirectory());
 			
 			jfc.setAccessory(unitPanel);

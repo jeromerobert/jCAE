@@ -42,7 +42,7 @@ public final class DecimateAction extends AlgoAction
 		DecimateParameter bean=new DecimateParameter();
 		if(Utilities.showEditBeanDialog(bean))
 		{
-			String meshDirectory = node.getLookup().lookup(AmibeNode.class).getMeshDirectory();
+			String meshDirectory = node.getLookup().lookup(AmibeDataObject.class).getMeshDirectory();
 			ArrayList<String> l = new ArrayList<String>();
 			if(bean.isUseTolerance())
 			{

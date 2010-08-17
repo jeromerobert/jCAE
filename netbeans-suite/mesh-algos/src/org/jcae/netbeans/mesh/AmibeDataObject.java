@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005-2009, by EADS France
+ * (C) Copyright 2005-2010, by EADS France
  */
 
 package org.jcae.netbeans.mesh;
@@ -23,12 +23,16 @@ package org.jcae.netbeans.mesh;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.XMLEncoder;
+import java.io.File;
 import java.io.IOException;
-import org.jcae.netbeans.mesh.Mesh;
+import org.jcae.mesh.xmldata.Groups;
+import org.jcae.mesh.xmldata.GroupsReader;
+import org.jcae.netbeans.Utilities;
 import org.openide.ErrorManager;
 import org.openide.cookies.SaveCookie;
 import org.openide.filesystems.FileLock;
 import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.MultiDataObject;
 import org.openide.loaders.MultiFileLoader;
@@ -56,16 +60,28 @@ public class AmibeDataObject extends MultiDataObject implements SaveCookie
 	@Override
 	protected Node createNodeDelegate()
 	{
-		return new AmibeNode(this);
+		AmibeNode r = new AmibeNode(this);
+		if(!isTemplate())
+		{
+			r.updateGeomNode();
+			refreshGroups(r);
+		}
+		return r;
 	}
 
 	private Mesh mesh;
-
+	private Groups groups;
 	public Mesh getMesh()
 	{
 		return mesh;
 	}
-
+	
+	public String getMeshDirectory()
+	{
+		String ref=FileUtil.toFile(getPrimaryFile().getParent()).getPath();
+		return Utilities.absoluteFileName(getMesh().getMeshFile(), ref);
+	}
+	
 	public void save() throws IOException
 	{
 		FileLock l = null;
@@ -89,5 +105,27 @@ public class AmibeDataObject extends MultiDataObject implements SaveCookie
 			if(l!=null)
 				l.releaseLock();
 		}
+	}
+
+	public void refreshGroups()
+	{
+		refreshGroups((AmibeNode) getNodeDelegate());
+	}
+	
+	/**
+	 * private implementation to be called by createNodeDelegate.
+	 * Avoid a stack overflow when calling getNodeDelegate.
+	 */
+	private void refreshGroups(AmibeNode amibeNode)
+	{		
+		String meshDir=getMeshDirectory();
+		File xmlFile=new File(meshDir, "jcae3d");
+        if (xmlFile.exists())
+            groups = GroupsReader.getGroups(meshDir);
+		amibeNode.setGroups(groups);
+	}
+
+	public Groups getGroups() {
+		return groups;
 	}
 }

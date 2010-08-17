@@ -21,25 +21,127 @@
 
 package org.jcae.netbeans.mesh;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyVetoException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jcae.vtk.LeafNode;
 import org.jcae.vtk.ViewableMesh;
+import org.openide.explorer.ExplorerManager;
 import org.openide.nodes.Node;
+import org.openide.util.WeakListeners;
 
 /**
  *
  * @author Jerome Robert
  */
 public class AmibeNViewable extends ViewableMesh {
-	private final Node node;
+	private final static Logger LOGGER =
+		Logger.getLogger(AmibeNViewable.class.getName());
+	/** The associated AmibeNode or a FilterNode on it */
+	private final Node amibeNode;
+	private final AmibeDataObject amibeDataObject;
+	private ExplorerManager explorerManager;
+	/**
+	 * The listener is wrapped in a Weak reference, so a reference must be kept
+	 * to avoid garbage collection.
+	 */
+	private PropertyChangeListener propertyChangeListener;
 
-	public AmibeNViewable(Map<String, LeafNode.DataProvider> mesh, Node node) {
+	/**
+	 *
+	 * @param mesh
+	 * @param node an AmibeNode or a FilterNode on an AmibeNode
+	 * @param m The explorer which reflect the selection done in the viewable
+	 */
+	public AmibeNViewable(Map<String, LeafNode.DataProvider> mesh, Node n, ExplorerManager em) {
 		super(mesh);
-		this.node = node;
+		this.amibeNode = n;
+		this.explorerManager = em;
+		amibeDataObject = getADO(n);
+		propertyChangeListener = new PropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent evt) {
+				if (ExplorerManager.PROP_SELECTED_NODES.equals(evt.getPropertyName()))
+				{
+					select((Node[]) evt.getNewValue());
+				}
+			}
+		};
+		em.addPropertyChangeListener(
+			WeakListeners.propertyChange(propertyChangeListener, this));
 	}
 
-	public Node getNode()
+	private AmibeDataObject getADO(Node node)
 	{
-		return node;
+		return node == null ? null : node.getLookup().lookup(AmibeDataObject.class);
+	}
+
+	private void select(Node[] nodes)
+	{
+		ArrayList<String> toSelect = new ArrayList<String>();
+		for(Node n:nodes)
+		{
+			GroupNode gn = n.getLookup().lookup(GroupNode.class);
+			if(gn != null &&
+				getADO(gn.getParentNode().getParentNode()) == amibeDataObject)
+			{
+				toSelect.add(gn.getName());
+			}
+		}
+		setSelection(toSelect.toArray(new String[toSelect.size()]));
+		selectSelectionNodes();
+		highlight();
+	}
+	
+	@Override
+	protected void fireSelectionChanged() {
+		super.fireSelectionChanged();
+		Node groupsProxy = null;
+
+		for (Node gn : amibeNode.getChildren().getNodes())
+		{
+			if (gn.getLookup().lookup(GroupChildren.class) != null)
+			{
+				groupsProxy = gn;
+				break;
+			}
+		}
+		
+		// Append to the selection explorer
+		Node[] childrenProxy = groupsProxy.getChildren().getNodes();
+		Node[] selectionExplorer = explorerManager.getSelectedNodes();
+
+		ArrayList<Node> nodes = new ArrayList<Node>(
+			childrenProxy.length + selectionExplorer.length);
+
+		nodes.addAll(Arrays.asList(selectionExplorer));
+		HashSet<String> selection = new HashSet<String>(Arrays.asList(getSelection()));
+
+		for (Node groupProxy : childrenProxy)
+		{
+			GroupNode groupNode = groupProxy.getLookup().lookup(GroupNode.class);
+
+			// Add if it's in the selection
+			if (selection.contains(groupNode.getGroup().getName()))
+				nodes.add(groupProxy);
+			// Remove from the selection if it is
+			else
+				nodes.remove(groupProxy);
+		}
+
+		try
+		{
+			explorerManager.setSelectedNodes(nodes.toArray(new Node[nodes.size()]));
+		} catch (PropertyVetoException e)
+		{
+			LOGGER.log(Level.SEVERE, null, e);
+		}
+
+		highlight();
 	}
 }

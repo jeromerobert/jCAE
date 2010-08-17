@@ -44,7 +44,7 @@ public class RemeshAction extends AlgoAction {
 
 	@Override
 	protected List<String> getArguments(Node node) {
-		String meshDirectory = node.getLookup().lookup(AmibeNode.class).getMeshDirectory();
+		String meshDirectory = node.getLookup().lookup(AmibeDataObject.class).getMeshDirectory();
 		RemeshPanel p = new RemeshPanel();
 		if(p.showDialog())
 		{

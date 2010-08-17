@@ -57,7 +57,7 @@
                         <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
                         <attr name="position" intvalue="50"/>
                     </file>
-                    <file name="org-openide-actions-ViewAction.instance">
+                    <file name="org-jcae-netbeans-mesh-ViewGroupAction.instance">
                         <attr name="position" intvalue="60"/>
                     </file>
                     <file name="org-jcae-netbeans-mesh-FreeEdgesAction.shadow">

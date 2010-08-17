@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2005-2010, by EADS France
  */
 
 package org.jcae.netbeans.mesh;
@@ -26,28 +26,15 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.beans.IntrospectionException;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import javax.swing.Action;
-import javax.xml.parsers.ParserConfigurationException;
-import org.jcae.mesh.xmldata.Group;
 import org.jcae.mesh.xmldata.Groups;
-import org.jcae.mesh.xmldata.GroupsReader;
 import org.jcae.netbeans.BeanProperty;
-import org.jcae.netbeans.Utilities;
-import org.jcae.netbeans.viewer3d.SelectionManager;
-import org.jcae.netbeans.viewer3d.ViewManager;
-import org.jcae.vtk.AmibeToMesh;
-import org.jcae.vtk.View;
 import org.openide.ErrorManager;
 import org.openide.actions.DeleteAction;
 import org.openide.actions.PropertiesAction;
-import org.openide.cookies.ViewCookie;
 import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataNode;
-import org.openide.loaders.DataObject;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
@@ -57,7 +44,6 @@ import org.openide.util.Exceptions;
 import org.openide.util.actions.SystemAction;
 import org.openide.util.datatransfer.PasteType;
 import org.openide.util.lookup.Lookups;
-import org.xml.sax.SAXException;
 
 /**
  * Contains only the geometric node and the groups node.
@@ -65,21 +51,14 @@ import org.xml.sax.SAXException;
  * this.
  * @author ibarz
  */
-public class AmibeNode extends DataNode implements ViewCookie
+public class AmibeNode extends DataNode
 {
-	private Groups groups;
 	private AbstractNode groupsNode;
 	private AbstractNode geomNode;
 
-	public AmibeNode(DataObject arg0)
+	public AmibeNode(AmibeDataObject arg0)
 	{
 		super(arg0, new Children.Array());
-		getCookieSet().add(this);
-		if(!arg0.isTemplate())
-		{
-			updateGeomNode();
-			refreshGroups();
-		}
 		setIconBaseWithExtension("org/jcae/netbeans/mesh/amibe.png");
 	}
 
@@ -191,97 +170,6 @@ public class AmibeNode extends DataNode implements ViewCookie
 		};
 	}
 
-	/**
-	 * Display in a View3D a list of groups.
-	 * The xml Directory xmlDir must be setted. After having load a project, xmlDir may be null the first time.
-	 *
-	 * @param the list of groups to display.
-	 * @param the View3D in which the Groups are displayed.
-	 */
-	public static void displayGroups(Groups groups, String meshName,
-		Collection<Group> groupsToDisplay, View view, Node node)
-		throws ParserConfigurationException, SAXException, IOException
-	{
-		String[] idGroupsDisplayed = new String[groupsToDisplay.size()];
-		Iterator<Group> iter = groupsToDisplay.iterator();
-		String sb="";
-		boolean full=false;
-		for(int i = 0 ; i < idGroupsDisplayed.length ; ++i)
-		{
-			Group g = iter.next();
-
-			idGroupsDisplayed[i] = g.getName();
-			if(sb.length()<20)
-				sb=sb+" "+g.getName();
-			else
-				full=true;
-		}
-
-		if(full)
-			sb=sb+"...";
-
-		AmibeToMesh reader = new AmibeToMesh(groups.getMeshFile(), idGroupsDisplayed);
-		AmibeNViewable interactor = new AmibeNViewable(reader.getTriangles(), node);
-		interactor.addBeams(reader.getBeams());
-		interactor.setName(meshName+" ["+sb+"]");
-		SelectionManager.getDefault().addInteractor(interactor, groups);
-		view.add(interactor);
-	}
-
-	public void view()
-	{
-		if(groups!=null)
-		{
-			View view=ViewManager.getDefault().getCurrentView();
-			try
-			{
-				displayGroups(groups, getName(),
-					Arrays.asList(groups.getGroups()), view, this);
-			}
-			catch (ParserConfigurationException ex)
-			{
-				Exceptions.printStackTrace(ex);
-			}
-			catch (SAXException ex)
-			{
-				Exceptions.printStackTrace(ex);
-			}
-			catch (IOException ex)
-			{
-				Exceptions.printStackTrace(ex);
-			}
-		}
-	}
-
-	public String getMeshDirectory()
-	{
-		String ref=FileUtil.toFile(getDataObject().getPrimaryFile().getParent()).getPath();
-		return Utilities.absoluteFileName(getMesh().getMeshFile(), ref);
-	}
-	/**
-	 * @return Returns the groups
-	 */
-	public void refreshGroups()
-	{
-		String meshDir=getMeshDirectory();
-		File xmlFile=new File(meshDir, "jcae3d");
-        if (xmlFile.exists())
-            groups = GroupsReader.getGroups(meshDir);
-
-        if(groupsNode!=null)
-        {
-        	getChildren().remove(new Node[]{groupsNode});
-        }
-
-        if(groups!=null && groups.getGroups().length>0)
-        {
-			GroupChildren groupChildren = new GroupChildren(groups);
-        	groupsNode=new AbstractNode(groupChildren, Lookups.fixed(groupChildren));
-        	groupsNode.setDisplayName("Groups");
-        	getChildren().add(new Node[]{groupsNode});
-        }
-	}
-
 	public Mesh getMesh() {
 		return getCookie(AmibeDataObject.class).getMesh();
 	}
@@ -313,16 +201,7 @@ public class AmibeNode extends DataNode implements ViewCookie
 		return s.substring(0, s.length()-"_mesh".length());
 	}
 
-	/**
-	 * Indicate if groups is the same than has the groupNode
-	 * @param groups
-	 */
-	boolean hasThisGroupsNode(Groups groups)
-	{
-		return this.groups == groups;
-	}
-
-	private void updateGeomNode()
+	public void updateGeomNode()
 	{
 		if(geomNode!=null)
 			getChildren().remove(new Node[]{geomNode});
@@ -372,5 +251,21 @@ public class AmibeNode extends DataNode implements ViewCookie
 		}
 		// Also try superclass, but give it lower priority:
 		super.createPasteTypes(t, ls);
+	}
+
+	public void setGroups(Groups groups)
+	{
+        if(groupsNode!=null)
+        {
+        	getChildren().remove(new Node[]{groupsNode});
+        }
+
+        if(groups != null)
+        {
+			GroupChildren groupChildren = new GroupChildren(groups);
+        	groupsNode=new AbstractNode(groupChildren, Lookups.fixed(groupChildren));
+        	groupsNode.setDisplayName("Groups");
+        	getChildren().add(new Node[]{groupsNode});
+        }
 	}
 }

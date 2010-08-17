@@ -124,7 +124,7 @@ public abstract class AlgoAction extends CookieAction {
 				runInSameVM(args, pyFile, io);
 			else
 				runInOtherVM(activatedNodes[0], args, pyFile, io);
-			activatedNodes[0].getLookup().lookup(AmibeNode.class).refreshGroups();
+			activatedNodes[0].getLookup().lookup(AmibeDataObject.class).refreshGroups();
 		}
 	}
 
