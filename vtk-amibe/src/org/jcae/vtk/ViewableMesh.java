@@ -21,10 +21,8 @@ package org.jcae.vtk;
 
 import java.awt.Color;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
 import org.jcae.vtk.AbstractNode.ActorCustomiser;
 import org.jcae.vtk.AbstractNode.MapperCustomiser;
 import vtk.vtkMapper;
@@ -45,7 +43,6 @@ public class ViewableMesh extends Viewable
 	private final Map<LeafNode, String> triasToNode = new HashMap<LeafNode, String>();
 	private final Map<String, LeafNode> groupToBeams = new HashMap<String, LeafNode>();
 	private final Map<LeafNode, String> beamsToNode = new HashMap<LeafNode, String>();
-	private final HashSet<String> groupsLoaded = new HashSet<String>();
 	private int currentColorID;
 	private final Palette palette;
 	private final static MapperCustomiser MAPPER_CUSTOMIZER = new MapperCustomiser() {
@@ -214,8 +211,9 @@ public class ViewableMesh extends Viewable
 		selectionNode.clear();
 		for (String id : selection)
 		{
-			if (groupsLoaded.contains(id))
-				selectionNode.add(groupToTrias.get(id));
+			LeafNode n = groupToTrias.get(id);
+			if(n != null)
+				selectionNode.add(n);
 		}
 	}
 }
