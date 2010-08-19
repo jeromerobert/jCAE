@@ -24,6 +24,7 @@ import java.beans.*;
 import org.jcae.netbeans.ProcessExecutor;
 import org.jcae.netbeans.Utilities;
 import org.openide.filesystems.FileUtil;
+import org.openide.modules.InstalledFileLocator;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
@@ -43,21 +44,26 @@ public final class BuidOEMMAction extends CookieAction
 
 			String xmlDir=Utilities.absoluteFileName(
 				c.getMesh().getMeshFile(), reference);
-			
+
+			String classpath = InstalledFileLocator.getDefault().
+				locate("modules/ext/amibe.jar", "org.jcae.netbeans.mesh", false).
+				getAbsolutePath();
+
 			String className="org.jcae.mesh.MeshOEMMIndex";
 			String[] cmdLinePre=Settings.getDefault().getCommandLineAlgo();
-			String[] cmdLine=new String[cmdLinePre.length+5];
+			String[] cmdLine=new String[cmdLinePre.length+7];
 
 			System.arraycopy(cmdLinePre, 0, cmdLine, 0, cmdLinePre.length);
 			int i=cmdLinePre.length;
 
+			cmdLine[i++]="-classpath";
+			cmdLine[i++]=classpath;
 			cmdLine[i++]=className;
 			cmdLine[i++]=xmlDir;
 			cmdLine[i++]=Utilities.absoluteFileName(
 				activatedNodes[0].getName()+".oemm", reference);
 			cmdLine[i++]=Integer.toString(bean.getLevel());
 			cmdLine[i++]=Integer.toString(bean.getTriangle());
-
 
 			// level_max tri_max outDir brep soupDir
 			ProcessExecutor pe=new ProcessExecutor(cmdLine);
