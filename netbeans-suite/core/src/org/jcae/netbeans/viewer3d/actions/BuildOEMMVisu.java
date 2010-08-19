@@ -36,7 +36,7 @@ public final class BuildOEMMVisu extends CookieAction
 
 	protected void performAction(Node[] activatedNodes)
 	{
-		BoraDataObject c = activatedNodes[0].getCookie(BoraDataObject.class);
+		AmibeDataObject c = activatedNodes[0].getCookie(AmibeDataObject.class);
 		String reference = FileUtil.toFile(
 				c.getPrimaryFile().getParent()).getPath();
 		
