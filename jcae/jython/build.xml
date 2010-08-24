@@ -19,13 +19,13 @@
 	</target>
 
 	<target name="-release.files" depends="-release.files.linux,-release.files.win32">
-		<copy todir="${cluster}/jython">
+		<copy todir="${cluster}/modules/jython">
 			<fileset dir="${jython.path}">
 				<exclude name="tests/**"/>
 				<exclude name="Lib/tests/**"/>
 			</fileset>
 		</copy>
-		<chmod file="${cluster}/jython/bin/jython${script.ext}" perm="755"/>
-		<chmod file="${cluster}/jython/jython${script.ext}" perm="755"/>
+		<chmod file="${cluster}/modules/jython/bin/jython${script.ext}" perm="755"/>
+		<chmod file="${cluster}/modules/jython/jython${script.ext}" perm="755"/>
 	</target>
 </project>

@@ -36,7 +36,7 @@ public class Installer extends ModuleInstall {
 	public void restored() {
 		Properties props = new Properties();
 		File f = InstalledFileLocator.getDefault().locate(
-			"jython/Lib", "org.jcae.netbeans", false);
+			"modules/jython/Lib", "org.jcae.netbeans", false);
 		props.setProperty("python.path", f.getPath());
 		PythonInterpreter.initialize(System.getProperties(), props, new String[] {""});
 	}

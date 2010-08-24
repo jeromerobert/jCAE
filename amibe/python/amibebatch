@@ -116,7 +116,7 @@ done
 
 test -n "$jcaehome" || jcaehome=${JCAE_HOME:-$parentdir}
 test -n "$javahome" || javahome=${JAVA_HOME:-$jcaehome/jre6}
-test -n "$jythonhome" || jythonhome=${JYTHON_HOME:-$jcaehome/jcae/jython}
+test -n "$jythonhome" || jythonhome=${JYTHON_HOME:-$jcaehome/jcae/modules/jython}
 test -n "$cmd" || usage $rc
 if test -n "$logproperties"
 then
