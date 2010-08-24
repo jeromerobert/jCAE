@@ -3,7 +3,7 @@ Source tree description
 
 - amibe: The mesher
 - htdocs: web site source
-- netbeans-suite: jCAE Netbeans modules (see a README there)
+- jcae: jCAE Netbeans modules (see a README there)
 - occjava: Opencascade Java wrapper
 - viewer3d: Generic legacy 3D viewer based on Java3D
 - viewer3d-amibe: viewer3d classes which require Amibe
