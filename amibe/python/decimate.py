@@ -3,6 +3,7 @@
 from org.jcae.mesh.amibe.ds import Mesh, Triangle
 from org.jcae.mesh.amibe.algos3d import SmoothNodes3D
 from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
+from org.jcae.mesh.amibe.projection import MeshLiaison
 from org.jcae.mesh.xmldata import MeshReader, MeshWriter
 
 # Java
@@ -72,11 +73,12 @@ if options.maxlength:
 
 mesh = Mesh()
 MeshReader.readObject3D(mesh, xmlDir)
+liaison = MeshLiaison(mesh)
 if options.preserveGroups:
-	mesh.buildGroupBoundaries()
+	liaison.getMesh().buildGroupBoundaries()
 
-cons = Class.forName("org.jcae.mesh.amibe.algos3d."+options.algorithm).getConstructor([ Mesh, Map ])
-cons.newInstance([ mesh, opts ]).compute()
+cons = Class.forName("org.jcae.mesh.amibe.algos3d."+options.algorithm).getConstructor([ MeshLiaison, Map ])
+cons.newInstance([ liaison, opts ]).compute()
 
-MeshWriter.writeObject3D(mesh, outDir, String())
+MeshWriter.writeObject3D(liaison.getMesh(), outDir, String())
 
