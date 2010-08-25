@@ -66,7 +66,6 @@ public class MeshWriter
 			else
 				nref++;
 		}
-		
 		//  Write boundary nodes and 1D references
 		if (nref > 0)
 		{
@@ -241,6 +240,18 @@ public class MeshWriter
 	public static void writeObject3D(Mesh submesh, String xmlDir, String brepFile)
 		throws IOException
 	{
+		writeObject3DGeneric(submesh, xmlDir, brepFile, false);
+	}
+
+	public static void writeObject3DWithReferences(Mesh submesh, String xmlDir, String brepFile)
+		throws IOException
+	{
+		writeObject3DGeneric(submesh, xmlDir, brepFile, true);
+	}
+
+	private static void writeObject3DGeneric(Mesh submesh, String xmlDir, String brepFile, boolean hasRef)
+		throws IOException
+	{
 		Collection<Triangle> trianglelist = submesh.getTriangles();
 		Collection<Vertex> nodelist = submesh.getNodes();
 		if (nodelist == null)
@@ -259,7 +270,7 @@ public class MeshWriter
 			nodelist.addAll(submesh.getBeams());
 		}
 		TObjectIntHashMap<Vertex> nodeIndex=new TObjectIntHashMap<Vertex>(nodelist.size());
-		AmibeWriter.Dim3 aw = new AmibeWriter.Dim3(xmlDir);
+		AmibeWriter.Dim3 aw = new AmibeWriter.Dim3(xmlDir, false, hasRef);
 		if (brepFile != null)
 			aw.setShape(brepFile);
 

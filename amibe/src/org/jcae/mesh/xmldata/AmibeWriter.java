@@ -127,9 +127,6 @@ public abstract class AmibeWriter {
 			return 3;
 		}
 
-		@Override
-		public void addNodeRef(int n) {}
-
 		public void addNormal(double x, double y, double z) throws IOException
 		{
 			normalChan.writeDouble(x);
@@ -219,6 +216,8 @@ public abstract class AmibeWriter {
 	}
 	public void addNodeRef(int n) throws IOException
 	{
+		if (null == refChan)
+			return;
 		refChan.writeInt(n);
 		numberOfRef++;
 	}
