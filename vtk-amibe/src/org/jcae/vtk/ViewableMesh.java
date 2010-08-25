@@ -20,6 +20,8 @@
 package org.jcae.vtk;
 
 import java.awt.Color;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -72,9 +74,14 @@ public class ViewableMesh extends Viewable
 	 */
 	public enum ViewMode { FILLED, WIRED }
 
-	public ViewableMesh(Map<String, LeafNode.DataProvider> triangles)
+	public ViewableMesh()
 	{
 		this(new Palette(Integer.MAX_VALUE));
+	}
+	
+	public ViewableMesh(Map<String, LeafNode.DataProvider> triangles)
+	{
+		this();
 		addTriangles(triangles);
 	}
 	
@@ -98,20 +105,49 @@ public class ViewableMesh extends Viewable
 		this.palette = palette;
 	}
 
+	/**
+	 * @param mesh a map associating group id to DataProvider. If dataprovider
+	 * is null the group is removed from the viewable.
+	 */
 	public void addTriangles(Map<String, LeafNode.DataProvider> mesh)
 	{
 		for (Entry<String, LeafNode.DataProvider> group : mesh.entrySet())
 		{
-			// Warning: Do *not* replace colorManager.getColor() by
-			// selectionColor here, some ColorManager may have a
-			// different behavior!
-			LeafNode groupNode = new LeafNode(rootNode, group.getValue(),
-				getColor(group.getKey()));
-			groupNode.setManager(true);
-			groupToTrias.put(group.getKey(), groupNode);
-			triasToNode.put(groupNode, group.getKey());
+			LeafNode groupNode = groupToTrias.get(group.getKey());
+			if(group.getValue() == null && groupNode != null)
+			{				
+				rootNode.removeChild(groupNode);
+				groupToTrias.remove(group.getKey());
+				triasToNode.remove(groupNode);
+			}
+			else if(group.getValue() != null && groupNode == null)
+			{
+				// Warning: Do *not* replace colorManager.getColor() by
+				// selectionColor here, some ColorManager may have a
+				// different behavior!
+				groupNode = new LeafNode(rootNode, group.getValue(),
+					getColor(group.getKey()));
+				groupNode.setManager(true);
+				groupNode.setPickable(true);
+				groupToTrias.put(group.getKey(), groupNode);
+				triasToNode.put(groupNode, group.getKey());
+			}
+			else if(group.getValue() != null && groupNode != null)
+			{
+				groupNode.setDataProvider(group.getValue());
+			}
 		}
 		rootNode.refresh();
+	}
+
+	public Collection<String> getTriaGroups()
+	{
+		return Collections.unmodifiableCollection(groupToTrias.keySet());
+	}
+
+	public Collection<String> getBeamGroups()
+	{
+		return Collections.unmodifiableCollection(groupToBeams.keySet());
 	}
 
 	/** ensure that beams and trias in the same groups have the same color */
@@ -130,20 +166,35 @@ public class ViewableMesh extends Viewable
 	{
 		for (Entry<String, LeafNode.DataProvider> group : beams.entrySet())
 		{
-			final LeafNode groupNode = new LeafNode(rootNode, group.getValue(),
-				getColor(group.getKey()));
-			groupNode.setActorCustomiser(new ActorCustomiser() {
-				public void customiseActor(vtkActor actor) {
-					vtkProperty p = actor.GetProperty();
-					Utils.vtkPropertySetColor(p, groupNode.getColor());
-					p.SetLineWidth(3.0);
-					p.Delete();
-				}
-			});
-			groupNode.setManager(true);
+			LeafNode groupNode =  groupToBeams.get(group.getKey());
+			if(group.getValue() == null && groupNode != null)
+			{
+				rootNode.removeChild(groupNode);
+				groupToBeams.remove(group.getKey());
+				beamsToNode.remove(groupNode);
+			}
+			else if(group.getValue() != null && groupNode == null)
+			{
+				final LeafNode fgn = new LeafNode(rootNode, group.getValue(),
+					getColor(group.getKey()));
+				fgn.setActorCustomiser(new ActorCustomiser() {
+					public void customiseActor(vtkActor actor) {
+						vtkProperty p = actor.GetProperty();
+						Utils.vtkPropertySetColor(p, fgn.getColor());
+						p.SetLineWidth(3.0);
+						p.Delete();
+					}
+				});
+				fgn.setManager(true);
+				fgn.setPickable(true);
 
-			groupToBeams.put(group.getKey(), groupNode);
-			beamsToNode.put(groupNode, group.getKey());
+				groupToBeams.put(group.getKey(), fgn);
+				beamsToNode.put(fgn, group.getKey());
+			}
+			else if(group.getValue() != null && groupNode != null)
+			{
+				groupNode.setDataProvider(group.getValue());
+			}
 		}
 		rootNode.refresh();
 	}

@@ -35,6 +35,10 @@
             <file name="org-jcae-netbeans-mesh-RemeshAction.instance">
                 <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.RemeshAction"/>
             </file>
+
+			<file name="org-jcae-netbeans-mesh-ViewGroupAction.instance"/>
+			<file name="org-jcae-netbeans-mesh-HideGroupAction.instance"/>
+			<file name="org-jcae-netbeans-mesh-RefreshGroupAction.instance"/>
         </folder>
     </folder>
 
@@ -57,8 +61,17 @@
                         <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
                         <attr name="position" intvalue="50"/>
                     </file>
-                    <file name="org-jcae-netbeans-mesh-ViewGroupAction.instance">
+                    <file name="org-jcae-netbeans-mesh-ViewGroupAction.shadow">
+                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-ViewGroupAction.instance"/>
                         <attr name="position" intvalue="60"/>
+                    </file>
+                    <file name="org-jcae-netbeans-mesh-HideGroupAction.shadow">
+                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-HideGroupAction.instance"/>
+                        <attr name="position" intvalue="61"/>
+                    </file>
+                    <file name="org-jcae-netbeans-mesh-RefreshGroupAction.shadow">
+                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-RefreshGroupAction.instance"/>
+                        <attr name="position" intvalue="62"/>
                     </file>
                     <file name="org-jcae-netbeans-mesh-FreeEdgesAction.shadow">
                         <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-FreeEdgesAction.instance"/>

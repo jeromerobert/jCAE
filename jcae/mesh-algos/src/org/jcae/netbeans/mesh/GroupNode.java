@@ -24,9 +24,6 @@ import java.lang.reflect.InvocationTargetException;
 import javax.swing.Action;
 import org.jcae.mesh.xmldata.Group;
 import org.jcae.mesh.xmldata.Groups;
-import org.jcae.netbeans.mesh.ExportGroupAction;
-import org.jcae.netbeans.mesh.FuseGroupAction;
-import org.jcae.netbeans.mesh.ViewGroupAction;
 import org.openide.actions.PropertiesAction;
 import org.openide.actions.RenameAction;
 import org.openide.nodes.AbstractNode;
@@ -37,15 +34,15 @@ import org.openide.util.actions.SystemAction;
 
 public class GroupNode extends AbstractNode implements Cookie
 {
-	private class IDProperty extends PropertySupport.ReadOnly<Integer>
+	private class IDProperty extends PropertySupport.ReadOnly<String>
 	{
 		public IDProperty()
 		{
-			super("ID", Integer.class, "group ID", "group ID");
+			super("ID", String.class, "group ID", "group ID");
 		}
 
-		public Integer getValue() throws IllegalAccessException, InvocationTargetException {
-			return group.getId();
+		public String getValue() throws IllegalAccessException, InvocationTargetException {
+			return group.getName();
 		}
 	}
 
@@ -86,12 +83,15 @@ public class GroupNode extends AbstractNode implements Cookie
 			group.setName(arg0);
 	}
 	
+	@Override
 	public Action[] getActions(boolean arg0)
 	{
 		return new Action[]
 		{
 			SystemAction.get(RenameAction.class),
 			SystemAction.get(ViewGroupAction.class),
+			SystemAction.get(HideGroupAction.class),
+			SystemAction.get(RefreshGroupAction.class),
 			SystemAction.get(ExportGroupAction.class),
 			SystemAction.get(FuseGroupAction.class),
 			SystemAction.get(PropertiesAction.class)

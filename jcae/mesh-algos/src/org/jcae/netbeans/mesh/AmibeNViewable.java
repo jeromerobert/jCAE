@@ -27,10 +27,10 @@ import java.beans.PropertyVetoException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jcae.vtk.LeafNode;
+import org.jcae.vtk.View;
+import org.jcae.vtk.Viewable;
 import org.jcae.vtk.ViewableMesh;
 import org.openide.explorer.ExplorerManager;
 import org.openide.nodes.Node;
@@ -59,8 +59,7 @@ public class AmibeNViewable extends ViewableMesh {
 	 * @param node an AmibeNode or a FilterNode on an AmibeNode
 	 * @param m The explorer which reflect the selection done in the viewable
 	 */
-	public AmibeNViewable(Map<String, LeafNode.DataProvider> mesh, Node n, ExplorerManager em) {
-		super(mesh);
+	public AmibeNViewable(Node n, ExplorerManager em) {
 		this.amibeNode = n;
 		this.explorerManager = em;
 		amibeDataObject = getADO(n);
@@ -76,7 +75,25 @@ public class AmibeNViewable extends ViewableMesh {
 			WeakListeners.propertyChange(propertyChangeListener, this));
 	}
 
-	private AmibeDataObject getADO(Node node)
+	public static AmibeNViewable get(Node n, View view)
+	{
+		AmibeDataObject ado = getADO(n);
+		if(ado != null)
+		{
+			for(Viewable v:view.getViewables())
+			{
+				if(v instanceof AmibeNViewable)
+				{
+					AmibeNViewable av = (AmibeNViewable) v;
+					if(ado.equals(getADO(av.amibeNode)))
+						return av;
+				}
+			}
+		}
+		return null;
+	}
+	
+	private static AmibeDataObject getADO(Node node)
 	{
 		return node == null ? null : node.getLookup().lookup(AmibeDataObject.class);
 	}

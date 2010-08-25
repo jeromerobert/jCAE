@@ -226,7 +226,7 @@ public class AmibeNode extends DataNode
 			{
 				@SuppressWarnings("unchecked")
 				List<File> x = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
-				if(x != null && !x.isEmpty())
+				if(x != null && !x.isEmpty() && !x.get(0).getPath().isEmpty())
 				{
 					final String path = FileUtil.getRelativePath(
 						getDataObject().getPrimaryFile().getParent(),
