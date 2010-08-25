@@ -503,6 +503,10 @@ public class Mesh implements Serializable
 	 */
 	public final void buildAdjacency()
 	{
+		buildAdjacency(0);
+	}
+	public final void buildAdjacency(int currentMaxLabel)
+	{
 		//  Connect all edges together
 		logger.fine("Connect triangles");
 		ArrayList<Triangle> newTri = new ArrayList<Triangle>();
@@ -523,7 +527,7 @@ public class Mesh implements Serializable
 		//  Find the list of vertices which are on mesh boundary
 		logger.fine("Build the list of nodes on boundaries and non-manifold edges");
 		HashSet<Vertex> bndNodes = new HashSet<Vertex>();
-		maxLabel = 0;
+		maxLabel = currentMaxLabel;
 		AbstractHalfEdge ot = null;
 		for (Triangle t: triangleList)
 		{
