@@ -50,7 +50,7 @@ public abstract class AmibeWriter {
 	public static class Dim1 extends AmibeWriter {
 
 		public Dim1(String name) throws IOException {
-			init(name);
+			init(name, true);
 		}
 
 		public void addNode(double x) throws IOException
@@ -70,7 +70,7 @@ public abstract class AmibeWriter {
 		public Dim2(String name, int index) throws IOException {			
 			binDirectory = "jcae2d."+ index +".files";
 			xmlFile = "jcae2d."+index;
-			init(name);
+			init(name, true);
 		}
 
 		public void addNode(double x, double y) throws IOException
@@ -98,7 +98,7 @@ public abstract class AmibeWriter {
 	public static class Dim3 extends AmibeWriter {
 		protected DataOutputStream normalChan;
 		public Dim3(String name, boolean normal) throws IOException {
-			init(name);
+			init(name, false);
 			haveNormal = normal;
 			if(normal)
 			{
@@ -338,7 +338,7 @@ public abstract class AmibeWriter {
 	private int nodesOffset, beamsOffset, triaOffset;
 	private DoubleFileReader nodesReader;
 	private File fnode;
-	protected final void init(String path) throws IOException
+	protected final void init(String path, boolean writeReferences) throws IOException
 	{
 		try {
 			new File(path).mkdirs();
@@ -352,7 +352,7 @@ public abstract class AmibeWriter {
 			File fgrp = new File(dir3d, "groups.bin");
 			File fbeams = new File(dir3d, beamsFName);
 			File bgroups = new File(dir3d, "bgroups.bin");
-			if(hasRef())
+			if(writeReferences)
 			{
 				refFName = "nodes1dref.bin";
 				File ref = new File(dir3d, refFName);
@@ -410,11 +410,6 @@ public abstract class AmibeWriter {
 		o.writeEndElement();
 	}
 
-	private boolean hasRef()
-	{
-		return dim() < 3;
-	}
-
 	private void writeSubMesh() throws IOException
 	{	
 		if(numberOfNodes == 0)
@@ -442,7 +437,7 @@ public abstract class AmibeWriter {
 			o.writeStartElement("nodes");
 			writeNumber(numberOfNodes);
 			writeFile("doublestream", dir + nodeFName, nodesOffset);
-			if(hasRef())
+			if(refChan != null)
 			{
 				o.writeStartElement("references");
 				writeNumber(numberOfRef);
