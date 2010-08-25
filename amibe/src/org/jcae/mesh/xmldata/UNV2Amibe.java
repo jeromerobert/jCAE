@@ -417,8 +417,17 @@ public class UNV2Amibe
 		try
 		{
 			UNV2Amibe u=new UNV2Amibe();
-			u.setStripedUnv("/tmp/FlightSMALL1-strp.unv");
-			u.importMesh("/home/jerome/Models/unv/FlightSMALL.unv", "/tmp/pouet");
+			String unvFile = "/home/jerome/Models/unv/FlightSMALL.unv";
+			String stripedFile = "/tmp/FlightSMALL1-strp.unv";
+			String amibeDir = "/tmp/pouet";
+			if (args.length > 0)
+				unvFile = args[0];
+			if (args.length > 1)
+				amibeDir = args[1];
+			if (args.length > 2)
+				stripedFile = args[2];
+			u.setStripedUnv(stripedFile);
+			u.importMesh(unvFile, amibeDir);
 		}
 		catch (IOException e)
 		{
