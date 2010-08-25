@@ -58,11 +58,11 @@
             <!-- Yes, the doubled app.name is a bit ugly, but better than the alternative; cf. #66441: -->
             <zipfileset dir="${cluster}" prefix="${zip.name}/${app.name}">
                 <exclude name="config/Modules/*.xml_hidden"/>
-				<exclude name="jython/bin/**"/>
-				<exclude name="jython/jython"/>
+				<exclude name="modules/jython/bin/**"/>
+				<exclude name="modules/jython/jython"/>
             </zipfileset>
-			<zipfileset dir="${cluster}/jython/bin" prefix="${zip.name}/${app.name}/jython/bin" filemode="755"/>
-			<zipfileset file="${cluster}/jython/jython" prefix="${zip.name}/${app.name}/jython/jython" filemode="755"/>
+			<zipfileset dir="${cluster}/modules/jython/bin" prefix="${zip.name}/${app.name}/modules/jython/bin" filemode="755"/>
+			<zipfileset file="${cluster}/modules/jython/jython" prefix="${zip.name}/${app.name}/modules/jython/jython" filemode="755"/>
 			<zipfileset file="../amibe/python/amibebatch" prefix="${zip.name}/bin" filemode="755"/>
 
 			<zipfileset dir="${jre.path}" prefix="${zip.name}/jre6">
