@@ -69,7 +69,6 @@
         <folder name="Modes">
             <folder name="explorer">
                 <file name="runtime.wstcref" url="runtimeWstcref.xml"/>
-                <file name="favorites.wstcref" url="favoritesWstcref.xml"/>
             </folder>
             <folder name="properties">
                 <file name="properties.wstcref" url="propertiesWstcref.xml"/>
