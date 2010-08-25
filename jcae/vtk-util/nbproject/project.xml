@@ -37,7 +37,7 @@
             </public-packages>
             <class-path-extension>
                 <runtime-relative-path>ext/vtk-util.jar</runtime-relative-path>
-                <binary-origin>${cluster}/modules/ext/vtk-util.jar</binary-origin>
+                <binary-origin>../../vtk-util/dist/vtk-util.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>

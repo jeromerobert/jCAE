@@ -53,11 +53,11 @@
             </public-packages>
             <class-path-extension>
                 <runtime-relative-path>ext/jcae-mesherocc.jar</runtime-relative-path>
-                <binary-origin>${cluster}/modules/ext/jcae-mesherocc.jar</binary-origin>
+                <binary-origin>../../amibe/dist/jcae-mesherocc.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/vtk-amibe-occ.jar</runtime-relative-path>
-                <binary-origin>${cluster}/modules/ext/vtk-amibe-occ.jar</binary-origin>
+                <binary-origin>../../vtk-amibe-occ/dist/vtk-amibe-occ.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>
