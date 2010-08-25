@@ -97,8 +97,8 @@ public abstract class AmibeWriter {
 
 	public static class Dim3 extends AmibeWriter {
 		protected DataOutputStream normalChan;
-		public Dim3(String name, boolean normal) throws IOException {
-			init(name, false);
+		public Dim3(String name, boolean normal, boolean hasRef) throws IOException {
+			init(name, hasRef);
 			haveNormal = normal;
 			if(normal)
 			{
@@ -110,6 +110,10 @@ public abstract class AmibeWriter {
 
 		public Dim3(String name) throws IOException {
 			this(name, false);
+		}
+
+		public Dim3(String name, boolean normal) throws IOException {
+			this(name, normal, false);
 		}
 
 		public void addNode(double x, double y, double z) throws IOException
