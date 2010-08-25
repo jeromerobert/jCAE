@@ -96,10 +96,8 @@ public abstract class AmibeWriter {
 	}
 
 	public static class Dim3 extends AmibeWriter {
-		protected DataOutputStream normalChan;
 		public Dim3(String name, boolean normal, boolean hasRef) throws IOException {
 			init(name, hasRef);
-			haveNormal = normal;
 			if(normal)
 			{
 				File dir3d = new File(name, binDirectory());
@@ -194,7 +192,7 @@ public abstract class AmibeWriter {
 			new NIOutputStream(fos.getChannel()), 1024*64));
 	}
 	
-	protected DataOutputStream nodeChan, triaChan, groupChan, refChan, beamChan;
+	protected DataOutputStream nodeChan, triaChan, groupChan, refChan, beamChan, normalChan;
 	private XMLWriter xmlWriter;
 	protected int numberOfNodes, numberOfTriangles, numberOfRef, numberOfBeams;
 	private List<Group> groups = new ArrayList<Group>();
@@ -205,7 +203,6 @@ public abstract class AmibeWriter {
 	private boolean shapeWritten;
 	private int subShape;
 	private boolean haveSubShape;
-	protected boolean haveNormal;
 	
 	/** Set the subShape */
 	public void setSubShape(int i)
@@ -463,7 +460,7 @@ public abstract class AmibeWriter {
 				o.writeStartElement("triangles");
 				writeNumber(numberOfTriangles);
 				writeFile("integerstream", dir + triaFName, triaOffset);
-				if(haveNormal)
+				if(null != normalChan)
 				{
 					o.writeStartElement("normals");
 					writeFile("doublestream", dir + JCAEXMLData.normals3dFilename, 0);
