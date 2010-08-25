@@ -544,6 +544,7 @@ public class Mesh implements Serializable
 				}
 			}
 		}
+		logger.fine("Found "+bndNodes.size()+" nodes on boundaries and nonmanifold edges");
 
 		// Set reference on boundary nodes if missing
 		for (Vertex v : bndNodes)
@@ -569,6 +570,8 @@ public class Mesh implements Serializable
 		}
 		if (nrJunctionPoints > 0)
 			logger.info("Found "+nrJunctionPoints+" junction points");
+		if (maxLabel != currentMaxLabel)
+			logger.fine("Created "+(maxLabel - currentMaxLabel)+" more references");
 		//  Remove all references to help the garbage collector.
 		for (ArrayList<Triangle> list : tVertList.values())
 			list.clear();
