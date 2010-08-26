@@ -27,7 +27,9 @@
 		<copy todir="${cluster}/modules/jython">
 			<fileset dir="${jython.path}">
 				<exclude name="tests/**"/>
-				<exclude name="Lib/tests/**"/>
+				<exclude name="Lib/test/**"/>
+				<exclude name="Lib/**/*.class"/>
+				<exclude name="Lib/email/test/**"/>
 			</fileset>
 		</copy>
 		<chmod file="${cluster}/modules/jython/bin/jython${script.ext}" perm="755"/>
