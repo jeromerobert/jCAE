@@ -42,6 +42,7 @@ import java.util.Iterator;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -430,6 +431,17 @@ public class Mesh implements Serializable
 		return groupNames.get(id);
 	}
 
+	public int[] getGroupIDs(String[] names)
+	{
+		Map<String, Integer> invertMap = new HashMap<String, Integer>();
+		for(Entry<Integer, String> e:groupNames.entrySet())
+			invertMap.put(e.getValue(), e.getKey());
+		int[] groupIds = new int[names.length];
+		int i = 0;
+		for(String name:names)
+			groupIds[i++] = invertMap.get(name);
+		return groupIds;
+	}
 	/**
 	 * Create and connect a dummy triangle to a vertex to make artificially
 	 * non manifold

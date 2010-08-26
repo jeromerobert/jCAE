@@ -57,14 +57,15 @@ public class SubMeshWorker
 	 * @return the directory containing the extracted mesh
 	 * @throws IOException
 	 */
-	public String extractGroups(int[] groupIds) throws IOException
+	public String extractGroups(String[] groupNames) throws IOException
 	{
 		logger.config("Extracting specified groups from directory: "+amibeDir);
 		MeshTraitsBuilder mtbInt = new MeshTraitsBuilder().addTriangleSet();
 		Mesh meshInt = new Mesh(mtbInt);
 		MeshReader.readObject3D(meshInt, amibeDir);
 
-		Mesh meshExt = splitSelectedGroups(meshInt, groupIds);
+		Mesh meshExt = splitSelectedGroups(meshInt,
+			meshInt.getGroupIDs(groupNames));
 		MeshWriter.writeObject3DWithReferences(meshInt, amibeDir+File.separator+submeshDirInt, null);
 		MeshWriter.writeObject3DWithReferences(meshExt, amibeDir+File.separator+submeshDirExt, null);
 		return amibeDir+File.separator+submeshDirExt;
@@ -171,8 +172,7 @@ public class SubMeshWorker
 	public static void main(String [] args)
 	{
 		SubMeshWorker smw = new SubMeshWorker(args[0]);
-		int[] groups = new int[1];
-		groups[0] = Integer.parseInt(args[2]);
+		String[] groups = new String[]{args[2]};
 		try {
 			String extractedDir = smw.extractGroups(groups);
 			Mesh workMesh = new Mesh();
