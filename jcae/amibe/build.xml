@@ -6,19 +6,31 @@
     <description>Builds, tests, and runs the project org.jcae.mesh.amibe.</description>
     <import file="nbproject/build-impl.xml"/>
 	<!-- from http://wiki.netbeans.org/DevFaqWrapperModules -->
-	<property name="amibe.project.dir" value="../../amibe"/>
-	<property name="vtk-amibe.project.dir" value="../vtk-amibe"/>
-	<target name="-release.files">
-		<!-- external dependencies -->
-		<copy file="${libs.trove.classpath}" tofile="${cluster}/modules/ext/trove.jar"/>
-		<copy file="${libs.vecmath.classpath}" tofile="${cluster}/modules/ext/vecmath.jar"/>
-		<copy todir="${cluster}/modules/ext" file="${amibe.project.dir}/dist/amibe.jar"/>
-		<copy todir="${cluster}/modules/ext" file="${vtk-amibe.project.dir}/dist/jcae-vtk-amibe.jar"/>
-		<copy file="../../amibe/logging.properties" tofile="${cluster}/etc/logging.properties"/>
-		<copy todir="${cluster}/amibe-python">
-			<fileset dir="../../amibe/python">
+	<property name="amibe.dir" value="../../amibe"/>
+	<property name="vtk-amibe.dir" value="../vtk-amibe"/>
+	<target name="release">
+		<echo message="Building ${amibe.dir}"/>
+		<ant dir="${amibe.dir}" antfile="nbbuild.xml" target="jar" inheritall="false" inheritrefs="false"/>
+		<copy verbose="true" todir="${cluster}/modules/ext" file="${amibe.dir}/dist/amibe.jar"/>
+		<copy verbose="true" file="${amibe.dir}/logging.properties" tofile="${cluster}/etc/logging.properties"/>
+		<copy verbose="true" todir="${cluster}/amibe-python">
+			<fileset dir="${amibe.dir}/python">
 				<exclude name="amibebatch"/>
 			</fileset>
 		</copy>
+		<echo message="Done building ${amibe.dir}"/>
+		<echo message="Building ${vtk-amibe.dir}"/>
+		<ant dir="${vtk-amibe.dir}" target="jar" inheritall="false" inheritrefs="false"/>
+		<copy verbose="true" todir="${cluster}/modules/ext" file="${vtk-amibe.dir}/dist/jcae-vtk-amibe.jar"/>
+		<echo message="Done building ${vtk-amibe.dir}"/>
+	</target>
+
+	<target name="clean" depends="projectized-common.clean">
+		<echo message="Cleaning ${amibe.dir}"/>
+		<ant dir="${amibe.dir}" antfile="nbbuild.xml" target="clean" inheritall="false" inheritrefs="false"/>
+		<echo message="Done cleaning ${amibe.dir}"/>
+		<echo message="Cleaning ${vtk-amibe-occ.dir}"/>
+		<ant dir="${vtk-amibe.dir}" target="clean" inheritall="false" inheritrefs="false"/>
+		<echo message="Done cleaning ${vtk-amibe-occ.dir}"/>
 	</target>
 </project>

@@ -6,9 +6,27 @@
     <description>Builds, tests, and runs the project org.jcae.mesh.cad.occ.</description>
     <import file="nbproject/build-impl.xml"/>
 	<!-- from http://wiki.netbeans.org/DevFaqWrapperModules -->
-	<property name="amibe.project.dir" value="../../amibe"/>
-	<target name="-release.files">
-		<copy file="${amibe.project.dir}/dist/jcae-mesherocc.jar" todir="${cluster}/modules/ext"/>
-		<copy file="../../vtk-amibe-occ/dist/vtk-amibe-occ.jar" todir="${cluster}/modules/ext"/>
+	<property name="amibe.dir" value="../../amibe"/>
+	<property name="vtk-amibe-occ.dir" value="../../vtk-amibe-occ"/>
+	<target name="release">
+		<echo message="Building ${amibe.dir}"/>
+		<ant dir="${amibe.dir}" antfile="nbbuild.xml" target="jar" inheritall="false" inheritrefs="false"/>
+		<copy verbose="true" file="${amibe.dir}/dist/jcae-mesherocc.jar" todir="${cluster}/modules/ext"/>
+		<echo message="Done building ${amibe.dir}"/>
+		<echo message="Building ${vtk-amibe-occ.dir}"/>
+		<ant dir="${vtk-amibe-occ.dir}" target="jar" inheritall="false" inheritrefs="false"/>
+		<copy verbose="true" file="${vtk-amibe-occ.dir}/dist/vtk-amibe-occ.jar" todir="${cluster}/modules/ext"/>
+		<echo message="Done building ${vtk-amibe-occ.dir}"/>
 	</target>
+
+	<target name="clean" depends="projectized-common.clean">
+		<echo message="Cleaning ${amibe.dir}"/>
+		<ant dir="${amibe.dir}" antfile="nbbuild.xml" target="clean" inheritall="false" inheritrefs="false"/>
+		<echo message="Done cleaning ${amibe.dir}"/>
+		<echo message="Cleaning ${vtk-amibe-occ.dir}"/>
+		<ant dir="${vtk-amibe-occ.dir}" target="clean" inheritall="false" inheritrefs="false"/>
+		<echo message="Done cleaning ${vtk-amibe-occ.dir}"/>
+	</target>
+	
+	<target name="compile" depends="release,projectized-common.compile"/>
 </project>

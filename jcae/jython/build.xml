@@ -18,7 +18,12 @@
 		<property name="script.ext" value=".bat"/>
 	</target>
 
-	<target name="-release.files" depends="-release.files.linux,-release.files.win32">
+	<!--
+	depends on up-to-date target because jython includes more than 1000 files
+	and the copy task takes times even to check that there is nothing to copy
+	-->
+	<target name="release" depends="-release.files.linux,-release.files.win32,up-to-date"
+		unless="is.jar.uptodate">
 		<copy todir="${cluster}/modules/jython">
 			<fileset dir="${jython.path}">
 				<exclude name="tests/**"/>
@@ -28,4 +33,6 @@
 		<chmod file="${cluster}/modules/jython/bin/jython${script.ext}" perm="755"/>
 		<chmod file="${cluster}/modules/jython/jython${script.ext}" perm="755"/>
 	</target>
+
+	<target name="compile" depends="release,projectized-common.compile"/>
 </project>

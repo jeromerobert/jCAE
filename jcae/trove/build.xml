@@ -6,8 +6,7 @@
     <description>Builds, tests, and runs the project gnu.trove.</description>
     <import file="nbproject/build-impl.xml"/>
 		<!-- from http://wiki.netbeans.org/DevFaqWrapperModules -->
-	<target name="-release.files">
-		<!-- external dependencies -->
-		<copy file="${libs.trove.classpath}" todir="${cluster}/modules/ext"/>
+	<target name="release">
+		<copy verbose="true" file="${libs.trove.classpath}" todir="${cluster}/modules/ext"/>
 	</target>
 </project>

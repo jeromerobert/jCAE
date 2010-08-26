@@ -71,4 +71,10 @@
 			<zipfileset dir="${jre.path}/bin" prefix="${zip.name}/jre6/bin" filemode="755"/>
         </zip>
     </target>
+
+    <target name="-no-build-modules" depends="branding,release,-hide-excluded-modules" if="no.build.modules"/>
+	<target name="-build-modules" unless="no.build.modules">
+		<antcall target="suite.build"/>
+	</target>	
+	<target name="build" depends="-init,-no-build-modules,-build-modules"/>
 </project>

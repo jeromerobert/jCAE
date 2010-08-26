@@ -22,7 +22,7 @@
 	</patternset>
 
 	<target name="-release.files.linux" if="arch.linux">
-		<copy todir="${cluster}/modules/lib">
+		<copy verbose="true" todir="${cluster}/modules/lib">
 			<fileset dir="${path.occ.linux}">
 				<patternset refid="occ.unix.files"/>
 			</fileset>
@@ -31,7 +31,7 @@
 	</target>
 
 	<target name="-release.files.win32" if="arch.win32">
-		<copy todir="${cluster}/modules/lib">
+		<copy verbose="true" todir="${cluster}/modules/lib">
 			<fileset dir="${path.occ.win32}">
 				<patternset refid="occ.windows.files"/>
 			</fileset>
@@ -39,8 +39,14 @@
 		<copy file="${original.project.dll}" todir="${cluster}/modules/lib"/>
 	</target>
 
-	<target name="-release.files" depends="-release.files.linux,-release.files.win32">
-		<copy file="${original.project.jar}" todir="${cluster}/modules/ext"/>
+	<target name="release" depends="-release.files.linux,-release.files.win32">
+		<echo message="Building ${original.project.dir}"/>
+		<ant dir="${original.project.dir}"
+			 target="jar" inheritall="false" inheritrefs="false"/>
+		<echo message="Done building ${original.project.dir}"/>
+
+		<copy verbose="true" todir="${cluster}/modules/ext"
+			  file="${original.project.jar}"/>
 	</target>
 
 	<target name="clean" depends="projectized-common.clean">

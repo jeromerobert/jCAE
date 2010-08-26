@@ -39,7 +39,7 @@
 		</copy>
 	</target>
 
-	<target name="-release.files" depends="-release.files.linux,-release.files.win32">
+	<target name="release" depends="-release.files.linux,-release.files.win32">
 		<copy file="${libs.VTK.classpath}" todir="${cluster}/modules/ext" />
 	</target>
 

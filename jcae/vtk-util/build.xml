@@ -6,8 +6,23 @@
     <description>Builds, tests, and runs the project org.jcae.vtk.</description>
     <import file="nbproject/build-impl.xml"/>
 	<!-- from http://wiki.netbeans.org/DevFaqWrapperModules -->
-	<target name="-release.files">
-		<!-- external dependencies -->
-		<copy file="../../vtk-util/dist/vtk-util.jar" todir="${cluster}/modules/ext"/>
+	<property name="original.project.dir" location="../../vtk-util"/>
+	<property name="original.project.jar" location="${original.project.dir}/dist/vtk-util.jar"/>
+	<target name="release">
+		<echo message="Building ${original.project.dir}"/>
+		<ant dir="${original.project.dir}"
+			 target="jar" inheritall="false" inheritrefs="false"/>
+		<echo message="Done building ${original.project.dir}"/>
+
+		<copy verbose="true" todir="${cluster}/modules/ext"
+			  file="${original.project.jar}"/>
+	</target>
+
+
+	<target name="clean" depends="projectized-common.clean">
+		<echo message="Cleaning ${original.project.dir}"/>
+		<ant dir="${original.project.dir}"
+			 target="clean" inheritall="false" inheritrefs="false"/>
+		<echo message="Done cleaning ${original.project.dir}"/>
 	</target>
 </project>
