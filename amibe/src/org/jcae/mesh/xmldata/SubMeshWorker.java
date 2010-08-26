@@ -177,9 +177,9 @@ public class SubMeshWorker
 			String extractedDir = smw.extractGroups(groups);
 			Mesh workMesh = new Mesh();
 			MeshReader.readObject3D(workMesh, extractedDir);
-			workMesh.tagFreeEdges(org.jcae.mesh.amibe.ds.AbstractHalfEdge.IMMUTABLE);
 
 			org.jcae.mesh.amibe.projection.MeshLiaison liaison = new org.jcae.mesh.amibe.projection.MeshLiaison(workMesh);
+			liaison.getMesh().tagFreeEdges(org.jcae.mesh.amibe.ds.AbstractHalfEdge.IMMUTABLE);
 			liaison.getMesh().buildRidges(0.9);
 
 			HashMap<String, String> opts = new HashMap<String, String>();
