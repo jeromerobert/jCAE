@@ -358,7 +358,9 @@ public class MeshReader
 				int numberOfElements = Integer.parseInt(groupNode.getElementsByTagName("number").item(0).getTextContent());
 				String os = ((Element) groupNode.getElementsByTagName("file").item(0)).getAttribute("offset");
 				int fileOffset = os.isEmpty() ? 0 : Integer.parseInt(os);
-				int id = Integer.parseInt(groupNode.getAttribute("id"));
+				String groupName = groupNode.getElementsByTagName("name").item(0).getTextContent();
+				int id = i+1;
+				mesh.setGroupName(id, groupName);
 				logger.fine("Group "+id+": reading "+numberOfElements+" elements");
 				for (int j=0; j < numberOfElements; j++)
 					facelist[ifrG.get(fileOffset+j)].setGroupId(id);
