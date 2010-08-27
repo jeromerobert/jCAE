@@ -39,6 +39,7 @@
 			<file name="org-jcae-netbeans-mesh-ViewGroupAction.instance"/>
 			<file name="org-jcae-netbeans-mesh-HideGroupAction.instance"/>
 			<file name="org-jcae-netbeans-mesh-RefreshGroupAction.instance"/>
+			<file name="org-jcae-netbeans-mesh-SwapAction.instance"/>
         </folder>
     </folder>
 
@@ -56,6 +57,10 @@
                     <file name="org-jcae-netbeans-mesh-DecimateAction.shadow">
                         <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-DecimateAction.instance"/>
                         <attr name="position" intvalue="40"/>
+                    </file>
+                    <file name="org-jcae-netbeans-mesh-SwapAction.shadow">
+                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-SwapAction.instance"/>
+                        <attr name="position" intvalue="42"/>
                     </file>
                     <file name="Separator1.instance">
                         <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>

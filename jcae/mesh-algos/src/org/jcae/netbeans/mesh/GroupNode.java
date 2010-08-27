@@ -91,6 +91,7 @@ public class GroupNode extends AbstractNode implements Cookie
 			SystemAction.get(RemeshAction.class),
 			SystemAction.get(SmoothAction.class),
 			SystemAction.get(DecimateAction.class),
+			SystemAction.get(SwapAction.class),
 			null,
 			SystemAction.get(RenameAction.class),
 			SystemAction.get(ViewGroupAction.class),
