@@ -110,6 +110,10 @@ public class MeshLiaison
 			newT.setGroupId(t.getGroupId());
 			this.currentMesh.add(newT);
 		}
+
+		// Create groups of currentMesh
+		for (int i = 1; i <= this.backgroundMesh.getNumberOfGroups(); i++)
+			this.currentMesh.setGroupName(i, this.backgroundMesh.getGroupName(i));
 		this.currentMesh.buildAdjacency();
 		
 		// Compute projections of vertices from currentMesh
