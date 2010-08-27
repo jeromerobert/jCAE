@@ -78,6 +78,7 @@ public class Remesh
 	private final boolean hasFeatureEdges;
 	private final double coplanarity;
 	private final boolean allowNearNodes;
+	private final boolean remeshOnlyFeatureEdges;
 	private AnalyticMetricInterface analyticMetric = LATER_BINDING;
 	private final Map<Vertex, EuclidianMetric3D> metrics;
 	private static final AnalyticMetricInterface LATER_BINDING = new AnalyticMetricInterface() {
@@ -134,6 +135,7 @@ public class Remesh
 		double size = 0.0;
 		boolean proj = false;
 		boolean nearNodes = false;
+		boolean onlyFeatureEdges = false;
 		double copl = 0.8;
 		Map<String, String> decimateOptions = new HashMap<String, String>();
 		for (final Map.Entry<String, String> opt: options.entrySet())
@@ -174,6 +176,8 @@ public class Remesh
 				proj = Boolean.valueOf(val).booleanValue();
 			else if (key.equals("allowNearNodes"))
 				nearNodes = Boolean.valueOf(val).booleanValue();
+			else if (key.equals("features"))
+				onlyFeatureEdges = Boolean.valueOf(val).booleanValue();
 			else
 				LOGGER.warning("Unknown option: "+key);
 		}
@@ -186,6 +190,7 @@ public class Remesh
 		project = proj;
 		coplanarity = copl;
 		allowNearNodes = nearNodes;
+		remeshOnlyFeatureEdges = onlyFeatureEdges;
 
 		if (!decimateOptions.isEmpty())
 		{
@@ -390,6 +395,11 @@ public class Remesh
 			f.clearAttributes(AbstractHalfEdge.MARKED);
 
 		int[] passes = new int[] { 2, 1 };
+		if (remeshOnlyFeatureEdges)
+		{
+			passes[0] = 1;
+			passes[1] = 0;
+		}
 
 		while (true)
 		{

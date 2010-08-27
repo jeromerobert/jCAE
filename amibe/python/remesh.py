@@ -30,6 +30,8 @@ parser.add_option("-D", "--decimate-target", metavar="NUMBER",
 parser.add_option("-d", "--decimate", metavar="FLOAT",
                   action="store", type="float", dest="decimateSize",
                   help="decimate mesh before remeshing, specify tolerance")
+parser.add_option("-f", "--features", action="store_true", dest="features",
+                  help="only remesh feature edges (boundaries, ridges, nonmanifold)")
 parser.add_option("-g", "--preserveGroups", action="store_true", dest="preserveGroups",
                   help="edges adjacent to two different groups are handled like free edges")
 parser.add_option("-m", "--metricsFile", metavar="STRING",
@@ -81,6 +83,8 @@ if options.project:
 	opts.put("project", "true")
 if options.allowNearNodes:
 	opts.put("allowNearNodes", "true")
+if options.features:
+	opts.put("features", "true")
 
 if options.decimateSize or options.decimateTarget:
 	decimateOptions = HashMap()
