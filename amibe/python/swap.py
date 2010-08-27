@@ -1,6 +1,6 @@
 
 # jCAE
-from org.jcae.mesh.amibe.ds import Mesh
+from org.jcae.mesh.amibe.ds import Mesh, AbstractHalfEdge
 from org.jcae.mesh.amibe.algos3d import SwapEdge
 from org.jcae.mesh.amibe.projection import MeshLiaison
 from org.jcae.mesh.xmldata import MeshReader, MeshWriter
@@ -25,6 +25,9 @@ parser.add_option("-c", "--coplanarity", metavar="FLOAT", default=0.95,
 		  help="minimum dot product of face normals allowed for swapping an edge (default 0.95)")
 parser.add_option("-g", "--preserveGroups", action="store_true", dest="preserveGroups",
                   help="edges adjacent to two different groups are handled like free edges")
+parser.add_option("-I", "--immutable-border",
+                  action="store_true", dest="immutable_border",
+                  help="Tag free edges as immutable")
 
 (options, args) = parser.parse_args(args=sys.argv[1:])
 
@@ -38,6 +41,8 @@ outDir = args[1]
 mesh = Mesh()
 MeshReader.readObject3D(mesh, xmlDir)
 liaison = MeshLiaison(mesh)
+if options.immutable_border:
+    liaison.mesh.tagFreeEdges(AbstractHalfEdge.IMMUTABLE)
 if options.coplanarity:
 	liaison.getMesh().buildRidges(options.coplanarity)
 if options.preserveGroups:

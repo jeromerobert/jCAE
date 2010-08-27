@@ -38,11 +38,11 @@ public final class DecimateAction extends AlgoAction
 	}
 
 	@Override
-	protected List<String> getArguments(Node node) {
+	protected List<String> getArguments(AmibeDataObject ado) {
 		DecimateParameter bean=new DecimateParameter();
 		if(Utilities.showEditBeanDialog(bean))
 		{
-			String meshDirectory = node.getLookup().lookup(AmibeDataObject.class).getMeshDirectory();
+			String meshDirectory = ado.getMeshDirectory();
 			ArrayList<String> l = new ArrayList<String>();
 			if(bean.isUseTolerance())
 			{

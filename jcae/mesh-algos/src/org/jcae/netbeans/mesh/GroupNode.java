@@ -88,6 +88,10 @@ public class GroupNode extends AbstractNode implements Cookie
 	{
 		return new Action[]
 		{
+			SystemAction.get(RemeshAction.class),
+			SystemAction.get(SmoothAction.class),
+			SystemAction.get(DecimateAction.class),
+			null,
 			SystemAction.get(RenameAction.class),
 			SystemAction.get(ViewGroupAction.class),
 			SystemAction.get(HideGroupAction.class),

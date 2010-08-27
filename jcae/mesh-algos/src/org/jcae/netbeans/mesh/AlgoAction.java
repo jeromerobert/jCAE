@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005-2009, by EADS France
+ * (C) Copyright 2005-2010, by EADS France
  */
 package org.jcae.netbeans.mesh;
 
@@ -25,14 +25,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import org.jcae.mesh.JCAEFormatter;
-import org.jcae.netbeans.mesh.AmibeNode;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.filesystems.FileUtil;
@@ -79,10 +81,22 @@ public abstract class AlgoAction extends CookieAction {
 
 	@Override
 	protected int mode() {
-		return CookieAction.MODE_EXACTLY_ONE;
+		return CookieAction.MODE_ALL;
+	}
+
+	private String join(List<String> l)
+	{
+		StringBuilder sb = new StringBuilder();
+		for(String s:l)
+		{
+			sb.append(s);
+			sb.append(' ');
+		}
+		return sb.toString();
 	}
 
 	private void runProcess(ProcessBuilder pb, final InputOutput io) throws IOException {
+		io.getOut().println("Running "+join(pb.command()));
 		final Process p = pb.start();
 		SwingUtilities.invokeLater(new Runnable() {
 
@@ -112,19 +126,82 @@ public abstract class AlgoAction extends CookieAction {
 		}
 	}
 
+	/** Check that groups are all from the same mesh */
+	private boolean checkGroups(Node[] nodes)
+	{
+		HashSet<AmibeDataObject> ados = new HashSet<AmibeDataObject>();
+		for(Node n:nodes)
+			ados.add(amibeDataObject(n));
+		if(ados.size() != 1)
+		{
+			JOptionPane.showMessageDialog(null, "Selected groups must belong to the same mesh.");
+			return false;
+		}
+		else
+			return true;
+	}
+
+	private String groupNames(Node[] nodes)
+	{
+		StringBuilder sb = new StringBuilder(2*nodes.length);
+		boolean first = true;
+		for(Node n:nodes)
+		{
+			GroupNode gn = n.getLookup().lookup(GroupNode.class);
+			if(gn != null)
+			{
+				if(!first)
+					sb.append(",");
+				sb.append(gn.getName());
+				first = false;
+			}
+		}
+		
+		return sb.toString();
+	}
+
+	private AmibeDataObject amibeDataObject(Node node)
+	{
+		AmibeDataObject ado = node.getLookup().lookup(AmibeDataObject.class);
+		if(ado == null)
+		{
+			ado = node.getParentNode().getParentNode().getLookup().lookup(AmibeDataObject.class);
+		}
+		return ado;
+	}
+	
 	@Override
-	protected void performAction(Node[] activatedNodes) {		
-		List<String> args = getArguments(activatedNodes[0]);
-		if (args != null) {
-			File pyFile = InstalledFileLocator.getDefault().locate(
-					"amibe-python/" + getCommand() + ".py",
-					"org.jcae.netbeans", false);
-			InputOutput io = IOProvider.getDefault().getIO(getName(), true);
-			if (Settings.getDefault().isRunInSameJVM())
-				runInSameVM(args, pyFile, io);
-			else
-				runInOtherVM(activatedNodes[0], args, pyFile, io);
-			activatedNodes[0].getLookup().lookup(AmibeDataObject.class).refreshGroups();
+	protected void performAction(Node[] activatedNodes) {
+		if(checkGroups(activatedNodes))
+		{			
+			AmibeDataObject ado = amibeDataObject(activatedNodes[0]);
+			String groupNames = groupNames(activatedNodes);
+			List<String> args = getArguments(ado);
+			if (args != null) {
+				String command;
+				if(!groupNames.isEmpty())
+				{
+					args.remove(args.size()-1); //inputdir
+					args.remove(args.size()-1); //outputdir
+					args.add(0,"--immutable-border");
+					args.add(0, getCommand());
+					args.add(0, groupNames);
+					args.add(0, ado.getMeshDirectory());
+					args.add(0, ado.getMeshDirectory());
+					command="submesh";
+				}
+				else
+					command=getCommand();
+				File pyFile = InstalledFileLocator.getDefault().locate(
+						"amibe-python/" + command + ".py",
+						"org.jcae.netbeans", false);
+				InputOutput io = IOProvider.getDefault().getIO(getName(), true);
+				if (Settings.getDefault().isRunInSameJVM())
+					runInSameVM(args, pyFile, io);
+				else
+					runInOtherVM(activatedNodes[0], args, pyFile, io);
+				ado.refreshGroups();
+			}
 		}
 	}
 
@@ -211,7 +288,7 @@ public abstract class AlgoAction extends CookieAction {
 	protected abstract String getCommand();
 
 	/** Show a dialog and return a list of argument or null to cancel */
-	protected abstract List<String> getArguments(Node node);
+	protected abstract List<String> getArguments(AmibeDataObject node);
 
 	@Override
 	protected boolean asynchronous() {
@@ -229,6 +306,6 @@ public abstract class AlgoAction extends CookieAction {
 
 	@Override
 	protected Class<?>[] cookieClasses() {
-		return new Class[] { AmibeNode.class };
+		return new Class<?>[] { AmibeDataObject.class, GroupNode.class };
 	}
 }

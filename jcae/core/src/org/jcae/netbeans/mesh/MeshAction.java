@@ -21,11 +21,9 @@
 
 package org.jcae.netbeans.mesh;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import org.openide.filesystems.FileUtil;
-import org.openide.nodes.Node;
+import org.openide.util.actions.CookieAction;
 
 /**
  *
@@ -44,13 +42,23 @@ public class MeshAction extends AlgoAction {
 	}
 
 	@Override
-	protected List<String> getArguments(Node node) {
-		Mesh m = node.getLookup().lookup(AmibeNode.class).getMesh();
+	protected List<String> getArguments(AmibeDataObject ado) {
+		Mesh m = ado.getMesh();
 		ArrayList<String> l = new ArrayList<String>();
 		l.add(m.getGeometryFile());
 		l.add(m.getMeshFile());
 		l.add(Double.toString(m.getEdgeLength()));
 		l.add(Double.toString(m.getDeflection()));
 		return l;
+	}
+
+	@Override
+	protected Class<?>[] cookieClasses() {
+		return new Class<?>[] { AmibeDataObject.class };
+	}
+
+	@Override
+	protected int mode() {
+		return CookieAction.MODE_EXACTLY_ONE;
 	}
 }

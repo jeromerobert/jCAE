@@ -1,8 +1,6 @@
 
 # jCAE
-from org.jcae.mesh.amibe.ds import Mesh, Triangle
-from org.jcae.mesh.amibe.algos3d import SmoothNodes3D
-from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
+from org.jcae.mesh.amibe.ds import Mesh, AbstractHalfEdge
 from org.jcae.mesh.amibe.projection import MeshLiaison
 from org.jcae.mesh.xmldata import MeshReader, MeshWriter
 
@@ -43,7 +41,10 @@ parser.add_option("-O", "--freeEdgeOnly", action="store_true", dest="freeEdgeOnl
 parser.add_option("-t", "--tolerance", metavar="FLOAT",
                   action="store", type="float", dest="tolerance",
                   help="geometry error allowed when decimating")
-
+parser.add_option("-I", "--immutable-border",
+                  action="store_true", dest="immutable_border",
+                  help="Tag free edges as immutable")
+                  
 (options, args) = parser.parse_args(args=sys.argv[1:])
 
 if len(args) != 2:
@@ -73,7 +74,10 @@ if options.maxlength:
 
 mesh = Mesh()
 MeshReader.readObject3D(mesh, xmlDir)
+
 liaison = MeshLiaison(mesh)
+if options.immutable_border:
+    liaison.mesh.tagFreeEdges(AbstractHalfEdge.IMMUTABLE)
 if options.preserveGroups:
 	liaison.getMesh().buildGroupBoundaries()
 

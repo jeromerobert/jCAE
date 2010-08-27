@@ -1,6 +1,6 @@
 
 # jCAE
-from org.jcae.mesh.amibe.ds import Mesh
+from org.jcae.mesh.amibe.ds import Mesh, AbstractHalfEdge
 from org.jcae.mesh.amibe.algos3d import Remesh, QEMDecimateHalfEdge, SwapEdge
 from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.projection import MeshLiaison
@@ -46,6 +46,9 @@ parser.add_option("-n", "--allowNearNodes",
 parser.add_option("-t", "--size", metavar="FLOAT", default=0.0,
                   action="store", type="float", dest="size",
                   help="target size")
+parser.add_option("-I", "--immutable-border",
+                  action="store_true", dest="immutable_border",
+                  help="Tag free edges as immutable")
 
 (options, args) = parser.parse_args(args=sys.argv[1:])
 
@@ -63,7 +66,10 @@ else:
 	mtb.addNodeList()
 mesh = Mesh(mtb)
 MeshReader.readObject3D(mesh, xmlDir)
+
 liaison = MeshLiaison(mesh, mtb)
+if options.immutable_border:
+    liaison.mesh.tagFreeEdges(AbstractHalfEdge.IMMUTABLE)
 if options.coplanarity:
 	liaison.getMesh().buildRidges(options.coplanarity)
 if options.preserveGroups:
