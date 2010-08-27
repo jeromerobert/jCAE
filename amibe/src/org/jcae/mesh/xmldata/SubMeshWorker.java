@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -43,6 +44,8 @@ public class SubMeshWorker
 	private static final String submeshDirInt = "int";
 
 	private final String amibeDir;
+	private int[] groupIdsIntToGlobal;
+	private int[] groupIdsExtToGlobal;
 
 	public SubMeshWorker(String dir)
 	{
@@ -53,7 +56,7 @@ public class SubMeshWorker
 	 * Extract groups from a mesh.  Two meshes are created on disk,
 	 * one with the selected groups, and one with the complement.
 	 *
-	 * @param groupIds  array of selected groups
+	 * @param groupNames  array of selected groups
 	 * @return the directory containing the extracted mesh
 	 * @throws IOException
 	 */
@@ -63,6 +66,23 @@ public class SubMeshWorker
 		MeshTraitsBuilder mtbInt = new MeshTraitsBuilder().addTriangleSet();
 		Mesh meshInt = new Mesh(mtbInt);
 		MeshReader.readObject3D(meshInt, amibeDir);
+
+		HashSet<String> setGroupNames = new HashSet<String>(groupNames.length);
+		for (String name : groupNames)
+			setGroupNames.add(name);
+
+		// By convention, group Ids start from 1.  First value will be unused.
+		groupIdsExtToGlobal = new int[1+groupNames.length];
+		groupIdsIntToGlobal = new int[1+meshInt.getNumberOfGroups() - groupNames.length];
+		int indInt = 1;
+		int indExt = 1;
+		for (int i = 1; i <= meshInt.getNumberOfGroups(); i++)
+		{
+			if (setGroupNames.contains(meshInt.getGroupName(i)))
+				groupIdsExtToGlobal[indExt++] = i;
+			else
+				groupIdsIntToGlobal[indInt++] = i;
+		}
 
 		Mesh meshExt = splitSelectedGroups(meshInt,
 			meshInt.getGroupIDs(groupNames));
@@ -101,10 +121,14 @@ public class SubMeshWorker
 				}
 				vExt[i] = vn;
 			}
-			meshExt.add(meshExt.createTriangle(vExt[0], vExt[1], vExt[2]));
+			Triangle newT = meshExt.createTriangle(vExt[0], vExt[1], vExt[2]);
+			newT.setGroupId(t.getGroupId());
+			meshExt.add(newT);
 		}
 		for (Triangle t : removedTriangles)
 			meshInt.remove(t);
+		for (int id : groupIds)
+			meshExt.setGroupName(id, meshInt.getGroupName(id));
 
 		logger.config("Extracted "+meshExt.getTriangles().size()+" triangles");
 
@@ -126,6 +150,7 @@ public class SubMeshWorker
 		mtbInt.addNodeSet();
 		Mesh meshInt = new Mesh(mtbInt);
 		MeshReader.readObject3D(meshInt, amibeDir+File.separator+submeshDirInt);
+
 		TIntObjectHashMap<Vertex> ref2Vertex = new TIntObjectHashMap<Vertex>();
 		for (Vertex v : meshInt.getNodes())
 		{
@@ -135,6 +160,18 @@ public class SubMeshWorker
 
 		Mesh meshExt = new Mesh(mtbInt);
 		MeshReader.readObject3D(meshExt, amibeDir+File.separator+submeshDirExt);
+
+		// Rebuild original group names
+		String[] mergedNames = new String[1 + meshExt.getNumberOfGroups() + meshInt.getNumberOfGroups()];
+		for (int i = 1; i <= meshInt.getNumberOfGroups(); i++)
+			mergedNames[groupIdsIntToGlobal[i]] = meshInt.getGroupName(i);
+		for (int i = 1; i <= meshExt.getNumberOfGroups(); i++)
+			mergedNames[groupIdsExtToGlobal[i]] = meshExt.getGroupName(i);
+		// Reset original groupId and groupName
+		for (Triangle t : meshInt.getTriangles())
+			t.setGroupId(groupIdsIntToGlobal[t.getGroupId()]);
+		for (int i = 1; i < mergedNames.length; i++)
+			meshInt.setGroupName(i, mergedNames[i]);
 
 		Vertex[] vInt = new Vertex[3];
 		for (Triangle t : meshExt.getTriangles())
@@ -161,7 +198,9 @@ public class SubMeshWorker
 				}
 				meshInt.add(vInt[i]);
 			}
-			meshInt.add(meshInt.createTriangle(vInt[0], vInt[1], vInt[2]));
+			Triangle newT = meshInt.createTriangle(vInt[0], vInt[1], vInt[2]);
+			newT.setGroupId(groupIdsExtToGlobal[t.getGroupId()]);
+			meshInt.add(newT);
 		}
 		MeshWriter.writeObject3D(meshInt, newDir, null);
 	}
