@@ -442,6 +442,12 @@ public class Mesh implements Serializable
 			groupIds[i++] = invertMap.get(name);
 		return groupIds;
 	}
+
+	public int getNumberOfGroups()
+	{
+		return groupNames.size();
+	}
+
 	/**
 	 * Create and connect a dummy triangle to a vertex to make artificially
 	 * non manifold
