@@ -74,7 +74,8 @@ public class Remesh
 
 	private final boolean project;
 	private final boolean hasRidges;
-	private final boolean hasFreeEdges;
+	// true if mesh has free edges, ridges or nonmanifold edges, false otherwise
+	private final boolean hasFeatureEdges;
 	private final double coplanarity;
 	private final boolean allowNearNodes;
 	private AnalyticMetricInterface analyticMetric = LATER_BINDING;
@@ -132,7 +133,6 @@ public class Remesh
 		mesh = m;
 		double size = 0.0;
 		boolean proj = false;
-		boolean ridges = false;
 		boolean nearNodes = false;
 		double copl = 0.8;
 		Map<String, String> decimateOptions = new HashMap<String, String>();
@@ -178,27 +178,12 @@ public class Remesh
 				LOGGER.warning("Unknown option: "+key);
 		}
 		if (meshLiaison == null)
-		{
-			ridges = true;
 			mesh.buildRidges(copl);
-		}
-		else
-		{
-			for (Triangle f: mesh.getTriangles())
-			{
-				if (f.hasAttributes(AbstractHalfEdge.SHARP))
-				{
-					ridges = true;
-					break;
-				}
-			}
-		}
 
 		double targetSize = size;
 		minlen = 1.0 / Math.sqrt(2.0);
 		maxlen = Math.sqrt(2.0);
 		project = proj;
-		hasRidges = ridges;
 		coplanarity = copl;
 		allowNearNodes = nearNodes;
 
@@ -208,7 +193,8 @@ public class Remesh
 		}
 
 		// Compute bounding box
-		boolean freeEdges = false;
+		boolean ridges = false;
+		boolean features = false;
 		double [] bbox = new double[6];
 		bbox[0] = bbox[1] = bbox[2] = Double.MAX_VALUE;
 		bbox[3] = bbox[4] = bbox[5] = - (Double.MAX_VALUE / 2.0);
@@ -216,8 +202,10 @@ public class Remesh
 		{
 			if (f.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
-			if (!freeEdges && f.hasAttributes(AbstractHalfEdge.BOUNDARY))
-				freeEdges = true;
+			if (!ridges && f.hasAttributes(AbstractHalfEdge.SHARP))
+				ridges = true;
+			if (!features && f.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+				features = true;
 			for (Vertex v : f.vertex)
 			{
 				double[] xyz = v.getUV();
@@ -231,7 +219,8 @@ public class Remesh
 			}
 		}
 		LOGGER.fine("Bounding box: lower("+bbox[0]+", "+bbox[1]+", "+bbox[2]+"), upper("+bbox[3]+", "+bbox[4]+", "+bbox[5]+")");
-		hasFreeEdges = freeEdges;
+		hasRidges = ridges;
+		hasFeatureEdges = ridges | features;
 
 		kdTree = new KdTree<Vertex>(bbox);
 		Collection<Vertex> nodeset = mesh.getNodes();
@@ -406,7 +395,7 @@ public class Remesh
 		{
 			for (int pass=0, maxPasses = passes[0]+passes[1]; pass < maxPasses ; pass++)
 			{
-				if (pass < passes[0] && !hasRidges && !hasFreeEdges)
+				if (pass < passes[0] && !hasFeatureEdges)
 					continue;
 				nrIter++;
 				// Maximal number of nodes which are inserted on an edge
