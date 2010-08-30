@@ -15,16 +15,19 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005-2009, by EADS France
+ * (C) Copyright 2005-2010, by EADS France
  */
 
 
 package org.jcae.netbeans.mesh;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
-import org.jcae.netbeans.mesh.AmibeNode;
-import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -44,8 +47,9 @@ public class RemeshAction extends AlgoAction {
 
 	@Override
 	protected List<String> getArguments(AmibeDataObject ado) {
-		String meshDirectory = ado.getMeshDirectory();
+		String meshDirectory = ado.getMeshDirectory();		
 		RemeshPanel p = new RemeshPanel();
+		p.setTargetSize(ado.getMesh().getEdgeLength());
 		if(p.showDialog())
 		{
 			ArrayList<String> l = new ArrayList<String>();
@@ -55,6 +59,20 @@ public class RemeshAction extends AlgoAction {
 			l.add(Double.toString(p.getTargetSize()));
 			if(p.isFeatureOnly())
 				l.add("--features");
+			if(p.isPointMetric())
+			{
+				try {
+					File f = File.createTempFile("jcae", ".txt");
+					f.deleteOnExit();
+					PrintStream out = new PrintStream(new FileOutputStream(f));
+					p.writePointMetric(out);
+					out.close();
+					l.add("--point-metric");
+					l.add(f.getPath());
+				} catch (IOException ex) {
+					Exceptions.printStackTrace(ex);
+				}
+			}
 			l.add(meshDirectory);
 			l.add(meshDirectory);
 			return l;

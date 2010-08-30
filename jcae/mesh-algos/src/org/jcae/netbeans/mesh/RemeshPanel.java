@@ -24,7 +24,10 @@ package org.jcae.netbeans.mesh;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.io.PrintStream;
+import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -52,6 +55,11 @@ public class RemeshPanel extends JPanel {
 		return (Double) coplField.getValue();
 	}
 
+	public void setTargetSize(double d)
+	{
+		sizeField.setValue(d);
+	}
+	
 	public double getTargetSize()
 	{
 		return (Double) sizeField.getValue();
@@ -64,8 +72,12 @@ public class RemeshPanel extends JPanel {
 	
 	public boolean showDialog()
 	{
-		return JOptionPane.showConfirmDialog(null, this, "Remesh options",
-			JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION;
+        JOptionPane jp = new JOptionPane(this,
+             JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+		JDialog d = jp.createDialog("Remesh options");
+		d.setResizable(true);
+		d.setVisible(true);
+        return Integer.valueOf(JOptionPane.OK_OPTION).equals(jp.getValue());
 	}
     /** This method is called from within the constructor to
      * initialize the form.
@@ -81,6 +93,7 @@ public class RemeshPanel extends JPanel {
         sizeField = new JFormattedTextField();
         coplField = new JFormattedTextField();
         featureCheckbox = new JCheckBox();
+        tablePanel = createTable();
 
         setLayout(new GridBagLayout());
 
@@ -114,6 +127,15 @@ public class RemeshPanel extends JPanel {
         gridBagConstraints.gridy = 2;
         gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
         add(featureCheckbox, gridBagConstraints);
+
+        tablePanel.setBorder(BorderFactory.createTitledBorder(NbBundle.getMessage(RemeshPanel.class, "RemeshPanel.tablePanel.border.title"))); // NOI18N
+        gridBagConstraints = new GridBagConstraints();
+        gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
+        gridBagConstraints.fill = GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new Insets(5, 0, 0, 0);
+        add(tablePanel, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
 
@@ -121,6 +143,25 @@ public class RemeshPanel extends JPanel {
     private JFormattedTextField coplField;
     private JCheckBox featureCheckbox;
     private JFormattedTextField sizeField;
+    private JPanel tablePanel;
     // End of variables declaration//GEN-END:variables
 
+	private JPanel createTable() {
+		return new PointMetricPanel() {
+			@Override
+			protected double getDefaultSize() {
+				return (Double)sizeField.getValue();
+			}
+		};
+	}
+
+	public void writePointMetric(PrintStream out)
+	{
+		((PointMetricPanel)tablePanel).writeTable(out);
+	}
+
+	public boolean isPointMetric()
+	{
+		return !((PointMetricPanel)tablePanel).isEmpty();
+	}
 }

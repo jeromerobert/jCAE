@@ -1,7 +1,7 @@
 
 # jCAE
 from org.jcae.mesh.amibe.ds import Mesh, AbstractHalfEdge
-from org.jcae.mesh.amibe.algos3d import Remesh, QEMDecimateHalfEdge, SwapEdge
+from org.jcae.mesh.amibe.algos3d import Remesh, QEMDecimateHalfEdge, SwapEdge, PointMetric
 from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.projection import MeshLiaison
 from org.jcae.mesh.xmldata import MeshReader, MeshWriter
@@ -37,6 +37,12 @@ parser.add_option("-g", "--preserveGroups", action="store_true", dest="preserveG
 parser.add_option("-m", "--metricsFile", metavar="STRING",
                   action="store", type="string", dest="metricsFile",
                   help="name of a file containing metrics map")
+parser.add_option("-P", "--point-metric", metavar="STRING",
+                  action="store", type="string", dest="point_metric_file",
+                  help="""A CSV file containing points which to refine around. Each line must contains 5 floating point values:
+                  - x, y, z
+                  - the distance of the source where the target size is defined
+                  - the target size at the given distance""")
 parser.add_option("-p", "--project",
                   action="store_true", dest="project",
                   help="project vertices onto local surface")
@@ -111,8 +117,11 @@ class RemeshMetric(Remesh.AnalyticMetricInterface):
 	def getTargetSize(self, x, y, z):
 		return min(200.0, (x - 9000.0)*(x - 9000.0) / 2250.0)
 
-if setAnalytic:
+if options.point_metric_file:
+    algo.setAnalyticMetric(PointMetric(options.size, options.point_metric_file))
+elif setAnalytic:
 	algo.setAnalyticMetric(RemeshMetric());
+
 algo.compute();
 MeshWriter.writeObject3D(algo.getOutputMesh(), outDir, String())
 
