@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Level;
@@ -145,7 +145,10 @@ public abstract class AlgoAction extends CookieAction {
 	{
 		StringBuilder sb = new StringBuilder(2*nodes.length);
 		boolean first = true;
-		for(Node n:nodes)
+		//A hashset is needed to remove double entries from the selection
+		//The cause of double entries in the selection is unknown (probably a
+		//netbeans bug)
+		for(Node n:new HashSet<Node>(Arrays.asList(nodes)))
 		{
 			GroupNode gn = n.getLookup().lookup(GroupNode.class);
 			if(gn != null)
