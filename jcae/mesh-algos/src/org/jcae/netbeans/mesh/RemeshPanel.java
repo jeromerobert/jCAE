@@ -24,11 +24,13 @@ package org.jcae.netbeans.mesh;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import javax.swing.JCheckBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import org.jcae.netbeans.DoubleFormatter;
+import org.openide.util.NbBundle;
 
 /**
  *
@@ -55,6 +57,11 @@ public class RemeshPanel extends JPanel {
 		return (Double) sizeField.getValue();
 	}
 
+	public boolean isFeatureOnly()
+	{
+		return featureCheckbox.isSelected();
+	}
+	
 	public boolean showDialog()
 	{
 		return JOptionPane.showConfirmDialog(null, this, "Remesh options",
@@ -73,6 +80,7 @@ public class RemeshPanel extends JPanel {
 		JLabel coplLabel = new JLabel();
         sizeField = new JFormattedTextField();
         coplField = new JFormattedTextField();
+        featureCheckbox = new JCheckBox();
 
         setLayout(new GridBagLayout());
 
@@ -98,11 +106,20 @@ public class RemeshPanel extends JPanel {
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new Insets(5, 5, 5, 5);
         add(coplField, gridBagConstraints);
+
+        featureCheckbox.setText(NbBundle.getMessage(RemeshPanel.class, "RemeshPanel.featureCheckbox.text")); // NOI18N
+        featureCheckbox.setToolTipText(NbBundle.getMessage(RemeshPanel.class, "RemeshPanel.featureCheckbox.toolTipText")); // NOI18N
+        gridBagConstraints = new GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
+        add(featureCheckbox, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private JFormattedTextField coplField;
+    private JCheckBox featureCheckbox;
     private JFormattedTextField sizeField;
     // End of variables declaration//GEN-END:variables
 

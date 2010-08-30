@@ -53,6 +53,8 @@ public class RemeshAction extends AlgoAction {
 			l.add(Double.toString(p.getCoplanarity()));
 			l.add("--size");
 			l.add(Double.toString(p.getTargetSize()));
+			if(p.isFeatureOnly())
+				l.add("--features");
 			l.add(meshDirectory);
 			l.add(meshDirectory);
 			return l;
