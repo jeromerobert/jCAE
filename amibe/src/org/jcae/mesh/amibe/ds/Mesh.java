@@ -21,6 +21,7 @@
 package org.jcae.mesh.amibe.ds;
 
 import gnu.trove.TIntArrayList;
+import gnu.trove.TIntHashSet;
 import gnu.trove.TIntIntHashMap;
 import org.jcae.mesh.amibe.traits.Traits;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
@@ -961,9 +962,18 @@ public class Mesh implements Serializable
 	 */
 	public final int buildGroupBoundaries()
 	{
+		return buildGroupBoundaries(null);
+	}
+
+	public final int buildGroupBoundaries(int[] groups)
+	{
 		if (triangleList.isEmpty())
 			return 0;
-		
+
+		TIntHashSet groupSet = new TIntHashSet();
+		if (null != groups)
+			groupSet.addAll(groups);
+
 		ArrayList<Triangle> newTriangles = new ArrayList<Triangle>();
 		AbstractHalfEdge ot    = null;
 		AbstractHalfEdge sym   = triangleList.iterator().next().getAbstractHalfEdge();
@@ -976,13 +986,16 @@ public class Mesh implements Serializable
 			if (t.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			int groupId = t.getGroupId();
+			if (!groupSet.isEmpty() && !groupSet.contains(groupId))
+				continue;
 			for (int i = 0; i < 3; i++)
 			{
 				ot = ot.next();
 				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 					continue;
 				sym = ot.sym(sym);
-				if (groupId != sym.getTri().getGroupId())
+				int symGroupId = sym.getTri().getGroupId();
+				if (groupId != symGroupId && (groupSet.isEmpty() || groupSet.contains(symGroupId)))
 					bindSymEdgesToVirtualTriangles(ot, sym, temp0, temp1, newTriangles);
 			}
 		}
