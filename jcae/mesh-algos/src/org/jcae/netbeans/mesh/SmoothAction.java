@@ -22,8 +22,6 @@ package org.jcae.netbeans.mesh;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jcae.netbeans.Utilities;
-import org.openide.nodes.Node;
 
 public final class SmoothAction extends AlgoAction
 {	
@@ -41,13 +39,15 @@ public final class SmoothAction extends AlgoAction
 	protected List<String> getArguments(AmibeDataObject ado) {
 		String meshDirectory = ado.getMeshDirectory();
 		SmoothParameters bean=new SmoothParameters();
-		if(Utilities.showEditBeanDialog(bean))
+		if(bean.showDialog())
 		{
 			ArrayList<String> l = new ArrayList<String>();
 			l.add("--iterations");
 			l.add(Integer.toString(bean.getIterationNumber()));
 			l.add("--size");
 			l.add(Double.toString(bean.getElementSize()));
+			if(bean.isPreserveGroups())
+				l.add("--preserveGroups");
 			l.add(meshDirectory);
 			l.add(meshDirectory);
 			return l;
