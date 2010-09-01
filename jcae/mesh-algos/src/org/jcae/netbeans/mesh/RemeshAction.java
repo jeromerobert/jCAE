@@ -59,6 +59,8 @@ public class RemeshAction extends AlgoAction {
 			l.add(Double.toString(p.getTargetSize()));
 			if(p.isFeatureOnly())
 				l.add("--features");
+			if(p.isPreserveGroups())
+				l.add("--preserveGroups");
 			if(p.isPointMetric())
 			{
 				try {

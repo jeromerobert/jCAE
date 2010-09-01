@@ -20,6 +20,7 @@ package org.jcae.netbeans.mesh;
  * (C) Copyright 2010, by EADS France
  */
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -68,6 +69,8 @@ public abstract class PointMetricPanel extends JPanel {
 		JButton buttonRemove = new JButton();
 
         setLayout(new GridBagLayout());
+
+        scrollPane.setPreferredSize(new Dimension(0, 100));
 
         table.setModel(new DefaultTableModel(
             new Object [][] {

@@ -20,6 +20,7 @@
 
 package org.jcae.netbeans.mesh;
 
+import java.awt.Dimension;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import org.openide.explorer.propertysheet.PropertySheet;
@@ -37,9 +38,17 @@ public class SmoothParameters extends PropertySheet
 {
 	private class MyProperty<T> extends PropertySupport.Reflection<T>
 	{
-		public MyProperty(Class<T> type, String property, String name) throws NoSuchMethodException {
+		public MyProperty(Class<T> type, String property, String name)
+			throws NoSuchMethodException
+		{
+			this(type, property, name, name);
+		}
+		public MyProperty(Class<T> type, String property, String name, String description)
+			throws NoSuchMethodException
+		{
 			super(SmoothParameters.this, type, property);
 			setName(name);
+			setShortDescription(description);
 		}
 	}
 	/** Creates a new instance of SmoothParameters */
@@ -53,6 +62,8 @@ public class SmoothParameters extends PropertySheet
 			}
 		};
 		setNodes(new Node[]{node});
+		setDescriptionAreaVisible(true);
+		setPreferredSize(new Dimension(0, 200));
 	}
 
 	private Sheet.Set createPropertySet()
@@ -60,9 +71,13 @@ public class SmoothParameters extends PropertySheet
 		Sheet.Set r = new Sheet.Set();
 		r.setName("Parameters");
 		try {			
-			r.put(new MyProperty<Double>(Double.TYPE, "elementSize", "element size"));
-			r.put(new MyProperty<Integer>(Integer.TYPE, "iterationNumber", "iteration number"));
-			r.put(new MyProperty<Boolean>(Boolean.TYPE, "preserveGroups", "preserve groups"));
+			r.put(new MyProperty<Double>(Double.TYPE, "elementSize", "Element size",
+				"Target edge size"));
+			r.put(new MyProperty<Integer>(Integer.TYPE, "iterationNumber",
+				"Iteration number", ""));
+			r.put(new MyProperty<Boolean>(Boolean.TYPE, "preserveGroups",
+				"Preserve groups",
+				"Edges adjacent to two different groups are handled like free edges."));
 		} catch (NoSuchMethodException ex) {
 			Exceptions.printStackTrace(ex);
 		}
