@@ -145,6 +145,8 @@ public class UNV2Amibe
 		out.setFixNoGroup(true);
 		importMesh(in, out);
 		out.finish();
+		if(stripedUnvFile!=null)
+			writeStripedUnv(out);
 	}
 	
 	private void importMesh(BufferedReader in, AmibeWriter.Dim3 out) throws IOException
@@ -188,8 +190,6 @@ public class UNV2Amibe
 				}
 			}
 		}
-		if(stripedUnvFile!=null)
-			writeStripedUnv(out);
 	}
 
 	/** List of nodes used in elements which are not written in the amibe file */
