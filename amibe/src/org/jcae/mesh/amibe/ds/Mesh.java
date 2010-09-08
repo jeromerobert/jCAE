@@ -131,6 +131,9 @@ public class Mesh implements Serializable
 	//  Set to true by Mesh2D, this subclass connects outer triangles
 	protected boolean outerTrianglesAreConnected = false;
 	
+	//  Set to true if references must be written onto disk
+	private boolean persistentReferences = false;
+
 	private int maxLabel = 0;
 
 	// 3D euclidian metric
@@ -447,6 +450,16 @@ public class Mesh implements Serializable
 	public int getNumberOfGroups()
 	{
 		return groupNames.size();
+	}
+
+	public boolean hasPersistentReferences()
+	{
+		return persistentReferences;
+	}
+
+	public void setPersistentReferences(boolean persistentReferences)
+	{
+		this.persistentReferences = persistentReferences;
 	}
 
 	/**

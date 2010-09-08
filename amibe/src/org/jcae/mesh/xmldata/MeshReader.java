@@ -249,6 +249,7 @@ public class MeshReader
 				refs = new int[numberOfReferences];
 				ifrR.get(refs);
 				ifrR.close();
+				mesh.setPersistentReferences(true);
 			}
 			
 			String nodesFile = xpath.evaluate("file/@location", submeshNodes);

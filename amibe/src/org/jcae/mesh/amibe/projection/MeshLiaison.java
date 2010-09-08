@@ -125,6 +125,8 @@ public class MeshLiaison
 				new ProjectedLocation(currentV.getUV(), v.getNeighbourIteratorTriangle().next()));
 		}
 		mapBgToCurrent.clear();
+
+		this.currentMesh.setPersistentReferences(this.backgroundMesh.hasPersistentReferences());
 	}
 	
 	public final Mesh getMesh()

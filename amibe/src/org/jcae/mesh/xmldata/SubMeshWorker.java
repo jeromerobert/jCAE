@@ -86,8 +86,10 @@ public class SubMeshWorker
 
 		Mesh meshExt = splitSelectedGroups(meshInt,
 			meshInt.getGroupIDs(groupNames));
-		MeshWriter.writeObject3DWithReferences(meshInt, amibeDir+File.separator+submeshDirInt, null);
-		MeshWriter.writeObject3DWithReferences(meshExt, amibeDir+File.separator+submeshDirExt, null);
+		meshInt.setPersistentReferences(true);
+		MeshWriter.writeObject3D(meshInt, amibeDir+File.separator+submeshDirInt, null);
+		meshExt.setPersistentReferences(true);
+		MeshWriter.writeObject3D(meshExt, amibeDir+File.separator+submeshDirExt, null);
 		return amibeDir+File.separator+submeshDirExt;
 	}
 
@@ -202,6 +204,7 @@ public class SubMeshWorker
 			newT.setGroupId(groupIdsExtToGlobal[t.getGroupId()]);
 			meshInt.add(newT);
 		}
+		meshInt.setPersistentReferences(true);
 		MeshWriter.writeObject3D(meshInt, newDir, null);
 	}
 
