@@ -376,7 +376,7 @@ public class MeshReader
 		}
 		catch(XPathExpressionException ex)
 		{
-			throw new IOException(ex.getMessage());
+			throw new IOException(ex);
 		}
 		logger.fine("end reading "+JCAEXMLData.xml3dFilename);
 	}
