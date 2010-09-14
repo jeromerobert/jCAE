@@ -28,6 +28,7 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.Handler;
@@ -35,6 +36,7 @@ import java.util.logging.LogRecord;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import org.jcae.mesh.JCAEFormatter;
+import org.jcae.mesh.xmldata.Group;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.filesystems.FileUtil;
@@ -141,25 +143,29 @@ public abstract class AlgoAction extends CookieAction {
 			return true;
 	}
 
-	private String groupNames(Node[] nodes)
+	private String groupNames(Node[] nodes, AmibeDataObject ado)
 	{
 		StringBuilder sb = new StringBuilder(2*nodes.length);
 		boolean first = true;
-		//A hashset is needed to remove double entries from the selection
-		//The cause of double entries in the selection is unknown (probably a
-		//netbeans bug)
-		for(Node n:new HashSet<Node>(Arrays.asList(nodes)))
+		int allGroupsNumber = ado.getGroups().getGroups().length;
+		TreeSet<String> selectedGroups = new TreeSet<String>();
+		for(Node n:nodes)
 		{
 			GroupNode gn = n.getLookup().lookup(GroupNode.class);
 			if(gn != null)
-			{
-				if(!first)
-					sb.append(",");
-				sb.append(gn.getName());
-				first = false;
-			}
+				selectedGroups.add(gn.getName());
 		}
-		
+
+		if(selectedGroups.size() == allGroupsNumber)
+			return "";
+
+		for(String s:selectedGroups)
+		{
+			if(!first)
+				sb.append(",");
+			sb.append(s);
+			first = false;
+		}
 		return sb.toString();
 	}
 
@@ -178,7 +184,7 @@ public abstract class AlgoAction extends CookieAction {
 		if(checkGroups(activatedNodes))
 		{			
 			AmibeDataObject ado = amibeDataObject(activatedNodes[0]);
-			String groupNames = groupNames(activatedNodes);
+			String groupNames = groupNames(activatedNodes, ado);
 			List<String> args = getArguments(ado);
 			if (args != null) {
 				String command;
