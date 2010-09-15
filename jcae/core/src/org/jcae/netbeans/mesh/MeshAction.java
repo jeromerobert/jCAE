@@ -23,6 +23,7 @@ package org.jcae.netbeans.mesh;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.openide.nodes.Node;
 import org.openide.util.actions.CookieAction;
 
 /**
@@ -60,5 +61,17 @@ public class MeshAction extends AlgoAction {
 	@Override
 	protected int mode() {
 		return CookieAction.MODE_EXACTLY_ONE;
+	}
+
+	@Override
+	protected boolean enable(Node[] activatedNodes) {
+		boolean b = super.enable(activatedNodes);
+		if(b)
+		{
+			AmibeDataObject ado = activatedNodes[0].getLookup().lookup(AmibeDataObject.class);
+			return ado.getMesh().getGeometryFile() != null;
+		}
+		else
+			return false;
 	}
 }
