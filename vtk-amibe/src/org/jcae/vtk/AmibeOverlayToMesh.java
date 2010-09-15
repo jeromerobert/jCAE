@@ -26,6 +26,9 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.vtk.LeafNode.DataProvider;
+import org.jcae.vtk.AbstractNode.ActorCustomiser;
+import vtk.vtkActor;
+import vtk.vtkProperty;
 
 /**
  *
@@ -52,6 +55,15 @@ public class AmibeOverlayToMesh extends Viewable
 				}
 			}
 		};
+		rootNode.setManager(true);		
+		rootNode.setActorCustomiser(new ActorCustomiser() {
+			public void customiseActor(vtkActor actor) {
+				vtkProperty p = actor.GetProperty();
+				p.SetLineWidth(5.0);
+				p.Delete();
+			}
+		});
 		new LeafNode(rootNode, dataProvider, color);
+		rootNode.refresh();
 	}
 }
