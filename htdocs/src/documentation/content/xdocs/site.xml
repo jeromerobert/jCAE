@@ -75,7 +75,7 @@ See http://forrest.apache.org/docs/linking.html for more info
 	<project label="Project">
 		<bugs label="Bugs" href="http://sourceforge.net/tracker/?group_id=74334&amp;atid=540660"/>
 		<features label="Feature Requests" href="http://sourceforge.net/tracker/?group_id=74334&amp;atid=540663"/>
-		<sources label="Sources (Git)" href="http://gitorious.org/jcae"/>
+		<sources label="Sources (Git)" href="http://github.com/jeromerobert/jCAE"/>
 		<sourceforge label="Sourceforge project" href="http://sourceforge.net/projects/jcae"/>
 	</project>
 
