@@ -587,8 +587,9 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 	@Override
 	public void postProcessAllHalfEdges()
 	{
-		if (liaison != null)
-			liaison.updateAll();
+// FIXME: temporarily disable updateAll(), it is buggy in few cases
+//		if (liaison != null)
+//			liaison.updateAll();
 		LOGGER.info("Number of contracted edges: "+processed);
 		LOGGER.info("Total number of edges not contracted during processing: "+notProcessed);
 		LOGGER.info("Total number of edges swapped to increase quality: "+swapped);
