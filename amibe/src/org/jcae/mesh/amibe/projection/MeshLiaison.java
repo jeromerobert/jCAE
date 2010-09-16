@@ -158,10 +158,28 @@ public class MeshLiaison
 		// Update location
 		location.updateTriangle(lf.current);
 		location.updateVertexIndex(target);
+
 		if (LOGGER.isLoggable(Level.FINEST))
 			LOGGER.log(Level.FINEST, "New projection: "+location);
 		double [] newPosition = new double[3];
 		location.projectOnTriangle(target, newPosition);
+		if (!location.computeBarycentricCoordinates(newPosition))
+		{
+			int[] index = new int[2];
+			double maxError = sqrDistanceVertexTriangle(target, lf.current, index);
+			AbstractHalfEdge newEdge = ot;
+			do
+			{
+				ot = newEdge;
+				newEdge = findBetterTriangleInNeighborhood(target, ot, maxError);
+				maxError *= 0.5;
+			} while (newEdge != null);
+			if (ot != null)
+			{
+				location.updateTriangle(ot.getTri());
+				location.updateVertexIndex(target);
+			}
+		}
 		if (!location.computeBarycentricCoordinates(newPosition))
 		{
 			double [] p0 = location.t.vertex[0].getUV();
@@ -176,9 +194,8 @@ public class MeshLiaison
 			double invSum = 1.0 / (location.b[0] + location.b[1] + location.b[2]);
 			for (int i = 0; i < 3; i++)
 				location.b[i] *= invSum;
-			// Move vertex on boundary
-			if (LOGGER.isLoggable(Level.FINER))
-				LOGGER.log(Level.FINER, "Position found outside triangle: "+newPosition[0]+" "+newPosition[1]+" "+newPosition[2]);
+			LOGGER.log(Level.WARNING, "Position found outside triangle: "+newPosition[0]+" "+newPosition[1]+" "+newPosition[2]);
+			// Move vertex on triangle boundary
 			newPosition[0] = location.b[0]*p0[0] + location.b[1]*p1[0] + location.b[2]*p2[0];
 			newPosition[1] = location.b[0]*p0[1] + location.b[1]*p1[1] + location.b[2]*p2[1];
 			newPosition[2] = location.b[0]*p0[2] + location.b[1]*p1[2] + location.b[2]*p2[2];
@@ -309,6 +326,11 @@ public class MeshLiaison
 		// Check a better start edge in neighborhood
 		if (LOGGER.isLoggable(Level.FINER))
 			LOGGER.log(Level.FINER, "Error too large: "+lf.dmin+" > "+maxError);
+		return findBetterTriangleInNeighborhood(pos, ot, maxError);
+	}
+
+	private static AbstractHalfEdge findBetterTriangleInNeighborhood(double[] pos, AbstractHalfEdge ot, double maxError)
+	{
 		int[] index = new int[2];
 		Triangle.List seen = new Triangle.List();
 		LinkedList<Triangle> queue = new LinkedList<Triangle>();
