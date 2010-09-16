@@ -119,11 +119,7 @@ public class MeshLiaison
 		// Compute projections of vertices from currentMesh
 		this.mapCurrentVertexProjection = new HashMap<Vertex, ProjectedLocation>(backgroundNodeset.size());
 		for (Vertex v: backgroundNodeset)
-		{
-			Vertex currentV = mapBgToCurrent.get(v);
-			this.mapCurrentVertexProjection.put(currentV,
-				new ProjectedLocation(currentV.getUV(), v.getNeighbourIteratorTriangle().next()));
-		}
+			this.addVertex(mapBgToCurrent.get(v), v.getNeighbourIteratorTriangle().next());
 		mapBgToCurrent.clear();
 
 		this.currentMesh.setPersistentReferences(this.backgroundMesh.hasPersistentReferences());
