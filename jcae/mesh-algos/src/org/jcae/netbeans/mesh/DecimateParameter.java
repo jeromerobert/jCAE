@@ -1,116 +1,147 @@
+/*
+ * Project Info:  http://jcae.sourceforge.net
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+ *
+ * (C) Copyright 2010, by EADS France
+ */
+
 package org.jcae.netbeans.mesh;
 
-import java.beans.BeanDescriptor;
-import java.beans.IntrospectionException;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyDescriptor;
-import java.beans.PropertyVetoException;
-import java.beans.SimpleBeanInfo;
+import java.awt.Dimension;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
+import org.openide.explorer.propertysheet.PropertySheet;
+import org.openide.nodes.AbstractNode;
+import org.openide.nodes.Children;
+import org.openide.nodes.Node;
+import org.openide.nodes.Node.PropertySet;
+import org.openide.nodes.PropertySupport;
+import org.openide.nodes.Sheet;
+import org.openide.util.Exceptions;
 
-// This bean is its own BeanInfo
-// see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4316819
-// see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4651485
-
-public class DecimateParameter extends SimpleBeanInfo
+public class DecimateParameter extends PropertySheet
 {
-	private static final int PROPERTY_tolerance = 2;	
-    private static final int PROPERTY_triangle = 0;
-    private static final int PROPERTY_useTolerance = 1;
+	private int triangles=10000;
+	private double tolerance = 0.01;
+	private boolean useTolerance=true;
+	private boolean preserveGroups = true;
 	
-	private double tolerance = 0.1;
-	
-	public BeanDescriptor getBeanDescriptor()
+	private class MyProperty<T> extends PropertySupport.Reflection<T>
 	{
-		BeanDescriptor toReturn=new BeanDescriptor(DecimateParameter.class);
-		toReturn.setDisplayName("Decimation parameters");
-		return toReturn;
+		public MyProperty(Class<T> type, String property, String name)
+			throws NoSuchMethodException
+		{
+			this(type, property, name, name);
+		}
+		public MyProperty(Class<T> type, String property, String name, String description)
+			throws NoSuchMethodException
+		{
+			super(DecimateParameter.this, type, property);
+			setName(name);
+			setShortDescription(description);
+		}
+	}
+	/** Creates a new instance of SmoothParameters */
+	public DecimateParameter()
+	{
+		AbstractNode node = new AbstractNode(Children.LEAF)
+		{
+			@Override
+			public PropertySet[] getPropertySets() {
+				return new PropertySet[]{createPropertySet()};
+			}
+		};
+		setNodes(new Node[]{node});
+		setDescriptionAreaVisible(true);
+		setPreferredSize(new Dimension(0, 250));
 	}
 
-	public PropertyDescriptor[] getPropertyDescriptors()
+	private Sheet.Set createPropertySet()
 	{
-		PropertyDescriptor[] properties = new PropertyDescriptor[3];
-		try
-		{
-			properties[PROPERTY_tolerance] = new PropertyDescriptor("tolerance", DecimateParameter.class);			
-			properties[PROPERTY_tolerance].setDisplayName("Tolerance");
-			properties[PROPERTY_tolerance].setShortDescription("Tolerance");
-			properties[PROPERTY_tolerance].setConstrained(true);
-			
-            properties[PROPERTY_triangle] = new PropertyDescriptor ( "triangle", org.jcae.netbeans.mesh.DecimateParameter.class, "getTriangle", "setTriangle" ); // NOI18N
-            properties[PROPERTY_triangle].setPreferred(true);
-			properties[PROPERTY_triangle].setDisplayName ( "Desired number of triangles" );
-            properties[PROPERTY_triangle].setShortDescription ( "Desired number of triangles" );
-            
-			properties[PROPERTY_useTolerance] = new PropertyDescriptor ( "useTolerance", org.jcae.netbeans.mesh.DecimateParameter.class, "isUseTolerance", "setUseTolerance" ); // NOI18N
-            properties[PROPERTY_useTolerance].setDisplayName ( "Use tolerance" );
-            properties[PROPERTY_useTolerance].setShortDescription ( "Use tolerance instead of number of triangles" );
-			
-		} 
-		catch (IntrospectionException e)
-		{
-			e.printStackTrace();
+		Sheet.Set r = new Sheet.Set();
+		r.setName("Parameters");
+		try {
+			r.put(new MyProperty<Boolean>(Boolean.TYPE, "useTolerance", "Use tolerance",
+				"Use tolerance parameter instead of triangle number parameter."));
+			r.put(new MyProperty<Double>(Double.TYPE, "tolerance",
+				"Tolerance", "Geometry absolute distance error allowed when decimating."){
+				@Override
+				public boolean canWrite() {
+					return useTolerance;
+				}
+			});
+			r.put(new MyProperty<Integer>(Integer.TYPE, "triangles",
+				"Target triangles", "Stops iterations when mesh contains this number of triangles."){
+				@Override
+				public boolean canWrite() {
+					return !useTolerance;
+				}
+			});
+			r.put(new MyProperty<Boolean>(Boolean.TYPE, "preserveGroups",
+				"Preserve groups",
+				"Edges adjacent to two different groups are handled like free edges."));
+
+		} catch (NoSuchMethodException ex) {
+			Exceptions.printStackTrace(ex);
 		}
-		return properties;
+		return r;
 	}
-	
-	
-	public void setTolerance(double level) throws PropertyVetoException
+
+	public boolean showDialog()
 	{
-		if(level<=0)
-			throw new PropertyVetoException(
-				"Must be > 0",
-				new PropertyChangeEvent(this, null, null, null));
-		this.tolerance = level;
+        JOptionPane jp = new JOptionPane(this,
+             JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+		JDialog d = jp.createDialog("Decimate parameters");
+		d.setResizable(true);
+		d.setVisible(true);
+        return Integer.valueOf(JOptionPane.OK_OPTION).equals(jp.getValue());
 	}
-	
-	public double getTolerance()
-	{
+
+	public boolean isPreserveGroups() {
+		return preserveGroups;
+	}
+
+	public void setPreserveGroups(boolean preserveGroups) {
+		this.preserveGroups = preserveGroups;
+	}
+
+	public double getTolerance() {
 		return tolerance;
 	}
 
-	/**
-	 * Holds value of property triangle.
-	 */
-	private int triangle=10000;
-
-	/**
-	 * Getter for property triangle.
-	 * @return Value of property triangle.
-	 */
-	public int getTriangle()
-	{
-		return this.triangle;
+	public void setTolerance(double tolerance) {
+		this.tolerance = tolerance;
 	}
 
-	/**
-	 * Setter for property triangle.
-	 * @param triangle New value of property triangle.
-	 */
-	public void setTriangle(int triangle)
-	{
-		this.triangle = triangle;
+	public int getTriangles() {
+		return triangles;
 	}
 
-	/**
-	 * Holds value of property useTolerance.
-	 */
-	private boolean useTolerance;
-
-	/**
-	 * Getter for property useTolerance.
-	 * @return Value of property useTolerance.
-	 */
-	public boolean isUseTolerance()
-	{
-		return this.useTolerance;
+	public void setTriangles(int triangle) {
+		this.triangles = triangle;
 	}
 
-	/**
-	 * Setter for property useTolerance.
-	 * @param useTolerance New value of property useTolerance.
-	 */
-	public void setUseTolerance(boolean useTolerance)
-	{
+	public boolean isUseTolerance() {
+		return useTolerance;
+	}
+
+	public void setUseTolerance(boolean useTolerance) {
 		this.useTolerance = useTolerance;
+		repaint();
 	}
+
+
 }

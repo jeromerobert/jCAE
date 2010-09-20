@@ -22,8 +22,6 @@ package org.jcae.netbeans.mesh;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jcae.netbeans.Utilities;
-import org.openide.nodes.Node;
 
 public final class DecimateAction extends AlgoAction
 {	
@@ -40,7 +38,7 @@ public final class DecimateAction extends AlgoAction
 	@Override
 	protected List<String> getArguments(AmibeDataObject ado) {
 		DecimateParameter bean=new DecimateParameter();
-		if(Utilities.showEditBeanDialog(bean))
+		if(bean.showDialog())
 		{
 			String meshDirectory = ado.getMeshDirectory();
 			ArrayList<String> l = new ArrayList<String>();
@@ -52,8 +50,10 @@ public final class DecimateAction extends AlgoAction
 			else
 			{
 				l.add("-n");
-				l.add(Integer.toString(bean.getTriangle()));
+				l.add(Integer.toString(bean.getTriangles()));
 			}
+			if(bean.isPreserveGroups())
+				l.add("-g");
 			l.add(meshDirectory);
 			l.add(meshDirectory);
 			return l;		
