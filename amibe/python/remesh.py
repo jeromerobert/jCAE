@@ -8,7 +8,7 @@ from org.jcae.mesh.xmldata import MeshReader, MeshWriter
 
 # Java
 from java.util import HashMap
-from java.lang import String
+from java.lang import String, Math
 
 # Python
 import sys
@@ -52,6 +52,9 @@ parser.add_option("-n", "--allowNearNodes",
 parser.add_option("-t", "--size", metavar="FLOAT", default=0.0,
                   action="store", type="float", dest="size",
                   help="target size")
+parser.add_option("-T", "--nearLengthRatio", metavar="FLOAT", default=1.0 / Math.sqrt(2.0),
+                  action="store", type="float", dest="nearLengthRatio",
+		  help="ratio to size target to determine if a vertex is near an existing point (default: 1/sqrt(2)")
 parser.add_option("-I", "--immutable-border",
                   action="store_true", dest="immutable_border",
                   help="Tag free edges as immutable")
@@ -97,6 +100,7 @@ if options.allowNearNodes:
 	opts.put("allowNearNodes", "true")
 if options.features:
 	opts.put("features", "true")
+opts.put("nearLengthRatio", str(options.nearLengthRatio))
 
 if options.decimateSize or options.decimateTarget:
 	decimateOptions = HashMap()

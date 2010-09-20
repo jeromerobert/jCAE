@@ -133,6 +133,7 @@ public class Remesh
 		liaison = meshLiaison;
 		mesh = m;
 		double size = 0.0;
+		double nearLengthRatio = 1.0 / Math.sqrt(2.0);
 		boolean proj = false;
 		boolean nearNodes = false;
 		boolean onlyFeatureEdges = false;
@@ -147,6 +148,10 @@ public class Remesh
 				size = Double.valueOf(val).doubleValue();
 				analyticMetric = null;
 				dfrMetrics = null;
+			}
+			else if (key.equals("nearLengthRatio"))
+			{
+				nearLengthRatio = Double.valueOf(val).doubleValue();
 			}
 			else if (key.equals("coplanarity"))
 			{
@@ -185,7 +190,7 @@ public class Remesh
 			mesh.buildRidges(copl);
 
 		double targetSize = size;
-		minlen = 1.0 / Math.sqrt(2.0);
+		minlen = nearLengthRatio;
 		maxlen = Math.sqrt(2.0);
 		project = proj;
 		coplanarity = copl;
