@@ -1,6 +1,9 @@
-Improve Print() to help debugging
+From: Denis Barbier <barbier@users.sf.net>
+Subject: Improve Print() to help debugging
 
 See http://www.vtk.org/Bug/view.php?id=7886
+
+Signed-off-by: Denis Barbier <barbier@users.sf.net>
 
 ---
  Wrapping/vtkParseJava.c |    2 +-
@@ -19,3 +22,5 @@ index 1edc5cc..6cfe209 100644
      }
  
    if (!strcmp("vtkObject",data->ClassName))
+-- 
+tg: (4c7c347..) jcae/VTK-5.6/parseJava (depends on: jcae/VTK-5.6/getColorBufferSizes)

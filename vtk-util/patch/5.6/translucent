@@ -1,6 +1,9 @@
-Allow picking translucent objects
+From: Denis Barbier <barbier@users.sf.net>
+Subject: Allow picking translucent objects
 
 See http://www.vtk.org/Bug/view.php?id=7295
+
+Signed-off-by: Denis Barbier <barbier@users.sf.net>
 
 ---
  Rendering/vtkRenderer.cxx |   23 +++++++++++++++++++++++
@@ -82,3 +85,5 @@ index a93e43d..79f3ad5 100644
  #if !defined(VTK_LEGACY_REMOVE)
    // VISIBLE CELL SELECTION ----------------------------------------
    friend class vtkVisibleCellSelector;
+-- 
+tg: (c430cc9..) jcae/VTK-5.6/translucent (depends on: jcae/VTK-5.6/offset)

@@ -1,5 +1,7 @@
-Work around a bug in object destructor
+From: Denis Barbier <barbier@users.sf.net>
+Subject: Work around a bug in object destructor
 
+Signed-off-by: Denis Barbier <barbier@users.sf.net>
 
 ---
  Common/vtkObject.cxx |    2 +-
@@ -18,3 +20,5 @@ index acebed0..9db7179 100644
      }
    delete this->SubjectHelper;
    this->SubjectHelper = NULL;
+-- 
+tg: (223d8ee..) jcae/VTK-5.6/warning (depends on: jcae/VTK-5.6/translucent)

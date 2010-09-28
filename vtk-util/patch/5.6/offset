@@ -1,15 +1,92 @@
-Make different polygon offset for each mappers.
+From: Denis Barbier <barbier@users.sf.net>
+Subject: Make different polygon offset for each mappers.
 
 By default VTK use statics members so the offset parameters are shared by all the mappers.
 See http://www.vtk.org/Bug/view.php?id=7294
 
+Signed-off-by: Denis Barbier <barbier@users.sf.net>
+
 ---
+ Geovis/vtkGeoView.cxx                              |   30 ++++----
  Rendering/vtkMapper.cxx                            |   69 ++++---------------
  Rendering/vtkMapper.h                              |   63 +++++++++++-------
  Rendering/vtkOpenGLImageActor.cxx                  |   11 +++-
  .../Testing/Cxx/TestOrientationMarkerWidget.cxx    |    2 +-
- 4 files changed, 65 insertions(+), 80 deletions(-)
+ 5 files changed, 80 insertions(+), 95 deletions(-)
 
+diff --git a/Geovis/vtkGeoView.cxx b/Geovis/vtkGeoView.cxx
+index 714322a..e263500 100644
+--- a/Geovis/vtkGeoView.cxx
++++ b/Geovis/vtkGeoView.cxx
+@@ -198,53 +198,53 @@ void vtkGeoView::Render()
+   double units = 0.0;
+ 
+   // Save the depth offset state.
+-  if(vtkMapper::GetResolveCoincidentTopology() ==
++  if(this->LowResEarthMapper->GetResolveCoincidentTopology() ==
+      VTK_RESOLVE_POLYGON_OFFSET)
+     {
+-    vtkMapper::GetResolveCoincidentTopologyPolygonOffsetParameters(
++    this->LowResEarthMapper->GetResolveCoincidentTopologyPolygonOffsetParameters(
+         factor, units);
+     }
+-  else if(vtkMapper::GetResolveCoincidentTopology() ==
++  else if(this->LowResEarthMapper->GetResolveCoincidentTopology() ==
+           VTK_RESOLVE_SHIFT_ZBUFFER)
+     {
+-    zShift = vtkMapper::GetResolveCoincidentTopologyZShift();
++    zShift = this->LowResEarthMapper->GetResolveCoincidentTopologyZShift();
+     }
+ 
+-  vtkMapper::SetResolveCoincidentTopologyZShift(0.0);
+-  vtkMapper::SetResolveCoincidentTopologyToPolygonOffset();
++  this->LowResEarthMapper->SetResolveCoincidentTopologyZShift(0.0);
++  this->LowResEarthMapper->SetResolveCoincidentTopologyToPolygonOffset();
+ 
+   // @Note: This is the workaround for mesa drivers. On Mesa OpenGL
+   // polygon offset is not correctly applied. Its only affecting
+   // the depth values for the outer sphere.
+   if(this->HasMesa())
+     {
+-    vtkMapper::SetResolveCoincidentTopologyPolygonOffsetParameters(1.0, 1.0);
++    this->LowResEarthMapper->SetResolveCoincidentTopologyPolygonOffsetParameters(1.0, 1.0);
+     }
+   else
+     {
+-    vtkMapper::SetResolveCoincidentTopologyPolygonOffsetParameters(1.0, 10500.0);
++    this->LowResEarthMapper->SetResolveCoincidentTopologyPolygonOffsetParameters(1.0, 10500.0);
+     }
+ 
+   this->Renderer->GetCullers()->RemoveAllItems();
+   this->RenderWindow->Render();
+ 
+   // Restore the depth offset state.
+-  if(vtkMapper::GetResolveCoincidentTopology() ==
++  if(this->LowResEarthMapper->GetResolveCoincidentTopology() ==
+      VTK_RESOLVE_POLYGON_OFFSET)
+     {
+-    vtkMapper::SetResolveCoincidentTopologyToPolygonOffset();
+-    vtkMapper::SetResolveCoincidentTopologyPolygonOffsetParameters(
++    this->LowResEarthMapper->SetResolveCoincidentTopologyToPolygonOffset();
++    this->LowResEarthMapper->SetResolveCoincidentTopologyPolygonOffsetParameters(
+         factor, units);
+     }
+-  else if(vtkMapper::GetResolveCoincidentTopology() ==
++  else if(this->LowResEarthMapper->GetResolveCoincidentTopology() ==
+           VTK_RESOLVE_SHIFT_ZBUFFER)
+     {
+-    vtkMapper::SetResolveCoincidentTopologyToShiftZBuffer();
+-    vtkMapper::SetResolveCoincidentTopologyZShift(zShift);
++    this->LowResEarthMapper->SetResolveCoincidentTopologyToShiftZBuffer();
++    this->LowResEarthMapper->SetResolveCoincidentTopologyZShift(zShift);
+     }
+   else
+     {
+-    vtkMapper::SetResolveCoincidentTopologyToOff();
++    this->LowResEarthMapper->SetResolveCoincidentTopologyToOff();
+     }
+ }
+ 
 diff --git a/Rendering/vtkMapper.cxx b/Rendering/vtkMapper.cxx
 index c81a7d3..6a98b11 100644
 --- a/Rendering/vtkMapper.cxx
@@ -278,3 +355,5 @@ index 6e69dc5..5622d48 100644
  
    // anatomic labelling
    //
+-- 
+tg: (b0487e3..) jcae/VTK-5.6/offset (depends on: jcae/VTK-5.6/displayList)

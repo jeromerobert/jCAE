@@ -1,6 +1,9 @@
-Gain many time in pick color.
+From: Denis Barbier <barbier@users.sf.net>
+Subject: Gain many time in pick color.
 
 Additionnal information at http://www.vtk.org/Bug/view.php?id=7111
+
+Signed-off-by: Denis Barbier <barbier@users.sf.net>
 
 ---
  Rendering/vtkOpenGLDisplayListPainter.cxx |   15 +++++++++++----
@@ -131,3 +134,5 @@ index 42c0e4a..a93e43d 100644
    // Set/Get a custom Render call. Allows to hook a Render call from an
    // external project.It will be used in place of vtkRenderer::Render() if it
    // is not NULL and its Used ivar is set to true.
+-- 
+tg: (0c23794..) jcae/VTK-5.6/displayList (depends on: vtk-5.6)

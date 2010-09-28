@@ -1,4 +1,5 @@
-Allow wrapping of vtkRenderWindow::GetColorBufferSizes
+From: Denis Barbier <barbier@users.sf.net>
+Subject: Allow wrapping of vtkRenderWindow::GetColorBufferSizes
 
 See http://www.vtk.org/Bug/view.php?id=7857
 
@@ -6,6 +7,8 @@ When color depth is lower than 24, vtkVisibleCellSelector::Select()
 silently fails.  We want to detect this case to provide
 a software alternative, or at least tell user why picking
 does not work.
+
+Signed-off-by: Denis Barbier <barbier@users.sf.net>
 
 ---
  Rendering/vtkMesaRenderWindow.h     |    1 +
@@ -93,3 +96,5 @@ index 1cc138c..a9b80dc 100644
  
    // Description:
    // Get the vtkPainterDeviceAdapter which can be used to paint on
+-- 
+tg: (eb5c3b5..) jcae/VTK-5.6/getColorBufferSizes (depends on: jcae/VTK-5.6/warning)
