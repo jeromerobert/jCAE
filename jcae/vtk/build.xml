@@ -24,7 +24,7 @@
 	</patternset>
 
 	<target name="-release.files.linux" if="arch.linux">
-		<copy todir="${cluster}/modules/lib">
+		<copy verbose="true" todir="${cluster}/modules/lib">
 			<fileset dir="${vtk.dir.linux}">
 				<patternset refid="vtk.unix.files"/>
 			</fileset>
@@ -32,7 +32,7 @@
 	</target>
 
 	<target name="-release.files.win32" if="arch.win32">
-		<copy todir="${cluster}/modules/lib">
+		<copy verbose="true" todir="${cluster}/modules/lib">
 			<fileset dir="${vtk.dir.win32}">
 				<patternset refid="vtk.windows.files"/>
 			</fileset>
