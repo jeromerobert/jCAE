@@ -147,6 +147,10 @@ public abstract class AlgoAction extends CookieAction {
 	{
 		StringBuilder sb = new StringBuilder(2*nodes.length);
 		boolean first = true;
+		assert ado != null;
+		if(ado.getGroups() == null)
+			return "";
+		assert ado.getGroups().getGroups() != null;
 		int allGroupsNumber = ado.getGroups().getGroups().length;
 		TreeSet<String> selectedGroups = new TreeSet<String>();
 		for(Node n:nodes)
