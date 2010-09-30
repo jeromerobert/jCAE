@@ -20,6 +20,7 @@
 
 package org.jcae.mesh.bora.xmldata;
 
+import java.util.logging.Level;
 import org.jcae.mesh.bora.ds.BSubMesh;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.bora.ds.BDiscretization;
@@ -33,6 +34,7 @@ import gnu.trove.TIntIntHashMap;
 import gnu.trove.TIntObjectHashMap;
 import java.io.IOException;
 import java.util.logging.Logger;
+import org.xml.sax.SAXException;
 
 public class BoraToUnvConvert implements FilterInterface
 {
@@ -200,33 +202,39 @@ public class BoraToUnvConvert implements FilterInterface
 
 	public static void main(String[] args)
 	{
-		org.jcae.mesh.bora.ds.BModel model = BModelReader.readObject(args[0], args[1]);
-		BSubMesh s = model.getSubMeshes().iterator().next();
-		BoraToUnvConvert conv = new BoraToUnvConvert(args[2], s);
-		TIntArrayList listOfFaces = new TIntArrayList();
-		for (java.util.Iterator<BCADGraphCell> its = model.getGraph().getRootCell().shapesExplorer(CADShapeEnum.EDGE); its.hasNext(); )
-		{
-			BCADGraphCell cell = its.next();
-			BDiscretization d = cell.getDiscretizationSubMesh(s);
-			if (d != null)
-				listOfFaces.add(d.getId());
+		try {
+			org.jcae.mesh.bora.ds.BModel model = BModelReader.readObject(args[0],
+				args[1]);
+			BSubMesh s = model.getSubMeshes().iterator().next();
+			BoraToUnvConvert conv = new BoraToUnvConvert(args[2], s);
+			TIntArrayList listOfFaces = new TIntArrayList();
+			for (java.util.Iterator<BCADGraphCell> its = model.getGraph().getRootCell().shapesExplorer(CADShapeEnum.EDGE); its.hasNext();) {
+				BCADGraphCell cell = its.next();
+				BDiscretization d = cell.getDiscretizationSubMesh(s);
+				if (d != null) {
+					listOfFaces.add(d.getId());
+				}
+			}
+			for (java.util.Iterator<BCADGraphCell> its = model.getGraph().getRootCell().shapesExplorer(CADShapeEnum.FACE); its.hasNext();) {
+				BCADGraphCell cell = its.next();
+				BDiscretization d = cell.getDiscretizationSubMesh(s);
+				if (d != null) {
+					listOfFaces.add(d.getId());
+				}
+			}
+			conv.collectBoundaryNodes(listOfFaces.toNativeArray());
+			conv.beforeProcessingAllShapes(false);
+			int groupId = 0;
+			for (int iFace : listOfFaces.toNativeArray()) {
+				groupId++;
+				conv.processOneShape(groupId, "test" + groupId, iFace);
+			}
+			conv.afterProcessingAllShapes();
+		} catch (SAXException ex) {
+			LOGGER.log(Level.SEVERE, null, ex);
+		} catch (IOException ex) {
+			LOGGER.log(Level.SEVERE, null, ex);
 		}
-		for (java.util.Iterator<BCADGraphCell> its = model.getGraph().getRootCell().shapesExplorer(CADShapeEnum.FACE); its.hasNext(); )
-		{
-			BCADGraphCell cell = its.next();
-			BDiscretization d = cell.getDiscretizationSubMesh(s);
-			if (d != null)
-				listOfFaces.add(d.getId());
-		}
-		conv.collectBoundaryNodes(listOfFaces.toNativeArray());
-		conv.beforeProcessingAllShapes(false);
-		int groupId = 0;
-		for (int iFace : listOfFaces.toNativeArray())
-		{
-			groupId++;
-			conv.processOneShape(groupId, "test"+groupId, iFace);
-		}
-		conv.afterProcessingAllShapes();
 	}
 
 }

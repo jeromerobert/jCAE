@@ -32,6 +32,8 @@ import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.MultiDataObject;
 import org.openide.loaders.MultiFileLoader;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
+import org.xml.sax.SAXException;
 
 public class BoraDataObject extends MultiDataObject implements SaveCookie
 {
@@ -75,8 +77,14 @@ public class BoraDataObject extends MultiDataObject implements SaveCookie
 		String tmpDir =  getDirectory();
 		File f = new File(tmpDir, "model");
 		if (f.exists()) {
-			LOGGER.info("Loading Bora model at : " + getDirectory());
-			bModel = BModelReader.readObject(getDirectory(), "model", false);
+			try {
+				LOGGER.info("Loading Bora model at : " + getDirectory());
+				bModel = BModelReader.readObject(getDirectory(), "model", false);
+			} catch (SAXException ex) {
+				Exceptions.printStackTrace(ex);
+			} catch (IOException ex) {
+				Exceptions.printStackTrace(ex);
+			}
 		}
 
 	}

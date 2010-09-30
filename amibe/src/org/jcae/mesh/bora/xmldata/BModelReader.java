@@ -22,6 +22,7 @@
 package org.jcae.mesh.bora.xmldata;
 
 
+import java.io.IOException;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.bora.ds.BModel;
 import org.jcae.mesh.bora.ds.BSubMesh;
@@ -36,11 +37,15 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import gnu.trove.TIntObjectHashMap;
+import java.util.logging.Level;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import java.util.logging.Logger;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+import org.xml.sax.SAXException;
 
 public class BModelReader
 {
@@ -64,15 +69,15 @@ public class BModelReader
 		return null;
 	}
 	
-	public static BModel readObject(String xmlDir)
+	public static BModel readObject(String xmlDir) throws SAXException, IOException
 	{
 		return readObject(xmlDir, "model", true);
 	}
-	public static BModel readObject(String xmlDir, String xmlFile)
+	public static BModel readObject(String xmlDir, String xmlFile) throws SAXException, IOException
 	{
 		return readObject(xmlDir, xmlFile, true);
 	}
-	public static BModel readObject(String xmlDir, String xmlFile, boolean validate)
+	public static BModel readObject(String xmlDir, String xmlFile, boolean validate) throws SAXException, IOException
 	{
 		BModel model = null;
 		// Reset ids
@@ -171,10 +176,13 @@ public class BModelReader
 				}
 			}
 		}
-		catch(Exception ex)
+		catch(ParserConfigurationException ex)
 		{
-			ex.printStackTrace();
-			throw new RuntimeException(ex);
+			LOGGER.log(Level.SEVERE, null, ex);
+		}
+		catch(XPathExpressionException ex)
+		{
+			LOGGER.log(Level.SEVERE, null, ex);
 		}
 		return model;
 	}

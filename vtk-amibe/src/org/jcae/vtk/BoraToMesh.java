@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
+import org.xml.sax.SAXException;
 
 /**
  * Converts a list of discretization to vtk mesh object
@@ -45,7 +46,7 @@ public class BoraToMesh {
 	private final static Logger LOGGER=Logger.getLogger(BoraToMesh.class.getName());
 	private final  Map<String, LeafNode.DataProvider> mesh;
 
-	public BoraToMesh(String xmlBoraDir) {
+	public BoraToMesh(String xmlBoraDir) throws SAXException, IOException {
 		this(buildMeshData(xmlBoraDir));
 	}
 
@@ -56,7 +57,7 @@ public class BoraToMesh {
 		}
 	}
 
-	private static Map<String, Collection<BDiscretization>> buildMeshData(String xmlBoraDir) {
+	private static Map<String, Collection<BDiscretization>> buildMeshData(String xmlBoraDir) throws SAXException, IOException {
 		BModel bModel = BModelReader.readObject(xmlBoraDir);
 		Map<String, Collection<BDiscretization>> meshData = new HashMap<String, Collection<BDiscretization>>();
 		for (BSubMesh subMesh : bModel.getSubMeshes()){
