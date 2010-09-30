@@ -76,7 +76,7 @@ public abstract class AbstractGroupAction extends CookieAction
 			for(Node n:arg0)
 			{
 				AmibeDataObject ado = n.getLookup().lookup(AmibeDataObject.class);
-				if(ado != null)
+				if(ado != null && ado.getGroups() != null)
 					groups2Group.put(n, createTreeSet(ado.getGroups().getGroups()));
 			}
 
