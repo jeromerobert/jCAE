@@ -48,16 +48,8 @@ public class GPure2Amibe {
 	private final TIntArrayList faceDataArray = new TIntArrayList();
 	/** local array to save face information in a group. */
 	private final TIntArrayList groupFaceArray = new TIntArrayList();
-	/**  String to save group data set name (GPure:name) */
-	private String groupDataName;
-	/** Flag to check GPure:faces i.e. face information inside tesselation data */
-	private boolean tessFaceLocation;
-	/** Flag to check GPure:positions i.e. point coordinates inside tesselation */
-	private boolean tessPosLocation;
 	/** Flag to check GPure:Description with group data */
 	private boolean groupDataSetActive;
-	/** Flag to check GPure:faces i.e. faces information inside group data */
-	private boolean groupFaceLocation;
 
 	/**
 	 *
@@ -106,16 +98,8 @@ public class GPure2Amibe {
 
 		while (streamReader.hasNext()) {
 			streamReader.next();
-			String qName = streamReader.getLocalName();
-			//Reading START_ELEMENT
-			if (streamReader.getEventType() == XMLStreamReader.START_ELEMENT) {
-				processStartElements(streamReader, qName, out);
-			}
-
-			//Reading END_ELEMENT
-			if (streamReader.getEventType() == XMLStreamReader.END_ELEMENT) {
-				processEndElements(qName, out);
-			}
+			if(streamReader.getEventType() == XMLStreamReader.START_ELEMENT)
+				processStartElements(streamReader, streamReader.getLocalName(), out);		
 		}
 
 		//Create a group with all faces and add to Amibe
@@ -135,81 +119,35 @@ public class GPure2Amibe {
 	 * @throws IOException
 	 */
 	private void processStartElements(XMLStreamReader streamReader, String qName,
-		AmibeWriter.Dim3 out) throws XMLStreamException, IOException {
+		AmibeWriter.Dim3 out) throws XMLStreamException, IOException
+	{
 		// if group data location is reached ; set flag  groupDataSetActive true.
-		if (false == groupDataSetActive && qName.equalsIgnoreCase("dataType") && (streamReader.getElementText()).equalsIgnoreCase(
-			"partition")) {
+		if (false == groupDataSetActive && qName.equalsIgnoreCase("dataType") &&
+			(streamReader.getElementText()).equalsIgnoreCase("partition")) {
 			groupDataSetActive = true;
 		}
 
-		// if tesselation face data location is reached ; set flag  tessFaceLocation true.
-		if (false == groupDataSetActive && qName.equalsIgnoreCase("faces")) {
-			tessFaceLocation = true;
-		}
-
-		// if tesselation positions data location is reached ; set flag  tessPosLocation true.
-		if (false == groupDataSetActive && qName.equalsIgnoreCase("positions")) {
-			tessPosLocation = true;
-		}
-
-		//if group face data location is reached ; set flag  groupFaceLocation true.
-		if (true == groupDataSetActive && qName.equalsIgnoreCase("faces")) {
-			groupFaceLocation = true;
-		}
-
-		//if group data name location is reached ; set flag  groupDataName true.
-		if (true == groupDataSetActive && qName.equalsIgnoreCase("name")) {
-			groupDataName = streamReader.getElementText();
-		}
-
 		//Read and convert tesselation face information
-		if (!groupDataSetActive && tessFaceLocation) {
+		if (!groupDataSetActive && qName.equalsIgnoreCase("faces")) {
 			convertTessFaceData(streamReader, out);
 		}
 
 		//Read and convert tesselation positions information
-		if (false == groupDataSetActive && true == tessPosLocation) {
+		if (!groupDataSetActive && qName.equalsIgnoreCase("positions")) {
 			convertTessPositionData(streamReader, out);
 		}
 
-		//Read and Convert group face information
-		if (true == groupFaceLocation && true == groupDataSetActive) {
+		//if group face data location is reached ; set flag  groupFaceLocation true.
+		if (groupDataSetActive && qName.equalsIgnoreCase("faces")) {
 			convertPartitionData(streamReader, groupFaceArray);
 		}
-	}
 
-	/**
-	 *
-	 * <li>Processes END_ELEMENT in GPure file.</li>
-	 * @param qName
-	 */
-	private void processEndElements(String qName, AmibeWriter.Dim3 out) throws
-		IOException {
-		// if tesselation face data location is reached ; set flag  tessFaceLocation false.
-		if (qName.equalsIgnoreCase("faces")) {
-			tessFaceLocation = false;
-		}
-
-		// if tesselation positions data location is reached ; set flag  tessPosLocation false.
-		if (qName.equalsIgnoreCase("positions")) {
-			tessPosLocation = false;
-		}
-
-		// if group face data location is reached ; set flag  groupFaceLocation false.
-		if (true == groupDataSetActive && qName.equalsIgnoreCase("faces")) {
-			groupFaceLocation = false;
-
-			// add the face information from current group data set to  groupFaceDataArray
-			// groupFaceDataArray.add(new ArrayList<Integer>(groupFaceArray));
-			// groupFaceArray.clear();
-		}
-
-		//if group data name is reached; set flag groupDataSetActive false.
-		if (true == groupDataSetActive && qName.equalsIgnoreCase("name")) {
+		//if group data name location is reached ; set flag  groupDataName true.
+		if (groupDataSetActive && qName.equalsIgnoreCase("name")) {
+			String groupDataName = streamReader.getElementText();
 			groupDataSetActive = false;
-			fillGroupFaceData(out);
+			fillGroupFaceData(out, groupDataName);
 		}
-
 	}
 
 	/**
@@ -290,6 +228,9 @@ public class GPure2Amibe {
 				groupFaceArray.add(faceValue);
 			}
 		}
+		// add the face information from current group data set to  groupFaceDataArray
+		// groupFaceDataArray.add(new ArrayList<Integer>(groupFaceArray));
+		// groupFaceArray.clear();
 	}
 
 	/**
@@ -297,7 +238,7 @@ public class GPure2Amibe {
 	 * @param out
 	 * @throws IOException
 	 */
-	private void fillGroupFaceData(AmibeWriter.Dim3 out) throws IOException {
+	private void fillGroupFaceData(AmibeWriter.Dim3 out, String groupDataName) throws IOException {
 		if (!groupDataName.isEmpty()) {
 			out.nextGroup(groupDataName);
 			for (int j = 0; j < groupFaceArray.size(); j++) {
