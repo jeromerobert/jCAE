@@ -25,6 +25,8 @@ import java.beans.PropertyChangeListener;
 import java.beans.XMLEncoder;
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Set;
 import org.jcae.mesh.xmldata.Groups;
 import org.jcae.mesh.xmldata.GroupsReader;
 import org.jcae.netbeans.Utilities;
@@ -55,6 +57,25 @@ public class AmibeDataObject extends MultiDataObject implements SaveCookie
 				setModified(true);
 			}
 		});
+	}
+
+	@Override
+	public String getName() {
+		Set<Entry> se = secondaryEntries();
+		if(se.isEmpty())
+			return getPrimaryFile().getName();
+		else
+		{
+			String s = null;
+			for(Entry e:se)
+			{
+				s = e.getFile().getName();
+				if(s.endsWith("_mesh"))
+					break;
+			}
+			System.out.println("dn: "+s);
+			return s.substring(0, s.length()-"_mesh".length());
+		}
 	}
 
 	@Override

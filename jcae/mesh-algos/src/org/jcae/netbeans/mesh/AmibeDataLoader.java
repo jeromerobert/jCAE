@@ -27,11 +27,9 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import org.jcae.netbeans.Utilities;
-import org.jcae.netbeans.mesh.Mesh;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.FileEntry;
 import org.openide.loaders.MultiDataObject;
@@ -43,8 +41,7 @@ public class AmibeDataLoader extends MultiFileLoader
 {
 	public static final String REQUIRED_MIME = "text/mesh+xml";
 	private static final long serialVersionUID = 1L;
-	private static Map<FileObject, Mesh> primaryToMesh = new HashMap<FileObject, Mesh>();
-	private static Map<FileObject, FileObject> secToPrimary = new HashMap<FileObject, FileObject>();
+	private static Map<FileObject, Mesh> primaryToMesh = new HashMap<FileObject, Mesh>();	
 
 	public AmibeDataLoader()
 	{
@@ -58,33 +55,31 @@ public class AmibeDataLoader extends MultiFileLoader
 	}
 
 	@Override
-	protected FileObject findPrimaryFile(FileObject arg0) {		
+	protected FileObject findPrimaryFile(FileObject arg0) {
+		FileObject toReturn = null;
 		if(REQUIRED_MIME.equals(arg0.getMIMEType()))
 		{
-			Mesh m = primaryToMesh.get(arg0);
-			if(m == null)
-				addMapEntry(arg0);
-			return arg0;
+			toReturn = addMapEntry(arg0);
 		}
 		else if(isjCAEDirectory(arg0))
 		{
-			FileObject p = secToPrimary.get(arg0);
-			if(p == null)
-				return fillMaps(arg0);
-			return p;
+			toReturn = arg0;
 		}
 		else if("oemm".equals(arg0.getExt()) && arg0.isFolder())
 		{
-			return arg0.getParent().getFileObject(arg0.getName()+"_mesh.xml");
+			toReturn = addMapEntry(arg0.getParent().getFileObject(arg0.getName()+"_mesh.xml"));
 		}
-		return null;
+		return toReturn;
 	}
 
 	@Override
 	protected MultiDataObject createMultiObject(FileObject primaryFile)
 		throws DataObjectExistsException
 	{
-		return new AmibeDataObject(primaryFile, this, primaryToMesh.get(primaryFile));
+		Mesh m = primaryToMesh.remove(primaryFile);
+		if(m == null)
+			m = new Mesh(primaryFile.getNameExt());
+		return new AmibeDataObject(primaryFile, this, m);
 	}
 
 	@Override
@@ -95,7 +90,6 @@ public class AmibeDataLoader extends MultiFileLoader
 
 	@Override
 	protected Entry createSecondaryEntry(MultiDataObject obj, FileObject secondaryFile) {		
-		primaryToMesh.remove(secToPrimary.remove(secondaryFile));
 		return new FileEntry(obj, secondaryFile);
 	}
 
@@ -110,35 +104,24 @@ public class AmibeDataLoader extends MultiFileLoader
 		else
 			return false;
 	}
-
-	private FileObject fillMaps(FileObject arg0) {
-		for(FileObject f:arg0.getParent().getChildren())
-			if(REQUIRED_MIME.equals(f.getMIMEType()))
-				if(arg0.equals(addMapEntry(f)))
-					return f;
-		return null;
-	}
 	
 	/**
 	 *
-	 * @param arg0 primary file (.xml)
-	 * @return secondary file (amibe.dir)
+	 * @param arg0 secondary file (.xml)
+	 * @return primary file (amibe.dir)
 	 */
-	private FileObject addMapEntry(FileObject arg0)
+	private FileObject addMapEntry(FileObject secondaryFile)
 	{
-		Mesh m = createMesh(arg0);
-		primaryToMesh.put(arg0, m);
-		File fp = FileUtil.toFile(arg0.getParent());
+		File fp = FileUtil.toFile(secondaryFile.getParent());
 		if(fp == null)
 			//will happen if the FileObject is a template
 			return null;
-		String reference = fp.getPath();
-		FileObject sec = FileUtil.toFileObject(
-			new File(Utilities.absoluteFileName(m.getMeshFile(), reference)));
-		secToPrimary.put(sec, arg0);
-		return sec;
+		Mesh m = createMesh(secondaryFile);
+		FileObject primaryFile = FileUtil.toFileObject(
+			new File(Utilities.absoluteFileName(m.getMeshFile(), fp.getPath())));
+		primaryToMesh.put(primaryFile, m);
+		return primaryFile;
 	}
-
 
 	private static Mesh createMesh(FileObject file)
 	{

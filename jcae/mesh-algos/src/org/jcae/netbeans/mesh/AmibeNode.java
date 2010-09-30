@@ -59,6 +59,7 @@ public class AmibeNode extends DataNode
 	public AmibeNode(AmibeDataObject arg0)
 	{
 		super(arg0, new Children.Array());
+		setDisplayName(getName());
 		setIconBaseWithExtension("org/jcae/netbeans/mesh/amibe.png");
 	}
 
@@ -172,33 +173,6 @@ public class AmibeNode extends DataNode
 
 	public Mesh getMesh() {
 		return getCookie(AmibeDataObject.class).getMesh();
-	}
-
-	@Override
-	public String getDisplayName() {
-		return getName();
-	}
-
-	@Override
-	public void setName(String arg0)
-	{
-		try
-		{
-			String o=getName();
-			getDataObject().rename(arg0+"_mesh");
-			fireDisplayNameChange(o, arg0);
-			fireNameChange(o, arg0);
-		}
-		catch (IOException e)
-		{
-			ErrorManager.getDefault().notify(e);
-		}
-	}
-
-	public String getName()
-	{
-		String s = getDataObject().getName();
-		return s.substring(0, s.length()-"_mesh".length());
 	}
 
 	public void updateGeomNode()
