@@ -15,19 +15,22 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2009, by EADS France
+ * (C) Copyright 2009-2010, by EADS France
  */
 
 package org.jcae.netbeans.mesh;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import javax.swing.event.ChangeListener;
+import org.jcae.mesh.xmldata.AmibeWriter;
 import org.openide.WizardDescriptor;
 import org.openide.WizardDescriptor.Panel;
 import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.TemplateWizard;
 
@@ -40,8 +43,11 @@ public class AmibeNewWizard implements WizardDescriptor.InstantiatingIterator<Wi
 	
 	public Set<AmibeDataObject> instantiate() throws IOException {
 		FileObject fo = wizard.getTargetFolder().getPrimaryFile();
-		FileObject m = fo.createData(wizard.getTargetName()+"_mesh.xml");
-		AmibeDataObject mdo = (AmibeDataObject) DataObject.find(m);
+		File f = new File(FileUtil.toFile(fo), wizard.getTargetName() + ".amibe");
+		AmibeWriter aw = new AmibeWriter.Dim3(f.getPath());
+		aw.nextSubMesh();
+		aw.finish();
+		AmibeDataObject mdo = (AmibeDataObject) DataObject.find(FileUtil.toFileObject(f));
 		mdo.save();
 		return Collections.singleton(mdo);
 	}

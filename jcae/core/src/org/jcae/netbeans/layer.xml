@@ -440,10 +440,11 @@
                 <attr name="template" boolvalue="true"/>
                 <attr name="instantiatingIterator" newvalue="org.jcae.netbeans.mesh.bora.BoraNewWizard"/>
             </file>
-            <file name="Amibe mesh_mesh.xml">
+            <folder name="Amibe mesh">
+				<file name="jcae3d"/>
                 <attr name="template" boolvalue="true"/>
                 <attr name="instantiatingIterator" newvalue="org.jcae.netbeans.mesh.AmibeNewWizard"/>
-            </file>
+            </folder>
         </folder>
         <folder name="Privileged">
             <file name="Geometry.shadow">
@@ -451,7 +452,7 @@
                 <attr name="position" intvalue="0"/>
             </file>
             <file name="Amibe mesh.shadow">
-                <attr name="originalFile" stringvalue="Templates/jCAE/Amibe mesh_mesh.xml"/>
+                <attr name="originalFile" stringvalue="Templates/jCAE/Amibe mesh"/>
                 <attr name="position" intvalue="100"/>
             </file>
 			<file name="Bora mesh.shadow">

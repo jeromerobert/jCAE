@@ -411,9 +411,7 @@ public abstract class AmibeWriter {
 	}
 
 	private void writeSubMesh() throws IOException
-	{	
-		if(numberOfNodes == 0)
-			return;
+	{
 		try
 		{
 			XMLStreamWriter o = xmlWriter.out;

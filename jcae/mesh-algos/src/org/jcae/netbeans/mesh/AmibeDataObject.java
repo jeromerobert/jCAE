@@ -39,6 +39,7 @@ import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.MultiDataObject;
 import org.openide.loaders.MultiFileLoader;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -61,23 +62,42 @@ public class AmibeDataObject extends MultiDataObject implements SaveCookie
 
 	@Override
 	public String getName() {
-		Set<Entry> se = secondaryEntries();
-		if(se.isEmpty())
+		FileObject xmlMesh = getXMLMesh(false);
+		if(xmlMesh == null)
 			return getPrimaryFile().getName();
 		else
 		{
-			String s = null;
-			for(Entry e:se)
-			{
-				s = e.getFile().getName();
-				if(s.endsWith("_mesh"))
-					break;
-			}
-			System.out.println("dn: "+s);
+			String s = xmlMesh.getName();
 			return s.substring(0, s.length()-"_mesh".length());
 		}
 	}
 
+	/** Return the secondary entry which ends by _mesh.xml */
+	private FileObject getXMLMesh(boolean create)
+	{
+		FileObject toReturn = null;
+		for(Entry e:secondaryEntries())
+		{
+			String s = e.getFile().getName();
+			if(s.endsWith("_mesh"))
+				toReturn = e.getFile();
+		}
+		
+		if(create)
+		{
+			String name = getPrimaryFile().getName();
+			try {
+				FileObject parent = getPrimaryFile().getParent();
+				FileLock l = parent.lock();
+				toReturn = parent.createData(name + "_mesh.xml");
+				l.releaseLock();
+			} catch (IOException ex) {
+				Exceptions.printStackTrace(ex);
+			}
+		}
+		return toReturn;
+	}
+	
 	@Override
 	protected Node createNodeDelegate()
 	{
@@ -109,7 +129,7 @@ public class AmibeDataObject extends MultiDataObject implements SaveCookie
 		XMLEncoder encoder = null;
 		try
 		{
-			FileObject out = getPrimaryFile();
+			FileObject out = getXMLMesh(true);
 			l = out.lock();
 			encoder = new XMLEncoder(out.getOutputStream(l));
 			encoder.writeObject(mesh);

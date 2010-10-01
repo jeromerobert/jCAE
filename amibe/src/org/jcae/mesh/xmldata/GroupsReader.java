@@ -72,12 +72,15 @@ public class GroupsReader
 			{
 				Element triangles = (Element) xmlDoc.getElementsByTagName(
 					"triangles").item(1); /* on recupere l'element triangle */
-				Group group = new Group();
-				group.setId(0);
-				group.setName("default");
-				group.setNumberOfElements(Integer.valueOf(
-					getStringByTagName(triangles, "number")).intValue());
-				group.setOffset(0);
+				if(triangles != null)
+				{
+					Group group = new Group();
+					group.setId(0);
+					group.setName("default");
+					group.setNumberOfElements(Integer.valueOf(
+						getStringByTagName(triangles, "number")).intValue());
+					group.setOffset(0);
+				}
 			}
 			else
 			{
