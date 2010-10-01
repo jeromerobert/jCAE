@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2007,2008,2009, by EADS France
+ * (C) Copyright 2007-2010, by EADS France
  */
 
 package org.jcae.mesh.xmldata;
@@ -27,10 +27,14 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
@@ -116,13 +120,67 @@ public class UNV2Amibe
 			
 			return l1;
 		}		
-	}	
+	}
+
+	/**
+	 * Map an UNV element ID with Amibe element ID.
+	 * This is required because UNV file mix beams and trias while amibe
+	 * separate them
+	 * This is done in a temporary file to save memory
+	 */
+	private static class IDMapping
+	{
+		/**
+		 * Element type in the temporary file used to separate beams from trias
+		 * in groups.
+		 */
+		public static int TRIAS = 0, BEAMS = 1;
+		private FileChannel channel;
+		private File file;
+		private ByteBuffer buffer = ByteBuffer.allocate(8);
+		public IDMapping() throws IOException
+		{
+			file = File.createTempFile("amibe", ".bin");
+			file.deleteOnExit();
+			channel = new RandomAccessFile(file, "rw").getChannel();
+		}
+
+		public void close() throws IOException
+		{
+			channel.close();
+			file.delete();
+		}
+
+		public void add(int amibeID, int type) throws IOException
+		{
+			buffer.rewind();
+			buffer.putInt(amibeID);
+			buffer.putInt(type);
+			buffer.rewind();			
+			channel.write(buffer);
+		}
+
+		public void seek(int id) throws IOException
+		{
+			buffer.rewind();
+			channel.read(buffer, 8*id);
+		}
+
+		public int getID()
+		{
+			return buffer.getInt(0);
+		}
+
+		public int getType()
+		{
+			return buffer.getInt(4);
+		}
+	}
 	
 	private static final Logger LOGGER=Logger.getLogger(UNV2Amibe.class.getName());
-	private String unitBlock;
-		
-	private int numberOfNodes, numberOfTriangles;
+	private String unitBlock;	
 	private String stripedUnvFile;
+	private IDMapping idMapping;
 	
 	/** a list of 2412 elements which won't be store in the amibe file */
 	private final ArrayList<Element> elements=new ArrayList<Element>();
@@ -151,6 +209,7 @@ public class UNV2Amibe
 	
 	private void importMesh(BufferedReader in, AmibeWriter.Dim3 out) throws IOException
 	{
+		idMapping = new IDMapping();
 		double unit = 1.0;
 		String line;
 		while ((line=in.readLine())!=null)
@@ -190,6 +249,7 @@ public class UNV2Amibe
 				}
 			}
 		}
+		idMapping.close();
 	}
 
 	/** List of nodes used in elements which are not written in the amibe file */
@@ -215,7 +275,7 @@ public class UNV2Amibe
 	
 	private void writeStripedUnv(AmibeWriter out) throws IOException
 	{
-		if(elements.size()==0)
+		if(elements.isEmpty())
 			return;
 		PrintStream stripedUnv=new PrintStream(new FileOutputStream(stripedUnvFile));
 		stripedUnv.println("    -1");
@@ -279,7 +339,14 @@ public class UNV2Amibe
 					st.nextToken();
 					int ind = Integer.parseInt(st.nextToken());
 					if (ind != 0)
-						out.addTriaToGroup(ind-1);
+					{
+						ind --;
+						idMapping.seek(ind);
+						if(idMapping.getType() == IDMapping.BEAMS)
+							out.addBeamToGroup(idMapping.getID());
+						else
+							out.addTriaToGroup(idMapping.getID());
+					}
 					
 					nbelem--;
 					if (type.equals("2435"))
@@ -349,8 +416,7 @@ public class UNV2Amibe
 			x = Double.parseDouble(x1)/unit;
 			y = Double.parseDouble(y1)/unit;
 			z = Double.parseDouble(z1)/unit;
-			out.addNode(x, y, z);
-			numberOfNodes++;
+			out.addNode(x, y, z);	
 		}
 	}
 
@@ -358,16 +424,14 @@ public class UNV2Amibe
 	{
 		LOGGER.fine("Reading triangles");
 		String line = "";
-
-		int p1, p2, p3;
+		int nbTrias = 0;
+		int nbBeams = 0;
 		while (!(line=rd.readLine()).trim().equals("-1"))
 		{
 			// first line: type of object
 			StringTokenizer st = new StringTokenizer(line);
 			st.nextToken(); // face index
 			int type=Integer.parseInt(st.nextToken());
-			//write degenerated triangle if
-			p1 = 1; p2 = 1; p3 = 1;  
 			switch(type)
 			{
 				case 41:
@@ -378,21 +442,29 @@ public class UNV2Amibe
 					line=rd.readLine();
 					// triangle
 					st = new StringTokenizer(line);
+					int p1, p2, p3;
 					p1 = Integer.parseInt(st.nextToken());
 					p2 = Integer.parseInt(st.nextToken());
-					p3 = Integer.parseInt(st.nextToken());					
+					p3 = Integer.parseInt(st.nextToken());
+					out.addTriangle(p1-1, p2-1, p3-1);
+					idMapping.add(nbTrias, IDMapping.TRIAS);
+					nbTrias ++;
 					break;
 				case 94:
 					break; //ignored
 				case 11: //rod
 				case 21: //linear beam
-					elements.add(new Element21(line, rd));
+					System.out.println("zob");
+					Element21 beam = new Element21(line, rd);
+					out.addBeam(beam.getNode(0)-1, beam.getNode(1)-1);
+					idMapping.add(nbBeams, IDMapping.BEAMS);
+					nbBeams ++;
 					break;
 				case 92: //parabolic triangles
-					Element92 e=new Element92(line, rd);					
-					p1=e.getNode(0);
-					p2=e.getNode(2);
-					p3=e.getNode(4);					
+					Element92 e=new Element92(line, rd);
+					out.addTriangle(e.getNode(0)-1, e.getNode(2)-1, e.getNode(4)-1);
+					idMapping.add(nbTrias, IDMapping.TRIAS);
+					nbTrias ++;
 					break;
 				case 118: //tetra
 					//skip it
@@ -400,10 +472,8 @@ public class UNV2Amibe
 					rd.readLine();
 					break;
 				default:
-					System.out.println("Warning: Section 2412, type "+type+" unknown");
-			}
-			out.addTriangle(p1-1, p2-1, p3-1);
-			numberOfTriangles++;
+					LOGGER.log(Level.WARNING, "Warning: Section 2412, type {0} unknown", type);
+			}			
 		}
 	}
 	
@@ -428,10 +498,8 @@ public class UNV2Amibe
 				stripedFile = args[2];
 			u.setStripedUnv(stripedFile);
 			u.importMesh(unvFile, amibeDir);
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
+		} catch (Exception ex) {
+			LOGGER.log(Level.SEVERE, null, ex);
 		}
 	}
 }
