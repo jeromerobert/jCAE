@@ -333,7 +333,7 @@ public abstract class AmibeReader extends XMLReader implements JCAEXMLData {
 				if(beg != null)
 				{
 					g.numberOfBeams = readInt(beg, "number");
-					g.beamsOffset = readFile(eg).offset;
+					g.beamsOffset = readFile(beg).offset;
 				}
 				sm.groups.put(g.getName(), g);
 			}
