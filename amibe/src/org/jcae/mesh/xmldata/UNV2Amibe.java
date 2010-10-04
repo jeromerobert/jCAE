@@ -454,7 +454,6 @@ public class UNV2Amibe
 					break; //ignored
 				case 11: //rod
 				case 21: //linear beam
-					System.out.println("zob");
 					Element21 beam = new Element21(line, rd);
 					out.addBeam(beam.getNode(0)-1, beam.getNode(1)-1);
 					idMapping.add(nbBeams, IDMapping.BEAMS);
