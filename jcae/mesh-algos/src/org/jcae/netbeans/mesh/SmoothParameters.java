@@ -78,6 +78,10 @@ public class SmoothParameters extends PropertySheet
 			r.put(new MyProperty<Boolean>(Boolean.TYPE, "preserveGroups",
 				"Preserve groups",
 				"Edges adjacent to two different groups are handled like free edges."));
+			r.put(new MyProperty<Double>(Double.TYPE, "coplanarity",
+				"Coplanarity",
+				"Dot product of face normals to detect feature edges. "+
+				"A negative value disable feature edges detection."));
 		} catch (NoSuchMethodException ex) {
 			Exceptions.printStackTrace(ex);
 		}
@@ -97,6 +101,15 @@ public class SmoothParameters extends PropertySheet
 	private double elementSize=-1;
 	private int iterationNumber=10;
 	private boolean preserveGroups = true;
+	private double coplanarity = -1.0;
+
+	public double getCoplanarity() {
+		return coplanarity;
+	}
+
+	public void setCoplanarity(double coplanarity) {
+		this.coplanarity = coplanarity;
+	}
 
 	public double getElementSize()
 	{
