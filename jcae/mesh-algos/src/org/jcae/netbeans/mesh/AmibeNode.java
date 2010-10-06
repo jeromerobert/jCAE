@@ -20,6 +20,7 @@
 
 package org.jcae.netbeans.mesh;
 
+import java.awt.Image;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -28,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import javax.swing.Action;
+import javax.swing.ImageIcon;
 import org.jcae.mesh.xmldata.Groups;
 import org.jcae.netbeans.BeanProperty;
 import org.openide.ErrorManager;
@@ -55,12 +57,22 @@ public class AmibeNode extends DataNode
 {
 	private AbstractNode groupsNode;
 	private AbstractNode geomNode;
-
+	public final static ImageIcon ICON =
+		new ImageIcon(AmibeNode.class.getResource("amibe.png"));
 	public AmibeNode(AmibeDataObject arg0)
 	{
 		super(arg0, new Children.Array());
 		setDisplayName(getName());
-		setIconBaseWithExtension("org/jcae/netbeans/mesh/amibe.png");
+	}
+
+	@Override
+	public Image getIcon(int type) {
+		return ICON.getImage();
+	}
+
+	@Override
+	public Image getOpenedIcon(int type) {
+		return getIcon(type);
 	}
 
 	public AbstractNode getGroupsNode()
