@@ -44,13 +44,13 @@ import java.util.logging.Logger;
 public class GPure2Amibe {
 
 	private final static Logger LOGGER = Logger.getLogger(GPure2Amibe.class.getName());
-	/** Array to save Tesselation face data (GPure:faces) */
-	private final TIntArrayList faceDataArray = new TIntArrayList();
+	private int numberOfFaces = 0;
 	/** local array to save face information in a group. */
 	private final TIntArrayList groupFaceArray = new TIntArrayList();
 	/** Flag to check GPure:Description with group data */
 	private boolean groupDataSetActive;
-
+	private boolean defaultGroupNeeded = true;	
+	
 	/**
 	 *
 	 * <li>Creates instance of XMLInputFactory</li>
@@ -102,10 +102,12 @@ public class GPure2Amibe {
 				processStartElements(streamReader, streamReader.getLocalName(), out);		
 		}
 
-		//Create a group with all faces and add to Amibe
-		out.nextGroup("allFaces");
-		for (int i = 0; i < faceDataArray.size(); i++) {
-			out.addTriaToGroup(faceDataArray.get(i));
+		if(defaultGroupNeeded)
+		{
+			//Create a group with all faces and add to Amibe
+			out.nextGroup("allFaces");
+			for (int i = 0; i < numberOfFaces; i++)
+				out.addTriaToGroup(i);
 		}
 		out.finish();
 	}
@@ -125,6 +127,7 @@ public class GPure2Amibe {
 		if (false == groupDataSetActive && qName.equalsIgnoreCase("dataType") &&
 			(streamReader.getElementText()).equalsIgnoreCase("partition")) {
 			groupDataSetActive = true;
+			defaultGroupNeeded = false;
 		}
 
 		//Read and convert tesselation face information
@@ -174,9 +177,7 @@ public class GPure2Amibe {
 
 			//Add triangle to AmibeWriter Object
 			out.addTriangle(iCellVal1, iCellVal2, iCellVal3);
-			faceDataArray.add(iCellVal1);
-			faceDataArray.add(iCellVal2);
-			faceDataArray.add(iCellVal3);
+			numberOfFaces ++;
 		}
 	}
 
