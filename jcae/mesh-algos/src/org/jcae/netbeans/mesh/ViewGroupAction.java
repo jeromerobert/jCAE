@@ -20,12 +20,17 @@
 
 package org.jcae.netbeans.mesh;
 
+import java.awt.EventQueue;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 import org.jcae.vtk.AmibeToMesh;
 import org.jcae.vtk.View;
 import org.openide.explorer.ExplorerManager;
+import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
+import org.openide.util.WeakListeners;
 import org.xml.sax.SAXException;
 
 public class ViewGroupAction extends AbstractGroupAction
@@ -35,8 +40,36 @@ public class ViewGroupAction extends AbstractGroupAction
 		return "View";
 	}
 
+	/**
+	 * A viewable which remove it self from the view if the underlying
+	 * DataObject is removed
+	 */
+	private static class AViewable extends AmibeNViewable implements PropertyChangeListener
+	{
+		private final View view;
+		public AViewable(Node n, ExplorerManager em, View view) {
+			super(n, em);
+			this.view = view;
+		}
+		public void propertyChange(PropertyChangeEvent evt) {
+			if(DataObject.PROP_VALID.equals(evt.getPropertyName()))
+			{
+				if(!(Boolean)evt.getNewValue())
+				{
+					//We are in the file system monitor thread so we need to
+					//switch to the EDT.
+					EventQueue.invokeLater(new Runnable(){
+						public void run() {
+							view.remove(AViewable.this);
+						}
+					});
+				}
+			}
+		}
+	};
+	
 	@Override
-	protected void processGroups(String[] idGroupsDisplayed, View view, Node node,
+	protected void processGroups(String[] idGroupsDisplayed, final View view, Node node,
 		ExplorerManager em)
 		throws ParserConfigurationException, SAXException, IOException
 	{
@@ -44,9 +77,14 @@ public class ViewGroupAction extends AbstractGroupAction
 		AmibeDataObject ado = node.getLookup().lookup(AmibeDataObject.class);
 		if(interactor == null)
 		{
-			interactor = new AmibeNViewable(node, em);
-			interactor.setName(ado.getName());
-			view.add(interactor);		
+			AViewable v = new AViewable(node, em, view);
+			v.setName(ado.getName());
+			view.add(v);
+			// thanks to WeakListerns, the PropertyChangeListener is
+			// automatically removed from the AmibeDataObject when the viewable
+			// is removed from the view
+			ado.addPropertyChangeListener(WeakListeners.propertyChange(v, ado));
+			interactor = v;
 		}		
 		AmibeToMesh reader = new AmibeToMesh(ado.getGroups().getMeshFile(), idGroupsDisplayed);
 		interactor.addTriangles(reader.getTriangles());
