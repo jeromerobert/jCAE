@@ -38,6 +38,8 @@ public class DecimateParameter extends PropertySheet
 	private double tolerance = 0.01;
 	private boolean useTolerance=true;
 	private boolean preserveGroups = true;
+	private boolean useMaxLength;
+	private double maxLength = 1.0;
 	
 	private class MyProperty<T> extends PropertySupport.Reflection<T>
 	{
@@ -93,6 +95,17 @@ public class DecimateParameter extends PropertySheet
 			r.put(new MyProperty<Boolean>(Boolean.TYPE, "preserveGroups",
 				"Preserve groups",
 				"Edges adjacent to two different groups are handled like free edges."));
+			r.put(new MyProperty<Boolean>(Boolean.TYPE, "useMaxLength",
+				"Use max length",
+				"Enable max length parameter."));
+
+			r.put(new MyProperty<Double>(Double.TYPE, "maxLength",
+				"Maximum length", "No edges longer than this value are created."){
+				@Override
+				public boolean canWrite() {
+					return useMaxLength;
+				}
+			});
 
 		} catch (NoSuchMethodException ex) {
 			Exceptions.printStackTrace(ex);
@@ -108,6 +121,22 @@ public class DecimateParameter extends PropertySheet
 		d.setResizable(true);
 		d.setVisible(true);
         return Integer.valueOf(JOptionPane.OK_OPTION).equals(jp.getValue());
+	}
+
+	public boolean isUseMaxLength() {
+		return useMaxLength;
+	}
+
+	public void setUseMaxLength(boolean useMaxLength) {
+		this.useMaxLength = useMaxLength;
+	}
+
+	public double getMaxLength() {
+		return maxLength;
+	}
+
+	public void setMaxLength(double maxLength) {
+		this.maxLength = maxLength;
 	}
 
 	public boolean isPreserveGroups() {
