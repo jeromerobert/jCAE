@@ -22,7 +22,6 @@ package org.jcae.netbeans.mesh;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.openide.nodes.Node;
 
 public final class SwapAction extends AlgoAction
 {	
@@ -38,11 +37,21 @@ public final class SwapAction extends AlgoAction
 
 	@Override
 	protected List<String> getArguments(AmibeDataObject ado) {
-		String meshDirectory = ado.getMeshDirectory();
-		ArrayList<String> l = new ArrayList<String>();
-		l.add(meshDirectory);
-		l.add(meshDirectory);
-		return l;
+		SwapPropertySheet propertySheet=new SwapPropertySheet();
+		if(propertySheet.showDialog())
+		{
+			String meshDirectory = ado.getMeshDirectory();
+			ArrayList<String> l = new ArrayList<String>();
+			if(propertySheet.isPreserveGroups())
+				l.add("--preserveGroups");
+			l.add("--coplanarity");
+			l.add(Double.toString(propertySheet.getCoplanarity()));
+			l.add(meshDirectory);
+			l.add(meshDirectory);
+			return l;
+		}
+		else
+			return null;
 	}
 }
 
