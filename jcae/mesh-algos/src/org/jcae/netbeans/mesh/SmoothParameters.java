@@ -101,7 +101,7 @@ public class SmoothParameters extends PropertySheet
 	private double elementSize=-1;
 	private int iterationNumber=10;
 	private boolean preserveGroups = true;
-	private double coplanarity = -1.0;
+	private double coplanarity = 0.95;
 
 	public double getCoplanarity() {
 		return coplanarity;
