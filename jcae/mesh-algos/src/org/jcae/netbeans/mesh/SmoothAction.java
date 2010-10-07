@@ -50,6 +50,8 @@ public final class SmoothAction extends AlgoAction
 				l.add("--preserveGroups");
 			l.add("--coplanarity");
 			l.add(Double.toString(bean.getCoplanarity()));
+			l.add("--tolerance");
+			l.add(Double.toString(bean.getTolerance()));
 			l.add(meshDirectory);
 			l.add(meshDirectory);
 			return l;

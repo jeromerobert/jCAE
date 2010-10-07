@@ -82,6 +82,9 @@ public class SmoothParameters extends PropertySheet
 				"Coplanarity",
 				"Dot product of face normals to detect feature edges. "+
 				"A negative value disable feature edges detection."));
+			r.put(new MyProperty<Double>(Double.TYPE, "tolerance",
+				"Tolerance",
+				"Process only nodes with quality lower than this value."));
 		} catch (NoSuchMethodException ex) {
 			Exceptions.printStackTrace(ex);
 		}
@@ -101,8 +104,16 @@ public class SmoothParameters extends PropertySheet
 	private double elementSize=-1;
 	private int iterationNumber=10;
 	private boolean preserveGroups = true;
-	private double coplanarity = 0.95;
+	private double coplanarity = 0.95, tolerance = 2.0;
 
+	public double getTolerance() {
+		return tolerance;
+	}
+
+	public void setTolerance(double tolerance) {
+		this.tolerance = tolerance;
+	}
+	
 	public double getCoplanarity() {
 		return coplanarity;
 	}

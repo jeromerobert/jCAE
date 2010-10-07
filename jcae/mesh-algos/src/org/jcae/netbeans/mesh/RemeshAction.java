@@ -75,6 +75,16 @@ public class RemeshAction extends AlgoAction {
 					Exceptions.printStackTrace(ex);
 				}
 			}
+			if(p.isAllowNearNodes())
+			{
+				l.add("--allowNearNodes");
+			}
+			else
+			{
+				l.add("--nearLengthRatio");
+				l.add(Double.toString(p.getNearLengthRatio()));
+			}
+
 			l.add(meshDirectory);
 			l.add(meshDirectory);
 			return l;

@@ -63,6 +63,9 @@ public class RemeshPanel extends JPanel {
 	private double coplanarity = 0.9;
 	private double targetSize = 1.0;
 	private boolean featureOnly, preserveGroups = true;
+	private boolean allowNearNodes;
+	private double nearLengthRatio = 0.70710678118654746;
+	
     private PointMetricPanel tablePanel = new PointMetricPanel() {
 		@Override
 		protected double getDefaultSize() {
@@ -104,18 +107,43 @@ public class RemeshPanel extends JPanel {
 			r.put(new MyProperty<Boolean>(Boolean.TYPE, "preserveGroups",
 				"Preserve groups",
 				"Edges adjacent to two different groups are handled like free edges."));
+			r.put(new MyProperty<Boolean>(Boolean.TYPE, "allowNearNodes",
+				"Allow near nodes",
+				"Insert vertices even if this creates a small edge."));
+			r.put(new MyProperty<Double>(Double.TYPE, "nearLengthRatio",
+				"Near length ratio",
+				"Ratio to size target to determine if a vertex is near an existing point (default: 1/sqrt(2)."){
+				@Override
+				public boolean canWrite() {
+					return !allowNearNodes;
+				}
+			});
 		} catch (NoSuchMethodException ex) {
 			Exceptions.printStackTrace(ex);
 		}
 		return r;
 	}
 
+	public boolean isAllowNearNodes() {
+		return allowNearNodes;
+	}
+
+	public void setAllowNearNodes(boolean allowNearNodes) {
+		this.allowNearNodes = allowNearNodes;
+	}
+
+	public double getNearLengthRatio() {
+		return nearLengthRatio;
+	}
+
+	public void setNearLengthRatio(double nearLengthRatio) {
+		this.nearLengthRatio = nearLengthRatio;
+	}
+
 	public boolean showDialog()
 	{
         final JOptionPane jp = new JOptionPane(this,
              JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
-		System.out.println(jp.getLayout());
-		System.out.println(Arrays.toString(jp.getComponents()));
 		JDialog d = jp.createDialog("Remesh options");
 		d.setResizable(true);
 		d.setVisible(true);
@@ -163,4 +191,5 @@ public class RemeshPanel extends JPanel {
 	public void setPreserveGroups(boolean preserveGroups) {
 		this.preserveGroups = preserveGroups;
 	}
+
 }
