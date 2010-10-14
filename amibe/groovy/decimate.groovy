@@ -59,7 +59,7 @@ options.addOption(
 options.addOption(
 	OptionBuilder.hasArg(false)
 		.withDescription("removes only free edges (for LengthDecimateHalfEdge only)")
-		.withLongOpt("freeEdgeOnly")
+		.withLongOpt("freeEdgesOnly")
 		.create('O'));
 options.addOption(
 	OptionBuilder.withArgName("VALUE").hasArg()
@@ -97,7 +97,7 @@ if (cmd.hasOption('t'))
 else if (cmd.hasOption('n'))
 	algoOptions.put("maxtriangles", cmd.getOptionValue('n'));
 if (cmd.hasOption('O'))
-	algoOptions.put("freeEdgeOnly", "true");
+	algoOptions.put("freeEdgesOnly", "true");
 if (cmd.hasOption('f'))
 	algoOptions.put("freeEdgeTol", cmd.getOptionValue('f'));
 if (cmd.hasOption('m'))

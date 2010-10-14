@@ -42,7 +42,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	private static final Logger LOGGER=Logger.getLogger(LengthDecimateHalfEdge.class.getName());
 	private final MeshLiaison liaison;
 	private Vertex v3;
-	private boolean freeEdgeOnly = false;
+	private boolean freeEdgesOnly = false;
 	private final double freeEdgeFactor;
 
 	/**
@@ -91,10 +91,10 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 				LOGGER.fine("Max edge length: "+maxEdgeLength);
 				maxEdgeLength = maxEdgeLength*maxEdgeLength;
 			}
-			else if ("freeEdgeOnly".equals(key))
+			else if ("freeEdgesOnly".equals(key))
 			{
-				freeEdgeOnly = Boolean.parseBoolean(val);
-				LOGGER.fine("freeEdgeOnly: "+freeEdgeOnly);
+				freeEdgesOnly = Boolean.parseBoolean(val);
+				LOGGER.fine("freeEdgesOnly: "+freeEdgesOnly);
 			}
 			else if ("freeEdgeTol".equals(key))
 			{
@@ -132,7 +132,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	protected final double cost(final HalfEdge e)
 	{
 		//Ensure that boundary and non manifold edges are never processed
-		if (freeEdgeOnly && !e.hasAttributes(AbstractHalfEdge.IMMUTABLE | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+		if (freeEdgesOnly && !e.hasAttributes(AbstractHalfEdge.IMMUTABLE | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 			return 4.0 * tolerance;
 		
 		double toReturn = e.origin().sqrDistance3D(e.destination());
@@ -148,7 +148,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	@Override
 	public boolean canProcessEdge(HalfEdge current)
 	{
-		if (freeEdgeOnly && !current.hasAttributes(AbstractHalfEdge.IMMUTABLE | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+		if (freeEdgesOnly && !current.hasAttributes(AbstractHalfEdge.IMMUTABLE | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 			return false;
 		current = uniqueOrientation(current);
 		Vertex v1 = current.origin();

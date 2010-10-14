@@ -36,7 +36,7 @@ parser.add_option("-m", "--maxlength", metavar="FLOAT",
 parser.add_option("-n", "--targetTriangles", metavar="NUMBER",
                   action="store", type="int", dest="targetTriangles",
                   help="stops iterations when mesh contains this number of triangles")
-parser.add_option("-O", "--freeEdgeOnly", action="store_true", dest="freeEdgeOnly",
+parser.add_option("-O", "--freeEdgesOnly", action="store_true", dest="freeEdgesOnly",
                   help="removes only free edges (for LengthDecimateHalfEdge only)")
 parser.add_option("-t", "--tolerance", metavar="FLOAT",
                   action="store", type="float", dest="tolerance",
@@ -65,8 +65,8 @@ if options.tolerance:
 	opts.put("size", str(options.tolerance))
 elif options.targetTriangles:
 	opts.put("maxtriangles", str(options.targetTriangles))
-if options.freeEdgeOnly:
-	opts.put("freeEdgeOnly", "true");
+if options.freeEdgesOnly:
+	opts.put("freeEdgesOnly", "true");
 if options.freeEdgeTol:
 	opts.put("freeEdgeTol", str(options.freeEdgeTol))
 if options.maxlength:
