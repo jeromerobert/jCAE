@@ -37,7 +37,7 @@ parser.add_option("-n", "--targetTriangles", metavar="NUMBER",
                   action="store", type="int", dest="targetTriangles",
                   help="stops iterations when mesh contains this number of triangles")
 parser.add_option("-O", "--freeEdgesOnly", action="store_true", dest="freeEdgesOnly",
-                  help="removes only free edges (for LengthDecimateHalfEdge only)")
+                  help="removes only free edges")
 parser.add_option("-t", "--tolerance", metavar="FLOAT",
                   action="store", type="float", dest="tolerance",
                   help="geometry error allowed when decimating")

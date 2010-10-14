@@ -111,6 +111,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 	private Quadric3DError.Placement placement = Quadric3DError.Placement.OPTIMAL;
 	private HashMap<Vertex, Quadric3DError> quadricMap = null;
 	private final MeshLiaison liaison;
+	private boolean freeEdgesOnly = false;
 	private Vertex v3;
 	private Quadric3DError q3 = new Quadric3DError();
 	// vCostOpt and qCostOpt must be used only by cost() method.
@@ -174,11 +175,18 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 				minCos = Double.parseDouble(val);
 				LOGGER.fine("Minimum dot product of face normals allowed for swapping an edge: "+minCos);
 			}
+			else if ("freeEdgesOnly".equals(key))
+			{
+				freeEdgesOnly = Boolean.parseBoolean(val);
+				LOGGER.fine("freeEdgesOnly: "+freeEdgesOnly);
+			}
 			else
 				throw new RuntimeException("Unknown option: "+key);
 		}
 		if (meshLiaison == null)
 			mesh.buildRidges(minCos);
+		if (freeEdgesOnly)
+			setNoSwapAfterProcessing(true);
 	}
 
 	@Override
@@ -330,6 +338,8 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		current = uniqueOrientation(current);
 		if (current.hasAttributes(AbstractHalfEdge.IMMUTABLE))
 			return false;
+		if (freeEdgesOnly && !current.hasAttributes(AbstractHalfEdge.BOUNDARY))
+			return false;
 		final Vertex v1 = current.origin();
 		final Vertex v2 = current.destination();
 		assert v1 != v2 : current;
@@ -463,7 +473,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		if (q3 == null)
 			q3 = new Quadric3DError();
 		updateIncidentEdges(current);
-		if (minCos >= -1.0)
+		if (!freeEdgesOnly && minCos >= -1.0)
 			checkAndSwapAroundOrigin(current);
 		return current.next();
 	}

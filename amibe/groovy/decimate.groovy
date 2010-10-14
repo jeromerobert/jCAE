@@ -58,7 +58,7 @@ options.addOption(
 		.create('n'));
 options.addOption(
 	OptionBuilder.hasArg(false)
-		.withDescription("removes only free edges (for LengthDecimateHalfEdge only)")
+		.withDescription("removes only free edges")
 		.withLongOpt("freeEdgesOnly")
 		.create('O'));
 options.addOption(
