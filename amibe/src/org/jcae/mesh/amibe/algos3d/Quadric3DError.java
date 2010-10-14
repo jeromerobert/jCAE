@@ -66,7 +66,6 @@ public class Quadric3DError implements Serializable
 	private final double [] A = new double[6];
 	private final double [] b = new double[3];
 	private double c;
-	private double area;
 	private double detA;
 	private boolean cachedDet = false;
 
@@ -104,19 +103,13 @@ public class Quadric3DError implements Serializable
 	// Add 2 quadrics
 	public final void computeQuadric3DError(Quadric3DError q1, Quadric3DError q2)
 	{
-		assert q1.area > 0.0 : q1;
-		assert q2.area > 0.0 : q2;
-		double l1 = q1.area / (q1.area + q2.area);
-		double l2 = q2.area / (q1.area + q2.area);
-
 		for (int i = 0; i < 6; i++)
-			A[i] = l1 * q1.A[i] + l2 * q2.A[i];
+			A[i] = q1.A[i] + q2.A[i];
 
 		for (int i = 0; i < 3; i++)
-			b[i] = l1 * q1.b[i] + l2 * q2.b[i];
+			b[i] = q1.b[i] + q2.b[i];
 
-		c = l1 * q1.c + l2 * q2.c;
-		area = q1.area + q2.area;
+		c = q1.c + q2.c;
 		cachedDet = false;
 	}
 
@@ -135,21 +128,20 @@ public class Quadric3DError implements Serializable
 	{
 		for (int k = 0; k < 3; k++)
 		{
-			b[k] += d * normal[k];
-			A[k] += normal[0] * normal[k];
+			b[k] += a * d * normal[k];
+			A[k] += a * normal[0] * normal[k];
 		}
 
-		A[3] += normal[1] * normal[1];
-		A[4] += normal[1] * normal[2];
-		A[5] += normal[2] * normal[2];
+		A[3] += a * normal[1] * normal[1];
+		A[4] += a * normal[1] * normal[2];
+		A[5] += a * normal[2] * normal[2];
 
-		c += d*d;
-		area += a;
+		c += a * d*d;
 		cachedDet = false;
 	}
 
 	// Used when adding virtual planes on boundaries
-	public final void addWeightedError(double [] normal, double d, double a, double scale)
+	public final void addWeightedError(double [] normal, double d, double scale)
 	{
 		for (int k = 0; k < 3; k++)
 		{
@@ -162,8 +154,6 @@ public class Quadric3DError implements Serializable
 		A[5] += scale * normal[2] * normal[2];
 
 		c += scale * d*d;
-		// area is not scaled!
-		area += a;
 		cachedDet = false;
 	}
 
