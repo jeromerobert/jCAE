@@ -26,16 +26,10 @@
         <folder name="jCAE">
             <file name="org-jcae-netbeans-mesh-FreeEdgesAction.instance"/>
             <file name="org-jcae-netbeans-mesh-MultipleEdgesAction.instance"/>
-            <file name="org-jcae-netbeans-mesh-SmoothAction.instance">
-                <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.SmoothAction"/>
-            </file>
-            <file name="org-jcae-netbeans-mesh-DecimateAction.instance">
-                <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.DecimateAction"/>
-            </file>
-            <file name="org-jcae-netbeans-mesh-RemeshAction.instance">
-                <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.RemeshAction"/>
-            </file>
-
+            <file name="org-jcae-netbeans-mesh-SmoothAction.instance"/>
+            <file name="org-jcae-netbeans-mesh-DecimateAction.instance"/>
+            <file name="org-jcae-netbeans-mesh-RefineAction.instance"/>
+			<file name="org-jcae-netbeans-mesh-RemeshAction.instance"/>
 			<file name="org-jcae-netbeans-mesh-ViewGroupAction.instance"/>
 			<file name="org-jcae-netbeans-mesh-HideGroupAction.instance"/>
 			<file name="org-jcae-netbeans-mesh-RefreshGroupAction.instance"/>
@@ -47,8 +41,13 @@
         <folder name="text">
             <folder name="mesh+xml">
                 <folder name="Actions">
-                    <file name="org-jcae-netbeans-mesh-RemeshAction.instance">
-                        <attr name="position" intvalue="20"/>
+                    <file name="org-jcae-netbeans-mesh-RemeshAction.shadow">
+                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-RemeshAction.instance"/>
+						<attr name="position" intvalue="15"/>
+                    </file>
+                    <file name="org-jcae-netbeans-mesh-RefineAction.shadow">
+                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-RefineAction.instance"/>
+						<attr name="position" intvalue="20"/>
                     </file>
                     <file name="org-jcae-netbeans-mesh-SmoothAction.shadow">
                         <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-SmoothAction.instance"/>

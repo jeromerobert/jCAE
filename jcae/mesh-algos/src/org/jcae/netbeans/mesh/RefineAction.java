@@ -21,37 +21,70 @@
 
 package org.jcae.netbeans.mesh;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+import org.openide.util.Exceptions;
 
 /**
  *
  * @author Jerome Robert
  */
-public class RemeshAction extends AlgoAction {
+public class RefineAction extends AlgoAction {
 
 	@Override
 	public String getName() {
-		return "Remesh";
+		return "Refine";
 	}
 
 	@Override
 	protected String getCommand() {
-		return "remesh";
+		return "refine";
 	}
 
 	@Override
 	protected List<String> getArguments(AmibeDataObject ado) {
 		String meshDirectory = ado.getMeshDirectory();		
-		RemeshPanel p = new RemeshPanel();
+		RefinePanel p = new RefinePanel();
 		p.setTargetSize(ado.getMesh().getEdgeLength());
 		if(p.showDialog())
 		{
 			ArrayList<String> l = new ArrayList<String>();
+			l.add("--coplanarity");
+			l.add(Double.toString(p.getCoplanarity()));
 			l.add("--size");
 			l.add(Double.toString(p.getTargetSize()));
+			if(p.isFeatureOnly())
+				l.add("--features");
 			if(p.isPreserveGroups())
 				l.add("--preserveGroups");
+			if(p.isPointMetric())
+			{
+				try {
+					File f = File.createTempFile("jcae", ".txt");
+					f.deleteOnExit();
+					PrintStream out = new PrintStream(new FileOutputStream(f));
+					p.writePointMetric(out);
+					out.close();
+					l.add("--point-metric");
+					l.add(f.getPath());
+				} catch (IOException ex) {
+					Exceptions.printStackTrace(ex);
+				}
+			}
+			if(p.isAllowNearNodes())
+			{
+				l.add("--allowNearNodes");
+			}
+			else
+			{
+				l.add("--nearLengthRatio");
+				l.add(Double.toString(p.getNearLengthRatio()));
+			}
+
 			l.add(meshDirectory);
 			l.add(meshDirectory);
 			return l;
