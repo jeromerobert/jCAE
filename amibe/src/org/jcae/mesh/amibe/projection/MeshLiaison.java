@@ -182,6 +182,7 @@ public class MeshLiaison
 		}
 		if (!location.computeBarycentricCoordinates(newPosition))
 		{
+/* FIXME: this should not happen. For now, do not move in such a case
 			double [] p0 = location.t.vertex[0].getUV();
 			double [] p1 = location.t.vertex[1].getUV();
 			double [] p2 = location.t.vertex[2].getUV();
@@ -199,6 +200,8 @@ public class MeshLiaison
 			newPosition[0] = location.b[0]*p0[0] + location.b[1]*p1[0] + location.b[2]*p2[0];
 			newPosition[1] = location.b[0]*p0[1] + location.b[1]*p1[1] + location.b[2]*p2[1];
 			newPosition[2] = location.b[0]*p0[2] + location.b[1]*p1[2] + location.b[2]*p2[2];
+*/
+			return false;
 		}
 		v.moveTo(newPosition[0], newPosition[1], newPosition[2]);
 		if (LOGGER.isLoggable(Level.FINER))
