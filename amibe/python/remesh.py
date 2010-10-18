@@ -79,7 +79,7 @@ SwapEdge(liaison, opts).compute()
 
 opts.clear()
 opts.put("coplanarity", "0.9")
-opts.put("maxtriangles", "1")
+opts.put("size", str(options.size*0.1))
 opts.put("maxlength", str(options.size*1.1))
 QEMDecimateHalfEdge(liaison, opts).compute()
 
@@ -89,27 +89,20 @@ SwapEdge(liaison, opts).compute()
 
 opts.clear()
 opts.put("coplanarity", "0.9")
-opts.put("size", str(options.size))
-opts.put("iterations", str(1))
+opts.put("iterations", str(8))
 SmoothNodes3DBg(liaison, opts).compute()
 
 opts.clear()
 opts.put("coplanarity", "0.9")
-opts.put("maxtriangles", "1")
-opts.put("maxlength", str(options.size*1.1))
+opts.put("size", str(options.size*0.2))
+opts.put("maxlength", str(options.size*1.2))
 QEMDecimateHalfEdge(liaison, opts).compute()
 
 opts.clear()
-opts.put("coplanarity", "0.9")
-opts.put("size", str(options.size))
-opts.put("iterations", str(10))
-SmoothNodes3DBg(liaison, opts).compute
+opts.put("coplanarity", "0.75")
+opts.put("tolerance", "0.6")
+opts.put("iterations", str(8))
+SmoothNodes3DBg(liaison, opts).compute()
 
-opts.put("coplanarity", "0.5")
-opts.put("tolerance", "0.3")
-opts.put("iterations", str(2))
-algo = SmoothNodes3DBg(liaison, opts)
-algo.compute()
-
-MeshWriter.writeObject3D(algo.getOutputMesh(), outDir, String())
+MeshWriter.writeObject3D(liaison.mesh, outDir, "")
 
