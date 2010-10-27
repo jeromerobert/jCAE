@@ -182,6 +182,14 @@ public class MeshLiaison
 		}
 		if (!location.computeBarycentricCoordinates(newPosition))
 		{
+			/* FIXME: this should not happen. Try all triangles to find the best projection */
+			LOGGER.log(Level.CONFIG, "Position found outside triangle: "+newPosition[0]+" "+newPosition[1]+" "+newPosition[2]+"; checking all triangles, this may be slow");
+			lf.walkDebug();
+			location.updateTriangle(lf.current);
+			location.updateVertexIndex(target);
+		}
+		if (!location.computeBarycentricCoordinates(newPosition))
+		{
 /* FIXME: this should not happen. For now, do not move in such a case
 			double [] p0 = location.t.vertex[0].getUV();
 			double [] p1 = location.t.vertex[1].getUV();
