@@ -361,4 +361,13 @@ public abstract class Viewable extends MultiCanvas
 	{
 		scene.setPickable(pickable);
 	}
+
+	/** VTK garbage collect all nodes associated to this viewable */
+	public void delete()
+	{
+		lockCanvas();
+		rootNode.removeAllChildren();
+		rootNode.deleteData();
+		unlockCanvas();
+	}
 }

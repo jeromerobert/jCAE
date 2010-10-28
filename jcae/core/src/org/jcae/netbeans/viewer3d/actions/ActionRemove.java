@@ -40,7 +40,8 @@ public class ActionRemove  extends ViewAction
 			Viewable viewable = view.getCurrentViewable();
 			if(viewable != null)
 			{
-				view.remove(view.getCurrentViewable());
+				view.remove(viewable);
+				viewable.delete();
 				SelectionManager.getDefault().removeInteractor(viewable);
 				SystemAction.get(SelectViewable.class).refresh();
 			}

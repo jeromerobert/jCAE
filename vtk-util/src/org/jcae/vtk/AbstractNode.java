@@ -446,6 +446,7 @@ public abstract class AbstractNode
 		// Compute normals that are not given
 		vtkPolyDataNormals algoNormals = new vtkPolyDataNormals();
 		algoNormals.SetInput(data);
+		data.Delete();
 		algoNormals.SplittingOff();
 		algoNormals.FlipNormalsOff();
 		algoNormals.AutoOrientNormalsOff();
@@ -453,7 +454,7 @@ public abstract class AbstractNode
 		algoNormals.Update();
 
 		data = algoNormals.GetOutput();
-		
+		algoNormals.Delete();
 		vtkFloatArray computedNormals = (vtkFloatArray) data.GetPointData().GetNormals();
 		float[] javaComputedNormals = computedNormals.GetJavaArray();
 		float[] javaNormals = dataProvider.getNormals();
@@ -474,6 +475,7 @@ public abstract class AbstractNode
 		normals.SetJavaArray(javaNormals);
 		
 		data.GetPointData().SetNormals(normals);
+		normals.Delete();
 		//fireDataModified(data);
 	}
 	
