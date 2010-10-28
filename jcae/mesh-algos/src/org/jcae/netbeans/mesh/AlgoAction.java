@@ -76,7 +76,8 @@ public abstract class AlgoAction extends CookieAction {
 					line = in.readLine();
 				}
 			} catch (IOException ex) {
-				Exceptions.printStackTrace(ex);
+				//the child process has been killed
+				out.println("End of stream");
 			}
 		}
 	}
