@@ -80,6 +80,7 @@ public abstract class Viewable extends MultiCanvas
 		{
 			vtkProperty p = actor.GetProperty();
 			Utils.vtkPropertySetColor(p, selectionColor);
+			p.SetLineWidth(3.0);
 			p.Delete();
 		}
 	}
