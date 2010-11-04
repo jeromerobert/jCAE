@@ -146,7 +146,7 @@ public class MeshLiaison
 		ProjectedLocation location = mapCurrentVertexProjection.get(v);
 		if (LOGGER.isLoggable(Level.FINEST))
 			LOGGER.log(Level.FINEST, "Old projection: "+location);
-		LocationFinder lf = new LocationFinder(target);
+		LocationFinder lf = new LocationFinder(target, backgroundMesh);
 		AbstractHalfEdge ot = location.t.getAbstractHalfEdge();
 		if (ot.apex() == location.t.vertex[location.vIndex])
 			ot = ot.prev();
@@ -819,17 +819,17 @@ public class MeshLiaison
 		int localEdgeIndex = -1;
 		int region = -1;
 		int[] index = new int[2];
-		private final Collection<Triangle> triangles;
+		private final Mesh mesh;
 
 		LocationFinder(double[] pos)
 		{
 			this(pos, null);
 		}
 
-		LocationFinder(double[] pos, Collection<Triangle> triangles)
+		LocationFinder(double[] pos, Mesh mesh)
 		{
 			System.arraycopy(pos, 0, target, 0, 3);
-			this.triangles = triangles;
+			this.mesh = mesh;
 		}
 
 		void walkAroundOrigin(AbstractHalfEdge ot)
@@ -899,7 +899,9 @@ public class MeshLiaison
 
 		void walkDebug()
 		{
-			for (Triangle f : triangles)
+			if (mesh == null)
+				return;
+			for (Triangle f : mesh.getTriangles())
 			{
 				if (f.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
