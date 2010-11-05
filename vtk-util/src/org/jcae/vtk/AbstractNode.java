@@ -611,4 +611,15 @@ public abstract class AbstractNode
 			p.Delete();
 		}
 	}
+
+	public void setCulling(boolean front, boolean back)
+	{
+		if(actor != null)
+		{
+			vtkProperty p = actor.GetProperty();
+			p.SetFrontfaceCulling(Utils.booleanToInt(front));
+			p.SetBackfaceCulling(Utils.booleanToInt(back));
+			p.Delete();
+		}
+	}
 }

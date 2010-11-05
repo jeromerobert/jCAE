@@ -703,4 +703,11 @@ public class Node extends AbstractNode
 		for(AbstractNode f:getChildren())
 			f.setEdgeVisible(b);
 	}
+
+	@Override
+	public void setCulling(boolean front, boolean back) {
+		super.setCulling(front, back);
+		for(AbstractNode f:getChildren())
+			f.setCulling(front, back);
+	}
 }
