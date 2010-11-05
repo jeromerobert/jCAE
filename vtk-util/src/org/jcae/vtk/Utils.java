@@ -866,14 +866,19 @@ public class Utils
 
 	public static int[] getValues(vtkCellArray array)
 	{
-		return getValues(array.GetData());
+		vtkIdTypeArray data = array.GetData();
+		int[] toReturn = getValues(data);
+		data.Delete();
+		return toReturn;
 	}
 
 	public static float[] getValues(vtkPoints points)
 	{
 		vtkDataArray array = points.GetData();
 		//TODO not sure it's always a float[] array
-		return ((vtkFloatArray) array).GetJavaArray();
+		float[] toReturn = ((vtkFloatArray) array).GetJavaArray();
+		array.Delete();
+		return toReturn;
 	}
 
 	/**
