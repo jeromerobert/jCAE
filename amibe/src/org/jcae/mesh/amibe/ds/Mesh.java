@@ -1151,6 +1151,7 @@ public class Mesh implements Serializable
 
 		AbstractHalfEdge ot  = null;
 		AbstractHalfEdge sym = triangleList.iterator().next().getAbstractHalfEdge();
+		boolean fixVertex  = (attr & AbstractHalfEdge.IMMUTABLE) != 0;
 
 		int toReturn = 0;
 		for (Triangle t: triangleList)
@@ -1168,6 +1169,11 @@ public class Mesh implements Serializable
 				if (groupId != sym.getTri().getGroupId())
 				{
 					ot.setAttributes(attr);
+					if (fixVertex)
+					{
+						ot.origin().setReadable(false);
+						ot.destination().setReadable(false);
+					}
 					toReturn++;
 				}
 			}
@@ -1190,6 +1196,7 @@ public class Mesh implements Serializable
 			throw new RuntimeException("tagFreeEdges called on a mesh without adjacency relations");
 
 		AbstractHalfEdge ot = null;
+		boolean fixVertex  = (attr & AbstractHalfEdge.IMMUTABLE) != 0;
 
 		int toReturn = 0;
 		for (Triangle t: triangleList)
@@ -1203,6 +1210,11 @@ public class Mesh implements Serializable
 				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
 				{
 					ot.setAttributes(attr);
+					if (fixVertex)
+					{
+						ot.origin().setReadable(false);
+						ot.destination().setReadable(false);
+					}
 					toReturn++;
 				}
 			}
