@@ -52,6 +52,7 @@ public class RemeshAction extends AlgoAction {
 			l.add(Double.toString(p.getTargetSize()));
 			if(p.isPreserveGroups())
 				l.add("--preserveGroups");
+                        l.add("-G");
 			l.add(meshDirectory);
 			l.add(meshDirectory);
 			return l;

@@ -29,6 +29,9 @@ parser.add_option("-t", "--size", metavar="FLOAT", default=0.0,
 parser.add_option("-I", "--immutable-border",
                   action="store_true", dest="immutable_border",
                   help="Tag free edges as immutable")
+parser.add_option("-G", "--immutable-border-group",
+                  action="store_true", dest="immutable_border_group",
+                  help="Tag border group edges as immutable")
 
 (options, args) = parser.parse_args(args=sys.argv[1:])
 
@@ -48,7 +51,10 @@ liaison = MeshLiaison(mesh, mtb)
 if options.immutable_border:
     liaison.mesh.tagFreeEdges(AbstractHalfEdge.IMMUTABLE)
 liaison.getMesh().buildRidges(0.9)
-if options.preserveGroups:
+if options.immutable_border_group:
+    liaison.mesh.tagGroupBoundaries(AbstractHalfEdge.IMMUTABLE)
+else:
+    if options.preserveGroups:
 	liaison.getMesh().buildGroupBoundaries()
 
 opts = HashMap()
