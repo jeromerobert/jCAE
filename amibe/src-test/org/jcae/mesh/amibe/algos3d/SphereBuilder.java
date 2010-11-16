@@ -224,7 +224,7 @@ public class SphereBuilder
 		Mesh mesh = createSphereMesh(level);
 		for (Vertex v : mesh.getNodes())
 		{
-			if (!v.isMutable())
+			if (v.getRef() > 0)
 				continue;
 			double [] coord = v.getUV();
 			double c = Math.cos(Math.PI * coord[2]);

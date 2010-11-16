@@ -155,6 +155,8 @@ public abstract class AbstractAlgoHalfEdge
 	{
 		if (!e.origin().isReadable() || !e.destination().isReadable())
 			return;
+		if (e.hasAttributes(AbstractHalfEdge.IMMUTABLE))
+			return;
 		double val = cost(e);
 		// If an edge will not be processed because of its cost, it is
 		// better to not put it in the tree.  One drawback though is

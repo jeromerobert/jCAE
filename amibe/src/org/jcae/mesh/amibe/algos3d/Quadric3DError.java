@@ -207,6 +207,8 @@ public class Quadric3DError implements Serializable
 			break;
 		case MIDDLE:
 			{
+				if (!v1.isMutable() || !v2.isMutable())
+					return;
 				// Keep a reference if there is one
 				double [] p1 = v1.getUV();
 				double [] p2 = v2.getUV();
@@ -220,6 +222,8 @@ public class Quadric3DError implements Serializable
 			norm2Row2 = A[2]*A[2] + A[4]*A[4] + A[5]*A[5];
 			norm = Math.sqrt(Math.max(norm2Row0, Math.max(norm2Row1, norm2Row2)));
 			ret.copy(bestCandidateV1V2Ref(v1, v2, q1, q2));
+			if (!ret.isMutable())
+				return;
 			if (detA() > 1.e-10*(norm*norm*norm))
 			{
 				double cfxx = A[3] * A[5] - A[4] * A[4];
@@ -242,6 +246,8 @@ public class Quadric3DError implements Serializable
 			norm2Row2 = A[2]*A[2] + A[4]*A[4] + A[5]*A[5];
 			norm = Math.sqrt(Math.max(norm2Row0, Math.max(norm2Row1, norm2Row2)));
 			ret.copy(bestCandidateV1V2Ref(v1, v2, q1, q2));
+			if (!ret.isMutable())
+				return;
 			if (detA() > 1.e-10*(norm*norm*norm))
 			{
 				// Find M = v1 + s(v2-v1) which minimizes
@@ -286,7 +292,12 @@ public class Quadric3DError implements Serializable
 
 	private static Vertex bestCandidateV1V2Ref(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2)
 	{
-		if (v1.getRef() == 0 && v2.getRef() == 0)
+		assert v1.isMutable() || v2.isMutable();
+		if(!v1.isMutable())
+			return v1;
+		else if(!v2.isMutable())
+			return v2;
+		else if(v1.getRef() == 0 && v2.getRef() == 0)
 			return bestCandidateV1V2(v1, v2, q1, q2);
 		else if (v1.getRef() == 0)
 			return v2;

@@ -29,7 +29,7 @@ public class TangentPlaneProjection implements LocalSurfaceProjection
 
 	public TangentPlaneProjection(Vertex o)
 	{
-		if (!o.isManifold() || !o.isMutable())
+		if (!o.isManifold() || o.getRef() > 0)
 		{
 			normal = null;
 			return;

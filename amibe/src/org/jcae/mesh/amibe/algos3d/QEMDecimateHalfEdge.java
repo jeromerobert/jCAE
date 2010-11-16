@@ -348,6 +348,8 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		// performed.
 		if (!v1.isWritable() || !v2.isWritable())
 			return false;
+		if (!v1.isMutable() && !v2.isMutable())
+			return false;
 		/* FIXME: add an option so that boundary nodes may be frozen. */
 		final Quadric3DError q1 = quadricMap.get(v1);
 		final Quadric3DError q2 = quadricMap.get(v2);

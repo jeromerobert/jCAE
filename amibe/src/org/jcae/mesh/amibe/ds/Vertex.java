@@ -76,6 +76,8 @@ public class Vertex implements Location, Serializable
 	//         1: list of incident wires
 	protected Object link;
 	
+	private boolean mutable = true;
+
 	// Used in OEMM
 	private int label;
 	private boolean readable = true;
@@ -127,6 +129,7 @@ public class Vertex implements Location, Serializable
 		label = that.label;
 		readable = that.readable;
 		writable = that.writable;
+		mutable = that.mutable;
 	}
 	
 	/**
@@ -572,9 +575,14 @@ public class Vertex implements Location, Serializable
 	 */
 	public final boolean isMutable()
 	{
-		return ref1d <= 0;
+		return mutable;
 	}
-	
+
+	public final void setMutable(boolean m)
+	{
+		mutable = m;
+	}
+
 	/**
 	 * Returns the discrete Gaussian curvature and the mean normal.
 	 * These discrete operators are described in "Discrete
@@ -884,6 +892,8 @@ public class Vertex implements Location, Serializable
 			r.append(" !R");
 		if (!writable)
 			r.append(" !W");
+		if (!mutable)
+			r.append(" !M");
 		return r.toString();
 	}
 	

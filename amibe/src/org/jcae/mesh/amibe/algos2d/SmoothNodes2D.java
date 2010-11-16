@@ -201,7 +201,7 @@ public class SmoothNodes2D
 		for (Vertex av: nodeset)
 		{
 			Vertex2D v = (Vertex2D) av;
-			if (!v.isMutable())
+			if (!v.isMutable() || v.getRef() > 0)
 				continue;
 			TriangleVH f = (TriangleVH) v.getLink();
 			if (f.hasAttributes(AbstractHalfEdge.OUTER))
@@ -225,7 +225,7 @@ public class SmoothNodes2D
 				break;
 			Vertex2D v = q.getData();
 			tree.remove(v);
-			if (!v.isMutable())
+			if (!v.isMutable() || v.getRef() > 0)
 				continue;
 			if (smoothNode(v, ot, q.getValue()))
 			{

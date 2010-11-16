@@ -173,7 +173,7 @@ public class SmoothNodes3D
 			}
 			for (Vertex v: nodeset)
 			{
-				if (!v.isManifold() || !v.isMutable())
+				if (!v.isManifold() || !v.isMutable() || v.getRef() > 0)
 					continue;
 				LocalSurfaceProjection qP = new QuadricProjection(v, true);
 				if (!qP.canProject())
@@ -200,7 +200,7 @@ public class SmoothNodes3D
 		tree.clear();
 		for (Vertex v: nodeset)
 		{
-			if (!v.isManifold() || !v.isMutable())
+			if (!v.isManifold() || !v.isMutable() || v.getRef() > 0)
 				continue;
 			Triangle f = (Triangle) v.getLink();
 			ot = f.getAbstractHalfEdge(ot);

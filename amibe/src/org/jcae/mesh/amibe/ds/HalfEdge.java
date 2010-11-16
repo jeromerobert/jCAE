@@ -586,6 +586,8 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		// Be consistent with collapse()
 		if (hasAttributes(IMMUTABLE | OUTER))
 			return false;
+		if (!origin().isMutable() && !destination().isMutable())
+			return false;
 		double [] xn = v.getUV();
 		if (origin().isManifold() && destination().isManifold())
 		{

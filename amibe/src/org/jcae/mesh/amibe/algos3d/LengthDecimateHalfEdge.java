@@ -159,6 +159,8 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 		// performed.
 		if (!v1.isWritable() || !v2.isWritable())
 			return false;
+		if (!v1.isMutable() && !v2.isMutable())
+			return false;
 		v3 = optimalPlacement(v1, v2);
 		if (!mesh.canCollapseEdge(current, v3))
 			return false;
