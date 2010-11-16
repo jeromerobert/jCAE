@@ -351,5 +351,31 @@ public class QEMDecimateHalfEdgeTest
 		assertTrue("Mesh is not valid", mesh.isValid());
 	}
 
+	@Test public void testShell7WithGroupBoundaries()
+	{
+		final Map<String, String> options = new HashMap<String, String>();
+		options.put("size", "0.5");
+		mesh = new Mesh();
+		createMxNShell(7, 7);
+		mesh.buildAdjacency();
+		for (Triangle t : T)
+			t.setGroupId(0);
+		for (int i = 28; i < 32; i++)
+			T[i].setGroupId(1);
+		for (int i = 40; i < 44; i++)
+			T[i].setGroupId(1);
+		mesh.buildGroupBoundaries();
+		assertTrue("Mesh is not valid", mesh.isValid());
+
+		int expected = 10;
+// try { org.jcae.mesh.xmldata.MeshWriter.writeObject3D(mesh, "XXX-avant", null); } catch (java.io.IOException ex) { ex.printStackTrace(); throw new RuntimeException(ex); }
+		new QEMDecimateHalfEdge(mesh, options).compute();
+		assertTrue("Mesh is not valid", mesh.isValid());
+		int res = AbstractAlgoHalfEdge.countInnerTriangles(mesh);
+// try { org.jcae.mesh.xmldata.MeshWriter.writeObject3D(mesh, "XXX-apres", null); } catch (java.io.IOException ex) { ex.printStackTrace(); throw new RuntimeException(ex); }
+		assertTrue("Final number of triangles: "+res, res == expected);
+		assertTrue("Mesh is not valid", mesh.isValid());
+	}
+
 
 }
