@@ -262,6 +262,21 @@ public class HalfEdgeTest extends AbstractHalfEdgeTest
 		buildMeshNM(4, 4, true);
 		super.collapse(v[8], v[4], v[8]);
 	}
+	// Check collapsing an edge which is incident
+	// to a non-manifold edge
+	@Test public void collapseIncidentNM()
+	{
+		Vertex v0 = mesh.createVertex(0.0, 0.0, 0.0);
+		Vertex v1 = mesh.createVertex(1.0, 0.0, 0.0);
+		Vertex v2 = mesh.createVertex(0.0, 1.0, 0.0);
+		Vertex v3 = mesh.createVertex(1.0, 1.0, 0.0);
+		Triangle T0 = mesh.createTriangle(v0, v1, v2);
+		Triangle T1 = mesh.createTriangle(v3, v1, v2);
+		mesh.add(T0);
+		mesh.add(T1);
+		mesh.buildAdjacency();
+		super.collapse(v0, v1, v0);
+	}
 	// Check when non-manifold edge is prevOrigin()
 	@Test public void collapseNM898()
 	{
