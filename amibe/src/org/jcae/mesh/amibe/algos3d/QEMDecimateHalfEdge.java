@@ -320,6 +320,8 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 	{
 		final Vertex o = e.origin();
 		final Vertex d = e.destination();
+		if (!o.isMutable() && !d.isMutable())
+			return Double.MAX_VALUE;
 		final Quadric3DError q1 = quadricMap.get(o);
 		assert q1 != null : o;
 		final Quadric3DError q2 = quadricMap.get(d);
