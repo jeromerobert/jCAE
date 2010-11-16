@@ -44,6 +44,9 @@ parser.add_option("-t", "--tolerance", metavar="FLOAT",
 parser.add_option("-I", "--immutable-border",
                   action="store_true", dest="immutable_border",
                   help="Tag free edges as immutable")
+parser.add_option("-G", "--immutable-border-group",
+                  action="store_true", dest="immutable_border_group",
+                  help="Tag border group edges as immutable")
                   
 (options, args) = parser.parse_args(args=sys.argv[1:])
 
@@ -78,9 +81,13 @@ MeshReader.readObject3D(mesh, xmlDir)
 liaison = MeshLiaison(mesh)
 if options.immutable_border:
     liaison.mesh.tagFreeEdges(AbstractHalfEdge.IMMUTABLE)
-if options.preserveGroups:
-	liaison.getMesh().buildGroupBoundaries()
 
+if options.immutable_border_group:
+    liaison.mesh.tagGroupBoundaries(AbstractHalfEdge.IMMUTABLE)
+else:
+    if options.preserveGroups:
+	liaison.getMesh().buildGroupBoundaries()
+    
 cons = Class.forName("org.jcae.mesh.amibe.algos3d."+options.algorithm).getConstructor([ MeshLiaison, Map ])
 cons.newInstance([ liaison, opts ]).compute()
 

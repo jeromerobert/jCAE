@@ -40,6 +40,10 @@ public class DecimateParameter extends PropertySheet
 	private boolean preserveGroups = true;
 	private boolean useMaxLength;
 	private double maxLength = 1.0;
+	private boolean keepBorder = true;
+	private boolean keepBorderGroups = true;
+
+
 	
 	private class MyProperty<T> extends PropertySupport.Reflection<T>
 	{
@@ -107,6 +111,14 @@ public class DecimateParameter extends PropertySheet
 				}
 			});
 
+			r.put(new MyProperty<Boolean>(Boolean.TYPE, "keepBorder",
+				"Keep border",
+				"No geometric transformation on free edges."));
+
+			r.put(new MyProperty<Boolean>(Boolean.TYPE, "keepBorderGroups",
+				"Keep border groups",
+				"ENo geometric transformation on border group edges."));
+
 		} catch (NoSuchMethodException ex) {
 			Exceptions.printStackTrace(ex);
 		}
@@ -171,6 +183,18 @@ public class DecimateParameter extends PropertySheet
 		this.useTolerance = useTolerance;
 		repaint();
 	}
+	public boolean isKeepBorder() {
+		return keepBorder;
+	}
 
+	public void setKeepBorder(boolean keepBorder) {
+		this.keepBorder = keepBorder;
+	}
+	public boolean isKeepBorderGroups() {
+		return keepBorderGroups;
+	}
 
+	public void setKeepBorderGroups(boolean keepBorderGroups) {
+		this.keepBorderGroups = keepBorderGroups;
+	}
 }

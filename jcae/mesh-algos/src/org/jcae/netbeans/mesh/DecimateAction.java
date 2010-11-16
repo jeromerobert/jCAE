@@ -59,6 +59,10 @@ public final class DecimateAction extends AlgoAction
 				l.add("--maxlength");
 				l.add(Double.toString(bean.getMaxLength()));
 			}
+                        if(bean.isKeepBorder())
+				l.add("-I");
+                        if(bean.isKeepBorderGroups())
+				l.add("-G");
 			l.add(meshDirectory);
 			l.add(meshDirectory);
 			return l;		
