@@ -1300,7 +1300,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		logger.fine("Non manifold fan iterator");
 		return new Iterator<AbstractHalfEdge>()
 		{
-			private final HalfEdge last = sym.next.next;
+			private final HalfEdge last = (hasAttributes(OUTER) ? next.next : sym.next.next);
 			private HalfEdge current = null;
 			public boolean hasNext()
 			{
