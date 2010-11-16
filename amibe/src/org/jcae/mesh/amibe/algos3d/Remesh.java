@@ -46,6 +46,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -447,8 +448,20 @@ public class Remesh
 						}
 
 						// Tag symmetric edge to process edges only once
-						sym = h.sym(sym);
-						sym.setAttributes(AbstractHalfEdge.MARKED);
+						if (!h.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+						{
+							sym = h.sym(sym);
+							sym.setAttributes(AbstractHalfEdge.MARKED);
+						}
+						else
+						{
+							for (Iterator<AbstractHalfEdge> it = h.fanIterator(); it.hasNext(); )
+							{
+								AbstractHalfEdge f = it.next();
+								f.setAttributes(AbstractHalfEdge.MARKED);
+								f.sym().setAttributes(AbstractHalfEdge.MARKED);
+							}
+						}
 
 						Vertex start = h.origin();
 						Vertex end = h.destination();
