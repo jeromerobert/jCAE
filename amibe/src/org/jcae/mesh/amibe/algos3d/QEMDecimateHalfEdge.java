@@ -277,8 +277,8 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 						d = - Matrix3D.prodSca(vect2, b.origin().getUV());
 						final Quadric3DError q1 = quadricMap.get(b.origin());
 						final Quadric3DError q2 = quadricMap.get(b.destination());
-						q1.addWeightedError(vect2, d, norm);
-						q2.addWeightedError(vect2, d, norm);
+						q1.addWeightedError(vect2, d, 100.0 * norm);
+						q2.addWeightedError(vect2, d, 100.0 * norm);
 					}
 				}
 			}
