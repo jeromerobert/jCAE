@@ -342,11 +342,9 @@ public class QEMDecimateHalfEdgeTest
 		assertTrue("Mesh is not valid", mesh.isValid());
 
 		int expected = 6;
-// try { org.jcae.mesh.xmldata.MeshWriter.writeObject3D(mesh, "XXX-avant", null); } catch (java.io.IOException ex) { ex.printStackTrace(); throw new RuntimeException(ex); }
 		new QEMDecimateHalfEdge(mesh, options).compute();
 		assertTrue("Mesh is not valid", mesh.isValid());
 		int res = AbstractAlgoHalfEdge.countInnerTriangles(mesh);
-// try { org.jcae.mesh.xmldata.MeshWriter.writeObject3D(mesh, "XXX-apres", null); } catch (java.io.IOException ex) { ex.printStackTrace(); throw new RuntimeException(ex); }
 		assertTrue("Final number of triangles: "+res, res == expected);
 		assertTrue("Mesh is not valid", mesh.isValid());
 	}
@@ -368,11 +366,31 @@ public class QEMDecimateHalfEdgeTest
 		assertTrue("Mesh is not valid", mesh.isValid());
 
 		int expected = 10;
-// try { org.jcae.mesh.xmldata.MeshWriter.writeObject3D(mesh, "XXX-avant", null); } catch (java.io.IOException ex) { ex.printStackTrace(); throw new RuntimeException(ex); }
 		new QEMDecimateHalfEdge(mesh, options).compute();
 		assertTrue("Mesh is not valid", mesh.isValid());
 		int res = AbstractAlgoHalfEdge.countInnerTriangles(mesh);
-// try { org.jcae.mesh.xmldata.MeshWriter.writeObject3D(mesh, "XXX-apres", null); } catch (java.io.IOException ex) { ex.printStackTrace(); throw new RuntimeException(ex); }
+		assertTrue("Final number of triangles: "+res, res == expected);
+		assertTrue("Mesh is not valid", mesh.isValid());
+	}
+
+	@Test public void testShellWithNonManifoldCorner()
+	{
+		final Map<String, String> options = new HashMap<String, String>();
+		options.put("maxtriangles", "1");
+		mesh = new Mesh();
+		createMxNShell(5, 5);
+		Vertex v0 = T[0].vertex[0];
+		T[0].vertex[0] = T[0].vertex[1];
+		T[0].vertex[1] = v0;
+		mesh.buildAdjacency();
+		assertTrue("Mesh is not valid", mesh.isValid());
+
+		int expected = 1;
+// try { org.jcae.mesh.xmldata.MeshWriter.writeObject3D(mesh, "XXX-0", null); } catch (java.io.IOException ex) { ex.printStackTrace(); throw new RuntimeException(ex); }
+		new QEMDecimateHalfEdge(mesh, options).compute();
+		assertTrue("Mesh is not valid", mesh.isValid());
+		int res = AbstractAlgoHalfEdge.countInnerTriangles(mesh);
+// try { org.jcae.mesh.xmldata.MeshWriter.writeObject3D(mesh, "XXX-1", null); } catch (java.io.IOException ex) { ex.printStackTrace(); throw new RuntimeException(ex); }
 		assertTrue("Final number of triangles: "+res, res == expected);
 		assertTrue("Mesh is not valid", mesh.isValid());
 	}
