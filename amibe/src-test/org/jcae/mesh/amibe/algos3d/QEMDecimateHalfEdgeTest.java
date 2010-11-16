@@ -23,6 +23,7 @@ package org.jcae.mesh.amibe.algos3d;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import java.util.Map;
 import java.util.HashMap;
 import static org.junit.Assert.*;
@@ -323,5 +324,32 @@ public class QEMDecimateHalfEdgeTest
 		assertTrue("Mesh is not valid", mesh.isValid());
 		assertTrue("Final number of triangles: "+res, res == expected);
 	}
+
+	@Test public void testShell3WithGroups()
+	{
+		final Map<String, String> options = new HashMap<String, String>();
+		options.put("size", "0.1");
+		mesh = new Mesh();
+		createMxNShell(3, 3);
+		mesh.buildAdjacency();
+		int cnt = 0;
+		for (Triangle t : T)
+		{
+			t.setGroupId(cnt / 4);
+			cnt++;
+		}
+		mesh.tagGroupBoundaries(AbstractHalfEdge.IMMUTABLE);
+		assertTrue("Mesh is not valid", mesh.isValid());
+
+		int expected = 6;
+// try { org.jcae.mesh.xmldata.MeshWriter.writeObject3D(mesh, "XXX-avant", null); } catch (java.io.IOException ex) { ex.printStackTrace(); throw new RuntimeException(ex); }
+		new QEMDecimateHalfEdge(mesh, options).compute();
+		assertTrue("Mesh is not valid", mesh.isValid());
+		int res = AbstractAlgoHalfEdge.countInnerTriangles(mesh);
+// try { org.jcae.mesh.xmldata.MeshWriter.writeObject3D(mesh, "XXX-apres", null); } catch (java.io.IOException ex) { ex.printStackTrace(); throw new RuntimeException(ex); }
+		assertTrue("Final number of triangles: "+res, res == expected);
+		assertTrue("Mesh is not valid", mesh.isValid());
+	}
+
 
 }
