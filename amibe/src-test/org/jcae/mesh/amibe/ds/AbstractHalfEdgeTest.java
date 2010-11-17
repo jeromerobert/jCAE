@@ -299,6 +299,23 @@ public class AbstractHalfEdgeTest
 		assertTrue("Mesh is not valid", mesh.isValid());
 	}
 	
+	final void buildMesh3()
+	{
+		createMxNShell(3, 2);
+		mesh.buildAdjacency();
+		assertTrue("Mesh is not valid", mesh.isValid());
+	}
+
+	final void buildMesh3NM()
+	{
+		createMxNShell(3, 2);
+		Vertex vTemp = T[0].vertex[0];
+		T[0].vertex[0] = T[0].vertex[1];
+		T[0].vertex[1] = vTemp;
+		mesh.buildAdjacency();
+		assertTrue("Mesh is not valid", mesh.isValid());
+	}
+
 	final AbstractHalfEdge find(Vertex v1, Vertex v2)
 	{
 		if (v1.isManifold())

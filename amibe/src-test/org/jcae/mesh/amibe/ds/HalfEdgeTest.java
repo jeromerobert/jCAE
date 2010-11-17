@@ -23,6 +23,7 @@ import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.junit.Before;
 import org.junit.Test;
+import static org.junit.Assert.assertTrue;
 
 public class HalfEdgeTest extends AbstractHalfEdgeTest
 {
@@ -262,21 +263,6 @@ public class HalfEdgeTest extends AbstractHalfEdgeTest
 		buildMeshNM(4, 4, true);
 		super.collapse(v[8], v[4], v[8]);
 	}
-	// Check collapsing an edge which is incident
-	// to a non-manifold edge
-	@Test public void collapseIncidentNM()
-	{
-		Vertex v0 = mesh.createVertex(0.0, 0.0, 0.0);
-		Vertex v1 = mesh.createVertex(1.0, 0.0, 0.0);
-		Vertex v2 = mesh.createVertex(0.0, 1.0, 0.0);
-		Vertex v3 = mesh.createVertex(1.0, 1.0, 0.0);
-		Triangle T0 = mesh.createTriangle(v0, v1, v2);
-		Triangle T1 = mesh.createTriangle(v3, v1, v2);
-		mesh.add(T0);
-		mesh.add(T1);
-		mesh.buildAdjacency();
-		super.collapse(v0, v1, v0);
-	}
 	// Check when non-manifold edge is prevOrigin()
 	@Test public void collapseNM898()
 	{
@@ -325,7 +311,35 @@ public class HalfEdgeTest extends AbstractHalfEdgeTest
 		buildMeshNM(2, 4, true);
 		super.collapse(v[1], v[3], v[1]);
 	}
+		/*
+		Vertex v0 = mesh.createVertex(0.0, 0.0, 0.0);
+		Vertex v1 = mesh.createVertex(1.0, 0.0, 0.0);
+		Vertex v2 = mesh.createVertex(0.0, 1.0, 0.0);
+		Vertex v3 = mesh.createVertex(1.0, 1.0, 0.0);
+		Triangle T0 = mesh.createTriangle(v0, v1, v2);
+		Triangle T1 = mesh.createTriangle(v3, v1, v2);
+		mesh.add(T0);
+		mesh.add(T1);
+		mesh.buildAdjacency(); */
 	
+	// Check collapsing a corner
+	@Test public void collapseCorner01()
+	{
+		super.buildMesh3();
+		assertTrue("Mesh contains "+mesh.getTriangles().size()+" triangles, 10 expected", 10 == mesh.getTriangles().size());
+		super.collapse(v[0], v[1], v[0]);
+		assertTrue("Mesh contains "+mesh.getTriangles().size()+" triangles, 8 expected", 8 == mesh.getTriangles().size());
+	}
+
+	@Test public void collapseCorner13()
+	{
+		super.buildMesh3();
+		AbstractHalfEdge e = find(v[1], v[3]);
+		Vertex a = e.apex();
+		e.collapse(mesh, v[1]);
+		assertTrue("Mesh contains "+mesh.getTriangles().size()+" triangles, 6 expected", 6 == mesh.getTriangles().size());
+	}
+
 	// Unit tests for {@link AbstractHalfEdge#swap} on
 	// non-manifold meshes.
 	@Test(expected= IllegalArgumentException.class) public void swapNM42()
