@@ -45,6 +45,7 @@ import javax.media.j3d.LineAttributes;
 
 import java.io.FileInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 import java.nio.MappedByteBuffer;
@@ -55,6 +56,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
+import org.xml.sax.SAXException;
 
 public class SampleBora1D
 {
@@ -240,7 +242,7 @@ public class SampleBora1D
 		return ret;
 	}
 
-	public static void main(String args[])
+	public static void main(String args[]) throws SAXException, IOException
 	{
 		final BModel model = BModelReader.readObject(args[0]);
 		JFrame feFrame = new JFrame("Bora Demo");
