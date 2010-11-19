@@ -941,7 +941,10 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	private static void replaceVertexLinks(Vertex o, Triangle oldT, Triangle newT)
 	{
 		if (o.isManifold())
-			o.setLink(newT);
+		{
+			if (o.getLink() == oldT)
+				o.setLink(newT);
+		}
 		else
 		{
 			Triangle [] tArray = (Triangle []) o.getLink();
