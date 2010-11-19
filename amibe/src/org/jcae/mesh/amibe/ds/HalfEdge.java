@@ -871,8 +871,11 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		{
 			if (t34.hasAttributes(OUTER) && s != null)
 				t34 = s.tri;
-			replaceVertexLinks(apex(), tri, t34);
-			replaceVertexLinks(n, tri, t34);
+			if (!t34.hasAttributes(OUTER))
+			{
+				replaceVertexLinks(apex(), tri, t34);
+				replaceVertexLinks(n, tri, t34);
+			}
 		}
 		if (f != null && f.hasAttributes(NONMANIFOLD))
 			f.HEglue(s);
@@ -889,6 +892,32 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			s.attributes |= attr3;
 		// Remove t1
 		m.remove(tri);
+		// If t3 and t4 are outer, they are discarded
+		if (f != null && s!= null &&  f.hasAttributes(OUTER) && s.hasAttributes(OUTER))
+		{
+			m.remove(s.tri);
+			m.remove(f.tri);
+			if (m.hasNodes())
+			{
+				Vertex a = apex();
+				if (a.isManifold())
+					m.remove(a);
+				else
+				{
+					Triangle [] tArray = (Triangle []) a.getLink();
+					ArrayList<Triangle> res = new ArrayList<Triangle>(tArray.length - 1);
+					for (Triangle T : tArray)
+					{
+						if (T != tri)
+							res.add(T);
+
+					}
+					Triangle [] nList = new Triangle[res.size()];
+					res.toArray(nList);
+					a.setLink(nList);
+				}
+			}
+		}
 		// By convention, edge is moved into (dV4V1)
 		// If s is null, edge is outer and return value does not matter
 		return (s == null ? null : s.next);
