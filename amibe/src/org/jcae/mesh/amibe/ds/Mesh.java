@@ -1792,6 +1792,17 @@ public class Mesh implements Serializable
 					logger.severe(" "+h);
 					return false;
 				}
+				for (Iterator<AbstractHalfEdge> it = e.fanIterator(); it.hasNext(); )
+				{
+					h = it.next();
+					if (h.hasAttributes(AbstractHalfEdge.OUTER))
+					{
+						logger.severe("Multiple edges: fan iterator error: ");
+						logger.severe(" "+e);
+						logger.severe(" "+h);
+						return false;
+					}
+				}
 			}
 		}
 		return true;
