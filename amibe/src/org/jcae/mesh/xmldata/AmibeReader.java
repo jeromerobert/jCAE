@@ -90,20 +90,30 @@ public abstract class AmibeReader extends XMLReader implements JCAEXMLData {
 		public long getTriasOffset() {
 			return triasOffset;
 		}
-		public int[] readTria3() throws IOException
+
+		public int[] readTria3Ids() throws IOException
 		{
 			if (numberOfTrias == 0)
 				return new int[0];
 			PrimitiveFileReaderFactory pfrf = new PrimitiveFileReaderFactory();
 			IntFileReader ifrG = pfrf.getIntReader(getBinFile(groupsFilename));
-			IntFileReader ifrT = pfrf.getIntReader(getBinFile("triangles"+dim()+"d.bin"));
-
-			int[] toReturn = new int[numberOfTrias * 3];
-
+			int[] toReturn = new int[numberOfTrias];
 			for (int i = 0; i < numberOfTrias; i++)
-				ifrT.get(ifrG.get(triasOffset+i) * 3, toReturn, i * 3, 3);
-
+				toReturn[i] = ifrG.get(triasOffset+i);
 			ifrG.close();
+			return toReturn;
+		}
+		
+		public int[] readTria3() throws IOException
+		{
+			if (numberOfTrias == 0)
+				return new int[0];
+			PrimitiveFileReaderFactory pfrf = new PrimitiveFileReaderFactory();
+			int[] ids = readTria3Ids();
+			IntFileReader ifrT = pfrf.getIntReader(getBinFile("triangles"+dim()+"d.bin"));
+			int[] toReturn = new int[numberOfTrias * 3];
+			for (int i = 0; i < numberOfTrias; i++)
+				ifrT.get(ids[i] * 3, toReturn, i * 3, 3);
 			ifrT.close();
 			return toReturn;
 		}
@@ -130,7 +140,7 @@ public abstract class AmibeReader extends XMLReader implements JCAEXMLData {
 	public class SubMesh
 	{
 		private int subShape;
-		private int numberOfNodes, numberOfTrias, numberOfBeams;
+		private int numberOfNodes, numberOfTrias, numberOfBeams, numberOfReferences;
 		private int nodesOffset, beamsOffset, triasOffset;
 		private LinkedHashMap<String, Group> groups = new LinkedHashMap<String, Group>();
 
@@ -195,11 +205,21 @@ public abstract class AmibeReader extends XMLReader implements JCAEXMLData {
 			return groups.get(id);
 		}
 
-		public float[] readNodes(int[] nodesID) throws IOException
+		public DoubleFileReader getNodes() throws IOException
 		{
 			File f = getBinFile("nodes"+dim()+"d.bin");
-			DoubleFileReader dfr = new PrimitiveFileReaderFactory().getDoubleReader(f);
+			return new PrimitiveFileReaderFactory().getDoubleReader(f);
+		}
 
+		public IntFileReader getTriangles() throws IOException
+		{
+			return new PrimitiveFileReaderFactory().getIntReader(
+				getBinFile("triangles"+dim()+"d.bin"));
+		}
+		
+		public float[] readNodes(int[] nodesID) throws IOException
+		{
+			DoubleFileReader dfr = getNodes();
 			float[] toReturn = new float[nodesID.length * dim()];
 
 			for (int i = 0; i < nodesID.length; i++)
@@ -212,6 +232,23 @@ public abstract class AmibeReader extends XMLReader implements JCAEXMLData {
 			dfr.close();
 
 			return toReturn;
+		}
+
+		public int[] getReferences() throws IOException
+		{
+			int[] refs = new int[numberOfReferences];
+			if(numberOfReferences > 0)
+			{
+				IntFileReader ifrR = new PrimitiveFileReaderFactory().getIntReader(
+					getBinFile("nodes1dref.bin"));
+				ifrR.get(refs);
+				ifrR.close();
+			}
+			return refs;
+		}
+		
+		public int getNumberOfReferences() {
+			return numberOfReferences;
 		}
 	}
 
@@ -305,18 +342,18 @@ public abstract class AmibeReader extends XMLReader implements JCAEXMLData {
 			SubMesh sm = new SubMesh();
 			sm.subShape = readInt(e, "subshape");
 			
-			Element nodes = getElement(mesh, "nodes");
+			Element nodes = getElement(e, "nodes");
 			sm.numberOfNodes = readInt(nodes, "number");
 			sm.nodesOffset = readFile(nodes).offset;
 
-			Element triangles = getElement(mesh, "triangles");
+			Element triangles = getElement(e, "triangles");
 			if(triangles != null)
 			{
 				sm.numberOfTrias = readInt(triangles, "number");
 				sm.triasOffset = readFile(triangles).offset;
 			}
 
-			Element beams = getElement(mesh, "beams");
+			Element beams = getElement(e, "beams");
 			if(beams != null)
 			{
 				sm.numberOfBeams = readInt(beams, "number");

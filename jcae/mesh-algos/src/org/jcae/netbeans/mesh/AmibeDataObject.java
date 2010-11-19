@@ -25,10 +25,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.XMLEncoder;
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.Set;
 import org.jcae.mesh.xmldata.Groups;
-import org.jcae.mesh.xmldata.GroupsReader;
 import org.jcae.netbeans.Utilities;
 import org.openide.ErrorManager;
 import org.openide.cookies.SaveCookie;
@@ -162,7 +159,7 @@ public class AmibeDataObject extends MultiDataObject implements SaveCookie
 		String meshDir=getMeshDirectory();
 		File xmlFile=new File(meshDir, "jcae3d");
         if (xmlFile.exists())
-            groups = GroupsReader.getGroups(meshDir);
+            groups = Groups.getGroups(meshDir);
 		amibeNode.setGroups(groups);
 	}
 

@@ -30,8 +30,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
+import org.jcae.mesh.xmldata.AmibeReader.SubMesh;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -423,5 +423,46 @@ public class Groups
 			exporter.write(stream);
 			stream.close();
 		}
+	}
+
+	public static Groups getGroups(String xmlPath)
+	{
+		Groups groupList = new Groups(xmlPath);
+		try
+		{
+			SubMesh sm = new AmibeReader.Dim3(xmlPath).getSubmeshes().get(0);
+			List<AmibeReader.Group> groups = sm.getGroups();
+			if (groups.isEmpty())
+			{
+				int nb = sm.getNumberOfTrias();
+				if(nb > 0)
+				{
+					Group group = new Group();
+					group.setName("default");
+					group.setNumberOfElements(nb);
+					group.setOffset(0);
+				}
+			}
+			else
+			{
+				for (AmibeReader.Group ag:groups)
+				{
+					Group group = new Group();
+					group.setName(ag.getName());
+					group.setNumberOfElements(ag.getNumberOfTrias());
+					group.setOffset((int) ag.getTriasOffset());
+					groupList.addGroup(group);
+				}
+			}
+		}
+		catch (SAXException e)
+		{
+			LOGGER.log(Level.SEVERE, e.getMessage(), e);
+		}
+		catch (IOException e)
+		{
+			LOGGER.log(Level.SEVERE, e.getMessage(), e);
+		}
+		return groupList;
 	}
 }

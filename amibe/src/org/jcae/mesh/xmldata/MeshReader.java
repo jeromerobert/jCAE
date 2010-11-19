@@ -21,6 +21,7 @@
 
 package org.jcae.mesh.xmldata;
 
+import java.util.logging.Level;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
@@ -42,6 +43,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.parsers.ParserConfigurationException;
+import org.jcae.mesh.xmldata.AmibeReader.SubMesh;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -197,7 +199,7 @@ public class MeshReader
 		}
 		logger.fine("end reading "+JCAEXMLData.xml2dFilename+iFace);
 	}
-	
+
 	/**
 	 * Loads an Amibe 3D XML file into an existing Mesh instance.
 	 *
@@ -207,178 +209,91 @@ public class MeshReader
 	public static void readObject3D(Mesh mesh, String xmlDir)
 		throws IOException
 	{
-		logger.info("Read mesh from "+xmlDir+File.separator+JCAEXMLData.xml3dFilename);
-		XPath xpath = XPathFactory.newInstance().newXPath();
-		Document document;
-		File xmlFile3d = null;
-		try
-		{
-			xmlFile3d = new File(xmlDir, JCAEXMLData.xml3dFilename);
-			document = XMLHelper.parseXML(xmlFile3d);
-		}
-		catch (ParserConfigurationException ex)
-		{
-			throw new IOException(ex.getMessage());
-		}
-		catch (SAXException ex)
-		{
-			throw new IOException(ex.getMessage());
-		}
-
-		try
-		{
-			String formatVersion = xpath.evaluate("/jcae/@version", document);
-			if (formatVersion != null && formatVersion.length() > 0)
-				throw new RuntimeException("File "+xmlFile3d+" has been written by a newer version of jCAE and cannot be re-read");
-			Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh", document, XPathConstants.NODE);
-			Node submeshNodes = (Node) xpath.evaluate("nodes", submeshElement, XPathConstants.NODE);
-			String refFile = xpath.evaluate("references/file/@location", submeshNodes);
-			int [] refs = null;
-			int numberOfReferences = 0;
-
-			PrimitiveFileReaderFactory pfrf = new PrimitiveFileReaderFactory();
-			if (refFile != null && refFile.length() > 0)
-			{
-				if (refFile.charAt(0) != File.separatorChar)
-					refFile = xmlDir+File.separator+refFile;
-				IntFileReader ifrR = pfrf.getIntReader(new File(refFile));
-
-				numberOfReferences = Integer.parseInt(
-					xpath.evaluate("references/number/text()", submeshNodes));
-				logger.fine("Reading "+numberOfReferences+" references");
-				refs = new int[numberOfReferences];
-				ifrR.get(refs);
-				ifrR.close();
+		try {
+			AmibeReader.Dim3 reader = new AmibeReader.Dim3(xmlDir);
+			SubMesh subMesh = reader.getSubmeshes().get(0);
+			int numberOfReferences = subMesh.getNumberOfReferences();
+			int[] refs = null;
+			if (numberOfReferences > 0) {
+				refs = subMesh.getReferences();
 				mesh.setPersistentReferences(true);
 			}
-			
-			String nodesFile = xpath.evaluate("file/@location", submeshNodes);
-			if (nodesFile.charAt(0) != File.separatorChar)
-				nodesFile = xmlDir+File.separator+nodesFile;
-			DoubleFileReader dfrN = pfrf.getDoubleReader(new File(nodesFile));
-			
-			int numberOfNodes = Integer.parseInt(
-				xpath.evaluate("number/text()", submeshNodes));
-			Vertex [] nodelist = new Vertex[numberOfNodes+1];
+			DoubleFileReader dfrN = subMesh.getNodes();
+			int numberOfNodes = subMesh.getNumberOfNodes();
+			Vertex[] nodelist = new Vertex[numberOfNodes + 1];
 			nodelist[numberOfNodes] = mesh.outerVertex;
 			int label;
-			double [] coord = new double[3];
-			logger.fine("Reading "+numberOfNodes+" nodes");
-			double [] bbmin = new double[3];
-			double [] bbmax = new double[3];
-			for (int j = 0; j < 3; j++)
-			{
+			double[] coord = new double[3];
+			double[] bbmin = new double[3];
+			double[] bbmax = new double[3];
+			for (int j = 0; j < 3; j++) {
 				bbmin[j] = Double.MAX_VALUE;
 				bbmax[j] = Double.MIN_VALUE;
 			}
-
-			mesh.ensureCapacity(2*numberOfNodes);
-			for (int i=0; i < numberOfNodes; i++)
-			{
+			mesh.ensureCapacity(2 * numberOfNodes);
+			for (int i = 0; i < numberOfNodes; i++) {
 				dfrN.get(coord);
 				nodelist[i] = mesh.createVertex(coord);
-				if (i < numberOfNodes - numberOfReferences)
+				if (i < numberOfNodes - numberOfReferences) {
 					label = 0;
-				else
-				{
+				} else {
 					assert refs != null;
-					label = refs[i+numberOfReferences-numberOfNodes];
+					label = refs[i + numberOfReferences - numberOfNodes];
 				}
 				nodelist[i].setRef(label);
-				for (int j = 0; j < 3; j++)
-				{
-					if (coord[j] > bbmax[j])
+				for (int j = 0; j < 3; j++) {
+					if (coord[j] > bbmax[j]) {
 						bbmax[j] = coord[j];
-					if (coord[j] < bbmin[j])
+					}
+					if (coord[j] < bbmin[j]) {
 						bbmin[j] = coord[j];
+					}
 				}
-			} 
-			dfrN.close();
-			
-			if (mesh.hasNodes())
-			{
-				for (int i=0; i < numberOfNodes; i++)
-					mesh.add(nodelist[i]);
 			}
-
-			Node submeshTriangles = (Node) xpath.evaluate("triangles",
-				submeshElement, XPathConstants.NODE);
-			String trianglesFile = xpath.evaluate("file/@location",
-				submeshTriangles);
-			if (trianglesFile.charAt(0) != File.separatorChar)
-				trianglesFile = xmlDir+File.separator+trianglesFile;
-			IntFileReader ifrT = pfrf.getIntReader(new File(trianglesFile));
-			
-			int numberOfTriangles = Integer.parseInt(
-				xpath.evaluate("number/text()", submeshTriangles));
-			logger.fine("Reading "+numberOfTriangles+" elements");
-			Triangle [] facelist = new Triangle[numberOfTriangles];
-			int [] ind = new int[3];
-			Vertex [] pts = new Vertex[3];
-			for (int i=0; i < numberOfTriangles; i++)
-			{
+			dfrN.close();
+			if (mesh.hasNodes()) {
+				for (int i = 0; i < numberOfNodes; i++) {
+					mesh.add(nodelist[i]);
+				}
+			}
+			IntFileReader ifrT = subMesh.getTriangles();
+			int numberOfTriangles = subMesh.getNumberOfTrias();
+			Triangle[] facelist = new Triangle[numberOfTriangles];
+			int[] ind = new int[3];
+			Vertex[] pts = new Vertex[3];
+			for (int i = 0; i < numberOfTriangles; i++) {
 				boolean outer = false;
-				for (int j = 0; j < 3; j++)
-				{
+				for (int j = 0; j < 3; j++) {
 					ind[j] = ifrT.get();
-					if (ind[j] < 0)
-					{
-						ind[j] = - ind[j];
+					if (ind[j] < 0) {
+						ind[j] = -ind[j];
 						outer = true;
 					}
 					pts[j] = nodelist[ind[j]];
 				}
-				if (!outer)
-				{
+				if (!outer) {
 					facelist[i] = mesh.createTriangle(pts[0], pts[1], pts[2]);
 					mesh.add(facelist[i]);
 				}
 			}
-			ifrT.close();
 			
-			Node groupsElement = (Node) xpath.evaluate("groups", submeshElement,
-				XPathConstants.NODE);
-			NodeList groupsList = (NodeList) xpath.evaluate("group",
-				groupsElement, XPathConstants.NODESET);
-			String groupsFile = xpath.evaluate("file/@location", groupsList.item(0));
-			if (groupsFile.charAt(0) != File.separatorChar)
-				groupsFile = xmlDir+File.separator+groupsFile;
-			IntFileReader ifrG = pfrf.getIntReader(new File(groupsFile));
-
-			// WARNING: xpath.evaluate() scans the whole XML document and not context
-			// node only, which is very counter-intuitive.  This will dramatically slow
-			// down processing if there are thousands of groups.
-			// A workaround is to use
-			//     Node current = groupsList.item(i).cloneNode(true);
-			// to clone all nodes below context node and pass this node to xpath.evaluate().
-			// This works well, but nodes have to be cloned.  Direct access to nodes is
-			// faster.
-			for (int i=0, n = groupsList.getLength(); i < n; i++)
-			{
-				Element groupNode = (Element) groupsList.item(i);
-				int numberOfElements = Integer.parseInt(groupNode.getElementsByTagName("number").item(0).getTextContent());
-				String os = ((Element) groupNode.getElementsByTagName("file").item(0)).getAttribute("offset");
-				int fileOffset = os.isEmpty() ? 0 : Integer.parseInt(os);
-				String groupName = groupNode.getElementsByTagName("name").item(0).getTextContent();
-				int id = i+1;
-				mesh.setGroupName(id, groupName);
-				logger.fine("Group "+id+": reading "+numberOfElements+" elements");
-				for (int j=0; j < numberOfElements; j++)
-					facelist[ifrG.get(fileOffset+j)].setGroupId(id);
+			ifrT.close();
+			int i = 1;
+			for (AmibeReader.Group g : subMesh.getGroups()) {
+				int id = i++;
+				mesh.setGroupName(id, g.getName());
+				for (int j : g.readTria3Ids()) {
+					facelist[j].setGroupId(id);
+				}
 			}
-			ifrG.close();
 			//  Build adjacency relations
-			if (mesh.hasAdjacency())
-			{
+			if (mesh.hasAdjacency()) {
 				logger.fine("Build mesh adjacency");
 				mesh.buildAdjacency();
 			}
-		}
-		catch(XPathExpressionException ex)
-		{
+		} catch (SAXException ex) {
 			throw new IOException(ex);
 		}
-		logger.fine("end reading "+JCAEXMLData.xml3dFilename);
 	}
 
 	// Method previously in MMesh3DReader, remove it?
