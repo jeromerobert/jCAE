@@ -123,16 +123,24 @@ public abstract class AmibeReader extends XMLReader implements JCAEXMLData {
 			if (numberOfBeams == 0)
 				return new int[0];
 			PrimitiveFileReaderFactory pfrf = new PrimitiveFileReaderFactory();
-			IntFileReader ifrG = pfrf.getIntReader(getBinFile("bgroups.bin"));
+			int[] ids = readBeamsIds();
 			IntFileReader ifrT = pfrf.getIntReader(getBinFile("beams"+dim()+"d.bin"));
-
 			int[] toReturn = new int[numberOfBeams * 2];
-
 			for (int i = 0; i < numberOfBeams; i++)
-				ifrT.get(ifrG.get(beamsOffset+i) * 2, toReturn, i * 2, 2);
-
-			ifrG.close();
+				ifrT.get(ids[i] * 2, toReturn, i * 2, 2);
 			ifrT.close();
+			return toReturn;
+		}
+
+		public int[] readBeamsIds() throws IOException {
+			if (numberOfBeams == 0)
+				return new int[0];
+			PrimitiveFileReaderFactory pfrf = new PrimitiveFileReaderFactory();
+			IntFileReader ifrG = pfrf.getIntReader(getBinFile("bgroups.bin"));
+			int[] toReturn = new int[numberOfBeams];
+			for (int i = 0; i < numberOfBeams; i++)
+				toReturn[i] = ifrG.get(beamsOffset+i);
+			ifrG.close();
 			return toReturn;
 		}
 	}
@@ -211,6 +219,12 @@ public abstract class AmibeReader extends XMLReader implements JCAEXMLData {
 			return new PrimitiveFileReaderFactory().getDoubleReader(f);
 		}
 
+		public IntFileReader getBeams() throws IOException
+		{
+			return new PrimitiveFileReaderFactory().getIntReader(
+				getBinFile("beams"+dim()+"d.bin"));
+		}
+		
 		public IntFileReader getTriangles() throws IOException
 		{
 			return new PrimitiveFileReaderFactory().getIntReader(

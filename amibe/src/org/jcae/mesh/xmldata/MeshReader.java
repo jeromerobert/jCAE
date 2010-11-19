@@ -275,16 +275,23 @@ public class MeshReader
 					facelist[i] = mesh.createTriangle(pts[0], pts[1], pts[2]);
 					mesh.add(facelist[i]);
 				}
-			}
-			
+			}		
 			ifrT.close();
+
+			IntFileReader ifrB = subMesh.getBeams();
+			int numberOfBeams = subMesh.getNumberOfBeams();
+			for (int i = 0; i < numberOfBeams; i++)
+				mesh.addBeam(nodelist[ifrB.get()], nodelist[ifrB.get()], 0);
+			ifrB.close();
+
 			int i = 1;
 			for (AmibeReader.Group g : subMesh.getGroups()) {
 				int id = i++;
 				mesh.setGroupName(id, g.getName());
-				for (int j : g.readTria3Ids()) {
+				for (int j : g.readTria3Ids())
 					facelist[j].setGroupId(id);
-				}
+				for(int j : g.readBeamsIds())
+					mesh.setBeamGroup(j, id);
 			}
 			//  Build adjacency relations
 			if (mesh.hasAdjacency()) {

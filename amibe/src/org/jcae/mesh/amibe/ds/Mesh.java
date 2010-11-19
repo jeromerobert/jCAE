@@ -426,6 +426,11 @@ public class Mesh implements Serializable
 		return beamGroups.get(i);
 	}
 
+	public void setBeamGroup(int i, int gid)
+	{
+		beamGroups.set(i, gid);
+	}
+
 	public void setGroupName(int id, String name)
 	{
 		groupNames.put(id, name);
