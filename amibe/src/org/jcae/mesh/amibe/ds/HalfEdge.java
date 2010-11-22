@@ -588,20 +588,8 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			return false;
 		if (!origin().isMutable() && !destination().isMutable())
 			return false;
-		// Do not collapse if both previous and next edges are either
-		// boundary or non-manifold
-		for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )
-		{
-			HalfEdge h = (HalfEdge) it.next();
-			if (h.next == null || h.next.next == null)
-				return false;
-			if (h.next.hasAttributes(BOUNDARY | NONMANIFOLD) && h.next.next.hasAttributes(BOUNDARY | NONMANIFOLD))
-				return false;
-			if (h.sym == null || h.sym.next == null || h.sym.next.next == null)
-				return false;
-			if (h.sym.next.hasAttributes(BOUNDARY | NONMANIFOLD) && h.sym.next.next.hasAttributes(BOUNDARY | NONMANIFOLD))
-				return false;
-		}
+		if (!canCollapseBoundaries())
+			return false;
 
 		double [] xn = v.getUV();
 		if (origin().isManifold() && destination().isManifold())
@@ -654,6 +642,36 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		return true;
 	}
 
+	// Do not collapse if both previous and next edges are either
+	// boundary or non-manifold
+	private boolean canCollapseBoundaries()
+	{
+		if (!hasAttributes(NONMANIFOLD))
+		{
+			if (next == null || next.next == null)
+				return false;
+			if (next.hasAttributes(BOUNDARY | NONMANIFOLD) && next.next.hasAttributes(BOUNDARY | NONMANIFOLD))
+				return false;
+			if (sym == null || sym.next == null || sym.next.next == null)
+				return false;
+			if (sym.next.hasAttributes(BOUNDARY | NONMANIFOLD) && sym.next.next.hasAttributes(BOUNDARY | NONMANIFOLD))
+				return false;
+			return true;
+		}
+		for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )
+		{
+			HalfEdge h = (HalfEdge) it.next();
+			if (h.next == null || h.next.next == null)
+				return false;
+			if (h.next.hasAttributes(BOUNDARY | NONMANIFOLD) && h.next.next.hasAttributes(BOUNDARY | NONMANIFOLD))
+				return false;
+			if (h.sym == null || h.sym.next == null || h.sym.next.next == null)
+				return false;
+			if (h.sym.next.hasAttributes(BOUNDARY | NONMANIFOLD) && h.sym.next.next.hasAttributes(BOUNDARY | NONMANIFOLD))
+				return false;
+		}
+		return true;
+	}
 	/**
 	 * Topology check.
 	 * See in AbstractHalfEdgeTest.buildMeshTopo() why this
