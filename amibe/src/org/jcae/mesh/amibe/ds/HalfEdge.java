@@ -588,6 +588,21 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			return false;
 		if (!origin().isMutable() && !destination().isMutable())
 			return false;
+		// Do not collapse if both previous and next edges are either
+		// boundary or non-manifold
+		for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )
+		{
+			HalfEdge h = (HalfEdge) it.next();
+			if (h.next == null || h.next.next == null)
+				return false;
+			if (h.next.hasAttributes(BOUNDARY | NONMANIFOLD) && h.next.next.hasAttributes(BOUNDARY | NONMANIFOLD))
+				return false;
+			if (h.sym == null || h.sym.next == null || h.sym.next.next == null)
+				return false;
+			if (h.sym.next.hasAttributes(BOUNDARY | NONMANIFOLD) && h.sym.next.next.hasAttributes(BOUNDARY | NONMANIFOLD))
+				return false;
+		}
+
 		double [] xn = v.getUV();
 		if (origin().isManifold() && destination().isManifold())
 		{
