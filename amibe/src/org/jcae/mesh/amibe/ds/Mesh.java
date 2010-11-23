@@ -411,8 +411,8 @@ public class Mesh implements Serializable
 	{
 		beams.add(v1);
 		beams.add(v2);
-		forceNonManifold(v1);
-		forceNonManifold(v2);
+		v1.setMutable(false);
+		v2.setMutable(false);
 		beamGroups.add(group);
 	}
 
@@ -466,26 +466,6 @@ public class Mesh implements Serializable
 	public void setPersistentReferences(boolean persistentReferences)
 	{
 		this.persistentReferences = persistentReferences;
-	}
-
-	/**
-	 * Create and connect a dummy triangle to a vertex to make artificially
-	 * non manifold
-	 * @return the created dummy triangle or null if the vertex was already non
-	 * manifold
-	 */
-	public Triangle forceNonManifold(Vertex v)
-	{
-		if(v.isManifold())
-		{
-			Triangle t1 = (Triangle) v.getLink();
-			Triangle t2 = createTriangle(v, null, null);
-			t2.setReadable(false);
-			t2.setWritable(false);
-			t2.setAttributes(AbstractHalfEdge.OUTER);
-			v.setLink(new Triangle[]{t1, t2});
-		}
-		return null;
 	}
 
 	/**

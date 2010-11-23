@@ -20,6 +20,7 @@
 package org.jcae.mesh.amibe.projection;
 
 import java.io.FileNotFoundException;
+import java.util.List;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.Triangle;
@@ -89,13 +90,11 @@ public class MeshLiaison
 		Map<Vertex, Vertex> mapBgToCurrent = new HashMap<Vertex, Vertex>(backgroundNodeset.size()+1);
 		for (Vertex v : backgroundNodeset)
 		{
-			Vertex currentV = this.currentMesh.createVertex(v.getUV());
-			currentV.setRef(v.getRef());
-			currentV.setLabel(v.getLabel());
-			mapBgToCurrent.put(v, currentV);
+			Vertex currentV = cloneVertex(v, currentMesh, mapBgToCurrent);
 			if (this.currentMesh.hasNodes())
 				this.currentMesh.add(currentV);
 		}
+
 		mapBgToCurrent.put(this.backgroundMesh.outerVertex, this.currentMesh.outerVertex);
 
 		// Create triangles of currentMesh
@@ -111,6 +110,7 @@ public class MeshLiaison
 			this.currentMesh.add(newT);
 		}
 
+		cloneBeams(backgroundMesh, currentMesh, mapBgToCurrent);
 		// Create groups of currentMesh
 		for (int i = 1; i <= this.backgroundMesh.getNumberOfGroups(); i++)
 			this.currentMesh.setGroupName(i, this.backgroundMesh.getGroupName(i));
@@ -119,12 +119,41 @@ public class MeshLiaison
 		// Compute projections of vertices from currentMesh
 		this.mapCurrentVertexProjection = new HashMap<Vertex, ProjectedLocation>(backgroundNodeset.size());
 		for (Vertex v: backgroundNodeset)
-			this.addVertex(mapBgToCurrent.get(v), v.getNeighbourIteratorTriangle().next());
+		{
+			Iterator<Triangle> it = v.getNeighbourIteratorTriangle();
+			if(it.hasNext())
+				this.addVertex(mapBgToCurrent.get(v), it.next());
+		}
 		mapBgToCurrent.clear();
 
 		this.currentMesh.setPersistentReferences(this.backgroundMesh.hasPersistentReferences());
 	}
-	
+
+	private void cloneBeams(Mesh backgroundMesh, Mesh currentMesh, Map<Vertex, Vertex> map) {
+		List<Vertex> beams = backgroundMesh.getBeams();
+
+		int nb = beams.size();
+		for (int i = 0; i < nb; i += 2)
+		{
+			Vertex v1 = map.get(beams.get(i));
+			if (v1 == null)
+				v1 = cloneVertex(beams.get(i), currentMesh, map);
+			Vertex v2 = map.get(beams.get(i + 1));
+			if (v2 == null)
+				v2 = cloneVertex(beams.get(i + 1), currentMesh, map);
+			currentMesh.addBeam(v1, v2, backgroundMesh.getBeamGroup(i / 2));
+		}
+	}
+
+	private Vertex cloneVertex(Vertex v, Mesh dst, Map<Vertex, Vertex> map)
+	{
+			Vertex currentV = this.currentMesh.createVertex(v.getUV());
+			currentV.setRef(v.getRef());
+			currentV.setLabel(v.getLabel());
+			map.put(v, currentV);
+			return currentV;
+	}
+
 	public final Mesh getMesh()
 	{
 		return currentMesh;
