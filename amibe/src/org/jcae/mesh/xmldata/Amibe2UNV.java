@@ -20,6 +20,7 @@
 
 package org.jcae.mesh.xmldata;
 
+import org.jcae.mesh.xmldata.AmibeReader.Group;
 import org.jcae.mesh.xmldata.MeshExporter.UNV.Unit;
 import java.io.File;
 import java.io.PrintStream;
@@ -32,9 +33,6 @@ import java.nio.channels.FileChannel;
 import java.text.NumberFormat;
 import javax.xml.parsers.ParserConfigurationException;
 import java.util.logging.Logger;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
@@ -94,58 +92,34 @@ public class Amibe2UNV
 
 	public void write(PrintStream out) throws ParserConfigurationException, SAXException, IOException
 	{
+		AmibeReader.Dim3 ar = new AmibeReader.Dim3(directory.getPath());
 		unvWriter.writeInit(out);
 		writeNodes(out);	
 		writeTriangles(out);
-		writeGroups(out);
+		writeGroups(out, ar);
 	}
 	
 	/**
 	 * @param out
 	 * @throws IOException 
 	 */
-	private void writeGroups(PrintStream out)
+	private void writeGroups(PrintStream out, AmibeReader amibeReader)
 			throws ParserConfigurationException, SAXException, IOException
 	{
-		Document document=XMLHelper.parseXML(new File(directory, JCAEXMLData.xml3dFilename));
-		Element xmlGroups=(Element) document.getElementsByTagName("groups").item(0);
-		NodeList nl=xmlGroups.getElementsByTagName("group");
-		int[] groupIds=new int[nl.getLength()];
-		String[] names=new String[groupIds.length];
-		long[] groupOffsets=new long[groupIds.length];
-		int[] groupSize=new int[groupIds.length];
-		File groupFile=unvWriter.getGroupFile();
-		for(int i=0; i<groupIds.length; i++)
-		{
-			Element e=(Element) nl.item(i);
-			groupIds[i]=Integer.parseInt(e.getAttribute("id"));
-			Element nameNode=(Element)e.getElementsByTagName("name").item(0);
-			names[i]=nameNode.getChildNodes().item(0).getNodeValue();
-
-			Element numberNode=(Element)e.getElementsByTagName("number").item(0);
-			String v=numberNode.getChildNodes().item(0).getNodeValue();
-			groupSize[i]=Integer.parseInt(v);
-			String os=((Element)e.getElementsByTagName("file").item(0)).getAttribute("offset");
-			groupOffsets[i]=Long.parseLong(os);
-		}
-		FileChannel fc = new FileInputStream(groupFile).getChannel();	
-		ByteBuffer bb=ByteBuffer.allocate(4);
 		out.println("    -1"+CR+"  2435");
-		for(int i=0;i<names.length; i++)
+		int i = 0;
+		for(Group g:amibeReader.getSubmeshes().get(0).getGroups())
 		{				
 			out.println(FORMAT_I10.format(i+1)+
 				"         0         0         0         0         0         0"+
-				FORMAT_I10.format(groupSize[i]));
+				FORMAT_I10.format(g.getNumberOfTrias()));
 			
-			out.println(names[i]);
+			out.println(g.getName());
 			int countg=0;
-			fc.position(groupOffsets[i]*4);
-			for(int j=0; j<groupSize[i]; j++)
+			for(int id:g.readTria3Ids())
 			{				
-				bb.rewind();
-				fc.read(bb);
 				out.print("         8"
-					+FORMAT_I10.format(bb.getInt(0)+1)
+					+FORMAT_I10.format(id+1)
 					+"         0         0");
 				countg++;
 				if ((countg % 2) == 0)
@@ -153,6 +127,7 @@ public class Amibe2UNV
 			}
 			if ((countg % 2) !=0 )
 				out.println();
+			i++;
 		}
 		out.println("    -1");
 	}	
