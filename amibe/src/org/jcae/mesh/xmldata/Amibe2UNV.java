@@ -21,6 +21,7 @@
 package org.jcae.mesh.xmldata;
 
 import org.jcae.mesh.xmldata.AmibeReader.Group;
+import org.jcae.mesh.xmldata.AmibeReader.SubMesh;
 import org.jcae.mesh.xmldata.MeshExporter.UNV.Unit;
 import java.io.File;
 import java.io.PrintStream;
@@ -93,26 +94,31 @@ public class Amibe2UNV
 	public void write(PrintStream out) throws ParserConfigurationException, SAXException, IOException
 	{
 		AmibeReader.Dim3 ar = new AmibeReader.Dim3(directory.getPath());
+		SubMesh sm = ar.getSubmeshes().get(0);
 		unvWriter.writeInit(out);
-		writeNodes(out);	
-		writeTriangles(out);
-		writeGroups(out, ar);
+		writeNodes(out);
+		out.println("    -1"+CR+"  2412");
+		int count = writeTriangles(out);
+		writeBeams(out, sm, count);
+		out.println("    -1");
+		writeGroups(out, sm, count);
 	}
 	
 	/**
 	 * @param out
+	 * @param count id of the first beam
 	 * @throws IOException 
 	 */
-	private void writeGroups(PrintStream out, AmibeReader amibeReader)
+	private void writeGroups(PrintStream out, AmibeReader.SubMesh subMesh, int count)
 			throws ParserConfigurationException, SAXException, IOException
 	{
 		out.println("    -1"+CR+"  2435");
 		int i = 0;
-		for(Group g:amibeReader.getSubmeshes().get(0).getGroups())
+		for(Group g:subMesh.getGroups())
 		{				
 			out.println(FORMAT_I10.format(i+1)+
 				"         0         0         0         0         0         0"+
-				FORMAT_I10.format(g.getNumberOfTrias()));
+				FORMAT_I10.format(g.getNumberOfTrias()+g.getNumberOfBeams()));
 			
 			out.println(g.getName());
 			int countg=0;
@@ -123,7 +129,16 @@ public class Amibe2UNV
 					+"         0         0");
 				countg++;
 				if ((countg % 2) == 0)
-					out.println("");
+					out.println();
+			}
+			for(int id:g.readBeamsIds())
+			{
+				out.print("         8"
+					+FORMAT_I10.format(id+count)
+					+"         0         0");
+				countg++;
+				if ((countg % 2) == 0)
+					out.println();
 			}
 			if ((countg % 2) !=0 )
 				out.println();
@@ -162,12 +177,11 @@ public class Amibe2UNV
 	 * @param out
 	 * @throws IOException 
 	 */
-	private void writeTriangles(PrintStream out) throws IOException
+	private int writeTriangles(PrintStream out) throws IOException
 	{
 		FileChannel fc = new FileInputStream(unvWriter.getTriaFile()).getChannel();
 		ByteBuffer bb=ByteBuffer.allocate(3*4);
 		int count = 1;
-		out.println("    -1"+CR+"  2412");
 		
 		while(fc.read(bb)!=-1)
 		{
@@ -178,7 +192,20 @@ public class Amibe2UNV
 			count ++;
 		}
 		
-		out.println("    -1");		
 		logger.info("Total number of triangles: "+count);
+		return count;
+	}
+
+	private void writeBeams(PrintStream out, AmibeReader.SubMesh subMesh, int count) throws IOException
+	{
+		IntFileReader beams = subMesh.getBeams();
+		long nb = beams.size() / 2;
+		for(int i = 0; i < nb; i++)
+		{
+			out.println(FORMAT_I10.format(count) +
+				"        21         2         1         5         2");
+			out.println("         0         1         1");
+			out.println(FORMAT_I10.format(beams.get()+1) + FORMAT_I10.format(beams.get()+1));
+		}
 	}
 }
