@@ -7,6 +7,7 @@ import java.io.PrintStream;
 import javax.swing.JFileChooser;
 import org.jcae.mesh.xmldata.Amibe2UNV;
 import org.jcae.mesh.xmldata.MeshExporter;
+import org.jcae.netbeans.mesh.AmibeDataObject;
 import org.jcae.netbeans.mesh.ExportGroupAction.ChooseUnitPanel;
 import org.openide.ErrorManager;
 import org.openide.nodes.Node;
