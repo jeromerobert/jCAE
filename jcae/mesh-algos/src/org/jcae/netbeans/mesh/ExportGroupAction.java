@@ -20,19 +20,22 @@
 
 package org.jcae.netbeans.mesh;
 
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.io.*;
 import java.util.HashSet;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
+import javax.swing.BorderFactory;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
+import javax.swing.JFormattedTextField;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
+import javax.swing.JSeparator;
+import javax.swing.border.TitledBorder;
 import javax.xml.parsers.ParserConfigurationException;
 import org.jcae.mesh.xmldata.MeshExporter;
-import org.jcae.netbeans.mesh.AmibeNode;
-import org.jcae.netbeans.mesh.GroupNode;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
@@ -45,23 +48,45 @@ public class ExportGroupAction extends CookieAction
 {
 	public static class ChooseUnitPanel extends JPanel
 	{	
-		private JRadioButton meters=new JRadioButton("Meters");
+		private JFormattedTextField scaleField = new JFormattedTextField(1.0);
+		private JComboBox unitCombo = new JComboBox(new Object[]{"m", "mm"});
+		
 		public ChooseUnitPanel()
-		{	
-			setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-			JRadioButton mm=new JRadioButton("Millimeters");
-			ButtonGroup bg=new ButtonGroup();
-			bg.add(meters);
-			bg.add(mm);
-			meters.setSelected(true);
-			add(meters);
-			add(Box.createVerticalStrut(5));
-			add(mm);
+		{
+			setLayout(new GridBagLayout());
+			setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+			GridBagConstraints gbc = new GridBagConstraints();
+			gbc.anchor = GridBagConstraints.WEST;
+			add(new JLabel("Unit:"), gbc);
+			gbc = new GridBagConstraints();
+			gbc.gridy = 1;
+			add(unitCombo, gbc);
+			gbc = new GridBagConstraints();
+			gbc.gridy = 2;
+			gbc.fill = GridBagConstraints.HORIZONTAL;
+			gbc.insets = new Insets(5, 5, 5, 5);
+			add(new JSeparator(), gbc);
+			gbc = new GridBagConstraints();
+			gbc.gridy = 3;
+			gbc.anchor = GridBagConstraints.WEST;
+			add(new JLabel("Scale:"), gbc);
+			gbc = new GridBagConstraints();
+			gbc.gridy = 4;
+			gbc.anchor = GridBagConstraints.NORTH;
+			gbc.fill = GridBagConstraints.HORIZONTAL;
+			gbc.weightx = 1.0;
+			gbc.weighty = 1.0;
+			add(scaleField, gbc);
 		}
 		
 		public boolean isMeters()
 		{
-			return meters.isSelected();
+			return unitCombo.getSelectedIndex() == 0;
+		}
+		
+		public double getScale()
+		{
+			return (Double)scaleField.getValue();
 		}
 	}	
 	

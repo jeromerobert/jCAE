@@ -71,6 +71,7 @@ public class Amibe2UNV
 	}
 	private final File directory;
 	private final MeshExporter.UNV unvWriter;
+	private double scale = 1.0;
 	
 	/**
 	 * @param directory The directory which contain 3d files
@@ -84,6 +85,11 @@ public class Amibe2UNV
 	public void setUnit(Unit unit)
 	{
 		unvWriter.setUnit(unit);
+	}
+
+	public void setScale(double scale)
+	{
+		this.scale = scale;
 	}
 
 	public void write(PrintStream out) throws ParserConfigurationException, SAXException, IOException
@@ -166,7 +172,7 @@ public class Amibe2UNV
 		{
 			bb.rewind();
 			MeshExporter.UNV.writeSingleNode(out, count,
-				bb.getDouble(), bb.getDouble(), bb.getDouble());
+				bb.getDouble()*scale, bb.getDouble()*scale, bb.getDouble()*scale);
 			bb.rewind();
 			count ++;
 		}
