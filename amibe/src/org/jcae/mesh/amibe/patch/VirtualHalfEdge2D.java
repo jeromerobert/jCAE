@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2005,2006, by EADS CRC
-    Copyright (C) 2007,2008,2009, by EADS France
+    Copyright (C) 2007,2008,2009,2010, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -39,11 +39,6 @@ import org.jcae.mesh.amibe.metrics.KdTree;
 public class VirtualHalfEdge2D extends VirtualHalfEdge
 {
 	private static final Logger logger=Logger.getLogger(VirtualHalfEdge2D.class.getName());
-	private static final VirtualHalfEdge2D [] work = new VirtualHalfEdge2D[4];
-	static {
-		for (int i = 0; i < 4; i++)
-			work[i] = new VirtualHalfEdge2D();
-	}
 	
 	public VirtualHalfEdge2D()
 	{
@@ -220,16 +215,16 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 			logger.fine("Split VirtualHalfEdge2D "+this+"\nat Vertex "+v);
 		Triangle backup = mesh.createTriangle(tri);
 		// Aliases
-		VirtualHalfEdge2D oldLeft = work[0];
-		VirtualHalfEdge2D oldRight = work[1];
+		VirtualHalfEdge2D oldLeft = mesh.poolVH2D[0];
+		VirtualHalfEdge2D oldRight = mesh.poolVH2D[1];
 		VirtualHalfEdge2D oldSymLeft = null;
 		VirtualHalfEdge2D oldSymRight = null;
 		
 		prevOTri(this, oldLeft);         // = (aod)
 		nextOTri(this, oldRight);        // = (dao)
-		oldSymLeft = work[2];
+		oldSymLeft = mesh.poolVH2D[2];
 		symOTri(oldLeft, oldSymLeft);    // = (oa*)
-		oldSymRight = work[3];
+		oldSymRight = mesh.poolVH2D[3];
 		symOTri(oldRight, oldSymRight);  // = (ad*)
 		//  Set vertices of newly created and current triangles
 		Vertex2D o = (Vertex2D) origin();
@@ -431,10 +426,10 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 			Vertex2D d = (Vertex2D) destination();
 			Vertex2D a = (Vertex2D) apex();
 			assert a != mesh.outerVertex : ""+this;
-			symOTri(this, work[0]);
-			work[0].next();
-			Vertex2D n = (Vertex2D) work[0].destination();
-			assert n != mesh.outerVertex : ""+work[0];
+			symOTri(this, mesh.poolVH2D[0]);
+			mesh.poolVH2D[0].next();
+			Vertex2D n = (Vertex2D) mesh.poolVH2D[0].destination();
+			assert n != mesh.outerVertex : ""+mesh.poolVH2D[0];
 			newl = n.onLeft(kdTree, start, end);
 			oldl = a.onLeft(kdTree, start, end);
 			boolean toSwap = (n != mesh.outerVertex) && (a.onLeft(kdTree, n, d) > 0L) && (a.onLeft(kdTree, o, n) > 0L) && !hasAttributes(BOUNDARY);

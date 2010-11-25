@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2004,2005,2006, by EADS CRC
-    Copyright (C) 2007,2008,2009, by EADS France
+    Copyright (C) 2007,2008,2009,2010, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -46,7 +46,7 @@ import java.util.logging.Logger;
  */
 public class Mesh2D extends Mesh
 {
-	private static final long serialVersionUID = 8462198630066460996L;
+	private static final long serialVersionUID = -2970368204713902058L;
 	private static final Logger logger=Logger.getLogger(Mesh2D.class.getName());
 	
 	//  Topological face on which mesh is applied
@@ -86,6 +86,9 @@ public class Mesh2D extends Mesh
 		for (int i = 0; i <= level_max; i++)
 			intArray[i] = Integer.valueOf(i);
 	}
+
+	// Some algorithms make heavy use of VirtualHalfEdge2D, create a pool
+	protected final VirtualHalfEdge2D [] poolVH2D = new VirtualHalfEdge2D[4];
 
 	// Utility class to improve debugging output
 	private static class OuterVertex2D extends Vertex2D
@@ -152,6 +155,9 @@ public class Mesh2D extends Mesh
 	{
 		outerVertex = new OuterVertex2D(0.0, 0.0);
 		outerTrianglesAreConnected = true;
+
+		for (int i = 0; i < 4; i++)
+			poolVH2D[i] = new VirtualHalfEdge2D();
 
 		double epsilon = meshParameters.getEpsilon();
 
