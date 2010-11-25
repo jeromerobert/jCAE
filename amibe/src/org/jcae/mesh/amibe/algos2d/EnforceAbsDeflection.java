@@ -107,9 +107,7 @@ public class EnforceAbsDeflection
 				double norm = Matrix3D.norm(v4);
 				if (norm > 0.0)
 				{
-					double dist = Math.abs(Matrix3D.prodSca(v4, v3));
-					dist /= Matrix3D.norm(v4);
-					if (dist > defl)
+					if (Math.abs(Matrix3D.prodSca(v4, v3)) > defl * norm)
 						badTriangles.add(t);
 				}
 			}
