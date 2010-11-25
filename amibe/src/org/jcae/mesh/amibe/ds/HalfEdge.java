@@ -50,7 +50,6 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 
 	private static final int [] next3 = { 1, 2, 0 };
 	private static final int [] prev3 = { 2, 0, 1 };
-	private static final double [][] temp = new double[5][3];
 	
 	HalfEdge (HalfEdgeTraitsBuilder htb, TriangleHE tri, byte localNumber, byte attributes)
 	{
@@ -428,21 +427,34 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		// Do not create an edge which will be difficult to modify later
 		if (a.getRef() != 0 && n.getRef() != 0 && (o.getRef() == 0 || d.getRef() == 0))
 			return invalid;
-		double s1 = Matrix3D.computeNormal3D(o.getUV(), d.getUV(), a.getUV(), temp[0], temp[1], temp[2]);
-		double s2 = Matrix3D.computeNormal3D(d.getUV(), o.getUV(), n.getUV(), temp[0], temp[1], temp[3]);
+		double[] temp0 = mesh.temp.t3_0;
+		double[] temp1 = mesh.temp.t3_1;
+		double[] temp2 = mesh.temp.t3_2;
+		double[] temp3 = mesh.temp.t3_3;
+		double[] temp4 = mesh.temp.t3_4;
+		double s1 = Matrix3D.computeNormal3D(o.getUV(), d.getUV(), a.getUV(), temp0, temp1, temp2);
+		double s2 = Matrix3D.computeNormal3D(d.getUV(), o.getUV(), n.getUV(), temp0, temp1, temp3);
 		// Make sure that edge swap does not create inverted triangles
-		double s3 = Matrix3D.computeNormal3D(o.getUV(), n.getUV(), a.getUV(), temp[0], temp[1], temp[2]);
-		double s4 = Matrix3D.computeNormal3D(d.getUV(), a.getUV(), n.getUV(), temp[0], temp[1], temp[3]);
-		if (Matrix3D.prodSca(temp[2], temp[3]) < minCos)
+		double s3 = Matrix3D.computeNormal3D(o.getUV(), n.getUV(), a.getUV(), temp0, temp1, temp2);
+		double s4 = Matrix3D.computeNormal3D(d.getUV(), a.getUV(), n.getUV(), temp0, temp1, temp3);
+		if (Matrix3D.prodSca(temp2, temp3) < minCos)
 			return invalid;
 		for (int i = 0; i < 4; i++)
 		{
 			HalfEdge h = (i == 0 ? next.next : (i == 1 ? sym.next : (i == 2 ? next : sym.next.next)));
 			if (h.hasAttributes(SHARP | OUTER | BOUNDARY | NONMANIFOLD))
 				continue;
-			Matrix3D.computeNormal3D(h.destination().getUV(), h.origin().getUV(), h.sym().apex().getUV(), temp[0], temp[1], temp[4]);
-			if (Matrix3D.prodSca(temp[2+i/2], temp[4]) < minCos)
-				return invalid;
+			Matrix3D.computeNormal3D(h.destination().getUV(), h.origin().getUV(), h.sym().apex().getUV(), temp0, temp1, temp4);
+			if (i < 2)
+			{
+				if (Matrix3D.prodSca(temp2, temp4) < minCos)
+					return invalid;
+			}
+			else
+			{
+				if (Matrix3D.prodSca(temp3, temp4) < minCos)
+					return invalid;
+			}
 		}
 
 		double p1 = o.distance3D(d) + d.distance3D(a) + a.distance3D(o);
@@ -471,11 +483,11 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @see Mesh#edgeSwap
 	 */
 	@Override
-	final HalfEdge swap()
+	final HalfEdge swap(Mesh mesh)
 	{
-		return HEswap();
+		return HEswap(mesh);
 	}
-	private HalfEdge HEswap()
+	private HalfEdge HEswap(Mesh mesh)
 	{
 		if (hasAttributes(SHARP | OUTER | BOUNDARY | NONMANIFOLD))
 			throw new IllegalArgumentException("Cannot swap "+this);
@@ -563,14 +575,17 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		double [] p0 = origin().getUV();
 		double [] p1 = destination().getUV();
 		double [] p2 = apex().getUV();
-		temp[1][0] = p1[0] - p0[0];
-		temp[1][1] = p1[1] - p0[1];
-		temp[1][2] = p1[2] - p0[2];
-		temp[2][0] = p2[0] - p0[0];
-		temp[2][1] = p2[1] - p0[1];
-		temp[2][2] = p2[2] - p0[2];
-		Matrix3D.prodVect3D(temp[1], temp[2], temp[0]);
-		return 0.5 * Matrix3D.norm(temp[0]);
+		double[] temp0 = m.temp.t3_0;
+		double[] temp1 = m.temp.t3_1;
+		double[] temp2 = m.temp.t3_2;
+		temp1[0] = p1[0] - p0[0];
+		temp1[1] = p1[1] - p0[1];
+		temp1[2] = p1[2] - p0[2];
+		temp2[0] = p2[0] - p0[0];
+		temp2[1] = p2[1] - p0[1];
+		temp2[2] = p2[2] - p0[2];
+		Matrix3D.prodVect3D(temp1, temp2, temp0);
+		return 0.5 * Matrix3D.norm(temp0);
 	}
 	
 	/**
@@ -581,7 +596,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @see Mesh#canCollapseEdge
 	 */
 	@Override
-	final boolean canCollapse(Vertex v)
+	final boolean canCollapse(Mesh mesh, Vertex v)
 	{
 		// Be consistent with collapse()
 		if (hasAttributes(IMMUTABLE | OUTER))
@@ -600,10 +615,10 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			Triangle t1 = tri;
 			Triangle t2 = sym.tri;
 			// Check that origin vertex can be moved
-			if (!checkNewRingNormalsSameFan(xn, t1, t2))
+			if (!checkNewRingNormalsSameFan(mesh, xn, t1, t2))
 				return false;
 			// Check that destination vertex can be moved
-			if (!sym.checkNewRingNormalsSameFan(xn, t1, t2))
+			if (!sym.checkNewRingNormalsSameFan(mesh, xn, t1, t2))
 				return false;
 			//  Topology check.
 			return canCollapseTopology();
@@ -621,10 +636,10 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		}
 		
 		// Check that origin vertex can be moved
-		if (!checkNewRingNormalsNonManifoldVertex(xn, ignored))
+		if (!checkNewRingNormalsNonManifoldVertex(mesh, xn, ignored))
 			return false;
 		// Check that destination vertex can be moved
-		if (!sym.checkNewRingNormalsNonManifoldVertex(xn, ignored))
+		if (!sym.checkNewRingNormalsNonManifoldVertex(mesh, xn, ignored))
 			return false;
 		ignored.clear();
 
@@ -716,13 +731,13 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * Warning: this method uses temp[0], temp[1], temp[2] and temp[3] temporary arrays.
 	 */
 	@Override
-	final boolean checkNewRingNormals(double [] newpt)
+	final boolean checkNewRingNormals(Mesh mesh, double [] newpt)
 	{
 		if (hasAttributes(IMMUTABLE))
 			return false;
 		Vertex o = origin();
 		if (o.isManifold())
-			return checkNewRingNormalsSameFan(newpt, null, null);
+			return checkNewRingNormalsSameFan(mesh, newpt, null, null);
 		for (Triangle start: (Triangle []) o.getLink())
 		{
 			HalfEdge f = (HalfEdge) start.getAbstractHalfEdge();
@@ -731,16 +746,20 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			else if (f.apex() == o)
 				f = f.next.next;
 			assert f.origin() == o;
-			if (!f.checkNewRingNormalsSameFan(newpt, null, null))
+			if (!f.checkNewRingNormalsSameFan(mesh, newpt, null, null))
 				return false;
 		}
 		return true;
 	}
 
-	private boolean checkNewRingNormalsSameFan(double [] newpt, Triangle t1, Triangle t2)
+	private boolean checkNewRingNormalsSameFan(Mesh mesh, double [] newpt, Triangle t1, Triangle t2)
 	{
 		// Loop around origin
 		HalfEdge f = this;
+		double [] temp0 = mesh.temp.t3_0;
+		double [] temp1 = mesh.temp.t3_1;
+		double [] temp2 = mesh.temp.t3_2;
+		double [] temp3 = mesh.temp.t3_3;
 		Vertex d = f.destination();
 		double [] xo = origin().getUV();
 		do
@@ -748,13 +767,13 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			if (f.tri != t1 && f.tri != t2 && !f.hasAttributes(OUTER))
 			{
 				double [] x1 = f.destination().getUV();
-				double area  = Matrix3D.computeNormal3DT(x1, f.apex().getUV(), xo, temp[0], temp[1], temp[2]);
+				double area  = Matrix3D.computeNormal3DT(x1, f.apex().getUV(), xo, temp0, temp1, temp2);
 				for (int i = 0; i < 3; i++)
-					temp[3][i] = newpt[i] - x1[i];
+					temp3[i] = newpt[i] - x1[i];
 				// Two triangles are removed when an edge is contracted.
 				// So normally triangle areas should increase.  If they
 				// decrease significantly, there may be a problem.
-				if (Matrix3D.prodSca(temp[3], temp[2]) >= - area)
+				if (Matrix3D.prodSca(temp3, temp2) >= - area)
 					return false;
 			}
 			f = f.nextOriginLoop();
@@ -763,11 +782,11 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		return true;
 	}
 
-	private boolean checkNewRingNormalsNonManifoldVertex(double [] newpt, Collection<Triangle> ignored)
+	private boolean checkNewRingNormalsNonManifoldVertex(Mesh mesh, double [] newpt, Collection<Triangle> ignored)
 	{
 		Vertex o = origin();
 		if (o.isManifold())
-			return checkNewRingNormalsSameFanNonManifoldVertex(newpt, ignored);
+			return checkNewRingNormalsSameFanNonManifoldVertex(mesh, newpt, ignored);
 		for (Triangle start: (Triangle []) o.getLink())
 		{
 			HalfEdge f = (HalfEdge) start.getAbstractHalfEdge();
@@ -776,15 +795,19 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			else if (f.apex() == o)
 				f = f.next.next;
 			assert f.origin() == o;
-			if (!f.checkNewRingNormalsSameFanNonManifoldVertex(newpt, ignored))
+			if (!f.checkNewRingNormalsSameFanNonManifoldVertex(mesh, newpt, ignored))
 				return false;
 		}
 		return true;
 	}
-	private boolean checkNewRingNormalsSameFanNonManifoldVertex(double [] newpt, Collection<Triangle> ignored)
+	private boolean checkNewRingNormalsSameFanNonManifoldVertex(Mesh mesh, double [] newpt, Collection<Triangle> ignored)
 	{
 		// Loop around origin
 		HalfEdge f = this;
+		double [] temp0 = mesh.temp.t3_0;
+		double [] temp1 = mesh.temp.t3_1;
+		double [] temp2 = mesh.temp.t3_2;
+		double [] temp3 = mesh.temp.t3_3;
 		Vertex d = f.destination();
 		double [] xo = origin().getUV();
 		do
@@ -792,13 +815,13 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			if (!ignored.contains(f.tri) && !f.hasAttributes(OUTER))
 			{
 				double [] x1 = f.destination().getUV();
-				double area  = Matrix3D.computeNormal3DT(x1, f.apex().getUV(), xo, temp[0], temp[1], temp[2]);
+				double area  = Matrix3D.computeNormal3DT(x1, f.apex().getUV(), xo, temp0, temp1, temp2);
 				for (int i = 0; i < 3; i++)
-					temp[3][i] = newpt[i] - x1[i];
+					temp3[i] = newpt[i] - x1[i];
 				// Two triangles are removed when an edge is contracted.
 				// So normally triangle areas should increase.  If they
 				// decrease significantly, there may be a problem.
-				if (Matrix3D.prodSca(temp[3], temp[2]) >= - area)
+				if (Matrix3D.prodSca(temp3, temp2) >= - area)
 					return false;
 			}
 			f = f.nextOriginLoop();

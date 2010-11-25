@@ -333,7 +333,7 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 					modifiedTriangles.add(tri);
 					modifiedTriangles.add(sym.tri);
 				}
-				swap();
+				swap(mesh);
 				nrSwap++;
 				totNrSwap++;
 			}
@@ -441,10 +441,10 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 				else if (oldl >= 0L)
 				{
 					//  a stands to the left of (start,end).
-					swap();              // = (ona)
+					swap(mesh);          // = (ona)
 				}
 				else if (mesh.rand.nextBoolean())
-					swap();              // = (ona)
+					swap(mesh);          // = (ona)
 				else
 					prevOrigin();        // = (ond)
 			}
@@ -456,13 +456,13 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 				else if (oldl <= 0L)
 				{
 					//  a stands to the right of (start,end).
-					swap();              // = (ona)
+					swap(mesh);          // = (ona)
 					next();              // = (nao)
 					prevOrigin();        // = (nda)
 				}
 				else if (mesh.rand.nextBoolean())
 				{
-					swap();              // = (ona)
+					swap(mesh);          // = (ona)
 					next();              // = (nao)
 					prevOrigin();        // = (nda)
 				}
@@ -476,7 +476,7 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 					nextDest();          // = (ndo)
 				else
 				{
-					swap();              // = (ona)
+					swap(mesh);          // = (ona)
 					next();              // = (nao)
 					if (oldl < 0L)
 						prevOrigin();// = (nda)

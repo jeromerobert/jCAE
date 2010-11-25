@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2004,2005,2006, by EADS CRC
-    Copyright (C) 2007,2008,2009, by EADS France
+    Copyright (C) 2007,2008,2009,2010, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -31,6 +31,7 @@ import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.metrics.Metric;
 import org.jcae.mesh.amibe.metrics.EuclidianMetric3D;
 import org.jcae.mesh.amibe.metrics.Location;
+import org.jcae.mesh.amibe.metrics.PoolWorkVectors;
 
 import java.util.Collection;
 import java.util.ArrayList;
@@ -139,6 +140,14 @@ public class Mesh implements Serializable
 	// 3D euclidian metric
 	private final Metric euclidian_metric3d = new EuclidianMetric3D();
 
+	// Temporary vectors used as work arrays in HalfEdge
+	protected final PoolWorkVectors temp = new PoolWorkVectors();
+
+	//  Complex algorithms require several VirtualHalfEdge, they are
+	//  allocated here to prevent allocation/deallocation overhead.
+	protected final VirtualHalfEdge[] tempVH = new VirtualHalfEdge[4];
+	protected final HalfEdge[] tempHE = new HalfEdge[6];
+
 	private List<Vertex> beams = new ArrayList<Vertex>();
 	private TIntArrayList beamGroups = new TIntArrayList();
 	private Map<Integer, String> groupNames = new HashMap<Integer, String>();
@@ -194,6 +203,11 @@ public class Mesh implements Serializable
 		triangleList = traitsBuilder.getTriangles(traits);
 		nodeList = traitsBuilder.getNodes(traits);
 		meshParameters = mp;
+
+		for (int i = 0; i < tempVH.length; i++)
+			tempVH[i] = new VirtualHalfEdge();
+		for (int i = 0; i < tempHE.length; i++)
+			tempHE[i] = new HalfEdge(traitsBuilder.getHalfEdgeTraitsBuilder(), (TriangleHE) null, (byte) 0, (byte) 0);
 	}
 	
 	public final MeshParameters getMeshParameters()
@@ -1321,7 +1335,7 @@ public class Mesh implements Serializable
 	 */
 	public final boolean canCollapseEdge(AbstractHalfEdge e, Vertex v)
 	{
-		return e.canCollapse(v);
+		return e.canCollapse(this, v);
 	}
 	
 	/**
@@ -1359,7 +1373,7 @@ public class Mesh implements Serializable
 	 */
 	public final AbstractHalfEdge edgeSwap(AbstractHalfEdge e)
 	{
-		return e.swap();
+		return e.swap(this);
 	}
 	
 	/**
@@ -1372,7 +1386,7 @@ public class Mesh implements Serializable
 	 */
 	public final boolean checkNewRingNormals(AbstractHalfEdge e, double [] pt)
 	{
-		return e.checkNewRingNormals(pt);
+		return e.checkNewRingNormals(this, pt);
 	}
 
 	/**

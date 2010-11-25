@@ -580,7 +580,7 @@ public abstract class AbstractHalfEdge
 	 * to an outer triangle.
 	 * @see Mesh#edgeSwap
 	 */
-	abstract AbstractHalfEdge swap();
+	abstract AbstractHalfEdge swap(Mesh m);
 
 	/**
 	 * Checks that triangles are not inverted if origin vertex is moved.
@@ -589,7 +589,7 @@ public abstract class AbstractHalfEdge
 	 * @return <code>false</code> if the new position produces
 	 *    an inverted triangle, <code>true</code> otherwise.
 	 */
-	abstract boolean checkNewRingNormals(double [] newpt);
+	abstract boolean checkNewRingNormals(Mesh m, double [] newpt);
 
 	/**
 	 * Checks whether an edge can be contracted into a given vertex.
@@ -598,7 +598,7 @@ public abstract class AbstractHalfEdge
 	 * @return <code>true</code> if this edge can be contracted into the single vertex n, <code>false</code> otherwise
 	 * @see Mesh#canCollapseEdge
 	 */
-	abstract boolean canCollapse(Vertex v);
+	abstract boolean canCollapse(Mesh m, Vertex v);
 
 	/**
 	 * Contracts an edge.

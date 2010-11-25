@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2007, by EADS France
+    Copyright (C) 2007,2010, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -418,7 +418,7 @@ public class AbstractHalfEdgeTest
 	final void canCollapse(Vertex o, Vertex d, Vertex n, boolean expected)
 	{
 		AbstractHalfEdge e = find(o, d);
-		assertTrue(expected == e.canCollapse(n));
+		assertTrue(expected == e.canCollapse(mesh, n));
 	}
 
 	final AbstractHalfEdge collapse(Vertex o, Vertex d, Vertex n)
@@ -436,7 +436,7 @@ public class AbstractHalfEdgeTest
 	{
 		AbstractHalfEdge e = find(o, d);
 		Vertex a = e.apex();
-		e = e.swap();
+		e = e.swap(mesh);
 		assertTrue("Mesh is not valid", mesh.isValid());
 		assertTrue("Error in origin", o == e.origin());
 		assertTrue("Error in apex", a == e.apex());

@@ -53,14 +53,6 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	private final double [] tempD1 = new double[3];
 	private final double [] tempD2 = new double[3];
 	
-	//  Complex algorithms require several VirtualHalfEdge, they are
-	//  allocated here to prevent allocation/deallocation overhead.
-	private static final VirtualHalfEdge [] work = new VirtualHalfEdge[4];
-	static {
-		for (int i = 0; i < 4; i++)
-			work[i] = new VirtualHalfEdge();
-	}
-	
 	/*
 	 * Vertices can be accessed through
 	 *        origin = tri.vertex[next3[localNumber]]
@@ -667,18 +659,18 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		if (hasAttributes(OUTER | BOUNDARY | NONMANIFOLD))
 			return invalid;
 		// Check for coplanarity
-		symOTri(this, work[0]);
+		symOTri(this, m.tempVH[0]);
 		computeNormal3D();
 		double [] n1 = getTempVector();
-		work[0].computeNormal3D();
-		double [] n2 = work[0].getTempVector();
+		m.tempVH[0].computeNormal3D();
+		double [] n2 = m.tempVH[0].getTempVector();
 		if (Matrix3D.prodSca(n1, n2) < minCos)
 			return invalid;
 		// Check for quality improvement
 		Vertex o = origin();
 		Vertex d = destination();
 		Vertex a = apex();
-		Vertex n = work[0].apex();
+		Vertex n = m.tempVH[0].apex();
 		if (maxLength > 0.0 && a.sqrDistance3D(n) > maxLength)
 			return invalid;
 		// Do not create an edge which will be difficult to modify later
@@ -696,7 +688,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		double p1 = o.distance3D(d) + d.distance3D(a) + a.distance3D(o);
 		double s1 = area(m);
 		double p2 = d.distance3D(o) + o.distance3D(n) + n.distance3D(d);
-		double s2 = work[0].area(m);
+		double s2 = m.tempVH[0].area(m);
 		// No need to multiply by 12.0 * Math.sqrt(3.0)
 		double Qbefore = Math.min(s1/p1/p1, s2/p2/p2);
 		
@@ -721,12 +713,12 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @see Mesh#edgeSwap
 	 */
 	@Override
-	protected final VirtualHalfEdge swap()
+	protected final VirtualHalfEdge swap(Mesh m)
 	{
-		VHswap();
+		VHswap(m);
 		return this;
 	}
-	private void VHswap()
+	private void VHswap(Mesh m)
 	{
 		if (hasAttributes(SHARP | OUTER | BOUNDARY | NONMANIFOLD))
 			throw new IllegalArgumentException("Cannot swap "+this);
@@ -748,44 +740,44 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		 */
 		// T1 = (oda)  --> (ona)
 		// T2 = (don)  --> (dan)
-		copyOTri(this, work[0]);        // (oda)
-		symOTri(this, work[1]);         // (don)
-		symOTri(this, work[2]);         // (don)
-		Vertex n = work[1].apex();
+		copyOTri(this, m.tempVH[0]);        // (oda)
+		symOTri(this, m.tempVH[1]);         // (don)
+		symOTri(this, m.tempVH[2]);         // (don)
+		Vertex n = m.tempVH[1].apex();
 		//  Clear SWAPPED flag for all edges of the 2 triangles
 		for (int i = 0; i < 3; i++)
 		{
-			work[0].clearAttributes(SWAPPED);
-			work[1].clearAttributes(SWAPPED);
-			work[0].next();
-			work[1].next();
+			m.tempVH[0].clearAttributes(SWAPPED);
+			m.tempVH[1].clearAttributes(SWAPPED);
+			m.tempVH[0].next();
+			m.tempVH[1].next();
 		}
-		work[1].next();                 // (ond)
-		int attr3 = work[1].attributes;
-		work[1].sym();                  // a3 = (no*)
-		work[1].VHglue(work[0]);
-		work[0].attributes = attr3;
-		work[0].pushAttributes();
-		work[0].next();                 // (dao)
-		copyOTri(work[0], work[1]);     // (dao)
-		int attr1 = work[1].attributes;
-		work[0].sym();                  // a1 = (ad*)
-		work[2].VHglue(work[0]);
-		work[2].attributes = attr1;
-		work[2].pushAttributes();
-		work[2].next();                 // (ond)
-		work[2].VHglue(work[1]);
+		m.tempVH[1].next();                 // (ond)
+		int attr3 = m.tempVH[1].attributes;
+		m.tempVH[1].sym();                  // a3 = (no*)
+		m.tempVH[1].VHglue(m.tempVH[0]);
+		m.tempVH[0].attributes = attr3;
+		m.tempVH[0].pushAttributes();
+		m.tempVH[0].next();                 // (dao)
+		copyOTri(m.tempVH[0], m.tempVH[1]);     // (dao)
+		int attr1 = m.tempVH[1].attributes;
+		m.tempVH[0].sym();                  // a1 = (ad*)
+		m.tempVH[2].VHglue(m.tempVH[0]);
+		m.tempVH[2].attributes = attr1;
+		m.tempVH[2].pushAttributes();
+		m.tempVH[2].next();                 // (ond)
+		m.tempVH[2].VHglue(m.tempVH[1]);
 		//  Mark new edge
-		work[1].attributes = 0;
-		work[2].attributes = 0;
-		work[1].setAttributes(SWAPPED);
-		work[2].setAttributes(SWAPPED);
+		m.tempVH[1].attributes = 0;
+		m.tempVH[2].attributes = 0;
+		m.tempVH[1].setAttributes(SWAPPED);
+		m.tempVH[2].setAttributes(SWAPPED);
 		//  Adjust vertices
-		work[2].setOrigin(a);           // (and)
-		work[1].setOrigin(n);           // (nao)
+		m.tempVH[2].setOrigin(a);           // (and)
+		m.tempVH[1].setOrigin(n);           // (nao)
 		//  Fix links to triangles
-		replaceVertexLinks(o, tri, work[2].tri, tri);
-		replaceVertexLinks(d, tri, work[2].tri, work[2].tri);
+		replaceVertexLinks(o, tri, m.tempVH[2].tri, tri);
+		replaceVertexLinks(d, tri, m.tempVH[2].tri, m.tempVH[2].tri);
 		pullAttributes();
 	}
 	
@@ -795,44 +787,44 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @param newpt  the new position to be checked
 	 * @return <code>false</code> if the new position produces
 	 *    an inverted triangle, <code>true</code> otherwise.
-	 * Warning: this method uses work[0] and work[1] temporary arrays.
+	 * Warning: this method uses m.tempVH[0] and m.tempVH[1] temporary arrays.
 	 */
 	@Override
-	final boolean checkNewRingNormals(double [] newpt)
+	final boolean checkNewRingNormals(Mesh m, double [] newpt)
 	{
 		Vertex o = origin();
 		if (o.isManifold())
-			return checkNewRingNormalsSameFan(newpt, null, null);
+			return checkNewRingNormalsSameFan(m, newpt, null, null);
 		for (Triangle start: (Triangle []) o.getLink())
 		{
-			work[1].bind((TriangleVH) start);
-			if (work[1].destination() == o)
-				work[1].next();
-			else if (work[1].apex() == o)
-				work[1].prev();
-			assert work[1].origin() == o;
-			if (!work[1].checkNewRingNormalsSameFan(newpt, null, null))
+			m.tempVH[1].bind((TriangleVH) start);
+			if (m.tempVH[1].destination() == o)
+				m.tempVH[1].next();
+			else if (m.tempVH[1].apex() == o)
+				m.tempVH[1].prev();
+			assert m.tempVH[1].origin() == o;
+			if (!m.tempVH[1].checkNewRingNormalsSameFan(m, newpt, null, null))
 				return false;
 		}
 		return true;
 	}
 	
 	/*
-	 * Warning: this method uses work[0] temporary array.
+	 * Warning: this method uses m.tempVH[0] temporary array.
 	 */
-	private boolean checkNewRingNormalsSameFan(double [] newpt, TriangleVH t1, TriangleVH t2)
+	private boolean checkNewRingNormalsSameFan(Mesh m, double [] newpt, TriangleVH t1, TriangleVH t2)
 	{
 		Vertex d = destination();
-		copyOTri(this, work[0]);
+		copyOTri(this, m.tempVH[0]);
 		do
 		{
-			if (work[0].tri != t1 && work[0].tri != t2 && !work[0].hasAttributes(OUTER))
+			if (m.tempVH[0].tri != t1 && m.tempVH[0].tri != t2 && !m.tempVH[0].hasAttributes(OUTER))
 			{
-				double [] x1 = work[0].destination().getUV();
-				work[0].next();
-				double area  = work[0].computeNormal3DT();
-				double [] nu = work[0].getTempVector();
-				work[0].prev();
+				double [] x1 = m.tempVH[0].destination().getUV();
+				m.tempVH[0].next();
+				double area  = m.tempVH[0].computeNormal3DT();
+				double [] nu = m.tempVH[0].getTempVector();
+				m.tempVH[0].prev();
 				for (int i = 0; i < 3; i++)
 					tempD1[i] = newpt[i] - x1[i];
 				// Two triangles are removed when an edge is contracted.
@@ -841,9 +833,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 				if (Matrix3D.prodSca(tempD1, nu) >= - area)
 					return false;
 			}
-			work[0].nextOriginLoop();
+			m.tempVH[0].nextOriginLoop();
 		}
-		while (work[0].destination() != d);
+		while (m.tempVH[0].destination() != d);
 		return true;
 	}
 	
@@ -853,10 +845,10 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @param n the resulting vertex
 	 * @return <code>true</code> if this edge can be contracted into the single vertex n, <code>false</code> otherwise
 	 * @see Mesh#canCollapseEdge
-	 * Warning: this method uses work[0], work[1] and work[2] temporary arrays.
+	 * Warning: this method uses m.tempVH[0], m.tempVH[1] and m.tempVH[2] temporary arrays.
 	 */
 	@Override
-	final boolean canCollapse(Vertex n)
+	final boolean canCollapse(Mesh m, Vertex n)
 	{
 		// Be consistent with collapse()
 		if (hasAttributes(OUTER))
@@ -870,16 +862,16 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			// case, do not create an HashSet to store only two
 			// triangles.
 			TriangleVH t1 = tri;
-			symOTri(this, work[1]);
-			TriangleVH t2 = work[1].tri;
+			symOTri(this, m.tempVH[1]);
+			TriangleVH t2 = m.tempVH[1].tri;
 			// Check that origin vertex can be moved
-			if (!checkNewRingNormalsSameFan(xn, t1, t2))
+			if (!checkNewRingNormalsSameFan(m, xn, t1, t2))
 				return false;
 			// Check that destination vertex can be moved
-			if (!work[1].checkNewRingNormalsSameFan(xn, t1, t2))
+			if (!m.tempVH[1].checkNewRingNormalsSameFan(m, xn, t1, t2))
 				return false;
 			//  Topology check.
-			return canCollapseTopology();
+			return canCollapseTopology(m);
 		}
 
 		// At least one vertex is non manifold.  Store all triangles
@@ -890,16 +882,16 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		{
 			VirtualHalfEdge f = (VirtualHalfEdge) it.next();
 			ignored.add(f.tri);
-			symOTri(f, work[1]);
-			ignored.add(work[1].tri);
+			symOTri(f, m.tempVH[1]);
+			ignored.add(m.tempVH[1].tri);
 		}
 		
 		// Check that origin vertex can be moved
-		if (!checkNewRingNormalsNonManifoldVertex(xn, ignored))
+		if (!checkNewRingNormalsNonManifoldVertex(m, xn, ignored))
 			return false;
 		// Check that destination vertex can be moved
-		symOTri(this, work[2]);
-		if (!work[2].checkNewRingNormalsNonManifoldVertex(xn, ignored))
+		symOTri(this, m.tempVH[2]);
+		if (!m.tempVH[2].checkNewRingNormalsNonManifoldVertex(m, xn, ignored))
 			return false;
 		ignored.clear();
 
@@ -911,50 +903,50 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )
 		{
 			VirtualHalfEdge f = (VirtualHalfEdge) it.next();
-			if (!f.canCollapseTopology())
+			if (!f.canCollapseTopology(m))
 				return false;
 		}
 		return true;
 	}
 	/*
-	 * Warning: this method uses work[0] and work[1] temporary arrays.
+	 * Warning: this method uses m.tempVH[0] and m.tempVH[1] temporary arrays.
 	 */
-	private boolean checkNewRingNormalsNonManifoldVertex(double [] newpt, Collection<TriangleVH> ignored)
+	private boolean checkNewRingNormalsNonManifoldVertex(Mesh m, double [] newpt, Collection<TriangleVH> ignored)
 	{
 		Vertex o = origin();
 		if (o.isManifold())
-			return checkNewRingNormalsSameFanNonManifoldVertex(newpt, ignored);
+			return checkNewRingNormalsSameFanNonManifoldVertex(m, newpt, ignored);
 		for (Triangle start: (Triangle []) o.getLink())
 		{
-			work[1].bind((TriangleVH) start);
-			if (work[1].destination() == o)
-				work[1].next();
-			else if (work[1].apex() == o)
-				work[1].prev();
-			assert work[1].origin() == o;
-			if (!work[1].checkNewRingNormalsSameFanNonManifoldVertex(newpt, ignored))
+			m.tempVH[1].bind((TriangleVH) start);
+			if (m.tempVH[1].destination() == o)
+				m.tempVH[1].next();
+			else if (m.tempVH[1].apex() == o)
+				m.tempVH[1].prev();
+			assert m.tempVH[1].origin() == o;
+			if (!m.tempVH[1].checkNewRingNormalsSameFanNonManifoldVertex(m, newpt, ignored))
 				return false;
 		}
 		return true;
 	}
 	/*
-	 * Warning: this method uses work[0] temporary array.
+	 * Warning: this method uses m.tempVH[0] temporary array.
 	 */
-	private boolean checkNewRingNormalsSameFanNonManifoldVertex(double [] newpt, Collection<TriangleVH> ignored)
+	private boolean checkNewRingNormalsSameFanNonManifoldVertex(Mesh m, double [] newpt, Collection<TriangleVH> ignored)
 	{
 		// Loop around origin.  We need to copy current instance
-		// into work[0] because loop may be interrupted.
-		copyOTri(this, work[0]);
+		// into m.tempVH[0] because loop may be interrupted.
+		copyOTri(this, m.tempVH[0]);
 		Vertex d = destination();
 		do
 		{
-			if (!ignored.contains(work[0].tri) && !work[0].hasAttributes(OUTER))
+			if (!ignored.contains(m.tempVH[0].tri) && !m.tempVH[0].hasAttributes(OUTER))
 			{
-				double [] x1 = work[0].destination().getUV();
-				work[0].next();
-				double area  = work[0].computeNormal3DT();
-				double [] nu = work[0].getTempVector();
-				work[0].prev();
+				double [] x1 = m.tempVH[0].destination().getUV();
+				m.tempVH[0].next();
+				double area  = m.tempVH[0].computeNormal3DT();
+				double [] nu = m.tempVH[0].getTempVector();
+				m.tempVH[0].prev();
 				for (int i = 0; i < 3; i++)
 					tempD1[i] = newpt[i] - x1[i];
 				// Two triangles are removed when an edge is contracted.
@@ -963,9 +955,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 				if (Matrix3D.prodSca(tempD1, nu) >= - area)
 					return false;
 			}
-			work[0].nextOriginLoop();
+			m.tempVH[0].nextOriginLoop();
 		}
-		while (work[0].destination() != d);
+		while (m.tempVH[0].destination() != d);
 		return true;
 	}
 	
@@ -973,37 +965,37 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * Topology check.
 	 * See in AbstractHalfEdgeTest.buildMeshTopo() why this
 	 * check is needed.
-	 * Warning: this method uses work[0] temporary array.
+	 * Warning: this method uses m.tempVH[0] temporary array.
 	 */
-	private boolean canCollapseTopology()
+	private boolean canCollapseTopology(Mesh m)
 	{
 		Collection<Vertex> neighbours = new HashSet<Vertex>();
-		// We need to copy current instance into work[0]
+		// We need to copy current instance into m.tempVH[0]
 		// because second loop may be interrupted.
-		copyOTri(this, work[0]);
-		Vertex d = work[0].destination();
+		copyOTri(this, m.tempVH[0]);
+		Vertex d = m.tempVH[0].destination();
 		do
 		{
 			// Warning: mesh.outerVertex is intentionnally not filtered out
-			neighbours.add(work[0].destination());
-			work[0].nextOriginLoop();
+			neighbours.add(m.tempVH[0].destination());
+			m.tempVH[0].nextOriginLoop();
 		}
-		while (work[0].destination() != d);
-		work[0].sym();
+		while (m.tempVH[0].destination() != d);
+		m.tempVH[0].sym();
 		int cnt = 0;
-		d = work[0].destination();
+		d = m.tempVH[0].destination();
 		do
 		{
 			// Warning: mesh.outerVertex is intentionnally not filtered out
-			if (neighbours.contains(work[0].destination()))
+			if (neighbours.contains(m.tempVH[0].destination()))
 			{
 				if (cnt > 1)
 					return false;
 				cnt++;
 			}
-			work[0].nextOriginLoop();
+			m.tempVH[0].nextOriginLoop();
 		}
-		while (work[0].destination() != d);
+		while (m.tempVH[0].destination() != d);
 		return true;
 	}
 	
@@ -1032,15 +1024,15 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		if (o.isManifold())
 			replaceEndpointsSameFan(v);
 		else
-			replaceEndpointsNonManifold(o, v);
+			replaceEndpointsNonManifold(m, o, v);
 		//  Replace d by n in all incident triangles
-		symOTri(this, work[2]);
+		symOTri(this, m.tempVH[2]);
 		if (d.isManifold())
-			work[2].replaceEndpointsSameFan(v);
+			m.tempVH[2].replaceEndpointsSameFan(v);
 		else
-			replaceEndpointsNonManifold(d, v);
+			replaceEndpointsNonManifold(m, d, v);
 		//  Set v links
-		deepCopyVertexLinks(o, d, v);
+		deepCopyVertexLinks(m, o, d, v);
 		if (logger.isLoggable(Level.FINE))
 			logger.fine("new point: "+v);
 		if (m.hasNodes())
@@ -1051,11 +1043,11 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		}
 		if (!hasAttributes(NONMANIFOLD))
 		{
-			work[2].VHcollapseSameFan(m, v);
+			m.tempVH[2].VHcollapseSameFan(m, v);
 			return VHcollapseSameFan(m, v);
 		}
 		// Edge is non-manifold
-		assert work[2].hasAttributes(OUTER);
+		assert m.tempVH[2].hasAttributes(OUTER);
 		// VHcollapseSameFan may modify internal data structure
 		// used by fanIterator(), we need a copy.
 		Map<TriangleVH, Integer> copy = new LinkedHashMap<TriangleVH, Integer>();
@@ -1070,17 +1062,17 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		{
 			TriangleVH t = entry.getKey();
 			int l = entry.getValue().intValue();
-			work[2].bind(t, l);
-			assert !work[2].hasAttributes(OUTER);
-			work[2].sym();
-			assert work[2].hasAttributes(OUTER);
-			work[2].VHcollapseSameFan(m, v);
-			work[2].bind(t, l);
-			work[2].VHcollapseSameFan(m, v);
+			m.tempVH[2].bind(t, l);
+			assert !m.tempVH[2].hasAttributes(OUTER);
+			m.tempVH[2].sym();
+			assert m.tempVH[2].hasAttributes(OUTER);
+			m.tempVH[2].VHcollapseSameFan(m, v);
+			m.tempVH[2].bind(t, l);
+			m.tempVH[2].VHcollapseSameFan(m, v);
 			if (t == tri)
 			{
-				ret = work[0].tri;
-				num = work[0].localNumber;
+				ret = m.tempVH[0].tri;
+				num = m.tempVH[0].localNumber;
 			}
 		}
 		assert ret != null;
@@ -1089,7 +1081,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 
 	/*
-	 * Warning: this method uses work[0] and work[1] temporary arrays.
+	 * Warning: this method uses m.tempVH[0] and m.tempVH[1] temporary arrays.
 	 */
 	private VirtualHalfEdge VHcollapseSameFan(Mesh m, Vertex n)
 	{
@@ -1112,20 +1104,20 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		//  written instead of n.
 		next();                         // (dV1o)
 		int attr4 = attributes;
-		VirtualHalfEdge vh4 = (hasSymmetricEdge() ? work[0] : null);
+		VirtualHalfEdge vh4 = (hasSymmetricEdge() ? m.tempVH[0] : null);
 		if (vh4 != null)
 			symOTri(this, vh4);     // (V1dV4)
 		next();                         // (V1od)
 		int attr3 = attributes;
-		VirtualHalfEdge vh3 = (hasSymmetricEdge() ? work[1] : null);
+		VirtualHalfEdge vh3 = (hasSymmetricEdge() ? m.tempVH[1] : null);
 		if (vh3 != null)
 			symOTri(this, vh3);     // (oV1V3)
 		if (!hasAttributes(OUTER))
 		{
-			TriangleVH t34 = work[1].tri;
+			TriangleVH t34 = m.tempVH[1].tri;
 			if (t34.hasAttributes(OUTER))
-				t34 = work[0].tri;
-			assert !t34.hasAttributes(OUTER) : work[0]+"\n"+work[1];
+				t34 = m.tempVH[0].tri;
+			assert !t34.hasAttributes(OUTER) : m.tempVH[0]+"\n"+m.tempVH[1];
 			// Update links of V1 and n
 			replaceVertexLinks(origin(), tri, t34);
 			replaceVertexLinks(n, tri, t34);
@@ -1167,20 +1159,20 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		while (destination() != d);
 	}
 	/*
-	 * Warning: this method uses work[0] temporary array.
+	 * Warning: this method uses m.tempVH[0] temporary array.
 	 */
-	private static void replaceEndpointsNonManifold(Vertex o, Vertex n)
+	private static void replaceEndpointsNonManifold(Mesh m, Vertex o, Vertex n)
 	{
 		Triangle [] oList = (Triangle []) o.getLink();
 		for (Triangle t: oList)
 		{
-			work[0].bind((TriangleVH) t);
-			if (work[0].destination() == o)
-				work[0].next();
-			else if (work[0].apex() == o)
-				work[0].prev();
-			assert work[0].origin() == o : ""+o+" not in "+work[0];
-			work[0].replaceEndpointsSameFan(n);
+			m.tempVH[0].bind((TriangleVH) t);
+			if (m.tempVH[0].destination() == o)
+				m.tempVH[0].next();
+			else if (m.tempVH[0].apex() == o)
+				m.tempVH[0].prev();
+			assert m.tempVH[0].origin() == o : ""+o+" not in "+m.tempVH[0];
+			m.tempVH[0].replaceEndpointsSameFan(n);
 		}
 	}
 	private static void replaceVertexLinks(Vertex o, TriangleVH oldT1, TriangleVH oldT2, TriangleVH newT)
@@ -1219,9 +1211,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		}
 	}
 	/*
-	 * Warning: this method uses work[0] and work[1] temporary arrays.
+	 * Warning: this method uses m.tempVH[0] and m.tempVH[1] temporary arrays.
 	 */
-	private static void deepCopyVertexLinks(Vertex o, Vertex d, Vertex v)
+	private static void deepCopyVertexLinks(Mesh m, Vertex o, Vertex d, Vertex v)
 	{
 		boolean ot = o.isManifold();
 		boolean dt = d.isManifold();
@@ -1261,76 +1253,76 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 				if (!allTriangles.contains(t))
 					res.add(t);
 				allTriangles.add(t);
-				work[0].bind((TriangleVH) t);
-				if (work[0].origin() != v)
-					work[0].next();
-				if (work[0].origin() != v)
-					work[0].next();
-				if (work[0].origin() == v)
+				m.tempVH[0].bind((TriangleVH) t);
+				if (m.tempVH[0].origin() != v)
+					m.tempVH[0].next();
+				if (m.tempVH[0].origin() != v)
+					m.tempVH[0].next();
+				if (m.tempVH[0].origin() == v)
 				{
 					// Add all triangles of the same fan to allTriangles
 					boolean found = false;
-					Vertex end = work[0].destination();
+					Vertex end = m.tempVH[0].destination();
 					do
 					{
-						work[0].nextOriginLoop();
-						allTriangles.add(work[0].tri);
-						if (work[0].destination() == v)
+						m.tempVH[0].nextOriginLoop();
+						allTriangles.add(m.tempVH[0].tri);
+						if (m.tempVH[0].destination() == v)
 						{
 							found = true;
-							copyOTri(work[0], work[1]);
+							copyOTri(m.tempVH[0], m.tempVH[1]);
 						}
 					}
-					while (work[0].destination() != end);
+					while (m.tempVH[0].destination() != end);
 					if (found)
 					{
-						work[1].next();
-						end = work[1].destination();
+						m.tempVH[1].next();
+						end = m.tempVH[1].destination();
 						do
 						{
-							work[1].nextOriginLoop();
-							allTriangles.add(work[1].tri);
+							m.tempVH[1].nextOriginLoop();
+							allTriangles.add(m.tempVH[1].tri);
 						}
-						while (work[1].destination() != end);
+						while (m.tempVH[1].destination() != end);
 					}
 				}
 				boolean found = false;
-				if (work[0].destination() == v)
+				if (m.tempVH[0].destination() == v)
 				{
 					found = true;
-					work[0].next();
+					m.tempVH[0].next();
 				}
-				else if (work[0].apex() == v)
+				else if (m.tempVH[0].apex() == v)
 				{
 					found = true;
-					work[0].prev();
+					m.tempVH[0].prev();
 				}
 				if (found)
 				{
 					// Add all triangles of the same fan to allTriangles
 					found = false;
-					Vertex end = work[0].destination();
+					Vertex end = m.tempVH[0].destination();
 					do
 					{
-						work[0].nextOriginLoop();
-						allTriangles.add(work[0].tri);
-						if (work[0].destination() == v)
+						m.tempVH[0].nextOriginLoop();
+						allTriangles.add(m.tempVH[0].tri);
+						if (m.tempVH[0].destination() == v)
 						{
 							found = true;
-							copyOTri(work[0], work[1]);
+							copyOTri(m.tempVH[0], m.tempVH[1]);
 						}
 					}
-					while (work[0].destination() != end);
+					while (m.tempVH[0].destination() != end);
 					if (found)
 					{
-						work[1].next();
-						end = work[1].destination();
+						m.tempVH[1].next();
+						end = m.tempVH[1].destination();
 						do
 						{
-							work[1].nextOriginLoop();
-							allTriangles.add(work[1].tri);
+							m.tempVH[1].nextOriginLoop();
+							allTriangles.add(m.tempVH[1].tri);
 						}
-						while (work[1].destination() != end);
+						while (m.tempVH[1].destination() != end);
 					}
 				}
 			}
@@ -1365,13 +1357,13 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		{
 			v.setLink(tri);
 			VHsplitSameFan(m, v);
-			if (work[1].hasAttributes(OUTER))
+			if (m.tempVH[1].hasAttributes(OUTER))
 			{
 				// Remove links between t2 and t4
-				work[1].next();                 // (nV2d)
-				symOTri(work[1], work[3]);      // (V2no)
-				work[1].setAdj(null);
-				work[3].setAdj(null);
+				m.tempVH[1].next();                 // (nV2d)
+				symOTri(m.tempVH[1], m.tempVH[3]);      // (V2no)
+				m.tempVH[1].setAdj(null);
+				m.tempVH[3].setAdj(null);
 			}
 			return this;
 		}
@@ -1402,17 +1394,17 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		{
 			TriangleVH t = entry.getKey();
 			int l = entry.getValue().intValue();
-			work[3].bind(t, l);
-			work[3].VHsplitSameFan(m, v);
-			if (work[3].origin() == o)
+			m.tempVH[3].bind(t, l);
+			m.tempVH[3].VHsplitSameFan(m, v);
+			if (m.tempVH[3].origin() == o)
 			{
-				symOTri(work[3], hOuter[2*cnt]);
-				copyOTri(work[1], hOuter[2*cnt+1]);
+				symOTri(m.tempVH[3], hOuter[2*cnt]);
+				copyOTri(m.tempVH[1], hOuter[2*cnt+1]);
 			}
 			else
 			{
-				copyOTri(work[1], hOuter[2*cnt]);
-				symOTri(work[3], hOuter[2*cnt+1]);
+				copyOTri(m.tempVH[1], hOuter[2*cnt]);
+				symOTri(m.tempVH[3], hOuter[2*cnt+1]);
 			}
 			assert hOuter[2*cnt].origin() == o || hOuter[2*cnt].destination() == o;
 			cnt++;
@@ -1420,25 +1412,25 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		for (int j = 0; j < 2; j++)
 		{
 			// Initializes an empty cycle
-			nextOTri(hOuter[j], work[3]);
-			nextOTri(work[3], work[0]);
-			work[3].VHglue(work[0]);
+			nextOTri(hOuter[j], m.tempVH[3]);
+			nextOTri(m.tempVH[3], m.tempVH[0]);
+			m.tempVH[3].VHglue(m.tempVH[0]);
 			for (int i = 1; i < cnt; i++)
 			{
-				// Store old sym into work[0]
-				symOTri(work[3], work[0]);
+				// Store old sym into m.tempVH[0]
+				symOTri(m.tempVH[3], m.tempVH[0]);
 				// Adds hOuter[2*i+j] to current cycle
-				prevOTri(hOuter[2*i+j], work[2]);
-				work[3].VHglue(work[2]);
-				work[2].prev();
-				work[2].VHglue(work[0]);
+				prevOTri(hOuter[2*i+j], m.tempVH[2]);
+				m.tempVH[3].VHglue(m.tempVH[2]);
+				m.tempVH[2].prev();
+				m.tempVH[2].VHglue(m.tempVH[0]);
 			}
 		}
 		return this;
 	}
 
 	/*
-	 * Warning: this method uses work[0], work[1] and work[2] temporary arrays.
+	 * Warning: this method uses m.tempVH[0], m.tempVH[1] and m.tempVH[2] temporary arrays.
 	 */
 	private void VHsplitSameFan(Mesh m, Vertex n)
 	{
@@ -1461,37 +1453,37 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		 *            V2                             V2
 		 */
 		splitVertexAddOneTriangle(m, n);
-		symOTri(this, work[0]);
-		work[0].splitVertexAddOneTriangle(m, n);
+		symOTri(this, m.tempVH[0]);
+		m.tempVH[0].splitVertexAddOneTriangle(m, n);
 		
 		// Now we must update links:
 		// Link together t1/t4 and t2/t3.
 		TriangleVH t1 = tri;
-		nextOTri(this, work[0]);        // (nV1o)
-		work[0].sym();                  // (V1nd)
-		work[0].next();                 // (ndV1)
-		TriangleVH t3 = work[0].tri;
+		nextOTri(this, m.tempVH[0]);        // (nV1o)
+		m.tempVH[0].sym();                  // (V1nd)
+		m.tempVH[0].next();                 // (ndV1)
+		TriangleVH t3 = m.tempVH[0].tri;
 
-		symOTri(this, work[1]);         // (dnV2)
-		work[0].VHglue(work[1]);
-		TriangleVH t2 = work[1].tri;
-		work[1].next();                 // (nV2d)
-		symOTri(work[1], work[0]);      // (V2no)
-		work[0].next();                 // (noV2)
-		VHglue(work[0]);
-		TriangleVH t4 = work[0].tri;
-		work[1].prev();                 // (dnV2)
+		symOTri(this, m.tempVH[1]);         // (dnV2)
+		m.tempVH[0].VHglue(m.tempVH[1]);
+		TriangleVH t2 = m.tempVH[1].tri;
+		m.tempVH[1].next();                 // (nV2d)
+		symOTri(m.tempVH[1], m.tempVH[0]);      // (V2no)
+		m.tempVH[0].next();                 // (noV2)
+		VHglue(m.tempVH[0]);
+		TriangleVH t4 = m.tempVH[0].tri;
+		m.tempVH[1].prev();                 // (dnV2)
 
 		TriangleVH t14 = (t1.hasAttributes(OUTER) ? t4 : t1);
 		TriangleVH t23 = (t2.hasAttributes(OUTER) ? t3 : t2);
 		//  Update vertex links
 		replaceVertexLinks(n, t1, t2, t14);
-		replaceVertexLinks(work[1].origin(), t1, t2, t23);
+		replaceVertexLinks(m.tempVH[1].origin(), t1, t2, t23);
 		replaceVertexLinks(origin(), t1, t2, t14);
 	}
 	
 	/*
-	 * Warning: this method uses work[1] and work[2] temporary arrays.
+	 * Warning: this method uses m.tempVH[1] and m.tempVH[2] temporary arrays.
 	 */
 	private void splitVertexAddOneTriangle(Mesh m, Vertex n)
 	{
@@ -1510,29 +1502,29 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		
 		if (!hasAttributes(OUTER))
 		{
-			nextOTri(this, work[2]);                // (dV1o)
-			symOTri(work[2], work[1]);              // (V1d*)
-			work[2].bind(t3, work[2].localNumber);  // (dV1n)
-			work[1].VHglue(work[2]);
+			nextOTri(this, m.tempVH[2]);                // (dV1o)
+			symOTri(m.tempVH[2], m.tempVH[1]);              // (V1d*)
+			m.tempVH[2].bind(t3, m.tempVH[2].localNumber);  // (dV1n)
+			m.tempVH[1].VHglue(m.tempVH[2]);
 		}
 
 		next();                         // (nV1o)
-		work[1].bind(t3, localNumber);  // (dV1n)
+		m.tempVH[1].bind(t3, localNumber);  // (dV1n)
 
 		// Update Triangle links
 		tri = t1;
-		work[1].tri = t3;
+		m.tempVH[1].tri = t3;
 
 		// Update vertices
 		setOrigin(n);
-		work[1].setApex(n);
+		m.tempVH[1].setApex(n);
 
 		// Inner edge
-		work[1].next();                 // (V1nd)
-		VHglue(work[1]);
+		m.tempVH[1].next();                 // (V1nd)
+		VHglue(m.tempVH[1]);
 
 		// Clear BOUNDARY and NONMANIFOLD flags on inner edges
-		work[1].clearAttributes(BOUNDARY | NONMANIFOLD);
+		m.tempVH[1].clearAttributes(BOUNDARY | NONMANIFOLD);
 		clearAttributes(BOUNDARY | NONMANIFOLD);
 		prev();                         // (onV1)
 	}
