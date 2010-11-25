@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2005,2006 by EADS CRC
-    Copyright (C) 2007,2009, by EADS France
+    Copyright (C) 2007,2009,2010, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -28,15 +28,9 @@ import java.io.Serializable;
  */
 public class Matrix3D implements Serializable
 {
-	private static final long serialVersionUID = 5729957735771428280L;
+	private static final long serialVersionUID = 4514401276126330902L;
 	private final double [] data = new double[9];
 	
-	private static final double [] c0 = new double[3];
-	private static final double [] c1 = new double[3];
-	private static final double [] c2 = new double[3];
-	private static final double [] c3 = new double[3];
-	private static final double [] c4 = new double[3];
-
 	/**
 	 * Create a <code>Matrix3D</code> instance and set it to the identity
 	 * matrix.
@@ -147,11 +141,6 @@ public class Matrix3D implements Serializable
 		data[j+3*i] = temp;
 	}
 	
-	private void copyColumn(int i, double [] dest)
-	{
-		System.arraycopy(data, 3*i, dest, 0, 3);
-	}
-	
 	//  Basic 3D linear algebra.
 	//  Note: these routines have been moved from Metric3D.
 	
@@ -166,7 +155,7 @@ public class Matrix3D implements Serializable
 	{
 		return ((A[0]*B[0])+(A[1]*B[1])+(A[2]*B[2]));
 	}
-	
+
 	/**
 	 * Return the Euclidian norm of a 3D vector.
 	 *
@@ -191,7 +180,15 @@ public class Matrix3D implements Serializable
 		ret[1] = v1[2] * v2[0] - v1[0] * v2[2];
 		ret[2] = v1[0] * v2[1] - v1[1] * v2[0];
 	}
-	
+
+	private static void prodVect3D(double [] v1, int offset1, double [] v2, int offset2,
+		double [] ret, int offset)
+	{
+		ret[offset]   = v1[offset1+1] * v2[offset2+2] - v1[offset1+2] * v2[offset2+1];
+		ret[offset+1] = v1[offset1+2] * v2[offset2]   - v1[offset1]   * v2[offset2+2];
+		ret[offset+2] = v1[offset1]   * v2[offset2+1] - v1[offset1+1] * v2[offset2];
+	}
+
 	public static double computeNormal3D(double [] p0, double [] p1, double [] p2, double [] tempD1, double [] tempD2, double [] ret)
 	{
 		tempD1[0] = p1[0] - p0[0];
@@ -255,20 +252,20 @@ public class Matrix3D implements Serializable
 	 */
 	public final boolean inv()
 	{
-		// adjoint matrix
-		copyColumn(0, c0);
-		copyColumn(1, c1);
-		copyColumn(2, c2);
-		prodVect3D(c1, c2, c3);
-		double det = prodSca(c0, c3);
+		double [] temp = new double[9];
+
+		// r0 <- c1 cross c2
+		prodVect3D(data, 3, data, 6, temp, 0);
+		// r0 . c0
+		double det = data[0]*temp[0] + data[1]*temp[1] + data[2]*temp[2];
 		if (det < 1.e-20)
 			return false;
-		prodVect3D(c2, c0, c4);
-		prodVect3D(c0, c1, c2);
-		// Metric3D adj = new Metric3D(c3, c4, c2);
-		System.arraycopy(c3, 0, data, 0, 3);
-		System.arraycopy(c4, 0, data, 3, 3);
-		System.arraycopy(c2, 0, data, 6, 3);
+		// r1 <- c2 cross c0
+		prodVect3D(data, 6, data, 0, temp, 3);
+		// r2 <- c0 cross c1
+		prodVect3D(data, 0, data, 3, temp, 6);
+		// Replace data by temp
+		System.arraycopy(temp, 0, data, 0, 9);
 		transp();
 		det = 1.0 / det;
 		for (int i = 0; i < 9; i++)
