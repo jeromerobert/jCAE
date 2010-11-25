@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2008,2009, by EADS France
+    Copyright (C) 2008,2009,2010, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -45,9 +45,9 @@ public class MeshLiaison
 	// Map between vertices of currentMesh and their projection on backgroundMesh
 	private final Map<Vertex, ProjectedLocation> mapCurrentVertexProjection;
 	
-	private final static double [] work1 = new double[3];
-	private final static double [] work2 = new double[3];
-	private final static double [] work3 = new double[3];
+	private final double [] work1 = new double[3];
+	private final double [] work2 = new double[3];
+	private final double [] work3 = new double[3];
 	
 	public MeshLiaison(Mesh backgroundMesh)
 	{
