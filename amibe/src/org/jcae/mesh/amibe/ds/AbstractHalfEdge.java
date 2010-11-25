@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2006, by EADS CRC
-    Copyright (C) 2007, by EADS France
+    Copyright (C) 2007,2010, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -635,7 +635,7 @@ public abstract class AbstractHalfEdge
 	 *
 	 * @return triangle area
 	 */
-	public abstract double area();
+	public abstract double area(Mesh m);
 
 	/**
 	 * Returns an iterator over triangle fans connected to this edge.  If edge is

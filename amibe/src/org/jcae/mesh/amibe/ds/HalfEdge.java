@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2006, by EADS CRC
-    Copyright (C) 2007,2008,2009, by EADS France
+    Copyright (C) 2007,2008,2009,2010, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -403,11 +403,11 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @return the minimum quality of the two triangles generated
 	 *    by swapping this edge.
 	 */
-	public final double checkSwap3D(double minCos)
+	public final double checkSwap3D(Mesh mesh, double minCos)
 	{
-		return checkSwap3D(minCos, 0.0);
+		return checkSwap3D(mesh, minCos, 0.0);
 	}
-	public final double checkSwap3D(double minCos, double maxLength)
+	public final double checkSwap3D(Mesh mesh, double minCos, double maxLength)
 	{
 		double invalid = -1.0;
 		if (hasAttributes(IMMUTABLE))
@@ -558,7 +558,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * Warning: this method uses temp[0], temp[1] and temp[2] temporary arrays.
 	 */
 	@Override
-	public double area()
+	public double area(Mesh m)
 	{
 		double [] p0 = origin().getUV();
 		double [] p1 = destination().getUV();

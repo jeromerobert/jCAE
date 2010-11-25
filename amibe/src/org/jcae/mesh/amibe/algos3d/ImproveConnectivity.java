@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2007,2008,2009, by EADS France
+    Copyright (C) 2007,2008,2009,2010, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -108,7 +108,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 			for (int i = 0; i < 3; i++)
 			{
 				e = e.next();
-				if (e.checkSwap3D(minCos) <= 0.0)
+				if (e.checkSwap3D(mesh, minCos) <= 0.0)
 				{
 					e.setAttributes(AbstractHalfEdge.MARKED);
 					e.sym().setAttributes(AbstractHalfEdge.MARKED);
@@ -178,7 +178,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 			return false;
 		if (current.hasAttributes(AbstractHalfEdge.MARKED) && current.sym().hasAttributes(AbstractHalfEdge.MARKED))
 			return false;
-		return current.checkSwap3D(minCos) > 0.0;
+		return current.checkSwap3D(mesh, minCos) > 0.0;
 	}
 
 	@Override

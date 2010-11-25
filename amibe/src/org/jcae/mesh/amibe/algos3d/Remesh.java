@@ -621,7 +621,7 @@ public class Remesh
 					{
 						edge = edge.nextApexLoop();
 						counter++;
-						if (edge.checkSwap3D(coplanarity) >= 0.0)
+						if (edge.checkSwap3D(mesh, coplanarity) >= 0.0)
 						{
 							edge.getTri().clearAttributes(AbstractHalfEdge.MARKED);
 							edge.sym().getTri().clearAttributes(AbstractHalfEdge.MARKED);

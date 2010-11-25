@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2008,2009, by EADS France
+    Copyright (C) 2008,2009,2010, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -398,7 +398,7 @@ public class SmoothNodes3DBg
 		Triangle f = edge.getTri();
 		assert f.vertex[0] != mesh.outerVertex && f.vertex[1] != mesh.outerVertex && f.vertex[2] != mesh.outerVertex : f;
 		double p = f.vertex[0].distance3D(f.vertex[1]) + f.vertex[1].distance3D(f.vertex[2]) + f.vertex[2].distance3D(f.vertex[0]);
-		double area = edge.area();
+		double area = edge.area(mesh);
 		double ret = scaleFactor * area / p / p;
 		assert ret >= 0.0 && ret <= 1.01;
 		return ret;

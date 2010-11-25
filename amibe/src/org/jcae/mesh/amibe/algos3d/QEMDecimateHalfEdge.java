@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2003,2006 by EADS CRC
-    Copyright (C) 2007,2008,2009, by EADS France
+    Copyright (C) 2007,2008,2009,2010, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -549,7 +549,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 			redo = false;
 			while(true)
 			{
-				if (current.checkSwap3D(minCos, maxEdgeLength) >= 0.0)
+				if (current.checkSwap3D(mesh, minCos, maxEdgeLength) >= 0.0)
 				{
 					// Swap edge
 					for (int i = 0; i < 3; i++)

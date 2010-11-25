@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2004,2005,2006, by EADS CRC
-    Copyright (C) 2007,2008,2009, by EADS France
+    Copyright (C) 2007,2008,2009,2010, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -618,7 +618,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * Warning: this method uses tempD, tempD1 and tempD2 temporary arrays.
 	 */
 	@Override
-	public final double area()
+	public final double area(Mesh m)
 	{
 		double [] p0 = origin().getUV();
 		double [] p1 = destination().getUV();
@@ -653,11 +653,11 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 *    by swapping this edge.
 	 */
 	@SuppressWarnings("unused")
-	private double checkSwap3D(double minCos)
+	private double checkSwap3D(Mesh m, double minCos)
 	{
-		return checkSwap3D(minCos, 0.0);
+		return checkSwap3D(m, minCos, 0.0);
 	}
-	private double checkSwap3D(double minCos, double maxLength)
+	private double checkSwap3D(Mesh m, double minCos, double maxLength)
 	{
 		double invalid = -1.0;
 		// Do not swap sharp edges
@@ -694,9 +694,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		if (s4 <= 0.0)
 			return invalid;
 		double p1 = o.distance3D(d) + d.distance3D(a) + a.distance3D(o);
-		double s1 = area();
+		double s1 = area(m);
 		double p2 = d.distance3D(o) + o.distance3D(n) + n.distance3D(d);
-		double s2 = work[0].area();
+		double s2 = work[0].area(m);
 		// No need to multiply by 12.0 * Math.sqrt(3.0)
 		double Qbefore = Math.min(s1/p1/p1, s2/p2/p2);
 		
