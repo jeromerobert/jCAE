@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2003,2004,2005,2006, by EADS CRC
-    Copyright (C) 2007,2008,2009, by EADS France
+    Copyright (C) 2007,2008,2009,2010, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -24,6 +24,7 @@ package org.jcae.mesh.amibe.patch;
 import org.jcae.mesh.cad.CADGeomSurface;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.metrics.Matrix2D;
+import org.jcae.mesh.amibe.metrics.PoolWorkVectors;
 import org.jcae.mesh.amibe.ds.MeshParameters;
 import java.util.logging.Logger;
 
@@ -77,53 +78,47 @@ import java.util.logging.Logger;
  */
 class MetricBuilder
 {
-	private static final long serialVersionUID = -5921524911267268608L;
-	private static final Logger logger=Logger.getLogger(MetricBuilder.class.getName());
+	private static final Logger LOGGER=Logger.getLogger(MetricBuilder.class.getName());
 	
-	private static final double [] c0 = new double[3];
-	private static final double [] c1 = new double[3];
-	private static final double [] c2 = new double[3];
-	private static final double [] values = new double[9];
-	private static final double [][] temp32 = new double[3][2];
-	
-	static Matrix2D computeIsotropic(CADGeomSurface surf, double length)
+	static Matrix2D computeIsotropic(CADGeomSurface surf, double length, PoolWorkVectors temp)
 	{
 		double diag = 1.0/length/length;
 		Matrix3D iso = new Matrix3D(diag, diag, diag);
-		return restrict2D(iso, surf);
+		return restrict2D(iso, surf, temp);
 	}
 
-	static Matrix2D computeGeometric(CADGeomSurface surf, MeshParameters mp)
+	static Matrix2D computeGeometric(CADGeomSurface surf, MeshParameters mp, PoolWorkVectors temp)
 	{
 		if (!mp.hasDeflection())
 			return null;
 		Matrix3D m;
 		if (mp.hasRelativeDeflection())
-			m = getRelativeDeflectionMetric(surf, mp.isIsotropic(), mp.getDeflection(), mp.getLength());
+			m = getRelativeDeflectionMetric(surf, temp, mp.isIsotropic(), mp.getDeflection(), mp.getLength());
 		else
-			m = getAbsoluteDeflectionMetric(surf, mp.isIsotropic(), mp.getDeflection());
+			m = getAbsoluteDeflectionMetric(surf, temp, mp.isIsotropic(), mp.getDeflection());
 		if (m == null)
 			return null;
-		return restrict2D(m, surf);
+		return restrict2D(m, surf, temp);
 	}
 
-	private static Matrix3D getRelativeDeflectionMetric(CADGeomSurface surf, boolean isotropic, double deflection, double edgeLength)
+	private static Matrix3D getRelativeDeflectionMetric(CADGeomSurface surf,
+		PoolWorkVectors temp, boolean isotropic, double deflection, double edgeLength)
 	{
 		double cmin = Math.abs(surf.minCurvature());
 		double cmax = Math.abs(surf.maxCurvature());
 		if (Double.isNaN(cmin) || Double.isNaN(cmax))
 		{
-			logger.fine("Undefined curvature");
+			LOGGER.fine("Undefined curvature");
 			return null;
 		}
 		if (cmin == 0.0 && cmax == 0.0)
 		{
-			logger.fine("Infinite curvature");
+			LOGGER.fine("Infinite curvature");
 			return null;
 		}
 		double [] dcurv = surf.curvatureDirections();
-		double [] dcurvmax = c0;
-		double [] dcurvmin = c1;
+		double [] dcurvmax = temp.t3_0;
+		double [] dcurvmin = temp.t3_1;
 		if (cmin < cmax)
 		{
 			System.arraycopy(dcurv, 0, dcurvmax, 0, 3);
@@ -131,14 +126,14 @@ class MetricBuilder
 		}
 		else
 		{
-			double temp = cmin;
+			double tmp = cmin;
 			cmin = cmax;
-			cmax = temp;
+			cmax = tmp;
 			System.arraycopy(dcurv, 0, dcurvmin, 0, 3);
 			System.arraycopy(dcurv, 3, dcurvmax, 0, 3);
 		}
-		Matrix3D.prodVect3D(dcurvmax, dcurvmin, c2);
-		Matrix3D A = new Matrix3D(dcurvmax, dcurvmin, c2);
+		Matrix3D.prodVect3D(dcurvmax, dcurvmin, temp.t3_2);
+		Matrix3D A = new Matrix3D(dcurvmax, dcurvmin, temp.t3_2);
 		double epsilon = deflection;
 		if (epsilon > 1.0)
 			epsilon = 1.0;
@@ -159,33 +154,34 @@ class MetricBuilder
 			param = new Matrix3D(diag, cmin*cmin / alpha2, 1.0/edgeLength/edgeLength);
 		}
 		A.transp();
-		Matrix3D temp = param.multL(A);
+		Matrix3D tempM = param.multL(A);
 		A.transp();
-		return temp.multR(A);
+		return tempM.multR(A);
 	}
 	
-	private static Matrix3D getAbsoluteDeflectionMetric(CADGeomSurface surf, boolean isotropic, double deflection)
+	private static Matrix3D getAbsoluteDeflectionMetric(CADGeomSurface surf,
+		PoolWorkVectors temp, boolean isotropic, double deflection)
 	{
 		double cmin = Math.abs(surf.minCurvature());
 		double cmax = Math.abs(surf.maxCurvature());
 		if (Double.isNaN(cmin) || Double.isNaN(cmax))
 		{
-			logger.fine("Undefined curvature");
+			LOGGER.fine("Undefined curvature");
 			return null;
 		}
 		if (cmin == 0.0 && cmax == 0.0)
 		{
-			logger.fine("Null curvature");
+			LOGGER.fine("Null curvature");
 			return null;
 		}
 		if (deflection * cmax >= 1.0 || deflection * cmin >= 1.0)
 		{
-			logger.fine("Curvature too large");
+			LOGGER.fine("Curvature too large");
 			return null;
 		}
 		double [] dcurv = surf.curvatureDirections();
-		double [] dcurvmax = c0;
-		double [] dcurvmin = c1;
+		double [] dcurvmax = temp.t3_0;
+		double [] dcurvmin = temp.t3_1;
 		if (cmin < cmax)
 		{
 			System.arraycopy(dcurv, 0, dcurvmax, 0, 3);
@@ -193,14 +189,14 @@ class MetricBuilder
 		}
 		else
 		{
-			double temp = cmin;
+			double tmp = cmin;
 			cmin = cmax;
-			cmax = temp;
+			cmax = tmp;
 			System.arraycopy(dcurv, 0, dcurvmin, 0, 3);
 			System.arraycopy(dcurv, 3, dcurvmax, 0, 3);
 		}
-		Matrix3D.prodVect3D(dcurvmax, dcurvmin, c2);
-		Matrix3D A = new Matrix3D(dcurvmax, dcurvmin, c2);
+		Matrix3D.prodVect3D(dcurvmax, dcurvmin, temp.t3_2);
+		Matrix3D A = new Matrix3D(dcurvmax, dcurvmin, temp.t3_2);
 		double epsilon = deflection * cmax;
 		//  In org.jcae.mesh.amibe.algos2d.Insertion, mean lengths are
 		//  targeted, and there is a sqrt(2) factor.  Division by 2
@@ -222,38 +218,38 @@ class MetricBuilder
 			param = new Matrix3D(diag, cmin*cmin / alpha2, diag);
 		}
 		A.transp();
-		Matrix3D temp = param.multL(A);
+		Matrix3D tempM = param.multL(A);
 		A.transp();
-		return temp.multR(A);
+		return tempM.multR(A);
 	}
 	
 	/**
 	 * Compute the metric induced to the tangent plane.
 	 */
-	private static Matrix2D restrict2D(Matrix3D m, CADGeomSurface surf)
+	private static Matrix2D restrict2D(Matrix3D m, CADGeomSurface surf, PoolWorkVectors temp)
 	{
 		double d1U[] = surf.d1U();
 		double d1V[] = surf.d1V();
 		// Check whether there is a tangent plane
-		Matrix3D.prodVect3D(d1U, d1V, c0);
-		if (Matrix3D.norm(c0) <= 0.0)
-			logger.fine("Unable to compute normal vector");
+		Matrix3D.prodVect3D(d1U, d1V, temp.t3_0);
+		if (Matrix3D.norm(temp.t3_0) <= 0.0)
+			LOGGER.fine("Unable to compute normal vector");
 
-		m.getValues(values);
+		m.getValues(temp.t9);
 		// B = (d1U,d1V,c0) is the local frame.
 		// The metrics induced by M3 on the tangent plane is tB M3 B
 		// temp32 = M3 * B
 		for (int i = 0; i < 3; i++)
 		{
-			temp32[i][0] = values[i] * d1U[0] + values[i+3] * d1U[1] + values[i+6] * d1U[2];
-			temp32[i][1] = values[i] * d1V[0] + values[i+3] * d1V[1] + values[i+6] * d1V[2];
+			temp.tt32[i][0] = temp.t9[i] * d1U[0] + temp.t9[i+3] * d1U[1] + temp.t9[i+6] * d1U[2];
+			temp.tt32[i][1] = temp.t9[i] * d1V[0] + temp.t9[i+3] * d1V[1] + temp.t9[i+6] * d1V[2];
 		}
 		//  ret = tB * temp32
 		return new Matrix2D(
-			d1U[0] * temp32[0][0] + d1U[1] * temp32[1][0] + d1U[2] * temp32[2][0],
-			d1U[0] * temp32[0][1] + d1U[1] * temp32[1][1] + d1U[2] * temp32[2][1],
-			d1V[0] * temp32[0][0] + d1V[1] * temp32[1][0] + d1V[2] * temp32[2][0],
-			d1V[0] * temp32[0][1] + d1V[1] * temp32[1][1] + d1V[2] * temp32[2][1]
+			d1U[0] * temp.tt32[0][0] + d1U[1] * temp.tt32[1][0] + d1U[2] * temp.tt32[2][0],
+			d1U[0] * temp.tt32[0][1] + d1U[1] * temp.tt32[1][1] + d1U[2] * temp.tt32[2][1],
+			d1V[0] * temp.tt32[0][0] + d1V[1] * temp.tt32[1][0] + d1V[2] * temp.tt32[2][0],
+			d1V[0] * temp.tt32[0][1] + d1V[1] * temp.tt32[1][1] + d1V[2] * temp.tt32[2][1]
 		);
 	}
 	
