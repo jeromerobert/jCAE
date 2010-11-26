@@ -21,7 +21,6 @@
 
 package org.jcae.mesh.amibe.algos2d;
 
-import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
@@ -116,28 +115,28 @@ public class Insertion
 		LOGGER.fine(" Insert inner nodes");
 		ArrayList<Vertex2D> nodes = new ArrayList<Vertex2D>();
 		ArrayList<Vertex2D> triNodes = new ArrayList<Vertex2D>();
-		VirtualHalfEdge2D sym = new VirtualHalfEdge2D();
-		VirtualHalfEdge2D ot = new VirtualHalfEdge2D();
+		AbstractHalfEdge sym = null;
+		AbstractHalfEdge ot = null;
 		HashSet<Triangle> trianglesToCheck = new HashSet<Triangle>(mesh.getTriangles().size());
 		double curMinlen = minlen;
 		// We use a LinkedHashSet instance below to keep triangle order
 		LinkedHashSet<Triangle> oldTrianglesToCheck = new LinkedHashSet<Triangle>(mesh.getTriangles().size());
 		// We do not want to split boundary edges.
-		for(Triangle gt : mesh.getTriangles())
+		for(Triangle t : mesh.getTriangles())
 		{
-			if (gt.hasAttributes(AbstractHalfEdge.OUTER))
+			if (t.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
-			TriangleVH t = (TriangleVH) gt;
-			ot.bind(t);
+			ot = t.getAbstractHalfEdge(ot);
+			if (sym == null)
+				sym = t.getAbstractHalfEdge(sym);
 			oldTrianglesToCheck.add(t);
 			for (int i = 0; i < 3; i++)
 			{
-				ot.next();
+				ot = ot.next();
 				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
 				{
 					ot.setAttributes(AbstractHalfEdge.MARKED);
-					sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
-					sym.sym();
+					sym = ot.sym(sym);
 					sym.setAttributes(AbstractHalfEdge.MARKED);
 				}
 				else
@@ -166,26 +165,24 @@ public class Insertion
 			int kdtreeSplit = 0;
 			nodes.clear();
 			LOGGER.fine("Check all edges");
-			for(Triangle gt : mesh.getTriangles())
+			for(Triangle t : mesh.getTriangles())
 			{
-				if (gt.hasAttributes(AbstractHalfEdge.OUTER))
+				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
-				TriangleVH t = (TriangleVH) gt;
-				ot.bind(t);
+				ot = t.getAbstractHalfEdge(ot);
 				triNodes.clear();
 				// Maximal number of nodes which are inserted on edges of this triangle
 				int nrTriNodes = 0;
 				for (int i = 0; i < 3; i++)
 				{
-					ot.next();
+					ot = ot.next();
 					if (ot.hasAttributes(AbstractHalfEdge.MARKED))
 					{
 						// This edge has already been checked and cannot be split
 						continue;
 					}
 					// Tag symmetric edge so that edges are checked only once
-					sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
-					sym.sym();
+					sym = ot.sym(sym);
 					sym.setAttributes(AbstractHalfEdge.MARKED);
 					double l = mesh.interpolatedDistance((Vertex2D) ot.origin(), (Vertex2D) ot.destination());
 					if (l < maxlen)
@@ -244,21 +241,19 @@ public class Insertion
 			Vertex2D c = null;
 			trianglesToCheck.clear();
 			LOGGER.fine("Check triangle centroids for "+oldTrianglesToCheck.size()+" triangles");
-			for (Triangle gt : oldTrianglesToCheck)
+			for (Triangle t : oldTrianglesToCheck)
 			{
-				if (gt.hasAttributes(AbstractHalfEdge.OUTER))
+				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
-				TriangleVH t = (TriangleVH) gt;
 				// Check triangle centroid only if at least one edge is large
 				boolean tooSmall = true;
-				ot.bind(t);
+				ot = t.getAbstractHalfEdge(ot);
 				for (int j = 0; tooSmall && j < 3; j++)
 				{
-					ot.next();
+					ot = ot.next();
 					if (ot.hasAttributes(AbstractHalfEdge.MARKED))
 					{
-						sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
-						sym.sym();
+						sym = ot.sym(sym);
 						if (!sym.hasAttributes(AbstractHalfEdge.MARKED))
 							tooSmall = false;
 					}
@@ -371,7 +366,7 @@ public class Insertion
 		LOGGER.config("Leave compute()");
 	}
 	
-	private int addCandidatePoints(VirtualHalfEdge2D ot, VirtualHalfEdge2D sym,
+	private int addCandidatePoints(AbstractHalfEdge ot, AbstractHalfEdge sym,
 		double edgeLength, ArrayList<Vertex2D> triNodes)
 	{
 		int nrNodes = 0;

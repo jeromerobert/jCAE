@@ -21,7 +21,6 @@
 
 package org.jcae.mesh.amibe.algos2d;
 
-import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.patch.Mesh2D;
@@ -58,10 +57,10 @@ public class CheckDelaunay
 	
 	private static final class FakeEdge
 	{
-		private final TriangleVH triangle;
+		private final Triangle triangle;
 		private final int localNumber;
 
-		private FakeEdge(TriangleVH t, int l)
+		private FakeEdge(Triangle t, int l)
 		{
 			triangle = t;
 			localNumber = l;
@@ -73,14 +72,12 @@ public class CheckDelaunay
 	 */
 	public final void compute()
 	{
-		TriangleVH t;
-		VirtualHalfEdge2D ot, sym;
+		AbstractHalfEdge ot = null;
+		AbstractHalfEdge sym = null;
 		Vertex2D v;
 		int cnt = 0;
 		LOGGER.config("Enter compute()");
 		mesh.pushCompGeom(3);
-		ot = new VirtualHalfEdge2D();
-		sym = new VirtualHalfEdge2D();
 
 		boolean redo = false;
 		int niter = mesh.getTriangles().size();
@@ -91,38 +88,37 @@ public class CheckDelaunay
 			ArrayList<FakeEdge> toSwap = new ArrayList<FakeEdge>();
 			Collection<Triangle> newList = new LinkedHashSet<Triangle>();
 			niter--;
-			for (Triangle at: oldList)
+			for (Triangle t: oldList)
 			{
-				t = (TriangleVH) at;
-				ot.bind(t);
+				ot = t.getAbstractHalfEdge(ot);
+				if (sym == null)
+					sym = t.getAbstractHalfEdge(sym);
 				for (int i = 0; i < 3; i++)
 				{
-					ot.next();
+					ot = ot.next();
 					ot.clearAttributes(AbstractHalfEdge.SWAPPED);
-					sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
-					sym.sym();
+					sym = ot.sym(sym);
 					sym.clearAttributes(AbstractHalfEdge.SWAPPED);
 				}
 			}
 			
-			for (Triangle at: oldList)
+			for (Triangle t: oldList)
 			{
-				t = (TriangleVH) at;
-				ot.bind(t);
-				ot.prev();
+				ot = t.getAbstractHalfEdge(ot);
+				ot = ot.prev();
 				for (int i = 0; i < 3; i++)
 				{
-					ot.next();
-					if (!ot.isMutable())
+					ot = ot.next();
+					if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD | AbstractHalfEdge.SHARP | AbstractHalfEdge.OUTER))
 						continue;
-					sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
-					sym.sym();
+					sym = ot.sym(sym);
 					if (ot.hasAttributes(AbstractHalfEdge.SWAPPED) || sym.hasAttributes(AbstractHalfEdge.SWAPPED))
 						continue;
 					ot.setAttributes(AbstractHalfEdge.SWAPPED);
 					sym.setAttributes(AbstractHalfEdge.SWAPPED);
 					v = (Vertex2D) sym.apex();
-					if (!ot.isDelaunay(mesh, v))
+					VirtualHalfEdge2D ot2 = new VirtualHalfEdge2D(t, i);
+					if (!ot2.isDelaunay(mesh, v))
 					{
 						cnt++;
 						toSwap.add(new FakeEdge(t, i));
@@ -132,14 +128,13 @@ public class CheckDelaunay
 			LOGGER.fine(" Found "+cnt+" non-Delaunay triangles");
 			for (FakeEdge e: toSwap)
 			{
-				ot.bind(e.triangle);
+				ot = e.triangle.getAbstractHalfEdge(ot);
 				for (int i = 0; i < e.localNumber; i++)
-					ot.next();
+					ot = ot.next();
 				if (ot.hasAttributes(AbstractHalfEdge.SWAPPED))
 				{
 					newList.add(ot.getTri());
-					sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
-					sym.sym();
+					sym = ot.sym(sym);
 					newList.add(sym.getTri());
 					mesh.edgeSwap(ot);
 					redo = true;

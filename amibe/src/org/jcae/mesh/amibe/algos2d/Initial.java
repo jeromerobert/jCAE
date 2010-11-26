@@ -26,7 +26,6 @@ import org.jcae.mesh.amibe.ds.MNode1D;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.MeshParameters;
 import org.jcae.mesh.amibe.ds.Triangle;
-import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
@@ -262,9 +261,6 @@ public class Initial
 
 	private void computeFromBoundaryNodes(Vertex2D [] bNodes)
 	{
-		TriangleVH t;
-		VirtualHalfEdge2D ot;
-
 		if (bNodes.length < 3)
 		{
 			LOGGER.warning("Boundary face contains less than 3 points, it is skipped...");
@@ -322,8 +318,8 @@ public class Initial
 					firstOnWire = null;
 				else
 				{
-					ot = v.getSurroundingOTriangle(mesh);
-					ot.split3(mesh, v, null, true); 
+					VirtualHalfEdge2D vh = v.getSurroundingOTriangle(mesh);
+					vh.split3(mesh, v, null, true);
 					if (firstOnWire == null)
 						firstOnWire = v;
 				}
@@ -359,12 +355,12 @@ public class Initial
 		mesh.popCompGeom(2);
 		
 		LOGGER.fine(" Mark outer elements");
-		t = (TriangleVH) mesh.outerVertex.getLink();
-		ot = new VirtualHalfEdge2D(t, 0);
+		Triangle t = (Triangle) mesh.outerVertex.getLink();
+		AbstractHalfEdge ot = t.getAbstractHalfEdge();
 		if (ot.origin() == mesh.outerVertex)
-			ot.next();
+			ot = ot.next();
 		else if (ot.destination() == mesh.outerVertex)
-			ot.prev();
+			ot = ot.prev();
 		assert ot.apex() == mesh.outerVertex : ot;
 		
 		Triangle.List tList = new Triangle.List();
@@ -376,35 +372,34 @@ public class Initial
 			tList.add(ot.getTri());
 			// Move counterclockwise to following edge with
 			// the same apex.
-			ot.next();
-			ot.sym();
-			ot.next();
+			ot = ot.next();
+			ot = ot.sym();
+			ot = ot.next();
 		}
 		while (ot.origin() != first);
 		
 		LOGGER.fine(" Mark holes");
-		VirtualHalfEdge2D sym = new VirtualHalfEdge2D();
+		AbstractHalfEdge sym = t.getAbstractHalfEdge();
 		// Dummy value to enter the loop
-		TriangleVH oldHead = t;
-		TriangleVH newHead = null;
+		Triangle oldHead = t;
+		Triangle newHead = null;
 		while (oldHead != newHead)
 		{
 			oldHead = newHead;
 			for (Iterator<Triangle> it = tList.iterator(); it.hasNext(); )
 			{
-				t = (TriangleVH) it.next();
+				t = it.next();
 				if (t == oldHead)
 					break;
-				ot.bind(t);
+				ot = t.getAbstractHalfEdge(ot);
 				boolean outer = ot.hasAttributes(AbstractHalfEdge.OUTER);
 				for (int i = 0; i < 3; i++)
 				{
-					ot.next();
-					sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
-					sym.sym();
+					ot = ot.next();
+					sym = ot.sym(sym);
 					if (tList.contains(sym.getTri()))
 						continue;
-					newHead = (TriangleVH) sym.getTri();
+					newHead = sym.getTri();
 					tList.add(newHead);
 					if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
 					{
@@ -435,7 +430,7 @@ public class Initial
 		LOGGER.fine(" Remove links to outer triangles");
 		for (Iterator<Triangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
 		{
-			t = (TriangleVH) it.next();
+			t = it.next();
 			if (t.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			for (Vertex v: t.vertex)
@@ -452,8 +447,8 @@ public class Initial
 			for (MNode1D p1: innerNodes)
 			{
 				Vertex2D v = Vertex2D.valueOf(p1, null, face);
-				ot = v.getSurroundingOTriangle(mesh);
-				ot.split3(mesh, v, null, true); 
+				VirtualHalfEdge2D vh = v.getSurroundingOTriangle(mesh);
+				vh.split3(mesh, v, null, true);
 			}
 			mesh.popCompGeom(2);
 		}

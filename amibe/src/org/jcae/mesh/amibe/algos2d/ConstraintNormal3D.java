@@ -21,12 +21,10 @@
 
 package org.jcae.mesh.amibe.algos2d;
 
-import org.jcae.mesh.amibe.ds.TriangleVH;
-import org.jcae.mesh.amibe.ds.Triangle;
-import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.patch.Mesh2D;
-import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.metrics.KdTree;
 import org.jcae.mesh.cad.CADGeomSurface;
@@ -75,13 +73,13 @@ public class ConstraintNormal3D
 	 */
 	public final void compute()
 	{
-		VirtualHalfEdge2D ot, sym;
+		AbstractHalfEdge ot = null;
+		AbstractHalfEdge sym = null;
 		int cnt = 0;
 		LOGGER.config("Enter compute()");
 		mesh.pushCompGeom(3);
 		LOGGER.fine(" Checking inverted triangles");
-		ot = new VirtualHalfEdge2D();
-		sym = new VirtualHalfEdge2D();
+
 		double [] vect1 = new double[3];
 		double [] vect2 = new double[3];
 		double [] vect3 = new double[3];
@@ -94,34 +92,33 @@ public class ConstraintNormal3D
 		Triangle.List newList = new Triangle.List();
 		Collection<Triangle> oldList = new ArrayList<Triangle>(mesh.getTriangles());
 		// Edges may have been marked by previous algorithms
-		for (Triangle gt : oldList)
+		for (Triangle t : oldList)
 		{
-			TriangleVH t = (TriangleVH) gt;
-			ot.bind(t);
+			ot = t.getAbstractHalfEdge(ot);
 			for (int i = 0; i < 3; i++)
 			{
-				ot.next();
+				ot = ot.next();
 				ot.clearAttributes(AbstractHalfEdge.SWAPPED);
 			}
+			if (sym == null)
+				sym = t.getAbstractHalfEdge(sym);
 		}
 
 		do {
 			redo = false;
 			cnt = 0;
 			niter--;
-			for (Triangle gt : oldList)
+			for (Triangle t : oldList)
 			{
-				TriangleVH t = (TriangleVH) gt;
-				ot.bind(t);
+				ot = t.getAbstractHalfEdge(ot);
 				int l = -1;
 				double best = 0.0;
 				for (int i = 0; i < 3; i++)
 				{
-					ot.next();
-					if (!ot.isMutable())
+					ot = ot.next();
+					if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD | AbstractHalfEdge.SHARP | AbstractHalfEdge.OUTER))
 						continue;
-					sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
-					sym.sym();
+					sym = ot.sym(sym);
 					if (ot.hasAttributes(AbstractHalfEdge.SWAPPED) || sym.hasAttributes(AbstractHalfEdge.SWAPPED))
 						continue;
 					// Make sure that triangles are not
@@ -186,24 +183,24 @@ public class ConstraintNormal3D
 				}
 				if (l >= 0)
 				{
-					ot.bind(t);
+					ot = t.getAbstractHalfEdge(ot);
 					for (int i = 0; i <= l; i++)
-						ot.next();
+						ot = ot.next();
 					// Add adjacent triangles to newList
 					for (int i = 0; i < 3; i++)
 					{
-						ot.next();
-						ot.sym(sym);
+						ot = ot.next();
+						sym = ot.sym(sym);
 						newList.addAllowDuplicates(sym.getTri());
 					}
-					ot.sym();
+					ot = ot.sym();
 					for (int i = 0; i < 3; i++)
 					{
-						ot.next();
-						ot.sym(sym);
+						ot = ot.next();
+						sym = ot.sym(sym);
 						newList.addAllowDuplicates(sym.getTri());
 					}
-					ot.sym();
+					ot = ot.sym();
 					mesh.edgeSwap(ot);
 
 					cnt++;
@@ -213,11 +210,11 @@ public class ConstraintNormal3D
 			oldList.clear();
 			for (Iterator<Triangle> it = newList.iterator(); it.hasNext(); )
 			{
-				TriangleVH t = (TriangleVH) it.next();
-				ot.bind(t);
+				Triangle t = it.next();
+				ot = t.getAbstractHalfEdge(ot);
 				for (int i = 0; i < 3; i++)
 				{
-					ot.next();
+					ot = ot.next();
 					ot.clearAttributes(AbstractHalfEdge.SWAPPED);
 				}
 				oldList.add(t);

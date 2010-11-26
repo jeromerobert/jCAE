@@ -20,14 +20,12 @@
 
 package org.jcae.mesh.amibe.algos2d;
 
-import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.MMesh1D;
 import org.jcae.mesh.amibe.ds.MeshParameters;
 import org.jcae.mesh.amibe.patch.Mesh2D;
-import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.patch.MetricOnSurface;
 import org.jcae.mesh.amibe.patch.Metric2D;
@@ -149,12 +147,12 @@ public class SmoothNodes2D
 	 */
 	private void computeTriangleQuality()
 	{
-		VirtualHalfEdge2D ot = new VirtualHalfEdge2D();
+		AbstractHalfEdge ot = null;
 		for (Triangle f: mesh.getTriangles())
 		{
 			if (f.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
-			ot.bind((TriangleVH) f);
+			ot = f.getAbstractHalfEdge(ot);
 			double val = triangleQuality(ot);
 			qualityMap.put(f, val);
 		}
@@ -195,7 +193,7 @@ public class SmoothNodes2D
 	 */
 	private void processAllNodes()
 	{
-		VirtualHalfEdge2D ot = new VirtualHalfEdge2D();
+		AbstractHalfEdge ot = null;
 		// Compute vertex quality
 		tree.clear();
 		for (Vertex av: nodeset)
@@ -203,14 +201,14 @@ public class SmoothNodes2D
 			Vertex2D v = (Vertex2D) av;
 			if (!v.isMutable() || v.getRef() > 0)
 				continue;
-			TriangleVH f = (TriangleVH) v.getLink();
+			Triangle f = (Triangle) v.getLink();
 			if (f.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
-			ot.bind(f);
+			ot = f.getAbstractHalfEdge(ot);
 			if (ot.destination() == v)
-				ot.next();
+				ot = ot.next();
 			else if (ot.apex() == v)
-				ot.prev();
+				ot = ot.prev();
 			assert ot.origin() == v;
 			double qv = vertexQuality(ot);
 			if (qv <= tolerance)
@@ -238,7 +236,7 @@ public class SmoothNodes2D
 				Vertex2D d = (Vertex2D) ot.destination();
 				do
 				{
-					ot.nextOrigin();
+					ot = ot.nextOrigin();
 					if (ot.hasAttributes(AbstractHalfEdge.OUTER))
 						continue;
 					double qt = triangleQuality(ot);
@@ -248,13 +246,13 @@ public class SmoothNodes2D
 				// Update neighbor vertex quality
 				do
 				{
-					ot.nextOrigin();
+					ot = ot.nextOrigin();
 					Vertex2D n = (Vertex2D) ot.destination();
 					if (!tree.contains(n))
 						continue;
-					ot.next();
+					ot = ot.next();
 					double qv = vertexQuality(ot);
-					ot.prev();
+					ot = ot.prev();
 					if (qv <= tolerance)
 						tree.update(n, qv);
 					else
@@ -270,14 +268,14 @@ public class SmoothNodes2D
 		}
 	}
 	
-	private boolean smoothNode(Vertex2D n, VirtualHalfEdge2D ot, double quality)
+	private boolean smoothNode(Vertex2D n, AbstractHalfEdge ot, double quality)
 	{
-		TriangleVH f = (TriangleVH) n.getLink();
-		ot.bind(f);
+		Triangle f = (Triangle) n.getLink();
+		ot = f.getAbstractHalfEdge(ot);
 		if (ot.destination() == n)
-			ot.next();
+			ot = ot.next();
 		else if (ot.apex() == n)
-			ot.prev();
+			ot = ot.prev();
 		assert ot.origin() == n;
 		double [] oldp2 = n.getUV();
 		
@@ -305,7 +303,7 @@ public class SmoothNodes2D
 		}
 		do
 		{
-			ot.nextOrigin();
+			ot = ot.nextOrigin();
 			assert !ot.hasAttributes(AbstractHalfEdge.OUTER);
 			Metric2D m1;
 			Vertex2D v = (Vertex2D) ot.destination();
@@ -353,7 +351,7 @@ public class SmoothNodes2D
 		KdTree kdTree = mesh.getKdTree();
 		do
 		{
-			ot.nextOrigin();
+			ot = ot.nextOrigin();
 			if (c.onLeft(kdTree, (Vertex2D) ot.destination(), (Vertex2D) ot.apex()) < 0L)
 				return false;
 		}
@@ -372,7 +370,7 @@ public class SmoothNodes2D
 		return true;
 	}
 	
-	private double triangleQuality(VirtualHalfEdge2D edge)
+	private double triangleQuality(AbstractHalfEdge edge)
 	{
 		Triangle f = edge.getTri();
 		assert f.vertex[0] != mesh.outerVertex && f.vertex[1] != mesh.outerVertex && f.vertex[2] != mesh.outerVertex : f;
@@ -405,7 +403,7 @@ public class SmoothNodes2D
 		return lmin / lmax;
 	}
 
-	private double vertexQuality(VirtualHalfEdge2D edge)
+	private double vertexQuality(AbstractHalfEdge edge)
 	{
 		Vertex2D d = (Vertex2D) edge.destination();
 		double ret = Double.MAX_VALUE;
