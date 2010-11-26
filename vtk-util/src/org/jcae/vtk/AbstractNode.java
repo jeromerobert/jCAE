@@ -29,6 +29,7 @@ import vtk.vtkCellArray;
 import vtk.vtkFloatArray;
 import vtk.vtkMapper;
 import vtk.vtkPainterPolyDataMapper;
+import vtk.vtkPointData;
 import vtk.vtkPoints;
 import vtk.vtkPolyData;
 import vtk.vtkPolyDataMapper;
@@ -455,8 +456,10 @@ public abstract class AbstractNode
 
 		data = algoNormals.GetOutput();
 		algoNormals.Delete();
-		vtkFloatArray computedNormals = (vtkFloatArray) data.GetPointData().GetNormals();
+		vtkPointData pointData = data.GetPointData();
+		vtkFloatArray computedNormals = (vtkFloatArray) pointData.GetNormals();		
 		float[] javaComputedNormals = computedNormals.GetJavaArray();
+		computedNormals.Delete();
 		float[] javaNormals = dataProvider.getNormals();
 		
 		// If the normals are not computed change them by the normals computed by the meshes
@@ -474,7 +477,8 @@ public abstract class AbstractNode
 		normals.SetNumberOfComponents(3);
 		normals.SetJavaArray(javaNormals);
 		
-		data.GetPointData().SetNormals(normals);
+		pointData.SetNormals(normals);
+		pointData.Delete();
 		normals.Delete();
 		//fireDataModified(data);
 	}

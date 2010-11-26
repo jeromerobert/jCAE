@@ -32,6 +32,7 @@ import vtk.vtkIdTypeArray;
 import vtk.vtkPainterPolyDataMapper;
 import vtk.vtkPolyData;
 import vtk.vtkPolyDataMapper;
+import vtk.vtkProperty;
 import vtk.vtkSelection;
 import vtk.vtkSelectionNode;
 
@@ -346,7 +347,9 @@ public class LeafNode extends AbstractNode
 		if (LOGGER.isLoggable(Level.FINEST))
 			LOGGER.log(Level.FINEST, "Attach color "+color+
 				" (opacity="+color.getAlpha()+") to actor @"+Integer.toHexString(actor.hashCode()));
-		Utils.vtkPropertySetColor(actor.GetProperty(), color);
+		vtkProperty p = actor.GetProperty();
+		Utils.vtkPropertySetColor(p, color);
+		p.Delete();
 	}
 
 	private void refreshHighlight()
@@ -365,7 +368,9 @@ public class LeafNode extends AbstractNode
 		else
 		{
 			// Reset original color
-			Utils.vtkPropertySetColor(actor.GetProperty(), color);
+			vtkProperty p = actor.GetProperty();
+			Utils.vtkPropertySetColor(p, color);
+			p.Delete();
 			getActorCustomiser().customiseActor(actor);
 			getMapperCustomiser().customiseMapper(mapper);
 			

@@ -29,6 +29,7 @@ import org.jcae.opencascade.jni.TopoDS_Face;
 import org.jcae.opencascade.jni.TopoDS_Shape;
 import org.jcae.opencascade.jni.TopoDS_Vertex;
 import vtk.vtkActor;
+import vtk.vtkProperty;
 
 /**
  *
@@ -151,7 +152,9 @@ public class ViewableCAD extends Viewable
 		{
 			public void customiseActor(vtkActor actor)
 			{
-				actor.GetProperty().SetPointSize(vertexSize);			
+				vtkProperty p = actor.GetProperty();
+				p.SetPointSize(vertexSize);
+				p.Delete();
 			}
 		});
 		
@@ -171,7 +174,9 @@ public class ViewableCAD extends Viewable
 		{
 			public void customiseActor(vtkActor actor)
 			{
-				actor.GetProperty().SetLineWidth(edgeSize);
+				vtkProperty p = actor.GetProperty();
+				p.SetLineWidth(edgeSize);
+				p.Delete();
 			}
 		});
 		
@@ -180,7 +185,9 @@ public class ViewableCAD extends Viewable
 		{
 			public void customiseActor(vtkActor actor)
 			{
-				actor.GetProperty().BackfaceCullingOn();
+				vtkProperty p = actor.GetProperty();
+				p.BackfaceCullingOn();
+				p.Delete();
 			}
 		});
 		

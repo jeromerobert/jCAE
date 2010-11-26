@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import vtk.vtkActor;
+import vtk.vtkCellData;
 import vtk.vtkExtractSelectedPolyDataIds;
 import vtk.vtkIdTypeArray;
 import vtk.vtkIntArray;
@@ -405,7 +406,10 @@ public class Node extends AbstractNode
 
 		vtkIntArray idsNative = new vtkIntArray();
 		idsNative.SetJavaArray(ids);
-		data.GetCellData().SetScalars(idsNative);
+		vtkCellData cellData = data.GetCellData();
+		cellData.SetScalars(idsNative);
+		cellData.Delete();
+		cellData = null;
 		idsNative.Delete();
 		idsNative = null;
 		timeStampData();

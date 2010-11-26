@@ -120,7 +120,10 @@ public class CameraManager
 		originAxes.GetActors(actors);
 		actors.InitTraversal();
 		for (vtkActor prop; (prop = actors.GetNextActor()) != null; )
+		{
 			prop.PickableOff();
+			prop.Delete();
+		}
 		actors.Delete();
 		actors = null;
 		
@@ -186,8 +189,10 @@ public class CameraManager
 		{
 			vtkTransform modelView = camera.GetViewTransformObject();
 			double[] point = modelView.TransformDoublePoint(0, 0, 0);
+			modelView.Delete();
 			zDistance = Math.abs(point[2]) * originAxesFactor;
 		}
+		camera.Delete();
 		originAxes.SetTotalLength(zDistance, zDistance, zDistance);
 	}
 

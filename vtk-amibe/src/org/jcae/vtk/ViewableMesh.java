@@ -93,9 +93,11 @@ public class ViewableMesh extends Viewable
 			public void customiseActor(vtkActor actor)
 			{
 				super.customiseActor(actor);
-				actor.GetProperty().EdgeVisibilityOn();
-				actor.GetProperty().LightingOff();
-				actor.GetProperty().SetEdgeColor(0.4, 0.4, 0.4);
+				vtkProperty p = actor.GetProperty();
+				p.EdgeVisibilityOn();
+				p.LightingOff();
+				p.SetEdgeColor(0.4, 0.4, 0.4);
+				p.Delete();
 			}
 		});
 		rootNode.setMapperCustomiser(MAPPER_CUSTOMIZER);
@@ -223,9 +225,11 @@ public class ViewableMesh extends Viewable
 			@Override
 			public void customiseActor(vtkActor actor)
 			{
-				actor.GetProperty().LightingOff();
-				actor.GetProperty().SetEdgeVisibility(wired);
-				actor.GetProperty().SetEdgeColor(0.2, 0.2, 0.2);
+				vtkProperty p = actor.GetProperty();
+				p.LightingOff();
+				p.SetEdgeVisibility(wired);
+				p.SetEdgeColor(0.2, 0.2, 0.2);
+				p.Delete();
 			}
 		});
 		rootNode.refresh();

@@ -33,6 +33,8 @@ import vtk.vtkActor;
 import vtk.vtkActorCollection;
 import vtk.vtkCanvas;
 import vtk.vtkIdTypeArray;
+import vtk.vtkInformation;
+import vtk.vtkInformationIntegerKey;
 import vtk.vtkIntArray;
 import vtk.vtkPlaneCollection;
 import vtk.vtkProp;
@@ -200,13 +202,17 @@ public class Scene implements AbstractNode.ActorListener
 			{
 				pickableActorBackup[j] = actor.GetPickable();
 				if (pickableActorBackup[j] == 0)
+				{
+					actor.Delete();
 					continue;
+				}
 				double[] bounds = actor.GetBounds();
 				BoundingBox box = new BoundingBox();
 				box.setLower(bounds[0], bounds[2], bounds[4]);
 				box.setUpper(bounds[1], bounds[3], bounds[5]);
 				if (!pickContext.intersect(box))
 					actor.PickableOff();
+				actor.Delete();
 			}
 			actors.Delete();
 		}
@@ -234,7 +240,10 @@ public class Scene implements AbstractNode.ActorListener
 			actors.InitTraversal();
 			int j = 0;
 			for (vtkActor actor; (actor = actors.GetNextActor()) != null; ++j)
+			{
 				actor.SetPickable(pickableActorBackup[j]);
+				actor.Delete();
+			}
 			actors.Delete();
 		}
 		
@@ -242,7 +251,11 @@ public class Scene implements AbstractNode.ActorListener
 		for (int i = 0; i < selection.GetNumberOfNodes(); ++i)
 		{
 			vtkSelectionNode child = selection.GetNode(i);
-			int IDActor = child.GetProperties().Get(child.PROP_ID());
+			vtkInformation info = child.GetProperties();
+			vtkInformationIntegerKey propID = child.PROP_ID();
+			int IDActor = info.Get(propID);
+			propID.Delete();
+			info.Delete();
 			vtkProp prop = selector.GetActorFromId(IDActor);
 
 			if (prop != null)
@@ -252,19 +265,25 @@ public class Scene implements AbstractNode.ActorListener
 				if (node != null)
 				{
 					vtkIdTypeArray ids = (vtkIdTypeArray) child.GetSelectionList();
+					child.Delete();
+					child = null;
 					int[] values = Utils.getValues(ids);
+					ids.Delete();
 					if(pickContext.isOneCell() && values.length > 1)
 						values = new int[]{values[0]};
 
 					node.setCellSelection(pickContext, values);
 					LOGGER.finest("Actor picked id: "+prop.GetVTKId());
 					LOGGER.finest("Picked node: "+node);
+					prop.Delete();
 					if(pickContext.isOneCell() && values.length > 0)
 						break;
 				}
 			}
 			else
 			{
+				child.Delete();
+				child = null;
 				// FIXME: For unknown reason, garbage is sometimes
 				// appended to real data. Exit loop when an unknown
 				// actor is found, further processing is useless.
