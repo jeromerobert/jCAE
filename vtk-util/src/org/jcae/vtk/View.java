@@ -25,6 +25,7 @@ import java.awt.AWTEvent;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -46,7 +47,12 @@ public class View extends Canvas {
 	private Point releasePosition;
 	private boolean interactive = true;
 	private boolean appendSelection;
-	
+
+	static
+	{
+		Utils.setVTKLogFile(new File(System.getProperty("user.home"),
+			".vtk.log").getPath());
+	}
 	public enum MouseMode
 	{
 		POINT_SELECTION,

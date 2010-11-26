@@ -47,12 +47,12 @@ import vtk.vtkCellArray;
 import vtk.vtkConeSource;
 import vtk.vtkDataArray;
 import vtk.vtkDoubleArray;
+import vtk.vtkFileOutputWindow;
 import vtk.vtkFloatArray;
 import vtk.vtkIdTypeArray;
-import vtk.vtkInformationIntegerKey;
 import vtk.vtkIntArray;
+import vtk.vtkOutputWindow;
 import vtk.vtkPNGWriter;
-import vtk.vtkPainter;
 import vtk.vtkPlane;
 import vtk.vtkPlaneCollection;
 import vtk.vtkPoints;
@@ -907,4 +907,16 @@ public class Utils
 			toReturn[i] = array[i];
 		return toReturn;
 	}
+
+    /** Redirect VTK log to a file */
+	public static void setVTKLogFile(String fileName)
+    {        
+        vtkFileOutputWindow output = new vtkFileOutputWindow();
+        output.SetFileName(fileName);
+        vtkOutputWindow w = new vtkOutputWindow();
+        w.SetInstance(output);
+        output.Delete();
+        w.Delete();
+    }
+
 }
