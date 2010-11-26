@@ -21,10 +21,7 @@
 
 package org.jcae.mesh.amibe.patch;
 
-import org.jcae.mesh.cad.CADGeomSurface;
-import org.jcae.mesh.amibe.ds.MeshParameters;
 import org.jcae.mesh.amibe.metrics.Matrix2D;
-import org.jcae.mesh.amibe.metrics.PoolWorkVectors;
 
 import java.util.logging.Logger;
 
@@ -51,41 +48,20 @@ public class MetricOnSurface implements Metric2D
 	//  First fundamental form
 	private double E, F, G;
 
-	/**
-	 * Creates a <code>MetricOnSurface</code> instance at a given point.
-	 *
-	 * @param surf  geometrical surface
-	 * @param mp    mesh parameters
-	 */
-	MetricOnSurface(CADGeomSurface surf, MeshParameters mp, PoolWorkVectors temp)
-	{
-		double discr = mp.getLength();
-		assert discr > 0;
-		Matrix2D m2d0 = MetricBuilder.computeIsotropic(surf, discr, temp);
-		Matrix2D m2d1 = MetricBuilder.computeGeometric(surf, mp, temp);
-		if (m2d1 != null)
-		{
-			//  The curvature metric is defined, so we can compute
-			//  its intersection with isotropic m2d0.
-			m2d0.makeSymmetric();
-			m2d1.makeSymmetric();
-			m2d0.intersection(m2d1).getValues(temp.tt22);
-		}
-		else
-			m2d0.getValues(temp.tt22);
-
-		E = temp.tt22[0][0];
-		F = 0.5 * (temp.tt22[0][1] + temp.tt22[1][0]);
-		G = temp.tt22[1][1];
-	}
 	
 	public MetricOnSurface()
 	{
-		E = 1.0;
-		F = 0.0;
-		G = 1.0;
+		this(1.0, 0.0, 1.0);
 	}
-	
+
+	// Called by MetricBuilder
+	MetricOnSurface(double E, double F, double G)
+	{
+		this.E = E;
+		this.F = F;
+		this.G = G;
+	}
+
 	/**
 	 * Return the determinant of this matrix.
 	 *
@@ -114,11 +90,7 @@ public class MetricOnSurface implements Metric2D
 		double d = det();
 		if (d == 0.0)
 			return null;
-		MetricOnSurface ret = new MetricOnSurface();
-		ret.E = G / d;
-		ret.G = E / d;
-		ret.F = - F / d;
-		return ret;
+		return new MetricOnSurface(G/d, -F/d, E/d) ;
 	}
 
 	/**

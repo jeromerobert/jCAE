@@ -438,7 +438,8 @@ public class Mesh2D extends Mesh
 			{
 				double uv[] = pt.getUV();
 				surface.setParameter(uv[0], uv[1]);
-				m2 = new MetricOnSurface(surface, meshParameters, temp);
+				MetricBuilder mb = new MetricBuilder(surface, meshParameters, temp);
+				m2 = mb.computeMetricOnSurface();
 			}
 			v2.metric = m2;
 		}

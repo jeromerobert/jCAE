@@ -79,30 +79,68 @@ import java.util.logging.Logger;
 class MetricBuilder
 {
 	private static final Logger LOGGER=Logger.getLogger(MetricBuilder.class.getName());
-	
-	static Matrix2D computeIsotropic(CADGeomSurface surf, double length, PoolWorkVectors temp)
+
+	private final PoolWorkVectors temp;
+	private final CADGeomSurface surf;
+	private final MeshParameters mp;
+
+	MetricBuilder(CADGeomSurface surf, MeshParameters mp, PoolWorkVectors temp)
 	{
+		this.surf = surf;
+		this.mp = mp;
+		this.temp = temp;
+	}
+
+	/**
+	 * Creates a <code>MetricOnSurface</code> instance at a given point.
+	 *
+	 * @param surf  geometrical surface
+	 * @param mp    mesh parameters
+	 */
+	MetricOnSurface computeMetricOnSurface()
+	{
+		Matrix2D m2d0 = computeIsotropic();
+		Matrix2D m2d1 = computeGeometric();
+		if (m2d1 != null)
+		{
+			//  The curvature metric is defined, so we can compute
+			//  its intersection with isotropic m2d0.
+			m2d0.makeSymmetric();
+			m2d1.makeSymmetric();
+			m2d0.intersection(m2d1).getValues(temp.tt22);
+		}
+		else
+			m2d0.getValues(temp.tt22);
+
+		double E = temp.tt22[0][0];
+		double F = 0.5 * (temp.tt22[0][1] + temp.tt22[1][0]);
+		double G = temp.tt22[1][1];
+		return new MetricOnSurface(E, F, G);
+	}
+
+	private Matrix2D computeIsotropic()
+	{
+		double length = mp.getLength();
 		double diag = 1.0/length/length;
 		Matrix3D iso = new Matrix3D(diag, diag, diag);
 		return restrict2D(iso, surf, temp);
 	}
 
-	static Matrix2D computeGeometric(CADGeomSurface surf, MeshParameters mp, PoolWorkVectors temp)
+	private Matrix2D computeGeometric()
 	{
 		if (!mp.hasDeflection())
 			return null;
 		Matrix3D m;
 		if (mp.hasRelativeDeflection())
-			m = getRelativeDeflectionMetric(surf, temp, mp.isIsotropic(), mp.getDeflection(), mp.getLength());
+			m = getRelativeDeflectionMetric();
 		else
-			m = getAbsoluteDeflectionMetric(surf, temp, mp.isIsotropic(), mp.getDeflection());
+			m = getAbsoluteDeflectionMetric();
 		if (m == null)
 			return null;
 		return restrict2D(m, surf, temp);
 	}
 
-	private static Matrix3D getRelativeDeflectionMetric(CADGeomSurface surf,
-		PoolWorkVectors temp, boolean isotropic, double deflection, double edgeLength)
+	private Matrix3D getRelativeDeflectionMetric()
 	{
 		double cmin = Math.abs(surf.minCurvature());
 		double cmax = Math.abs(surf.maxCurvature());
@@ -134,7 +172,7 @@ class MetricBuilder
 		}
 		Matrix3D.prodVect3D(dcurvmax, dcurvmin, temp.t3_2);
 		Matrix3D A = new Matrix3D(dcurvmax, dcurvmin, temp.t3_2);
-		double epsilon = deflection;
+		double epsilon = mp.getDeflection();
 		if (epsilon > 1.0)
 			epsilon = 1.0;
 		//  In org.jcae.mesh.amibe.algos2d.Insertion, mean lengths are
@@ -143,7 +181,7 @@ class MetricBuilder
 		double alpha2 = 4.0 * epsilon * (2.0 - epsilon) / 2.0;
 		double diag = cmax*cmax / alpha2;
 		Matrix3D param;
-		if (isotropic)
+		if (mp.isIsotropic())
 			param = new Matrix3D(diag, diag, diag);
 		else
 		{
@@ -151,7 +189,7 @@ class MetricBuilder
 			if (epsilon > 1.0)
 				epsilon = 1.0;
 			alpha2 = 4.0 * epsilon * (2.0 - epsilon) / 2.0;
-			param = new Matrix3D(diag, cmin*cmin / alpha2, 1.0/edgeLength/edgeLength);
+			param = new Matrix3D(diag, cmin*cmin / alpha2, 1.0/mp.getLength()/mp.getLength());
 		}
 		A.transp();
 		Matrix3D tempM = param.multL(A);
@@ -159,8 +197,7 @@ class MetricBuilder
 		return tempM.multR(A);
 	}
 	
-	private static Matrix3D getAbsoluteDeflectionMetric(CADGeomSurface surf,
-		PoolWorkVectors temp, boolean isotropic, double deflection)
+	private Matrix3D getAbsoluteDeflectionMetric()
 	{
 		double cmin = Math.abs(surf.minCurvature());
 		double cmax = Math.abs(surf.maxCurvature());
@@ -174,6 +211,7 @@ class MetricBuilder
 			LOGGER.fine("Null curvature");
 			return null;
 		}
+		double deflection = mp.getDeflection();
 		if (deflection * cmax >= 1.0 || deflection * cmin >= 1.0)
 		{
 			LOGGER.fine("Curvature too large");
@@ -204,7 +242,7 @@ class MetricBuilder
 		double alpha2 = 4.0 * epsilon * (2.0 - epsilon) / 2.0;
 		double diag = cmax*cmax / alpha2;
 		Matrix3D param;
-		if (isotropic)
+		if (mp.isIsotropic())
 			param = new Matrix3D(diag, diag, diag);
 		else
 		{
