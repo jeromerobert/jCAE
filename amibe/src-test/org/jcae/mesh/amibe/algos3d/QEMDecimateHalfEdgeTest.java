@@ -385,7 +385,7 @@ public class QEMDecimateHalfEdgeTest
 		mesh.buildAdjacency();
 		assertTrue("Mesh is not valid", mesh.isValid());
 
-		int expected = 1;
+		int expected = 2;
 // try { org.jcae.mesh.xmldata.MeshWriter.writeObject3D(mesh, "XXX-0", null); } catch (java.io.IOException ex) { ex.printStackTrace(); throw new RuntimeException(ex); }
 		new QEMDecimateHalfEdge(mesh, options).compute();
 		assertTrue("Mesh is not valid", mesh.isValid());
