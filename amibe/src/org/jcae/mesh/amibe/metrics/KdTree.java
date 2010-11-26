@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2004,2005, by EADS CRC
-    Copyright (C) 2007,2008,2009, by EADS France
+    Copyright (C) 2007,2008,2009,2010, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -207,7 +207,12 @@ public class KdTree<T extends Location>
 	 * Conversion between double and integer coordinates.
 	 */
 	private final double [] x0;
-	
+
+	/**
+	 * Methods only available in 2D.
+	 */
+	public final K2DInterface k2D;
+
 	/**
 	 * Dummy constructor.  This instance must be properly initialised by calling
 	 * {@link #setup} before putting elements into it.
@@ -218,6 +223,10 @@ public class KdTree<T extends Location>
 	{
 		BUCKETSIZE = 10;
 		dimension = d;
+		if (d == 2)
+			k2D = new K2D();
+		else
+			k2D = new K2DInvalid();
 		nrSub = 1 << dimension;
 		x0 = new double[dimension+1];
 		root = new Cell();
@@ -243,6 +252,10 @@ public class KdTree<T extends Location>
 	{
 		BUCKETSIZE = bucketsize;
 		dimension = bbox.length / 2;
+		if (dimension == 2)
+			k2D = new K2D();
+		else
+			k2D = new K2DInvalid();
 		nrSub = 1 << dimension;
 		x0 = new double[dimension+1];
 		root = new Cell();
@@ -297,7 +310,7 @@ public class KdTree<T extends Location>
 	 * @param p  double coordinates
 	 * @param i  integer coordinates
 	 */
-	public final void double2int(double [] p, int [] i)
+	private void double2int(double [] p, int [] i)
 	{
 		for (int k = 0; k < dimension; k++)
 			i[k] = (int) ((p[k] - x0[k]) * x0[dimension]);
@@ -313,7 +326,7 @@ public class KdTree<T extends Location>
 		for (int k = 0; k < dimension; k++)
 			p[k] = x0[k] + i[k] / x0[dimension];
 	}
-	
+
 	/**
 	 * Return the coordinates of the center of the grid.
 	 * @return the coordinates of the center of the grid.
@@ -914,5 +927,62 @@ public class KdTree<T extends Location>
 		}
 		return ret;
 	}
-	
+
+	// Methods only available in 2D
+	public interface K2DInterface
+	{
+		public long onLeft(double[] p0, double[] p1, double[] p2);
+		public long distance2(double[] p0, double[] p1);
+		public long distance2cached(double[] p1);
+	}
+	private final class K2DInvalid implements K2DInterface
+	{
+		public long onLeft(double[] p0, double[] p1, double[] p2) {
+			throw new RuntimeException("Method onLeft only available in 2D");
+		}
+
+		public long distance2(double[] p0, double[] p1) {
+			throw new RuntimeException("Method distance2 only available in 2D");
+		}
+
+		public long distance2cached(double[] p1) {
+			throw new RuntimeException("Method distance2cached only available in 2D");
+		}
+
+	}
+	private final class K2D implements K2DInterface
+	{
+		// Temporary arrays
+		private final int[] i0 = new int[2];
+		private final int[] i1 = new int[2];
+		private final int[] i2 = new int[2];
+
+		public final long onLeft(double[] p0, double[] p1, double[] p2)
+		{
+			double2int(p0, i0);
+			double2int(p1, i1);
+			double2int(p2, i2);
+			long x01 = i1[0] - i0[0];
+			long y01 = i1[1] - i0[1];
+			long x02 = i2[0] - i0[0];
+			long y02 = i2[1] - i0[1];
+			return x01 * y02 - x02 * y01;
+		}
+
+		public final long distance2(double[] p0, double[] p1)
+		{
+			double2int(p0, i0);
+			double2int(p1, i1);
+			long dx = i1[0] - i0[0];
+			long dy = i1[1] - i0[1];
+			return dx * dx + dy * dy;
+		}
+		public final long distance2cached(double[] p1)
+		{
+			double2int(p1, i1);
+			long dx = i1[0] - i0[0];
+			long dy = i1[1] - i0[1];
+			return dx * dx + dy * dy;
+		}
+	}
 }

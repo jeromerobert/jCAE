@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2004,2005,2006, by EADS CRC
-    Copyright (C) 2007,2008,2009, by EADS France
+    Copyright (C) 2007,2008,2009,2010, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -48,10 +48,6 @@ public class Vertex2D extends Vertex
 	private static final long serialVersionUID = -6099275818186028566L;
 	private static final Logger logger=Logger.getLogger(Vertex2D.class.getName());
 	private static final Vertex2D circumcenter = new Vertex2D(null, 0.0, 0.0);
-	
-	//  These 2 integer arrays are temporary workspaces
-	private static final int [] i0 = new int[2];
-	private static final int [] i1 = new int[2];
 
 	/**
 	 * Metric at this Vertex.  It is managed by Mesh2D.
@@ -274,15 +270,8 @@ public class Vertex2D extends Vertex
 	 */
 	public final long onLeft(KdTree kdTree, Vertex2D v1, Vertex2D v2)
 	{
-		kdTree.double2int(param, i0);
-		kdTree.double2int(v1.param, i1);
-		long x01 = i1[0] - i0[0];
-		long y01 = i1[1] - i0[1];
-		kdTree.double2int(v2.param, i1);
-		long x02 = i1[0] - i0[0];
-		long y02 = i1[1] - i0[1];
-		return x01 * y02 - x02 * y01;
-	}
+		return kdTree.k2D.onLeft(param, v1.param, v2.param);
+ 	}
 	
 	//  Current vertex is symmetric apical vertex
 	final boolean inCircle2D(Mesh2D mesh, VirtualHalfEdge2D ot)
@@ -466,18 +455,11 @@ public class Vertex2D extends Vertex
 	
 	private long distance2(KdTree kdTree, Vertex2D that)
 	{
-		kdTree.double2int(param, i0);
-		kdTree.double2int(that.param, i1);
-		long dx = i0[0] - i1[0];
-		long dy = i0[1] - i1[1];
-		return dx * dx + dy * dy;
+		return kdTree.k2D.distance2(param, that.param);
 	}
 	private long distance2cached(KdTree kdTree, Vertex2D that)
 	{
-		kdTree.double2int(that.param, i1);
-		long dx = i0[0] - i1[0];
-		long dy = i0[1] - i1[1];
-		return dx * dx + dy * dy;
+		return kdTree.k2D.distance2cached(that.param);
 	}
 	
 	@Override
