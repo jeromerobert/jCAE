@@ -278,11 +278,14 @@ public class MeshReader
 			}		
 			ifrT.close();
 
-			IntFileReader ifrB = subMesh.getBeams();
 			int numberOfBeams = subMesh.getNumberOfBeams();
-			for (int i = 0; i < numberOfBeams; i++)
-				mesh.addBeam(nodelist[ifrB.get()], nodelist[ifrB.get()], 0);
-			ifrB.close();
+			if (numberOfBeams > 0)
+			{
+				IntFileReader ifrB = subMesh.getBeams();
+				for (int i = 0; i < numberOfBeams; i++)
+					mesh.addBeam(nodelist[ifrB.get()], nodelist[ifrB.get()], 0);
+				ifrB.close();
+			}
 
 			int i = 1;
 			for (AmibeReader.Group g : subMesh.getGroups()) {
