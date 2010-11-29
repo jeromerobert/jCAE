@@ -98,7 +98,6 @@ public class BugMemory
 				if(ob != null && ob.GetReferenceCount() <= 1)
 				{
 					System.out.println("coucou la voila");
-					//ob.Delete();
 				}
 			}*/
 		}

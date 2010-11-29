@@ -142,7 +142,6 @@ public class View extends Canvas {
 					pressPosition, releasePosition);
 				for(Viewable viewable : getViewables())
 					viewable.setClippingPlanes(planes);
-				planes.Delete();
 				setMouseMode(MouseMode.POINT_SELECTION);
 				RenderSecured();
 				break;
@@ -234,13 +233,11 @@ public class View extends Canvas {
 		{
 			vtkInteractorStyleRubberBand3D it = new vtkInteractorStyleRubberBand3D();
 			getIren().SetInteractorStyle(it);
-			it.Delete();
 		}
 		else if (!actualIsPoint && futureIsPoint)
 		{
 			vtkInteractorStyleTrackballCamera it = new vtkInteractorStyleTrackballCamera();
 			getIren().SetInteractorStyle(it);
-			it.Delete();
 		}
 
 		mouseMode = mode;

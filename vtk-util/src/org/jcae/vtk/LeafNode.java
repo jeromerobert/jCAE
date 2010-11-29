@@ -347,9 +347,7 @@ public class LeafNode extends AbstractNode
 		if (LOGGER.isLoggable(Level.FINEST))
 			LOGGER.log(Level.FINEST, "Attach color "+color+
 				" (opacity="+color.getAlpha()+") to actor @"+Integer.toHexString(actor.hashCode()));
-		vtkProperty p = actor.GetProperty();
-		Utils.vtkPropertySetColor(p, color);
-		p.Delete();
+		Utils.vtkPropertySetColor(actor.GetProperty(), color);
 	}
 
 	private void refreshHighlight()
@@ -370,7 +368,6 @@ public class LeafNode extends AbstractNode
 			// Reset original color
 			vtkProperty p = actor.GetProperty();
 			Utils.vtkPropertySetColor(p, color);
-			p.Delete();
 			getActorCustomiser().customiseActor(actor);
 			getMapperCustomiser().customiseMapper(mapper);
 			
@@ -414,19 +411,15 @@ public class LeafNode extends AbstractNode
 		vtkIdTypeArray arr = Utils.setValues(selection);
 		selectionNode.SetSelectionList(arr);
 		sel.AddNode(selectionNode);
-		selectionNode.Delete();
 		
 		vtkExtractSelectedPolyDataIds selFilter = new vtkExtractSelectedPolyDataIds();
 		selFilter.ReleaseDataFlagOn();
 		selFilter.SetInput(1, sel);
-		sel.Delete();
 		selFilter.SetInput(0, data);
 
 		vtkPolyData dataFiltered = selFilter.GetOutput();
 		selFilter.Update();		
 		selectionMapper.SetInput(dataFiltered);
-		selFilter.Delete();
-		dataFiltered.Delete();
 	}
 
 	@Override

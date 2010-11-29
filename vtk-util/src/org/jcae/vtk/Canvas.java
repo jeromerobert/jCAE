@@ -72,7 +72,6 @@ public class Canvas extends vtkCanvas
 				new vtkInteractorStyleTrackballCamera();
 		style.AutoAdjustCameraClippingRangeOn();
 		getIren().SetInteractorStyle(style);
-		style.Delete();
 		if(!DISABLE_2D_OPT)
 			rw.AddObserver("EndEvent", this, "endEvent");
 	}
@@ -254,7 +253,6 @@ public class Canvas extends vtkCanvas
 			mapper = listOfActors.GetNextActor().GetMapper();
 			mapper.SetImmediateModeRendering(Utils.booleanToInt(mode));
 		}
-		listOfActors.Delete();
 	}
 
 	@Override

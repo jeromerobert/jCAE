@@ -45,7 +45,6 @@ public class BugWeakRef
 			sample.SetSampleDimensions(30, 30, 30);
 			sample.SetImplicitFunction(quadric);
 			sample.GetImplicitFunction();
-			quadric.Delete();
 		}
 	}
 }

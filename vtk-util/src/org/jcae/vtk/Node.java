@@ -408,9 +408,7 @@ public class Node extends AbstractNode
 		idsNative.SetJavaArray(ids);
 		vtkCellData cellData = data.GetCellData();
 		cellData.SetScalars(idsNative);
-		cellData.Delete();
 		cellData = null;
-		idsNative.Delete();
 		idsNative = null;
 		timeStampData();
 
@@ -422,7 +420,6 @@ public class Node extends AbstractNode
 			/*vtkInformation i = mapper.GetInformation();
 			i.Set(Utils.CONSERVE_MEMORY, 1);
 			i.Set(Utils.HIGH_QUALITY, 0);
-			i.Delete();
 			vtkDefaultPainter vdp = (vtkDefaultPainter) mapper.GetPainter();
 			System.out.println(vdp.GetDisplayListPainter().GetInformation());*/
 		}
@@ -463,7 +460,6 @@ public class Node extends AbstractNode
 			table.SetTableValue(i, (double) color.getRed() / 255., (double) color.getGreen() / 255., (double) color.getBlue() / 255., (double) color.getAlpha() / 255.);
 		}
 		mapper.SetLookupTable(table);
-		table.Delete();
 		mapper.UseLookupTableScalarRangeOn();
 		mapper.SetScalarModeToUseCellData();
 
@@ -579,7 +575,6 @@ public class Node extends AbstractNode
 		selectionMapper.ScalarVisibilityOff();
 		vtkPolyData d = selectInto(data, selection.toNativeArray());
 		selectionMapper.SetInput(d);
-		d.Delete();
 		selectionActor.SetMapper(selectionMapper);
 		getSelectionMapperCustomiser().customiseMapper(selectionMapper);
 		
@@ -639,18 +634,14 @@ public class Node extends AbstractNode
 		// list of cells to be selected
 		vtkIdTypeArray arr = Utils.setValues(cellID);
 		selectionNode.SetSelectionList(arr);
-		arr.Delete();
 		selection.AddNode(selectionNode);
-		selectionNode.Delete();
 		vtkExtractSelectedPolyDataIds selFilter = new vtkExtractSelectedPolyDataIds();
 		selFilter.ReleaseDataFlagOn();
 		selFilter.SetInput(1, selection);
-		selection.Delete();
 		selFilter.SetInput(0, input);
 
 		vtkPolyData dataFiltered = selFilter.GetOutput();
 		selFilter.Update();
-		selFilter.Delete();
 		return dataFiltered;
 	}
 

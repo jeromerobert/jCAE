@@ -154,7 +154,6 @@ public class ViewableCAD extends Viewable
 			{
 				vtkProperty p = actor.GetProperty();
 				p.SetPointSize(vertexSize);
-				p.Delete();
 			}
 		});
 		
@@ -176,7 +175,6 @@ public class ViewableCAD extends Viewable
 			{
 				vtkProperty p = actor.GetProperty();
 				p.SetLineWidth(edgeSize);
-				p.Delete();
 			}
 		});
 		
@@ -187,7 +185,6 @@ public class ViewableCAD extends Viewable
 			{
 				vtkProperty p = actor.GetProperty();
 				p.BackfaceCullingOn();
-				p.Delete();
 			}
 		});
 		

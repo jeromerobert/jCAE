@@ -80,7 +80,6 @@ public abstract class Viewable extends MultiCanvas
 		{
 			vtkProperty p = actor.GetProperty();
 			Utils.vtkPropertySetColor(p, selectionColor);
-			p.Delete();
 		}
 	}
 
@@ -348,7 +347,6 @@ public abstract class Viewable extends MultiCanvas
 		// Send empty plane collection to removeCanvas the older planes
 		vtkPlaneCollection empty = new vtkPlaneCollection();
 		setClippingPlanes(empty);
-		empty.Delete();
 		render();
 	}
 

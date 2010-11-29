@@ -60,7 +60,6 @@ public class AmibeOverlayToMesh extends Viewable
 			public void customiseActor(vtkActor actor) {
 				vtkProperty p = actor.GetProperty();
 				p.SetLineWidth(5.0);
-				p.Delete();
 			}
 		});
 		new LeafNode(rootNode, dataProvider, color);

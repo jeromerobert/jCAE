@@ -355,7 +355,6 @@ public class Utils
 			plane.SetNormal(n.x, n.y, n.z);
 			plane.SetOrigin(p1);
 			planes.AddItem(plane);
-			plane.Delete();
 		}
 		
 		return planes;
@@ -564,8 +563,6 @@ public class Utils
 				w2i.Update();
 				canvas.unlock();
 				writer.Write();
-				writer.Delete();
-				w2i.Delete();
 			}
 		});
 	}
@@ -690,7 +687,6 @@ public class Utils
 		d.SetJavaArray(points);
 		d.SetNumberOfComponents(3);
 		vtkPoints.SetData(d);
-		d.Delete();
 		d = null;
 		return vtkPoints;
 	}
@@ -703,7 +699,6 @@ public class Utils
 		d.SetJavaArray(points);
 		d.SetNumberOfComponents(3);
 		vtkPoints.SetData(d);
-		d.Delete();
 		d = null;
 		return vtkPoints;
 	}
@@ -827,8 +822,6 @@ public class Utils
 		intArray.SetJavaArray(cells);
 		array.DeepCopy(intArray);
 		vtkCells.SetCells(cellNumber, array);
-		array.Delete();
-		intArray.Delete();
 		return vtkCells;
 	}
 
@@ -850,7 +843,6 @@ public class Utils
 		vtkIntArray iarray = new vtkIntArray();
 		iarray.DeepCopy(idarray);
 		int[] toReturn = iarray.GetJavaArray();
-		iarray.Delete();
 		return toReturn;
 	}
 
@@ -860,7 +852,6 @@ public class Utils
 		iarray.SetJavaArray(values);
 		vtkIdTypeArray array = new vtkIdTypeArray();
 		array.DeepCopy(iarray);
-		iarray.Delete();
 		return array;
 	}
 
@@ -868,7 +859,6 @@ public class Utils
 	{
 		vtkIdTypeArray data = array.GetData();
 		int[] toReturn = getValues(data);
-		data.Delete();
 		return toReturn;
 	}
 
@@ -877,7 +867,6 @@ public class Utils
 		vtkDataArray array = points.GetData();
 		//TODO not sure it's always a float[] array
 		float[] toReturn = ((vtkFloatArray) array).GetJavaArray();
-		array.Delete();
 		return toReturn;
 	}
 
@@ -913,10 +902,7 @@ public class Utils
     {        
         vtkFileOutputWindow output = new vtkFileOutputWindow();
         output.SetFileName(fileName);
-        vtkOutputWindow w = new vtkOutputWindow();
-        w.SetInstance(output);
-        output.Delete();
-        w.Delete();
+        new vtkOutputWindow().SetInstance(output);
     }
 
 }

@@ -122,9 +122,7 @@ public class CameraManager
 		for (vtkActor prop; (prop = actors.GetNextActor()) != null; )
 		{
 			prop.PickableOff();
-			prop.Delete();
 		}
-		actors.Delete();
 		actors = null;
 		
 		marker = new vtkOrientationMarkerWidget();
@@ -189,10 +187,8 @@ public class CameraManager
 		{
 			vtkTransform modelView = camera.GetViewTransformObject();
 			double[] point = modelView.TransformDoublePoint(0, 0, 0);
-			modelView.Delete();
 			zDistance = Math.abs(point[2]) * originAxesFactor;
 		}
-		camera.Delete();
 		originAxes.SetTotalLength(zDistance, zDistance, zDistance);
 	}
 
@@ -321,11 +317,9 @@ public class CameraManager
 		canvas.lock();
 		vtkCamera current = renderer.GetActiveCamera();
 		int parallel = current.GetParallelProjection();
-		current.Delete();
 		vtkCamera c = copy(defaultCameras[orientation.ordinal()]);
 		c.SetParallelProjection(parallel);
 		renderer.SetActiveCamera(c);
-		c.Delete();
 		canvas.unlock();		
 		refresh();
 	}
@@ -374,13 +368,11 @@ public class CameraManager
 			actors[k].SetPickable(1);
 			k++;
 		}
-		vtkActors.Delete();
 
 		vtkCellPicker picker = new vtkCellPicker();
 		canvas.lock();
 		picker.Pick(pickPosition.getX(), pickPosition.getY(), 0., canvas.GetRenderer());
 		double[] position = picker.GetPickPosition();
-		picker.Delete();
 		canvas.GetRenderer().GetActiveCamera().SetFocalPoint(position);
 		canvas.getIren().GetInteractorStyle();
 		canvas.RenderSecured();
@@ -408,7 +400,6 @@ public class CameraManager
 	{
 		vtkCamera c = renderer.GetActiveCamera();
 		boolean toReturn = c.GetParallelProjection() != 0;
-		c.Delete();
 		return toReturn;
 	}
 
@@ -416,6 +407,5 @@ public class CameraManager
 	{
 		vtkCamera c = renderer.GetActiveCamera();
 		c.SetParallelProjection(b ? 1 : 0);
-		c.Delete();
 	}
 }

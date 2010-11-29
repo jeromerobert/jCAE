@@ -97,7 +97,6 @@ public class ViewableMesh extends Viewable
 				p.EdgeVisibilityOn();
 				p.LightingOff();
 				p.SetEdgeColor(0.4, 0.4, 0.4);
-				p.Delete();
 			}
 		});
 		rootNode.setMapperCustomiser(MAPPER_CUSTOMIZER);
@@ -184,7 +183,6 @@ public class ViewableMesh extends Viewable
 						vtkProperty p = actor.GetProperty();
 						Utils.vtkPropertySetColor(p, fgn.getColor());
 						p.SetLineWidth(3.0);
-						p.Delete();
 					}
 				});
 				fgn.setManager(true);
@@ -229,7 +227,6 @@ public class ViewableMesh extends Viewable
 				p.LightingOff();
 				p.SetEdgeVisibility(wired);
 				p.SetEdgeColor(0.2, 0.2, 0.2);
-				p.Delete();
 			}
 		});
 		rootNode.refresh();

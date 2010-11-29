@@ -43,15 +43,12 @@ public class BillBoard extends vtkTexturedActor2D
 		vtkPNGReader reader = new vtkPNGReader();
 		reader.SetFileName(texturePath);
 		vtkImageData image = reader.GetOutput();
-		reader.Delete();
 		vtkTexture texture = new vtkTexture();
 		texture.SetInput(image);
 		image.Update();
 		int[] dimensions = image.GetDimensions();
-		image.Delete();
 
 		this.SetTexture(texture);
-		texture.Delete();
 		construct(dimensions[0], dimensions[1], posX, posY, posZ);
 	}
 
@@ -79,11 +76,9 @@ public class BillBoard extends vtkTexturedActor2D
 		vtkPolyData data = new vtkPolyData();
 		vtkPoints p = Utils.createPoints(points);
 		data.SetPoints(p);
-		p.Delete();
 
 		vtkCellArray polys = Utils.createCells(1, cells);
 		data.SetPolys(polys);
-		polys.Delete();
 		
 		float[] tCoords =
 		{
@@ -99,25 +94,20 @@ public class BillBoard extends vtkTexturedActor2D
 		nativeCoords.SetName("TextureCoordinates");
 
 		data.GetPointData().SetTCoords(nativeCoords);
-		nativeCoords.Delete();
 
 		vtkCoordinate pos = new vtkCoordinate();
 		pos.SetCoordinateSystemToWorld();
 		pos.SetValue(posX, posY, posZ);
 		vtkCoordinate coordView = new vtkCoordinate();
 		coordView.SetReferenceCoordinate(pos);
-		pos.Delete();
 		coordView.SetCoordinateSystemToViewport();
 
 		vtkPolyDataMapper2D mapper = new vtkPolyDataMapper2D();
 		mapper.SetInput(data);
-		data.Delete();
 		mapper.SetTransformCoordinate(coordView);
 
-		coordView.Delete();
 
 		this.SetMapper(mapper);
-		mapper.Delete();
 
 	}
 

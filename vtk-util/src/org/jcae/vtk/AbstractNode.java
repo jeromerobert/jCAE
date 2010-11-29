@@ -406,29 +406,18 @@ public abstract class AbstractNode
 	
 	protected void createData(LeafNode.DataProvider dataProvider)
 	{
-		if(data != null)
-			data.Delete();
-		
 		data = new vtkPolyData();
-
-		vtkPoints p = Utils.createPoints(dataProvider.getNodes());
-		data.SetPoints(p);
-		p.Delete();
-		p = null;
+		data.SetPoints(Utils.createPoints(dataProvider.getNodes()));
 
 		vtkCellArray cells = Utils.createCells(dataProvider.getNbrOfVertices(),
 			dataProvider.getVertices());
 		data.SetVerts(cells);		
-		cells.Delete();
 		
 		cells=Utils.createCells(dataProvider.getNbrOfLines(), dataProvider.getLines());
 		data.SetLines(cells);
-		cells.Delete();
 
 		cells=Utils.createCells(dataProvider.getNbrOfPolys(), dataProvider.getPolys());
 		data.SetPolys(cells);
-		cells.Delete();
-		cells = null;
 				
 		if(LOGGER.isLoggable(Level.FINEST))
 		{
@@ -447,7 +436,6 @@ public abstract class AbstractNode
 		// Compute normals that are not given
 		vtkPolyDataNormals algoNormals = new vtkPolyDataNormals();
 		algoNormals.SetInput(data);
-		data.Delete();
 		algoNormals.SplittingOff();
 		algoNormals.FlipNormalsOff();
 		algoNormals.AutoOrientNormalsOff();
@@ -455,11 +443,9 @@ public abstract class AbstractNode
 		algoNormals.Update();
 
 		data = algoNormals.GetOutput();
-		algoNormals.Delete();
 		vtkPointData pointData = data.GetPointData();
 		vtkFloatArray computedNormals = (vtkFloatArray) pointData.GetNormals();		
 		float[] javaComputedNormals = computedNormals.GetJavaArray();
-		computedNormals.Delete();
 		float[] javaNormals = dataProvider.getNormals();
 		
 		// If the normals are not computed change them by the normals computed by the meshes
@@ -478,8 +464,6 @@ public abstract class AbstractNode
 		normals.SetJavaArray(javaNormals);
 		
 		pointData.SetNormals(normals);
-		pointData.Delete();
-		normals.Delete();
 		//fireDataModified(data);
 	}
 	
@@ -487,18 +471,15 @@ public abstract class AbstractNode
 	{
 		if(data != null)
 		{
-			data.Delete();
 			data = null;
 		}
 		if(actor != null)
 		{
 			fireActorDeleted(actor);
-			actor.Delete();
 			actor = null;
 		}
 		if(mapper != null)
 		{
-			mapper.Delete();
 			mapper = null;
 		}
 	}
@@ -511,12 +492,10 @@ public abstract class AbstractNode
 		fireActorDeleted(selectionActor);
 		if(selectionActor != null)
 		{
-			selectionActor.Delete();
 			selectionActor = null;
 		}
 		if(selectionMapper != null)
 		{
-			selectionMapper.Delete();
 			selectionMapper = null;
 		}
 	}
@@ -612,7 +591,6 @@ public abstract class AbstractNode
 		{
 			vtkProperty p = actor.GetProperty();
 			p.SetEdgeVisibility(Utils.booleanToInt(b));
-			p.Delete();
 		}
 	}
 
@@ -623,7 +601,6 @@ public abstract class AbstractNode
 			vtkProperty p = actor.GetProperty();
 			p.SetFrontfaceCulling(Utils.booleanToInt(front));
 			p.SetBackfaceCulling(Utils.booleanToInt(back));
-			p.Delete();
 		}
 	}
 }
