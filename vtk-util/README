@@ -1,6 +1,16 @@
 About VTK and garbage collector
 -------------------------------
 
+VTK 5.6
+-------
+Starting with VTK 5.6 the finalize() method of vtkObjectBase has been removed.
+VTK .Delete() is now called from a dedicated Executor which ensure that
+.Delete() is always call in the EDT.
+Automatic VTK Java GC must be started with:
+		vtkGlobalJavaHash.GarbageCollector.SetAutoGarbageCollection(true);
+
+VTK 5.4 and before
+------------------
 Some VTK object manager X11 resource and must always be released between a 
 vtkRenderer.Lock and vtkRenderer.Unlock call. If not segfault (or other
 strange things may happen).

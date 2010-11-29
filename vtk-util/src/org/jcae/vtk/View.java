@@ -29,6 +29,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import vtk.vtkGlobalJavaHash;
 import vtk.vtkInteractorStyleRubberBand3D;
 import vtk.vtkInteractorStyleTrackballCamera;
 import vtk.vtkPlaneCollection;
@@ -52,6 +53,8 @@ public class View extends Canvas {
 	{
 		Utils.setVTKLogFile(new File(System.getProperty("user.home"),
 			".vtk.log").getPath());
+		vtkGlobalJavaHash.GarbageCollector.SetDebug(Boolean.getBoolean("vtk.gc.debug"));
+		vtkGlobalJavaHash.GarbageCollector.SetAutoGarbageCollection(true);
 	}
 	public enum MouseMode
 	{
