@@ -1,10 +1,15 @@
---- /tmp/app.sh	2008-06-27 14:22:04.000000000 +0200
-+++ release/zebra	2008-06-27 14:48:26.000000000 +0200
-@@ -72,6 +72,11 @@
-     clusters="$clusters:$extraclusters"
+--- /tmp/app.sh	2010-11-30 17:27:08.692139067 +0100
++++ jcae	2010-11-30 17:36:36.976138104 +0100
+@@ -72,6 +72,16 @@
+     clusters="$clusters:$extra_clusters"
  fi
  
-+LD_LIBRARY_PATH="$progdir/../$APPNAME/modules/lib:$LD_LIBRARY_PATH"
++#An absolut path is prefered as sub-processes may be run from other directories
++curdir="$PWD"
++cd "$progdir/../$APPNAME/modules/lib"
++libdir="$PWD"
++cd "$curdir"
++LD_LIBRARY_PATH="$libdir:$LD_LIBRARY_PATH"
 +export LD_LIBRARY_PATH
 +MMGT_OPT=0
 +export MMGT_OPT

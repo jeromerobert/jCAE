@@ -68,11 +68,16 @@ readClusters() {
 
 clusters=`(cat "$progdir/../etc/$APPNAME".clusters; echo) | readClusters | tr '\012' ':'`
 
-if [ ! -z "$extraclusters" ] ; then
-    clusters="$clusters:$extraclusters"
+if [ ! -z "$extra_clusters" ] ; then
+    clusters="$clusters:$extra_clusters"
 fi
 
-LD_LIBRARY_PATH="$progdir/../$APPNAME/modules/lib:$LD_LIBRARY_PATH"
+#An absolut path is prefered as sub-processes may be run from other directories
+curdir="$PWD"
+cd "$progdir/../$APPNAME/modules/lib"
+libdir="$PWD"
+cd "$curdir"
+LD_LIBRARY_PATH="$libdir:$LD_LIBRARY_PATH"
 export LD_LIBRARY_PATH
 MMGT_OPT=0
 export MMGT_OPT
