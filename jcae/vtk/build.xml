@@ -12,6 +12,7 @@
 	<patternset id="vtk.unix.files">
 		<include name="libvtk*Java.so"/>
 		<include name="libvtk*.so.?.?"/>
+		<include name="libvtkNetCDF_cxx.so"/>
 		<include name="libvtkverdict.so.vtk?.?.?"/>
 		<exclude name="libvtk*Java.so.?.?"/>
 	</patternset>
