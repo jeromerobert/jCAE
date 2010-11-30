@@ -278,11 +278,14 @@ public abstract class AlgoAction extends CookieAction {
 					"modules/jython/bin/jython" + ext, "org.jcae.netbeans.mesh", false);
 			pb.command().add(f.getPath());
 			for (String s : Settings.getDefault().parameters()) {
-				if (s.startsWith("-")) {
+				if (s.startsWith("-") && !s.startsWith("-D")) {
 					s = "-J" + s;
 				}
 				pb.command().add(s);
 			}
+			String home = System.getProperty("netbeans.user");
+			File dir = new File(new File(new File(new File(home), "var"), "cache"), "jython");
+			pb.command().add("-Dpython.cachedir="+dir.getPath());
 			pb.environment().put("CLASSPATH", getClassPath());			
 			pb.command().add(pyFile.getPath());
 			pb.command().addAll(args);
