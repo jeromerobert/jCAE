@@ -49,6 +49,7 @@ public class AmibeNewWizard implements WizardDescriptor.InstantiatingIterator<Wi
 		aw.finish();
 		AmibeDataObject mdo = (AmibeDataObject) DataObject.find(FileUtil.toFileObject(f));
 		mdo.save();
+		fo.refresh(true);
 		return Collections.singleton(mdo);
 	}
 
