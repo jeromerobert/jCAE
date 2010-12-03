@@ -15,22 +15,28 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2005-2010, by EADS France
  */
 
 package org.jcae.netbeans.mesh;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import javax.swing.Action;
 import org.jcae.mesh.xmldata.Group;
 import org.jcae.mesh.xmldata.Groups;
-import org.openide.actions.PropertiesAction;
-import org.openide.actions.RenameAction;
+import org.openide.filesystems.FileUtil;
+import org.openide.loaders.DataFolder;
+import org.openide.loaders.DataObject;
+import org.openide.loaders.DataObjectNotFoundException;
+import org.openide.loaders.InstanceDataObject;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node.Cookie;
 import org.openide.nodes.PropertySupport;
-import org.openide.util.actions.SystemAction;
+import org.openide.util.Exceptions;
 
 public class GroupNode extends AbstractNode implements Cookie
 {
@@ -71,12 +77,14 @@ public class GroupNode extends AbstractNode implements Cookie
 		getCookieSet().add(this);
 	}
 	
+	@Override
 	public boolean canRename()
 	{
 		return true;
 	}
 	
-	public void setName(String arg0)
+	@Override
+	public final void setName(String arg0)
 	{
 		super.setName(arg0);
 		if(group!=null)
@@ -86,21 +94,27 @@ public class GroupNode extends AbstractNode implements Cookie
 	@Override
 	public Action[] getActions(boolean arg0)
 	{
-		return new Action[]
-		{
-			SystemAction.get(RefineAction.class),
-			SystemAction.get(SmoothAction.class),
-			SystemAction.get(DecimateAction.class),
-			SystemAction.get(SwapAction.class),
-			null,
-			SystemAction.get(RenameAction.class),
-			SystemAction.get(ViewGroupAction.class),
-			SystemAction.get(HideGroupAction.class),
-			SystemAction.get(RefreshGroupAction.class),
-			SystemAction.get(ExportGroupAction.class),
-			SystemAction.get(FuseGroupAction.class),
-			SystemAction.get(PropertiesAction.class)
-		};
+		ArrayList<Action> toReturn = new ArrayList<Action>();
+		Enumeration<DataObject> dobjs = DataFolder.findFolder(
+			FileUtil.getConfigFile("NodeMenus/org-jcae-netbeans-mesh-GroupNode")).children();
+		while(dobjs.hasMoreElements())
+		{			
+			try {
+				InstanceDataObject ido =
+					dobjs.nextElement().getLookup().lookup(InstanceDataObject.class);
+				if(ido != null && ido.instanceOf(Action.class))
+					toReturn.add((Action) ido.instanceCreate());
+				else
+					toReturn.add(null);				
+			} catch (DataObjectNotFoundException ex) {
+				Exceptions.printStackTrace(ex);
+			} catch (IOException ex) {
+				Exceptions.printStackTrace(ex);
+			} catch (ClassNotFoundException ex) {
+				Exceptions.printStackTrace(ex);
+			}
+		}
+		return toReturn.toArray(new Action[toReturn.size()]);
 	}
 
 	public Group getGroup()
@@ -113,6 +127,7 @@ public class GroupNode extends AbstractNode implements Cookie
 		return groups;
 	}
 	
+	@Override
 	public PropertySet[] getPropertySets()
 	{
 		return new PropertySet[]{
@@ -122,6 +137,7 @@ public class GroupNode extends AbstractNode implements Cookie
 					return new Property[]{new IDProperty(), new NumberProperty()};
 				}
 				
+				@Override
 				public String getName()
 				{
 					return "Mesh";
