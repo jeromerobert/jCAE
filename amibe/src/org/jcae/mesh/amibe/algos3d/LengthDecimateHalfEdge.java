@@ -148,7 +148,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	@Override
 	public boolean canProcessEdge(HalfEdge current)
 	{
-		if (freeEdgesOnly && !current.hasAttributes(AbstractHalfEdge.IMMUTABLE | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+		if (freeEdgesOnly && !current.hasAttributes(AbstractHalfEdge.IMMUTABLE | AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 			return false;
 		current = uniqueOrientation(current);
 		Vertex v1 = current.origin();
@@ -184,9 +184,9 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 
 	private Vertex optimalPlacement(Vertex v1, Vertex v2)
 	{
-		if (v1.getRef() > 0)
+		if (v1.getRef() > 0 || !v1.isMutable())
 			return v1;
-		else if (v2.getRef() != 0)
+		else if (v2.getRef() != 0 || !v2.isMutable())
 			return v2;
 		return v1;
 	}
