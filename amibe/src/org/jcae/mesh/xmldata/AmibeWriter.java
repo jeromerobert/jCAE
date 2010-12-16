@@ -523,7 +523,7 @@ public abstract class AmibeWriter {
 	 */
 	private void checkNoGroup() throws IOException
 	{
-		if(groups.size()==0)
+		if(groups.isEmpty())
 		{
 			Group g=new Group();
 			g.name="EXT";
