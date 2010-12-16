@@ -76,7 +76,40 @@ public class RemeshPolyline
 	public List<Vertex> compute()
 	{
 		List<Vertex> newWire = new ArrayList<Vertex>();
+		Vertex last = bgWire.get(bgWire.size() -1);
+		double target = 1.0;
+		double maxError = 1.e-3;
+		while(true)
+		{
+			double lastLength = compute(newWire, target, maxError);
+			if (lastLength < maxError)
+			{
+				newWire.set(newWire.size() - 1, last);
+				break;
+			}
+			else if (lastLength > target - maxError)
+			{
+				newWire.add(last);
+				break;
+			}
+			else if (lastLength < 0.5 * target)
+			{
+				target += lastLength / newWire.size();
+			}
+			else
+			{
+				target -= lastLength / (1.0 + newWire.size());
+			}
+			LOGGER.fine("Length of last segment: "+lastLength+" number of segments: "+newWire.size()+" -> new target: "+target);
+		}
+		LOGGER.config("Number of segments: "+(newWire.size() - 1)+" mean target: "+target);
+		return newWire;
+	}
 
+	private double compute(List<Vertex> newWire, double targetSize, double maxError)
+	{
+		newWire.clear();
+		newWire.add(bgWire.get(0));
 		int segment = 0;
 		Vertex vS = bgWire.get(0);
 		EuclidianMetric3D mS = metricsMap.get(vS);
@@ -88,18 +121,19 @@ public class RemeshPolyline
 		double logRatio = Math.log(hE/hS);
 		double [] lower = new double[3];
 		double [] upper = new double[3];
-		double maxError = 0.001;
-		double target = 1.0;
-		int nrDichotomy = 20;
+		double target = targetSize;
+		int nrDichotomy = - 2 * (int) (Math.log(maxError) / Math.log(2.0));
+		LOGGER.finest("Dichotomy: MaxError="+maxError+" max nr. of dichotomy: "+nrDichotomy);
 		while (true)
 		{
 			double edgeLength = interpolatedDistance(vS, mS, vE, mE);
-			if (edgeLength < 1.0 - maxError)
+			if (edgeLength < target - maxError)
 			{
-				target = 1.0 - edgeLength;
+				target = targetSize - edgeLength;
+				LOGGER.fine("End of segment found, target set to "+target);
 				segment++;
 				if (segment >= bgWire.size() - 1)
-					break;
+					return edgeLength;
 				vS = bgWire.get(segment);
 				mS = metricsMap.get(vS);
 				vE = bgWire.get(segment+1);
@@ -109,13 +143,7 @@ public class RemeshPolyline
 				logRatio = Math.log(hE/hS);
 				continue;
 			}
-			else
-				target = 1.0;
 
-			// One could take nrDichotomy = 1-log(maxError)/log(2), but this
-			// value may not work when surface parameters have a large
-			// gradient, so take a larger value to be safe.
-	
 			System.arraycopy(vS.getUV(), 0, lower, 0, 3);
 			System.arraycopy(vE.getUV(), 0, upper, 0, 3);
 			// 1-d coordinate between lower and upper points
@@ -140,6 +168,7 @@ public class RemeshPolyline
 					vS = np;
 					mS = m;
 					newWire.add(np);
+					target = targetSize;
 					break;
 				}
 				else if (l > target)
@@ -168,11 +197,9 @@ public class RemeshPolyline
 			if (cnt < 0)
 			{
 				LOGGER.severe("Dichotomy failed");
-				assert false;
+				return -1.0;
 			}
 		}
-
-		return newWire;
 	}
 
 	private static double interpolatedDistance(Vertex pt1, Metric m1, Vertex pt2, Metric m2)
