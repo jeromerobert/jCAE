@@ -662,6 +662,8 @@ public class Mesh implements Serializable
 			ArrayList<Triangle> list = entry.getValue();
 			int cnt = 0;
 			AbstractHalfEdge ot = null;
+			if (null == v.getLink())
+				continue;
 			ot = v.getIncidentAbstractHalfEdge((Triangle) v.getLink(), ot);
 			Vertex d = ot.destination();
 			do
