@@ -43,16 +43,6 @@ public class RemeshPolyline
 	private final Mesh mesh;
 	private final Map<Vertex, EuclidianMetric3D> metricsMap = new LinkedHashMap<Vertex, EuclidianMetric3D>();
 	private final List<Vertex> bgWire = new ArrayList<Vertex>();
-	private static final class VertexOnWire
-	{
-		private final Vertex vertex;
-		private final double abscissa;
-		public VertexOnWire(Vertex v, double a)
-		{
-			this.vertex = v;
-			this.abscissa = a;
-		}
-	}
 
 	public RemeshPolyline(Mesh m, List<Vertex> vertices, List<EuclidianMetric3D> metrics)
 	{
@@ -94,11 +84,11 @@ public class RemeshPolyline
 			}
 			else if (lastLength < 0.5 * target)
 			{
-				target += lastLength / newWire.size();
+				target = ((newWire.size() - 1) * target + lastLength) / newWire.size();
 			}
 			else
 			{
-				target -= lastLength / (1.0 + newWire.size());
+				target = (newWire.size() * target + lastLength) / (1.0 + newWire.size());
 			}
 			LOGGER.fine("Length of last segment: "+lastLength+" number of segments: "+newWire.size()+" -> new target: "+target);
 		}
@@ -127,10 +117,10 @@ public class RemeshPolyline
 		while (true)
 		{
 			double edgeLength = interpolatedDistance(vS, mS, vE, mE);
-			if (edgeLength < target - maxError)
+			if (edgeLength < target)
 			{
-				target = targetSize - edgeLength;
-				LOGGER.fine("End of segment found, target set to "+target);
+				target -= edgeLength;
+				LOGGER.fine("End of segment "+segment+" found, edgeLength="+edgeLength+" target set to "+target);
 				segment++;
 				if (segment >= bgWire.size() - 1)
 					return edgeLength;
@@ -143,6 +133,7 @@ public class RemeshPolyline
 				logRatio = Math.log(hE/hS);
 				continue;
 			}
+			LOGGER.fine("Length segment="+edgeLength+" target="+target+" maxError="+maxError);
 
 			System.arraycopy(vS.getUV(), 0, lower, 0, 3);
 			System.arraycopy(vE.getUV(), 0, upper, 0, 3);
@@ -154,6 +145,8 @@ public class RemeshPolyline
 				0.5*(lower[1]+upper[1]),
 				0.5*(lower[2]+upper[2]));
 			int cnt = nrDichotomy;
+			if (edgeLength > 1.0)
+				cnt *= (int) edgeLength;
 			while(cnt >= 0)
 			{
 				cnt--;
