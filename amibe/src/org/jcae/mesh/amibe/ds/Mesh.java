@@ -1191,11 +1191,16 @@ public class Mesh implements Serializable
 	 */
 	public final int tagFreeEdges(int attr)
 	{
+		return tagIf(AbstractHalfEdge.BOUNDARY, attr);
+	}
+
+	public final int tagIf(int criterion, int attr)
+	{
 		if (triangleList.isEmpty())
 			return 0;
 
 		if (!hasAdjacency())
-			throw new RuntimeException("tagFreeEdges called on a mesh without adjacency relations");
+			throw new RuntimeException("tagIf called on a mesh without adjacency relations");
 
 		AbstractHalfEdge ot = null;
 		boolean pinVertices  = (attr & AbstractHalfEdge.IMMUTABLE) != 0;
@@ -1209,7 +1214,7 @@ public class Mesh implements Serializable
 			for (int i = 0; i < 3; i++)
 			{
 				ot = ot.next();
-				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
+				if (ot.hasAttributes(criterion))
 				{
 					ot.setAttributes(attr);
 					if (pinVertices)
@@ -1222,7 +1227,7 @@ public class Mesh implements Serializable
 			}
 		}
 		if (toReturn > 0 && logger.isLoggable(Level.CONFIG))
-			logger.log(Level.CONFIG, "Number of free edges: "+toReturn);
+			logger.log(Level.CONFIG, "Number of tagged edges: "+toReturn);
 		return toReturn;
 	}
 
