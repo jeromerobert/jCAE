@@ -445,6 +445,12 @@ public class Mesh implements Serializable
 		beamGroups.set(i, gid);
 	}
 
+	public void resetBeams()
+	{
+		beams.clear();
+		beamGroups.clear();
+	}
+
 	public void setGroupName(int id, String name)
 	{
 		groupNames.put(id, name);
