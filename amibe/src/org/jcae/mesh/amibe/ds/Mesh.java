@@ -427,6 +427,8 @@ public class Mesh implements Serializable
 		beams.add(v2);
 		v1.setMutable(false);
 		v2.setMutable(false);
+		nodeList.add(v1);
+		nodeList.add(v2);
 		beamGroups.add(group);
 	}
 
