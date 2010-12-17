@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
@@ -40,10 +41,20 @@ public class RemeshPolyline
 {
 	private final static Logger LOGGER = Logger.getLogger(RemeshPolyline.class.getName());
 
+	// Background mesh, it is needed only as a factory to build vertices
 	private final Mesh mesh;
-	private final Map<Vertex, EuclidianMetric3D> metricsMap = new LinkedHashMap<Vertex, EuclidianMetric3D>();
+	// Sorted list of vertices
 	private final List<Vertex> bgWire = new ArrayList<Vertex>();
+	// Map containing the metrics at each input point
+	private final Map<Vertex, EuclidianMetric3D> metricsMap = new LinkedHashMap<Vertex, EuclidianMetric3D>();
 
+	/**
+	 * Constructor.
+	 *
+	 * @param m Mesh
+	 * @param vertices Sorted list of vertices
+	 * @param metrics List of metrics at those points
+	 */
 	public RemeshPolyline(Mesh m, List<Vertex> vertices, List<EuclidianMetric3D> metrics)
 	{
 		if (vertices.size() != metrics.size())
@@ -60,70 +71,133 @@ public class RemeshPolyline
 				abscissa += v.distance3D(last);
 			last = v;
 		}
-		LOGGER.fine("Polyline length: "+abscissa);
+		LOGGER.fine("Polyline approximate length: "+abscissa);
 	}
+
+	/**
+	 * Discretize the polyline and return the sorted list of vertices.
+	 *
+	 * @return sorted list of vertices
+	 */
 
 	public List<Vertex> compute()
 	{
 		List<Vertex> newWire = new ArrayList<Vertex>();
 		Vertex last = bgWire.get(bgWire.size() -1);
+		newWire.add(bgWire.get(0));
+		newWire.add(last);
+		// Target size in the unit mesh.  This value is adjusted so
+		// that the last length is similar to others.
 		double target = 1.0;
+		// Maximal error
 		double maxError = 1.e-3;
+		double curError = Double.MAX_VALUE;
 		while(true)
 		{
+			List<Vertex> saveList = new ArrayList<Vertex>(newWire);
+			// lastLength is the distance between the last inserted
+			// point and the last point of the polyline.
 			double lastLength = compute(newWire, target, maxError);
 			if (lastLength < maxError)
 			{
+				// We found a good discretization, replace the
+				// last point by the real destination point.
 				newWire.set(newWire.size() - 1, last);
 				break;
 			}
-			else if (lastLength > target - maxError)
+			else if (lastLength > target - maxError || 1 == newWire.size())
 			{
+				// In the first case, discretization is also good.
+				// If only one vertex has been inserted, this means that
+				// the polyline is too small and does not have to
+				// be discretized.
 				newWire.add(last);
 				break;
 			}
 			else if (lastLength < 0.5 * target)
 			{
-				target = ((newWire.size() - 1) * target + lastLength) / newWire.size();
+				// Avoid infinite loops
+				if (lastLength > curError)
+				{
+					LOGGER.warning("Beam discretization may be of poor quality");
+					return saveList;
+				}
+				curError = lastLength;
+				// The last subsegment is small, increase target size
+				// so that when all subsegments have the same size.
+				// Use a relaxation factor of 0.6
+				target += 0.6 * lastLength / (newWire.size() - 1);
+				newWire.set(newWire.size() - 1, last);
 			}
 			else
 			{
-				target = (newWire.size() * target + lastLength) / (1.0 + newWire.size());
+				// Avoid infinite loops
+				if (target - lastLength > curError)
+				{
+					LOGGER.warning("Beam discretization may be of poor quality");
+					break;
+				}
+				curError = target - lastLength;
+				// The last subsegment is large, we will add another
+				// point, but target size must be decreased.
+				// Use a relaxation factor of 0.6
+				target -= 0.6 * (target - lastLength) / (newWire.size());
+				newWire.add(last);
 			}
-			LOGGER.fine("Length of last segment: "+lastLength+" number of segments: "+newWire.size()+" -> new target: "+target);
+
+			if (LOGGER.isLoggable(Level.FINE))
+				LOGGER.fine("Length of last segment: "+lastLength+" number of vertices: "+newWire.size()+" -> new target: "+target);
 		}
 		LOGGER.config("Number of segments: "+(newWire.size() - 1)+" mean target: "+target);
 		return newWire;
 	}
 
+	// Discretization points are inserted into the newWire list. Distances are
+	// computed according to metrics at given points, we try to insert points
+	// at distance 1.  Return the fraction of segment which could not be
+	// discretized.
 	private double compute(List<Vertex> newWire, double targetSize, double maxError)
 	{
+		// FIXME: In order to control the global error, we fix error
+		// at each point, maybe this is not needed.
+		if (!newWire.isEmpty())
+			maxError /= newWire.size();
+
+		// Start a new wire, add the first point
 		newWire.clear();
-		newWire.add(bgWire.get(0));
 		int segment = 0;
 		Vertex vS = bgWire.get(0);
 		EuclidianMetric3D mS = metricsMap.get(vS);
 		Vertex vE = bgWire.get(1);
 		EuclidianMetric3D mE = metricsMap.get(vE);
+		newWire.add(vS);
 
+		// Metrics are interpolated geometrically.
 		double hS = mS.getUnitBallBBox()[0];
 		double hE = mE.getUnitBallBBox()[0];
 		double logRatio = Math.log(hE/hS);
+
+		// The best candidate is found by dichotomy.
+		// Allocate lower and upper bounds.
 		double [] lower = new double[3];
 		double [] upper = new double[3];
 		double target = targetSize;
+		double accumulated = 0;
 		int nrDichotomy = - 2 * (int) (Math.log(maxError) / Math.log(2.0));
-		LOGGER.finest("Dichotomy: MaxError="+maxError+" max nr. of dichotomy: "+nrDichotomy);
+		if (LOGGER.isLoggable(Level.FINEST))
+			LOGGER.finest("Dichotomy: MaxError="+maxError+" max nr. of dichotomy: "+nrDichotomy);
 		while (true)
 		{
 			double edgeLength = interpolatedDistance(vS, mS, vE, mE);
 			if (edgeLength < target)
 			{
+				accumulated += edgeLength;
 				target -= edgeLength;
-				LOGGER.fine("End of segment "+segment+" found, edgeLength="+edgeLength+" target set to "+target);
+				if (LOGGER.isLoggable(Level.FINE))
+					LOGGER.fine("End of segment "+segment+" found, edgeLength="+edgeLength+" target set to "+target);
 				segment++;
 				if (segment >= bgWire.size() - 1)
-					return edgeLength;
+					return accumulated;
 				vS = bgWire.get(segment);
 				mS = metricsMap.get(vS);
 				vE = bgWire.get(segment+1);
@@ -133,7 +207,8 @@ public class RemeshPolyline
 				logRatio = Math.log(hE/hS);
 				continue;
 			}
-			LOGGER.fine("Length segment="+edgeLength+" target="+target+" maxError="+maxError);
+			if (LOGGER.isLoggable(Level.FINE))
+				LOGGER.fine("Length segment="+edgeLength+" target="+target+" maxError="+maxError);
 
 			System.arraycopy(vS.getUV(), 0, lower, 0, 3);
 			System.arraycopy(vE.getUV(), 0, upper, 0, 3);
@@ -157,18 +232,21 @@ public class RemeshPolyline
 				double l = interpolatedDistance(vS, mS, np, m);
 				if (Math.abs(l - target) < maxError)
 				{
-					LOGGER.finest("Add point: "+l+" =~ "+target);
+					if (LOGGER.isLoggable(Level.FINER))
+						LOGGER.finer("Add point: "+l+" =~ "+target+" "+np);
 					vS = np;
 					mS = m;
 					newWire.add(np);
 					target = targetSize;
+					accumulated = 0;
 					break;
 				}
 				else if (l > target)
 				{
 					delta *= 0.5;
 					alpha -= delta;
-					LOGGER.finest(l+" > "+target+" "+cnt+" "+delta+" "+alpha);
+					if (LOGGER.isLoggable(Level.FINEST))
+						LOGGER.finest(l+" > "+target+" "+cnt+" "+delta+" "+alpha);
 					System.arraycopy(pos, 0, upper, 0, 3);
 					np.moveTo(
 						0.5*(lower[0] + pos[0]),
@@ -179,7 +257,8 @@ public class RemeshPolyline
 				{
 					delta *= 0.5;
 					alpha += delta;
-					LOGGER.finest(l+" < "+target+" "+cnt+" "+delta+" "+alpha);
+					if (LOGGER.isLoggable(Level.FINEST))
+						LOGGER.finest(l+" < "+target+" "+cnt+" "+delta+" "+alpha);
 					System.arraycopy(pos, 0, lower, 0, 3);
 					np.moveTo(
 						0.5*(upper[0] + pos[0]),
