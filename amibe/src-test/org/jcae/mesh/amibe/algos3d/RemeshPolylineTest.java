@@ -79,4 +79,24 @@ public class RemeshPolylineTest
 		assertTrue("Expected 2 vertices, found "+result.size(), 2 == result.size());
 	}
 
+	@Test public void test101exact()
+	{
+		m.clear();
+		m.add(new EuclidianMetric3D(1));
+		m.add(new EuclidianMetric3D(1));
+
+		List<Vertex> result = new RemeshPolyline(bgMesh, v, m).compute();
+		assertTrue("Expected 101 vertices, found "+result.size(), 101 == result.size());
+	}
+
+	@Test public void test1001exact()
+	{
+		m.clear();
+		m.add(new EuclidianMetric3D(0.1));
+		m.add(new EuclidianMetric3D(0.1));
+
+		List<Vertex> result = new RemeshPolyline(bgMesh, v, m).compute();
+		assertTrue("Expected 1001 vertices, found "+result.size(), 1001 == result.size());
+	}
+
 }
