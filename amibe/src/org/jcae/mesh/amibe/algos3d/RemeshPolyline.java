@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
  
-    Copyright (C) 2010, by EADS France
+    Copyright (C) 2010-2011, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -71,7 +71,7 @@ public class RemeshPolyline
 				abscissa += v.distance3D(last);
 			last = v;
 		}
-		LOGGER.fine("Polyline approximate length: "+abscissa);
+		LOGGER.log(Level.FINE, "Polyline approximate length: {0}", abscissa);
 	}
 
 	/**
@@ -146,9 +146,9 @@ public class RemeshPolyline
 			}
 
 			if (LOGGER.isLoggable(Level.FINE))
-				LOGGER.fine("Length of last segment: "+lastLength+" number of vertices: "+newWire.size()+" -> new target: "+target);
+				LOGGER.log(Level.FINE, "Length of last segment: {0} number of vertices: {1} -> new target: {2}", new Object[]{lastLength, newWire.size(), target});
 		}
-		LOGGER.config("Number of segments: "+(newWire.size() - 1)+" mean target: "+target);
+		LOGGER.log(Level.CONFIG, "Number of segments: {0} mean target: {1}", new Object[]{newWire.size() - 1, target});
 		return newWire;
 	}
 
@@ -185,7 +185,7 @@ public class RemeshPolyline
 		double accumulated = 0;
 		int nrDichotomy = - 2 * (int) (Math.log(maxError) / Math.log(2.0));
 		if (LOGGER.isLoggable(Level.FINEST))
-			LOGGER.finest("Dichotomy: MaxError="+maxError+" max nr. of dichotomy: "+nrDichotomy);
+			LOGGER.log(Level.FINEST, "Dichotomy: MaxError={0} max nr. of dichotomy: {1}", new Object[]{maxError, nrDichotomy});
 		while (true)
 		{
 			double edgeLength = interpolatedDistance(vS, mS, vE, mE);
@@ -194,7 +194,7 @@ public class RemeshPolyline
 				accumulated += edgeLength;
 				target -= edgeLength;
 				if (LOGGER.isLoggable(Level.FINE))
-					LOGGER.fine("End of segment "+segment+" found, edgeLength="+edgeLength+" target set to "+target);
+					LOGGER.log(Level.FINE, "End of segment {0} found, edgeLength={1} target set to {2}", new Object[]{segment, edgeLength, target});
 				segment++;
 				if (segment >= bgWire.size() - 1)
 					return accumulated;
@@ -208,7 +208,7 @@ public class RemeshPolyline
 				continue;
 			}
 			if (LOGGER.isLoggable(Level.FINE))
-				LOGGER.fine("Length segment="+edgeLength+" target="+target+" maxError="+maxError);
+				LOGGER.log(Level.FINE, "Length segment={0} target={1} maxError={2}", new Object[]{edgeLength, target, maxError});
 
 			System.arraycopy(vS.getUV(), 0, lower, 0, 3);
 			System.arraycopy(vE.getUV(), 0, upper, 0, 3);
@@ -233,7 +233,7 @@ public class RemeshPolyline
 				if (Math.abs(l - target) < maxError)
 				{
 					if (LOGGER.isLoggable(Level.FINER))
-						LOGGER.finer("Add point: "+l+" =~ "+target+" "+np);
+						LOGGER.log(Level.FINER, "Add point: {0} =~ {1} {2}", new Object[]{l, target, np});
 					vS = np;
 					mS = m;
 					newWire.add(np);
@@ -246,7 +246,7 @@ public class RemeshPolyline
 					delta *= 0.5;
 					alpha -= delta;
 					if (LOGGER.isLoggable(Level.FINEST))
-						LOGGER.finest(l+" > "+target+" "+cnt+" "+delta+" "+alpha);
+						LOGGER.log(Level.FINEST, "{0} > {1} {2} {3} {4}", new Object[]{l, target, cnt, delta, alpha});
 					System.arraycopy(pos, 0, upper, 0, 3);
 					np.moveTo(
 						0.5*(lower[0] + pos[0]),
@@ -258,7 +258,7 @@ public class RemeshPolyline
 					delta *= 0.5;
 					alpha += delta;
 					if (LOGGER.isLoggable(Level.FINEST))
-						LOGGER.finest(l+" < "+target+" "+cnt+" "+delta+" "+alpha);
+						LOGGER.log(Level.FINEST, "{0} < {1} {2} {3} {4}", new Object[]{l, target, cnt, delta, alpha});
 					System.arraycopy(pos, 0, lower, 0, 3);
 					np.moveTo(
 						0.5*(upper[0] + pos[0]),
