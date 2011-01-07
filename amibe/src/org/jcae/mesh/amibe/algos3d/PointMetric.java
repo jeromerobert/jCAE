@@ -56,7 +56,7 @@ public class PointMetric implements Remesh.AnalyticMetricInterface {
 	}
 
 	public PointMetric(double defaultSize, String fileName) throws IOException {
-		setGlobalSize(invHInf);
+		setGlobalSize(defaultSize);
 		BufferedReader br = new BufferedReader(new FileReader(fileName));
 		String buffer = br.readLine();
 		while(buffer != null)
@@ -81,6 +81,7 @@ public class PointMetric implements Remesh.AnalyticMetricInterface {
 
 	/**
 	 * Add a point around which to refine
+	 * @param d Distance at which to define the target size
 	 * @param size The target size at a d distance of the source
 	 */
 	public final void addPoint(double x, double y, double z, double d, double size)
