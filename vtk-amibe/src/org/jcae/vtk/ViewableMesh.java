@@ -20,6 +20,7 @@
 package org.jcae.vtk;
 
 import java.awt.Color;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import org.jcae.vtk.AbstractNode.ActorCustomiser;
 import org.jcae.vtk.AbstractNode.MapperCustomiser;
+import org.jcae.vtk.LeafNode.DataProvider;
 import vtk.vtkMapper;
 import vtk.vtkActor;
 import vtk.vtkProperty;
@@ -40,13 +42,19 @@ import vtk.vtkProperty;
  */
 public class ViewableMesh extends Viewable
 {
+	private static class BeamNodeWrapper
+	{
+		public LeafNode beams, vertexBeams;
+	}
+	
 	private ViewMode viewMode = ViewMode.WIRED;
 	private final Map<String, LeafNode> groupToTrias = new HashMap<String, LeafNode>();
 	private final Map<LeafNode, String> triasToNode = new HashMap<LeafNode, String>();
-	private final Map<String, LeafNode> groupToBeams = new HashMap<String, LeafNode>();
+	private final Map<String, BeamNodeWrapper> groupToBeams = new HashMap<String, BeamNodeWrapper>();
 	private final Map<LeafNode, String> beamsToNode = new HashMap<LeafNode, String>();
 	private int currentColorID;
 	private final Palette palette;
+	private boolean beamVertVisible = true;
 	private final static MapperCustomiser MAPPER_CUSTOMIZER = new MapperCustomiser() {
 		@Override
 		public void customiseMapper(vtkMapper mapper)
@@ -154,7 +162,8 @@ public class ViewableMesh extends Viewable
 	/** ensure that beams and trias in the same groups have the same color */
 	private Color getColor(String groupid)
 	{
-		LeafNode a = groupToBeams.get(groupid);
+		BeamNodeWrapper aa = groupToBeams.get(groupid);
+		LeafNode a = aa == null ? null : groupToBeams.get(groupid).beams;
 		if(a != null)
 			return a.getColor();
 		a = groupToTrias.get(groupid);
@@ -163,40 +172,88 @@ public class ViewableMesh extends Viewable
 		return palette.getColor(currentColorID++);
 	}
 
+	private DataProvider createVertices(final DataProvider value) {
+		DataProvider toReturn = new DataProvider()
+		{
+			@Override
+			public void load() {
+				if(value.getNodes().length == 0)
+					value.load();
+				setNodes(value.getNodes());
+				int n = nodes.length / 3;
+				int[] vert = new int[2*n];
+				for(int i = 0; i<n; i++)
+				{
+					vert[2*i] = 1;
+					vert[2*i+1] = i;
+				}
+				setVertices(vert);
+			}
+		};
+		return toReturn;
+	}
+	
 	public void addBeams(Map<String, LeafNode.DataProvider> beams)
 	{
 		for (Entry<String, LeafNode.DataProvider> group : beams.entrySet())
 		{
-			LeafNode groupNode =  groupToBeams.get(group.getKey());
+			BeamNodeWrapper groupNode = groupToBeams.get(group.getKey());
 			if(group.getValue() == null && groupNode != null)
 			{
-				rootNode.removeChild(groupNode);
+				rootNode.removeChild(groupNode.beams);
+				if(groupNode.vertexBeams != null)
+					rootNode.removeChild(groupNode.vertexBeams);
 				groupToBeams.remove(group.getKey());
-				beamsToNode.remove(groupNode);
+				beamsToNode.remove(groupNode.beams);
 			}
 			else if(group.getValue() != null && groupNode == null)
 			{
+				BeamNodeWrapper bnw = new BeamNodeWrapper();
 				final LeafNode fgn = new LeafNode(rootNode, group.getValue(),
-					getColor(group.getKey()));
+					getColor(group.getKey()));				
 				fgn.setActorCustomiser(new ActorCustomiser() {
 					public void customiseActor(vtkActor actor) {
 						vtkProperty p = actor.GetProperty();
 						Utils.vtkPropertySetColor(p, fgn.getColor());
-						p.SetLineWidth(3.0);
+						p.SetLineWidth(2.0);					
 					}
 				});
 				fgn.setManager(true);
 				fgn.setPickable(true);
+				bnw.beams = fgn;
 
-				groupToBeams.put(group.getKey(), fgn);
+				if(beamVertVisible)
+				{
+					final LeafNode vertexNode = new LeafNode(rootNode, createVertices(group.getValue()), Color.WHITE);
+					vertexNode.setActorCustomiser(new ActorCustomiser() {
+						public void customiseActor(vtkActor actor) {
+							actor.GetProperty().SetPointSize(3.0);
+						}
+					});
+					vertexNode.setManager(true);
+					vertexNode.setPickable(false);
+					bnw.vertexBeams = vertexNode;
+				}
+
+				groupToBeams.put(group.getKey(), bnw);
 				beamsToNode.put(fgn, group.getKey());
 			}
 			else if(group.getValue() != null && groupNode != null)
-			{
-				groupNode.setDataProvider(group.getValue());
+			{				
+				groupNode.beams.setDataProvider(group.getValue());
+				if(groupNode.vertexBeams != null)
+					groupNode.vertexBeams.setDataProvider(group.getValue());
 			}
 		}
 		rootNode.refresh();
+	}
+
+	public boolean isBeamVertVisible() {
+		return beamVertVisible;
+	}
+
+	public void setBeamVertVisible(boolean beamVertVisible) {
+		this.beamVertVisible = beamVertVisible;
 	}
 	
 	public void selectSelectionNodes() {
@@ -269,3 +326,4 @@ public class ViewableMesh extends Viewable
 		}
 	}
 }
+
