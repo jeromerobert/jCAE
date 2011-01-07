@@ -131,7 +131,7 @@ public abstract class XMLReader {
 		return toReturn;
 	}
 
-	protected abstract void read(Document dom) throws SAXException, XPathExpressionException;
+	protected abstract void read(Document dom) throws SAXException, XPathExpressionException, IOException;
 
 	public void read(File in) throws SAXException, IOException
 	{

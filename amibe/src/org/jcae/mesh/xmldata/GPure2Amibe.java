@@ -19,257 +19,141 @@
  */
 package org.jcae.mesh.xmldata;
 
-import gnu.trove.TIntArrayList;
-import java.util.logging.Level;
 
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import java.io.FileReader;
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.xml.xpath.XPathExpressionException;
+import org.jcae.mesh.xmldata.AmibeWriter.Dim3;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
-/**
- *
+/** 
  * Convert a GPure mesh to an Amibe mesh.
- * <ul>
- * <li>GPure file contains only one part information.</li>
- * <li>GPure file can contain multiple groups.</li>
- * <li>Only triangles, nodes and groups are imported.</li>
- * <li>One extra group containing all faces is added to Amibe.</li>
- * </ul>
- * @author Ganesh Patil
  */
-public class GPure2Amibe {
-
-	private final static Logger LOGGER = Logger.getLogger(GPure2Amibe.class.getName());
-	private int numberOfFaces = 0;
-	/** local array to save face information in a group. */
-	private final TIntArrayList groupFaceArray = new TIntArrayList();
-	/** Flag to check GPure:Description with group data */
-	private boolean groupDataSetActive;
-	private boolean defaultGroupNeeded = true;	
-	
-	/**
-	 *
-	 * <li>Creates instance of XMLInputFactory</li>
-	 * @param inFile
-	 * @param outFile
-	 * @throws java.io.IOException
-	 */
-	public void convert(String inFile, String outFile) throws IOException,
-		XMLStreamException {
-		XMLInputFactory factory = XMLInputFactory.newInstance();
-		convert(factory, inFile, outFile);
+public class GPure2Amibe extends XMLReader {
+	private final String outputDir;
+	private Dim3 out;
+	private int nodeCounter;
+	public GPure2Amibe(String outputDir) {
+		this.outputDir = outputDir;
 	}
 
-	/**
-	 *
-	 * <li>Creates instance of XMLStreamReader using inFile</li>
-	 * @param factory
-	 * @param inFile
-	 * @param outDir
-	 * @throws XMLStreamException
-	 * @throws IOException
-	 */
-	private void convert(XMLInputFactory factory, String inFile, String outDir)
-		throws XMLStreamException, IOException {
-		LOGGER.log(Level.INFO, "Reading {0}", inFile);
-		XMLStreamReader streamReader =
-			factory.createXMLStreamReader(new FileReader(inFile));
-		convert(streamReader, outDir);
-	}
-
-	/**
-	 *
-	 * <li>Reads the mesh data</li>
-	 * <li>Writes Amibe mesh files</li>
-	 * @param streamReader
-	 * @param outDir
-	 * @throws IOException
-	 * @throws XMLStreamException
-	 */
-	private void convert(XMLStreamReader streamReader, String outDir) throws
-		IOException, XMLStreamException
-	{
-		//Amibe writer
-		AmibeWriter.Dim3 out = new AmibeWriter.Dim3(outDir);
-
-		while (streamReader.hasNext()) {
-			streamReader.next();
-			if(streamReader.getEventType() == XMLStreamReader.START_ELEMENT)
-				processStartElements(streamReader, streamReader.getLocalName(), out);		
+	@Override
+	protected void read(Document dom) throws SAXException,
+		XPathExpressionException,
+		IOException {
+		out = new AmibeWriter.Dim3(outputDir);
+		Element triaElement = null;
+		ArrayList<Element> edgeElements = new ArrayList<Element>();
+		ArrayList<Element> partitionElements = new ArrayList<Element>();
+		for(Element e:getElements(dom.getDocumentElement(), "rdf:Description"))
+		{
+			Element typeElement = getElement(e, "GPure:type");
+			String type = typeElement == null ? null : typeElement.getTextContent().trim();
+			if("Data".equals(type))
+				partitionElements.add(e);
+			else if("Tesselation".equals(type))
+			{
+				if(getElement(e, "GPure:faces") == null)
+					edgeElements.add(e);
+				else
+				{
+					if(triaElement != null)
+						throw new IllegalStateException("Cannot convert a file"+
+							"containing more than one triangulated part");
+					triaElement = e;
+				}
+			}
+		}		
+		if(triaElement != null)
+		{
+			Element positions = getElement(triaElement, "GPure:positions");
+			addNodes(positions.getTextContent());
+			//free some memory
+			positions.setTextContent("");
+			Element faces = getElement(triaElement, "GPure:faces");
+			addTriangles(faces.getTextContent());
+			//free some memory
+			GPure:faces.setTextContent("");
 		}
 
-		if(defaultGroupNeeded)
+		for(Element e:partitionElements)
+		{			
+			out.nextGroup(getElement(e, "GPure:name").getTextContent());
+			addToGroup(getElement(e, "GPure:faces").getTextContent());
+		}
+
+		int beamOffset = 0;
+		for(Element e:edgeElements)
 		{
-			//Create a group with all faces and add to Amibe
-			out.nextGroup("allFaces");
-			for (int i = 0; i < numberOfFaces; i++)
-				out.addTriaToGroup(i);
+			int nodeOffset = nodeCounter;
+			Element positions = getElement(e, "GPure:positions");
+			addNodes(positions.getTextContent());
+			Element edges = getElement(e, "GPure:edges");
+			beamOffset += addBeams(edges.getTextContent(), nodeOffset, beamOffset);
 		}
 		out.finish();
 	}
 
-	/**
-	 * <li>Processes START_ELEMENT in GPure file.</li>
-	 * @param streamReader
-	 * @param qName
-	 * @param out
-	 * @throws XMLStreamException
-	 * @throws IOException
-	 */
-	private void processStartElements(XMLStreamReader streamReader, String qName,
-		AmibeWriter.Dim3 out) throws XMLStreamException, IOException
-	{
-		// if group data location is reached ; set flag  groupDataSetActive true.
-		if (false == groupDataSetActive && qName.equalsIgnoreCase("dataType") &&
-			(streamReader.getElementText()).equalsIgnoreCase("partition")) {
-			groupDataSetActive = true;
-			defaultGroupNeeded = false;
-		}
-
-		//Read and convert tesselation face information
-		if (!groupDataSetActive && qName.equalsIgnoreCase("faces")) {
-			convertTessFaceData(streamReader, out);
-		}
-
-		//Read and convert tesselation positions information
-		if (!groupDataSetActive && qName.equalsIgnoreCase("positions")) {
-			convertTessPositionData(streamReader, out);
-		}
-
-		//if group face data location is reached ; set flag  groupFaceLocation true.
-		if (groupDataSetActive && qName.equalsIgnoreCase("faces")) {
-			convertPartitionData(streamReader, groupFaceArray);
-		}
-
-		//if group data name location is reached ; set flag  groupDataName true.
-		if (groupDataSetActive && qName.equalsIgnoreCase("name")) {
-			String groupDataName = streamReader.getElementText();
-			groupDataSetActive = false;
-			fillGroupFaceData(out, groupDataName);
-		}
+	@Override
+	protected String getXSD() {
+		return null;
 	}
 
-	/**
-	 *
-	 * <li>Writes tesselation face data in AmibeWriter object.</li>
-	 * @param streamReader
-	 * @param out
-	 * @throws IOException
-	 * @throws XMLStreamException
-	 */
-	private void convertTessFaceData(XMLStreamReader streamReader,
-		AmibeWriter.Dim3 out) throws IOException, XMLStreamException {
-		StringTokenizer cellId = new StringTokenizer(
-			streamReader.getElementText(), " \n");
-		while (cellId.hasMoreTokens()) {
-			String cellVal1 = cellId.nextToken();
-			int iCellVal1 = Integer.parseInt(cellVal1);
-
-			String cellVal2 = cellId.nextToken();
-			int iCellVal2 = Integer.parseInt(cellVal2);
-
-			String cellVal3 = cellId.nextToken();
-			int iCellVal3 = Integer.parseInt(cellVal3);
-
-			//Add triangle to AmibeWriter Object
-			out.addTriangle(iCellVal1, iCellVal2, iCellVal3);
-			numberOfFaces ++;
-		}
-	}
-
-	/**
-	 *
-	 * <li>Writes tesselation positions data in AmibeWriter object.</li>
-	 * @param streamReader
-	 * @param out
-	 * @throws IOException
-	 * @throws XMLStreamException
-	 */
-	private void convertTessPositionData(XMLStreamReader streamReader,
-		AmibeWriter.Dim3 out) throws IOException, XMLStreamException {
-		StringTokenizer cordinatesAll = new StringTokenizer(
-			streamReader.getElementText(), ", \n");
-		while (cordinatesAll.hasMoreTokens()) {
-			//X-Cordinate
-			String cordVal1 = cordinatesAll.nextToken().trim();
-			double dCordVal1 = Double.parseDouble(cordVal1);
-
-			//Y-Cordinate
-			String cordVal2 = cordinatesAll.nextToken().trim();
-			double dCordVal2 = Double.parseDouble(cordVal2);
-
-			//Z-Cordinate
-			String cordVal3 = cordinatesAll.nextToken().trim();
-			double dCordVal3 = Double.parseDouble(cordVal3);
-
-			//add node to AmibeWriter Obejct
-			out.addNode(dCordVal1, dCordVal2, dCordVal3);
-		}
-	}
-
-	/**
-	 *
-	 * <li>Writes group data in AmibeWriter object.</li>
-	 * @param streamReader
-	 * @param groupFaceArray
-	 * @throws XMLStreamException
-	 */
-	private void convertPartitionData(XMLStreamReader streamReader,
-		TIntArrayList groupFaceArray) throws XMLStreamException {
-		StringTokenizer groupFaceData = new StringTokenizer(
-			streamReader.getElementText(), " \n");
-		while (groupFaceData.hasMoreTokens()) {
-			String faceVal = groupFaceData.nextToken().trim();
-			if (!(faceVal.isEmpty())) {
-				int faceValue = Integer.parseInt(faceVal);
-				groupFaceArray.add(faceValue);
-			}
-		}
-		// add the face information from current group data set to  groupFaceDataArray
-		// groupFaceDataArray.add(new ArrayList<Integer>(groupFaceArray));
-		// groupFaceArray.clear();
-	}
-
-	/**
-	 * Reads the face information array for group data and pass it to AmibeWriter
-	 * @param out
-	 * @throws IOException
-	 */
-	private void fillGroupFaceData(AmibeWriter.Dim3 out, String groupDataName) throws IOException {
-		if (!groupDataName.isEmpty()) {
-			out.nextGroup(groupDataName);
-			for (int j = 0; j < groupFaceArray.size(); j++) {
-				// Fill group information
-				out.addTriaToGroup(groupFaceArray.get(j));
-			}
-			groupDataName = "";
-			groupFaceArray.clear();
-		}
-	}
-
-	/**
-	 *
-	 * @param args
-	 * @throws IOException
-	 */
-	public static void main(String args[]) throws IOException {
+	public static void main(final String[] args) {
 		try {
-			GPure2Amibe g = new GPure2Amibe();
-			String inFile = "/tmp/zebra37931.tmp/zebra-out.gpure";
-			String outDir = "/tmp/pouet.amibe";
-			if (args.length > 0) {
-				inFile = args[0];
-			}
-			if (args.length > 1) {
-				outDir = args[1];
-			}
-			g.convert(inFile, outDir);
-		} catch (Exception e) {
-			LOGGER.log(Level.SEVERE, null, e);
+			new GPure2Amibe("/tmp/testamibe").read(new File("/tmp/zebra7116.tmp/zebra-out.gpure"));
+		} catch (SAXException ex) {
+			Logger.getLogger(GPure2Amibe.class.getName()).log(Level.SEVERE, null,
+				ex);
+		} catch (IOException ex) {
+			Logger.getLogger(GPure2Amibe.class.getName()).log(Level.SEVERE, null,
+				ex);
 		}
+	}
+
+	private void addNodes(String textContent) throws IOException {
+		StringTokenizer cordinatesAll = new StringTokenizer(textContent, ", \n");
+		while (cordinatesAll.hasMoreTokens()) {
+			out.addNode(Double.parseDouble(cordinatesAll.nextToken()),
+				Double.parseDouble(cordinatesAll.nextToken()),
+				Double.parseDouble(cordinatesAll.nextToken()));
+			nodeCounter ++;
+		}
+	}
+
+	private void addTriangles(String textContent) throws IOException {		
+		StringTokenizer cordinatesAll = new StringTokenizer(textContent, " \n");
+		while (cordinatesAll.hasMoreTokens()) {
+			out.addTriangle(Integer.parseInt(cordinatesAll.nextToken()),
+				Integer.parseInt(cordinatesAll.nextToken()),
+				Integer.parseInt(cordinatesAll.nextToken()));
+		}
+	}
+
+	private void addToGroup(String textContent) throws IOException {
+		StringTokenizer cordinatesAll = new StringTokenizer(textContent, " \n");
+		while (cordinatesAll.hasMoreTokens()) {
+			out.addTriaToGroup(Integer.parseInt(cordinatesAll.nextToken()));
+		}
+	}
+
+	private int addBeams(String textContent, int nodeOffset, int beamOffset) throws IOException {
+		StringTokenizer cordinatesAll = new StringTokenizer(textContent, " \n");
+		int id = 0;
+		out.nextGroup(""+beamOffset);
+		while (cordinatesAll.hasMoreTokens()) {
+			out.addBeam(
+				nodeOffset + Integer.parseInt(cordinatesAll.nextToken()),
+				nodeOffset + Integer.parseInt(cordinatesAll.nextToken()));
+			out.addBeamToGroup(beamOffset+id);
+			id ++;
+		}
+		return id;
 	}
 }
