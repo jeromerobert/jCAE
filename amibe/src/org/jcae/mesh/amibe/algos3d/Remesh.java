@@ -204,12 +204,8 @@ public class Remesh
 			new QEMDecimateHalfEdge(liaison, decimateOptions).compute();
 		}
 
-		// Compute bounding box
 		boolean ridges = false;
 		boolean features = false;
-		double [] bbox = new double[6];
-		bbox[0] = bbox[1] = bbox[2] = Double.MAX_VALUE;
-		bbox[3] = bbox[4] = bbox[5] = - (Double.MAX_VALUE / 2.0);
 		for (Triangle f: mesh.getTriangles())
 		{
 			if (f.hasAttributes(AbstractHalfEdge.OUTER))
@@ -218,23 +214,10 @@ public class Remesh
 				ridges = true;
 			if (!features && f.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 				features = true;
-			for (Vertex v : f.vertex)
-			{
-				double[] xyz = v.getUV();
-				for (int k = 2; k >= 0; k--)
-				{
-					if (xyz[k] < bbox[k])
-						bbox[k] = xyz[k];
-					if (xyz[k] > bbox[3+k])
-						bbox[3+k] = xyz[k];
-				}
-			}
 		}
-		LOGGER.fine("Bounding box: lower("+bbox[0]+", "+bbox[1]+", "+bbox[2]+"), upper("+bbox[3]+", "+bbox[4]+", "+bbox[5]+")");
 		hasRidges = ridges;
 		hasFeatureEdges = ridges | features;
 
-		kdTree = new KdTree<Vertex>(bbox);
 		Collection<Vertex> nodeset = mesh.getNodes();
 		if (nodeset == null)
 		{
@@ -247,11 +230,30 @@ public class Remesh
 			}
 		}
 
+		// Compute bounding box
+		double [] bbox = new double[6];
+		bbox[0] = bbox[1] = bbox[2] = Double.MAX_VALUE;
+		bbox[3] = bbox[4] = bbox[5] = - (Double.MAX_VALUE / 2.0);
+		for (Vertex v : nodeset)
+		{
+			double[] xyz = v.getUV();
+			for (int k = 2; k >= 0; k--)
+			{
+				if (xyz[k] < bbox[k])
+					bbox[k] = xyz[k];
+				if (xyz[k] > bbox[3+k])
+					bbox[3+k] = xyz[k];
+			}
+		}
+		LOGGER.fine("Bounding box: lower("+bbox[0]+", "+bbox[1]+", "+bbox[2]+"), upper("+bbox[3]+", "+bbox[4]+", "+bbox[5]+")");
+		kdTree = new KdTree<Vertex>(bbox);
 		for (Vertex v : nodeset)
 			kdTree.add(v);
 
 		for (Vertex v : nodeset)
 		{
+			if (null == v.getLink())
+				continue;
 			Triangle t = liaison.getBackgroundTriangle(v);
 			double d0 = v.sqrDistance3D(t.vertex[0]);
 			double d1 = v.sqrDistance3D(t.vertex[1]);
