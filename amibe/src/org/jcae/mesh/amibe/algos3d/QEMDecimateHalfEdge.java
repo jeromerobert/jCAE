@@ -390,6 +390,14 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 	public HalfEdge processEdge(HalfEdge current, double costCurrent)
 	{
 		current = uniqueOrientation(current);
+		Vertex v1 = current.origin();
+		Vertex v2 = current.destination();
+		// If v1 or v2 are on a beam, they must not be replaced by v3,
+		// otherwise beams are no more connected to triangles.
+		if (!v1.isMutable())
+			v3 = v1;
+		else if (!v2.isMutable())
+			v3 = v2;
 		if (LOGGER.isLoggable(Level.FINE))
 		{
 			LOGGER.fine("Contract edge: "+current+" into "+v3+"  cost="+costCurrent);
@@ -438,18 +446,19 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		//  By convention, collapse() returns edge (v3, apex)
 		assert (!current.hasAttributes(AbstractHalfEdge.OUTER));
 		final Vertex apex = current.apex();
-		Vertex v1 = current.origin();
-		Vertex v2 = current.destination();
-		// If v1 and v2 are manifold, they are removed from the
-		// mesh and can be reused.
+		// If v1 or v2 are manifold, they are removed from the
+		// mesh and can be reused.  There is a problem vith vertex
+		// on beams, they may be considered as manifold whereas they
+		// are not.  Add an isMutable() test, but ideally isManifold()
+		// should get fixed.
 		Vertex vFree = null;
 		Quadric3DError qFree = null;
-		if (v1.isManifold())
+		if (v1.isManifold() && v1.isMutable())
 		{
 			vFree = v1;
 			qFree = quadricMap.remove(vFree);
 		}
-		if (v2.isManifold())
+		if (v2.isManifold() && v2.isMutable())
 		{
 			vFree = v2;
 			qFree = quadricMap.remove(vFree);
