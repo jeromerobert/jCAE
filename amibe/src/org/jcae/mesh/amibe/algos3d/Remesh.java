@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2009,2010, by EADS France
+    Copyright (C) 2009,2010,2011, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -46,6 +46,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -242,8 +243,7 @@ public class Remesh
 			{
 				if (f.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
-				for (Vertex v: f.vertex)
-					nodeset.add(v);
+				nodeset.addAll(Arrays.asList(f.vertex));
 			}
 		}
 
