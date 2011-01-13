@@ -74,6 +74,23 @@ public class RemeshPolyline
 		LOGGER.log(Level.FINE, "Polyline approximate length: {0}", abscissa);
 	}
 
+	public RemeshPolyline(Mesh m, List<Vertex> vertices, Remesh.AnalyticMetricInterface analytic)
+	{
+		mesh = m;
+		double abscissa = 0;
+		Vertex last = null;
+		for (Vertex v : vertices)
+		{
+			bgWire.add(v);
+			double [] pos = v.getUV();
+			metricsMap.put(v, new EuclidianMetric3D(analytic.getTargetSize(pos[0], pos[1], pos[2])));
+			if (last != null)
+				abscissa += v.distance3D(last);
+			last = v;
+		}
+		LOGGER.log(Level.FINE, "Polyline approximate length: {0}", abscissa);
+	}
+
 	/**
 	 * Discretize the polyline and return the sorted list of vertices.
 	 *
