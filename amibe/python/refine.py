@@ -1,14 +1,20 @@
 
 # jCAE
 from org.jcae.mesh.amibe.ds import Mesh, AbstractHalfEdge
-from org.jcae.mesh.amibe.algos3d import Remesh, QEMDecimateHalfEdge, SwapEdge, PointMetric
+from org.jcae.mesh.amibe.algos3d import Remesh, QEMDecimateHalfEdge, SwapEdge, PointMetric, RemeshPolyline
 from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.projection import MeshLiaison
+from org.jcae.mesh.amibe.metrics import EuclidianMetric3D
 from org.jcae.mesh.xmldata import MeshReader, MeshWriter
 
 # Java
 from java.util import HashMap
+from java.util import ArrayList
+from java.util import LinkedHashMap
 from java.lang import String, Math
+
+# GNU trove
+from gnu.trove import TIntArrayList
 
 # Python
 import sys
@@ -127,5 +133,58 @@ elif setAnalytic:
 	algo.setAnalyticMetric(RemeshMetric());
 
 algo.compute();
-MeshWriter.writeObject3D(algo.getOutputMesh(), outDir, String())
+#MeshWriter.writeObject3D(algo.getOutputMesh(), outDir, String())
 
+# Now compute beams
+bgroupMap = LinkedHashMap()
+newMesh = algo.getOutputMesh()
+#print "beams size: "+str(mesh.getBeams().size())
+for i in xrange(newMesh.getBeams().size() / 2):
+	bId = newMesh.getBeamGroup(i)
+	listBeamId = bgroupMap.get(bId)
+	if listBeamId is None:
+		listBeamId = TIntArrayList(100)
+		bgroupMap.put(bId, listBeamId)
+	listBeamId.add(i)
+
+vertices = ArrayList(newMesh.getBeams())
+newMesh.resetBeams()
+mapGroupToListOfPolylines = LinkedHashMap()
+for bId in bgroupMap.keySet():
+	listBeamId = bgroupMap.get(bId)
+	listOfPolylines = ArrayList()
+	polyline = ArrayList()
+	lastVertex = None
+	for i in xrange(listBeamId.size()):
+		b = listBeamId.get(i) 
+		if lastVertex != vertices.get(2*b):
+			# New polyline
+			polyline = ArrayList()
+			listOfPolylines.add(polyline)
+			polyline.add(vertices.get(2*b))
+		lastVertex = vertices.get(2*b+1)
+		polyline.add(lastVertex)
+	#print "Group "+str(bId)+" contains "+str(listOfPolylines.size())+" polylines and "+str(listBeamId.size()+1)+" vertices"
+	mapGroupToListOfPolylines.put(bId, listOfPolylines)
+
+for bId in bgroupMap.keySet():
+	listBeamId = bgroupMap.get(bId)
+	listOfPolylines = mapGroupToListOfPolylines.get(bId)
+	nrPoly = listOfPolylines.size()
+	for numPoly in xrange(nrPoly):
+		polyline = listOfPolylines.get(numPoly)
+		if options.point_metric_file:
+			met = PointMetric(options.size, options.point_metric_file)
+		elif setAnalytic:
+			met = RemeshMetric()
+		else:
+			met = ArrayList()
+			for v in polyline:
+				met.add(EuclidianMetric3D(options.size))
+		#print "Remesh polyline "+str(numPoly+1)+"/"+str(nrPoly)+" of group "+str(bId)+"/"+str(bgroupMap.size())+" "+str(polyline.size())+" vertices"
+		result = RemeshPolyline(newMesh, polyline, met).compute()
+		for i in xrange(result.size() - 1):
+			newMesh.addBeam(result.get(i), result.get(i+1), bId)
+		#print "  New polyline: "+str(result.size())+" vertices"
+
+MeshWriter.writeObject3D(newMesh, outDir, "")
