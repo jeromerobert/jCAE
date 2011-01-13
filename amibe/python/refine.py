@@ -75,10 +75,7 @@ xmlDir = args[0]
 outDir = args[1]
 
 mtb = MeshTraitsBuilder.getDefault3D()
-if options.decimateSize or options.decimateTarget:
-	mtb.addNodeSet()
-else:
-	mtb.addNodeList()
+mtb.addNodeSet()
 mesh = Mesh(mtb)
 MeshReader.readObject3D(mesh, xmlDir)
 
