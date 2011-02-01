@@ -20,7 +20,6 @@
 
 package org.jcae.mesh.xmldata;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.File;
 import java.io.StringReader;
@@ -52,6 +51,7 @@ public class XMLHelper
 		throws ParserConfigurationException, SAXException, IOException
 	{
 		DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
+		factory.setNamespaceAware(true);
 		DocumentBuilder builder=factory.newDocumentBuilder();
 		builder.setEntityResolver(new ClassPathEntityResolver());
 		Document document=builder.parse(file);
@@ -64,6 +64,7 @@ public class XMLHelper
 		throws ParserConfigurationException, SAXException, IOException
 	{
 		DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
+		factory.setNamespaceAware(true);
 		DocumentBuilder builder=factory.newDocumentBuilder();
 		Document subDoc=builder.parse(new InputSource(new StringReader(string)));
 		Element e=subDoc.getDocumentElement();		
