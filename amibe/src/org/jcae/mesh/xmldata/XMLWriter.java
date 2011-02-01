@@ -20,10 +20,9 @@
 
 package org.jcae.mesh.xmldata;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -55,35 +54,23 @@ public class XMLWriter {
 
 	private final static Logger LOGGER = Logger.getLogger(XMLWriter.class.getName());
 	public final XMLStreamWriter out;
+	private final String filename;
 	private Validator validator;
 	private Document document;
-	private StreamResult streamResult;
-	public XMLWriter(String filename, URL validator) throws IOException
+
+	public XMLWriter(String f, URL xsdPath) throws IOException
 	{
 		//Use a writer else indentation do not work
 		//http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6337981
-		this(new StreamResult(new FileWriter(filename)), validator);
-	}
-
-	public XMLWriter(OutputStream out, URL validator) throws IOException
-	{
-		//Use a writer else indentation do not work
-		//http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6337981
-		this(new StreamResult(new OutputStreamWriter(out)), validator);
-	}
-
-	private XMLWriter(StreamResult streamResult, URL validator)
-	{
 		XMLStreamWriter o = null;
 		try {
-			this.streamResult = streamResult;
 			document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
 			DOMResult result = new DOMResult(document);
 			o = XMLOutputFactory.newInstance().createXMLStreamWriter(result);
 			o.writeStartDocument();
 
 			Schema xsd = SchemaFactory.newInstance(
-				XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema(validator);
+				XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema(xsdPath);
 			this.validator = xsd.newValidator();
 		} catch (SAXException ex) {
 			LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
@@ -93,6 +80,7 @@ public class XMLWriter {
 			LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
 		}
 		out = o;
+		filename = f;
 	}
 
 	public void close() throws SAXException, IOException
@@ -104,10 +92,13 @@ public class XMLWriter {
 			tf.setAttribute("indent-number", 2);
 			Transformer t = tf.newTransformer();
 			t.setOutputProperty(OutputKeys.INDENT, "yes");
+			StreamResult streamResult = new StreamResult(new FileWriter(filename));
 			t.transform(source, streamResult);
 			streamResult.getWriter().close();
 			//We validate after writting the file to be able to debug it.
-			validator.validate(source);
+			validator.validate(new DOMSource(XMLHelper.parseXML(new File(filename))));
+		} catch (ParserConfigurationException ex) {
+			Logger.getLogger(XMLWriter.class.getName()).log(Level.SEVERE, null, ex);
 		} catch (TransformerException ex) {
 			LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
 		} catch (XMLStreamException ex) {
