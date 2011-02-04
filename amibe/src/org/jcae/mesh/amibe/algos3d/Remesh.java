@@ -801,8 +801,10 @@ public class Remesh
 				}
 			}
 			if (cnt < 0)
+			{
 				nrFailedInterpolations++;
-			return nrNodes;
+				return nrNodes;
+			}
 		}
 		return nrNodes;
 	}
