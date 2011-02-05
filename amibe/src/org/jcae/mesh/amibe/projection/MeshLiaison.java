@@ -288,6 +288,19 @@ public class MeshLiaison
 			move(v, v.getUV());
 	}
 
+	public AbstractHalfEdge findSurroundingTriangleDebug(Vertex v, boolean background)
+	{
+		LocationFinder lf = new LocationFinder(v.getUV(), background ? backgroundMesh : currentMesh);
+		lf.walkDebug();
+		int i = lf.localEdgeIndex;
+		AbstractHalfEdge ret = lf.current.getAbstractHalfEdge();
+		if (ret.origin() == lf.current.vertex[i])
+			ret = ret.next();
+		else if (ret.destination() == lf.current.vertex[i])
+			ret = ret.prev();
+		return ret;
+	}
+
 	public AbstractHalfEdge findSurroundingTriangle(Vertex v, Vertex start, double maxError, boolean background)
 	{
 		Triangle t = null;
