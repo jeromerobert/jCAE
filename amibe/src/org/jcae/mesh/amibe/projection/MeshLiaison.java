@@ -438,6 +438,12 @@ public class MeshLiaison
 		return null;
 	}
 
+	public static double getDistanceVertexTriangle(Vertex v, Triangle tri)
+	{
+		int[] index = new int[2];
+		return Math.sqrt(sqrDistanceVertexTriangle(v.getUV(), tri, index));
+	}
+
 	/**
 	 * Compute squared distance between a point and a triangle.  See
 	 *   http://www.geometrictools.com/Documentation/DistancePoint3Triangle3.pdf
