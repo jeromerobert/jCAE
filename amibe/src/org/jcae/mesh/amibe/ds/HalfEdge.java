@@ -500,6 +500,8 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		Vertex o = origin();
 		Vertex d = destination();
 		Vertex a = apex();
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("swap edge ("+o+" "+d+")");
 		/*
 		 *            d                    d
 		 *            .                    .
