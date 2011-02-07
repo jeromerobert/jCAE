@@ -43,9 +43,11 @@ public final class SwapAction extends AlgoAction
 			String meshDirectory = ado.getMeshDirectory();
 			ArrayList<String> l = new ArrayList<String>();
 			if(propertySheet.isPreserveGroups())
-				l.add("--preserveGroups");
+				l.add("--preserveGroups");			
 			l.add("--coplanarity");
 			l.add(Double.toString(propertySheet.getCoplanarity()));
+			l.add("--minQualityFactor");
+			l.add(Double.toString(propertySheet.getMinQualityFactor()));
 			l.add(meshDirectory);
 			l.add(meshDirectory);
 			return l;

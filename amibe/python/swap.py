@@ -23,6 +23,9 @@ parser = OptionParser(usage="amibebatch %s [OPTIONS] %s\n\n%s" % cmd,
 parser.add_option("-c", "--coplanarity", metavar="FLOAT", default=0.95,
                   action="store", type="float", dest="coplanarity",
 		  help="minimum dot product of face normals allowed for swapping an edge (default 0.95)")
+parser.add_option("-q", "--minQualityFactor", metavar="FLOAT", default=0,
+                  action="store", type="float", dest="min_quality_factor",
+		  help="Swap edge only if the triangles quality is multiplied by the given factor (default 0).")
 parser.add_option("-g", "--preserveGroups", action="store_true", dest="preserveGroups",
                   help="edges adjacent to two different groups are handled like free edges")
 parser.add_option("-I", "--immutable-border",
@@ -50,6 +53,8 @@ if options.preserveGroups:
 
 opts = HashMap()
 opts.put("coplanarity", str(options.coplanarity))
+if options.min_quality_factor:
+    opts.put("minQualityFactor", str(options.min_quality_factor))
 sm = SwapEdge(liaison, opts)
 sm.setProgressBarStatus(10000)
 sm.compute()

@@ -72,7 +72,7 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 				minCos = Double.parseDouble(val);
 				LOGGER.fine("Minimum dot product of face normals allowed for swapping an edge: "+minCos);
 			}
-			else if(key.equals("qualityFactor"))
+			else if(key.equals("minQualityFactor"))
 			{
 				minQualityFactor = Double.parseDouble(val);
 			}

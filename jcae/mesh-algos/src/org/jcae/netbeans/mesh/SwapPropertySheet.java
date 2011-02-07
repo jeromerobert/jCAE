@@ -78,6 +78,9 @@ public class SwapPropertySheet extends PropertySheet {
 			r.put(new MyProperty<Double>(Double.TYPE, "coplanarity",
 				"Coplanarity",
 				"minimum dot product of face normals allowed for swapping an edge."));
+			r.put(new MyProperty<Double>(Double.TYPE, "minQualityFactor",
+				"Minimal quality factor",
+				"Swap edge only if the triangles quality is multiplied by the given factor."));
 		} catch (NoSuchMethodException ex) {
 			Exceptions.printStackTrace(ex);
 		}
@@ -96,7 +99,8 @@ public class SwapPropertySheet extends PropertySheet {
 
 	private boolean preserveGroups = true;
 	private double coplanarity = 0.95;
-
+	private double minQualityFactor = 0;
+	
 	public double getCoplanarity() {
 		return coplanarity;
 	}
@@ -115,5 +119,13 @@ public class SwapPropertySheet extends PropertySheet {
 	 * @param preserveGroups the preserveGroups to set
 	 */ public void setPreserveGroups(boolean preserveGroups) {
 		this.preserveGroups = preserveGroups;
+	}
+
+	public double getMinQualityFactor() {
+		return minQualityFactor;
+	}
+
+	public void setMinQualityFactor(double minQualityFactor) {
+		this.minQualityFactor = minQualityFactor;
 	}
 }
