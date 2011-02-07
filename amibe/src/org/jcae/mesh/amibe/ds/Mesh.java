@@ -1419,7 +1419,7 @@ public class Mesh implements Serializable
 	{
 		AbstractHalfEdge ret = e.split(this, v);
 		if (traitsBuilder.hasTrace())
-			traitsBuilder.getTrace(traits).vertexSplit(e, v);
+			traitsBuilder.getTrace(traits).vertexSplit(ret, v);
 		return ret;
 	}
 	
