@@ -34,8 +34,6 @@ public class TraceRecord implements TraceInterface
 	private static final String MANY_SPACES = "                                                                                  ";
 	private String logName;
 	private PrintStream out = System.out;
-	private PrintStream mainOut = System.out;
-	private String meshVariable = "mesh";
 	private boolean disabled;
 	private int indentLevel;
 	private String tab = "";
@@ -59,36 +57,38 @@ public class TraceRecord implements TraceInterface
 		} catch (FileNotFoundException ex) {
 			LOGGER.log(Level.SEVERE, null, ex);
 		}
-		mainOut = out;
 	}
 
 	public void createMesh(String meshName, Mesh mesh)
 	{
-		meshVariable = meshName;
-		println(mainOut, "import org.jcae.mesh.amibe.traits.MeshTraitsBuilder");
-		println(mainOut, "import org.jcae.mesh.xmldata.MeshWriter");
-		println(mainOut, "import org.jcae.mesh.amibe.ds.Mesh");
+		String meshVariable = meshName;
+		println("import org.jcae.mesh.amibe.traits.MeshTraitsBuilder");
+		println("import org.jcae.mesh.xmldata.MeshWriter");
+		println("import org.jcae.mesh.amibe.ds.Mesh");
 
-		println(mainOut, "cntModule = 0");
-		println(mainOut, "mods = []");
-		println(mainOut, "while True:");
+		println("cntModule = 0");
+		println("mods = []");
+		println("while True:");
 		startScope();
-		println(mainOut, "try:");
+		println("try:");
 		startScope();
-		println(mainOut, "mods.append(__import__(\""+logName+"_cl%d\" % cntModule))");
-		println(mainOut, "cntModule += 1");
+		println("mods.append(__import__(\""+logName+"_cl%d\" % cntModule))");
+		println("cntModule += 1");
 		endScope();
-		println(mainOut, "except ImportError:");
+		println("except ImportError:");
 		startScope();
-		println(mainOut, "break");
+		println("break");
 		endScope();
 		endScope();
 
-		println(mainOut, "mtb = org.jcae.mesh.amibe.traits.MeshTraitsBuilder.getDefault3D()");
-		println(mainOut, "mtb.addTraceReplay()");
-		println(mainOut, "mtb.addNodeSet()");
-		println(mainOut, meshVariable+" = org.jcae.mesh.amibe.ds.Mesh(mtb)");
-		println(mainOut, "mods[0].c("+meshVariable+")");
+		println("mtb = org.jcae.mesh.amibe.traits.MeshTraitsBuilder.getDefault3D()");
+		println("mtb.addTraceReplay()");
+		println("mtb.addNodeSet()");
+		println(meshVariable+" = org.jcae.mesh.amibe.ds.Mesh(mtb)");
+		println("[m.c("+meshVariable+") for m in mods]");
+		println("org.jcae.mesh.xmldata.MeshWriter.writeObject3D("+meshVariable+
+			", \""+logName+"-out\""+", None)");
+		out.close();
 
 		try {
 			out = new PrintStream(new FileOutputStream(logName+"_cl"+cntClasses+".py"));
@@ -342,7 +342,7 @@ public class TraceRecord implements TraceInterface
 			endScope();
 			endScope();
 			out.close();
-			mainOut.println("mods["+cntClasses+"].c("+meshVariable+")");
+
 			try {
 				out = new PrintStream(new FileOutputStream(logName+"_cl"+cntClasses+".py"));
 			} catch (FileNotFoundException ex) {
@@ -360,21 +360,11 @@ public class TraceRecord implements TraceInterface
 
 	public void println(String x)
 	{
-		println(out, x);
-	}
-
-	private void println(PrintStream o, String x)
-	{
 		if (!disabled)
 		{
-			o.println(tab+x);
+			out.println(tab+x);
 			cntLines++;
 		}
-	}
-
-	public void printMeshln(String x)
-	{
-		println(meshVariable+x);
 	}
 
 	public void finish()
@@ -383,9 +373,6 @@ public class TraceRecord implements TraceInterface
 		endScope();
 		endScope();
 		out.close();
-		println(mainOut, "org.jcae.mesh.xmldata.MeshWriter.writeObject3D("+meshVariable+
-			", \""+logName+"-out\""+", None)");
-		mainOut.close();
 	}
 
 }
