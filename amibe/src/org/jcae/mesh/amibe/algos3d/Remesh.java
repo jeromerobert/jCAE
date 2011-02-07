@@ -384,6 +384,8 @@ public class Remesh
 		int nrIter = 0;
 		int processed = 0;
 		double curMinlen = minlen;
+		if (allowNearNodes)
+			curMinlen *= 0.01;
 		// Number of nodes which were skipped
 		int skippedNodes = 0;
 		AbstractHalfEdge h = null;
@@ -502,7 +504,7 @@ public class Remesh
 							assert metric != null;
 							double[] uv = v.getUV();
 							Vertex n = kdTree.getNearestVertex(metric, uv);
-							if (allowNearNodes || interpolatedDistance(v, metric, n, metrics.get(n)) > curMinlen)
+							if (interpolatedDistance(v, metric, n, metrics.get(n)) > curMinlen)
 							{
 								kdTree.add(v);
 								metrics.put(v, metric);
@@ -536,6 +538,8 @@ public class Remesh
 				}
 				// Reset curMinlen to minlen
 				curMinlen = minlen;
+				if (allowNearNodes)
+					curMinlen *= 0.01;
 
 				for (Vertex v : nodes)
 				{
