@@ -86,6 +86,8 @@ public class MeshLiaison
 		}
 		
 		this.currentMesh = new Mesh(mtb);
+		this.currentMesh.getTrace().setDisabled(this.backgroundMesh.getTrace().getDisabled());
+
 		// Create vertices of currentMesh
 		Map<Vertex, Vertex> mapBgToCurrent = new HashMap<Vertex, Vertex>(backgroundNodeset.size()+1);
 		for (Vertex v : backgroundNodeset)

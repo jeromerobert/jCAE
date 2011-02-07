@@ -308,6 +308,16 @@ public class Mesh implements Serializable
 	}
 
 	/**
+	 * Returns the Trace instance associated with this mesh.
+	 *
+	 * @return the Trace instance associated with this mesh.
+	 */
+	public final TraceInterface getTrace()
+	{
+		return traitsBuilder.getTrace(traits);
+	}
+
+	/**
 	 * Returns the Kd-tree associated with this mesh.
 	 *
 	 * @return the Kd-tree associated with this mesh.
@@ -620,6 +630,8 @@ public class Mesh implements Serializable
 			list.clear();
 		// Add outer triangles
 		triangleList.addAll(newTri);
+		if (traitsBuilder.hasTrace())
+			traitsBuilder.getTrace(traits).println("self.m.buildAdjacency()");
 	}
 
 	private Map<Vertex, ArrayList<Triangle>> getMapVertexLinks()
@@ -934,6 +946,8 @@ public class Mesh implements Serializable
 		}
 		if (toReturn > 0 && logger.isLoggable(Level.CONFIG))
 			logger.log(Level.CONFIG, "Found "+toReturn+" sharp edges");
+		if (traitsBuilder.hasTrace())
+			traitsBuilder.getTrace(traits).println("self.m.buildRidges("+coplanarity+")");
 		return toReturn;
 	}
 
@@ -1030,6 +1044,8 @@ public class Mesh implements Serializable
 		if (toReturn > 0 && logger.isLoggable(Level.CONFIG))
 			logger.log(Level.CONFIG, "Add virtual boundaries for "+toReturn+" edges");
 		rebuildVertexLinks();
+		if (traitsBuilder.hasTrace())
+			traitsBuilder.getTrace(traits).println("self.m.buildGroupBoundaries()");
 		return toReturn;
 	}
 
@@ -1340,6 +1356,8 @@ public class Mesh implements Serializable
 			}
 		}
 
+		if (traitsBuilder.hasTrace())
+			traitsBuilder.getTrace(traits).println("self.m.buildPartition()");
 
 		return countPart;
 	}
@@ -1368,6 +1386,8 @@ public class Mesh implements Serializable
 	 */
 	public final AbstractHalfEdge edgeCollapse(AbstractHalfEdge e, Vertex v)
 	{
+		if (traitsBuilder.hasTrace())
+			traitsBuilder.getTrace(traits).edgeCollapse(e, v);
 		return e.collapse(this, v);
 	}
 	
@@ -1379,7 +1399,10 @@ public class Mesh implements Serializable
 	 */
 	public final AbstractHalfEdge vertexSplit(AbstractHalfEdge e, Vertex v)
 	{
-		return e.split(this, v);
+		AbstractHalfEdge ret = e.split(this, v);
+		if (traitsBuilder.hasTrace())
+			traitsBuilder.getTrace(traits).vertexSplit(e, v);
+		return ret;
 	}
 	
 	/**
@@ -1391,6 +1414,8 @@ public class Mesh implements Serializable
 	 */
 	public final AbstractHalfEdge edgeSwap(AbstractHalfEdge e)
 	{
+		if (traitsBuilder.hasTrace())
+			traitsBuilder.getTrace(traits).edgeSwap(e);
 		return e.swap(this);
 	}
 	

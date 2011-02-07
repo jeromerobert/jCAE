@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2006, by EADS CRC
-    Copyright (C) 2007,2009, by EADS France
+    Copyright (C) 2007,2009,2011, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,10 @@ package org.jcae.mesh.amibe.traits;
 
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.TraceInterface;
+import org.jcae.mesh.amibe.ds.TraceNull;
+import org.jcae.mesh.amibe.ds.TraceRecord;
+import org.jcae.mesh.amibe.ds.TraceReplay;
 import org.jcae.mesh.amibe.metrics.KdTree;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -34,11 +38,14 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	private static final int BITNODES     = 9;
 	private static final int BITGROUPS    = 10;
 	private static final int BITKDTREE    = 11;
+	private static final int BITTRACE     = 12;
 
 	private static final int TRIANGLES        = 1 << BITTRIANGLES;
 	private static final int NODES            = 1 << BITNODES;
 	private static final int GROUPLIST        = 1 << BITGROUPS;
 	private static final int KDTREE           = 1 << BITKDTREE;
+	private static final int TRACE            = 1 << BITTRACE;
+	private static final int TRACEREPLAY      = 1 << 29;
 	private static final int TRIANGLESET      = 1 << 30;
 	private static final int NODESET          = 1 << 31;
 
@@ -47,6 +54,8 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	private TriangleTraitsBuilder triangleTraitsBuilder = new TriangleTraitsBuilder();
 
 	private int dimension;
+
+	private final TraceInterface singletonTraceNull = new TraceNull();
 
 	/**
 	 * Constructor.
@@ -152,6 +161,11 @@ public class MeshTraitsBuilder extends TraitsBuilder
 		return hasCapability(NODES);
 	}
 
+	public final boolean hasTrace()
+	{
+		return hasCapability(TRACE);
+	}
+
 	/**
 	 * Adds group list to mesh traits.
 	 *
@@ -201,6 +215,31 @@ public class MeshTraitsBuilder extends TraitsBuilder
 		return null;
 	}
 
+	/**
+	 * Adds {@link KdTree} instance to mesh traits.
+	 *
+	 * @return  this instance
+	 */
+	public final MeshTraitsBuilder addTraceRecord()
+	{
+		attributes |= TRACE;
+		attributes &= ~TRACEREPLAY;
+		return this;
+	}
+
+	public final MeshTraitsBuilder addTraceReplay()
+	{
+		attributes |= TRACE | TRACEREPLAY;
+		return this;
+	}
+
+	public final TraceInterface getTrace(Traits t)
+	{
+		if ((attributes & TRACE) != 0)
+			return (TraceInterface) t.array[index[BITTRACE]];
+		return singletonTraceNull;
+	}
+
 	@Override
 	protected void subInitTraits(Traits t)
 	{
@@ -217,6 +256,13 @@ public class MeshTraitsBuilder extends TraitsBuilder
 			t.array[index[BITGROUPS]] = new ArrayList();
 		if ((attributes & KDTREE) != 0)
 			t.array[index[BITKDTREE]] = new KdTree(dimension);
+		if ((attributes & TRACE) != 0)
+		{
+			if ((attributes & TRACEREPLAY) != 0)
+				t.array[index[BITTRACE]] = new TraceReplay();
+			else
+				t.array[index[BITTRACE]] = new TraceRecord();
+		}
 	}
 
 	/**
