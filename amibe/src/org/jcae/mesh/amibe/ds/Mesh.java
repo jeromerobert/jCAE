@@ -634,6 +634,7 @@ public class Mesh implements Serializable
 		{
 			traitsBuilder.getTrace(traits).println("self.m.buildAdjacency()");
 			traitsBuilder.getTrace(traits).addAdjacentTriangles(this);
+			traitsBuilder.getTrace(traits).println("# End: self.m.buildAdjacency()");
 		}
 	}
 
@@ -1057,6 +1058,7 @@ public class Mesh implements Serializable
 			}
 			traitsBuilder.getTrace(traits).println("self.m.buildGroupBoundaries(groups)");
 			traitsBuilder.getTrace(traits).addAdjacentTriangles(this);
+			traitsBuilder.getTrace(traits).println("# End: self.m.buildGroupBoundaries()");
 		}
 		return toReturn;
 	}
@@ -1372,6 +1374,7 @@ public class Mesh implements Serializable
 		{
 			traitsBuilder.getTrace(traits).println("self.m.buildPartition()");
 			traitsBuilder.getTrace(traits).addAdjacentTriangles(this);
+			traitsBuilder.getTrace(traits).println("# End: self.m.buildPartition()");
 		}
 
 		return countPart;
