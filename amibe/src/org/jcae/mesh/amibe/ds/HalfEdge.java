@@ -392,6 +392,14 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		return ret;
 	}
 	
+	public final double checkSwap3D(Mesh mesh, double minCos)
+	{
+		return checkSwap3D(mesh, minCos, 0.0);
+	}
+	public final double checkSwap3D(Mesh mesh, double minCos, double maxLength)
+	{
+		return checkSwap3D(mesh, minCos, 0.0, 0);
+	}
 	/**
 	 * Checks the dihedral angle of an edge.
 	 * Warning: this method uses temp[0], temp[1], temp[2] and temp[3] temporary arrays.
@@ -399,14 +407,12 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @param minCos  if the dot product of the normals to adjacent
 	 *    triangles is lower than minCos, then <code>-1.0</code> is
 	 *    returned.
+	 * @param minQualityFactor If the quality of the generated triangle is not
+	 *    multiplied by this factor, the returned value is -1
 	 * @return the minimum quality of the two triangles generated
-	 *    by swapping this edge.
+	 *    by swapping this edge or -1 if the swap must not be done
 	 */
-	public final double checkSwap3D(Mesh mesh, double minCos)
-	{
-		return checkSwap3D(mesh, minCos, 0.0);
-	}
-	public final double checkSwap3D(Mesh mesh, double minCos, double maxLength)
+	public final double checkSwap3D(Mesh mesh, double minCos, double maxLength, double minQualityFactor)
 	{
 		double invalid = -1.0;
 		if (hasAttributes(IMMUTABLE))
@@ -465,7 +471,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		double p3 = o.distance3D(n) + n.distance3D(a) + a.distance3D(o);
 		double p4 = d.distance3D(a) + a.distance3D(n) + n.distance3D(d);
 		double Qafter = Math.min(s3/p3/p3, s4/p4/p4);
-		if (Qafter > Qbefore)
+		if (Qafter > Qbefore && Qafter > minQualityFactor*Qbefore)
 			return Qafter;
 		// If both configurations are almost identical, prefer the one
 		// which does not link two vertices on inner boundaries

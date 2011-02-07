@@ -41,7 +41,8 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 {
 	private static final Logger LOGGER=Logger.getLogger(SwapEdge.class.getName());
 	private int counter = 0;
-	
+	/** Swap only if the quality is improved by at least this factory */
+	private double minQualityFactor;
 	/**
 	 * Creates a <code>SwapEdge</code> instance.
 	 *
@@ -71,6 +72,10 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 				minCos = Double.parseDouble(val);
 				LOGGER.fine("Minimum dot product of face normals allowed for swapping an edge: "+minCos);
 			}
+			else if(key.equals("qualityFactor"))
+			{
+				minQualityFactor = Double.parseDouble(val);
+			}
 			else
 				throw new RuntimeException("Unknown option: "+key);
 		}
@@ -94,7 +99,7 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 	@Override
 	public double cost(final HalfEdge e)
 	{
-		return - e.checkSwap3D(mesh, minCos);
+		return - e.checkSwap3D(mesh, minCos, 0, minQualityFactor);
 	}
 	
 	@Override
