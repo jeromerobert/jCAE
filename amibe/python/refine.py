@@ -27,7 +27,7 @@ Remesh an existing mesh.
 cmd=("refine  ", "<inputDir> <outputDir>", "Remesh an existing mesh")
 parser = OptionParser(usage="amibebatch %s [OPTIONS] %s\n\n%s" % cmd,
 	prog="refine")
-parser.add_option("-c", "--coplanarity", metavar="FLOAT", default=-1.0,
+parser.add_option("-c", "--coplanarity", metavar="FLOAT",
                   action="store", type="float", dest="coplanarity",
 		  help="dot product of face normals to detect feature edges")
 parser.add_option("-D", "--decimate-target", metavar="NUMBER",
