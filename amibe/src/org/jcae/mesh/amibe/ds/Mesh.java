@@ -631,7 +631,10 @@ public class Mesh implements Serializable
 		// Add outer triangles
 		triangleList.addAll(newTri);
 		if (traitsBuilder.hasTrace())
+		{
 			traitsBuilder.getTrace(traits).println("self.m.buildAdjacency()");
+			traitsBuilder.getTrace(traits).addAdjacentTriangles(this);
+		}
 	}
 
 	private Map<Vertex, ArrayList<Triangle>> getMapVertexLinks()
@@ -1045,7 +1048,16 @@ public class Mesh implements Serializable
 			logger.log(Level.CONFIG, "Add virtual boundaries for "+toReturn+" edges");
 		rebuildVertexLinks();
 		if (traitsBuilder.hasTrace())
-			traitsBuilder.getTrace(traits).println("self.m.buildGroupBoundaries()");
+		{
+			traitsBuilder.getTrace(traits).println("groups = []");
+			if (null != groups)
+			{
+				for (int i : groups)
+					traitsBuilder.getTrace(traits).println("groups.append("+i+")");
+			}
+			traitsBuilder.getTrace(traits).println("self.m.buildGroupBoundaries(groups)");
+			traitsBuilder.getTrace(traits).addAdjacentTriangles(this);
+		}
 		return toReturn;
 	}
 
@@ -1357,7 +1369,10 @@ public class Mesh implements Serializable
 		}
 
 		if (traitsBuilder.hasTrace())
+		{
 			traitsBuilder.getTrace(traits).println("self.m.buildPartition()");
+			traitsBuilder.getTrace(traits).addAdjacentTriangles(this);
+		}
 
 		return countPart;
 	}

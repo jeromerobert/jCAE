@@ -58,6 +58,11 @@ public class TraceNull implements TraceInterface
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
+	public int getVertexId(Vertex v)
+	{
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
+
 	public void add(Triangle t)
 	{
 	}
@@ -75,11 +80,12 @@ public class TraceNull implements TraceInterface
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
-	public void println(String x)
+	public int getTriangleId(Triangle t)
 	{
+		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
-	public void printMeshln(String x)
+	public void println(String x)
 	{
 	}
 
@@ -96,6 +102,10 @@ public class TraceNull implements TraceInterface
 	}
 
 	public void vertexSplit(AbstractHalfEdge h, Vertex v)
+	{
+	}
+
+	public void addAdjacentTriangles(Mesh m)
 	{
 	}
 

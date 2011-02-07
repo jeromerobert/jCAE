@@ -102,6 +102,9 @@ public class TraceRecord implements TraceInterface
 		startScope();
 		println("self.m = m");
 
+		mapIdVertex.put(-1, mesh.outerVertex);
+		mapVertexId.put(mesh.outerVertex, -1);
+		println("self.m.getTrace().add(self.m.outerVertex, -1)");
 		for (Vertex v : mesh.getNodes())
 		{
 			createAndAdd(v);
@@ -165,6 +168,11 @@ public class TraceRecord implements TraceInterface
 		return mapIdVertex.get(id);
 	}
 
+	public int getVertexId(Vertex v)
+	{
+		return mapVertexId.get(v);
+	}
+
 	private void createAndAdd(Triangle t)
 	{
 		add(t);
@@ -203,6 +211,43 @@ public class TraceRecord implements TraceInterface
 	public Triangle getTriangle(int id)
 	{
 		return mapIdTriangle.get(id);
+	}
+
+	public int getTriangleId(Triangle t)
+	{
+		return mapTriangleId.get(t);
+	}
+
+	public void addAdjacentTriangles(Mesh m)
+	{
+		if (disabled)
+			return;
+		for (Triangle t : m.getTriangles())
+		{
+			if (!t.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+				continue;
+			if (t.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
+			AbstractHalfEdge ot = t.getAbstractHalfEdge();
+			println("t = self.m.getTrace().getTriangle("+mapTriangleId.get(t)+")");
+			println("ot = t.getAbstractHalfEdge()");
+			println("for i in xrange(3):");
+			startScope();
+			for (int i = 0; i < 3; i++)
+			{
+				ot = ot.next();
+				println("ot = ot.next()");
+				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+				{
+					Triangle s = ot.sym().getTri();
+					if (!mapTriangleId.contains(s))
+						add(s);
+					println("self.m.getTrace().add(ot.sym().getTri(), "+mapTriangleId.get(s)+")");
+				}
+			}
+			endScope();
+			checkLines();
+		}
 	}
 
 	private void startScope()

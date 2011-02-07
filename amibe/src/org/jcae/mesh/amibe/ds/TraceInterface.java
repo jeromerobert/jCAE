@@ -33,17 +33,20 @@ public interface TraceInterface
 	void add(Vertex v, int id);
 	void remove(Vertex v);
 	Vertex getVertex(int id);
+	int getVertexId(Vertex v);
 
 	void add(Triangle t);
 	void add(Triangle t, int id);
 	void remove(Triangle t);
 	Triangle getTriangle(int id);
+	int getTriangleId(Triangle t);
+
+	void addAdjacentTriangles(Mesh m);
 
 	void edgeSwap(AbstractHalfEdge h);
 	void edgeCollapse(AbstractHalfEdge h, Vertex v);
 	void vertexSplit(AbstractHalfEdge h, Vertex v);
 
 	void println(String x);
-	void printMeshln(String x);
 	void finish();
 }

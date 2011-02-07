@@ -77,6 +77,12 @@ public class TraceReplay implements TraceInterface
 		return mapIdVertex.get(id);
 	}
 
+
+	public int getVertexId(Vertex v)
+	{
+		return mapVertexId.get(v);
+	}
+
 	public void add(Triangle t)
 	{
 		// Do nothing
@@ -100,6 +106,11 @@ public class TraceReplay implements TraceInterface
 		return mapIdTriangle.get(id);
 	}
 
+	public int getTriangleId(Triangle t)
+	{
+		return mapTriangleId.get(t);
+	}
+
 	public void edgeSwap(AbstractHalfEdge h)
 	{
 		// Do nothing
@@ -119,12 +130,13 @@ public class TraceReplay implements TraceInterface
 	{
 	}
 
-	public void printMeshln(String x)
+	public void finish()
 	{
 	}
 
-	public void finish()
+	public void addAdjacentTriangles(Mesh m)
 	{
+		// Do nothing
 	}
 
 }
