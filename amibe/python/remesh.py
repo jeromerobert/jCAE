@@ -82,7 +82,7 @@ opts.put("coplanarity", "0.9")
 SwapEdge(liaison, opts).compute()
 
 opts.clear()
-opts.put("allowNearNodes", "true")
+opts.put("nearLengthRatio", "0.1")
 opts.put("size", str(options.size))
 Remesh(liaison, opts).compute()
 
