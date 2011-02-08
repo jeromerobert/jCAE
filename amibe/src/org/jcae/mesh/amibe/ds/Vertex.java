@@ -24,11 +24,7 @@ import java.util.logging.Logger;
 import org.jcae.mesh.amibe.traits.VertexTraitsBuilder;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.metrics.Location;
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 import java.io.Serializable;
 
 /**
@@ -323,37 +319,6 @@ public class Vertex implements Location, Serializable
 			ot = ot.prev();
 		assert ot.origin() == this;
 		return ot;
-	}
-
-	/**
-	 * Set link to an array of Triangles.  This routine eliminates
-	 * duplicates to keep only one Triangle by fan.
-	 *
-	 * @param triangles  initial set of adjacent triangles.
-	 */
-	public final void setLinkFan(Collection<Triangle> triangles)
-	{
-		ArrayList<Triangle> res = new ArrayList<Triangle>();
-		Set<Triangle> allTriangles = new HashSet<Triangle>();
-		AbstractHalfEdge ot = null;
-		for (Triangle t: triangles)
-		{
-			if (allTriangles.contains(t))
-				continue;
-			allTriangles.add(t);
-			res.add(t);
-			ot = getIncidentAbstractHalfEdge(t, ot);
-			// Add all triangles of the same fan to allTriangles
-			Vertex d = ot.destination();
-			do
-			{
-				ot = ot.nextOriginLoop();
-				allTriangles.add(ot.getTri());
-			}
-			while (ot.destination() != d);
-		}
-		link = new Triangle[res.size()];
-		res.toArray((Triangle[]) link);
 	}
 
 	public final void setReadable(boolean r)
