@@ -177,7 +177,7 @@ public class MeshLiaison
 		ProjectedLocation location = mapCurrentVertexProjection.get(v);
 		if (LOGGER.isLoggable(Level.FINEST))
 			LOGGER.log(Level.FINEST, "Old projection: "+location);
-		LocationFinder lf = new LocationFinder(target, backgroundMesh);
+		LocationFinder lf = new LocationFinder(target);
 		AbstractHalfEdge ot = location.t.getAbstractHalfEdge();
 		if (ot.apex() == location.t.vertex[location.vIndex])
 			ot = ot.prev();
@@ -215,7 +215,7 @@ public class MeshLiaison
 		{
 			/* FIXME: this should not happen. Try all triangles to find the best projection */
 			LOGGER.log(Level.CONFIG, "Position found outside triangle: "+newPosition[0]+" "+newPosition[1]+" "+newPosition[2]+"; checking all triangles, this may be slow");
-			lf.walkDebug();
+			lf.walkDebug(backgroundMesh);
 			location.updateTriangle(lf.current);
 			location.updateVertexIndex(target);
 		}
@@ -294,8 +294,8 @@ public class MeshLiaison
 
 	public static AbstractHalfEdge findSurroundingTriangleDebug(Vertex v, Mesh mesh)
 	{
-		LocationFinder lf = new LocationFinder(v.getUV(), mesh);
-		lf.walkDebug();
+		LocationFinder lf = new LocationFinder(v.getUV());
+		lf.walkDebug(mesh);
 		int i = lf.localEdgeIndex;
 		AbstractHalfEdge ret = lf.current.getAbstractHalfEdge();
 		if (ret.origin() == lf.current.vertex[i])
@@ -430,8 +430,8 @@ public class MeshLiaison
 
 	public static Triangle getNearestTriangleDebug(Vertex v, Mesh m)
 	{
-		LocationFinder lf = new LocationFinder(v.getUV(), m);
-		lf.walkDebug();
+		LocationFinder lf = new LocationFinder(v.getUV());
+		lf.walkDebug(m);
 		return lf.current;
 	}
 
@@ -858,17 +858,10 @@ public class MeshLiaison
 		int localEdgeIndex = -1;
 		int region = -1;
 		int[] index = new int[2];
-		private final Mesh mesh;
 
 		LocationFinder(double[] pos)
 		{
-			this(pos, null);
-		}
-
-		LocationFinder(double[] pos, Mesh mesh)
-		{
 			System.arraycopy(pos, 0, target, 0, 3);
-			this.mesh = mesh;
 		}
 
 		void walkOnTriangle(Triangle t)
@@ -944,10 +937,8 @@ public class MeshLiaison
 			} while (true);
 		}
 
-		void walkDebug()
+		void walkDebug(Mesh mesh)
 		{
-			if (mesh == null)
-				return;
 			for (Triangle f : mesh.getTriangles())
 			{
 				if (f.hasAttributes(AbstractHalfEdge.OUTER))
