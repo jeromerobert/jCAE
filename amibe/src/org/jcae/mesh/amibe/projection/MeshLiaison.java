@@ -871,6 +871,18 @@ public class MeshLiaison
 			this.mesh = mesh;
 		}
 
+		void walkOnTriangle(Triangle t)
+		{
+			double dist = sqrDistanceVertexTriangle(target, t, index);
+			if (dist < dmin)
+			{
+				dmin = dist;
+				current = t;
+				localEdgeIndex = index[0];
+				region = index[1];
+			}
+		}
+	
 		void walkAroundOrigin(AbstractHalfEdge ot)
 		{
 			AbstractHalfEdge loop = ot.getTri().getAbstractHalfEdge();
@@ -886,15 +898,7 @@ public class MeshLiaison
 					loop = loop.nextOriginLoop();
 					continue;
 				}
-				Triangle t = loop.getTri();
-				double dist = sqrDistanceVertexTriangle(target, t, index);
-				if (dist < dmin)
-				{
-					dmin = dist;
-					current = t;
-					localEdgeIndex = index[0];
-					region = index[1];
-				}
+				walkOnTriangle(loop.getTri());
 				loop = loop.nextOriginLoop();
 			}
 			while (loop.destination() != d);
