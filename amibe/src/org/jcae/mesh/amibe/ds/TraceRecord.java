@@ -102,6 +102,8 @@ public class TraceRecord implements TraceInterface
 
 		println("class c():");
 		startScope();
+		println("def startMethodHook(self):");
+		println("    pass");
 		println("def __init__(self, m):");
 		startScope();
 		println("self.m = m");
@@ -398,6 +400,7 @@ public class TraceRecord implements TraceInterface
 				endScope();
 			out.println(tab+"def cont"+cntMethods+"(self):");
 			startScope();
+			out.println(tab+"self.startMethodHook()");
 			cntLines = 0;
 			cntMethods++;
 			checkMethods();
@@ -422,6 +425,8 @@ public class TraceRecord implements TraceInterface
 
 			out.println(tab+"class c():");
 			startScope();
+			out.println(tab+"def startMethodHook(self):");
+			out.println(tab+"    pass");
 			out.println(tab+"def __init__(self, m):");
 			startScope();
 			out.println(tab+"self.m = m");
