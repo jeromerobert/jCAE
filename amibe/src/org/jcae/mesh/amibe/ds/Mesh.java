@@ -1417,9 +1417,11 @@ public class Mesh implements Serializable
 	 */
 	public final AbstractHalfEdge vertexSplit(AbstractHalfEdge e, Vertex v)
 	{
+		if (traitsBuilder.hasTrace())
+			traitsBuilder.getTrace(traits).vertexSplitBefore(e, v);
 		AbstractHalfEdge ret = e.split(this, v);
 		if (traitsBuilder.hasTrace())
-			traitsBuilder.getTrace(traits).vertexSplit(ret, v);
+			traitsBuilder.getTrace(traits).vertexSplitAfter(ret, v);
 		return ret;
 	}
 	

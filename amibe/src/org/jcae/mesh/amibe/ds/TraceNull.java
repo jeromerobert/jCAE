@@ -101,7 +101,11 @@ public class TraceNull implements TraceInterface
 	{
 	}
 
-	public void vertexSplit(AbstractHalfEdge h, Vertex v)
+	public void vertexSplitAfter(AbstractHalfEdge h, Vertex v)
+	{
+	}
+
+	public void vertexSplitBefore(AbstractHalfEdge h, Vertex v)
 	{
 	}
 

@@ -121,7 +121,12 @@ public class TraceReplay implements TraceInterface
 		// Do nothing
 	}
 
-	public void vertexSplit(AbstractHalfEdge h, Vertex v)
+	public void vertexSplitAfter(AbstractHalfEdge h, Vertex v)
+	{
+		// Do nothing
+	}
+
+	public void vertexSplitBefore(AbstractHalfEdge h, Vertex v)
 	{
 		// Do nothing
 	}

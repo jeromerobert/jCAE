@@ -45,7 +45,8 @@ public interface TraceInterface
 
 	void edgeSwap(AbstractHalfEdge h);
 	void edgeCollapse(AbstractHalfEdge h, Vertex v);
-	void vertexSplit(AbstractHalfEdge h, Vertex v);
+	void vertexSplitAfter(AbstractHalfEdge h, Vertex v);
+	void vertexSplitBefore(AbstractHalfEdge h, Vertex v);
 
 	void println(String x);
 	void finish();

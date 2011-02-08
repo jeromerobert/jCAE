@@ -299,7 +299,7 @@ public class TraceRecord implements TraceInterface
 		checkLines();
 	}
 
-	public void vertexSplit(AbstractHalfEdge h, Vertex v)
+	public void vertexSplitBefore(AbstractHalfEdge h, Vertex v)
 	{
 		if (disabled)
 			return;
@@ -313,6 +313,12 @@ public class TraceRecord implements TraceInterface
 		else if(h.getLocalNumber() == 2)
 			println("ot = ot.prev()");
 		println("ot = self.m.vertexSplit(ot, self.m.getTrace().getVertex("+mapVertexId.get(v)+"))");
+	}
+
+	public void vertexSplitAfter(AbstractHalfEdge h, Vertex v)
+	{
+		if (disabled)
+			return;
 		if (h.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 		{
 			println("fanIt = ot.fanIterator()");
@@ -324,7 +330,6 @@ public class TraceRecord implements TraceInterface
 		}
 		else
 			traceSplitTriangle(h);
-
 		checkLines();
 	}
 
