@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2008,2009,2010, by EADS France
+    Copyright (C) 2008-2011, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -444,6 +444,13 @@ public class MeshLiaison
 	{
 		int[] index = new int[2];
 		return Math.sqrt(sqrDistanceVertexTriangle(v.getUV(), tri, index));
+	}
+
+	public static Triangle getNearestTriangleDebug(Vertex v, Mesh m)
+	{
+		LocationFinder lf = new LocationFinder(v.getUV(), m);
+		lf.walkDebug();
+		return lf.current;
 	}
 
 	/**
