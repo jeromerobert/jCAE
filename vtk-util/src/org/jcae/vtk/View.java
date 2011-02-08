@@ -262,7 +262,6 @@ public class View extends Canvas {
 		
 		interactor.setAppendSelection(appendSelection);
 		interactor.addCanvas(this);
-		cameraManager.fitAll();
 		// Set it the current viewable
 		setCurrentViewable(interactor);
 		
