@@ -292,9 +292,9 @@ public class MeshLiaison
 			move(v, v.getUV());
 	}
 
-	public AbstractHalfEdge findSurroundingTriangleDebug(Vertex v, boolean background)
+	public static AbstractHalfEdge findSurroundingTriangleDebug(Vertex v, Mesh mesh)
 	{
-		LocationFinder lf = new LocationFinder(v.getUV(), background ? backgroundMesh : currentMesh);
+		LocationFinder lf = new LocationFinder(v.getUV(), mesh);
 		lf.walkDebug();
 		int i = lf.localEdgeIndex;
 		AbstractHalfEdge ret = lf.current.getAbstractHalfEdge();
@@ -326,31 +326,27 @@ public class MeshLiaison
 				ot = ot.prev(ot);
 			assert start == ot.origin();
 
-			AbstractHalfEdge ret = findSurroundingTriangle(v, ot, maxError);
+			AbstractHalfEdge ret = findSurroundingTriangle(v, t, ot.getLocalNumber(), maxError);
 			if (ret != null)
 				return ret;
 		}
-
 		// We were not able to find a valid triangle.
 		// Iterate over all triangles to find the best one.
 		// FIXME: This is obviously very slow!
 		if (LOGGER.isLoggable(Level.FINE))
 			LOGGER.log(Level.FINE, "Maximum error reached, search into the whole mesh for vertex "+v);
-		Mesh mesh = background ? backgroundMesh : currentMesh;
-		LocationFinder lf = new LocationFinder(v.getUV(), mesh);
-		lf.walkDebug();
-		AbstractHalfEdge ret = lf.current.getAbstractHalfEdge();
-		if (ret.origin() == lf.current.vertex[lf.localEdgeIndex])
-			ret = ret.next();
-		else if (ret.destination() == lf.current.vertex[lf.localEdgeIndex])
-			ret = ret.prev();
-		return ret;
+		return findSurroundingTriangleDebug(v, (background ? backgroundMesh : currentMesh));
 	}
 
-	private static AbstractHalfEdge findSurroundingTriangle(Vertex v, AbstractHalfEdge ot, double maxError)
+	public static AbstractHalfEdge findSurroundingTriangle(Vertex v, Triangle start, int localEdge, double maxError)
 	{
 		double[] pos = v.getUV();
 		LocationFinder lf = new LocationFinder(pos);
+		AbstractHalfEdge ot = start.getAbstractHalfEdge();
+		if (localEdge == 1)
+			ot = ot.next();
+		else if (localEdge == 2)
+			ot = ot.prev();
 		lf.walkAroundOrigin(ot);
 		lf.walkByAdjacency();
 
