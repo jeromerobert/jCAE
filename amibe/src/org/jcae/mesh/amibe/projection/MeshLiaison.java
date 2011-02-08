@@ -336,29 +336,13 @@ public class MeshLiaison
 		// FIXME: This is obviously very slow!
 		if (LOGGER.isLoggable(Level.FINE))
 			LOGGER.log(Level.FINE, "Maximum error reached, search into the whole mesh for vertex "+v);
-		double dmin = Double.MAX_VALUE;
-		int[] index = new int[2];
-		int i = -1;
-		double[] pos = v.getUV();
-		AbstractHalfEdge ret = null;
 		Mesh mesh = background ? backgroundMesh : currentMesh;
-		for (Triangle f : mesh.getTriangles())
-		{
-			if (f.hasAttributes(AbstractHalfEdge.OUTER))
-				continue;
-			double dist = sqrDistanceVertexTriangle(pos, f, index);
-			if (dist < dmin)
-			{
-				dmin = dist;
-				t = f;
-				i = index[0];
-			}
-
-		}
-		ret = t.getAbstractHalfEdge(ret);
-		if (ret.origin() == t.vertex[i])
+		LocationFinder lf = new LocationFinder(v.getUV(), mesh);
+		lf.walkDebug();
+		AbstractHalfEdge ret = lf.current.getAbstractHalfEdge();
+		if (ret.origin() == lf.current.vertex[lf.localEdgeIndex])
 			ret = ret.next();
-		else if (ret.destination() == t.vertex[i])
+		else if (ret.destination() == lf.current.vertex[lf.localEdgeIndex])
 			ret = ret.prev();
 		return ret;
 	}
