@@ -566,7 +566,7 @@ public class Remesh
 					Vertex near = neighborMap.get(v);
 					double localSize = 0.5 * metrics.get(v).getUnitBallBBox()[0];
 					double localSize2 = localSize * localSize;
-					AbstractHalfEdge ot = liaison.findSurroundingTriangle(v, near, localSize2, false);
+					AbstractHalfEdge ot = liaison.findSurroundingTriangle(v, near, 0.1*localSize2, false);
 					if (ot.hasAttributes(AbstractHalfEdge.IMMUTABLE))
 					{
 						// Vertex is not inserted
