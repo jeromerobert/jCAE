@@ -24,6 +24,7 @@ import gnu.trove.TObjectIntHashMap;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.util.Iterator;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -121,7 +122,10 @@ public class TraceRecord implements TraceInterface
 			}
 		}
 		if (mesh.hasAdjacency())
+		{
 			println("self.m.buildAdjacency()");
+			addAdjacentTriangles(mesh);
+		}
 		checkLines();
 	}
 
@@ -241,8 +245,10 @@ public class TraceRecord implements TraceInterface
 				{
 					Triangle s = ot.sym().getTri();
 					if (!mapTriangleId.contains(s))
+					{
 						add(s);
-					println("self.m.getTrace().add(ot.sym().getTri(), "+mapTriangleId.get(s)+")");
+						println("self.m.getTrace().add(ot.sym().getTri(), "+mapTriangleId.get(s)+")");
+					}
 				}
 			}
 			endScope();
@@ -298,6 +304,8 @@ public class TraceRecord implements TraceInterface
 		if (disabled)
 			return;
 		createAndAdd(v);
+		if (h.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+			println("# NONMANIFOLD vertexSplit");
 		println("t = self.m.getTrace().getTriangle("+mapTriangleId.get(h.getTri())+")");
 		println("ot = t.getAbstractHalfEdge()");
 		if (h.getLocalNumber() == 1)
@@ -305,17 +313,63 @@ public class TraceRecord implements TraceInterface
 		else if(h.getLocalNumber() == 2)
 			println("ot = ot.prev()");
 		println("ot = self.m.vertexSplit(ot, self.m.getTrace().getVertex("+mapVertexId.get(v)+"))");
-		if (h.hasSymmetricEdge())
+		if (h.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 		{
+			println("fanIt = ot.fanIterator()");
+			for (Iterator<AbstractHalfEdge> fanIt = h.fanIterator(); fanIt.hasNext();)
+			{
+				println("ot = fanIt.next()");
+				traceSplitTriangle(fanIt.next());
+			}
+		}
+		else
+			traceSplitTriangle(h);
+
+		checkLines();
+	}
+
+	/*
+	 * When edge (od) is manifold, vertex split adds two triangles
+	 * and returned edge is (on) on t1.
+	 * When edge (od) is non-manifold, returned edge is either (on)
+	 * or (dn).  By convention, t1 cannot be outer (and thus t3).
+	 * Returned edge either belongs to t1 or t3.
+	 *            V1                             V1
+	 *            /'\                            /|\
+	 *          /     \                        /  |  \
+	 *        /         \                    /    |    \
+	 *      /             \                /      |      \
+	 *    /       t1        \            /   t1  v|  t3    \
+	 * o +-------------------+ d ---> o +---------+---------+ d
+	 *    \       t2        /            \   t4   |  t2    /
+	 *      \             /                \      |      /
+	 *        \         /                    \    |    /
+	 *          \     /                        \  |  /
+	 *            \,/                            \|/
+	 *            V2                             V2
+	 */
+	private void traceSplitTriangle(AbstractHalfEdge h)
+	{
+		if(mapTriangleId.contains(h.getTri()))
+		{
+			// h is on t1
+			// Add t4
 			add(h.sym().getTri());
 			println("self.m.getTrace().add(ot.sym().getTri(), "+mapTriangleId.get(h.sym().getTri())+")");
-		}
-		if (h.next().hasSymmetricEdge())
-		{
+			// Add t3
 			add(h.next().sym().getTri());
 			println("self.m.getTrace().add(ot.next().sym().getTri(), " + mapTriangleId.get(h.next().sym().getTri()) + ")");
 		}
-		checkLines();
+		else
+		{
+			// h is on t3
+			// Add t3
+			add(h.getTri());
+			println("self.m.getTrace().add(ot.getTri(), "+mapTriangleId.get(h.getTri())+")");
+			// Add t4.  WARNING: t2 and t4 are outer and are not connected!
+			add(h.prev().sym().prev().sym().getTri());
+			println("self.m.getTrace().add(ot.prev().sym().prev().sym().getTri(), " + mapTriangleId.get(h.prev().sym().prev().sym().getTri()) + ")");
+		}
 	}
 
 	private void checkLines()
