@@ -39,6 +39,9 @@ parser.add_option("-I", "--immutable-border",
 parser.add_option("-G", "--immutable-border-group",
                   action="store_true", dest="immutable_border_group",
                   help="Tag border group edges as immutable")
+parser.add_option("-r", "--record", metavar="PREFIX",
+                  action="store", type="string", dest="recordFile",
+                  help="record mesh operations in a Python file to replay this scenario")
 
 (options, args) = parser.parse_args(args=sys.argv[1:])
 
@@ -50,19 +53,27 @@ xmlDir = args[0]
 outDir = args[1]
 
 mtb = MeshTraitsBuilder.getDefault3D()
+if options.recordFile:
+	mtb.addTraceRecord()
 mtb.addNodeSet()
 mesh = Mesh(mtb)
+if options.recordFile:
+	mesh.getTrace().setDisabled(True)
 MeshReader.readObject3D(mesh, xmlDir)
 
 liaison = MeshLiaison(mesh, mtb)
+if options.recordFile:
+	liaison.getMesh().getTrace().setDisabled(False)
+	liaison.getMesh().getTrace().setLogFile(options.recordFile)
+	liaison.getMesh().getTrace().createMesh("mesh", liaison.getMesh())
 if options.immutable_border:
-    liaison.mesh.tagFreeEdges(AbstractHalfEdge.IMMUTABLE)
+	liaison.mesh.tagFreeEdges(AbstractHalfEdge.IMMUTABLE)
 liaison.getMesh().buildRidges(0.9)
 if options.immutable_border_group:
-    liaison.mesh.tagGroupBoundaries(AbstractHalfEdge.IMMUTABLE)
+	liaison.mesh.tagGroupBoundaries(AbstractHalfEdge.IMMUTABLE)
 else:
-    if options.preserveGroups:
-	liaison.getMesh().buildGroupBoundaries()
+	if options.preserveGroups:
+		liaison.getMesh().buildGroupBoundaries()
 
 opts = HashMap()
 opts.put("coplanarity", "0.9")
