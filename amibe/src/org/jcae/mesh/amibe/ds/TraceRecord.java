@@ -377,6 +377,15 @@ public class TraceRecord implements TraceInterface
 		}
 	}
 
+	public void moveVertex(Vertex v, double x, double y, double z)
+	{
+		if (disabled)
+			return;
+		println("v = self.m.getTrace().getVertex("+mapVertexId.get(v)+")");
+		println("v.moveTo("+x+", "+y+", "+z+")");
+		checkLines();
+	}
+
 	private void checkLines()
 	{
 		if (cntLines > 40)

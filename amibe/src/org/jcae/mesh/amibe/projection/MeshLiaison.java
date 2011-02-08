@@ -242,7 +242,9 @@ public class MeshLiaison
 */
 			return false;
 		}
+		currentMesh.getTrace().moveVertex(v, newPosition[0], newPosition[1], newPosition[2]);
 		v.moveTo(newPosition[0], newPosition[1], newPosition[2]);
+
 		if (LOGGER.isLoggable(Level.FINER))
 			LOGGER.log(Level.FINER, "Final position: "+v);
 		return true;

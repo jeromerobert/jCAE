@@ -109,6 +109,10 @@ public class TraceNull implements TraceInterface
 	{
 	}
 
+	public void moveVertex(Vertex v, double x, double y, double z)
+	{
+	}
+
 	public void addAdjacentTriangles(Mesh m)
 	{
 	}
