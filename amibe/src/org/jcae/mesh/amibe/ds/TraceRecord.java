@@ -31,6 +31,9 @@ import java.util.logging.Logger;
 
 public class TraceRecord implements TraceInterface
 {
+	private static final int NR_METHODS = 80;
+	private static final int NR_LINES_BY_METHOD = 40;
+
         private static final Logger LOGGER=Logger.getLogger(TraceRecord.class.getName());
 	private static final String MANY_SPACES = "                                                                                  ";
 	private String logName;
@@ -388,7 +391,7 @@ public class TraceRecord implements TraceInterface
 
 	private void checkLines()
 	{
-		if (cntLines > 40)
+		if (cntLines > NR_LINES_BY_METHOD)
 		{
 			out.println(tab+"self.cont"+cntMethods+"()\n");
 			if (indentLevel > 0)
@@ -403,7 +406,7 @@ public class TraceRecord implements TraceInterface
 
 	private void checkMethods()
 	{
-		if (cntMethods > 100)
+		if (cntMethods > NR_METHODS)
 		{
 			out.println(tab+"pass");
 			cntClasses++;
