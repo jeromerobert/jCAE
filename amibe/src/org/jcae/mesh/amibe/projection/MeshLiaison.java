@@ -319,14 +319,7 @@ public class MeshLiaison
 		}
 		if (t != null)
 		{
-			AbstractHalfEdge ot = t.getAbstractHalfEdge();
-			if (start == ot.destination())
-				ot = ot.next(ot);
-			else if (start == ot.apex())
-				ot = ot.prev(ot);
-			assert start == ot.origin();
-
-			AbstractHalfEdge ret = findSurroundingTriangle(v, t, ot.getLocalNumber(), maxError);
+			AbstractHalfEdge ret = findSurroundingTriangle(v, t, maxError);
 			if (ret != null)
 				return ret;
 		}
@@ -338,14 +331,19 @@ public class MeshLiaison
 		return findSurroundingTriangleDebug(v, (background ? backgroundMesh : currentMesh));
 	}
 
-	public static AbstractHalfEdge findSurroundingTriangle(Vertex v, Triangle start, int localEdge, double maxError)
+	/**
+	 * @return an AbstractHalfEdge whose distance to vertex v is lower than maxError.
+	 *     If no edge is found, null is returned.
+	 */
+	public static AbstractHalfEdge findSurroundingTriangle(Vertex v, Triangle start, double maxError)
 	{
 		double[] pos = v.getUV();
 		LocationFinder lf = new LocationFinder(pos);
+		lf.walkOnTriangle(start);
 		AbstractHalfEdge ot = start.getAbstractHalfEdge();
-		if (localEdge == 1)
+		if (lf.localEdgeIndex == 1)
 			ot = ot.next();
-		else if (localEdge == 2)
+		else if (lf.localEdgeIndex == 2)
 			ot = ot.prev();
 		lf.walkAroundOrigin(ot);
 		lf.walkByAdjacency();
