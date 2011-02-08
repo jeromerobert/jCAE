@@ -428,13 +428,6 @@ public class MeshLiaison
 		return Math.sqrt(sqrDistanceVertexTriangle(v.getUV(), tri, index));
 	}
 
-	public static Triangle getNearestTriangleDebug(Vertex v, Mesh m)
-	{
-		LocationFinder lf = new LocationFinder(v.getUV());
-		lf.walkDebug(m);
-		return lf.current;
-	}
-
 	/**
 	 * Compute squared distance between a point and a triangle.  See
 	 *   http://www.geometrictools.com/Documentation/DistancePoint3Triangle3.pdf
