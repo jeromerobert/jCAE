@@ -221,6 +221,8 @@ public class SmoothNodes3DBg
 		}
 		LOGGER.info("Number of moved points: "+processed);
 		LOGGER.info("Total number of points not moved during processing: "+notProcessed);
+		assert mesh.checkNoDegeneratedTriangles();
+		assert mesh.checkNoInvertedTriangles();
 		return this;
 	}
 	

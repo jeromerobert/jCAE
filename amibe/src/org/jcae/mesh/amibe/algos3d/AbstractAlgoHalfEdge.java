@@ -79,6 +79,8 @@ public abstract class AbstractAlgoHalfEdge
 		thisLogger().info("Initial number of triangles: "+countInnerTriangles(mesh));
 		processAllHalfEdges();
 		thisLogger().info("Final number of triangles: "+countInnerTriangles(mesh));
+		assert mesh.checkNoDegeneratedTriangles();
+		assert mesh.checkNoInvertedTriangles();
 	}
 
 	public void setProgressBarStatus(int n)
