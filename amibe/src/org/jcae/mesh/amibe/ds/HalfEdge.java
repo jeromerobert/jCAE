@@ -25,6 +25,7 @@ import org.jcae.mesh.amibe.metrics.Matrix3D;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.NoSuchElementException;
@@ -1085,7 +1086,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			System.arraycopy(oList, 0, nList, 0, oList.length);
 			System.arraycopy(dList, 0, nList, oList.length, dList.length);
 			ArrayList<Triangle> res = new ArrayList<Triangle>();
-			Set<Triangle> allTriangles = new HashSet<Triangle>();
+			Set<Triangle> allTriangles = new LinkedHashSet<Triangle>();
 			// o and d have already been replaced by v
 			for (Triangle t: nList)
 			{

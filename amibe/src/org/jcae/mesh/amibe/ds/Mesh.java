@@ -579,7 +579,7 @@ public class Mesh implements Serializable
 		
 		//  Find the list of vertices which are on mesh boundary
 		logger.fine("Build the list of nodes on boundaries and non-manifold edges");
-		HashSet<Vertex> bndNodes = new HashSet<Vertex>();
+		LinkedHashSet<Vertex> bndNodes = new LinkedHashSet<Vertex>();
 		maxLabel = currentMaxLabel;
 		AbstractHalfEdge ot = null;
 		for (Triangle t: triangleList)
@@ -703,7 +703,7 @@ public class Mesh implements Serializable
 			if (cnt == list.size())
 				continue;
 			// Non-manifold vertex
-			HashSet<Triangle> neighbours = new HashSet<Triangle>(list);
+			LinkedHashSet<Triangle> neighbours = new LinkedHashSet<Triangle>(list);
 			ArrayList<Triangle> fans = new ArrayList<Triangle>();
 			while (!neighbours.isEmpty())
 			{
@@ -1947,7 +1947,7 @@ import gnu.trove.TObjectIntHashMap;
 			else
 				out = new PrintWriter(new FileOutputStream(file));
 			out.println("    -1"+cr+"  2411");
-			HashSet<Vertex> nodeset = new HashSet<Vertex>();
+			LinkedHashSet<Vertex> nodeset = new LinkedHashSet<Vertex>();
 			for (Triangle t: triangleList)
 			{
 				if (t.hasAttributes(AbstractHalfEdge.OUTER))
@@ -2011,7 +2011,7 @@ import gnu.trove.TObjectIntHashMap;
 			else
 				out = new PrintWriter(new FileOutputStream(file));
 			out.println("MeshVersionFormatted 1"+cr+"Dimension"+cr+"3");
-			HashSet<Vertex> nodeset = new HashSet<Vertex>();
+			LinkedHashSet<Vertex> nodeset = new LinkedHashSet<Vertex>();
 			for(Triangle t: triangleList)
 			{
 				if (t.hasAttributes(AbstractHalfEdge.OUTER))
