@@ -377,6 +377,7 @@ public class Remesh
 		}
 
 		ArrayList<Vertex> nodes = new ArrayList<Vertex>();
+		ArrayList<Triangle> triangles = new ArrayList<Triangle>();
 		ArrayList<Vertex> triNodes = new ArrayList<Vertex>();
 		ArrayList<EuclidianMetric3D> triMetrics = new ArrayList<EuclidianMetric3D>();
 
@@ -423,6 +424,7 @@ public class Remesh
 				// Number of nodes which are too near from existing vertices
 				int tooNearNodes = 0;
 				nodes.clear();
+				triangles.clear();
 				neighborMap.clear();
 				skippedNodes = 0;
 				LOGGER.fine("Check all edges");
@@ -507,6 +509,7 @@ public class Remesh
 								kdTree.add(v);
 								metrics.put(v, metric);
 								nodes.add(v);
+								triangles.add(t);
 							}
 							else
 							{
@@ -562,11 +565,12 @@ public class Remesh
 					if (index >= imax)
 						index -= imax;
 					Vertex v = nodes.get(index);
-					double[] pos = v.getUV();
-					Vertex near = neighborMap.get(v);
+					Triangle start = triangles.get(index);
 					double localSize = 0.5 * metrics.get(v).getUnitBallBBox()[0];
 					double localSize2 = localSize * localSize;
-					AbstractHalfEdge ot = liaison.findSurroundingTriangle(v, near, 0.1*localSize2, false);
+					AbstractHalfEdge ot = MeshLiaison.findSurroundingTriangle(v, start, 0.1 * localSize2);
+					if (ot == null)
+						ot = MeshLiaison.findSurroundingTriangleDebug(v, mesh);
 					if (ot.hasAttributes(AbstractHalfEdge.IMMUTABLE))
 					{
 						// Vertex is not inserted
@@ -580,6 +584,7 @@ public class Remesh
 						Vertex o = ot.origin();
 						Vertex d = ot.destination();
 						Vertex n = sym.apex();
+						double[] pos = v.getUV();
 						Matrix3D.computeNormal3D(o.getUV(), n.getUV(), pos, temp[0], temp[1], temp[2]);
 						Matrix3D.computeNormal3D(n.getUV(), d.getUV(), pos, temp[0], temp[1], temp[3]);
 						if (Matrix3D.prodSca(temp[2], temp[3]) <= 0.0)
