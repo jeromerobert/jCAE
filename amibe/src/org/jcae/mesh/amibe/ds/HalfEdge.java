@@ -782,7 +782,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 				// Two triangles are removed when an edge is contracted.
 				// So normally triangle areas should increase.  If they
 				// decrease significantly, there may be a problem.
-				if (Matrix3D.prodSca(temp3, temp2) >= - area)
+				if (area == 0.0 || Matrix3D.prodSca(temp3, temp2) >= - area)
 					return false;
 			}
 			f = f.nextOriginLoop();
