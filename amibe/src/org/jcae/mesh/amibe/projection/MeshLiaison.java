@@ -296,11 +296,10 @@ public class MeshLiaison
 	{
 		LocationFinder lf = new LocationFinder(v.getUV());
 		lf.walkDebug(mesh);
-		int i = lf.localEdgeIndex;
 		AbstractHalfEdge ret = lf.current.getAbstractHalfEdge();
-		if (ret.origin() == lf.current.vertex[i])
+		if (ret.origin() == lf.current.vertex[lf.localEdgeIndex])
 			ret = ret.next();
-		else if (ret.destination() == lf.current.vertex[i])
+		else if (ret.destination() == lf.current.vertex[lf.localEdgeIndex])
 			ret = ret.prev();
 		return ret;
 	}
@@ -856,7 +855,7 @@ public class MeshLiaison
 			System.arraycopy(pos, 0, target, 0, 3);
 		}
 
-		void walkOnTriangle(Triangle t)
+		boolean walkOnTriangle(Triangle t)
 		{
 			double dist = sqrDistanceVertexTriangle(target, t, index);
 			if (dist < dmin)
@@ -865,16 +864,19 @@ public class MeshLiaison
 				current = t;
 				localEdgeIndex = index[0];
 				region = index[1];
+				return true;
 			}
+			return false;
 		}
 	
-		void walkAroundOrigin(AbstractHalfEdge ot)
+		boolean walkAroundOrigin(AbstractHalfEdge ot)
 		{
 			AbstractHalfEdge loop = ot.getTri().getAbstractHalfEdge();
 			if (loop.origin() == ot.destination())
 				loop = loop.prev();
 			else if (loop.origin() == ot.apex())
 				loop = loop.next();
+			boolean modified = false;
 			Vertex d = loop.destination();
 			do
 			{
@@ -883,20 +885,22 @@ public class MeshLiaison
 					loop = loop.nextOriginLoop();
 					continue;
 				}
-				walkOnTriangle(loop.getTri());
+				modified |= walkOnTriangle(loop.getTri());
 				loop = loop.nextOriginLoop();
 			}
 			while (loop.destination() != d);
+			return modified;
 		}
 
 		// Cross edges to see if adjacent triangle is nearer
-		void walkByAdjacency()
+		boolean walkByAdjacency()
 		{
 			AbstractHalfEdge ot = current.getAbstractHalfEdge();
 			if (ot.origin() == current.vertex[localEdgeIndex])
 				ot = ot.next();
 			else if (ot.destination() == current.vertex[localEdgeIndex])
 				ot = ot.prev();
+			boolean modified = false;
 			do
 			{
 				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
@@ -906,6 +910,7 @@ public class MeshLiaison
 				double dist = sqrDistanceVertexTriangle(target, t, index);
 				if (dist >= dmin)
 					break;
+				modified = true;
 				dmin = dist;
 				ot = sym;
 				current = t;
@@ -927,6 +932,7 @@ public class MeshLiaison
 						ot = ot.prev();
 				}
 			} while (true);
+			return modified;
 		}
 
 		void walkDebug(Mesh mesh)
