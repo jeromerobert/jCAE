@@ -327,7 +327,7 @@ public class MeshLiaison
 		// Iterate over all triangles to find the best one.
 		// FIXME: This is obviously very slow!
 		if (LOGGER.isLoggable(Level.FINE))
-			LOGGER.log(Level.FINE, "Maximum error reached, search into the whole mesh for vertex "+v);
+			LOGGER.log(Level.FINE, "Maximum error reached, search into the whole "+(background ? "background " : "")+"mesh for vertex "+v);
 		return findSurroundingTriangleDebug(v, (background ? backgroundMesh : currentMesh));
 	}
 
@@ -843,6 +843,7 @@ public class MeshLiaison
 
 	private static class LocationFinder
 	{
+		private final static Logger LOGGER2 = Logger.getLogger(LocationFinder.class.getName());
 		private double[] target = new double[3];
 		double dmin = Double.MAX_VALUE;
 		Triangle current;
@@ -942,6 +943,7 @@ public class MeshLiaison
 					localEdgeIndex = index[0];
 				}
 			}
+			LOGGER2.fine("Minimum squared distance after walkDebug(): "+dmin);
 		}
 
 		@Override
