@@ -568,7 +568,7 @@ public class Remesh
 					Triangle start = triangles.get(index);
 					double localSize = 0.5 * metrics.get(v).getUnitBallBBox()[0];
 					double localSize2 = localSize * localSize;
-					AbstractHalfEdge ot = MeshLiaison.findSurroundingTriangle(v, start, 0.1 * localSize2);
+					AbstractHalfEdge ot = MeshLiaison.findSurroundingTriangle(v, start, localSize2);
 					if (ot == null)
 						ot = MeshLiaison.findSurroundingTriangleDebug(v, mesh);
 					if (ot.hasAttributes(AbstractHalfEdge.IMMUTABLE))
