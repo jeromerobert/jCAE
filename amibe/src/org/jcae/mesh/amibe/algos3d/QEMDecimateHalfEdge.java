@@ -472,6 +472,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 				liaison.addVertex(v3, bg1T);
 			else
 				liaison.addVertex(v3, bg2T);
+			liaison.move(v3, v3.getUV());
 		}
 		// Now current == (v3*a)
 		// Update edge costs
@@ -613,8 +614,6 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 	@Override
 	public void postProcessAllHalfEdges()
 	{
-		if (liaison != null)
-			liaison.updateAll();
 		LOGGER.info("Number of contracted edges: "+processed);
 		LOGGER.info("Total number of edges not contracted during processing: "+notProcessed);
 		LOGGER.info("Total number of edges swapped to increase quality: "+swapped);
