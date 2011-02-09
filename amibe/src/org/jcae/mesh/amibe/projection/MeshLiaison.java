@@ -924,6 +924,10 @@ public class MeshLiaison
 		void walkByAdjacency()
 		{
 			AbstractHalfEdge ot = current.getAbstractHalfEdge();
+			if (ot.origin() == current.vertex[localEdgeIndex])
+				ot = ot.next();
+			else if (ot.destination() == current.vertex[localEdgeIndex])
+				ot = ot.prev();
 			do
 			{
 				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
