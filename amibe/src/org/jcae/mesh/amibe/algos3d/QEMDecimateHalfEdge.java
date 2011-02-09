@@ -359,22 +359,49 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		assert q2 != null : v2;
 		q3.computeQuadric3DError(q1, q2);
 		q3.optimalPlacement(v1, v2, q1, q2, placement, v3);
+		if (liaison != null)
+		{
+			Triangle bg1T = liaison.getBackgroundTriangle(v1);
+			Triangle bg2T = liaison.getBackgroundTriangle(v2);
+			if (v3.sqrDistance3D(v1) < v3.sqrDistance3D(v2))
+				liaison.addVertex(v3, bg1T);
+			else
+				liaison.addVertex(v3, bg2T);
+			liaison.move(v3, v3.getUV());
+		}
 		if (!mesh.canCollapseEdge(current, v3))
+		{
+			if (liaison != null)
+				liaison.removeVertex(v3);
 			return false;
+		}
 		if (maxEdgeLength > 0.0)
 		{
 			for (Iterator<Vertex> itnv = v1.getNeighbourIteratorVertex(); itnv.hasNext(); )
 			{
 				Vertex n = itnv.next();
 				if (n != mesh.outerVertex && v3.sqrDistance3D(n) > maxEdgeLength)
+				{
+					if (liaison != null)
+						liaison.removeVertex(v3);
 					return false;
+				}
 			}
 			for (Iterator<Vertex> itnv = v2.getNeighbourIteratorVertex(); itnv.hasNext(); )
 			{
 				Vertex n = itnv.next();
 				if (n != mesh.outerVertex && v3.sqrDistance3D(n) > maxEdgeLength)
+				{
+					if (liaison != null)
+						liaison.removeVertex(v3);
 					return false;
+				}
 			}
+		}
+		if (liaison != null)
+		{
+			liaison.removeVertex(v1);
+			liaison.removeVertex(v2);
 		}
 		return true;
 	}
@@ -395,9 +422,17 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		// If v1 or v2 are on a beam, they must not be replaced by v3,
 		// otherwise beams are no more connected to triangles.
 		if (!v1.isMutable())
+		{
+			Triangle bgT = liaison.removeVertex(v3);
 			v3 = v1;
+			liaison.addVertex(v3, bgT);
+		}
 		else if (!v2.isMutable())
+		{
+			Triangle bgT = liaison.removeVertex(v3);
 			v3 = v2;
+			liaison.addVertex(v3, bgT);
+		}
 		if (LOGGER.isLoggable(Level.FINE))
 		{
 			LOGGER.fine("Contract edge: "+current+" into "+v3+"  cost="+costCurrent);
@@ -464,16 +499,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 			qFree = quadricMap.remove(vFree);
 		}
 		current = (HalfEdge) mesh.edgeCollapse(current, v3);
-		if (liaison != null)
-		{
-			Triangle bg1T = liaison.removeVertex(v1);
-			Triangle bg2T = liaison.removeVertex(v2);
-			if (v3.sqrDistance3D(v1) < v3.sqrDistance3D(v2))
-				liaison.addVertex(v3, bg1T);
-			else
-				liaison.addVertex(v3, bg2T);
-			liaison.move(v3, v3.getUV());
-		}
+
 		// Now current == (v3*a)
 		// Update edge costs
 		quadricMap.put(v3, q3);
