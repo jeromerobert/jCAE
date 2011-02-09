@@ -184,7 +184,7 @@ public class MeshLiaison
 		else if (ot.destination() == location.t.vertex[location.vIndex])
 			ot = ot.next();
 		lf.walkAroundOrigin(ot);
-		lf.walkByAdjacency();
+		lf.walkFlipFlop();
 		// Now lf contains the new location.
 		// Update location
 		location.updateTriangle(lf.current);
@@ -345,7 +345,7 @@ public class MeshLiaison
 		else if (lf.localEdgeIndex == 2)
 			ot = ot.prev();
 		lf.walkAroundOrigin(ot);
-		lf.walkByAdjacency();
+		lf.walkFlipFlop();
 
 		if (lf.dmin < maxError)
 		{
@@ -889,6 +889,36 @@ public class MeshLiaison
 				loop = loop.nextOriginLoop();
 			}
 			while (loop.destination() != d);
+			return modified;
+		}
+
+		boolean walkFlipFlop()
+		{
+			AbstractHalfEdge ot = current.getAbstractHalfEdge();
+			if (ot.origin() == current.vertex[localEdgeIndex])
+				ot = ot.next();
+			else if (ot.destination() == current.vertex[localEdgeIndex])
+				ot = ot.prev();
+
+			boolean modified = false;
+			int countdown = 2;
+			while (true)
+			{
+				if (walkAroundOrigin(ot))
+				{
+					modified = true;
+					countdown = 2;
+					ot = current.getAbstractHalfEdge(ot);
+					if (ot.origin() == current.vertex[localEdgeIndex])
+						ot = ot.next();
+					else if (ot.destination() == current.vertex[localEdgeIndex])
+						ot = ot.prev();
+				}
+				ot = ot.sym();
+				countdown--;
+				if (countdown <= 0)
+					break;
+			}
 			return modified;
 		}
 
