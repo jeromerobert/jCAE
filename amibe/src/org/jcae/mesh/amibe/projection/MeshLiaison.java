@@ -367,30 +367,45 @@ public class MeshLiaison
 	public static AbstractHalfEdge findSurroundingTriangle(Vertex v, Triangle start, double maxError)
 	{
 		double[] pos = v.getUV();
+		boolean redo = true;
 		LocationFinder lf = new LocationFinder(pos);
-		lf.walkOnTriangle(start);
-		AbstractHalfEdge ot = start.getAbstractHalfEdge();
-		if (lf.localEdgeIndex == 1)
-			ot = ot.next();
-		else if (lf.localEdgeIndex == 2)
-			ot = ot.prev();
-		lf.walkAroundOrigin(ot);
-		lf.walkFlipFlop();
-
-		if (lf.dmin < maxError)
+		Triangle t = start;
+		AbstractHalfEdge ot = t.getAbstractHalfEdge();
+		while(true)
 		{
-			AbstractHalfEdge ret = lf.current.getAbstractHalfEdge();
-			if (ret.origin() == lf.current.vertex[lf.localEdgeIndex])
-				ret = ret.next();
-			else if (ret.destination() == lf.current.vertex[lf.localEdgeIndex])
-				ret = ret.prev();
-			return ret;
+			lf.walkOnTriangle(t);
+			if (lf.localEdgeIndex == 1)
+				ot = ot.next();
+			else if (lf.localEdgeIndex == 2)
+				ot = ot.prev();
+			lf.walkAroundOrigin(ot);
+			lf.walkFlipFlop();
+
+			ot = lf.current.getAbstractHalfEdge(ot);
+			if (ot.origin() == lf.current.vertex[lf.localEdgeIndex])
+				ot = ot.next();
+			else if (ot.destination() == lf.current.vertex[lf.localEdgeIndex])
+				ot = ot.prev();
+			if (lf.dmin < maxError)
+				return ot;
+
+			if (!redo)
+				break;
+			// Check a better start edge in neighborhood
+			if (LOGGER.isLoggable(Level.FINER))
+				LOGGER.log(Level.FINER, "Error too large: "+lf.dmin+" > "+maxError);
+			ot = findBetterTriangleInNeighborhood(pos, ot, maxError);
+			if (ot == null)
+				return null;
+			redo = false;
+			t = ot.getTri();
+			if (ot.origin() == t.vertex[0])
+				ot = ot.next();
+			else if (ot.destination() == t.vertex[0])
+				ot = ot.prev();
 		}
 
-		// Check a better start edge in neighborhood
-		if (LOGGER.isLoggable(Level.FINER))
-			LOGGER.log(Level.FINER, "Error too large: "+lf.dmin+" > "+maxError);
-		return findBetterTriangleInNeighborhood(pos, ot, maxError);
+		return null;
 	}
 
 	private static AbstractHalfEdge findBetterTriangleInNeighborhood(double[] pos, AbstractHalfEdge ot, double maxError)
