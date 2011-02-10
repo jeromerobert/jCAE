@@ -380,7 +380,7 @@ public class SmoothNodes3DBg
 		// modify liaison, this is not needed
 		System.arraycopy(n.getUV(), 0, centroid3, 0, 3);
 		n.moveTo(saveX, saveY, saveZ);
-		if (!mesh.checkNewRingNormals(ot, centroid3))
+		if (!mesh.canMoveOrigin(ot, centroid3))
 		{
 			liaison.backupRestore(n, true);
 			LOGGER.finer("Point not moved, some triangles would become inverted");

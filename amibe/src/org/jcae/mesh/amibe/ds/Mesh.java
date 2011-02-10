@@ -1438,7 +1438,19 @@ public class Mesh implements Serializable
 			traitsBuilder.getTrace(traits).edgeSwap(e);
 		return e.swap(this);
 	}
-	
+
+	/**
+	 * Checks whether origin point can be moved without introducing degenerated triangles.
+	 *
+	 * @param e   edge to be checked
+	 * @param v   the destination vertex
+	 * @return <code>true</code> if origin of this edge can be moved, false otherwise.
+	 */
+	public final boolean canMoveOrigin(AbstractHalfEdge e, double[] pt)
+	{
+		return e.canMoveOrigin(this, pt);
+	}
+
 	/**
 	 * Checks whether origin of an edge can be moved without inverting triangles.
 	 *
