@@ -39,7 +39,7 @@ parser.add_option("-I", "--immutable-border",
 parser.add_option("-G", "--immutable-border-group",
                   action="store_true", dest="immutable_border_group",
                   help="Tag border group edges as immutable")
-parser.add_option("-r", "--record", metavar="PREFIX",
+parser.add_option("--record", metavar="PREFIX",
                   action="store", type="string", dest="recordFile",
                   help="record mesh operations in a Python file to replay this scenario")
 
@@ -175,4 +175,6 @@ for bId in bgroupMap.keySet():
 			liaison.mesh.addBeam(result.get(i), result.get(i+1), bId)
 		#print "  New polyline: "+str(result.size())+" vertices"
 
+if options.recordFile:
+	liaison.getMesh().getTrace().finish()
 MeshWriter.writeObject3D(liaison.mesh, outDir, "")

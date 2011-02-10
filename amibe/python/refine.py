@@ -64,7 +64,7 @@ parser.add_option("-T", "--nearLengthRatio", metavar="FLOAT", default=1.0 / Math
 parser.add_option("-I", "--immutable-border",
                   action="store_true", dest="immutable_border",
                   help="Tag free edges as immutable")
-parser.add_option("-r", "--record", metavar="PREFIX",
+parser.add_option("--record", metavar="PREFIX",
                   action="store", type="string", dest="recordFile",
                   help="record mesh operations in a Python file to replay this scenario")
 

@@ -51,6 +51,9 @@ parser.add_option("-t", "--tolerance", metavar="FLOAT", default=2.0,
 parser.add_option("-I", "--immutable-border",
                   action="store_true", dest="immutable_border",
                   help="Tag free edges as immutable")
+parser.add_option("--record", metavar="PREFIX",
+                  action="store", type="string", dest="recordFile",
+                  help="record mesh operations in a Python file to replay this scenario")
                   
 (options, args) = parser.parse_args(args=sys.argv[1:])
 
@@ -74,10 +77,18 @@ xmlDir = args[0]
 outDir = args[1]
 
 mtb = MeshTraitsBuilder.getDefault3D()
+if options.recordFile:
+	mtb.addTraceRecord()
 mtb.addNodeList()
 mesh = Mesh(mtb)
+if options.recordFile:
+	mesh.getTrace().setDisabled(True)
 MeshReader.readObject3D(mesh, xmlDir)
 liaison = MeshLiaison(mesh, mtb)
+if options.recordFile:
+	liaison.getMesh().getTrace().setDisabled(False)
+	liaison.getMesh().getTrace().setLogFile(options.recordFile)
+	liaison.getMesh().getTrace().createMesh("mesh", liaison.getMesh())
 if options.immutable_border:
     liaison.mesh.tagFreeEdges(AbstractHalfEdge.IMMUTABLE)
 if options.coplanarity:
@@ -101,6 +112,8 @@ else:
 	sm = SmoothNodes3DBg(liaison, opts)
 sm.setProgressBarStatus(10000)
 sm.compute()
+if options.recordFile:
+	liaison.getMesh().getTrace().finish()
 
 MeshWriter.writeObject3D(sm.getOutputMesh(), outDir, String())
 
