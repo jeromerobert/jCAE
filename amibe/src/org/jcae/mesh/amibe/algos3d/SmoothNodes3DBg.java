@@ -367,12 +367,6 @@ public class SmoothNodes3DBg
 			centroid3[i] /= nn;
 		for (int i = 0; i < 3; i++)
 			centroid3[i] = oldp3[i] + relaxation * (centroid3[i] - oldp3[i]);
-		if (!mesh.checkNewRingNormals(ot, centroid3))
-		{
-			LOGGER.finer("Point not moved, some triangles would become inverted");
-			return false;
-		}
-
 		double saveX = oldp3[0];
 		double saveY = oldp3[1];
 		double saveZ = oldp3[2];
@@ -381,6 +375,18 @@ public class SmoothNodes3DBg
 			LOGGER.finer("Point not moved, projection failed");
 			return false;
 		}
+		// Temporarily reset n to its previous location, but do not
+		// modify liaison, this is not needed
+		System.arraycopy(n.getUV(), 0, centroid3, 0, 3);
+		n.moveTo(saveX, saveY, saveZ);
+		if (!mesh.checkNewRingNormals(ot, centroid3))
+		{
+			liaison.move(n, n.getUV());
+			LOGGER.finer("Point not moved, some triangles would become inverted");
+			return false;
+		}
+		n.moveTo(centroid3[0], centroid3[1], centroid3[2]);
+
 		if (checkQuality)
 		{
 			// Check that quality has not been degraded
