@@ -131,7 +131,7 @@ public class TraceReplay implements TraceInterface
 		// Do nothing
 	}
 
-	public void moveVertex(Vertex v, double x, double y, double z)
+	public void moveVertex(Vertex v)
 	{
 	}
 

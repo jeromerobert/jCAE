@@ -25,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.Iterator;
+import java.util.Set;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -87,7 +88,10 @@ public class TraceRecord implements TraceInterface
 
 		println("mtb = org.jcae.mesh.amibe.traits.MeshTraitsBuilder.getDefault3D()");
 		println("mtb.addTraceReplay()");
-		println("mtb.addNodeSet()");
+		if (mesh.getNodes() instanceof Set)
+			println("mtb.addNodeSet()");
+		else
+			println("mtb.addNodeList()");
 		println(meshVariable+" = org.jcae.mesh.amibe.ds.Mesh(mtb)");
 		println("[m.c("+meshVariable+") for m in mods]");
 		println("org.jcae.mesh.xmldata.MeshWriter.writeObject3D("+meshVariable+
@@ -382,12 +386,15 @@ public class TraceRecord implements TraceInterface
 		}
 	}
 
-	public void moveVertex(Vertex v, double x, double y, double z)
+	public void moveVertex(Vertex v)
 	{
-		if (disabled)
-			return;
-		println("v = self.m.getTrace().getVertex("+mapVertexId.get(v)+")");
-		println("v.moveTo("+x+", "+y+", "+z+")");
+		if (!disabled)
+		{
+			double[] pos = v.getUV();
+			println("# Vertex "+v);
+			println("v = self.m.getTrace().getVertex("+mapVertexId.get(v)+")");
+			println("v.moveTo("+pos[0]+", "+pos[1]+", "+pos[2]+")");
+		}
 		checkLines();
 	}
 
