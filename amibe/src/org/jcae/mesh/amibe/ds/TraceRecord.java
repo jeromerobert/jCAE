@@ -388,7 +388,7 @@ public class TraceRecord implements TraceInterface
 
 	public void moveVertex(Vertex v)
 	{
-		if (!disabled)
+		if (!disabled && mapVertexId.containsKey(v))
 		{
 			double[] pos = v.getUV();
 			println("# Vertex "+v);

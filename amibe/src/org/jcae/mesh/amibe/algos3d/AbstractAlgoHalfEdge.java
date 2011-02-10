@@ -72,6 +72,7 @@ public abstract class AbstractAlgoHalfEdge
 	public final void compute()
 	{
 		thisLogger().info("Run "+getClass().getName());
+		mesh.getTrace().println("# Begin "+getClass().getName());
 		preProcessAllHalfEdges();
 		thisLogger().info("Compute initial tree");
 		computeTree();
@@ -79,6 +80,7 @@ public abstract class AbstractAlgoHalfEdge
 		thisLogger().info("Initial number of triangles: "+countInnerTriangles(mesh));
 		processAllHalfEdges();
 		thisLogger().info("Final number of triangles: "+countInnerTriangles(mesh));
+		mesh.getTrace().println("# End "+getClass().getName());
 		assert mesh.checkNoDegeneratedTriangles();
 		assert mesh.checkNoInvertedTriangles();
 	}

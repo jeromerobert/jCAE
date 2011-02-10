@@ -353,6 +353,7 @@ public class Remesh
 	public final Remesh compute()
 	{
 		LOGGER.info("Run "+getClass().getName());
+		mesh.getTrace().println("# Begin Remesh");
 
 		if (analyticMetric != null || !metricsPartitionMap.isEmpty())
 		{
@@ -674,6 +675,7 @@ public class Remesh
 			LOGGER.info("Number of failed interpolations: "+nrFailedInterpolations);
 		LOGGER.config("Leave compute()");
 
+		mesh.getTrace().println("# End Remesh");
 		return this;
 	}
 
