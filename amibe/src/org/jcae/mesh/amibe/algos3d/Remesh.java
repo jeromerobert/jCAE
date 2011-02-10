@@ -624,21 +624,22 @@ public class Remesh
 					HalfEdge edge = (HalfEdge) ot;
 					edge = edge.prev();
 					Vertex s = edge.origin();
-					int counter = 0;
+					boolean advance = true;
 					do
 					{
-						edge = edge.nextApexLoop();
-						counter++;
+						advance = true;
 						if (edge.checkSwap3D(mesh, coplanarity) >= 0.0)
 						{
 							edge.getTri().clearAttributes(AbstractHalfEdge.MARKED);
 							edge.sym().getTri().clearAttributes(AbstractHalfEdge.MARKED);
 							edge = (HalfEdge) mesh.edgeSwap(edge);
-							counter--;
 							totNrSwap++;
+							advance = false;
 						}
+						else
+							edge = edge.nextApexLoop();
 					}
-					while ((edge.origin() != s || counter == 0) && counter < 20);
+					while (!advance || edge.origin() != s);
 					afterSwapHook();
 					if (processed > 0 && (processed % progressBarStatus) == 0)
 						LOGGER.info("Vertices inserted: "+processed);
