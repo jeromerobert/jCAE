@@ -370,9 +370,10 @@ public class SmoothNodes3DBg
 		double saveX = oldp3[0];
 		double saveY = oldp3[1];
 		double saveZ = oldp3[2];
-		if (!liaison.move(n, centroid3))
+		if (!liaison.backupAndMove(n, centroid3))
 		{
 			LOGGER.finer("Point not moved, projection failed");
+			liaison.backupRestore(n, true);
 			return false;
 		}
 		// Temporarily reset n to its previous location, but do not
@@ -381,7 +382,7 @@ public class SmoothNodes3DBg
 		n.moveTo(saveX, saveY, saveZ);
 		if (!mesh.checkNewRingNormals(ot, centroid3))
 		{
-			liaison.move(n, n.getUV());
+			liaison.backupRestore(n, true);
 			LOGGER.finer("Point not moved, some triangles would become inverted");
 			return false;
 		}
@@ -393,11 +394,12 @@ public class SmoothNodes3DBg
 			if (vertexQuality(ot) < quality)
 			{
 				n.moveTo(saveX, saveY, saveZ);
-				liaison.move(n, n.getUV());
+				liaison.backupRestore(n, true);
 				LOGGER.finer("Point not moved, quality decreases");
 				return false;
 			}
 		}
+		liaison.backupRestore(n, false);
 		return true;
 	}
 

@@ -48,6 +48,7 @@ public class MeshLiaison
 	private final double [] work1 = new double[3];
 	private final double [] work2 = new double[3];
 	private final double [] work3 = new double[3];
+	private final ProjectedLocation savedProjectedLocation = new ProjectedLocation();
 	
 	public MeshLiaison(Mesh backgroundMesh)
 	{
@@ -161,6 +162,23 @@ public class MeshLiaison
 		return currentMesh;
 	}
 
+	public final void backupRestore(Vertex v, boolean restore)
+	{
+		ProjectedLocation location = mapCurrentVertexProjection.get(v);
+		if (!location.isCached)
+			throw new IllegalStateException();
+		if (restore)
+			location.copy(savedProjectedLocation);
+		else
+			currentMesh.getTrace().moveVertex(v);
+		location.isCached = false;
+	}
+
+	public final boolean backupAndMove(Vertex v, double [] target)
+	{
+		return move(v, target, true);
+	}
+
 	/**
 	 * Move Vertex on the desired location, project onto background mesh
 	 * and update projection map.
@@ -171,10 +189,21 @@ public class MeshLiaison
 	 */
 	public final boolean move(Vertex v, double [] target)
 	{
+		return move(v, target, false);
+	}
+	private boolean move(Vertex v, double [] target, boolean backup)
+	{
 		if (LOGGER.isLoggable(Level.FINER))
 			LOGGER.log(Level.FINER, "Trying to move vertex "+v+" to ("+target[0]+", "+target[1]+", "+target[2]+")");
 		// Old projection
 		ProjectedLocation location = mapCurrentVertexProjection.get(v);
+		if (backup)
+		{
+			if (location.isCached)
+				throw new IllegalStateException();
+			savedProjectedLocation.copy(location);
+			location.isCached = true;
+		}
 		if (LOGGER.isLoggable(Level.FINEST))
 			LOGGER.log(Level.FINEST, "Old projection: "+location);
 		LocationFinder lf = new LocationFinder(target);
@@ -243,7 +272,8 @@ public class MeshLiaison
 			return false;
 		}
 		v.moveTo(newPosition[0], newPosition[1], newPosition[2]);
-		currentMesh.getTrace().moveVertex(v);
+		if (!backup)
+			currentMesh.getTrace().moveVertex(v);
 
 		if (LOGGER.isLoggable(Level.FINER))
 			LOGGER.log(Level.FINER, "Final position: "+v);
@@ -756,6 +786,10 @@ public class MeshLiaison
 		private int vIndex = -1;
 		// barycentric coordinates
 		private final double [] b = new double[3];
+		private boolean isCached;
+		ProjectedLocation()
+		{
+		}
 
 		/**
 		 *
@@ -768,7 +802,16 @@ public class MeshLiaison
 			computeBarycentricCoordinates(xyz);
 			updateVertexIndex(xyz);
 		}
-		
+
+		void copy(ProjectedLocation that)
+		{
+			t = that.t;
+			invArea = that.invArea;
+			vIndex = that.vIndex;
+			System.arraycopy(that.normal, 0, normal, 0, 3);
+			System.arraycopy(that.b, 0, b, 0, 3);
+		}
+
 		private boolean updateTriangle(Triangle newT)
 		{
 			if (newT == t)
