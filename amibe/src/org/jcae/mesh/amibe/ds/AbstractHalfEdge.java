@@ -590,6 +590,7 @@ public abstract class AbstractHalfEdge
 	 *    an inverted triangle, <code>true</code> otherwise.
 	 */
 	abstract boolean checkNewRingNormals(Mesh m, double [] newpt);
+	abstract boolean canMoveOrigin(Mesh m, double [] newpt);
 
 	/**
 	 * Checks whether an edge can be contracted into a given vertex.

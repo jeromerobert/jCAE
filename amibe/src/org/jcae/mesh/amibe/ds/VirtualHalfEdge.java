@@ -809,6 +809,11 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		return true;
 	}
 	
+	final boolean canMoveOrigin(Mesh m, double [] newpt)
+	{
+		return checkNewRingNormals(m, newpt);
+	}
+
 	/*
 	 * Warning: this method uses m.tempVH[0] temporary array.
 	 */

@@ -731,6 +731,32 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		return true;
 	}
 	
+	final boolean canMoveOrigin(Mesh mesh, double [] newpt)
+	{
+		assert origin().isManifold() && origin().isMutable();
+		Vertex d = destination();
+		HalfEdge f = this;
+		double [] temp0 = mesh.temp.t3_0;
+		double [] temp1 = mesh.temp.t3_1;
+		double [] temp2 = mesh.temp.t3_2;
+		double [] temp3 = mesh.temp.t3_3;
+		// Loop around origin
+		do
+		{
+			if (!f.hasAttributes(OUTER | BOUNDARY | NONMANIFOLD | SHARP))
+			{
+				double [] x1 = f.destination().getUV();
+				double area1  = Matrix3D.computeNormal3D(newpt, x1, f.apex().getUV(), temp0, temp1, temp2);
+				double area2  = Matrix3D.computeNormal3D(x1, newpt, f.sym().apex().getUV(), temp0, temp1, temp3);
+				if (area1 == 0.0 || area2 == 0.0 || Matrix3D.prodSca(temp3, temp2) < -0.4)
+					return false;
+			}
+			f = f.nextOriginLoop();
+		}
+		while (f.destination() != d);
+		return true;
+	}
+
 	/**
 	 * Checks that triangles are not inverted if origin vertex is moved.
 	 *
