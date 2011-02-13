@@ -503,6 +503,13 @@ public class Remesh
 							Vertex v = triNodes.get(index);
 							EuclidianMetric3D metric = triMetrics.get(index);
 							assert metric != null;
+							double localSize = 0.5 * metric.getUnitBallBBox()[0];
+							double localSize2 = localSize * localSize;
+							Vertex bgNear = neighborBgMap.get(neighborMap.get(v));
+							Triangle bgT = liaison.findSurroundingTriangle(v, bgNear, localSize2, true).getTri();
+							liaison.addVertex(v, bgT);
+							liaison.move(v, v.getUV());
+
 							double[] uv = v.getUV();
 							Vertex n = kdTree.getNearestVertex(metric, uv);
 							if (allowNearNodes || interpolatedDistance(v, metric, n, metrics.get(n)) > curMinlen)
@@ -511,10 +518,20 @@ public class Remesh
 								metrics.put(v, metric);
 								nodes.add(v);
 								triangles.add(t);
+								double d0 = v.sqrDistance3D(bgT.vertex[0]);
+								double d1 = v.sqrDistance3D(bgT.vertex[1]);
+								double d2 = v.sqrDistance3D(bgT.vertex[2]);
+								if (d0 <= d1 && d0 <= d2)
+									neighborBgMap.put(v, bgT.vertex[0]);
+								else if (d1 <= d0 && d1 <= d2)
+									neighborBgMap.put(v, bgT.vertex[1]);
+								else
+									neighborBgMap.put(v, bgT.vertex[2]);
 							}
 							else
 							{
 								tooNearNodes++;
+								liaison.removeVertex(v);
 							}
 							index += prime;
 							if (index >= imax)
@@ -577,6 +594,8 @@ public class Remesh
 					{
 						// Vertex is not inserted
 						skippedNodes++;
+						liaison.removeVertex(v);
+						neighborBgMap.remove(v);
 						continue;
 					}
 					if (!ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
@@ -592,6 +611,8 @@ public class Remesh
 						{
 							// Vertex is not inserted
 							skippedNodes++;
+							liaison.removeVertex(v);
+							neighborBgMap.remove(v);
 							continue;
 						}
 					}
@@ -599,6 +620,8 @@ public class Remesh
 					{
 						// Vertex is not inserted
 						skippedNodes++;
+						liaison.removeVertex(v);
+						neighborBgMap.remove(v);
 						continue;
 					}
 					ot.clearAttributes(AbstractHalfEdge.MARKED);
@@ -606,18 +629,6 @@ public class Remesh
 					ot = mesh.vertexSplit(ot, v);
 					assert ot.destination() == v : v+" "+ot;
 					kdTree.add(v);
-					Vertex bgNear = neighborBgMap.get(neighborMap.get(v));
-					Triangle bgT = liaison.findSurroundingTriangle(v, bgNear, localSize2, true).getTri();
-					liaison.addVertex(v, bgT);
-					double d0 = v.sqrDistance3D(bgT.vertex[0]);
-					double d1 = v.sqrDistance3D(bgT.vertex[1]);
-					double d2 = v.sqrDistance3D(bgT.vertex[2]);
-					if (d0 <= d1 && d0 <= d2)
-						neighborBgMap.put(v, bgT.vertex[0]);
-					else if (d1 <= d0 && d1 <= d2)
-						neighborBgMap.put(v, bgT.vertex[1]);
-					else
-						neighborBgMap.put(v, bgT.vertex[2]);
 					processed++;
 					afterSplitHook();
 					// Swap edges
