@@ -74,6 +74,9 @@ public class Remesh
 	private int nrInterpolations;
 	private int nrFailedInterpolations;
 
+	Map<Triangle, Collection<Vertex>> mapTriangleVertices = new HashMap<Triangle, Collection<Vertex>>();
+	Map<Vertex, Triangle> surroundingTriangle = new HashMap<Vertex, Triangle>();
+
 	private final boolean project;
 	private final boolean hasRidges;
 	// true if mesh has free edges, ridges or nonmanifold edges, false otherwise
@@ -350,6 +353,74 @@ public class Remesh
 		return l;
 	}
 
+	private Map<Triangle, Collection<Vertex>> collectVertices(AbstractHalfEdge ot)
+	{
+		Map <Triangle, Collection<Vertex>> verticesToDispatch = new HashMap<Triangle, Collection<Vertex>>();
+		if (ot.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+		{
+			for (Iterator<AbstractHalfEdge> itf = ot.fanIterator(); itf.hasNext(); )
+			{
+				Triangle t = itf.next().getTri();
+				assert !t.hasAttributes(AbstractHalfEdge.OUTER);
+				Collection<Vertex> prev = mapTriangleVertices.remove(t);
+				if (prev != null)
+				{
+					verticesToDispatch.put(t, new ArrayList<Vertex>(prev));
+					prev.clear();
+				}
+			}
+		}
+		else
+		{
+			Triangle t = ot.getTri();
+			Collection<Vertex> prev = mapTriangleVertices.remove(t);
+			if (prev != null)
+			{
+				verticesToDispatch.put(t, new ArrayList<Vertex>(prev));
+				prev.clear();
+			}
+			if (!ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
+			{
+				ot = ot.sym();
+				t = ot.getTri();
+				prev = mapTriangleVertices.remove(t);
+				ot = ot.sym();
+				if (prev != null)
+				{
+					verticesToDispatch.put(t, new ArrayList<Vertex>(prev));
+					prev.clear();
+				}
+			}
+		}
+		return verticesToDispatch;
+	}
+
+	private void dispatchVertices(Vertex newVertex, Map<Triangle, Collection<Vertex>> verticesToDispatch)
+	{
+		for (Map.Entry<Triangle, Collection<Vertex>> entry : verticesToDispatch.entrySet())
+		{
+			Triangle t = entry.getKey();
+			for (Vertex v : entry.getValue())
+			{
+				surroundingTriangle.remove(v);
+				if (v == newVertex)
+				{
+					// There is no need to insert this vertex
+					continue;
+				}
+				Triangle vT = MeshLiaison.findSurroundingInAdjacentTriangles(v, t);
+				surroundingTriangle.put(v, vT);
+				Collection<Vertex> c = mapTriangleVertices.get(vT);
+				if (c == null)
+				{
+					c = new ArrayList<Vertex>();
+					mapTriangleVertices.put(vT, c);
+				}
+				c.add(v);
+			}
+		}
+	}
+
 	public final Remesh compute()
 	{
 		LOGGER.info("Run "+getClass().getName());
@@ -378,7 +449,6 @@ public class Remesh
 		}
 
 		ArrayList<Vertex> nodes = new ArrayList<Vertex>();
-		ArrayList<Triangle> triangles = new ArrayList<Triangle>();
 		ArrayList<Vertex> triNodes = new ArrayList<Vertex>();
 		ArrayList<EuclidianMetric3D> triMetrics = new ArrayList<EuclidianMetric3D>();
 
@@ -425,7 +495,8 @@ public class Remesh
 				// Number of nodes which are too near from existing vertices
 				int tooNearNodes = 0;
 				nodes.clear();
-				triangles.clear();
+				surroundingTriangle.clear();
+				mapTriangleVertices.clear();
 				neighborMap.clear();
 				skippedNodes = 0;
 				LOGGER.fine("Check all edges");
@@ -437,6 +508,9 @@ public class Remesh
 					sym = t.getAbstractHalfEdge(sym);
 					triNodes.clear();
 					triMetrics.clear();
+					Collection<Vertex> newVertices = mapTriangleVertices.get(t);
+					if (newVertices == null)
+						newVertices = new ArrayList<Vertex>();
 					// Maximal number of nodes which are inserted on edges of this triangle
 					int nrTriNodes = 0;
 					for (int i = 0; i < 3; i++)
@@ -517,7 +591,8 @@ public class Remesh
 								kdTree.add(v);
 								metrics.put(v, metric);
 								nodes.add(v);
-								triangles.add(t);
+								newVertices.add(v);
+								surroundingTriangle.put(v, t);
 								double d0 = v.sqrDistance3D(bgT.vertex[0]);
 								double d1 = v.sqrDistance3D(bgT.vertex[1]);
 								double d2 = v.sqrDistance3D(bgT.vertex[2]);
@@ -537,6 +612,8 @@ public class Remesh
 							if (index >= imax)
 								index -= imax;
 						}
+						if (!newVertices.isEmpty())
+							mapTriangleVertices.put(t, newVertices);
 					}
 				}
 				if (nodes.isEmpty())
@@ -583,17 +660,14 @@ public class Remesh
 					if (index >= imax)
 						index -= imax;
 					Vertex v = nodes.get(index);
-					Triangle start = triangles.get(index);
-					double localSize = 0.5 * metrics.get(v).getUnitBallBBox()[0];
-					double localSize2 = localSize * localSize;
-					AbstractHalfEdge ot = MeshLiaison.findSurroundingTriangle(v, start, localSize2);
-					if (ot == null)
-						ot = MeshLiaison.findSurroundingTriangleDebug(v, mesh);
+					Triangle start = surroundingTriangle.remove(v);
+					AbstractHalfEdge ot = MeshLiaison.findNearestEdge(v, start);
 					sym = ot.sym(sym);
 					if (ot.hasAttributes(AbstractHalfEdge.IMMUTABLE))
 					{
 						// Vertex is not inserted
 						skippedNodes++;
+						mapTriangleVertices.get(start).remove(v);
 						liaison.removeVertex(v);
 						neighborBgMap.remove(v);
 						continue;
@@ -611,6 +685,7 @@ public class Remesh
 						{
 							// Vertex is not inserted
 							skippedNodes++;
+							mapTriangleVertices.get(start).remove(v);
 							liaison.removeVertex(v);
 							neighborBgMap.remove(v);
 							continue;
@@ -620,14 +695,21 @@ public class Remesh
 					{
 						// Vertex is not inserted
 						skippedNodes++;
+						mapTriangleVertices.get(start).remove(v);
 						liaison.removeVertex(v);
 						neighborBgMap.remove(v);
 						continue;
 					}
 					ot.clearAttributes(AbstractHalfEdge.MARKED);
 					sym.clearAttributes(AbstractHalfEdge.MARKED);
+
+					Map<Triangle, Collection<Vertex>> verticesToDispatch = collectVertices(ot);
+
 					ot = mesh.vertexSplit(ot, v);
 					assert ot.destination() == v : v+" "+ot;
+
+					dispatchVertices(v, verticesToDispatch);
+
 					kdTree.add(v);
 					processed++;
 					afterSplitHook();
@@ -643,7 +725,9 @@ public class Remesh
 						{
 							edge.getTri().clearAttributes(AbstractHalfEdge.MARKED);
 							edge.sym().getTri().clearAttributes(AbstractHalfEdge.MARKED);
+							Map<Triangle, Collection<Vertex>> vTri = collectVertices(edge);
 							edge = (HalfEdge) mesh.edgeSwap(edge);
+							dispatchVertices(null, vTri);
 							totNrSwap++;
 							advance = false;
 						}
@@ -662,6 +746,7 @@ public class Remesh
 					assert mesh.checkNoInvertedTriangles();
 				}
 				assert mesh.checkNoDegeneratedTriangles();
+				assert surroundingTriangle.isEmpty() : "surroundingTriangle still contains "+surroundingTriangle.size()+" vertices";
 
 				if (LOGGER.isLoggable(Level.FINE))
 				{

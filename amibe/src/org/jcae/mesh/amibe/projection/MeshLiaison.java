@@ -334,6 +334,18 @@ public class MeshLiaison
 		return ret;
 	}
 
+	public static AbstractHalfEdge findNearestEdge(Vertex v, Triangle t)
+	{
+		LocationFinder lf = new LocationFinder(v.getUV());
+		lf.walkOnTriangle(t);
+		AbstractHalfEdge ret = lf.current.getAbstractHalfEdge();
+		if (ret.origin() == lf.current.vertex[lf.localEdgeIndex])
+			ret = ret.next();
+		else if (ret.destination() == lf.current.vertex[lf.localEdgeIndex])
+			ret = ret.prev();
+		return ret;
+	}
+
 	public AbstractHalfEdge findSurroundingTriangle(Vertex v, Vertex start, double maxError, boolean background)
 	{
 		Triangle t = null;
@@ -358,6 +370,28 @@ public class MeshLiaison
 		if (LOGGER.isLoggable(Level.FINE))
 			LOGGER.log(Level.FINE, "Maximum error reached, search into the whole "+(background ? "background " : "")+"mesh for vertex "+v);
 		return findSurroundingTriangleDebug(v, (background ? backgroundMesh : currentMesh));
+	}
+
+	public static Triangle findSurroundingInAdjacentTriangles(Vertex v, Triangle start)
+	{
+		double[] pos = v.getUV();
+		AbstractHalfEdge ot = start.getAbstractHalfEdge();
+		AbstractHalfEdge sym = start.getAbstractHalfEdge();
+		int[] index = new int[2];
+		double dmin = sqrDistanceVertexTriangle(pos, start, index);
+		for (int i = 0; i < 3; i++)
+		{
+			ot = ot.next();
+			if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+				continue;
+			sym = ot.sym(sym);
+			Triangle t = sym.getTri();
+			double dist = sqrDistanceVertexTriangle(pos, t, index);
+			if (dist < dmin)
+				return t;
+		}
+
+		return start;
 	}
 
 	/**
