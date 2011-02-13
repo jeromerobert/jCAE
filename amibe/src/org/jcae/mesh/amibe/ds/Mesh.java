@@ -1887,12 +1887,15 @@ public class Mesh implements Serializable
 			if (t.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			ot = t.getAbstractHalfEdge(ot);
+			sym = t.getAbstractHalfEdge(sym);
 			for (int i = 0; i < 3; i++)
 			{
 				ot = ot.next();
 				if (ot.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 					continue;
-				sym = ot.sym();
+				if (!ot.hasSymmetricEdge())
+					continue;
+				sym = ot.sym(sym);
 				Vertex o = ot.origin();
 				Vertex d = ot.destination();
 				Vertex a = ot.apex();

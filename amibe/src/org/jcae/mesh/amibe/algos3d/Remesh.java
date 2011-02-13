@@ -441,7 +441,7 @@ public class Remesh
 					int nrTriNodes = 0;
 					for (int i = 0; i < 3; i++)
 					{
-						h = h.next(h);
+						h = h.next();
 						if (h.hasAttributes(AbstractHalfEdge.IMMUTABLE))
 							continue;
 						if ((pass < passes[0]) != (h.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD)))
@@ -572,6 +572,7 @@ public class Remesh
 					AbstractHalfEdge ot = MeshLiaison.findSurroundingTriangle(v, start, localSize2);
 					if (ot == null)
 						ot = MeshLiaison.findSurroundingTriangleDebug(v, mesh);
+					sym = ot.sym(sym);
 					if (ot.hasAttributes(AbstractHalfEdge.IMMUTABLE))
 					{
 						// Vertex is not inserted
@@ -581,7 +582,6 @@ public class Remesh
 					if (!ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 					{
 						// Check whether edge can be split
-						sym = ot.sym(sym);
 						Vertex o = ot.origin();
 						Vertex d = ot.destination();
 						Vertex n = sym.apex();
@@ -602,8 +602,8 @@ public class Remesh
 						continue;
 					}
 					ot.clearAttributes(AbstractHalfEdge.MARKED);
-					ot.sym().clearAttributes(AbstractHalfEdge.MARKED);
-					mesh.vertexSplit(ot, v);
+					sym.clearAttributes(AbstractHalfEdge.MARKED);
+					ot = mesh.vertexSplit(ot, v);
 					assert ot.destination() == v : v+" "+ot;
 					kdTree.add(v);
 					Vertex bgNear = neighborBgMap.get(neighborMap.get(v));
