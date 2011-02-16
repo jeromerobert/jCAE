@@ -483,6 +483,49 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			return Qafter;
 		return invalid;
 	}
+
+	public final double checkSwapNormal(Mesh mesh, double coplanarity, double[] normal)
+	{
+		double invalid = -2.0;
+		if (hasAttributes(IMMUTABLE))
+			return invalid;
+		// Do not swap sharp edges
+		if (hasAttributes(SHARP))
+			return invalid;
+		// Check if there is an adjacent edge
+		if (hasAttributes(OUTER | BOUNDARY | NONMANIFOLD))
+			return invalid;
+		// Check for coplanarity
+		Vertex o = origin();
+		Vertex d = destination();
+		Vertex a = apex();
+		Vertex n = sym.apex();
+		// Do not create an edge which will be difficult to modify later
+		if (a.getRef() != 0 && n.getRef() != 0 && (o.getRef() == 0 || d.getRef() == 0))
+			return invalid;
+		double[] temp0 = mesh.temp.t3_0;
+		double[] temp1 = mesh.temp.t3_1;
+		double[] temp2 = mesh.temp.t3_2;
+		double[] temp3 = mesh.temp.t3_3;
+		double s1 = Matrix3D.computeNormal3D(o.getUV(), d.getUV(), a.getUV(), temp0, temp1, temp2);
+		double s2 = Matrix3D.computeNormal3D(d.getUV(), o.getUV(), n.getUV(), temp0, temp1, temp3);
+		double cBefore1 = Matrix3D.prodSca(temp2, normal);
+		double cBefore2 = Matrix3D.prodSca(temp3, normal);
+		if (cBefore2 < cBefore1)
+			cBefore1 = cBefore2;
+		// Make sure that edge swap does not create inverted triangles
+		double s3 = Matrix3D.computeNormal3D(o.getUV(), n.getUV(), a.getUV(), temp0, temp1, temp2);
+		double s4 = Matrix3D.computeNormal3D(d.getUV(), a.getUV(), n.getUV(), temp0, temp1, temp3);
+		double cAfter1 = Matrix3D.prodSca(temp2, normal);
+		double cAfter2 = Matrix3D.prodSca(temp3, normal);
+		if (cAfter2 < cAfter1)
+			cAfter1 = cAfter2;
+		if (cAfter1 < coplanarity)
+			return invalid;
+		if (cBefore1 < 0.0 && cAfter1 > 0.0)
+			return - invalid;
+		return (cAfter1 - cBefore1);
+	}
 	
 	/**
 	 * Swaps an edge.

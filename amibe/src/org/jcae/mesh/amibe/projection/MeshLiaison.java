@@ -296,6 +296,13 @@ public class MeshLiaison
 		return location.t;
 	}
 
+	public final double[] getBackgroundNormal(Vertex v)
+	{
+		ProjectedLocation location = mapCurrentVertexProjection.get(v);
+		assert location != null : "Vertex "+v+" not found";
+		return location.normal;
+	}
+
 	/**
 	 * Add a Vertex.
 	 *
