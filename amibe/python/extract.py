@@ -1,26 +1,35 @@
 # jCAE
-from org.jcae.mesh.xmldata import SubMeshWorker
+from org.jcae.mesh.amibe.ds import Mesh
+from org.jcae.mesh.xmldata import SubMeshWorker, MeshReader, MeshWriter
 
 # Java
 from java.lang import String
 
 # Python
 import sys, os
-from array import array
+from optparse import OptionParser
 
 """
-extract specified groups from a mesh
+   Extract specified groups from a mesh
 """
-args=sys.argv[1:]
-if len(args) != 3:
-    print "Extract specified groups from a mesh"
-    print "Syntax: extract <inputDir> <outputDir> <comma-separated group list>"
-    sys.exit(1)
 
-input_dir=args[0]
-output_dir=args[1]
-group_list=array(String, args[2].split(","))
-submesh_worker = SubMeshWorker(input_dir)
-extractedDir = submesh_worker.extractGroups(group_list)
-os.rename(extractedDir, output_dir)
+cmd=("extract    ", "<inputDir> <outputDir> <groupName> [<groupName>...]", "Extract specified groups")
+parser = OptionParser(usage="amibebatch %s [OPTIONS] %s\n\n%s" % cmd,
+	prog="extract")
+
+(options, args) = parser.parse_args(args=sys.argv[1:])
+
+if len(args) < 3:
+	parser.print_usage()
+	sys.exit(1)
+
+xmlDir = args[0]
+outDir = args[1]
+
+s = SubMeshWorker(xmlDir)
+groups = args[2:]
+extractedDir = s.extractGroups(groups)
+m = Mesh()
+MeshReader.readObject3D(m, extractedDir)
+MeshWriter.writeObject3D(m, outDir, String())
 
