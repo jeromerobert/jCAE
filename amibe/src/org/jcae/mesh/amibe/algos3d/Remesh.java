@@ -24,7 +24,6 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.ds.Skeleton;
 import org.jcae.mesh.amibe.metrics.KdTree;
 import org.jcae.mesh.amibe.projection.MeshLiaison;
 import org.jcae.mesh.amibe.ds.HalfEdge;
@@ -65,7 +64,6 @@ public class Remesh
 	private int progressBarStatus = 10000;
 	private final Mesh mesh;
 	private final MeshLiaison liaison;
-	private final Skeleton skeleton;
 	// Octree to find nearest Vertex in current mesh
 	private final KdTree<Vertex> kdTree;
 	private Map<Vertex, Vertex> neighborBgMap = new HashMap<Vertex, Vertex>();
@@ -204,7 +202,7 @@ public class Remesh
 		allowNearNodes = nearNodes;
 		remeshOnlyFeatureEdges = onlyFeatureEdges;
 
-		skeleton = new Skeleton(mesh);
+		liaison.buildSkeleton();
 
 		if (!decimateOptions.isEmpty())
 		{
@@ -892,7 +890,7 @@ public class Remesh
 						// Check that point is not near of a border
 						double localSize = 0.9 * minlen * m.getUnitBallBBox()[0];
 						double localSize2 = localSize * localSize;
-						if (skeleton.isNearer(np, borderGroup, localSize2))
+						if (liaison.isNearSkeleton(np, borderGroup, localSize2))
 						{
 							r--;
 							break;

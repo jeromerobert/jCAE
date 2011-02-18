@@ -19,20 +19,22 @@
 
 package org.jcae.mesh.amibe.projection;
 
-import java.io.FileNotFoundException;
-import java.util.List;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
+import gnu.trove.TIntObjectHashMap;
+import java.io.FileNotFoundException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,6 +46,7 @@ public class MeshLiaison
 	private final Mesh currentMesh;
 	// Map between vertices of currentMesh and their projection on backgroundMesh
 	private final Map<Vertex, ProjectedLocation> mapCurrentVertexProjection;
+	private Skeleton skeleton;
 	
 	private final double [] work1 = new double[3];
 	private final double [] work2 = new double[3];
@@ -500,6 +503,16 @@ public class MeshLiaison
 		}
 		seen.clear();
 		return null;
+	}
+
+	public final void buildSkeleton()
+	{
+		skeleton = new Skeleton(backgroundMesh);
+	}
+
+	public final boolean isNearSkeleton(Vertex v, int groupId, double distance2)
+	{
+		return skeleton.isNearer(v, groupId, distance2);
 	}
 
 	public static double getDistanceVertexTriangle(Vertex v, Triangle tri)
@@ -1092,4 +1105,104 @@ public class MeshLiaison
 
 	}
 
+	private static class Skeleton
+	{
+		private final TIntObjectHashMap<Collection<Line>> mapGroupBorder = new TIntObjectHashMap<Collection<Line>>();
+	
+		Skeleton(Mesh mesh)
+		{
+			if (!mesh.hasAdjacency())
+				throw new IllegalArgumentException("Mesh does not contain adjacency relations");
+			AbstractHalfEdge ot = null;
+			for (Triangle t : mesh.getTriangles())
+			{
+				if (t.hasAttributes(AbstractHalfEdge.OUTER))
+					continue;
+				int groupId = t.getGroupId();
+				Collection<Line> borders = mapGroupBorder.get(groupId);
+				if (borders == null)
+				{
+					borders = new ArrayList<Line>();
+					mapGroupBorder.put(groupId, borders);
+				}
+				// This test is performed here so that mapGroupBorder.get(N)
+				// is not null if a group has no boundary edge.
+				if (!t.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+					continue;
+				ot = t.getAbstractHalfEdge(ot);
+				for (int i = 0; i < 3; i++)
+				{
+					ot = ot.next();
+					if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+						borders.add(new Line(ot.origin(), ot.destination()));
+				}
+			}
+		}
+	
+		double getSqrDistance(Vertex v, int groupId)
+		{
+			Collection<Line> borders = mapGroupBorder.get(groupId);
+			if (borders == null)
+				throw new IllegalArgumentException("group identifier not found");
+			double[] pos = v.getUV();
+			double dMin = Double.MAX_VALUE;
+			for (Line l : borders)
+			{
+				double d = l.sqrDistance(pos);
+				if (d < dMin)
+					dMin = d;
+			}
+			return dMin;
+		}
+	
+		boolean isNearer(Vertex v, int groupId, double distance2)
+		{
+			Collection<Line> borders = mapGroupBorder.get(groupId);
+			if (borders == null)
+				throw new IllegalArgumentException("group identifier "+groupId+" not found");
+			double[] pos = v.getUV();
+			for (Line l : borders)
+			{
+				if (l.sqrDistance(pos) <= distance2)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+	
+		private static class Line
+		{
+			private final double[] origin = new double[3];
+			private final double[] direction = new double[3];
+			private final double sqrNormDirection;
+			Line(Vertex v1, Vertex v2)
+			{
+				System.arraycopy(v1.getUV(), 0, origin, 0, 3);
+				double[] end = v2.getUV();
+				direction[0] = end[0] - origin[0];
+				direction[1] = end[1] - origin[1];
+				direction[2] = end[2] - origin[2];
+				sqrNormDirection = direction[0] * direction[0] + direction[1] * direction[1] + direction[2] * direction[2];
+			}
+	
+			double sqrDistance(double[] v)
+			{
+				double t =
+					direction[0] * (v[0] - origin[0]) +
+					direction[1] * (v[1] - origin[1]) +
+					direction[2] * (v[2] - origin[2]);
+				if (t <= 0)
+					t = 0.0;
+				else if (t >= sqrNormDirection)
+					t = 1.0;
+				else
+					t /= sqrNormDirection;
+				double dx = v[0] - (origin[0] + t * direction[0]);
+				double dy = v[1] - (origin[1] + t * direction[1]);
+				double dz = v[2] - (origin[2] + t * direction[2]);
+				return dx * dx + dy * dy + dz * dz;
+			}
+		}
+	}
 }
