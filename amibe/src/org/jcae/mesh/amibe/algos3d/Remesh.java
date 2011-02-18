@@ -682,6 +682,15 @@ public class Remesh
 							(xd[1] - xo[1]) * (pos[1] - xo[1]) +
 							(xd[2] - xo[2]) * (pos[2] - xo[2])
 							);
+						if (xScal < 0.01 || xScal > 0.99)
+						{
+							// Vertex is not inserted
+							skippedNodes++;
+							mapTriangleVertices.get(start).remove(v);
+							liaison.removeVertex(v);
+							neighborBgMap.remove(v);
+							continue;
+						}
 						v.moveTo(
 							xo[0] + xScal * (xd[0] - xo[0]),
 							xo[1] + xScal * (xd[1] - xo[1]),
