@@ -816,7 +816,7 @@ public class Remesh
 		{
 			//  Long edges are discretized, but do not create more than 4 subsegments
 			nr = 3;
-			target = edgeLength / nr;
+			target = edgeLength / (nr + 1);
 			maxError = 0.1;
 		}
 		else
