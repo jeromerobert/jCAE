@@ -646,6 +646,8 @@ public class Remesh
 					mapTriangleVertices.get(start).remove(v);
 					liaison.removeVertex(v);
 					neighborBgMap.remove(v);
+					ot.clearAttributes(AbstractHalfEdge.MARKED);
+					sym.clearAttributes(AbstractHalfEdge.MARKED);
 					continue;
 				}
 				if (!ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
@@ -664,6 +666,8 @@ public class Remesh
 						mapTriangleVertices.get(start).remove(v);
 						liaison.removeVertex(v);
 						neighborBgMap.remove(v);
+						ot.clearAttributes(AbstractHalfEdge.MARKED);
+						sym.clearAttributes(AbstractHalfEdge.MARKED);
 						continue;
 					}
 				}
@@ -691,6 +695,8 @@ public class Remesh
 							mapTriangleVertices.get(start).remove(v);
 							liaison.removeVertex(v);
 							neighborBgMap.remove(v);
+							ot.clearAttributes(AbstractHalfEdge.MARKED);
+							sym.clearAttributes(AbstractHalfEdge.MARKED);
 							continue;
 						}
 						v.moveTo(
@@ -698,6 +704,17 @@ public class Remesh
 							xo[1] + xScal * (xd[1] - xo[1]),
 							xo[2] + xScal * (xd[2] - xo[2]));
 						mesh.getTrace().moveVertex(v);
+					}
+					else
+					{
+						// Vertex is not inserted
+						skippedNodes++;
+						mapTriangleVertices.get(start).remove(v);
+						liaison.removeVertex(v);
+						neighborBgMap.remove(v);
+						ot.clearAttributes(AbstractHalfEdge.MARKED);
+						sym.clearAttributes(AbstractHalfEdge.MARKED);
+						continue;
 					}
 				}
 				ot.clearAttributes(AbstractHalfEdge.MARKED);
