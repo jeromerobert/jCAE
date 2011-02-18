@@ -477,9 +477,11 @@ public class Remesh
 		for (Triangle f : mesh.getTriangles())
 			f.clearAttributes(AbstractHalfEdge.MARKED);
 
+		boolean reversed = true;
 		while (true)
 		{
 			nrIter++;
+			reversed = !reversed;
 			// Maximal number of nodes which are inserted on an edge
 			int maxNodes = 0;
 			// Number of checked edges
@@ -543,7 +545,7 @@ public class Remesh
 						h.setAttributes(AbstractHalfEdge.MARKED);
 						continue;
 					}
-					int nrNodes = addCandidatePoints(h, l, triNodes, triMetrics, neighborMap);
+					int nrNodes = addCandidatePoints(h, l, reversed, triNodes, triMetrics, neighborMap);
 					if (nrNodes > nrTriNodes)
 					{
 						nrTriNodes = nrNodes;
@@ -773,7 +775,7 @@ public class Remesh
 		return this;
 	}
 
-	private int addCandidatePoints(AbstractHalfEdge ot, double edgeLength,
+	private int addCandidatePoints(AbstractHalfEdge ot, double edgeLength, boolean reversed,
 		ArrayList<Vertex> triNodes, ArrayList<EuclidianMetric3D> triMetrics,
 		Map<Vertex, Vertex> neighborMap)
 	{
@@ -785,7 +787,7 @@ public class Remesh
 		//  Ensure that start point has the lowest edge size
 		double [] xs = start.getUV();
 		double [] xe = end.getUV();
-		if (mS.distance2(xs, xe) < mE.distance2(xs, xe))
+		if (reversed || mS.distance2(xs, xe) < mE.distance2(xs, xe))
 		{
 			Vertex tempV = start;
 			start = end;
