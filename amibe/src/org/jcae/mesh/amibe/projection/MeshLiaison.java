@@ -379,6 +379,7 @@ public class MeshLiaison
 		AbstractHalfEdge sym = start.getAbstractHalfEdge();
 		int[] index = new int[2];
 		double dmin = sqrDistanceVertexTriangle(pos, start, index);
+		Triangle ret = start;
 		for (int i = 0; i < 3; i++)
 		{
 			ot = ot.next();
@@ -388,10 +389,13 @@ public class MeshLiaison
 			Triangle t = sym.getTri();
 			double dist = sqrDistanceVertexTriangle(pos, t, index);
 			if (dist < dmin)
-				return t;
+			{
+				dmin = dist;
+				ret = t;
+			}
 		}
 
-		return start;
+		return ret;
 	}
 
 	/**
