@@ -107,7 +107,8 @@ public class TraceRecord implements TraceInterface
 		println("class c():");
 		startScope();
 		println("def startMethodHook(self):");
-		println("    pass");
+		println("    assert self.m.checkNoDegeneratedTriangles()");
+		println("    assert self.m.checkNoInvertedTriangles()");
 		println("def __init__(self, m):");
 		startScope();
 		println("self.m = m");
@@ -433,7 +434,8 @@ public class TraceRecord implements TraceInterface
 			out.println(tab+"class c():");
 			startScope();
 			out.println(tab+"def startMethodHook(self):");
-			out.println(tab+"    pass");
+			out.println(tab+"    assert self.m.checkNoDegeneratedTriangles()");
+			out.println(tab+"    assert self.m.checkNoInvertedTriangles()");
 			out.println(tab+"def __init__(self, m):");
 			startScope();
 			out.println(tab+"self.m = m");
