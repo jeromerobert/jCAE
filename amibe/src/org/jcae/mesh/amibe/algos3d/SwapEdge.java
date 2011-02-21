@@ -99,6 +99,13 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 	@Override
 	public double cost(final HalfEdge e)
 	{
+		if (liaison != null)
+		{
+			double[] tNormal = liaison.getBackgroundNormal(e.origin());
+			if (e.checkSwapNormal(mesh, minCos, tNormal) < -1.0)
+				return Double.MAX_VALUE;
+		}
+
 		return - e.checkSwap3D(mesh, minCos, 0, minQualityFactor);
 	}
 	
