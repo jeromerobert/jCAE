@@ -723,10 +723,17 @@ public class Remesh
 				edge = edge.prev();
 				Vertex s = edge.origin();
 				boolean advance = true;
+				double [] tNormal = liaison.getBackgroundNormal(v);
 				do
 				{
 					advance = true;
-					if (edge.checkSwap3D(mesh, coplanarity) >= 0.0)
+					double checkNormal = edge.checkSwapNormal(mesh, coplanarity, tNormal);
+					if (checkNormal < -1.0)
+					{
+						edge = edge.nextApexLoop();
+						continue;
+					}
+					if (edge.checkSwap3D(mesh, -2.0) > 0.0)
 					{
 						edge.getTri().clearAttributes(AbstractHalfEdge.MARKED);
 						edge.sym().getTri().clearAttributes(AbstractHalfEdge.MARKED);
