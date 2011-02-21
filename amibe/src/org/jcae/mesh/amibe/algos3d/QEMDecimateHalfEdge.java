@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2003,2006 by EADS CRC
-    Copyright (C) 2007,2008,2009,2010, by EADS France
+    Copyright (C) 2007-2011, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -110,7 +110,6 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 	private static final Logger LOGGER=Logger.getLogger(QEMDecimateHalfEdge.class.getName());
 	private Quadric3DError.Placement placement = Quadric3DError.Placement.OPTIMAL;
 	private HashMap<Vertex, Quadric3DError> quadricMap = null;
-	private final MeshLiaison liaison;
 	private boolean freeEdgesOnly = false;
 	private Vertex v3;
 	private Quadric3DError q3 = new Quadric3DError();
@@ -140,8 +139,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 
 	private QEMDecimateHalfEdge(final Mesh m, final MeshLiaison meshLiaison, final Map<String, String> options)
 	{
-		super(m);
-		liaison = meshLiaison;
+		super(m, meshLiaison);
 		v3 = m.createVertex(0.0, 0.0, 0.0);
 		vCostOpt = m.createVertex(0.0, 0.0, 0.0);
 		for (final Map.Entry<String, String> opt: options.entrySet())

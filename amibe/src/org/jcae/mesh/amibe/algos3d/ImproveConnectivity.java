@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2007,2008,2009,2010, by EADS France
+    Copyright (C) 2007-2011, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -45,7 +45,6 @@ import java.util.logging.Logger;
 public class ImproveConnectivity extends AbstractAlgoHalfEdge
 {
 	private static final Logger LOGGER=Logger.getLogger(ImproveConnectivity.class.getName());
-	private final MeshLiaison liaison;
 	private TObjectIntHashMap<Vertex> map;
 	
 	/**
@@ -67,8 +66,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 
 	private ImproveConnectivity(final Mesh m, final MeshLiaison meshLiaison, final Map<String, String> options)
 	{
-		super(m);
-		liaison = meshLiaison;
+		super(m, meshLiaison);
 		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
 			final String key = opt.getKey();

@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2005, by EADS CRC
-    Copyright (C) 2007,2008,2009,2010, by EADS France
+    Copyright (C) 2007-2011, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -62,7 +62,7 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 
 	private SwapEdge(final Mesh m, final MeshLiaison meshLiaison, final Map<String, String> options)
 	{
-		super(m);
+		super(m, meshLiaison);
 		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
 			final String key = opt.getKey();

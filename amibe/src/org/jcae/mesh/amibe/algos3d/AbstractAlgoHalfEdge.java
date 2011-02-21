@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2006, by EADS CRC
-    Copyright (C) 2007,2008,2009,2010, by EADS France
+    Copyright (C) 2007-2011, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -27,6 +27,7 @@ import org.jcae.mesh.amibe.ds.TriangleHE;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.projection.MeshLiaison;
 import org.jcae.mesh.amibe.util.QSortedTree;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import java.util.Stack;
@@ -43,6 +44,7 @@ import java.util.logging.Logger;
 public abstract class AbstractAlgoHalfEdge
 {
 	Mesh mesh;
+	MeshLiaison liaison;
 	int nrFinal = 0;
 	int nrTriangles = 0;
 	double tolerance = 0.0;
@@ -67,7 +69,12 @@ public abstract class AbstractAlgoHalfEdge
 
 	AbstractAlgoHalfEdge(final Mesh m)
 	{
+		this(m, null);
+	}
+	AbstractAlgoHalfEdge(final Mesh m, final MeshLiaison meshLiaison)
+	{
 		mesh = m;
+		liaison = meshLiaison;
 	}
 	public final void compute()
 	{

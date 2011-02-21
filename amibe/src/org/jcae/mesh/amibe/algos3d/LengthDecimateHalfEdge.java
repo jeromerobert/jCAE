@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2003,2006 by EADS CRC
-    Copyright (C) 2007,2008,2009, by EADS France
+    Copyright (C) 2007,2008,2009,2011, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -40,7 +40,6 @@ import java.util.logging.Logger;
 public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 {
 	private static final Logger LOGGER=Logger.getLogger(LengthDecimateHalfEdge.class.getName());
-	private final MeshLiaison liaison;
 	private Vertex v3;
 	private boolean freeEdgesOnly = false;
 	private final double freeEdgeFactor;
@@ -65,8 +64,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 
 	private LengthDecimateHalfEdge(final Mesh m, final MeshLiaison meshLiaison, final Map<String, String> options)
 	{
-		super(m);
-		liaison = meshLiaison;
+		super(m, meshLiaison);
 		v3 = null;
 		m.createVertex(0.0, 0.0, 0.0);
 		double freeEdgeTol = Double.NaN;
