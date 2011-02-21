@@ -48,6 +48,7 @@ import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -454,6 +455,7 @@ public class Remesh
 		ArrayList<Vertex> triNodes = new ArrayList<Vertex>();
 		ArrayList<EuclidianMetric3D> triMetrics = new ArrayList<EuclidianMetric3D>();
 
+		LinkedHashSet<Vertex> boundaryNodes = new LinkedHashSet<Vertex>();
 		Map<Vertex, Vertex> neighborMap = new HashMap<Vertex, Vertex>();
 		int nrIter = 0;
 		int processed = 0;
@@ -491,6 +493,7 @@ public class Remesh
 			nodes.clear();
 			surroundingTriangle.clear();
 			mapTriangleVertices.clear();
+			boundaryNodes.clear();
 			neighborMap.clear();
 			skippedNodes = 0;
 			LOGGER.fine("Check all edges");
@@ -543,7 +546,8 @@ public class Remesh
 						h.setAttributes(AbstractHalfEdge.MARKED);
 						continue;
 					}
-					int nrNodes = addCandidatePoints(h, l, reversed, triNodes, triMetrics, neighborMap);
+					int nrNodes = addCandidatePoints(h, l, reversed,
+						triNodes, triMetrics, boundaryNodes, neighborMap);
 					if (nrNodes > nrTriNodes)
 					{
 						nrTriNodes = nrNodes;
@@ -575,8 +579,18 @@ public class Remesh
 						liaison.move(v, v.getUV());
 
 						double[] uv = v.getUV();
-						Vertex n = kdTree.getNearestVertex(metric, uv);
-						if (allowNearNodes || interpolatedDistance(v, metric, n, metrics.get(n)) > minlen)
+						boolean validCandidate = allowNearNodes;
+						if (!validCandidate)
+						{
+							if (boundaryNodes.contains(v))
+								validCandidate = true;
+						}
+						if (!validCandidate)
+						{
+							Vertex n = kdTree.getNearestVertex(metric, uv);
+							validCandidate = interpolatedDistance(v, metric, n, metrics.get(n)) > minlen;
+						}
+						if (validCandidate)
 						{
 							kdTree.add(v);
 							metrics.put(v, metric);
@@ -789,7 +803,7 @@ public class Remesh
 
 	private int addCandidatePoints(AbstractHalfEdge ot, double edgeLength, boolean reversed,
 		ArrayList<Vertex> triNodes, ArrayList<EuclidianMetric3D> triMetrics,
-		Map<Vertex, Vertex> neighborMap)
+		Set<Vertex> boundaryNodes, Map<Vertex, Vertex> neighborMap)
 	{
 		int nrNodes = 0;
 		Vertex start = ot.origin();
@@ -893,6 +907,8 @@ public class Remesh
 							break;
 						}
 					}
+					else
+						boundaryNodes.add(last);
 					triNodes.add(last);
 					triMetrics.add(m);
 					if (start.getRef() == 0 && end.getRef() != 0)
