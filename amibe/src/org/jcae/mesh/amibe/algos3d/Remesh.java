@@ -474,6 +474,8 @@ public class Remesh
 		// Clear MARKED attribute
 		for (Triangle f : mesh.getTriangles())
 			f.clearAttributes(AbstractHalfEdge.MARKED);
+		// Tag IMMUTABLE edges
+		mesh.tagIf(AbstractHalfEdge.IMMUTABLE, AbstractHalfEdge.MARKED);
 
 		boolean reversed = true;
 		while (true)
@@ -508,8 +510,6 @@ public class Remesh
 				for (int i = 0; i < 3; i++)
 				{
 					h = h.next();
-					if (h.hasAttributes(AbstractHalfEdge.IMMUTABLE))
-						continue;
 					if (h.hasAttributes(AbstractHalfEdge.MARKED))
 					{
 						// This edge has already been checked and cannot be split
@@ -644,8 +644,6 @@ public class Remesh
 					mapTriangleVertices.get(start).remove(v);
 					liaison.removeVertex(v);
 					neighborBgMap.remove(v);
-					ot.clearAttributes(AbstractHalfEdge.MARKED);
-					sym.clearAttributes(AbstractHalfEdge.MARKED);
 					continue;
 				}
 				if (!ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
@@ -664,8 +662,6 @@ public class Remesh
 						mapTriangleVertices.get(start).remove(v);
 						liaison.removeVertex(v);
 						neighborBgMap.remove(v);
-						ot.clearAttributes(AbstractHalfEdge.MARKED);
-						sym.clearAttributes(AbstractHalfEdge.MARKED);
 						continue;
 					}
 				}
@@ -693,8 +689,6 @@ public class Remesh
 							mapTriangleVertices.get(start).remove(v);
 							liaison.removeVertex(v);
 							neighborBgMap.remove(v);
-							ot.clearAttributes(AbstractHalfEdge.MARKED);
-							sym.clearAttributes(AbstractHalfEdge.MARKED);
 							continue;
 						}
 						v.moveTo(
@@ -710,13 +704,9 @@ public class Remesh
 						mapTriangleVertices.get(start).remove(v);
 						liaison.removeVertex(v);
 						neighborBgMap.remove(v);
-						ot.clearAttributes(AbstractHalfEdge.MARKED);
-						sym.clearAttributes(AbstractHalfEdge.MARKED);
 						continue;
 					}
 				}
-				ot.clearAttributes(AbstractHalfEdge.MARKED);
-				sym.clearAttributes(AbstractHalfEdge.MARKED);
 
 				Map<Triangle, Collection<Vertex>> verticesToDispatch = collectVertices(ot);
 
