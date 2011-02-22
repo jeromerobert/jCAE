@@ -693,6 +693,9 @@ public class Remesh
 
 				ot = mesh.vertexSplit(ot, v);
 				assert ot.destination() == v : v+" "+ot;
+				// Triangles around v have been modified, they
+				// must reset their MARKED flag.  This will be
+				// done below when swapping edges.
 
 				dispatchVertices(v, verticesToDispatch);
 
@@ -708,6 +711,7 @@ public class Remesh
 				do
 				{
 					advance = true;
+					edge.getTri().clearAttributes(AbstractHalfEdge.MARKED);
 					double checkNormal = edge.checkSwapNormal(mesh, coplanarity, tNormal);
 					if (checkNormal < -1.0)
 					{
@@ -716,7 +720,6 @@ public class Remesh
 					}
 					if (edge.checkSwap3D(mesh, -2.0) > 0.0)
 					{
-						edge.getTri().clearAttributes(AbstractHalfEdge.MARKED);
 						edge.sym().getTri().clearAttributes(AbstractHalfEdge.MARKED);
 						Map<Triangle, Collection<Vertex>> vTri = collectVertices(edge);
 						edge = (HalfEdge) mesh.edgeSwap(edge);
