@@ -679,47 +679,14 @@ public class Remesh
 						continue;
 					}
 				}
-				else
+				else if (!boundaryNodes.contains(v))
 				{
-					// Split boundary edge.  Project the vertex onto this edge
-					double [] xo = ot.origin().getUV();
-					double [] xd = ot.destination().getUV();
-					double xNorm2 =
-						(xd[0] - xo[0]) * (xd[0] - xo[0]) +
-						(xd[1] - xo[1]) * (xd[1] - xo[1]) +
-						(xd[2] - xo[2]) * (xd[2] - xo[2]);
-					if (xNorm2 > 0)
-					{
-						double[] pos = v.getUV();
-						double xScal = (1.0 / xNorm2) * (
-							(xd[0] - xo[0]) * (pos[0] - xo[0]) +
-							(xd[1] - xo[1]) * (pos[1] - xo[1]) +
-							(xd[2] - xo[2]) * (pos[2] - xo[2])
-							);
-						if (xScal < 0.01 || xScal > 0.99)
-						{
-							// Vertex is not inserted
-							skippedNodes++;
-							mapTriangleVertices.get(start).remove(v);
-							liaison.removeVertex(v);
-							neighborBgMap.remove(v);
-							continue;
-						}
-						v.moveTo(
-							xo[0] + xScal * (xd[0] - xo[0]),
-							xo[1] + xScal * (xd[1] - xo[1]),
-							xo[2] + xScal * (xd[2] - xo[2]));
-						mesh.getTrace().moveVertex(v);
-					}
-					else
-					{
-						// Vertex is not inserted
-						skippedNodes++;
-						mapTriangleVertices.get(start).remove(v);
-						liaison.removeVertex(v);
-						neighborBgMap.remove(v);
-						continue;
-					}
+					// Vertex is not inserted
+					skippedNodes++;
+					mapTriangleVertices.get(start).remove(v);
+					liaison.removeVertex(v);
+					neighborBgMap.remove(v);
+					continue;
 				}
 
 				Map<Triangle, Collection<Vertex>> verticesToDispatch = collectVertices(ot);
