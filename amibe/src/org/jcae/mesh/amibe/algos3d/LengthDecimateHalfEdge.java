@@ -113,6 +113,8 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 			freeEdgeFactor = tolerance / freeEdgeTol;
 		if (meshLiaison == null)
 			mesh.buildRidges(minCos);
+		if (freeEdgesOnly)
+			setNoSwapAfterProcessing(true);
 	}
 	
 	@Override

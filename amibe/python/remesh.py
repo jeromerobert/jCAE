@@ -1,7 +1,7 @@
 
 # jCAE
 from org.jcae.mesh.amibe.ds import Mesh, AbstractHalfEdge
-from org.jcae.mesh.amibe.algos3d import Remesh, QEMDecimateHalfEdge, SwapEdge, PointMetric
+from org.jcae.mesh.amibe.algos3d import Remesh, QEMDecimateHalfEdge, SwapEdge, LengthDecimateHalfEdge
 from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.projection import MeshLiaison
 from org.jcae.mesh.amibe.metrics import EuclidianMetric3D
@@ -12,7 +12,6 @@ from org.jcae.mesh.amibe.algos3d import SmoothNodes3DBg, RemeshPolyline
 from java.util import HashMap
 from java.util import ArrayList
 from java.util import LinkedHashMap
-from java.lang import String, Math
 
 # GNU trove
 from gnu.trove import TIntArrayList
@@ -81,25 +80,8 @@ opts.put("size", str(options.size*0.06))
 QEMDecimateHalfEdge(liaison, opts).compute()
 
 opts.clear()
-opts.put("coplanarity", "0.9")
-SwapEdge(liaison, opts).compute()
-
-opts.clear()
 opts.put("size", str(options.size))
 Remesh(liaison, opts).compute()
-
-opts.clear()
-opts.put("coplanarity", "0.9")
-SwapEdge(liaison, opts).compute()
-
-opts.clear()
-opts.put("nearLengthRatio", "0.1")
-opts.put("size", str(options.size))
-Remesh(liaison, opts).compute()
-
-opts.clear()
-opts.put("coplanarity", "0.9")
-SwapEdge(liaison, opts).compute()
 
 opts.clear()
 opts.put("coplanarity", "0.9")
@@ -110,6 +92,11 @@ QEMDecimateHalfEdge(liaison, opts).compute()
 opts.clear()
 opts.put("coplanarity", "0.9")
 SwapEdge(liaison, opts).compute()
+
+opts.clear()
+opts.put("size", str(options.size*0.3))
+opts.put("freeEdgesOnly", "true")
+LengthDecimateHalfEdge(liaison, opts).compute()
 
 opts.clear()
 opts.put("coplanarity", "0.9")
