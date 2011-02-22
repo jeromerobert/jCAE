@@ -810,7 +810,7 @@ public class Remesh
 			target = 0.5*edgeLength;
 			maxError = Math.min(0.02, 0.9*Math.abs(target - 0.5*Math.sqrt(2)));
 		}
-		else if (edgeLength > 3.0)
+		else if (edgeLength > 4.0)
 		{
 			//  Long edges are discretized, but do not create more than 4 subsegments
 			nr = 3;
