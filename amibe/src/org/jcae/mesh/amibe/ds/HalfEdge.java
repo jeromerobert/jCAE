@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2006, by EADS CRC
-    Copyright (C) 2007,2008,2009,2010, by EADS France
+    Copyright (C) 2007-2011, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -444,23 +444,26 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		// Make sure that edge swap does not create inverted triangles
 		double s3 = Matrix3D.computeNormal3D(o.getUV(), n.getUV(), a.getUV(), temp0, temp1, temp2);
 		double s4 = Matrix3D.computeNormal3D(d.getUV(), a.getUV(), n.getUV(), temp0, temp1, temp3);
-		if (Matrix3D.prodSca(temp2, temp3) < minCos)
-			return invalid;
-		for (int i = 0; i < 4; i++)
+		if (minCos > -1.0)
 		{
-			HalfEdge h = (i == 0 ? next.next : (i == 1 ? sym.next : (i == 2 ? next : sym.next.next)));
-			if (h.hasAttributes(SHARP | OUTER | BOUNDARY | NONMANIFOLD))
-				continue;
-			Matrix3D.computeNormal3D(h.destination().getUV(), h.origin().getUV(), h.sym().apex().getUV(), temp0, temp1, temp4);
-			if (i < 2)
+			if (Matrix3D.prodSca(temp2, temp3) < minCos)
+				return invalid;
+			for (int i = 0; i < 4; i++)
 			{
-				if (Matrix3D.prodSca(temp2, temp4) < minCos)
-					return invalid;
-			}
-			else
-			{
-				if (Matrix3D.prodSca(temp3, temp4) < minCos)
-					return invalid;
+				HalfEdge h = (i == 0 ? next.next : (i == 1 ? sym.next : (i == 2 ? next : sym.next.next)));
+				if (h.hasAttributes(SHARP | OUTER | BOUNDARY | NONMANIFOLD))
+					continue;
+				Matrix3D.computeNormal3D(h.destination().getUV(), h.origin().getUV(), h.sym().apex().getUV(), temp0, temp1, temp4);
+				if (i < 2)
+				{
+					if (Matrix3D.prodSca(temp2, temp4) < minCos)
+						return invalid;
+				}
+				else
+				{
+					if (Matrix3D.prodSca(temp3, temp4) < minCos)
+						return invalid;
+				}
 			}
 		}
 
