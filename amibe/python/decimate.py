@@ -50,15 +50,15 @@ parser.add_option("-G", "--immutable-border-group",
                   
 (options, args) = parser.parse_args(args=sys.argv[1:])
 
-if len(args) != 2:
-	parser.print_usage()
-	sys.exit(1)
-
 if options.listAlgorithm:
 	print "Available algorithms for decimation:" 
 	print "    LengthDecimateHalfEdge" 
 	print "    QEMDecimateHalfEdge" 
 	sys.exit(0)
+
+if len(args) != 2:
+	parser.print_usage()
+	sys.exit(1)
 
 xmlDir = args[0]
 outDir = args[1]
