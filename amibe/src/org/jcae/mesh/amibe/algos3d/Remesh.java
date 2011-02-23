@@ -454,9 +454,9 @@ public class Remesh
 		ArrayList<Vertex> nodes = new ArrayList<Vertex>();
 		ArrayList<Vertex> triNodes = new ArrayList<Vertex>();
 		ArrayList<EuclidianMetric3D> triMetrics = new ArrayList<EuclidianMetric3D>();
+		ArrayList<Vertex> triNeighbor = new ArrayList<Vertex>();
 
 		LinkedHashSet<Vertex> boundaryNodes = new LinkedHashSet<Vertex>();
-		Map<Vertex, Vertex> neighborMap = new HashMap<Vertex, Vertex>();
 		int nrIter = 0;
 		int processed = 0;
 		// Number of nodes which were skipped
@@ -494,7 +494,6 @@ public class Remesh
 			surroundingTriangle.clear();
 			mapTriangleVertices.clear();
 			boundaryNodes.clear();
-			neighborMap.clear();
 			skippedNodes = 0;
 			LOGGER.fine("Check all edges");
 			for(Triangle t : mesh.getTriangles())
@@ -505,6 +504,7 @@ public class Remesh
 				sym = t.getAbstractHalfEdge(sym);
 				triNodes.clear();
 				triMetrics.clear();
+				triNeighbor.clear();
 				Collection<Vertex> newVertices = mapTriangleVertices.get(t);
 				if (newVertices == null)
 					newVertices = new ArrayList<Vertex>();
@@ -547,7 +547,7 @@ public class Remesh
 						continue;
 					}
 					int nrNodes = addCandidatePoints(h, l, reversed,
-						triNodes, triMetrics, boundaryNodes, neighborMap);
+						triNodes, triMetrics, triNeighbor, boundaryNodes);
 					if (nrNodes > nrTriNodes)
 					{
 						nrTriNodes = nrNodes;
@@ -573,7 +573,7 @@ public class Remesh
 						assert metric != null;
 						double localSize = 0.5 * metric.getUnitBallBBox()[0];
 						double localSize2 = localSize * localSize;
-						Vertex bgNear = neighborBgMap.get(neighborMap.get(v));
+						Vertex bgNear = neighborBgMap.get(triNeighbor.get(index));
 						Triangle bgT = liaison.findSurroundingTriangle(v, bgNear, localSize2, true).getTri();
 						liaison.addVertex(v, bgT);
 						liaison.move(v, v.getUV());
@@ -773,7 +773,7 @@ public class Remesh
 
 	private int addCandidatePoints(AbstractHalfEdge ot, double edgeLength, boolean reversed,
 		ArrayList<Vertex> triNodes, ArrayList<EuclidianMetric3D> triMetrics,
-		Set<Vertex> boundaryNodes, Map<Vertex, Vertex> neighborMap)
+		ArrayList<Vertex> triNeighbor, Set<Vertex> boundaryNodes)
 	{
 		int nrNodes = 0;
 		Vertex start = ot.origin();
@@ -882,13 +882,13 @@ public class Remesh
 					triNodes.add(last);
 					triMetrics.add(m);
 					if (start.getRef() == 0 && end.getRef() != 0)
-						neighborMap.put(last, start);
+						triNeighbor.add(start);
 					else if (start.getRef() != 0 && end.getRef() == 0)
-							neighborMap.put(last, end);
+							triNeighbor.add(end);
 					else if (m.distance2(pos, start.getUV()) < m.distance2(pos, end.getUV()))
-						neighborMap.put(last, start);
+						triNeighbor.add(start);
 					else
-						neighborMap.put(last, end);
+						triNeighbor.add(end);
 					nrNodes++;
 					r--;
 					break;
