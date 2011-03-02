@@ -22,6 +22,8 @@ from optparse import OptionParser
 cmd=("valence    ", "<inputDir> <outputDir>", "Swap edges to improve node connectivity")
 parser = OptionParser(usage="amibebatch %s [OPTIONS] %s\n\n%s" % cmd,
 	prog="valence")
+parser.add_option("-g", "--preserveGroups", action="store_true", dest="preserveGroups",
+                  help="edges adjacent to two different groups are handled like free edges")
 parser.add_option("-c", "--coplanarity", metavar="FLOAT", default=0.95,
                   action="store", type="float", dest="coplanarity",
 		  help="minimum dot product of face normals when building feature edges (default 0.95)")
@@ -42,10 +44,12 @@ liaison = MeshLiaison(mesh, mtb)
 
 if options.coplanarity:
 	liaison.getMesh().buildRidges(options.coplanarity)
+if options.preserveGroups:
+	liaison.getMesh().buildGroupBoundaries()
 
 opts = HashMap()
 if options.coplanarity:
 	opts.put("coplanarity", str(options.coplanarity))
 ImproveConnectivity(liaison, opts).compute()
-MeshWriter.writeObject3D(mesh, outDir, String())
+MeshWriter.writeObject3D(liaison.getMesh(), outDir, String())
 
