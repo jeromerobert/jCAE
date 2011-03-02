@@ -106,7 +106,9 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 			for (int i = 0; i < 3; i++)
 			{
 				e = e.next();
-				if (e.checkSwap3D(mesh, minCos) <= 0.0)
+				Vertex v = e.origin();
+				double [] tNormal = liaison.getBackgroundNormal(v);
+				if (e.checkSwapNormal(mesh, minCos, tNormal) <= -1.0)
 				{
 					e.setAttributes(AbstractHalfEdge.MARKED);
 					e.sym().setAttributes(AbstractHalfEdge.MARKED);
@@ -176,7 +178,10 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 			return false;
 		if (current.hasAttributes(AbstractHalfEdge.MARKED) && current.sym().hasAttributes(AbstractHalfEdge.MARKED))
 			return false;
-		return current.checkSwap3D(mesh, minCos) > 0.0;
+		Vertex v = current.origin();
+		double [] tNormal = liaison.getBackgroundNormal(v);
+		double checkNormal = current.checkSwapNormal(mesh, minCos, tNormal);
+		return (checkNormal > -1.0);
 	}
 
 	@Override
