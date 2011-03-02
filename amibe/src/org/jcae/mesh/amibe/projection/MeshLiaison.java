@@ -1134,13 +1134,13 @@ public class MeshLiaison
 				}
 				// This test is performed here so that mapGroupBorder.get(N)
 				// is not null if a group has no boundary edge.
-				if (!t.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+				if (!t.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD | AbstractHalfEdge.SHARP))
 					continue;
 				ot = t.getAbstractHalfEdge(ot);
 				for (int i = 0; i < 3; i++)
 				{
 					ot = ot.next();
-					if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+					if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD | AbstractHalfEdge.SHARP))
 						borders.add(new Line(ot.origin(), ot.destination()));
 				}
 			}
