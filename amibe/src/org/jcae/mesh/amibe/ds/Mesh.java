@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2004,2005,2006, by EADS CRC
-    Copyright (C) 2007,2008,2009,2010, by EADS France
+    Copyright (C) 2007-2011, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -920,6 +920,9 @@ public class Mesh implements Serializable
 
 		AbstractHalfEdge ot  = null;
 		AbstractHalfEdge sym = triangleList.iterator().next().getAbstractHalfEdge();
+		ArrayList<Triangle> newTriangles = new ArrayList<Triangle>();
+		AbstractHalfEdge temp0 = null;
+		AbstractHalfEdge temp1 = null;
 
 		for (Triangle t: triangleList)
 		{
@@ -944,12 +947,15 @@ public class Mesh implements Serializable
 						setRefVertexOnInnerBoundary(ot.origin());
 					if (ot.destination().getRef() == 0)
 						setRefVertexOnInnerBoundary(ot.destination());
-					toReturn++;
+					bindSymEdgesToVirtualTriangles(ot, sym, temp0, temp1, newTriangles);
 				}
 			}
 		}
+		rebuildVertexLinks();
+		toReturn = newTriangles.size() / 2;
+		triangleList.addAll(newTriangles);
 		if (toReturn > 0 && logger.isLoggable(Level.CONFIG))
-			logger.log(Level.CONFIG, "Found "+toReturn+" sharp edges");
+			logger.log(Level.CONFIG, "Add virtual boundaries for "+toReturn+" sharp edges");
 		if (traitsBuilder.hasTrace())
 			traitsBuilder.getTrace(traits).println("self.m.buildRidges("+coplanarity+")");
 		return toReturn;
