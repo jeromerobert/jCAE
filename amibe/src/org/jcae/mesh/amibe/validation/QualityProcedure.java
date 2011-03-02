@@ -36,9 +36,9 @@ import java.lang.reflect.InvocationTargetException;
  */
 public abstract class QualityProcedure
 {
-	protected static final int FACE = 1;
-	static final int NODE = 2;
-	static final int EDGE = 3;
+	public static final int FACE = 1;
+	public static final int NODE = 2;
+	public static final int EDGE = 3;
 	
 	// By default, values are computed by faces.
 	int type = FACE;
@@ -53,7 +53,7 @@ public abstract class QualityProcedure
 		MaxLengthFace.class,
 		MinAngleFace.class,
 		MinLengthFace.class,
-		// NodeConnectivity.class,
+		NodeConnectivity.class,
 		null
 	};
 
@@ -101,7 +101,7 @@ public abstract class QualityProcedure
 	 *
 	 * @return element type
 	 */
-	protected final int getType()
+	public final int getType()
 	{
 		return type;
 	}
