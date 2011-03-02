@@ -125,27 +125,16 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 		Vertex d = e.destination();
 		Vertex a = e.apex();
 		Vertex n = e.sym().apex();
-		double before = vertexQuality(o, 0);
-		double temp = vertexQuality(d, 0);
-		if (temp < before)
-			before = temp;
-		temp = vertexQuality(a, 0);
-		if (temp < before)
-			before = temp;
-		temp = vertexQuality(n, 0);
-		if (temp < before)
-			before = temp;
-
-		double after = vertexQuality(o, -1);
-		temp = vertexQuality(d, -1);
-		if (temp < after)
-			after = temp;
-		temp = vertexQuality(a, 1);
-		if (temp < after)
-			after = temp;
-		temp = vertexQuality(n, 1);
-		if (temp < after)
-			after = temp;
+		double before = 
+			vertexQuality(o, 0) +
+			vertexQuality(d, 0) +
+			vertexQuality(a, 0) +
+			vertexQuality(n, 0);
+		double after =
+			vertexQuality(o, -1) +
+			vertexQuality(d, -1) +
+			vertexQuality(a, 1) +
+			vertexQuality(n, 1);
 		return before - after;
 	}
 	
@@ -153,23 +142,16 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 	{
 		if (!v.isManifold())
 			return 1.0;
-		if (v.getRef() != 0)
+		if (v.getRef() != 0 || !v.isManifold() || !v.isMutable())
 		{
 			int q = map.get(v);
 			assert q > 0;
 			if (q + delta <= 1)
 				return -100.0;
-			return 1.0;
+			return 0.0;
 		}
 		int q = map.get(v) + delta;
-		return connectivityQuality(q);
-	}
-
-	private double connectivityQuality(int q)
-	{
-		if (q < 7)
-			return q / 6.0;
-		return 1.5 - q / 12.0;
+		return - (q - 6.0) * (q - 6.0);
 	}
 
 	@Override
