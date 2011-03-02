@@ -660,7 +660,7 @@ public class Remesh
 					neighborBgMap.remove(v);
 					continue;
 				}
-				if (!ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+				if (!ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD | AbstractHalfEdge.SHARP))
 				{
 					// Check whether edge can be split
 					Vertex o = ot.origin();
@@ -799,7 +799,7 @@ public class Remesh
 		double logRatio = Math.log(hE/hS);
 		double [] lower = new double[3];
 		double [] upper = new double[3];
-		boolean border = ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD);
+		boolean border = ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD | AbstractHalfEdge.SHARP);
 		int borderGroup = ot.getTri().getGroupId();
 		int nr;
 		double maxError, target;
