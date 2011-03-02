@@ -200,7 +200,7 @@ public class SmoothNodes3DBg
 				for (int i = 0; i < 3; i++)
 				{
 					ot = ot.next();
-					if (ot.hasAttributes(AbstractHalfEdge.IMMUTABLE | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.SHARP))
+					if (ot.hasAttributes(AbstractHalfEdge.IMMUTABLE | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD | AbstractHalfEdge.SHARP))
 					{
 						immutableNodes.add(ot.origin());
 						immutableNodes.add(ot.destination());
