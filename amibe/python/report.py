@@ -135,12 +135,21 @@ for i in xrange(len(data)):
 	data[i] = QualityFloat(mean)
 	data[i].setQualityProcedure(qproc)
 	data[i].setTarget(options.scaleFactor)
-for f in mesh.getTriangles():
-	if f.isWritable():
+if qproc.getType() == QualityProcedure.FACE:
+	for f in mesh.getTriangles():
+		if not f.isWritable():
+			continue
 		i = f.getGroupId() + 1 - options.ifacemin
 		if i < 0 or not options.detailed:
 			i = 0
 		data[i].compute(f)
+elif qproc.getType() == QualityProcedure.NODE:
+	if options.detailed:
+		print("The --detailed option cannot be combined with -c NodeConnectivity")
+		sys.exit(1)
+	for v in mesh.getNodes():
+		if v.isWritable():
+			data[0].compute(v)
 
 for i in xrange(len(data)):
 	data[i].finish()
