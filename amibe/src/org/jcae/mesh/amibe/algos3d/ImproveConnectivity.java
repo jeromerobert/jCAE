@@ -31,6 +31,7 @@ import org.jcae.mesh.xmldata.MeshWriter;
 import java.io.IOException;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Iterator;
 import gnu.trove.TObjectIntHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -224,15 +225,27 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 	
 	private void removeAllEdgesIncidentTo(Vertex v)
 	{
-		Triangle t = (Triangle) v.getLink();
-		HalfEdge current = (HalfEdge) t.getAbstractHalfEdge();
-		if (current.destination() == v)
-			current = current.next();
-		else if (current.apex() == v)
-			current = current.prev();
-		assert current.origin() == v;
-		Vertex d = current.destination();
-		do
+		HalfEdge current;
+		Vertex d = null;
+		Iterator<AbstractHalfEdge> it = null;
+		boolean isManifold = v.isManifold();
+		if (isManifold)
+		{
+			Triangle t = (Triangle) v.getLink();
+			current = (HalfEdge) t.getAbstractHalfEdge();
+			if (current.destination() == v)
+				current = current.next();
+			else if (current.apex() == v)
+				current = current.prev();
+			assert current.origin() == v;
+			d = current.destination();
+		}
+		else
+		{
+			it = v.getNeighbourIteratorAbstractHalfEdge();
+			current = (HalfEdge) it.next();
+		}
+		while (true)
 		{
 			HalfEdge h = uniqueOrientation(current);
 			if (!tree.remove(h))
@@ -242,22 +255,44 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 			if (!tree.remove(h))
 				notInTree++;
 			assert !tree.contains(h);
-			current = current.nextOriginLoop();
+			if (isManifold)
+			{
+				current = current.nextOriginLoop();
+				if (current.destination() == d)
+					break;
+			}
+			else
+			{
+				if (!it.hasNext())
+					break;
+				current = (HalfEdge) it.next();
+			}
 		}
-		while (current.destination() != d);
 	}
 
 	private void addAllEdgesIncidentTo(Vertex v)
 	{
-		Triangle t = (Triangle) v.getLink();
-		HalfEdge current = (HalfEdge) t.getAbstractHalfEdge();
-		if (current.destination() == v)
-			current = current.next();
-		else if (current.apex() == v)
-			current = current.prev();
-		assert current.origin() == v;
-		Vertex d = current.destination();
-		do
+		HalfEdge current;
+		Vertex d = null;
+		Iterator<AbstractHalfEdge> it = null;
+		boolean isManifold = v.isManifold();
+		if (isManifold)
+		{
+			Triangle t = (Triangle) v.getLink();
+			current = (HalfEdge) t.getAbstractHalfEdge();
+			if (current.destination() == v)
+				current = current.next();
+			else if (current.apex() == v)
+				current = current.prev();
+			assert current.origin() == v;
+			d = current.destination();
+		}
+		else
+		{
+			it = v.getNeighbourIteratorAbstractHalfEdge();
+			current = (HalfEdge) it.next();
+		}
+		while (true)
 		{
 			HalfEdge h = uniqueOrientation(current);
 			if (!h.hasAttributes(AbstractHalfEdge.IMMUTABLE | AbstractHalfEdge.OUTER | AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD) && !tree.contains(h))
@@ -279,9 +314,19 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 					h.setAttributes(AbstractHalfEdge.MARKED);
 				}
 			}
-			current = current.nextOriginLoop();
+			if (isManifold)
+			{
+				current = current.nextOriginLoop();
+				if (current.destination() == d)
+					break;
+			}
+			else
+			{
+				if (!it.hasNext())
+					break;
+				current = (HalfEdge) it.next();
+			}
 		}
-		while (current.destination() != d);
 	}
 
 	@Override
