@@ -20,6 +20,7 @@
 
 package org.jcae.mesh.amibe.validation;
 
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.ds.Vertex;
 import java.util.Iterator;
 
@@ -32,6 +33,16 @@ public class NodeConnectivity extends QualityProcedure
 		type = QualityProcedure.NODE;
 	}
 
+	/**
+	 * Returns <code>MeshTraitsBuilder</code> instance needed by this class.
+	 */
+	@Override
+	public final MeshTraitsBuilder getMeshTraitsBuilder()
+	{
+		MeshTraitsBuilder ret = MeshTraitsBuilder.getDefault3D();
+		ret.addNodeList();
+		return ret;
+	}
 	@Override
 	public float quality(Object o)
 	{
@@ -41,12 +52,7 @@ public class NodeConnectivity extends QualityProcedure
 		int count = 0;
 		for (Iterator<Vertex> itnv = n.getNeighbourIteratorVertex(); itnv.hasNext(); itnv.next())
 			count++;
-		if (count <= 6)
-			return (count / 6.0f);
-		else if (count <= 11)
-			return (2.0f - count / 6.0f);
-		else
-			return 0.0f;
+		return (float) count;
 	}
 	
 }
