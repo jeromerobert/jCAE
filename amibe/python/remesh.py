@@ -1,7 +1,7 @@
 
 # jCAE
 from org.jcae.mesh.amibe.ds import Mesh, AbstractHalfEdge
-from org.jcae.mesh.amibe.algos3d import Remesh, QEMDecimateHalfEdge, SwapEdge, LengthDecimateHalfEdge
+from org.jcae.mesh.amibe.algos3d import *
 from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.projection import MeshLiaison
 from org.jcae.mesh.amibe.metrics import EuclidianMetric3D
@@ -88,6 +88,10 @@ opts.put("coplanarity", "0.9")
 SwapEdge(liaison, opts).compute()
 
 opts.clear()
+opts.put("coplanarity", "0.9")
+ImproveEdgeConnectivity(liaison, opts).compute()
+
+opts.clear()
 opts.put("size", str(options.size*0.3))
 opts.put("freeEdgesOnly", "true")
 LengthDecimateHalfEdge(liaison, opts).compute()
@@ -96,6 +100,10 @@ opts.clear()
 opts.put("coplanarity", "0.9")
 opts.put("iterations", str(8))
 SmoothNodes3DBg(liaison, opts).compute()
+
+opts.clear()
+opts.put("coplanarity", "0.9")
+SwapEdge(liaison, opts).compute()
 
 opts.clear()
 opts.put("coplanarity", "0.9")
