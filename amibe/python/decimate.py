@@ -1,6 +1,7 @@
 
 # jCAE
 from org.jcae.mesh.amibe.ds import Mesh, AbstractHalfEdge
+from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.projection import MeshLiaison
 from org.jcae.mesh.xmldata import MeshReader, MeshWriter
 
@@ -25,6 +26,9 @@ parser.add_option("-A", "--list-algorithm", action="store_true", dest="listAlgor
 parser.add_option("-a", "--algorithm", metavar="STRING", default=defaultAlgo,
                   action="store", type="string", dest="algorithm",
 		  help="decimation algorithm (default: "+defaultAlgo+")")
+parser.add_option("-c", "--coplanarity", metavar="FLOAT",
+                  action="store", type="float", dest="coplanarity",
+		  help="dot product of face normals to detect feature edges")
 parser.add_option("-f", "--freeEdgeTol", metavar="FLOAT",
                   action="store", type="float", dest="freeEdgeTol",
                   help="Decimate free edges whose length is smaller than tolerance.  -t value is used if not specified. (for LengthDecimateHalfEdge only)")
@@ -47,6 +51,9 @@ parser.add_option("-I", "--immutable-border",
 parser.add_option("-G", "--immutable-border-group",
                   action="store_true", dest="immutable_border_group",
                   help="Tag border group edges as immutable")
+parser.add_option("--record", metavar="PREFIX",
+                  action="store", type="string", dest="recordFile",
+                  help="record mesh operations in a Python file to replay this scenario")
                   
 (options, args) = parser.parse_args(args=sys.argv[1:])
 
@@ -75,10 +82,23 @@ if options.freeEdgeTol:
 if options.maxlength:
 	opts.put("maxlength", str(options.maxlength))
 
-mesh = Mesh()
+mtb = MeshTraitsBuilder.getDefault3D()
+if options.recordFile:
+	mtb.addNodeSet()
+	mtb.addTraceRecord()
+mesh = Mesh(mtb)
+if options.recordFile:
+	mesh.getTrace().setDisabled(True)
 MeshReader.readObject3D(mesh, xmlDir)
+assert mesh.isValid()
 
-liaison = MeshLiaison(mesh)
+liaison = MeshLiaison(mesh, mtb)
+if options.recordFile:
+	liaison.getMesh().getTrace().setDisabled(False)
+	liaison.getMesh().getTrace().setLogFile(options.recordFile)
+	liaison.getMesh().getTrace().createMesh("mesh", liaison.getMesh())
+if options.coplanarity:
+	liaison.getMesh().buildRidges(options.coplanarity)
 if options.immutable_border:
     liaison.mesh.tagFreeEdges(AbstractHalfEdge.IMMUTABLE)
 
@@ -91,5 +111,7 @@ else:
 cons = Class.forName("org.jcae.mesh.amibe.algos3d."+options.algorithm).getConstructor([ MeshLiaison, Map ])
 cons.newInstance([ liaison, opts ]).compute()
 
+if options.recordFile:
+	liaison.getMesh().getTrace().finish()
 MeshWriter.writeObject3D(liaison.getMesh(), outDir, String())
 
