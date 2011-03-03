@@ -697,6 +697,11 @@ public class Mesh implements Serializable
 			{
 				if (!ot.hasAttributes(AbstractHalfEdge.OUTER))
 					cnt++;
+				if (ot.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+				{
+					cnt = 0;
+					break;
+				}
 				ot = ot.nextOriginLoop();
 			}
 			while (ot.destination() != d);
@@ -951,9 +956,9 @@ public class Mesh implements Serializable
 				}
 			}
 		}
-		rebuildVertexLinks();
 		toReturn = newTriangles.size() / 2;
 		triangleList.addAll(newTriangles);
+		rebuildVertexLinks();
 		if (toReturn > 0 && logger.isLoggable(Level.CONFIG))
 			logger.log(Level.CONFIG, "Add virtual boundaries for "+toReturn+" sharp edges");
 		if (traitsBuilder.hasTrace())
