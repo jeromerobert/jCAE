@@ -43,9 +43,9 @@ import java.util.logging.Logger;
  * In <a href="www.cs.technion.ac.il/~gotsman/AmendedPubl/SGP/SGP03.pdf">Explicit Surface Remeshing</a>, Vitaly Surazhsky and Craig Gotsman proposes an interesting algorithm.
  */
 
-public class ImproveConnectivity extends AbstractAlgoHalfEdge
+public class ImproveEdgeConnectivity extends AbstractAlgoHalfEdge
 {
-	private static final Logger LOGGER=Logger.getLogger(ImproveConnectivity.class.getName());
+	private static final Logger LOGGER=Logger.getLogger(ImproveEdgeConnectivity.class.getName());
 	private TObjectIntHashMap<Vertex> map;
 	
 	/**
@@ -55,17 +55,17 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 	 * @param options  map containing key-value pairs to modify algorithm
 	 *        behaviour.  Valid key is <code>coplanar</code>.
 	 */
-	public ImproveConnectivity(final Mesh m, final Map<String, String> options)
+	public ImproveEdgeConnectivity(final Mesh m, final Map<String, String> options)
 	{
 		this(m, null, options);
 	}
 
-	public ImproveConnectivity(final MeshLiaison liaison, final Map<String, String> options)
+	public ImproveEdgeConnectivity(final MeshLiaison liaison, final Map<String, String> options)
 	{
 		this(liaison.getMesh(), liaison, options);
 	}
 
-	private ImproveConnectivity(final Mesh m, final MeshLiaison meshLiaison, final Map<String, String> options)
+	private ImproveEdgeConnectivity(final Mesh m, final MeshLiaison meshLiaison, final Map<String, String> options)
 	{
 		super(m, meshLiaison);
 		for (final Map.Entry<String, String> opt: options.entrySet())
@@ -360,7 +360,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
-		new ImproveConnectivity(mesh, options).compute();
+		new ImproveEdgeConnectivity(mesh, options).compute();
 		try
 		{
 			MeshWriter.writeObject3D(mesh, args[argc+1], null);

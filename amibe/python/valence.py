@@ -1,6 +1,6 @@
 
 # jCAE
-from org.jcae.mesh.amibe.algos3d import ImproveConnectivity
+from org.jcae.mesh.amibe.algos3d import ImproveEdgeConnectivity
 from org.jcae.mesh.amibe.ds import Mesh
 from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.projection import MeshLiaison
@@ -50,6 +50,6 @@ if options.preserveGroups:
 opts = HashMap()
 if options.coplanarity:
 	opts.put("coplanarity", str(options.coplanarity))
-ImproveConnectivity(liaison, opts).compute()
+ImproveEdgeConnectivity(liaison, opts).compute()
 MeshWriter.writeObject3D(liaison.getMesh(), outDir, String())
 
