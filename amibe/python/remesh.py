@@ -85,12 +85,6 @@ Remesh(liaison, opts).compute()
 
 opts.clear()
 opts.put("coplanarity", "0.9")
-opts.put("size", str(options.size*0.1))
-opts.put("maxlength", str(options.size*1.1))
-QEMDecimateHalfEdge(liaison, opts).compute()
-
-opts.clear()
-opts.put("coplanarity", "0.9")
 SwapEdge(liaison, opts).compute()
 
 opts.clear()
