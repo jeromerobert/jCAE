@@ -304,6 +304,7 @@ public abstract class Shape<T extends Shape<T>> implements Comparable<T>
 			ArrayList<T> set = new ArrayList<T>(Arrays.asList(parent.children));
 			if(set.contains(shape))
 			{						
+				parent.impl.free(true);
 				bb.remove(parent.impl, impl);
 				set.remove(shape);
 				parent.children = set.toArray(getFactory().createArray(set.size()));

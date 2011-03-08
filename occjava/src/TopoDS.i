@@ -191,6 +191,7 @@
 class TopoDS_Shape
 {
 	public:
+	%rename(free) Free;
 	%rename(shapeType) ShapeType;
 	%rename(nativeIsSame) IsSame;
 	%rename(orientation) Orientation;
@@ -203,6 +204,8 @@ class TopoDS_Shape
 	void Reverse() ;
 	TopoDS_Shape Reversed() const;
 	Standard_Integer HashCode(const Standard_Integer Upper) const;
+	Standard_Boolean Free() const;
+	void Free(const Standard_Boolean F) ;
 };
 
 %extend TopoDS_Shape
