@@ -1,10 +1,11 @@
 To build OccJava with mingw you need a OpenCASCADE binaries built with mingw. Official binaries are built with Microsoft Visual C++.
 
-The follwing patches are needed to build OpenCASCADE 6.3 with mingw:
+The follwing patches are needed to build OpenCASCADE 6.5 with mingw:
+- patch from the Opencascade Debian package (quilt --quiltrc debian/patches/quiltrc push -a)
 - occ-mingw-makefile.patch
 - occ-mingw-port.patch
 
-Once OpenCASCADE 6.3 is built with mingw you can build OccJava by setting CASROOT and JAVA variables in Makefile.mingw and run make -f Makefile.mingw.
+Once OpenCASCADE 6.5 is built with mingw you can build OccJava by setting CASROOT and JAVA variables in Makefile.mingw and run make -f Makefile.mingw.
 
 To build with mingw on Debian you need mingw32 mingw32-binutils mingw32-runtime packages.
 

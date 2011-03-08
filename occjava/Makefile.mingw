@@ -7,9 +7,8 @@
 # - Run make -f Makefile.mingw
 #
 
-CASROOT := /home/jerome/occ6.3/opencascade-6.3.0.dfsg.1/ros/
-JAVA := /home/jerome/.wine/drive_c/Java/jdk1.6.0_12/
-
+CASROOT?=/home/robert/occ6.3/opencascade/ros/
+JAVA?=/home/robert/.wine/drive_c/Java/jdk1.6.0_21
 
 LIBS := -L$(CASROOT)/mingw/lib -lTKBRep -lTKBool -lTKG2d -lTKG3d -lTKGeomBase -lTKIGES -lTKMath -lTKOffset -lTKXSBase -lTKernel -lTKSTEP -lTKPrim -lTKTopAlgo -lTKFillet -lTKMesh -lTKBO -lTKGeomAlgo -lTKShHealing -lTKSTEPBase
 CXX := i586-mingw32msvc-g++
@@ -22,7 +21,7 @@ CPPFLAGS := -I$(JAVA)/include -I$(JAVA)/include/win32 -I$(CASROOT)/inc -DWNT -D_
 JAVAGENSRCDIR := src-java/org/jcae/opencascade/jni/
 
 Release/OccJava.dll : src/OccJava_wrap.o src/jnistream.o
-	mkdir Release
+	mkdir -p Release
 	$(CXX) $(LDFLAGS) -o $@ $^ $(LIBS) 
 
 src/jnistream.o : src/jnistream.cxx

@@ -1,9 +1,10 @@
 diff --git a/.gitignore b/.gitignore
 new file mode 100644
-index 0000000..6c46671
+index 0000000..f045603
 --- /dev/null
 +++ b/.gitignore
-@@ -0,0 +1,79 @@
+@@ -0,0 +1,80 @@
++.pc
 +*.o
 +*.class
 +*.a
@@ -85,164 +86,47 @@ index 0000000..6c46671
 +ros/mingw/
 diff --git a/ros/adm/mingw/Makefile b/ros/adm/mingw/Makefile
 new file mode 100644
-index 0000000..d66a5ed
+index 0000000..6350613
 --- /dev/null
 +++ b/ros/adm/mingw/Makefile
-@@ -0,0 +1,35 @@
+@@ -0,0 +1,34 @@
 +all:
-+	javac OCCMingw.java
-+	java OCCMingw
-+	make -C TKernel
-+	make -C TKMath
-+	make -C TKAdvTools
-+	make -C TKG2d
-+	make -C TKG3d
-+	make -C TKGeomBase
-+	make -C TKBRep
-+	make -C TKGeomAlgo
-+	make -C TKTopAlgo
-+	make -C TKPrim
-+	make -C TKBO
-+	make -C TKHLR
-+	make -C TKMesh
-+	make -C TKShHealing
-+	make -C TKBool
-+	make -C TKXMesh
-+	make -C TKFillet
-+	make -C TKFeat
-+	make -C TKOffset
-+	make -C TKXSBase
-+	make -C TKSTEPBase
-+	make -C TKSTEPAttr
-+	make -C TKSTEP209
-+	make -C TKSTEP
-+	make -C TKIGES
-+	make -C TKService
-+	make -C TKV2d
-+	make -C TKV3d
++	./pywok.py
++	$(MAKE) -C TKernel
++	$(MAKE) -C TKMath
++	$(MAKE) -C TKAdvTools
++	$(MAKE) -C TKG2d
++	$(MAKE) -C TKG3d
++	$(MAKE) -C TKGeomBase
++	$(MAKE) -C TKBRep
++	$(MAKE) -C TKGeomAlgo
++	$(MAKE) -C TKTopAlgo
++	$(MAKE) -C TKPrim
++	$(MAKE) -C TKBO
++	$(MAKE) -C TKHLR
++	$(MAKE) -C TKMesh
++	$(MAKE) -C TKShHealing
++	$(MAKE) -C TKBool
++	$(MAKE) -C TKXMesh
++	$(MAKE) -C TKFillet
++	$(MAKE) -C TKFeat
++	$(MAKE) -C TKOffset
++	$(MAKE) -C TKXSBase
++	$(MAKE) -C TKSTEPBase
++	$(MAKE) -C TKSTEPAttr
++	$(MAKE) -C TKSTEP209
++	$(MAKE) -C TKSTEP
++	$(MAKE) -C TKIGES
++	$(MAKE) -C TKService
++	$(MAKE) -C TKV2d
++	$(MAKE) -C TKV3d
 +
 +clean:
 +	rm -rf OCCMingw*.class TKernel FWOSPlugin PTKernel TKAdvTools TKBO TKBRep TKBin TKBinL TKBinTObj TKBinXCAF TKBool TKCAF TKCDF TKCDLFront TKCPPClient TKCPPExt TKCPPIntExt TKCPPJini TKCSFDBSchema TKDCAF TKDraw TKFeat TKFillet TKG2d TKG3d TKGeomAlgo TKGeomBase TKHLR TKIDLFront TKIGES TKLCAF TKMath TKMesh TKMeshVS TKNIS TKOffset TKOpenGl TKPCAF TKPLCAF TKPShape TKPrim TKSTEP TKSTEP209 TKSTEPAttr TKSTEPBase TKSTL TKService TKShHealing TKShapeSchema TKStdLSchema TKStdSchema TKTCPPExt TKTObj TKTObjDRAW TKTopAlgo TKTopTest TKV2d TKV3d TKVRML TKViewerTest TKWOK TKWOKTcl TKXCAF TKXCAFSchema TKXDEDRAW TKXDEIGES TKXDESTEP TKXMesh TKXSBase TKXSDRAW TKXml TKXmlL TKXmlTObj TKXmlXCAF TKjcas 
 +
-diff --git a/ros/adm/mingw/OCCMingw.java b/ros/adm/mingw/OCCMingw.java
-new file mode 100644
-index 0000000..e1f7b8f
---- /dev/null
-+++ b/ros/adm/mingw/OCCMingw.java
-@@ -0,0 +1,110 @@
-+
-+import java.io.File;
-+import java.io.FileFilter;
-+import java.io.FileNotFoundException;
-+import java.io.PrintStream;
-+import java.util.ArrayList;
-+import java.util.List;
-+import java.util.Scanner;
-+import java.util.logging.Level;
-+import java.util.logging.Logger;
-+
-+/**
-+ *
-+ * @author Jerome Robert
-+ */
-+public class OCCMingw {
-+
-+	private static List<String> createPList(File file)
-+	{
-+		ArrayList<String> toReturn = new ArrayList();
-+		try
-+		{
-+			Scanner s = new Scanner(file);
-+			while(s.hasNextLine())
-+			{
-+				String ss = s.nextLine().trim();
-+				if(!ss.isEmpty())
-+					toReturn.add(ss);
-+			}
-+		}
-+		catch (FileNotFoundException ex)
-+		{
-+			Logger.getLogger(OCCMingw.class.getName()).log(Level.SEVERE, null,
-+				ex);
-+		}
-+		return toReturn;
-+	}
-+	
-+	private static class DirFilter implements FileFilter
-+	{
-+		public boolean accept(File pathname)
-+		{
-+			return pathname.isDirectory();
-+		}
-+	}
-+
-+	private static void createMakefile(String libName, List<String> packages)
-+	{
-+		PrintStream out = null;
-+		try
-+		{
-+			File libDir = new File(libName);
-+			libDir.mkdir();
-+			out = new PrintStream(new File(libDir, "Makefile"));
-+			out.println("include ../header.mk");
-+			packages.remove("Xw");
-+			packages.remove("ImageUtility");
-+			for(String p:packages)
-+			{
-+				out.println("objects += $(patsubst %.cxx,%.o,$(notdir $(wildcard $(SRC)/"+p+"/*.cxx)))");
-+				out.println("objects += $(patsubst %.c,%.o,$(notdir $(wildcard $(SRC)/"+p+"/*.c)))");
-+				out.println("objects += $(patsubst %.cxx,%.o,$(notdir $(wildcard $(DRV)/"+p+"/*.cxx)))");
-+				out.println("objects += $(patsubst %.c,%.o,$(notdir $(wildcard $(DRV)/"+p+"/*.c)))");
-+			}
-+			for(String p:packages)
-+			{
-+				out.println("%.o : $(SRC)/"+p+"/%.cxx");
-+				out.println("\t$(CXX) $(CPPFLAGS) -I$(DRV)/"+p+" -I$(SRC)/"+p+"  -c $(CXXFLAGS) -o $@ $<");
-+				out.println("%.o : $(DRV)/"+p+"/%.cxx");
-+				out.println("\t$(CXX) $(CPPFLAGS) -I$(DRV)/"+p+" -I$(SRC)/"+p+"  -c $(CXXFLAGS) -o $@ $<");
-+				out.println("%.o : $(SRC)/"+p+"/%.c");
-+				out.println("\t$(CC)  $(CPPFLAGS) -I$(DRV)/"+p+" -I$(SRC)/"+p+"  -c $(CFLAGS)   -o $@ $<");
-+				out.println("%.o : $(DRV)/"+p+"/%.c");
-+				out.println("\t$(CC)  $(CPPFLAGS) -I$(DRV)/"+p+" -I$(SRC)/"+p+"  -c $(CFLAGS)   -o $@ $<");
-+			}
-+
-+			out.println("$(BIN)/"+libName+".dll : $(objects)");
-+			out.println("\tmkdir -p $(LIB) $(BIN)");
-+			out.println("\t$(CXX) $(LDFLAGS) -L$(LIB) -o $@ $^ $("+libName+"FLAGS) -Wl,--out-implib,$(LIB)/lib"+libName+".a");
-+			out.close();
-+		}
-+		catch (FileNotFoundException ex)
-+		{
-+			Logger.getLogger(OCCMingw.class.getName()).log(Level.SEVERE, null, ex);
-+		}
-+		finally
-+		{
-+			if(out != null)
-+				out.close();
-+		}
-+	}
-+
-+	public static void main(final String[] args)
-+	{
-+		for(File dir:new File("../../src").listFiles(new DirFilter()))
-+		{
-+			File[] packages = dir.listFiles(new FileFilter() {
-+
-+				public boolean accept(File pathname)
-+				{
-+					return "PACKAGES".equals(pathname.getName());
-+				}
-+			});
-+			if(packages.length > 0)
-+			{
-+				createMakefile(packages[0].getParentFile().getName(), createPList(packages[0]));
-+			}
-+		}
-+	}
-+}
 diff --git a/ros/adm/mingw/header.mk b/ros/adm/mingw/header.mk
 new file mode 100644
-index 0000000..ab77cb8
+index 0000000..ee3efb7
 --- /dev/null
 +++ b/ros/adm/mingw/header.mk
 @@ -0,0 +1,40 @@
@@ -270,7 +154,7 @@ index 0000000..ab77cb8
 +TKBOFLAGS := -lTKernel -lTKG2d -lTKG3d -lTKMath -lTKGeomBase -lTKTopAlgo -lTKBRep -lTKGeomAlgo
 +TKMeshFLAGS := -lTKernel -lTKG2d -lTKG3d -lTKMath -lTKGeomBase -lTKTopAlgo -lTKBRep -lTKGeomAlgo
 +TKShHealingFLAGS := -lTKernel -lTKG2d -lTKG3d -lTKMath -lTKGeomBase -lTKTopAlgo -lTKBRep -lTKGeomAlgo
-+TKBoolFLAGS := -lTKernel -lTKGeomAlgo -lTKG3d -lTKGeomBase -lTKTopAlgo -lTKMath -lTKBO -lTKG2d -lTKBRep -lTKPrim
++TKBoolFLAGS := -lTKernel -lTKGeomAlgo -lTKG3d -lTKShHealing -lTKGeomBase -lTKTopAlgo -lTKMath -lTKBO -lTKG2d -lTKBRep -lTKPrim
 +TKXMeshFLAGS := -lTKernel -lTKG2d -lTKMath -lTKMesh
 +TKFilletFLAGS := -lTKernel -lTKG2d -lTKG3d -lTKMath -lTKGeomBase -lTKTopAlgo -lTKBRep -lTKGeomAlgo -lTKBool
 +TKFeatFLAGS := -lTKernel -lTKG2d -lTKG3d -lTKMath -lTKGeomBase -lTKTopAlgo -lTKBRep -lTKGeomAlgo -lTKBO -lTKPrim -lTKBool
@@ -286,3 +170,104 @@ index 0000000..ab77cb8
 +TKV3dFLAGS := -lTKernel -lTKG3d -lTKTopAlgo -lTKGeomBase -lTKService -lTKMath -lTKMesh -lTKGeomAlgo -lTKHLR -lTKBRep -lTKG2d -lTKV2d -lcomdlg32 -lgdi32
 +
 +
+diff --git a/ros/adm/mingw/pywok.py b/ros/adm/mingw/pywok.py
+new file mode 100755
+index 0000000..3c7bc25
+--- /dev/null
++++ b/ros/adm/mingw/pywok.py
+@@ -0,0 +1,95 @@
++#! /usr/bin/python
++
++# Use of EXTERNLIB is currently disabled because TKernel/EXTERNLIB
++# contains strings which are not libs
++
++import os
++
++def parse_list(pdir, key):
++    pfile = os.path.join(pdir, key)
++    toreturn=[]
++    try:
++        f = open(pfile)
++        for l in f:
++            s = l.strip()
++            if len(s)>0:
++                toreturn.append(s)
++        f.close()
++    except IOError:
++        pass
++    return toreturn
++
++def to_ld_param(libs):
++    toreturn=[]
++    for l in libs:
++        toreturn.append(" -l"+l)
++    return " ".join(toreturn)
++
++def create_makefile(name, packages, externlibs):
++    try:
++        os.mkdir(name)
++    except OSError:
++        pass
++
++    out=open(os.path.join(name, "Makefile"), "w")
++
++    try:
++        packages.remove("Xw")
++    except ValueError:
++        pass
++
++    try:
++        packages.remove("ImageUtility")
++    except ValueError:
++        pass
++
++    out.write("include ../header.mk\n")
++
++    for p in packages:
++        out.write("""
++objects += $(patsubst %%.cxx,%%.o,$(notdir $(wildcard $(SRC)/%s/*.cxx)))
++objects += $(patsubst %%.c,%%.o,$(notdir $(wildcard $(SRC)/%s/*.c)))
++objects += $(patsubst %%.cxx,%%.o,$(notdir $(wildcard $(DRV)/%s/*.cxx)))
++objects += $(patsubst %%.c,%%.o,$(notdir $(wildcard $(DRV)/%s/*.c)))
++""" % (p,p,p,p))
++
++    for p in packages:
++        out.write("""
++%%.o : $(SRC)/%s/%%.cxx
++	$(CXX) $(CPPFLAGS) -I$(DRV)/%s -I$(SRC)/%s  -c $(CXXFLAGS) -o $@ $<
++%%.o : $(DRV)/%s/%%.cxx
++	$(CXX) $(CPPFLAGS) -I$(DRV)/%s -I$(SRC)/%s  -c $(CXXFLAGS) -o $@ $<
++%%.o : $(SRC)/%s/%%.c
++	$(CC)  $(CPPFLAGS) -I$(DRV)/%s -I$(SRC)/%s  -c $(CFLAGS) -o $@ $<
++%%.o : $(DRV)/%s/%%.c
++	$(CC)  $(CPPFLAGS) -I$(DRV)/%s -I$(SRC)/%s  -c $(CFLAGS) -o $@ $<
++""" % (p,p,p, p,p,p, p,p,p, p,p,p))
++
++    out.write("""
++$(BIN)/%s.dll : $(objects)
++	mkdir -p $(LIB) $(BIN)
++	$(CXX) $(LDFLAGS) -L$(LIB) -o $@ $^ $(%sFLAGS) -Wl,--out-implib,$(LIB)/lib%s.a
++""" % (name, name, name))
++    out.close();
++
++def search_libs(package, libdict):
++    try:
++        l=libdict[package]
++    except KeyError:
++        l=[]
++    toreturn=[]
++    toreturn.extend(l)
++    for p in l:
++        toreturn.extend(search_libs(p, libdict))
++    return toreturn
++
++externlibs={}
++packages={}
++for dir in os.listdir("../../src"):
++    pdir = os.path.join("../../src", dir)
++    packages[dir]=parse_list(pdir, "PACKAGES")
++    externlibs[dir]=parse_list(pdir, "EXTERNLIB")
++
++for dir, plist in packages.iteritems():
++    if len(plist)>0:
++        create_makefile(dir, plist, search_libs(dir, externlibs))

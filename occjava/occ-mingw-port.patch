@@ -1,5 +1,5 @@
 diff --git a/ros/inc/Handle_Standard_Transient.hxx b/ros/inc/Handle_Standard_Transient.hxx
-index 5370d3c..059a747 100644
+index 0500103..e3c6202 100644
 --- a/ros/inc/Handle_Standard_Transient.hxx
 +++ b/ros/inc/Handle_Standard_Transient.hxx
 @@ -13,7 +13,7 @@
@@ -11,7 +11,7 @@ index 5370d3c..059a747 100644
  // Disable the warning "conversion from 'unsigned int' to Standard_Transient *"
  #pragma warning (push)
  #pragma warning (disable:4312)
-@@ -224,7 +224,7 @@ private:
+@@ -228,7 +228,7 @@ private:
    Standard_Transient *entity;
  };
  
@@ -21,7 +21,7 @@ index 5370d3c..059a747 100644
  #endif
  
 diff --git a/ros/inc/Standard_Atomic.hxx b/ros/inc/Standard_Atomic.hxx
-index 93f80ec..111a333 100644
+index 4842877..73adc8b 100644
 --- a/ros/inc/Standard_Atomic.hxx
 +++ b/ros/inc/Standard_Atomic.hxx
 @@ -24,7 +24,7 @@
@@ -33,17 +33,8 @@ index 93f80ec..111a333 100644
  
  extern "C" {
  long _InterlockedIncrement(long volatile* lpAddend);
-@@ -51,7 +51,7 @@ inline int Standard_Atomic_DecrementTest (int volatile* var)
- //       however these definitions involve specific type atomic_t
- // Note: The same code probably would work for Intel compiler
- //===================================================
--#elif defined(LIN)
-+#elif defined(__GNUC__)
- 
- inline void Standard_Atomic_Increment (int volatile* var)
- {
 diff --git a/ros/inc/Standard_CString.hxx b/ros/inc/Standard_CString.hxx
-index ee3420e..b3f794c 100644
+index a1caadf..f003f8c 100644
 --- a/ros/inc/Standard_CString.hxx
 +++ b/ros/inc/Standard_CString.hxx
 @@ -13,7 +13,7 @@
@@ -55,11 +46,23 @@ index ee3420e..b3f794c 100644
  #  define strcasecmp _stricmp
  # endif
  
+diff --git a/ros/inc/Standard_Macro.hxx b/ros/inc/Standard_Macro.hxx
+index 0df32b7..852d8c2 100644
+--- a/ros/inc/Standard_Macro.hxx
++++ b/ros/inc/Standard_Macro.hxx
+@@ -125,7 +125,4 @@
+ //#  endif  // WNT
+ # endif  // __Standard_API
+ 
+-// Define _OCC64 variable (unless already defined) if platform is known to be 64-bit
+-#include <arch-6.5.0/Standard_Macro64.hxx>
+-
+ #endif  
 diff --git a/ros/inc/Standard_values.h b/ros/inc/Standard_values.h
-index 917255b..5807d46 100644
+index 623800a..bc78d2e 100644
 --- a/ros/inc/Standard_values.h
 +++ b/ros/inc/Standard_values.h
-@@ -41,6 +41,10 @@ Facility : CAS-CADE V1.3A
+@@ -31,6 +31,10 @@ Facility : CAS-CADE V1.3A
  # include <limits>
  #endif
  
@@ -85,10 +88,10 @@ index 5820d62..238c58c 100644
  #define MFT_COMMANDBUFFERSIZE 512
  typedef struct _MFT_CommandBuffer {
 diff --git a/ros/src/OSD/OSD.cxx b/ros/src/OSD/OSD.cxx
-index 4422f52..27ecf14 100644
+index 58e75b1..e1b133a 100644
 --- a/ros/src/OSD/OSD.cxx
 +++ b/ros/src/OSD/OSD.cxx
-@@ -95,7 +95,7 @@ Standard_Boolean OSD::CStringToReal(const Standard_CString aString,
+@@ -99,7 +99,7 @@ Standard_Boolean OSD::CStringToReal(const Standard_CString aString,
  //=======================================================================
  
  #ifdef WNT
@@ -98,12 +101,12 @@ index 4422f52..27ecf14 100644
  # include <Mapiwin.h>
  #endif
 diff --git a/ros/src/OSD/OSD_Process.cxx b/ros/src/OSD/OSD_Process.cxx
-index a63ff84..7393f5f 100644
+index 8b01231..6eeb9b3 100644
 --- a/ros/src/OSD/OSD_Process.cxx
 +++ b/ros/src/OSD/OSD_Process.cxx
-@@ -194,7 +194,7 @@ Standard_Integer OSD_Process::Error()const{
- #undef NOUSER /* we need SW_HIDE from windows.h */
- #endif
+@@ -202,7 +202,7 @@ Standard_Integer OSD_Process::Error()const{
+ #include <Quantity_Date.hxx>
+ 
  #include <OSD_WNT_1.hxx>
 -#include <LMCONS.H> /// pour UNLEN  ( see MSDN about GetUserName() )
 +#include <lmcons.h> /// pour UNLEN  ( see MSDN about GetUserName() )
@@ -126,10 +129,10 @@ index 89a67a1..a21df90 100644
    default:
      break;
 diff --git a/ros/src/Standard/Standard_MMgrOpt.cxx b/ros/src/Standard/Standard_MMgrOpt.cxx
-index 32a5963..048111a 100644
+index c170bbd..0be6e25 100644
 --- a/ros/src/Standard/Standard_MMgrOpt.cxx
 +++ b/ros/src/Standard/Standard_MMgrOpt.cxx
-@@ -670,7 +670,7 @@ void Standard_MMgrOpt::FreeMemory (Standard_Address aBlock,
+@@ -846,7 +846,7 @@ void Standard_MMgrOpt::FreeMemory (Standard_Address aBlock,
      // recover handle to the memory mapping stored just before the block
      const HANDLE * aMBlock = (const HANDLE *)aBlock;
      HANDLE hMap = *(--aMBlock);
@@ -206,7 +209,7 @@ index 0f7b898..eeedb54 100644
  static XFORM xfmIdent = { ( FLOAT )0.8660,  ( FLOAT )0.5000,
                            ( FLOAT )-0.5000, ( FLOAT )0.8660,
 diff --git a/ros/src/WNT/WNT_DDriver.cxx b/ros/src/WNT/WNT_DDriver.cxx
-index ca4c01c..cdbbb2d 100644
+index 9c98336..4099c9c 100644
 --- a/ros/src/WNT/WNT_DDriver.cxx
 +++ b/ros/src/WNT/WNT_DDriver.cxx
 @@ -102,7 +102,7 @@ static void __fastcall         _dd_fill_buff ( char* );
@@ -228,7 +231,7 @@ index ca4c01c..cdbbb2d 100644
                       LPARAM                   lpData
                      ) {
 diff --git a/ros/src/WNT/WNT_IconBox.cxx b/ros/src/WNT/WNT_IconBox.cxx
-index 90cf263..70df131 100644
+index d5565a3..f80699f 100644
 --- a/ros/src/WNT/WNT_IconBox.cxx
 +++ b/ros/src/WNT/WNT_IconBox.cxx
 @@ -30,7 +30,7 @@ WNT_IconBox :: WNT_IconBox (
@@ -241,7 +244,7 @@ index 90cf263..70df131 100644
                          ),
                      aStyle | WS_VSCROLL,
 @@ -322,8 +322,10 @@ Standard_Boolean WNT_IconBox :: IconSize (
-  
+ 
   }  // end for
  
 - return ( i > len ) ? Standard_False :
@@ -254,10 +257,10 @@ index 90cf263..70df131 100644
  }  // end WNT_IconBox :: IconSize
  //***//
 diff --git a/ros/src/WNT/WNT_ImageProcessor.cxx b/ros/src/WNT/WNT_ImageProcessor.cxx
-index ad61cff..2b70470 100644
+index 7809c05..7782e72 100644
 --- a/ros/src/WNT/WNT_ImageProcessor.cxx
 +++ b/ros/src/WNT/WNT_ImageProcessor.cxx
-@@ -50,6 +50,10 @@
+@@ -49,6 +49,10 @@
  #endif  /* _DEBUG */
  #define WINNT35X() (WNT_osVer.dwPlatformId   == VER_PLATFORM_WIN32_NT && \
                      WNT_osVer.dwMajorVersion == 3 )
@@ -282,10 +285,10 @@ index c2f1d87..44e64ff 100644
  }  // end constructor
  
 diff --git a/ros/src/WNT/WNT_Window.cxx b/ros/src/WNT/WNT_Window.cxx
-index dd24caf..cb33623 100644
+index a4bfca0..f1f71ab 100644
 --- a/ros/src/WNT/WNT_Window.cxx
 +++ b/ros/src/WNT/WNT_Window.cxx
-@@ -439,10 +439,10 @@ Aspect_TypeOfResize WNT_Window :: DoResize () const {
+@@ -514,10 +514,10 @@ Aspect_TypeOfResize WNT_Window :: DoResize () const {
  
   if ( wp.showCmd != SW_SHOWMINIMIZED ) {
  
@@ -300,7 +303,7 @@ index dd24caf..cb33623 100644
  
    switch ( mask ) {
  
-@@ -1087,7 +1087,7 @@ void WNT_Window :: doCreate (
+@@ -1207,7 +1207,7 @@ void WNT_Window :: doCreate (
  
   if ( wProc != &WNT_WndProc ) {
  
