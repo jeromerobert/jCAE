@@ -1,3 +1,5 @@
+This patch is for Opencascade 6.3. The bug is fixed in Opencascade 6.5.
+
 diff --git a/ros/src/BRepMesh/BRepMesh_FastDiscret.cxx b/ros/src/BRepMesh/BRepMesh_FastDiscret.cxx
 index 9ec6e90..9dc10bc 100644
 --- a/ros/src/BRepMesh/BRepMesh_FastDiscret.cxx

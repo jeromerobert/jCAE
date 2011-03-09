@@ -1,0 +1,16 @@
+This patch is for Opencascade 6.5.
+See http://www.opencascade.org/org/forum/thread_20076/
+
+diff --git a/ros/src/BRepMesh/BRepMesh_FastDiscretFace.cxx b/ros/src/BRepMesh/BRepMesh_FastDiscretFace.cxx
+index 8f96927..e0f5684 100644
+--- a/ros/src/BRepMesh/BRepMesh_FastDiscretFace.cxx
++++ b/ros/src/BRepMesh/BRepMesh_FastDiscretFace.cxx
+@@ -936,7 +936,7 @@ void BRepMesh_FastDiscretFace::InternalVertices ( const Handle(BRepAdaptor_HSurf
+       }
+     }
+   }
+-  else if (thetype == GeomAbs_BezierSurface || thetype == GeomAbs_BSplineSurface)
++  else if (false)
+   {
+     Standard_Integer i, j;
+ 

@@ -80,6 +80,8 @@ class BRepTools
 		const Standard_CString file);
 
 	static  void Write(const TopoDS_Shape& Sh,Standard_OStream& S) ;
+	%rename(clean) Clean;
+	static  void Clean(const TopoDS_Shape& S) ;
 };
 
 %extend BRepTools

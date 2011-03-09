@@ -28,6 +28,7 @@ import org.jcae.opencascade.jni.TopoDS_Edge;
 import org.jcae.opencascade.jni.TopoDS_Face;
 import org.jcae.opencascade.jni.TopoDS_Shape;
 import org.jcae.opencascade.jni.TopoDS_Vertex;
+import org.jcae.vtk.AbstractNode.ActorCustomiser;
 import vtk.vtkActor;
 import vtk.vtkProperty;
 
@@ -56,6 +57,7 @@ public class ViewableCAD extends Viewable
 	private int vertexSize = 4;
 	private int edgeSize = 2;
 	private boolean onlyFreeEdges = false;
+	private Node facesFront, facesBack;
 	
 	public enum ShapeType
 	{
@@ -188,8 +190,8 @@ public class ViewableCAD extends Viewable
 			}
 		});
 		
-		Node facesFront = new Node(faces);
-		Node facesBack = new Node(faces);
+		facesFront = new Node(faces);
+		facesBack = new Node(faces);
 		facesFront.setManager(true);
 		facesBack.setManager(true);
 
@@ -230,6 +232,25 @@ public class ViewableCAD extends Viewable
 				nodeToTopo.put(backFaceNode, face);
 			}
 		}
+	}
+
+	public void setTriangleVisible(final boolean b)
+	{
+		ActorCustomiser ac = new AbstractNode.ActorCustomiser() {
+			@Override
+			public void customiseActor(vtkActor actor) {
+				vtkProperty p = actor.GetProperty();
+				p.LightingOff();
+				p.SetEdgeVisibility(b ? 1 : 0);
+				p.SetEdgeColor(0.2, 0.2, 0.2);
+			}
+		};
+
+		facesBack.setActorCustomiser(ac);
+		facesFront.setActorCustomiser(ac);
+		facesBack.refresh();
+		facesFront.refresh();
+		render();
 	}
 
 	public Node getEdges()

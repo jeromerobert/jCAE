@@ -23,11 +23,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
 import org.jcae.opencascade.Utilities;
 import org.jcae.opencascade.jni.BRepBndLib;
 import org.jcae.opencascade.jni.BRepMesh_IncrementalMesh;
+import org.jcae.opencascade.jni.BRepTools;
 import org.jcae.opencascade.jni.BRep_Tool;
 import org.jcae.opencascade.jni.Bnd_Box;
 import org.jcae.opencascade.jni.GCPnts_UniformDeflection;
@@ -231,23 +233,6 @@ public class OCCMeshExtractor
 		}
 
 		/**
-		 * Compute the bounding box of the face and
-		 * return the maximum bound value
-		 * @param shape
-		 * @return
-		 */
-		private static float getMaxBound(TopoDS_Shape shape)
-		{
-			Bnd_Box box = new Bnd_Box();
-			BRepBndLib.add(shape, box);
-			double[] bbox = box.get();
-			double minBoundingBox =
-					Math.max(Math.max(bbox[3] - bbox[0],bbox[4] - bbox[1]),
-						bbox[5] - bbox[2]);
-			return (float) minBoundingBox;
-		}
-
-		/**
 		 * @param itriangles
 		 */
 		static private void reverseMesh(int[] itriangles)
@@ -267,18 +252,7 @@ public class OCCMeshExtractor
 			TopLoc_Location loc = new TopLoc_Location();
 			Poly_Triangulation pt = BRep_Tool.triangulation(face, loc);
 
-			float error = 0.001f * getMaxBound(face) * 4;
-			int iter = 0;
 			float[] newNodes = null;
-			//try to mesh with error, if the geometry is too dirty try error/10
-			// and then error/100
-			while ((pt == null) && (iter < 3))
-			{
-				new BRepMesh_IncrementalMesh(face, error, false);
-				pt = BRep_Tool.triangulation(face, loc);
-				error /= 10;
-				iter++;
-			}
 
 			if (pt == null)
 			{
@@ -365,7 +339,7 @@ public class OCCMeshExtractor
 	}
 	
 	private final TopoDS_Shape shape;
-
+	private boolean meshCreated;
 	/**
 	 * Create a CAOMeshExtractor from a TopoDS_Shape object
 	 * 
@@ -396,10 +370,27 @@ public class OCCMeshExtractor
 		return vertices;
 	}
 
+	/**
+	 * Create the mesh by calling BRepMesh_IncrementalMesh
+	 * Override to call it with custom parameters
+	 */
+	protected void createMesh()
+	{
+		//Force to recreate the mesh with our parameters
+		BRepTools.clean(shape);
+		new BRepMesh_IncrementalMesh(shape, 7E-3, true);
+	}
+
 	public Collection<TopoDS_Face> getFaces()
 	{
+		if(!meshCreated)
+		{
+			createMesh();
+			meshCreated = true;
+		}
+
 		TopExp_Explorer explorer = new TopExp_Explorer();
-		HashSet<TopoDS_Face> faces = new HashSet<TopoDS_Face>();
+		HashSet<TopoDS_Face> faces = new LinkedHashSet<TopoDS_Face>();
 
 		for (explorer.init(shape, TopAbs_ShapeEnum.FACE); explorer.more(); explorer.next())
 			faces.add((TopoDS_Face) explorer.current());
