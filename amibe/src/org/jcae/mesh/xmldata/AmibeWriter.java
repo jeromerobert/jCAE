@@ -189,12 +189,15 @@ public abstract class AmibeWriter {
 			new NIOutputStream(fos.getChannel()), 1024*64));
 	}
 	
-	protected DataOutputStream nodeChan, triaChan, groupChan, refChan, beamChan, normalChan;
+	protected DataOutputStream nodeChan, triaChan, groupChan, refChan,
+		beamChan, normalChan, nodeGroupChan;
 	private XMLWriter xmlWriter;
 	protected int numberOfNodes, numberOfTriangles, numberOfRef, numberOfBeams;
 	private List<Group> groups = new ArrayList<Group>();
-	private long groupOffset, bGroupOffset;
+	private List<Group> nodeGroups = new ArrayList<Group>();
+	private long groupOffset, bGroupOffset, nodeGroupOffset;
 	private Group currentGroup;
+	private Group currentNodeGroup;
 	private boolean checkNoGroup;
 	private String shape;
 	private boolean shapeWritten;
@@ -323,6 +326,7 @@ public abstract class AmibeWriter {
 			nodeChan.close();
 			triaChan.close();
 			groupChan.close();
+			nodeGroupChan.close();
 			beamChan.close();
 			bGroupChan.close();
 			if(refChan != null)
@@ -362,6 +366,7 @@ public abstract class AmibeWriter {
 			triaChan = createDOS(ftria);
 			groupChan = createDOS(fgrp);
 			bGroupChan = createDOS(bgroups);
+			nodeGroupChan = createDOS(new File(dir3d, "nodeGroups.bin"));
 			beamChan = createDOS(fbeams);
 			xmlWriter = new XMLWriter(new File(path, xmlFile()).getPath(),
 				getClass().getResource("jcae.xsd"));
@@ -467,6 +472,7 @@ public abstract class AmibeWriter {
 			}
 			
 			writeGroups();
+			writeNodeGroups();
 			o.writeEndElement(); //submesh
 		} catch (XMLStreamException ex) {
 			Logger.getLogger(AmibeWriter.class.getName()).log(Level.SEVERE, null,
@@ -535,12 +541,38 @@ public abstract class AmibeWriter {
 		}
 	}
 
+	private void writeNodeGroups() throws XMLStreamException, IOException
+	{
+		if(!nodeGroups.isEmpty())
+		{
+			XMLStreamWriter o = xmlWriter.out;
+			o.writeStartElement("nodeGroups");
+			for (Group g : nodeGroups) {
+				o.writeStartElement("group");
+				o.writeStartElement("name");
+				o.writeCharacters(g.name);
+				o.writeEndElement();
+				if(g.nbElement > 0)
+				{
+					writeNumber(g.nbElement);
+					writeFile("integerstream", binDirectory() + "/nodeGroups.bin", g.offset);
+				}
+				o.writeEndElement();
+			}
+			o.writeEndElement(); //groups
+		}
+	}
+
 	/** Create a new group and make it the current node group */
 	public void nextNodeGroup(String name)
 	{
-		//TODO Implement in the same way as nextGroup
-		//TODO also implement a writeNodeGroups() methods in the same way as
-		//writeGroups() and call it in writeSubMesh()
+		if(name == null)
+			throw new NullPointerException();
+		Group g=new Group();
+		g.name = name;
+		g.offset= nodeGroupOffset;
+		nodeGroups.add(g);
+		currentNodeGroup = g;
 	}
 
 	/**
@@ -548,10 +580,10 @@ public abstract class AmibeWriter {
 	 * nextNodeGroup must have been called before calling this method
 	 * @param id the ID of the node to add
 	 */
-	public void addNodeToGroup(int nodeID)
+	public void addNodeToGroup(int nodeID) throws IOException
 	{
-		//TODO Implement in the same way as addTriaToGroup
-		//TODO also implement a writeNodeGroups() methods in the same way as
-		//writeGroups() and call it in writeSubMesh()
+		nodeGroupChan.writeInt(nodeID);
+		nodeGroupOffset ++;
+		currentNodeGroup.nbElement ++;
 	}
 }
