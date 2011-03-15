@@ -221,7 +221,7 @@ public class Amibe2GEO {
 		HashSet<Node> junctions = new HashSet<Node>(surfaceNodes);
 		junctions.retainAll(beamNodes);
 		writeDim(out, surfaceNodes.size(), edgesMap.size(), triangles.length,
-			beamNodes.size(), beams.length, junctions.size());
+			beamNodes.size(), beams.length, junctions.size(), sm.getGroups().size());
 		writeSurfNode(out, surfaceNodes);
 		writeEdges(out, edgesMap.values());
 		writeTriangles(out, triangles, groupIDs);
@@ -291,7 +291,7 @@ public class Amibe2GEO {
 	}
 
 	private void writeDim(PrintStream out, int nbSurfNod, int nbEdge,
-		int nbTriangles, int nbWireNode, int nbWire, int junctionSize)
+		int nbTriangles, int nbWireNode, int nbWire, int junctionSize, int nbGroups)
 	{
 		out.println("[DIM]");
 		out.println(nbSurfNod + " //Number of surface-nod");
@@ -313,9 +313,9 @@ public class Amibe2GEO {
 		out.println("0 //Number and rank of CoaxialWg");
 		out.println("0 //Number and rank of CoaxialCavit");
 		out.println("1 //Number of Object");
-		out.println("5 //Number of Sub-Object");
+		out.println((nbGroups+1)+" //Number of Sub-Object");
 		out.println("0 //Number of Sources");
-		out.println("3 //Number of Properties");
+		out.println(nbGroups+" //Number of Properties");
 		out.println("0 //Number of Em-Field");
 		out.println("0 //Number of Antenna");
 		out.println("[END]");
