@@ -50,10 +50,10 @@ public class Amibe2GEO {
 		public int edgeID = -1;
 		private List<Object> elements = new ArrayList<Object>(6);
 
-		private Node(double[] buffer) {
-			x = buffer[0];
-			y = buffer[1];
-			z = buffer[2];
+		private Node(double[] buffer, double scale) {
+			x = buffer[0] * scale;
+			y = buffer[1] * scale;
+			z = buffer[2] * scale;
 		}
 
 		public void addElement(Object element)
@@ -261,6 +261,9 @@ public class Amibe2GEO {
 		for(int i = 0; i < toReturn.length; i++)
 		{
 			trias.get(buffer);
+			assert buffer[0] >= 0 && buffer[0] < nodes.length : buffer[0]+" "+nodes.length;
+			assert buffer[1] >= 0 && buffer[1] < nodes.length : buffer[0]+" "+nodes.length;
+			assert buffer[2] >= 0 && buffer[2] < nodes.length : buffer[0]+" "+nodes.length;
 			toReturn[i] = new Triangle(buffer, edgesMap, nodes, i+1);
 		}
 		return toReturn;
@@ -268,12 +271,13 @@ public class Amibe2GEO {
 
 	private Node[] readNodes(DoubleFileReader dfr) throws IOException
 	{
+		double scale = getScaleFactor();
 		Node[] toReturn = new Node[(int)(dfr.size()/3)];
 		double[] buffer = new double[3];
 		for(int i = 0; i<toReturn.length; i++)
 		{
 			dfr.get(3*i, buffer);
-			toReturn[i] = new Node(buffer);
+			toReturn[i] = new Node(buffer, scale);
 		}
 		return toReturn;
 	}
@@ -505,5 +509,10 @@ public class Amibe2GEO {
 
 	protected double getResistivity(String name) {
 		return 0;
+	}
+
+	protected double getScaleFactor()
+	{
+		return 1.0;
 	}
 }
