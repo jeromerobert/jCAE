@@ -1,3 +1,12 @@
+About nbproject/build-impl.xml
+------------------------------
+
+This file is required and there are 2 ways to create it:
+* Openning this project in Netbeans
+* Running ant config
+
+
+
 About VTK and garbage collector
 -------------------------------
 

@@ -4,7 +4,10 @@
 <!-- (If you delete it and reopen the project it will be recreated.) -->
 <project name="vtk-util" default="default" basedir=".">
     <description>Builds, tests, and runs the project TestVTK.</description>
-    <import file="nbproject/build-impl.xml"/>
+	<target name="config" description="Create nbproject/build-impl.xml">
+		<xslt in="nbproject/project.xml" out="nbproject/build-impl.xml" style="build-impl.xsl"/>
+	</target>
+    <import file="nbproject/build-impl.xml" optional="true"/>
 	<property file="../zebra-netbeans/nbproject/private/private.properties"/>
     <!--
 
