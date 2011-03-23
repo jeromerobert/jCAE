@@ -42,8 +42,9 @@ import org.xml.sax.SAXException;
  *
  * @author Jerome Robert
  */
-public class Amibe2GEO {	
-	private class Node
+public class Amibe2GEO {
+
+	private static class Node
 	{
 		public final double x, y, z;
 		public int surfaceID = -1;
@@ -85,7 +86,7 @@ public class Amibe2GEO {
 			}
 		}
 	}
-	private class Edge
+	private static class Edge
 	{
 		public final Node n1, n2;
 		public String group;
@@ -135,7 +136,7 @@ public class Amibe2GEO {
 		}
 	}
 
-	private class Triangle
+	private static class Triangle
 	{
 		public String group;
 		public final Edge edge1, edge2, edge3;
@@ -173,6 +174,18 @@ public class Amibe2GEO {
 			result.add(edge3.n2);
 		}
 	}
+
+	private static class Source
+	{
+		public final int id, wireID;
+
+		public Source(int id, int wireID) {
+			this.id = id;
+			this.wireID = wireID;
+		}
+	}
+
+	private List<Source> sources = new ArrayList<Source>();
 	private final String inputDir;
 	
 	public Amibe2GEO(String inputDir)
@@ -221,7 +234,8 @@ public class Amibe2GEO {
 		HashSet<Node> junctions = new HashSet<Node>(surfaceNodes);
 		junctions.retainAll(beamNodes);
 		writeDim(out, surfaceNodes.size(), edgesMap.size(), triangles.length,
-			beamNodes.size(), beams.length, junctions.size(), sm.getGroups().size());
+			beamNodes.size(), beams.length, junctions.size(), sm.getGroups().size(),
+			nbSource(beamNodes));
 		writeSurfNode(out, surfaceNodes);
 		writeEdges(out, edgesMap.values());
 		writeTriangles(out, triangles, groupIDs);
@@ -229,6 +243,8 @@ public class Amibe2GEO {
 		writeSegments(out, beams, groupIDs);
 		writeJunctions(out, nodes);
 		writeFreeSpace(out);
+		if(!sources.isEmpty())
+			writeSources(out);
 		writeProperties(out, sm.getGroups());
 		writeObject(out);
 		writeSubObject(out, sm.getGroups());
@@ -295,7 +311,8 @@ public class Amibe2GEO {
 	}
 
 	private void writeDim(PrintStream out, int nbSurfNod, int nbEdge,
-		int nbTriangles, int nbWireNode, int nbWire, int junctionSize, int nbGroups)
+		int nbTriangles, int nbWireNode, int nbWire, int junctionSize, int nbGroups,
+		int nbSource)
 	{
 		out.println("[DIM]");
 		out.println(nbSurfNod + " //Number of surface-nod");
@@ -318,7 +335,7 @@ public class Amibe2GEO {
 		out.println("0 //Number and rank of CoaxialCavit");
 		out.println("1 //Number of Object");
 		out.println((nbGroups+1)+" //Number of Sub-Object");
-		out.println("0 //Number of Sources");
+		out.println(nbSource+" //Number of Sources");
 		out.println(nbGroups+" //Number of Properties");
 		out.println("0 //Number of Em-Field");
 		out.println("0 //Number of Antenna");
@@ -381,6 +398,24 @@ public class Amibe2GEO {
 		out.println();
 	}
 
+	private int nbSource(Collection<Node> wireNodes)
+	{
+		int toReturn = 0;
+		ArrayList<Edge> edges = new ArrayList<Edge>(3);
+		for(Node n: wireNodes)
+		{
+			n.getEdges(edges);
+			if(edges.size() == 2)
+			{
+				String g = edges.get(0).group;
+				if(g.equals(edges.get(1).group) && isSource(g))
+					toReturn ++;
+			}
+			edges.clear();
+		}
+		return toReturn;
+	}
+
 	private void writeWireNode(PrintStream out, Collection<Node> wireNodes,
 		Map<String, Integer> groupIDs)
 	{
@@ -388,19 +423,32 @@ public class Amibe2GEO {
 		out.println("WNod   Label  X(m) Y(m) Z(m) Re Np   Ns   Mult Sg1  Sg2 ....");
 		writeUselessLine(out);
 		int id = 1;
+		int nextPortID = 1;
 		ArrayList<Edge> edges = new ArrayList<Edge>(3);
 		for(Node n: wireNodes)
 		{
 			n.edgeID = id;
 			int propertyID = 0;
+			int sourceID = 0;
 			n.getEdges(edges);
 			if(edges.size() == 2)
 			{
 				String g = edges.get(0).group;
-				if(g.equals(edges.get(1).group) && isNodalResistance(g))
-					propertyID = groupIDs.get(edges.get(0).group);
+				if(g.equals(edges.get(1).group))
+				{
+					if(isNodalResistance(g) && isSource(g))
+						throw new RuntimeException("CA VA PAS LA TETE ! "+g);
+					if(isNodalResistance(g))
+						propertyID = groupIDs.get(edges.get(0).group);
+					else if(isSource(g))
+					{
+						Source p = new Source(nextPortID++, id);
+						sources.add(p);
+						sourceID = p.id;
+					}
+				}
 			}
-			out.print(id+" "+id+" "+n.x+" "+n.y+" "+n.z+" 01 "+propertyID+" 0 "+(edges.size()-1));
+			out.print(id+" "+id+" "+n.x+" "+n.y+" "+n.z+" 01 "+propertyID+" "+sourceID+" "+(edges.size()-1));
 			for(Edge e: edges)
 				out.print(" "+e.id);
 			out.println();
@@ -455,14 +503,27 @@ public class Amibe2GEO {
 	}
 	private void writeUselessLine(PrintStream out)
 	{
-		out.println("- \\_o< -- COIN COIN -- PAN -- \\_x<");
+		out.println("-");
 	}
 
 	private void writeFreeSpace(PrintStream out)
 	{
 		out.println("[FREESPACE]");
-		out.println("Description for Reg Zone number 1");
+		writeUselessLine(out);
 		out.println("1.0000E+00 0.0000E+00 1.0000E+00 0.0000E+00  //Epsilon,Mu for these zone and Name");
+		out.println("[END]");
+		out.println();
+	}
+
+	private void writeSources(PrintStream out)
+	{
+		out.println("[SOURCE]");
+		writeUselessLine(out);
+		writeUselessLine(out);
+		for(Source s:sources)
+			out.println(s.id+" 001 Volt     00 00 0 0 ORDER0 1 0 0 0 0 0 "+getSourceName(
+				s.id, s.wireID));
+
 		out.println("[END]");
 		out.println();
 	}
@@ -514,5 +575,15 @@ public class Amibe2GEO {
 	protected double getScaleFactor()
 	{
 		return 1.0;
+	}
+
+	protected boolean isSource(String name)
+	{
+		return false;
+	}
+
+	protected String getSourceName(int sourceID, int nodeID)
+	{
+		return Integer.toString(sourceID);
 	}
 }
