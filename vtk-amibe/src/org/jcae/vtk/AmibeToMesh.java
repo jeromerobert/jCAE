@@ -163,10 +163,13 @@ public class AmibeToMesh
 		for(String id : groupExtraction)
 		{
 			Group g = sm.getGroup(id);
-			if(g.getNumberOfTrias() > 0)
-				triangles.put(id, new TriaData(reader, id));
-			if(g.getNumberOfBeams() > 0)
-				beams.put(id, new BeamData(reader, id));
+			if(g != null)
+			{
+				if(g.getNumberOfTrias() > 0)
+					triangles.put(id, new TriaData(reader, id));
+				if(g.getNumberOfBeams() > 0)
+					beams.put(id, new BeamData(reader, id));
+			}
 		}
 	}
 }
