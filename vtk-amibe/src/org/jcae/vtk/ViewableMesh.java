@@ -242,7 +242,8 @@ public class ViewableMesh extends Viewable
 			{				
 				groupNode.beams.setDataProvider(group.getValue());
 				if(groupNode.vertexBeams != null)
-					groupNode.vertexBeams.setDataProvider(group.getValue());
+					groupNode.vertexBeams.setDataProvider(
+						createVertices(group.getValue()));
 			}
 		}
 		rootNode.refresh();
