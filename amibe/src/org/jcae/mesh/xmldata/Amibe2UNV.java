@@ -186,8 +186,12 @@ public class Amibe2UNV
 		while(fc.read(bb)!=-1)
 		{
 			bb.rewind();
-			MeshExporter.UNV.writeSingleTriangle(out, count,
-				bb.getInt()+1, bb.getInt()+1, bb.getInt()+1);
+			int n1 = bb.getInt();
+			int n2 = bb.getInt();
+			int n3 = bb.getInt();
+			if(n1 >= 0)
+				MeshExporter.UNV.writeSingleTriangle(out, count,
+					n1+1, n2+1, n3+1);
 			bb.rewind();
 			count ++;
 		}
