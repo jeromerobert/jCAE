@@ -35,6 +35,7 @@
 			<file name="org-jcae-netbeans-mesh-RefreshGroupAction.instance"/>
 			<file name="org-jcae-netbeans-mesh-SwapAction.instance"/>
 			<file name="org-jcae-netbeans-mesh-ExportUNV.instance"/>
+			<file name="org-jcae-netbeans-mesh-ExportVTKAction.instance"/>
 			<file name="org-jcae-netbeans-mesh-FuseGroupAction.instance"/>
 			<file name="org-jcae-netbeans-mesh-ExportGroupAction.instance"/>
         </folder>
@@ -95,6 +96,10 @@
                     <file name="org-jcae-netbeans-mesh-ExportUNV.shadow">
                         <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-ExportUNV.instance"/>
                         <attr name="position" intvalue="110"/>
+                    </file>
+                    <file name="org-jcae-netbeans-mesh-ExportVTKAction.shadow">
+                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-ExportVTKAction.instance"/>
+                        <attr name="position" intvalue="130"/>
                     </file>
                     <file name="Separator3.instance">
                         <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>

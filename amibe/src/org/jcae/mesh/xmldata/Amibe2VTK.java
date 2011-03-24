@@ -67,7 +67,7 @@ public class Amibe2VTK
 	private boolean dummyData;
 	
 	/** @param directory The directory which contain 3d files */
-	private Amibe2VTK(File directory)
+	public Amibe2VTK(File directory)
 	{
 		this.directory=directory;
 	}
