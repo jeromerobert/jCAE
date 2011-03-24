@@ -134,6 +134,8 @@ vtk-util/build/
 vtk-util/dist/
 vtk-util/manifest.mf
 vtk-util/nbproject/private/
+vtk-util/nbproject/build-impl.xml
+vtk-util/nbproject/genfiles.properties
 amibe/build
 amibe/dist/
 amibe/nbproject/build-impl.xml
