@@ -103,6 +103,7 @@ SmoothNodes3DBg(liaison, opts).compute()
 
 opts.clear()
 opts.put("coplanarity", "0.9")
+opts.put("expectInsert", "false")
 SwapEdge(liaison, opts).compute()
 
 opts.clear()
@@ -110,6 +111,11 @@ opts.put("coplanarity", "0.9")
 opts.put("size", str(options.size*0.2))
 opts.put("maxlength", str(options.size*1.2))
 QEMDecimateHalfEdge(liaison, opts).compute()
+
+opts.clear()
+opts.put("coplanarity", "0.9")
+opts.put("expectInsert", "false")
+SwapEdge(liaison, opts).compute()
 
 opts.clear()
 opts.put("coplanarity", "0.75")

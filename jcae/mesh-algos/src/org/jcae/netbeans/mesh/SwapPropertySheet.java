@@ -81,6 +81,9 @@ public class SwapPropertySheet extends PropertySheet {
 			r.put(new MyProperty<Double>(Double.TYPE, "minQualityFactor",
 				"Minimal quality factor",
 				"Swap edge only if the triangles quality is multiplied by the given factor."));
+			r.put(new MyProperty<Boolean>(Boolean.TYPE, "expectInsert",
+				"Expect point insertion",
+				"Constrain swapping conditions for easier further point insertion."));
 		} catch (NoSuchMethodException ex) {
 			Exceptions.printStackTrace(ex);
 		}
@@ -100,6 +103,7 @@ public class SwapPropertySheet extends PropertySheet {
 	private boolean preserveGroups = true;
 	private double coplanarity = 0.95;
 	private double minQualityFactor = 0;
+	private boolean expectInsert = true;
 	
 	public double getCoplanarity() {
 		return coplanarity;
@@ -127,5 +131,13 @@ public class SwapPropertySheet extends PropertySheet {
 
 	public void setMinQualityFactor(double minQualityFactor) {
 		this.minQualityFactor = minQualityFactor;
+	}
+
+	public boolean isExpectInsert() {
+		return expectInsert;
+	}
+
+	public void setExpectInsert(boolean expectInsert) {
+		this.expectInsert = expectInsert;
 	}
 }

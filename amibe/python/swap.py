@@ -31,7 +31,9 @@ parser.add_option("-g", "--preserveGroups", action="store_true", dest="preserveG
 parser.add_option("-I", "--immutable-border",
                   action="store_true", dest="immutable_border",
                   help="Tag free edges as immutable")
-
+parser.add_option("-i", "--no-expect-insert",
+                  action="store_true", dest="no_expect_insert",
+                  help="Relax swapping conditions when no further point insertion are expected")
 (options, args) = parser.parse_args(args=sys.argv[1:])
 
 if len(args) != 2:
@@ -55,6 +57,8 @@ opts = HashMap()
 opts.put("coplanarity", str(options.coplanarity))
 if options.min_quality_factor:
     opts.put("minQualityFactor", str(options.min_quality_factor))
+if options.no_expect_insert:
+    opts.put("expectInsert", "false")
 sm = SwapEdge(liaison, opts)
 sm.setProgressBarStatus(10000)
 sm.compute()

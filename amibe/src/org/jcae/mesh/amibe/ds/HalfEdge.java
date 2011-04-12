@@ -399,7 +399,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	public final double checkSwap3D(Mesh mesh, double minCos, double maxLength)
 	{
-		return checkSwap3D(mesh, minCos, 0.0, 0);
+		return checkSwap3D(mesh, minCos, 0.0, 0, true);
 	}
 	/**
 	 * Checks the dihedral angle of an edge.
@@ -409,11 +409,14 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 *    triangles is lower than minCos, then <code>-1.0</code> is
 	 *    returned.
 	 * @param minQualityFactor If the quality of the generated triangle is not
-	 *    multiplied by this factor, the returned value is -1
+	 *    at least multiplied by this factor, the returned value is -1
+	 * @param expectInsert Set it to true if later point insertion are expected.
+	 *    This is typically the case before and during ReMesh.
 	 * @return the minimum quality of the two triangles generated
 	 *    by swapping this edge or -1 if the swap must not be done
 	 */
-	public final double checkSwap3D(Mesh mesh, double minCos, double maxLength, double minQualityFactor)
+	public final double checkSwap3D(Mesh mesh, double minCos, double maxLength,
+		double minQualityFactor, boolean expectInsert)
 	{
 		double invalid = -1.0;
 		if (hasAttributes(IMMUTABLE))
@@ -432,7 +435,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		if (maxLength > 0.0 && a.sqrDistance3D(n) > maxLength)
 			return invalid;
 		// Do not create an edge which will be difficult to modify later
-		if (a.getRef() != 0 && n.getRef() != 0 && (o.getRef() == 0 || d.getRef() == 0))
+		if (expectInsert && a.getRef() != 0 && n.getRef() != 0 && (o.getRef() == 0 || d.getRef() == 0))
 			return invalid;
 		double[] temp0 = mesh.temp.t3_0;
 		double[] temp1 = mesh.temp.t3_1;
@@ -479,12 +482,19 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			return Qafter;
 		// If both configurations are almost identical, prefer the one
 		// which does not link two vertices on inner boundaries
-		if (Qafter > 2.0*Qbefore && (a.getRef() == 0 || n.getRef() == 0) && o.getRef() != 0 && d.getRef() != 0)
+		if (expectInsert && Qafter > 0.5*Qbefore &&
+			(a.getRef() == 0 || n.getRef() == 0) &&
+			o.getRef() != 0 && d.getRef() != 0)
 			return Qafter;
 		return invalid;
 	}
 
 	public final double checkSwapNormal(Mesh mesh, double coplanarity, double[] normal)
+	{
+		return checkSwapNormal(mesh, coplanarity, normal, true);
+	}
+
+	public final double checkSwapNormal(Mesh mesh, double coplanarity, double[] normal, boolean expectInsert)
 	{
 		double invalid = -2.0;
 		if (hasAttributes(IMMUTABLE))
@@ -501,7 +511,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		Vertex a = apex();
 		Vertex n = sym.apex();
 		// Do not create an edge which will be difficult to modify later
-		if (a.getRef() != 0 && n.getRef() != 0 && (o.getRef() == 0 || d.getRef() == 0))
+		if (expectInsert && a.getRef() != 0 && n.getRef() != 0 && (o.getRef() == 0 || d.getRef() == 0))
 			return invalid;
 		double[] temp0 = mesh.temp.t3_0;
 		double[] temp1 = mesh.temp.t3_1;

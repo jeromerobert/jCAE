@@ -43,6 +43,7 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 	private int counter = 0;
 	/** Swap only if the quality is improved by at least this factory */
 	private double minQualityFactor;
+	private boolean expectInsert = true;
 	/**
 	 * Creates a <code>SwapEdge</code> instance.
 	 *
@@ -76,6 +77,10 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 			{
 				minQualityFactor = Double.parseDouble(val);
 			}
+			else if(key.equals("expectInsert"))
+			{
+				expectInsert = Boolean.parseBoolean(val);
+			}
 			else
 				throw new RuntimeException("Unknown option: "+key);
 		}
@@ -103,14 +108,14 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 		if (liaison != null)
 		{
 			double[] tNormal = liaison.getBackgroundNormal(e.origin());
-			if (e.checkSwapNormal(mesh, minCos, tNormal) < -1.0)
+			if (e.checkSwapNormal(mesh, minCos, tNormal, expectInsert) < -1.0)
 				return Double.MAX_VALUE;
 			// Triangle normals have been checked, let checkSwap3D
 			// only check triangle quality
 			coplanarity = -2.0;
 		}
 
-		return - e.checkSwap3D(mesh, coplanarity, 0, minQualityFactor);
+		return - e.checkSwap3D(mesh, coplanarity, 0, minQualityFactor, expectInsert);
 	}
 	
 	@Override
