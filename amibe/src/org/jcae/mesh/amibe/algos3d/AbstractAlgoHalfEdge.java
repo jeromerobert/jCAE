@@ -78,6 +78,8 @@ public abstract class AbstractAlgoHalfEdge
 	}
 	public final void compute()
 	{
+		assert mesh.checkNoDegeneratedTriangles();
+		assert mesh.checkNoInvertedTriangles();
 		thisLogger().info("Run "+getClass().getName());
 		mesh.getTrace().println("# Begin "+getClass().getName());
 		preProcessAllHalfEdges();
