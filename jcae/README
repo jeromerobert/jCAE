@@ -43,3 +43,10 @@ Building
 
 Run ant -p in this directory to get available Ant targets.
 
+Building without OpenCASCADE
+----------------------------
+- Edit/create amibe/nbproject/private/private.properties and
+add no.occ=true
+- Edit/create nbproject/private/private.properties and add
+modules=mesh-algos:vtk:amibe:tweakui:jython:vtk-util:vecmath:trove
+
