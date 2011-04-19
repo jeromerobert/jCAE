@@ -340,19 +340,11 @@ public class SmoothNodes3DBg
 				double[] newp3 = v.getUV();
 				if (sizeTarget > 0.0)
 				{
-					if (l > sizeTarget)
-					{
-						// Find the point on this edge which has the
-						// desired length
-						double p = sizeTarget / l;
-						for (int i = 0; i < 3; i++)
-							centroid3[i] += newp3[i] + p * (oldp3[i] - newp3[i]);
-					}
-					else
-					{
-						for (int i = 0; i < 3; i++)
-							centroid3[i] += oldp3[i];
-					}
+					// Find the point on this edge which has the
+					// desired length
+					double p = sizeTarget / l;
+					for (int i = 0; i < 3; i++)
+						centroid3[i] += newp3[i] + p * (oldp3[i] - newp3[i]);
 				}
 				else
 				{

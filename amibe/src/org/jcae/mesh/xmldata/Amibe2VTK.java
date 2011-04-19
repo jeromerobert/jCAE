@@ -65,6 +65,11 @@ public class Amibe2VTK
 	private final File directory;
 	private Document document;
 	private boolean dummyData;
+
+	public Amibe2VTK(String directory)
+	{
+		this.directory=new File(directory);
+	}
 	
 	/** @param directory The directory which contain 3d files */
 	public Amibe2VTK(File directory)

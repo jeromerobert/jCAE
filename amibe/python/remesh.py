@@ -5,7 +5,7 @@ from org.jcae.mesh.amibe.algos3d import *
 from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.projection import MeshLiaison
 from org.jcae.mesh.amibe.metrics import EuclidianMetric3D
-from org.jcae.mesh.xmldata import MeshReader, MeshWriter
+from org.jcae.mesh.xmldata import MeshReader, MeshWriter, Amibe2VTK
 from org.jcae.mesh.amibe.algos3d import SmoothNodes3DBg, RemeshPolyline
 
 # Java
@@ -19,6 +19,13 @@ from gnu.trove import TIntArrayList
 # Python
 import sys
 from optparse import OptionParser
+
+debug_write_counter=1
+def writeVTK(liaison):
+    global debug_write_counter
+    """MeshWriter.writeObject3D(liaison.mesh, "/tmp/tmp.amibe", "")
+    Amibe2VTK("/tmp/tmp.amibe").write("/tmp/m%i.vtp" % debug_write_counter);"""
+    debug_write_counter=debug_write_counter+1
 
 """
 Remesh an existing mesh.
@@ -74,37 +81,62 @@ else:
 	if options.preserveGroups:
 		liaison.getMesh().buildGroupBoundaries()
 
+#0
+writeVTK(liaison)
+
 opts = HashMap()
 opts.put("coplanarity", "0.9")
 opts.put("size", str(options.size*0.06))
 QEMDecimateHalfEdge(liaison, opts).compute()
 
+#1
+writeVTK(liaison)
+
 opts.clear()
 opts.put("size", str(options.size))
 Remesh(liaison, opts).compute()
+
+#2
+writeVTK(liaison)
 
 opts.clear()
 opts.put("coplanarity", "0.9")
 SwapEdge(liaison, opts).compute()
 
-opts.clear()
-opts.put("coplanarity", "0.9")
-ImproveEdgeConnectivity(liaison, opts).compute()
+#3
+writeVTK(liaison)
 
 opts.clear()
 opts.put("size", str(options.size*0.3))
 opts.put("freeEdgesOnly", "true")
 LengthDecimateHalfEdge(liaison, opts).compute()
 
+#4
+writeVTK(liaison)
+
+opts.clear()
+opts.put("coplanarity", "0.9")
+ImproveEdgeConnectivity(liaison, opts).compute()
+
+#5
+writeVTK(liaison)
+
 opts.clear()
 opts.put("coplanarity", "0.9")
 opts.put("iterations", str(8))
+opts.put("size", str(options.size))
 SmoothNodes3DBg(liaison, opts).compute()
+
+#6
+writeVTK(liaison)
 
 opts.clear()
 opts.put("coplanarity", "0.9")
 opts.put("expectInsert", "false")
 SwapEdge(liaison, opts).compute()
+
+#7
+writeVTK(liaison)
 
 opts.clear()
 opts.put("coplanarity", "0.9")
@@ -112,16 +144,22 @@ opts.put("size", str(options.size*0.2))
 opts.put("maxlength", str(options.size*1.2))
 QEMDecimateHalfEdge(liaison, opts).compute()
 
+writeVTK(liaison)
+
 opts.clear()
 opts.put("coplanarity", "0.9")
 opts.put("expectInsert", "false")
 SwapEdge(liaison, opts).compute()
+
+writeVTK(liaison)
 
 opts.clear()
 opts.put("coplanarity", "0.75")
 opts.put("tolerance", "0.6")
 opts.put("iterations", str(8))
 SmoothNodes3DBg(liaison, opts).compute()
+
+writeVTK(liaison)
 
 #MeshWriter.writeObject3D(liaison.mesh, outDir, "")
 
