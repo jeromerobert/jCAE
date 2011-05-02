@@ -27,6 +27,7 @@
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepBuilderAPI_MakeSolid.hxx>
+#include <BRepBuilderAPI_NurbsConvert.hxx>
 #include <Standard_Version.hxx>
 #if OCC_VERSION_MAJOR >= 6
 #include <BRepBuilderAPI_Sewing.hxx>
@@ -47,20 +48,21 @@ class BRepBuilderAPI_MakeShape
 
 class BRepBuilderAPI_ModifyShape: public BRepBuilderAPI_MakeShape
 {
+	%rename(modifiedShape) ModifiedShape;
 	BRepBuilderAPI_ModifyShape()=0;
+	public:
+	virtual const TopoDS_Shape& ModifiedShape(const TopoDS_Shape& S) const;
 };
 
 class BRepBuilderAPI_Transform : public BRepBuilderAPI_ModifyShape
 {
 	%rename(perform) Perform;
-	%rename(modifiedShape) ModifiedShape;
 	public:
 	BRepBuilderAPI_Transform(const gp_Trsf& T);
 	BRepBuilderAPI_Transform(const TopoDS_Shape& S,	const gp_Trsf& T,
 		const Standard_Boolean Copy = Standard_False);
 	void Perform(const TopoDS_Shape& S,
 		const Standard_Boolean Copy = Standard_False) ;
-	virtual const TopoDS_Shape& ModifiedShape(const TopoDS_Shape& S) const;
 };
 
 class BRepBuilderAPI_MakeVertex: public BRepBuilderAPI_MakeShape
@@ -191,3 +193,15 @@ class BRepBuilderAPI_Sewing
 	Standard_Boolean IsModifiedSubShape(const TopoDS_Shape& shape) const;
 	TopoDS_Shape ModifiedSubShape(const TopoDS_Shape& shape) const;
 };
+
+class BRepBuilderAPI_NurbsConvert : public BRepBuilderAPI_ModifyShape
+{
+	%rename(perform) Perform;
+	public:
+	BRepBuilderAPI_NurbsConvert();
+	BRepBuilderAPI_NurbsConvert(const TopoDS_Shape& S,
+		const Standard_Boolean Copy = Standard_False);
+	void Perform(const TopoDS_Shape& S,
+		const Standard_Boolean Copy = Standard_False) ;
+};
+

@@ -47,6 +47,7 @@ occjava/src-java/org/jcae/opencascade/jni/BRepBuilderAPI_MakeSolid.java
 occjava/src-java/org/jcae/opencascade/jni/BRepBuilderAPI_MakeVertex.java
 occjava/src-java/org/jcae/opencascade/jni/BRepBuilderAPI_MakeWire.java
 occjava/src-java/org/jcae/opencascade/jni/BRepBuilderAPI_ModifyShape.java
+occjava/src-java/org/jcae/opencascade/jni/BRepBuilderAPI_NurbsConvert.java
 occjava/src-java/org/jcae/opencascade/jni/BRepBuilderAPI_Sewing.java
 occjava/src-java/org/jcae/opencascade/jni/BRepBuilderAPI_Transform.java
 occjava/src-java/org/jcae/opencascade/jni/BRepCheck_Analyzer.java
