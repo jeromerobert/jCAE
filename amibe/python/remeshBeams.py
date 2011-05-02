@@ -46,42 +46,11 @@ mtb.addNodeList()
 mesh = Mesh(mtb)
 MeshReader.readObject3D(mesh, xmlDir)
 
-bgroupMap = LinkedHashMap()
-#print "beams size: "+str(mesh.getBeams().size())
-for i in xrange(mesh.getBeams().size() / 2):
-	bId = mesh.getBeamGroup(i)
-	listBeamId = bgroupMap.get(bId)
-	if listBeamId is None:
-		listBeamId = TIntArrayList(100)
-		bgroupMap.put(bId, listBeamId)
-	listBeamId.add(i)
-
-vertices = ArrayList(mesh.getBeams())
+polylines=PolylineFactory(mesh)
 mesh.resetBeams()
-mapGroupToListOfPolylines = LinkedHashMap()
-for bId in bgroupMap.keySet():
-	listBeamId = bgroupMap.get(bId)
-	listOfPolylines = ArrayList()
-	polyline = ArrayList()
-	lastVertex = None
-	for i in xrange(listBeamId.size()):
-		b = listBeamId.get(i) 
-		if lastVertex != vertices.get(2*b):
-			# New polyline
-			polyline = ArrayList()
-			listOfPolylines.add(polyline)
-			polyline.add(vertices.get(2*b))
-		lastVertex = vertices.get(2*b+1)
-		polyline.add(lastVertex)
-	print "Group "+str(bId)+" contains "+str(listOfPolylines.size())+" polylines and "+str(listBeamId.size()+1)+" vertices"
-	mapGroupToListOfPolylines.put(bId, listOfPolylines)
-
-for bId in bgroupMap.keySet():
-	listBeamId = bgroupMap.get(bId)
-	listOfPolylines = mapGroupToListOfPolylines.get(bId)
-	nrPoly = listOfPolylines.size()
-	for numPoly in xrange(nrPoly):
-		polyline = listOfPolylines.get(numPoly)
+for entry in polylines.entrySet():
+  groupId = entry.key
+  for polyline in entry.value:
 		listM = ArrayList()
 		for v in polyline:
 			listM.add(EuclidianMetric3D(size))
@@ -90,7 +59,7 @@ for bId in bgroupMap.keySet():
 		print "Remesh polyline "+str(numPoly+1)+"/"+str(nrPoly)+" of group "+str(bId)+"/"+str(bgroupMap.size())+" "+str(polyline.size())+" vertices"
 		result = RemeshPolyline(mesh, polyline, listM).compute()
 		for i in xrange(result.size() - 1):
-			mesh.addBeam(result.get(i), result.get(i+1), bId)
+			mesh.addBeam(result.get(i), result.get(i+1), groupId)
 		print "  New polyline: "+str(result.size())+" vertices"
 		#for v in result:
 		#	print v
