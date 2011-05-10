@@ -20,12 +20,15 @@
 
 package org.jcae.mesh.xmldata;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import javax.xml.parsers.ParserConfigurationException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
+import org.jcae.mesh.xmldata.AmibeReader.SubMesh;
 import org.xml.sax.SAXException;
 
 /**
@@ -63,7 +66,6 @@ public class Amibe2VTK
 		}
 	}
 	private final File directory;
-	private Document document;
 	private boolean dummyData;
 
 	public Amibe2VTK(String directory)
@@ -77,37 +79,20 @@ public class Amibe2VTK
 		this.directory=directory;
 	}
 
-	private long computeNumberOfTriangle(File triaFile) throws IOException
+	private long computeNumberOfTriangle(IntFileReader triaFile) throws IOException
 	{
-		DataInputStream in = new DataInputStream(
-			new BufferedInputStream(new FileInputStream(triaFile)));
-		long nbt = triaFile.length()/4/3;
+		long nbt = triaFile.size()/3;
 		long toReturn = 0;
 		for(int i=0; i<nbt; i++)
 		{
-			if(in.readInt()>=0)
+			if(triaFile.get()>=0)
 				toReturn++;
-			in.skipBytes(8);
+			triaFile.get();
+			triaFile.get();
 		}
+		triaFile.close();
 		return toReturn;
 	}
-	
-	private File getNodeFile()
-	{
-		Element xmlNodes = (Element) document.getElementsByTagName(
-			"nodes").item(0);
-		String a=((Element)xmlNodes.getElementsByTagName("file").item(0)).getAttribute("location");
-		return new File(directory, a);
-	}
-	
-	private File getTriaFile()
-	{
-		Element xmlNodes = (Element) document.getElementsByTagName(
-			"triangles").item(0);
-		Node fn = xmlNodes.getElementsByTagName("file").item(0);
-		String a=((Element)fn).getAttribute("location");
-		return new File(directory, a);
-	}	
 
 	public void write(String fileName) throws IOException, SAXException, ParserConfigurationException
 	{
@@ -126,18 +111,17 @@ public class Amibe2VTK
 	public final void write(OutputStream out)
 		throws ParserConfigurationException, SAXException, IOException
 	{
-		document=XMLHelper.parseXML(new File(directory, JCAEXMLData.xml3dFilename));
-
+		AmibeReader.Dim3 amibeReader = new AmibeReader.Dim3(directory.getPath());
+		SubMesh sm = amibeReader.getSubmeshes().get(0);
 		PrintStream os=new PrintStream(out);
-		File nodeFile=getNodeFile();
-		File triaFile=getTriaFile();
-		long nbp=getNodeFile().length()/8/3;
-		long nbt=computeNumberOfTriangle(getTriaFile());
-		writeHeader(os, nbp, nbt);
+		long nbp=sm.getNumberOfNodes();
+		long nbt=computeNumberOfTriangle(sm.getTriangles());
+		writeHeader(os, nbp, nbt, sm.getNumberOfBeams());
 		os.flush();
 		DataOutputStream dos=new DataOutputStream(new BufferedOutputStream(out));
-		writeNode(dos, nodeFile, nbp);
-		writeTriangles(dos, triaFile, nbt);
+		writeNode(dos, sm.getNodes(), nbp);
+		writeTriangles(dos, sm.getTriangles(), nbt);
+		writeBeams(dos, sm.getBeams(), sm.getNumberOfBeams());
 		if(dummyData)
 			writeData(dos, nbt);
 		dos.flush();
@@ -152,17 +136,16 @@ public class Amibe2VTK
 	 * @param nbt the number of triangles
 	 * @throws IOException
 	 */
-	private void writeTriangles(DataOutputStream dos, File triaFile, long nbt)
+	private void writeTriangles(DataOutputStream dos, IntFileReader triaFile, long nbt)
 		throws IOException
 	{
 		//Write the size of the array in octets
 		dos.writeInt((int) nbt*4*3);
-		DataInputStream in = new DataInputStream(
-			new BufferedInputStream(new FileInputStream(triaFile)));
 		
 		//Write the connectivity array
 		for(int i=0; i<nbt*3; i++)
-		{	int v = in.readInt();
+		{
+			int v = triaFile.get();
 			if(v>=0)
 				dos.writeInt(v);
 		}
@@ -174,6 +157,36 @@ public class Amibe2VTK
 		//connectivity array
 		for(int i=1; i<=nbt; i++)
 			dos.writeInt(3*i);
+
+		triaFile.close();
+	}
+
+	/**
+	 * write the triangle connectivity
+	 * @param dos the stream to write on
+	 * @param triaFile the amibe triangle file
+	 * @param nbt the number of triangles
+	 * @throws IOException
+	 */
+	private void writeBeams(DataOutputStream dos, IntFileReader beamFile, long numberOfBeams)
+		throws IOException
+	{
+		//Write the size of the array in octets
+		dos.writeInt((int) numberOfBeams*4*2);
+
+		//Write the connectivity array
+		for(int i=0; i<numberOfBeams*2; i++)
+			dos.writeInt(beamFile.get());
+
+		//Write the size of the array in octets
+		dos.writeInt((int) numberOfBeams*4);
+
+		//Write the offset of each cells (in our case beams) in the
+		//connectivity array
+		for(int i=1; i<=numberOfBeams; i++)
+			dos.writeInt(2*i);
+
+		beamFile.close();
 	}
 
 	/**
@@ -182,16 +195,15 @@ public class Amibe2VTK
 	 * @param nodeFile the amibe node file
 	 * @param nbp the number of nodes
 	 * @throws IOException
-	 */	private void writeNode(DataOutputStream dos, File nodeFile, long nbp)
+	 */	private void writeNode(DataOutputStream dos, DoubleFileReader nodeFile, long nbp)
 		throws IOException
 	{
 		//Write the size of the array in octets
-		 dos.writeInt((int) nbp*8*3);
-		DataInputStream in = new DataInputStream(
-			new BufferedInputStream(new FileInputStream(nodeFile)));
-		
+		dos.writeInt((int) nbp*8*3);
 		for(int i=0; i<nbp*3; i++)
-			dos.writeDouble(in.readDouble());
+			dos.writeDouble(nodeFile.get());
+
+		nodeFile.close();
 	}
 	 
 	/**
@@ -227,7 +239,8 @@ public class Amibe2VTK
 	 * @param numberOfNodes the number of nodes
 	 * @param numberOfTriangles the number of triangles
 	 */
-	private void writeHeader(PrintStream out, long numberOfNodes, long numberOfTriangles)
+	private void writeHeader(PrintStream out, long numberOfNodes,
+		long numberOfTriangles, long numberOfLines)
 	{
 		//This is Java so we write in big endian		
 		out.println("<VTKFile type=\"PolyData\" version=\"0.1\" byte_order=\"BigEndian\">");
@@ -236,12 +249,14 @@ public class Amibe2VTK
 		//Everything in one piece
 		//TODO write one piece by group
 		out.println("<Piece NumberOfPoints=\""+numberOfNodes+
-			"\" NumberOfPolys=\""+numberOfTriangles+"\">");
+			"\" NumberOfPolys=\""+numberOfTriangles+
+			"\" NumberOfLines=\""+numberOfLines+"\">");
 		
 		out.println("<Points><DataArray type=\"Float64\" NumberOfComponents=\"3\" "+
 			"format=\"appended\" offset=\"0\"/></Points>");		
 		long offset=4+(numberOfNodes*8*3);		
-		
+
+		//polys
 		out.println("<Polys><DataArray type=\"Int32\" Name=\"connectivity\""+
 			" format=\"appended\" offset=\""+offset+"\"/>");
 		offset+=4+numberOfTriangles*4*3;
@@ -249,7 +264,16 @@ public class Amibe2VTK
 		out.println("<DataArray type=\"Int32\" Name=\"offsets\" format=\"appended\"" +
 			" offset=\""+offset+"\"/></Polys>");		
 		offset+=4+numberOfTriangles*4;
-		
+
+		//lines
+		out.println("<Lines><DataArray type=\"Int32\" Name=\"connectivity\""+
+			" format=\"appended\" offset=\""+offset+"\"/>");
+		offset+=4+numberOfLines*4*2;
+
+		out.println("<DataArray type=\"Int32\" Name=\"offsets\" format=\"appended\"" +
+			" offset=\""+offset+"\"/></Lines>");
+		offset+=4+numberOfLines*4;
+
 		if(dummyData)
 		{
 			out.println("<CellData Scalars=\"Dummy\">");
