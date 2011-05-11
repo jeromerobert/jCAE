@@ -26,14 +26,39 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.metrics.Matrix3D;
 
 /**
  * Compute polylines from the beams of a mesh
  * @author Jerome Robert
  */
 public class PolylineFactory extends HashMap<Integer, Collection<List<Vertex>>>{
+
+	/** Remove polylines ends which would lead to small polylines */
+	private static void filterSmall(Set<BeamVertex> polylineEnds, double small2) {
+		Set<BeamVertex> toRemove = new HashSet<BeamVertex>();
+		for(BeamVertex bv: polylineEnds)
+		{
+			for(Beam b:bv)
+			{
+				BeamVertex other = b.getOther(bv);
+				if(polylineEnds.contains(other) && !toRemove.contains(bv) && b.lengthSqr() < small2)
+				{
+					if(bv.isManifold() && !other.isManifold())
+						toRemove.add(bv);
+					else if(other.isManifold() && !bv.isManifold())
+						toRemove.add(other);
+					else if(bv.isManifold() && other.isManifold())
+						toRemove.add(other);
+				}
+			}
+		}
+		polylineEnds.removeAll(toRemove);
+	}
+
 	private static class BeamVertex extends ArrayList<Beam>
 		implements Comparable<BeamVertex>
 	{
@@ -41,9 +66,35 @@ public class PolylineFactory extends HashMap<Integer, Collection<List<Vertex>>>{
 		/** Replace hashCode to ensure the algorithm is reproducible */
 		private final int id = beamCounter ++;
 		public final Vertex vertex;
-		public boolean isManifold()
+
+		public boolean isPolylineEnd(double dotProdLimit)
 		{
-			return size() == 2;
+			return !isManifold() || !isSmooth(dotProdLimit);
+		}
+
+		private boolean isManifold()
+		{
+			return size() == 2 &&  get(0).group == get(1).group;
+		}
+
+		private double[] getVector(int i)
+		{
+			Vertex vv1 = get(i).getOther(this).vertex;
+			double[] r = new double[3];
+			for(int j = 0; j<3; j++)
+				r[j] = vv1.getUV()[j] - vertex.getUV()[j];
+			return r;
+		}
+		private boolean isSmooth(double dotProdLimit)
+		{
+			if(dotProdLimit < -1)
+				return true;
+			double[] v1 = getVector(0);
+			double[] v2 = getVector(1);
+			double nv1 = Matrix3D.norm(v1);
+			double nv2 = Matrix3D.norm(v2);
+			double dot = Matrix3D.prodSca(v1, v2) / nv1 / nv2;
+			return dot < dotProdLimit;
 		}
 
 		/** Non manifold vertices are concidered higher than others */
@@ -84,9 +135,11 @@ public class PolylineFactory extends HashMap<Integer, Collection<List<Vertex>>>{
 	private static class Beam
 	{
 		public final BeamVertex v1, v2;
-		public Beam(BeamVertex v1, BeamVertex v2) {
+		public final int group;
+		public Beam(BeamVertex v1, BeamVertex v2, int group) {
 			this.v1 = v1;
 			this.v2 = v2;
+			this.group = group;
 		}
 
 		public BeamVertex getOther(BeamVertex v)
@@ -109,6 +162,11 @@ public class PolylineFactory extends HashMap<Integer, Collection<List<Vertex>>>{
 		{
 			assert v1.contains(this);
 			assert v2.contains(this);
+		}
+
+		public double lengthSqr()
+		{
+			return v1.vertex.sqrDistance3D(v2.vertex);
 		}
 	}
 
@@ -133,10 +191,10 @@ public class PolylineFactory extends HashMap<Integer, Collection<List<Vertex>>>{
 		{
 			BeamVertex v1 = createBeamVertex(beams.get(i*2), verticeMap);
 			BeamVertex v2 = createBeamVertex(beams.get(i*2+1), verticeMap);
-			Beam beam = new Beam(v1, v2);
+			int group = mesh.getBeamGroup(i);
+			Beam beam = new Beam(v1, v2, group);
 			v1.add(beam);
 			v2.add(beam);
-			int group = mesh.getBeamGroup(i);
 			Collection<Beam> beamSet = beamMap.get(group);
 			if(beamSet == null)
 			{
@@ -148,15 +206,21 @@ public class PolylineFactory extends HashMap<Integer, Collection<List<Vertex>>>{
 		return beamMap;
 	}
 
-	/** @return the oposit beam of the polyline */
+	/**
+	 * Create a polyline
+	 * @param startV start vertex of the polyline
+	 * @param start first beam of the polyline
+	 * @param polyline the created polyline as a list of vertex
+	 * @param beams the created polyline as a list of beams
+	 */
 	private static void createPolyline(BeamVertex startV, Beam start,
-		List<Vertex> polyline, List<Beam> beams)
+		List<Vertex> polyline, List<Beam> beams, Set<BeamVertex> polylineEnds)
 	{
 		polyline.add(startV.vertex);
 		BeamVertex cv = start.getOther(startV);
 		Beam cb = start;
 		beams.add(start);
-		while(cv.isManifold() && cv != startV)
+		while(cv != startV && !polylineEnds.contains(cv) )
 		{			
 			assert startV.vertex != cv.vertex;
 			assert !polyline.contains(cv.vertex):polyline.indexOf(cv.vertex)+" / "+polyline.size();
@@ -169,9 +233,22 @@ public class PolylineFactory extends HashMap<Integer, Collection<List<Vertex>>>{
 		polyline.add(cv.vertex);
 	}
 
+	/** Create polylines without angle constraints */
 	public PolylineFactory(Mesh mesh) {
+		this(mesh, -1.0, 0);
+	}
+
+	/**
+	 * @param mesh
+	 * @param angle Ridge limit angle in degrees. Polylines won't contains angle
+	 *   smaller than this value.
+	 * @param smallBeams beams smaller than this value will be ignore when
+	 *   calculating the smooth criteria
+	 */
+	public PolylineFactory(Mesh mesh, double angle, double smallBeams) {
+		angle = Math.cos(Math.toRadians(angle));
 		Map<Integer, Collection<Beam>> beamMap = indexify(mesh);
-		HashSet<BeamVertex> nonManVerts = new HashSet<BeamVertex>();
+		HashSet<BeamVertex> polylineEnds = new HashSet<BeamVertex>();
 		ArrayList<Beam> polylineB = new ArrayList<Beam>();
 		for(Entry<Integer, Collection<Beam>> e:beamMap.entrySet())
 		{
@@ -179,15 +256,16 @@ public class PolylineFactory extends HashMap<Integer, Collection<List<Vertex>>>{
 			Collection<List<Vertex>> polylines = new ArrayList<List<Vertex>>();
 			put(group, polylines);
 			Collection<Beam> beamSet = e.getValue();
-			nonManVerts.clear();
+			polylineEnds.clear();
 			for(Beam b:beamSet)
 			{
-				if(!b.v1.isManifold())
-					nonManVerts.add(b.v1);
-				if(!b.v2.isManifold())
-					nonManVerts.add(b.v2);
+				if(b.v1.isPolylineEnd(angle))
+					polylineEnds.add(b.v1);
+				if(b.v2.isPolylineEnd(angle))
+					polylineEnds.add(b.v2);
 			}
-			for(BeamVertex bv:nonManVerts)
+			filterSmall(polylineEnds, smallBeams * smallBeams);
+			for(BeamVertex bv:polylineEnds)
 			{
 				for(Beam startBeam:bv)
 				{
@@ -195,7 +273,7 @@ public class PolylineFactory extends HashMap<Integer, Collection<List<Vertex>>>{
 					{
 						ArrayList<Vertex> polyline = new ArrayList<Vertex>();
 						polylineB.clear();
-						createPolyline(bv, startBeam, polyline, polylineB);
+						createPolyline(bv, startBeam, polyline, polylineB, polylineEnds);
 						polylines.add(polyline);
 						beamSet.removeAll(polylineB);
 					}

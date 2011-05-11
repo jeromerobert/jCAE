@@ -162,7 +162,7 @@ SmoothNodes3DBg(liaison, opts).compute()
 writeVTK(liaison)
 
 #MeshWriter.writeObject3D(liaison.mesh, outDir, ""
-polylines=PolylineFactory(liaison.mesh)
+polylines=PolylineFactory(liaison.mesh, 135.0, options.size*0.2)
 liaison.mesh.resetBeams()
 for entry in polylines.entrySet():
   groupId = entry.key
@@ -170,7 +170,7 @@ for entry in polylines.entrySet():
 		listM = ArrayList()
 		for v in polyline:
 			listM.add(EuclidianMetric3D(options.size))
-		#print "Remesh polyline "+str(numPoly+1)+"/"+str(nrPoly)+" of group "+str(bId)+"/"+str(bgroupMap.size())+" "+str(polyline.size())+" vertices"
+		#print "Remesh polyline of group "+str(groupId)+"/"+str(polylines.size())+" "+str(polyline.size())+" vertices"
 		result = RemeshPolyline(liaison.mesh, polyline, listM).compute()
 		for i in xrange(result.size() - 1):
 			liaison.mesh.addBeam(result.get(i), result.get(i+1), groupId)
