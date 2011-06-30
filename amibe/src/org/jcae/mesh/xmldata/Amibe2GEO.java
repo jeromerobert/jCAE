@@ -22,9 +22,8 @@
 package org.jcae.mesh.xmldata;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -197,12 +196,18 @@ public class Amibe2GEO {
 	{
 		File pd = new File(directory, name);
 		pd.mkdirs();
-		PrintStream ps = new PrintStream(new FileOutputStream(new File(pd, name+".geo")));
+		PrintWriter ps = new PrintWriter(new File(pd, name+".geo"))
+		{
+			@Override
+			public void println() {
+				write("\r\n");
+			}
+		};
 		write(ps);
 		ps.close();
 	}
 
-	public void write(PrintStream out) throws SAXException, IOException
+	public void write(PrintWriter out) throws SAXException, IOException
 	{
 		writeHeader(out);
 		AmibeReader.Dim3 ar = new AmibeReader.Dim3(inputDir);
@@ -298,7 +303,7 @@ public class Amibe2GEO {
 		return toReturn;
 	}
 
-	private void writeHeader(PrintStream out)
+	private void writeHeader(PrintWriter out)
 	{
 		out.println("[GENERAL]");
 		out.println("3.71 //Version number");
@@ -310,7 +315,7 @@ public class Amibe2GEO {
 		out.println();
 	}
 
-	private void writeDim(PrintStream out, int nbSurfNod, int nbEdge,
+	private void writeDim(PrintWriter out, int nbSurfNod, int nbEdge,
 		int nbTriangles, int nbWireNode, int nbWire, int junctionSize, int nbGroups,
 		int nbSource)
 	{
@@ -343,7 +348,7 @@ public class Amibe2GEO {
 		out.println();
 	}
 
-	private void writeSurfNode(PrintStream out, Collection<Node> surfaceNodes) {
+	private void writeSurfNode(PrintWriter out, Collection<Node> surfaceNodes) {
 		out.println("[SURFACE-NOD]");
 		out.println("TNod   Label  X(m)             Y(m)             Z(m)             Region");
 		writeUselessLine(out);
@@ -358,7 +363,7 @@ public class Amibe2GEO {
 		out.println();
 	}
 
-	private void writeEdges(PrintStream out, Collection<Edge> edges)
+	private void writeEdges(PrintWriter out, Collection<Edge> edges)
 	{
 		out.println("[EDGE]");
 		out.println("Edg    Labl   Np   Ns   Nd1    Nd2    Mult Tg1  Tg2    .....");
@@ -378,7 +383,7 @@ public class Amibe2GEO {
 		out.println();
 	}
 
-	private void writeTriangles(PrintStream out, Triangle[] triangles, Map<String, Integer> groupIDs) {
+	private void writeTriangles(PrintWriter out, Triangle[] triangles, Map<String, Integer> groupIDs) {
 		out.println("[TRIANGLE]");
 		out.println("Tgl    Label  Type   Met Reg     IP Edg1   Edg2   Edg3   SubObj Object Nd1    Nd2    Nd3");
 		writeUselessLine(out);
@@ -416,7 +421,7 @@ public class Amibe2GEO {
 		return toReturn;
 	}
 
-	private void writeWireNode(PrintStream out, Collection<Node> wireNodes,
+	private void writeWireNode(PrintWriter out, Collection<Node> wireNodes,
 		Map<String, Integer> groupIDs)
 	{
 		out.println("[WIRE-NOD]");
@@ -460,7 +465,7 @@ public class Amibe2GEO {
 	}
 
 
-	private void writeSegments(PrintStream out, Edge[] beams,
+	private void writeSegments(PrintWriter out, Edge[] beams,
 		Map<String, Integer> groupIDs) {
 		out.println("[SEGMENT]");
 		out.println("Sgl    Labl   Typ    Met Regi. Radius       Np   Elm1   Elm2  SubObj Object");
@@ -476,7 +481,7 @@ public class Amibe2GEO {
 		out.println();
 	}
 
-	private void writeJunctions(PrintStream out, Node[] nodes)
+	private void writeJunctions(PrintWriter out, Node[] nodes)
 	{
 		out.println("[JUNCTION]");
 		out.println("jun JWmult JTMult WElm   JTNd");
@@ -501,12 +506,12 @@ public class Amibe2GEO {
 		out.println("[END]");
 		out.println();
 	}
-	private void writeUselessLine(PrintStream out)
+	private void writeUselessLine(PrintWriter out)
 	{
 		out.println("-");
 	}
 
-	private void writeFreeSpace(PrintStream out)
+	private void writeFreeSpace(PrintWriter out)
 	{
 		out.println("[FREESPACE]");
 		writeUselessLine(out);
@@ -515,7 +520,7 @@ public class Amibe2GEO {
 		out.println();
 	}
 
-	private void writeSources(PrintStream out)
+	private void writeSources(PrintWriter out)
 	{
 		out.println("[SOURCE]");
 		writeUselessLine(out);
@@ -528,17 +533,17 @@ public class Amibe2GEO {
 		out.println();
 	}
 
-	private void writeProperties(PrintStream out, List<Group> groups)
+	private void writeProperties(PrintWriter out, List<Group> groups)
 	{
 		out.println("[PROPERTY]");
 		int i = 1;
 		for(Group g:groups)
-			out.println((i++)+" 0 "+getResistivity(g.getName())+" "+g.getName());
+			out.println((i++)+" 0 "+getResistivity(g.getName())+" "+g.getName()+" //R");
 		out.println("[END]");
 		out.println();
 	}
 
-	private void writeObject(PrintStream out)
+	private void writeObject(PrintWriter out)
 	{
 		out.println("[OBJECT]");
 		out.println("00000 not defined");
@@ -546,7 +551,7 @@ public class Amibe2GEO {
 		out.println();
 	}
 
-	private void writeSubObject(PrintStream out, List<Group> groups)
+	private void writeSubObject(PrintWriter out, List<Group> groups)
 	{
 		out.println("[SUB-OBJECT]");
 		out.println("0 not defined");
