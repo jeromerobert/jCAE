@@ -216,26 +216,26 @@ public class UNV2Amibe
 		{
 			if (line.trim().equals("-1"))
 			{
-				line = in.readLine();
-				if (line.trim().equals("2411") || line.trim().equals("781"))
+				line = in.readLine().trim();
+				if (line.equals("2411") || line.equals("781"))
 				{
 					// read nodes
 					convertNodes(in, unit, out);
 				}
-				else if (line.trim().equals("2412"))
+				else if (line.equals("2412"))
 				{
 					// read faces
 					convertFaces(in, out);
 				}
-				else if (line.trim().equals("164"))
+				else if (line.equals("164"))
 				{
 					// read unit
 					unit = readUnit(in);
 				}
-				else if ( (line.trim().equals("2430")) || (line.trim().equals("2435")) )
+				else if ( "2430".equals(line) || "2435".equals(line) || "2477".equals(line) )
 				{
 					// read groups
-					convertGroups(in, line.trim(), out);
+					convertGroups(in, line, out);
 				}
 				/*else if (line.trim().equals("2414"))
 				{
@@ -349,7 +349,7 @@ public class UNV2Amibe
 					}
 					
 					nbelem--;
-					if (type.equals("2435"))
+					if ("2435".equals(type) || "2477".equals("type"))
 					{
 						st.nextToken();
 						st.nextToken();
