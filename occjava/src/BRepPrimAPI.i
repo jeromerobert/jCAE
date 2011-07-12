@@ -61,12 +61,16 @@ class BRepPrimAPI_MakeTorus : public BRepBuilderAPI_MakeShape
 	public:
 	BRepPrimAPI_MakeTorus(const gp_Ax2& Axes,const Standard_Real R1,
 		const Standard_Real R2);
+	BRepPrimAPI_MakeTorus(const gp_Ax2& Axes, const Standard_Real R1,
+		const Standard_Real R2, const Standard_Real angle1,
+		const Standard_Real angle2, const Standard_Real angle);
 };
 
 class BRepPrimAPI_MakeSphere : public BRepBuilderAPI_MakeShape
 {
 	public:
 	BRepPrimAPI_MakeSphere(const gp_Pnt& center,const Standard_Real radius);
+	BRepPrimAPI_MakeSphere(const gp_Ax2& axis,const Standard_Real R,const Standard_Real angle1,const Standard_Real angle2,const Standard_Real angle3);
 };
 
 class BRepPrimAPI_MakeSweep  : public BRepBuilderAPI_MakeShape
