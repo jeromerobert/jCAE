@@ -110,10 +110,9 @@ AC_LANG_POP
 #############################
 # Swig
 #############################
-# http://sourceforge.net/mailarchive/forum.php?thread_id=9715058&forum_id=46758
-# http://gcc.gnu.org/bugzilla/show_bug.cgi?id=21920
-CXXFLAGS="${CXXFLAGS} -fno-strict-aliasing"
-AC_PROG_SWIG(1.3.27)
+# -fpermissive is required with g++ 4.6 until a better fix is found
+CXXFLAGS="${CXXFLAGS} -fpermissive"
+AC_PROG_SWIG(1.3.40)
 SWIG_ENABLE_CXX
 
 ########
