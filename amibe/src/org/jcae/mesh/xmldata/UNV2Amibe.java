@@ -232,7 +232,8 @@ public class UNV2Amibe
 					// read unit
 					unit = readUnit(in);
 				}
-				else if ( "2430".equals(line) || "2435".equals(line) || "2477".equals(line) )
+				else if ( "2430".equals(line) || "2435".equals(line) ||
+					"2477".equals(line) || "2467".equals(line))
 				{
 					// read groups
 					convertGroups(in, line, out);
@@ -349,7 +350,7 @@ public class UNV2Amibe
 					}
 					
 					nbelem--;
-					if ("2435".equals(type) || "2477".equals("type"))
+					if ("2435".equals(type) || "2477".equals(type) || "2467".equals(type))
 					{
 						st.nextToken();
 						st.nextToken();
