@@ -1,0 +1,27 @@
+From http://anonscm.debian.org/gitweb/?p=collab-maint/vtk.git;a=commit;h=7947864007ebf679c03a64615fa2743f857fee98
+
+diff --git a/Common/vtkPythonUtil.h b/Common/vtkPythonUtil.h
+index 4e1ca28..4097fa7 100644
+--- a/Common/vtkPythonUtil.h
++++ b/Common/vtkPythonUtil.h
+@@ -17,6 +17,7 @@
+ 
+ #include "vtkPython.h"
+ #include "vtkCommand.h"
++#include <stddef.h>
+ 
+ #if defined(WIN32)
+ # if defined(vtkCommonPythonD_EXPORTS)
+diff --git a/Utilities/vtkmetaio/metaUtils.cxx b/Utilities/vtkmetaio/metaUtils.cxx
+index 08d3e8d..01fab81 100644
+--- a/Utilities/vtkmetaio/metaUtils.cxx
++++ b/Utilities/vtkmetaio/metaUtils.cxx
+@@ -23,6 +23,7 @@
+ 
+ #include <stdio.h>
+ #include <ctype.h>
++#include <stddef.h>
+ 
+ #include <sys/stat.h>
+ #include <fcntl.h>
+

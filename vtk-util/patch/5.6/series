@@ -6,3 +6,4 @@ warning
 getColorBufferSizes
 parseJava
 parallel
+gcc4.6
