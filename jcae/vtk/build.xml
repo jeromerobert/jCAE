@@ -25,6 +25,7 @@
 			<fileset dir="${vtk.dir.linux}">
 				<patternset refid="vtk.unix.files"/>
 			</fileset>
+			<fileset file="${path.libstdc++}"/>
 		</copy>
 	</target>
 
