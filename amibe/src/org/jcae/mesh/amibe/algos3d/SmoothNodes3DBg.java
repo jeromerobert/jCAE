@@ -209,7 +209,7 @@ public class SmoothNodes3DBg
 			}
 			for (Vertex v: nodeset)
 			{
-				if (!v.isManifold() || (preserveBoundaries && v.getRef() != 0))
+				if (!v.isManifold() || (preserveBoundaries && v.getRef() != 0) || !v.isMutable())
 					immutableNodes.add(v);
 			}
 

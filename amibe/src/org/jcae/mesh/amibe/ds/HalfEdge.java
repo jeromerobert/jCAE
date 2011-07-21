@@ -789,8 +789,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	
 	final boolean canMoveOrigin(Mesh mesh, double [] newpt)
 	{
-		if(!origin().isManifold() || origin().isMutable())
-			return false;
+		assert origin().isManifold() && origin().isMutable();
 		Vertex d = destination();
 		HalfEdge f = this;
 		double [] temp0 = mesh.temp.t3_0;
