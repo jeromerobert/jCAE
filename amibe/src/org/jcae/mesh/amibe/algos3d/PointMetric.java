@@ -36,6 +36,9 @@ public class PointMetric implements Remesh.AnalyticMetricInterface {
 		public double sx,sy,sz;
 		/** source_distance^3/target_size */
 		public double coef;
+		/** The target size at a d distance of the source */
+		public double size;
+
 		public double distance(double x, double y, double z)
 		{
 			double dx = sx-x;
@@ -91,14 +94,19 @@ public class PointMetric implements Remesh.AnalyticMetricInterface {
 		s.sx = x;
 		s.sy = y;
 		s.sz = z;
+		s.size = size;
 		sources.add(s);
 	}
 
 	@Override
 	public double getTargetSize(double x, double y, double z) {
 		double sum = invHInf;
+		double minSize = Double.MAX_VALUE;
 		for(Source s:sources)
+		{
 			sum += s.coef/Math.pow(s.distance(x, y, z), 3);
-		return 1.0/sum;
+			minSize = Math.min(s.size, minSize);
+		}
+		return Math.max(1.0/sum, minSize);
 	}
 }
