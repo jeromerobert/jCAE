@@ -32,7 +32,8 @@ import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 
 /**
- * Compute polylines from the beams of a mesh
+ * Compute polylines from the beams of a mesh.
+ * The key of the map is the group id.
  * @author Jerome Robert
  */
 public class PolylineFactory extends HashMap<Integer, Collection<List<Vertex>>>{

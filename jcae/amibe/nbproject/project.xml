@@ -35,6 +35,8 @@
                 <package>org.jcae.mesh</package>
                 <package>org.jcae.mesh.amibe.algos3d</package>
                 <package>org.jcae.mesh.amibe.ds</package>
+                <package>org.jcae.mesh.amibe.projection</package>
+                <package>org.jcae.mesh.amibe.traits</package>
                 <package>org.jcae.mesh.amibe.util</package>
                 <package>org.jcae.mesh.bora.ds</package>
                 <package>org.jcae.mesh.bora.xmldata</package>

@@ -26,6 +26,7 @@ import org.jcae.mesh.amibe.metrics.EuclidianMetric3D;
 import org.jcae.mesh.amibe.metrics.Metric;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,11 @@ public class RemeshPolyline
 	// Map containing the metrics at each input point
 	private final Map<Vertex, EuclidianMetric3D> metricsMap = new LinkedHashMap<Vertex, EuclidianMetric3D>();
 
+	public RemeshPolyline(Mesh m, List<Vertex> vertices, double size)
+	{
+		this(m, vertices,
+			Collections.nCopies(vertices.size(), new EuclidianMetric3D(size)));
+	}
 	/**
 	 * Constructor.
 	 *
