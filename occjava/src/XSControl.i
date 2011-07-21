@@ -231,10 +231,12 @@ class STEPControl_Writer
 {
 	%rename(write) Write;
 	%rename(transfer) Transfer;
+	%rename(model) Model;
 	public:
 	STEPControl_Writer();
 	IFSelect_ReturnStatus Write(const Standard_CString filename);
 	IFSelect_ReturnStatus Transfer(TopoDS_Shape theShape, STEPControl_StepModelType mode);
+	Handle_StepData_StepModel Model(const Standard_Boolean newone);
 };
 
 
