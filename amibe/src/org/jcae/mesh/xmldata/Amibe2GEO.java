@@ -104,10 +104,7 @@ public class Amibe2GEO {
 
 		@Override
 		public int hashCode() {
-			int hash = 3;
-			hash = 53 * hash + (this.n1 != null ? this.n1.hashCode() : 0);
-			hash = 53 * hash + (this.n2 != null ? this.n2.hashCode() : 0);
-			return hash;
+			return n1.hashCode() ^ n2.hashCode();
 		}
 
 		public Collection<Triangle> getTriangles()
