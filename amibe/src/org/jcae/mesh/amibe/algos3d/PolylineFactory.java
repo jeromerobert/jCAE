@@ -266,19 +266,31 @@ public class PolylineFactory extends HashMap<Integer, Collection<List<Vertex>>>{
 					polylineEnds.add(b.v2);
 			}
 			filterSmall(polylineEnds, smallBeams * smallBeams);
-			for(BeamVertex bv:polylineEnds)
+
+			//The first iteration is for polyline ends detected by isPolylineEnd.
+			//Following iterations are for smooth polylines
+			while(!polylineEnds.isEmpty())
 			{
-				for(Beam startBeam:bv)
+				for(BeamVertex bv:polylineEnds)
 				{
-					if(beamSet.contains(startBeam))
+					for(Beam startBeam:bv)
 					{
-						ArrayList<Vertex> polyline = new ArrayList<Vertex>();
-						polylineB.clear();
-						createPolyline(bv, startBeam, polyline, polylineB, polylineEnds);
-						polylines.add(polyline);
-						beamSet.removeAll(polylineB);
+						if(beamSet.contains(startBeam))
+						{
+							ArrayList<Vertex> polyline = new ArrayList<Vertex>();
+							polylineB.clear();
+							createPolyline(bv, startBeam, polyline, polylineB, polylineEnds);
+							polylines.add(polyline);
+							beamSet.removeAll(polylineB);
+						}
 					}
 				}
+				polylineEnds.clear();
+				// Beams which are in smooth loops are not detected by
+				// isPolylineEnd. At this step beamSet should only contains such
+				// beams, so any vertex could be concidered as a polyline end.
+				if(!beamSet.isEmpty())
+					polylineEnds.add(beamSet.iterator().next().v1);
 			}
 		}
 	}
