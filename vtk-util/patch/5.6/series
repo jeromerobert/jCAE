@@ -7,3 +7,4 @@ getColorBufferSizes
 parseJava
 parallel
 gcc4.6
+w64-mingw

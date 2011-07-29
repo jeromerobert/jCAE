@@ -9,35 +9,15 @@ Required packages:
 
 Build VTK for Linux to create the required VTKCompileToolsConfig.cmake file.
 
-Create the toolchain-mingw.cmake file:
-
-# the name of the target operating system
-SET(CMAKE_SYSTEM_NAME Windows)
-
-# which compilers to use for C and C++
-SET(CMAKE_C_COMPILER i586-mingw32msvc-gcc)
-SET(CMAKE_CXX_COMPILER i586-mingw32msvc-g++)
-
-# here is the target environment located
-SET(CMAKE_FIND_ROOT_PATH /usr/i586-mingw32msvc /home/jerome/kitware/vtk-mingw-install )
-
-# adjust the default behaviour of the FIND_XXX() commands:
-# search headers and libraries in the target environment, search
-# programs in the host environment
-set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-
-
-
 Patch CMake to do not build libFooBar.dll files but FooBar.dll. Edit /usr/share/cmake-2.6/Modules/Platform/Windows-gcc.cmake
 or /usr/share/cmake-2.8/Modules/Platform/Windows-GNU.cmake:
 SET(CMAKE_SHARED_MODULE_PREFIX "")
 SET(CMAKE_SHARED_LIBRARY_PREFIX "")
 
-
 Run cmake in your build directory:
-cmake -DCMAKE_TOOLCHAIN_FILE=../VTK/toolchain-mingw.cmake -DVTKCompileTools_DIR=../build-5.6-amd64 ../VTK
+cmake -DCMAKE_TOOLCHAIN_FILE=/a/path/toolchain-mingw.cmake -DVTKCompileTools_DIR=../build-5.6-amd64 ../VTK
+
+CMake toolchain files example can be found allong with this README.
 
 Change the CMake default configuration:
 
@@ -81,7 +61,8 @@ Change the CMake default configuration:
 -VTK_WRAP_JAVA:BOOL=OFF
 +VTK_WRAP_JAVA:BOOL=ON
 
-
+If you build VTK 5.6 with with g++ 4.6 you may need to add:
+CMAKE_CXX_FLAGS:STRING=-fpermissive
 
 If you get an error about vtksysEncodeExecutable.exe while the build fix Utilities/kwsys/CMakeFiles/vtksys.dir/build.make to run it with wine:
 

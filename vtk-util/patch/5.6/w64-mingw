@@ -1,0 +1,14 @@
+diff --git a/Common/vtkWin32Header.h b/Common/vtkWin32Header.h
+index 7e0881b..498aac6 100644
+--- a/Common/vtkWin32Header.h
++++ b/Common/vtkWin32Header.h
+@@ -87,7 +87,7 @@ Do_not_include_vtkWin32Header_directly__vtkSystemIncludes_includes_it;
+   // See VTK/Utilities/Upgrading/README.WindowsMangling.txt for details.
+ # define VTK_WORKAROUND_WINDOWS_MANGLE
+ 
+-#if ( _MSC_VER >= 1300 ) // Visual studio .NET
++#if ( _MSC_VER >= 1300 || _WIN64 ) // Visual studio .NET
+ #pragma warning ( disable : 4311 )
+ #pragma warning ( disable : 4312 )
+ #  define vtkGetWindowLong GetWindowLongPtr
+
