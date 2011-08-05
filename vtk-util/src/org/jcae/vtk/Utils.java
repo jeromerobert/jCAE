@@ -29,6 +29,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
@@ -49,8 +50,10 @@ import vtk.vtkDataArray;
 import vtk.vtkDoubleArray;
 import vtk.vtkFileOutputWindow;
 import vtk.vtkFloatArray;
+import vtk.vtkGlobalJavaHash;
 import vtk.vtkIdTypeArray;
 import vtk.vtkIntArray;
+import vtk.vtkObjectBase;
 import vtk.vtkOutputWindow;
 import vtk.vtkPNGWriter;
 import vtk.vtkPlane;
@@ -687,7 +690,7 @@ public class Utils
 		d.SetJavaArray(points);
 		d.SetNumberOfComponents(3);
 		vtkPoints.SetData(d);
-		d = null;
+		delete(d);
 		return vtkPoints;
 	}
 
@@ -699,7 +702,7 @@ public class Utils
 		d.SetJavaArray(points);
 		d.SetNumberOfComponents(3);
 		vtkPoints.SetData(d);
-		d = null;
+		delete(d);
 		return vtkPoints;
 	}
 	
@@ -822,6 +825,8 @@ public class Utils
 		intArray.SetJavaArray(cells);
 		array.DeepCopy(intArray);
 		vtkCells.SetCells(cellNumber, array);
+		delete(array);
+		delete(intArray);
 		return vtkCells;
 	}
 
@@ -843,6 +848,7 @@ public class Utils
 		vtkIntArray iarray = new vtkIntArray();
 		iarray.DeepCopy(idarray);
 		int[] toReturn = iarray.GetJavaArray();
+		delete(iarray);
 		return toReturn;
 	}
 
@@ -867,6 +873,7 @@ public class Utils
 		vtkDataArray array = points.GetData();
 		//TODO not sure it's always a float[] array
 		float[] toReturn = ((vtkFloatArray) array).GetJavaArray();
+		delete(array);
 		return toReturn;
 	}
 
@@ -905,4 +912,19 @@ public class Utils
         new vtkOutputWindow().SetInstance(output);
     }
 
+	/**
+	 * Tag a vtkObjectBase so it will be deleted at the native level at the
+	 * next vtkGlobalJavaHash.GC() call. Such call is normally triggered by
+	 * vtkJavaGarbageCollector.
+	 * As JVM doesn't monitor the native memory usage, VTK object may never be
+	 * deleted if the Java garbage collector is not triggered by other java
+	 * object creation. This methods allows to manually tag a vtkObject as
+	 * removable without actually removing it.
+	 */
+	public static void delete(vtkObjectBase o)
+	{
+		WeakReference ref = (WeakReference)
+			vtkGlobalJavaHash.PointerToReference.get(o.GetVTKId());
+		ref.clear();
+	}
 }
