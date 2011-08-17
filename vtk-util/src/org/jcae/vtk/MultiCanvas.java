@@ -147,8 +147,7 @@ public abstract class MultiCanvas implements Node.ActorListener, Node.ChildCreat
 			LOGGER.log(Level.FINE, "Number of actors : " + canvas.GetRenderer().GetViewProps().GetNumberOfItems());
 		}
 
-		int index = listCanvas.indexOf(canvas);		
-		listCanvas.remove(index);
+		listCanvas.remove(canvas);
 		
 		// Dot not lock the canvas when doing this because the 3d context can be already removed
 		vtkRenderer renderer = canvas.GetRenderer();
