@@ -15,16 +15,17 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2005-2011, by EADS France
  */
 
 package org.jcae.netbeans.mesh;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import org.jcae.mesh.xmldata.Group;
 import org.jcae.mesh.xmldata.Groups;
-import org.jcae.netbeans.mesh.GroupNode;
 import org.openide.nodes.Children.Array;
 import org.openide.nodes.Node;
 
@@ -45,6 +46,11 @@ public class GroupChildren extends Array {
 	protected Collection<Node> initCollection()
 	{
 		Group[] gps=groups.getGroups();
+		Arrays.sort(gps, new Comparator<Group>(){
+			public int compare(Group o1, Group o2) {
+				return o1.getName().compareTo(o2.getName());
+			}
+		});
 		ArrayList<Node> toReturn = new ArrayList<Node>(gps.length);
 		for(int i=0; i<gps.length; i++)
 		{
