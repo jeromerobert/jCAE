@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.text.NumberFormat;
-import javax.xml.parsers.ParserConfigurationException;
 import java.util.logging.Logger;
 import org.xml.sax.SAXException;
 
@@ -91,7 +90,14 @@ public class Amibe2UNV
 		this.scale = scale;
 	}
 
-	public void write(PrintStream out) throws ParserConfigurationException, SAXException, IOException
+	public void write(String fileName) throws IOException, SAXException
+	{
+		PrintStream out = new PrintStream(fileName);
+		write(out);
+		out.close();
+	}
+
+	public void write(PrintStream out) throws SAXException, IOException
 	{
 		AmibeReader.Dim3 ar = new AmibeReader.Dim3(directory.getPath());
 		SubMesh sm = ar.getSubmeshes().get(0);
@@ -103,14 +109,14 @@ public class Amibe2UNV
 		out.println("    -1");
 		writeGroups(out, sm, count);
 	}
-	
+
 	/**
 	 * @param out
 	 * @param count id of the first beam
 	 * @throws IOException 
 	 */
 	private void writeGroups(PrintStream out, AmibeReader.SubMesh subMesh, int count)
-			throws ParserConfigurationException, SAXException, IOException
+			throws SAXException, IOException
 	{
 		out.println("    -1"+CR+"  2435");
 		int i = 0;
@@ -210,6 +216,7 @@ public class Amibe2UNV
 				"        21         2         1         5         2");
 			out.println("         0         1         1");
 			out.println(FORMAT_I10.format(beams.get()+1) + FORMAT_I10.format(beams.get()+1));
+			count ++;
 		}
 	}
 }

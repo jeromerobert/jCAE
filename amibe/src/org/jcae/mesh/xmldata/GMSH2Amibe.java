@@ -22,6 +22,7 @@ package org.jcae.mesh.xmldata;
 
 import gnu.trove.TIntArrayList;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -174,8 +175,11 @@ public class GMSH2Amibe {
 
 	public static void main(final String[] args) {
 		try {
-			new GMSH2Amibe("/home/robert/JCAEProject/myt1.amibe").read("/tmp/myt1.msh");
-		} catch (IOException ex) {
+			String amibe = args[1]+".amibe";
+			new GMSH2Amibe(amibe).read(args[0]);
+			new Amibe2UNV(new File(amibe)).write(args[1]+".unv");
+			new Amibe2VTK(new File(amibe)).write(args[1]+".vtp");
+		} catch (Exception ex) {
 			Logger.getLogger(GMSH2Amibe.class.getName()).log(Level.SEVERE, null,
 				ex);
 		}
