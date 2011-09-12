@@ -112,7 +112,7 @@ public class MeshWriter
 	 * Used by {@link #writeObject(org.jcae.mesh.amibe.patch.Mesh2D, String, String, int)}
 	 */
 	private static void writeObjectTriangles(Collection<Triangle> trianglelist,
-		TObjectIntHashMap<Vertex> nodeIndex, AmibeWriter aw) throws IOException
+		TObjectIntHashMap<Vertex> nodeIndex, AmibeWriter aw, boolean writeOuter) throws IOException
 	{
 		int nrTriangles=0;
 		// First write inner triangles
@@ -126,16 +126,19 @@ public class MeshWriter
 				nodeIndex.get(f.vertex[2]));
 			nrTriangles++;
 		}
-		// Next write outer triangles
-		for(Triangle f: trianglelist)
+		if(writeOuter)
 		{
-			if (f.isWritable())
-				continue;
-			aw.addTriangle(
-				-nodeIndex.get(f.vertex[0]),
-				-nodeIndex.get(f.vertex[1]),
-				-nodeIndex.get(f.vertex[2]));
-			nrTriangles++;
+			// Next write outer triangles
+			for(Triangle f: trianglelist)
+			{
+				if (f.isWritable())
+					continue;
+				aw.addTriangle(
+					-nodeIndex.get(f.vertex[0]),
+					-nodeIndex.get(f.vertex[1]),
+					-nodeIndex.get(f.vertex[2]));
+				nrTriangles++;
+			}
 		}
 	}
 
@@ -226,7 +229,7 @@ public class MeshWriter
 		aw.setShape(brepFile);
 		aw.setSubShape(index);
 		writeObjectNodes(nodelist, submesh.outerVertex, aw, nodeIndex);
-		writeObjectTriangles(trianglelist, nodeIndex, aw);
+		writeObjectTriangles(trianglelist, nodeIndex, aw, true);
 		aw.finish();
 	}
 	
@@ -265,7 +268,7 @@ public class MeshWriter
 			aw.setShape(brepFile);
 
 		writeObjectNodes(nodelist, submesh.outerVertex, aw, nodeIndex);
-		writeObjectTriangles(trianglelist, nodeIndex, aw);
+		writeObjectTriangles(trianglelist, nodeIndex, aw, false);
 		writeObjectGroups(submesh, aw);
 		List<Vertex> beams = submesh.getBeams();
 		for(int i = 0; i<beams.size(); i+=2)
