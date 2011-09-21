@@ -38,7 +38,7 @@ public class FrustumPicker extends PickContext
 	private final Point3d frustumLower = new Point3d();
 	private final Point3d frustumUpper = new Point3d();
 	private final boolean oneCell;
-
+	private final RayPicker rayPicker;
 	/**
 	 * Constructor.
 	 * 
@@ -60,6 +60,7 @@ public class FrustumPicker extends PickContext
 			secondPoint.x, secondPoint.y, canvas.GetRenderer());
 		canvas.unlock();
 		computePlanes(verts);
+		rayPicker = null;
 	}
 
 	/**
@@ -84,6 +85,16 @@ public class FrustumPicker extends PickContext
 			secondPoint.x, secondPoint.y, canvas.GetRenderer());
 		canvas.unlock();
 		computePlanes(verts);
+		rayPicker = picker;
+	}
+
+	/**
+	 * Return the ray picker used to create this frustrum picker or null if
+	 * this frustrum picker as been created without ray picker
+	 */
+	public RayPicker getRayPicker()
+	{
+		return rayPicker;
 	}
 
 	private final void computePlanes(double[] verts)
