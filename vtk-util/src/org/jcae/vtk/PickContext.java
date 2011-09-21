@@ -40,7 +40,7 @@ public abstract class PickContext
 	private final boolean visible;
 	
 	/* Set of selected leaves */
-	private final Set<LeafNode> selectionNode = new HashSet<LeafNode>();
+	protected Set<LeafNode> selectionNode = new HashSet<LeafNode>();
 	
 	/**
 	 * Constructor.

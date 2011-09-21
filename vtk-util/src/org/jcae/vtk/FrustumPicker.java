@@ -64,10 +64,13 @@ public class FrustumPicker extends PickContext
 	}
 
 	/**
-	 * Constructor.  Sometimes picked objects are very small and selection
+	 * Sometimes picked objects are very small and selection
 	 * by a ray picker would be uncomfortable.  This constructor transforms
 	 * a RayPicker object into a FrustumPicker object by enlarging pick point
 	 * by the desired number of pixels in each direction.
+	 * The create FrustrumPicker and the RayPicker share the same selected node
+	 * list. That is adding a node to the FrustrumPicker will make it available
+	 * to the underlying RayPicker.
 	 * 
 	 * @param picker picker to enlarge
 	 * @param tolerance  pixel tolerance
@@ -75,6 +78,7 @@ public class FrustumPicker extends PickContext
 	public FrustumPicker(RayPicker picker, int tolerance)
 	{
 		super(picker.getCanvas(), picker.onlyVisible());
+		selectionNode = picker.selectionNode;
 		oneCell = true;
 		int [] pickPosition = picker.getPressPosition();
 		this.firstPoint = new Point(pickPosition[0] - tolerance, pickPosition[1] - tolerance);
