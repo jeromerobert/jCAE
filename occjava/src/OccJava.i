@@ -60,6 +60,7 @@
 %include "GeomLProp_SLProps.i"
 %include "BRepTools.i"
 %include "BRepBuilderAPI.i"
+%include "BRepOffsetAPI.i"
 %include "BRepPrimAPI.i"
 %include "BRepAlgoAPI.i"
 %include "Poly.i"

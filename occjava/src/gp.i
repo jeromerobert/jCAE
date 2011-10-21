@@ -356,6 +356,15 @@ class gp_Circ
     gp_Circ(const gp_Ax2& axis, const Standard_Real radius);
 };
 
+%{#include <gp_Parab.hxx>%}
+%rename(GP_Parab) gp_Parab;
+class gp_Parab
+{
+    public:
+	gp_Parab(const gp_Ax2& A2,const Standard_Real Focal);
+	gp_Parab(const gp_Ax1& D,const gp_Pnt& F);
+};
+
 /**
  * TColgp_Array1OfPnt2d
  */
