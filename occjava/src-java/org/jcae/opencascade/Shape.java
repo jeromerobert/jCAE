@@ -235,6 +235,7 @@ public abstract class Shape<T extends Shape<T>> implements Comparable<T>
 	
 	public void add(T newShape)
 	{
+		impl.free(true);
 		new BRep_Builder().add(impl, newShape.impl);
 		T[] nc = getFactory().createArray(children.length + 1);
 		System.arraycopy(children, 0, nc, 0, children.length);
