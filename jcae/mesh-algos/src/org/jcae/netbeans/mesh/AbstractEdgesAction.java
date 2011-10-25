@@ -22,6 +22,7 @@
 package org.jcae.netbeans.mesh;
 
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -38,6 +39,7 @@ import org.jcae.vtk.AmibeOverlayToMesh;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
 import org.openide.filesystems.FileUtil;
+import org.openide.loaders.DataObject;
 import org.openide.util.HelpCtx;
 import org.openide.util.Lookup.Result;
 import org.openide.util.LookupEvent;
@@ -55,17 +57,22 @@ public abstract class AbstractEdgesAction extends BooleanStateAction
 	public abstract String getViewSuffix();
 	private AmibeDataObject amibeDataObject;
 	private boolean lock;
+	//Keep it as a field, else it's garbage collected
+	//See http://wiki.netbeans.org/DevFaqTrackGlobalSelection or
+	//http://emilian-bold.blogspot.com/2006/11/netbeans-platform-lookupresult-garbage.html
+	private final Result<AmibeDataObject> currentSelection;
+
 	public AbstractEdgesAction() {
 		setBooleanState(false);
-		final Result<AmibeDataObject> r =
+		currentSelection =
 			org.openide.util.Utilities.actionsGlobalContext().lookupResult(
 			AmibeDataObject.class);
 		//listen to node selection
-		r.addLookupListener(new LookupListener() {
+		currentSelection.addLookupListener(new LookupListener() {
 			public void resultChanged(LookupEvent ev) {
-				if(r.allInstances().size() == 1)
+				if(currentSelection.allInstances().size() == 1)
 				{
-					amibeDataObject = r.allInstances().iterator().next();
+					amibeDataObject = currentSelection.allInstances().iterator().next();
 					setEnabled(true);
 					lock = true;
 					setBooleanState(getAViewable(amibeDataObject)!=null);
@@ -85,7 +92,7 @@ public abstract class AbstractEdgesAction extends BooleanStateAction
 						return;
 					View view = ViewManager.getDefault().getCurrentView();
 					if((Boolean)evt.getNewValue())
-						view.add(createViewable(amibeDataObject));
+						view.add(createViewable(amibeDataObject, view));
 					else
 						view.remove(getAViewable(amibeDataObject));
 				}
@@ -112,13 +119,33 @@ public abstract class AbstractEdgesAction extends BooleanStateAction
 	private class AViewable extends AmibeOverlayToMesh
 	{
 		private final AmibeDataObject amibeDataObject;
-		public AViewable(AmibeDataObject ado, String xmlDir, Color color)
+		private final View view;
+		public AViewable(AmibeDataObject ado, String xmlDir, Color color, View view)
 			throws ParserConfigurationException, SAXException, IOException
 		{
 			super(new AmibeOverlayProvider(
 				new File(xmlDir),
 				AbstractEdgesAction.this.getBranchGroupLabel()), color);
 			this.amibeDataObject = ado;
+			this.view = view;
+			//Remove the viewable when the associated file is removed by the user
+			ado.addPropertyChangeListener(new PropertyChangeListener() {
+				public void propertyChange(PropertyChangeEvent evt) {
+					if(DataObject.PROP_VALID.equals(evt.getPropertyName()))
+					{
+						if(!(Boolean)evt.getNewValue())
+						{
+							//We are in the file system monitor thread so we need to
+							//switch to the EDT.
+							EventQueue.invokeLater(new Runnable(){
+								public void run() {
+									AViewable.this.view.remove(AViewable.this);
+								}
+							});
+						}
+					}
+				}
+			});
 		}
 
 		public String getBranchGroupLabel()
@@ -127,7 +154,7 @@ public abstract class AbstractEdgesAction extends BooleanStateAction
 		}
 	}
 	
-	private AViewable createViewable(AmibeDataObject c)
+	private AViewable createViewable(AmibeDataObject c, View view)
 	{
 		try
 		{		
@@ -148,7 +175,7 @@ public abstract class AbstractEdgesAction extends BooleanStateAction
 			else
 				color = AmibeOverlayProvider.MULTI_EDGE_COLOR;
 			
-			AViewable mesh = new AViewable(c, xmlDir, color);
+			AViewable mesh = new AViewable(c, xmlDir, color, view);
 			mesh.setName(c.getName()+" "+getViewSuffix());
 			return mesh;
 		}
