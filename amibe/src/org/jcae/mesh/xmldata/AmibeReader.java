@@ -359,6 +359,9 @@ public abstract class AmibeReader extends XMLReader implements JCAEXMLData {
 			Element nodes = getElement(e, "nodes");
 			sm.numberOfNodes = readInt(nodes, "number");
 			sm.nodesOffset = readFile(nodes).offset;
+			Element references = getElement(nodes, "references");
+			if(references != null)
+				sm.numberOfReferences = readInt(references, "number");
 
 			Element triangles = getElement(e, "triangles");
 			if(triangles != null)
