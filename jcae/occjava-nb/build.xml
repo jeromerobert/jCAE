@@ -8,13 +8,13 @@
 	<!-- from http://wiki.netbeans.org/DevFaqWrapperModules -->
 	<property name="original.project.dir" value="../occjava"/>
 	<property name="original.project.jar" value="${original.project.dir}/dist/occjava.jar"/>
-	<property name="original.project.so" value="../../occjava/src/.libs/libOccJava.so"/>
-	<property name="original.project.dll" value="../../occjava/Release/OccJava.dll"/>
-
 	<property file="../nbproject/private/private.properties"/>
 	<property file="../nbproject/project.properties"/>
 	<patternset id="occ.unix.files">
+		<!-- Debian packaging -->
 		<include name="libTK*-*.so"/>
+		<!-- OCE packaging -->
+		<include name="libTK*.so.1"/>
 	</patternset>
 
 	<patternset id="occ.windows.files">
@@ -27,7 +27,7 @@
 				<patternset refid="occ.unix.files"/>
 			</fileset>
 		</copy>
-		<copy file="${original.project.so}" todir="${cluster}/modules/lib"/>
+		<copy file="${path.occjava.linux}" todir="${cluster}/modules/lib"/>
 	</target>
 
 	<target name="-release.files.win32" if="arch.win32">
@@ -36,7 +36,7 @@
 				<patternset refid="occ.windows.files"/>
 			</fileset>
 		</copy>
-		<copy file="${original.project.dll}" todir="${cluster}/modules/lib"/>
+		<copy file="${path.occjava.win32}" todir="${cluster}/modules/lib"/>
 	</target>
 
 	<target name="release" depends="-release.files.linux,-release.files.win32">
