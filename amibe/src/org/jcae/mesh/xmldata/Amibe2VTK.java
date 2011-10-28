@@ -27,6 +27,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 import javax.xml.parsers.ParserConfigurationException;
 import org.jcae.mesh.xmldata.AmibeReader.SubMesh;
 import org.xml.sax.SAXException;
@@ -122,8 +124,7 @@ public class Amibe2VTK
 		writeNode(dos, sm.getNodes(), nbp);
 		writeTriangles(dos, sm.getTriangles(), nbt);
 		writeBeams(dos, sm.getBeams(), sm.getNumberOfBeams());
-		if(dummyData)
-			writeData(dos, nbt);
+		writeData(dos, nbt+sm.getNumberOfBeams());
 		dos.flush();
 		os.println("</AppendedData></VTKFile>");
 		os.flush();
@@ -212,24 +213,33 @@ public class Amibe2VTK
 	 * @param nbt the number of triangles
 	 * @throws IOException
 	 */
-	private void writeData(DataOutputStream dos, long nbt)
-		throws IOException
+	private void writeData(final DataOutputStream dos, long nbt)
+		throws IOException, SAXException
 	{
-		//Write the size of the array in octets
-		dos.writeInt((int) nbt*8);		
-		for(int i=0; i<nbt; i++)
-			dos.writeDouble(i);
-		
-		dos.writeInt((int) nbt*8);
-		for(int i=0; i<nbt; i++)
-			dos.writeDouble((double)i*i);
-
-		dos.writeInt((int) nbt*8*3);
-		for(int i=0; i<nbt; i++)
+		dos.writeInt((int) nbt*4);
+		new GroupInverter(directory.getPath(), new GroupInverter.IntegerWriter() {
+			public void writeInt(ByteBuffer i) throws IOException {
+				dos.write(i.array());
+			}
+		}).invert();
+		if(dummyData)
 		{
-			dos.writeDouble(i);
-			dos.writeDouble(i);
-			dos.writeDouble(i);
+			//Write the size of the array in octets
+			dos.writeInt((int) nbt*8);
+			for(int i=0; i<nbt; i++)
+				dos.writeDouble(i);
+
+			dos.writeInt((int) nbt*8);
+			for(int i=0; i<nbt; i++)
+				dos.writeDouble((double)i*i);
+
+			dos.writeInt((int) nbt*8*3);
+			for(int i=0; i<nbt; i++)
+			{
+				dos.writeDouble(i);
+				dos.writeDouble(i);
+				dos.writeDouble(i);
+			}
 		}
 	}	 
 
@@ -274,26 +284,30 @@ public class Amibe2VTK
 			" offset=\""+offset+"\"/></Lines>");
 		offset+=4+numberOfLines*4;
 
+		long numberOfElements = numberOfLines+numberOfTriangles;
+		out.println("<CellData Scalars=\"Groups\">");
+		out.println("\t<DataArray type=\"Int32\" Name=\"Groups\" format=\"appended\" offset=\""
+			+offset+"\"/>");
+		offset += 4+numberOfElements*4;
 		if(dummyData)
 		{
-			out.println("<CellData Scalars=\"Dummy\">");
 			out.println("\t<DataArray type=\"Float64\" Name=\"Dummy\" format=\"appended\" offset=\""
 				+offset+"\"/>");
-			offset += 4+numberOfTriangles * 8;
+			offset += 4+numberOfElements * 8;
 
 			out.println("\t<DataArray type=\"Float64\" Name=\"Dummy x Dummy\" format=\"appended\" offset=\""
 				+offset+"\"/>");
 			//always keep track of offset in case we want to add thins to the
 			//file
-			offset += 4+numberOfTriangles * 8;
+			offset += 4+numberOfElements * 8;
 			
 			out.println("\t<DataArray type=\"Float64\" Name=\"Dummy vector\" NumberOfComponents=\"3\""+
 				" format=\"appended\" offset=\""+offset+"\"/>");
 			//always keep track of offset in case we want to add thins to the
 			//file
-			offset += 4+numberOfTriangles*8*3;			
-			out.println("</CellData>");
+			offset += 4+numberOfElements*8*3;
 		}
+		out.println("</CellData>");
 		
 		out.println("</Piece></PolyData>");
 		out.print("<AppendedData encoding=\"raw\"> _");
