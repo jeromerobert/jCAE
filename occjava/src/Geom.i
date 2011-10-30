@@ -24,6 +24,9 @@
 #include <Geom2d_Curve.hxx>
 #include <Geom_Geometry.hxx>
 #include <Geom2d_Geometry.hxx>
+#include <Geom_BoundedCurve.hxx>
+#include <Geom_BSplineCurve.hxx>
+#include <Geom_TrimmedCurve.hxx>
 %}
 
 %rename(Geom_Geometry) Handle_Geom_Geometry;
@@ -31,7 +34,9 @@
 %rename(Geom_Surface) Handle_Geom_Surface;
 %rename(Geom2d_Geometry) Handle_Geom2d_Geometry;
 %rename(Geom2d_Curve) Handle_Geom2d_Curve;
-
+%rename(Geom_BoundedCurve) Handle_Geom_BoundedCurve;
+%rename(Geom_BSplineCurve) Handle_Geom_BSplineCurve;
+%rename(Geom_TrimmedCurve) Handle_Geom_TrimmedCurve;
 class Handle_Geom_Geometry
 {
 	Handle_Geom_Geometry()=0;
@@ -134,3 +139,138 @@ class Handle_Geom2d_Curve: public Handle_Geom2d_Geometry
 	Handle_Geom2d_Curve()=0;
 };
 
+class Handle_Geom_BoundedCurve : public Handle_Geom_Curve {
+	Handle_Geom_BoundedCurve()=0;
+};
+
+class Handle_Geom_BSplineCurve : public Handle_Geom_BoundedCurve {
+	Handle_Geom_BSplineCurve()=0;
+};
+
+%extend Handle_Geom_BSplineCurve
+{
+//  void movePointAndTangent(const Standard_Real U,const gp_Pnt& P,const gp_Vec& Tangent,const Standard_Real Tolerance,const Standard_Integer StartingCondition,const Standard_Integer EndingCondition,Standard_Integer& *OUTPUT);
+  
+  void setKnot(const Standard_Integer Index,const Standard_Real K)
+  {
+    (*self)->SetKnot(Index,K);
+  }
+  
+  void setKnot(const Standard_Integer Index,const Standard_Real K,const Standard_Integer M)
+  {
+    (*self)->SetKnot(Index,K,M);
+  }
+
+  void setPeriodic()
+  {
+    (*self)->SetPeriodic();
+  }
+  
+  void setNotPeriodic()
+  {
+    (*self)->SetNotPeriodic();
+  }
+  
+  void setOrigin(const Standard_Integer Index)
+  {
+     (*self)->SetOrigin(Index);
+  }
+
+  void setOrigin(const Standard_Real U,const Standard_Real Tol)
+  {
+     (*self)->SetOrigin(U,Tol);
+  }
+  
+  void setPole(const Standard_Integer Index,const gp_Pnt& P)
+  {
+    (*self)->SetPole(Index,P);
+  }
+  
+  void setPole(const Standard_Integer Index,const gp_Pnt& P,const Standard_Real Weight)
+  {
+    (*self)->SetPole(Index,P,Weight);
+  }
+  
+  void movePoint(const Standard_Real U,const gp_Pnt& P,const Standard_Integer Index1,const Standard_Integer Index2,Standard_Integer& FirstModifiedPole,Standard_Integer& LastModifiedPole)
+  {
+    (*self)->MovePoint(U,P,Index1,Index2,FirstModifiedPole,LastModifiedPole);
+  }
+
+  void movePointAndTangent(const Standard_Real U,const gp_Pnt& P,const gp_Vec& Tangent,const Standard_Real Tolerance,const Standard_Integer StartingCondition,const Standard_Integer EndingCondition)
+  {
+    Standard_Integer ErrorStatus =0;
+	(*self)->MovePointAndTangent(U,P,Tangent,Tolerance,StartingCondition,EndingCondition,ErrorStatus);
+  }
+  
+  Standard_Boolean isClosed() const
+  {
+    return (*self)->IsClosed();
+  }
+  
+  Standard_Boolean isPeriodic() const
+  {
+    return (*self)->IsPeriodic();
+  }
+  
+  Standard_Boolean isRational() const
+  {
+    return (*self)->IsRational();
+  }
+  
+  GeomAbs_Shape continuity() const
+  {
+    return (*self)->Continuity();
+  }
+  
+  Standard_Integer Degree() const
+  {
+    return (*self)->Degree();
+  }
+  
+  /*
+  gp_Vec dN(const Standard_Real U,const Standard_Integer N) const
+  {
+    return (*self)->DN(U,N);
+  }
+  */
+  
+  gp_Pnt localValue(const Standard_Real U,const Standard_Integer FromK1,const Standard_Integer ToK2) const
+  {
+    return (*self)->LocalValue(U,FromK1,ToK2);
+  }
+  
+  gp_Pnt endPoint() const
+  {
+    return (*self)->EndPoint();
+  }
+  
+  gp_Pnt startPoint() const
+  {
+    return (*self)->StartPoint();
+  }
+  
+  Standard_Integer nbKnots() const
+  {
+    return (*self)->NbKnots();
+  }
+  
+  Standard_Integer nbPoles() const
+  {
+    return (*self)->NbPoles();
+  }
+  
+  gp_Pnt pole(const Standard_Integer Index) const
+  {
+    return (*self)->Pole(Index);
+  }
+  
+  Standard_Real weight(const Standard_Integer Index) const
+  {
+    return (*self)->Weight(Index);
+  }
+  
+}
+
+class Handle_Geom_TrimmedCurve : public Handle_Geom_BoundedCurve {
+	Handle_Geom_TrimmedCurve()=0;
+};

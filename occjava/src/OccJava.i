@@ -52,6 +52,7 @@
 
 %include "Standard.i"
 %include "gp.i"
+%include "TCol.i"
 %include "TopAbs.i"
 %include "TopoDS.i"
 %include "GeomAbs.i"
@@ -74,6 +75,10 @@
 %include "APIHeaderSection_MakeHeader.i"
 // This one require Opencascade 6.2
 %include "ShapeUpgrade.i"
+//Jens Schmidt, req. f. Thesis
+%include "GeomAPI.i"
+%include "GC.i"
+
 
 %typemap(javacode) TopExp
 %{

@@ -101,6 +101,7 @@ class BRepBuilderAPI_MakeEdge : public BRepBuilderAPI_MakeShape
 	%rename(isDone) IsDone;
 	public:
 	BRepBuilderAPI_MakeEdge();
+	BRepBuilderAPI_MakeEdge(const Handle_Geom_Curve& L);
 	BRepBuilderAPI_MakeEdge(const TopoDS_Vertex& V1,const TopoDS_Vertex& V2);
 	BRepBuilderAPI_MakeEdge(const gp_Pnt& P1,const gp_Pnt& P2);
 	BRepBuilderAPI_MakeEdge(const gp_Circ& L);

@@ -27,6 +27,7 @@
 #include <BRepPrimAPI_MakeSphere.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <BRepPrimAPI_MakeRevol.hxx>
+#include <BRepOffsetAPI_MakePipe.hxx>
 %}
 
 class BRepPrimAPI_MakeBox : public BRepBuilderAPI_MakeShape
@@ -98,3 +99,7 @@ class BRepPrimAPI_MakeRevol  : public BRepPrimAPI_MakeSweep {
     BRepPrimAPI_MakeRevol(const TopoDS_Shape& shape, const gp_Ax1& axis, const Standard_Boolean copy = Standard_False);
 };
 
+class BRepOffsetAPI_MakePipe  : public BRepPrimAPI_MakeSweep {
+    public:
+	BRepOffsetAPI_MakePipe(const TopoDS_Wire& Spine,const TopoDS_Shape& Profile);
+};
