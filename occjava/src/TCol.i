@@ -23,9 +23,9 @@
 	Handle_TColStd_HArray1OfBoolean()=0;
 };
 
-%typemap(jni) Handle_TColStd_HArray1OfBoolean, const Handle_TColStd_HArray1OfBoolean&   "jdoubleArray"
-%typemap(jtype) Handle_TColStd_HArray1OfBoolean, const Handle_TColStd_HArray1OfBoolean& "double[]"
-%typemap(jstype) Handle_TColStd_HArray1OfBoolean, const Handle_TColStd_HArray1OfBoolean& "double[]"
+%typemap(jni) Handle_TColStd_HArray1OfBoolean, const Handle_TColStd_HArray1OfBoolean&   "jbooleanArray"
+%typemap(jtype) Handle_TColStd_HArray1OfBoolean, const Handle_TColStd_HArray1OfBoolean& "boolean[]"
+%typemap(jstype) Handle_TColStd_HArray1OfBoolean, const Handle_TColStd_HArray1OfBoolean& "boolean[]"
 %typemap(javain) Handle_TColStd_HArray1OfBoolean, const Handle_TColStd_HArray1OfBoolean& "$javainput"
 
 %typemap(in) Handle_TColStd_HArray1OfBoolean, const Handle_TColStd_HArray1OfBoolean&, Handle_TColStd_HArray1OfBoolean&
@@ -37,7 +37,7 @@
 		return $null;
 	}
 	jsize sz = JCALL1(GetArrayLength, jenv, $input);
-	jdouble* jarr = JCALL2(GetDoubleArrayElements, jenv, $input, NULL);
+	jboolean* jarr = JCALL2(GetBooleanArrayElements, jenv, $input, NULL);
 	
 	if (!jarr)
 	{
@@ -49,9 +49,6 @@
 	for (i=1,j=0; i<=sz; i++,j++) {
 	  a->SetValue(i,Standard_Boolean(jarr[j]));
 	}
-	//a->SetValue(1,Standard_Boolean(1));
-	//a->SetValue(2,Standard_Boolean(0));
-	//a->SetValue(3,Standard_Boolean(0));
 	
 	Handle_TColStd_HArray1OfBoolean *c = new Handle_TColStd_HArray1OfBoolean(a);
 	$1 = *(Handle_TColStd_HArray1OfBoolean **)&c;
