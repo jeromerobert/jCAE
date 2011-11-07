@@ -449,7 +449,7 @@ public abstract class AbstractNode
 		float[] javaNormals = dataProvider.getNormals();
 		
 		// If the normals are not computed change them by the normals computed by the meshes
-		for(int i = 0 ; i < javaComputedNormals.length / 3 ; i += 3)
+		for(int i = 0 ; i < javaComputedNormals.length ; i+= 3)
 		{
 			if(javaNormals[i] == 0. && javaNormals[i + 1] == 0. && javaNormals[i + 2] == 0.)
 			{
