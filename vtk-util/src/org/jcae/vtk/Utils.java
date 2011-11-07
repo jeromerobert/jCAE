@@ -140,12 +140,12 @@ public class Utils
 	
 	public static boolean isMeshCoherent(float[] points, int[] indices)
 	{
-		boolean[] flags = new boolean[indices.length];
+		boolean[] flags = new boolean[points.length/3];
 
 		// Init
 		Arrays.fill(flags, false);
 
-		for (int i = 0; i < indices.length; ++i)
+		for (int i = 0; i < indices.length;)
 		{
 			// The number of points of the polygon
 			int nb = indices[i];
@@ -154,12 +154,13 @@ public class Utils
 				return false;
 
 			// Explore the polygon
-			for (int j = i; j < i + nb; ++j)
+			for (int j = i + 1; j < i + nb + 1; j++)
 				// Check out of bound
 				if (indices[j] >= points.length)
 					return false;
 				else
 					flags[indices[j]] = true;
+			i = i + nb + 1;
 		}
 
 		// Check if all the points are used
