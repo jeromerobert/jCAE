@@ -102,6 +102,25 @@ public class UNV2Amibe
 		}		
 	}
 
+	private class Element24 extends Element {
+
+		public Element24(String line, BufferedReader in) throws IOException {
+			super(line, in);
+		}
+
+		@Override
+		protected String parse(BufferedReader in) throws IOException {
+			nodes = new int[3];
+			String l1 = in.readLine();
+			String l2 = in.readLine();
+			StringTokenizer st = new StringTokenizer(l2);
+			nodes[0] = Integer.parseInt(st.nextToken());
+			nodes[1] = Integer.parseInt(st.nextToken());
+			nodes[2] = Integer.parseInt(st.nextToken());
+			return l1 + '\n' + l2;
+		}
+	}
+
 	private class Element92 extends Element
 	{		
 		public Element92(String line, BufferedReader in) throws IOException
@@ -459,6 +478,12 @@ public class UNV2Amibe
 					out.addBeam(beam.getNode(0)-1, beam.getNode(1)-1);
 					idMapping.add(nbBeams, IDMapping.BEAMS);
 					nbBeams ++;
+					break;
+				case 24:  // parabolic beam
+					Element24 b = new Element24(line, rd);
+					out.addBeam(b.getNode(0) - 1, b.getNode(2) - 1);
+					idMapping.add(nbBeams, IDMapping.BEAMS);
+					nbBeams++;
 					break;
 				case 92: //parabolic triangles
 					Element92 e=new Element92(line, rd);
