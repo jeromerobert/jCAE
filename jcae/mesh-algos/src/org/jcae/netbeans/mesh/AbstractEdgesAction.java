@@ -131,7 +131,7 @@ public abstract class AbstractEdgesAction extends BooleanStateAction
 			//Remove the viewable when the associated file is removed by the user
 			ado.addPropertyChangeListener(new PropertyChangeListener() {
 				public void propertyChange(PropertyChangeEvent evt) {
-					if(DataObject.PROP_VALID.equals(evt.getPropertyName()))
+					if(evt != null && DataObject.PROP_VALID.equals(evt.getPropertyName()))
 					{
 						if(!(Boolean)evt.getNewValue())
 						{
