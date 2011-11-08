@@ -532,12 +532,20 @@ public abstract class AmibeWriter {
 		if(groups.isEmpty())
 		{
 			Group g=new Group();
-			g.name="EXT";
+			g.name="C_EXT";
 			g.nbElement=numberOfTriangles;
 			g.offset=0;
 			groups.add(g);
 			for(int i=0; i<numberOfTriangles; i++)
 				groupChan.writeInt(i);
+
+			g=new Group();
+			g.name="CF_EXT";
+			g.bNbElement=numberOfBeams;
+			g.bOffset=0;
+			groups.add(g);
+			for(int i=0; i<numberOfBeams; i++)
+				bGroupChan.writeInt(i);
 		}
 	}
 
