@@ -607,11 +607,12 @@ public class Mesh implements Serializable
 		}
 
 		int nrJunctionPoints = 0;
+		ArrayList<Vertex> freeVertices = new ArrayList<Vertex>();
 		for (Vertex v: tVertList.keySet())
 		{
 			if (bndNodes.contains(v))
 				continue;
-			if (!v.isManifold())
+			if (v.getLink() instanceof Triangle[])
 			{
 				nrJunctionPoints++;
 				if (v.getRef() == 0)
@@ -620,9 +621,17 @@ public class Mesh implements Serializable
 					v.setRef(maxLabel);
 				}
 			}
+			else if(v.getLink() == null)
+				freeVertices.add(v);
 		}
 		if (nrJunctionPoints > 0)
 			logger.info("Found "+nrJunctionPoints+" junction points");
+		if (!freeVertices.isEmpty())
+		{
+			logger.log(Level.INFO, "Removed "+freeVertices.size()+" free points");
+			nodeList.removeAll(freeVertices);
+			freeVertices = null;
+		}
 		if (maxLabel != currentMaxLabel)
 			logger.fine("Created "+(maxLabel - currentMaxLabel)+" more references");
 		//  Remove all references to help the garbage collector.
