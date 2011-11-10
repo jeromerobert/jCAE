@@ -21,6 +21,7 @@
 package org.jcae.mesh.amibe.metrics;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -361,7 +362,13 @@ public class KdTree<T extends Location>
 	{
 		int ret = 0;
 		if (size == 0)
-			throw new RuntimeException("Exceeded maximal number of levels for kd-trees... Aborting");
+		{
+			double[] coords = new double[3];
+			int2double(ijk, coords);
+			throw new RuntimeException(
+				"Exceeded maximal number of levels for kd-trees around "+
+				Arrays.toString(coords) +"... Aborting");
+		}
 		for (int k = 0; k < dimension; k++)
 		{
 			if ((ijk[k] & size) != 0)
