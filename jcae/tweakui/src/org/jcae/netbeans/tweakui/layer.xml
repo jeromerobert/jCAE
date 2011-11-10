@@ -52,14 +52,18 @@
             <file name="Separator4.instance_hidden"/>
             <file name="SwitchToRecentDocumentAction.shadow_hidden"/>
             <file name="ViewRuntimeTabAction.shadow_hidden"/>
-            <file name="org-netbeans-modules-options-OptionsWindowAction.instance">
+            <file name="org-netbeans-modules-options-OptionsWindowAction.shadow">
+                <!--org.netbeans.modules.options.OptionsWindowAction-->
+                <attr name="originalFile" stringvalue="Actions/Window/org-netbeans-modules-options-OptionsWindowAction.instance"/>
                 <attr name="position" intvalue="0"/>
             </file>
             <file name="org-netbeans-core-io-ui-IOWindowAction.shadow">
                 <attr name="originalFile" stringvalue="Actions/Window/org-netbeans-core-io-ui-IOWindowAction.instance"/>
                 <attr name="position" intvalue="900"/>
             </file>
-            <file name="org-netbeans-modules-autoupdate-ui-actions-PluginManagerAction.instance">
+            <file name="org-netbeans-modules-autoupdate-ui-actions-PluginManagerAction.shadow">
+                <!--org.netbeans.modules.autoupdate.ui.actions.PluginManagerAction-->
+                <attr name="originalFile" stringvalue="Actions/System/org-netbeans-modules-autoupdate-ui-actions-PluginManagerAction.instance"/>
                 <attr name="position" intvalue="700"/>
             </file>
         </folder>
