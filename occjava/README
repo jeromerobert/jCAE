@@ -1,17 +1,36 @@
-occjava-swig is a Java wrapper for a small subset of Opencascade
-libraries based on swig (www.swig.org).
+OccJava is a Java wrapper for a small subset of Opencascade libraries
+based on swig (www.swig.org).
 
-This library is needed to run the CAD module of jCAE. It should be
-installed like this :
-- install swig
-- export CASROOT=<Opencascade/ros>
-- when compiling from SVN instead of tarballs, run ./autogen.sh
-- ./configure
-- make
-- make install
-- ant
+This library is needed to run the CAD module of jCAE. It require Swig,
+CMake, OCCT (http://www.opencascade.org) or OCE (https://github.com/tpaviot/oce).
 
-Mixing libstdc++5 and libstdc++6
+Swig and CMake can be installed on Debian/ubuntu with:
+apt-get install swig cmake
+
+Build OCE from source (https://github.com/tpaviot/oce/wiki/Build) or install OCCT.
+If you build OCE you can disable X11 support in CMakeCache.txt:
+OCE_DISABLE_X11:BOOL=ON
+
+Then to build occjava:
+
+$ mkdir occjava-linux-build
+$ cd occjava-linux-build
+$ cmake -DOCE_DIR=/path/to/oce/lib/oce-0.7.0-dev /path/to/occjava (for OCE)
+or
+$ cmake -DOCC_INCLUDE_PATH=/path/to/occt/inc -DOCC_LIB=/path/to/occt/lib /path/to/occjava
+$ make
+
+Build the jcae-sources/jcae/occjava project from netbeans
+If you intend to build the occjava netbeans module set path.occ.linux and path.occ.win32
+in jcae/nbproject/private/private.properties to /path/to/occjava-linux-build/libOccJava.so
+and /path/to/occjava-win32-build/OccJava.dll
+
+About OCE and OCCT
+------------------
+jCAE developers now use OCE and no longer test OccJava with OCCT. Anyway as OCE and OCCT
+are very close OccJava should keep working with both.
+
+Mixing libstdc++5 and libstdc++6 (outdated)
 --------------------------------
 Starting from version 0.14.1+r1221 (2007-05-10), using the same g++ version for
 OpenCASCADE and occjava is required. This is due to the addition of STL iostream
@@ -20,7 +39,7 @@ you get this compilation warning:
 ld: warning: libstdc++.so.5, needed by XXXXXX, may conflict with libstdc++.so.6
 occjava will crash as soon as you will use the iostream binding.
 
-Note
+Note (outdated)
 ----
 The wrapper may not compile properly with -O2. -fno-strict-aliasing
 is required with -O2. See:
@@ -33,7 +52,7 @@ How to add class and methods (draft)
 - Copy method/class definition from Opencascade header
 - For Geom_Geometry and Geom2d_Geometry: Change Handle(aType) to Handle_aType
 
-Required OpenCASCADE libraries
+Required OpenCASCADE libraries (probably outdated)
 ------------------------------
 The whole OpenCASCADE bundle is not require to use OccJava. Here is the list
 of required libraries.
