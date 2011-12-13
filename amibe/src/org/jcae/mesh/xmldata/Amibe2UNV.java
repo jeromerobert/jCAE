@@ -20,6 +20,7 @@
 
 package org.jcae.mesh.xmldata;
 
+import java.util.logging.Level;
 import org.jcae.mesh.xmldata.AmibeReader.Group;
 import org.jcae.mesh.xmldata.AmibeReader.SubMesh;
 import org.jcae.mesh.xmldata.MeshExporter.UNV.Unit;
@@ -104,7 +105,7 @@ public class Amibe2UNV
 		unvWriter.writeInit(out);
 		writeNodes(out);
 		out.println("    -1"+CR+"  2412");
-		int count = writeTriangles(out);
+		int count = writeTriangles(out, sm);
 		writeBeams(out, sm, count);
 		out.println("    -1");
 		writeGroups(out, sm, count);
@@ -183,40 +184,42 @@ public class Amibe2UNV
 	 * @param out
 	 * @throws IOException 
 	 */
-	private int writeTriangles(PrintStream out) throws IOException
+	private int writeTriangles(PrintStream out, AmibeReader.SubMesh subMesh) throws IOException
 	{
-		FileChannel fc = new FileInputStream(unvWriter.getTriaFile()).getChannel();
-		ByteBuffer bb=ByteBuffer.allocate(3*4);
 		int count = 1;
-		
-		while(fc.read(bb)!=-1)
+		if(subMesh.getNumberOfTrias() > 0)
 		{
-			bb.rewind();
-			int n1 = bb.getInt();
-			int n2 = bb.getInt();
-			int n3 = bb.getInt();
-			if(n1 >= 0)
-				MeshExporter.UNV.writeSingleTriangle(out, count,
-					n1+1, n2+1, n3+1);
-			bb.rewind();
-			count ++;
+			IntFileReader trias = subMesh.getTriangles();
+			long nb = trias.size() / 3;
+			for(int i = 0; i<nb; i++)
+			{
+				int n1 = trias.get();
+				int n2 = trias.get();
+				int n3 = trias.get();
+				if(n1 >= 0)
+					MeshExporter.UNV.writeSingleTriangle(out, count,
+						n1+1, n2+1, n3+1);
+				count ++;
+			}
 		}
-		
-		logger.info("Total number of triangles: "+count);
+		logger.log(Level.INFO, "Total number of triangles: {0}", count-1);
 		return count;
 	}
 
 	private void writeBeams(PrintStream out, AmibeReader.SubMesh subMesh, int count) throws IOException
 	{
-		IntFileReader beams = subMesh.getBeams();
-		long nb = beams.size() / 2;
-		for(int i = 0; i < nb; i++)
+		if(subMesh.getNumberOfBeams() > 0)
 		{
-			out.println(FORMAT_I10.format(count) +
-				"        21         2         1         5         2");
-			out.println("         0         1         1");
-			out.println(FORMAT_I10.format(beams.get()+1) + FORMAT_I10.format(beams.get()+1));
-			count ++;
+			IntFileReader beams = subMesh.getBeams();
+			long nb = beams.size() / 2;
+			for(int i = 0; i < nb; i++)
+			{
+				out.println(FORMAT_I10.format(count) +
+					"        21         2         1         5         2");
+				out.println("         0         1         1");
+				out.println(FORMAT_I10.format(beams.get()+1) + FORMAT_I10.format(beams.get()+1));
+				count ++;
+			}
 		}
 	}
 }
