@@ -92,7 +92,6 @@ public class ViewGroupAction extends AbstractGroupAction
                             public void fileFolderCreated(FileEvent fe) {}
                             public void fileDataCreated(FileEvent fe) {}
                             public void fileChanged(FileEvent fe) {
-                                if(fe.getFile().getName().equalsIgnoreCase("jcae3d"))
                                     refreshView(temp);
                             }
                             public void fileDeleted(FileEvent fe) {}
