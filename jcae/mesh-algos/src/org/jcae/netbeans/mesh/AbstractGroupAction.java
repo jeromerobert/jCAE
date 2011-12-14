@@ -30,6 +30,7 @@ import java.util.TreeSet;
 import javax.xml.parsers.ParserConfigurationException;
 import org.jcae.mesh.xmldata.Group;
 import org.jcae.netbeans.viewer3d.ViewManager;
+import org.jcae.vtk.AmibeToMesh;
 import org.jcae.vtk.View;
 import org.openide.explorer.ExplorerManager;
 import org.openide.nodes.Node;
@@ -42,6 +43,8 @@ import org.xml.sax.SAXException;
 public abstract class AbstractGroupAction extends CookieAction
 {
 
+        Node[] temp;
+        
 	protected int mode()
 	{
 		return CookieAction.MODE_ALL;
@@ -65,6 +68,8 @@ public abstract class AbstractGroupAction extends CookieAction
 
 	protected void performAction(Node[] arg0)
 	{
+
+                temp = arg0;
 		ExplorerManager em = ((ExplorerManager.Provider)
 			TopComponent.getRegistry().getActivated()).getExplorerManager();
 		try
@@ -77,7 +82,9 @@ public abstract class AbstractGroupAction extends CookieAction
 			{
 				AmibeDataObject ado = n.getLookup().lookup(AmibeDataObject.class);
 				if(ado != null && ado.getGroups() != null)
-					groups2Group.put(n, createTreeSet(ado.getGroups().getGroups()));
+                                {
+                                        groups2Group.put(n, createTreeSet(ado.getGroups().getGroups()));                                        
+                                }
 			}
 
 			//GroupNode
@@ -116,7 +123,68 @@ public abstract class AbstractGroupAction extends CookieAction
 		}			
 	}
 
-	private String[] groupsToID(Collection<Group> groupsToDisplay)
+	protected void refreshView(Node[] arg0)
+	{
+		//ExplorerManager em = ((ExplorerManager.Provider) TopComponent.getRegistry().getActivated()).getExplorerManager();
+		try
+		{
+			HashMap<Node, Collection<Group>> groups2Group = new HashMap<Node, Collection<Group>>();
+
+			for(Node n:arg0)
+			{
+				AmibeDataObject ado = n.getLookup().lookup(AmibeDataObject.class);
+				if(ado != null && ado.getGroups() != null)
+                                {
+                                    //ado.addListenerFileChange();
+					groups2Group.put(n, createTreeSet(ado.getGroups().getGroups()));                                        
+                                }
+			}
+
+			//GroupNode
+			for(Node n:arg0)
+			{
+				GroupNode gn = n.getLookup().lookup(GroupNode.class);
+				if(gn != null)
+				{
+					Node amibeNode=n.getParentNode().getParentNode();
+					Collection<Group> c=groups2Group.get(amibeNode);
+					if(c==null)
+					{
+						c=createTreeSet(gn.getGroup());
+						groups2Group.put(amibeNode, c);
+					}
+					else
+						c.add(gn.getGroup());
+				}
+			}
+
+                        
+			View v = ViewManager.getDefault().getCurrentView();
+			for(Entry<Node, Collection<Group>> e:groups2Group.entrySet())
+                        {
+                            String[] groupsToDisplay = groupsToID(e.getValue());
+                            AmibeNViewable interactor = AmibeNViewable.get(e.getKey(), v);
+                            AmibeDataObject ado = e.getKey().getLookup().lookup(AmibeDataObject.class);
+                            if(interactor != null)
+                            {
+                                    AmibeToMesh reader = new AmibeToMesh(ado.getGroups().getMeshFile(), groupsToDisplay);
+                                    interactor.addTriangles(reader.getTriangles());
+                                    interactor.addBeams(reader.getBeams());
+                                    v.Render();
+                            }
+                        }
+		}
+		catch(IOException ex)
+		{
+			Exceptions.printStackTrace(ex);
+		}
+		catch(SAXException ex)
+		{
+			Exceptions.printStackTrace(ex);
+		}			
+	}
+
+        private String[] groupsToID(Collection<Group> groupsToDisplay)
 	{
 		String[] idGroupsDisplayed = new String[groupsToDisplay.size()];
 		int i = 0;
