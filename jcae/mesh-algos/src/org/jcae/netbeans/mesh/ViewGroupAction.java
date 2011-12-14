@@ -31,43 +31,19 @@ import org.openide.explorer.ExplorerManager;
 import org.openide.filesystems.FileAttributeEvent;
 import org.openide.filesystems.FileChangeListener;
 import org.openide.filesystems.FileEvent;
+import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileRenameEvent;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
 import org.openide.util.WeakListeners;
 import org.xml.sax.SAXException;
 
-public class ViewGroupAction extends AbstractGroupAction implements FileChangeListener
+public class ViewGroupAction extends AbstractGroupAction
 {    
 	public String getName()
 	{
 		return "View";
 	}
-
-    public void fileFolderCreated(FileEvent fe) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void fileDataCreated(FileEvent fe) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void fileChanged(FileEvent fe) {
-        if(fe.getFile().getName().equalsIgnoreCase("jcae3d"))
-            refreshView(temp);
-    }
-
-    public void fileDeleted(FileEvent fe) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void fileRenamed(FileRenameEvent fre) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void fileAttributeChanged(FileAttributeEvent fae) {
-        //throw new UnsupportedOperationException("Not supported yet.");
-    }
 
 	/**
 	 * A viewable which remove it self from the view if the underlying
@@ -106,8 +82,24 @@ public class ViewGroupAction extends AbstractGroupAction implements FileChangeLi
 		AmibeNViewable interactor = AmibeNViewable.get(node, view);
 		AmibeDataObject ado = node.getLookup().lookup(AmibeDataObject.class);
 
-                ado.getPrimaryFile().addRecursiveListener(this);
+                //ado.getPrimaryFile().addRecursiveListener(this);
+		FileObject[] amibeChildren = ado.getPrimaryFile().getChildren();
+		for(int i=0; i< amibeChildren.length; i++)
+                    if(amibeChildren[i].getName().equalsIgnoreCase("jcae3d"))
+                    {
+                        amibeChildren[i].addFileChangeListener(new FileChangeListener() {
 
+                            public void fileFolderCreated(FileEvent fe) {}
+                            public void fileDataCreated(FileEvent fe) {}
+                            public void fileChanged(FileEvent fe) {
+                                if(fe.getFile().getName().equalsIgnoreCase("jcae3d"))
+                                    refreshView(temp);
+                            }
+                            public void fileDeleted(FileEvent fe) {}
+                            public void fileRenamed(FileRenameEvent fre) {}
+                            public void fileAttributeChanged(FileAttributeEvent fae) {}
+                        });
+                    }
 		if(interactor == null)
 		{
 			AViewable v = new AViewable(node, em, view);
