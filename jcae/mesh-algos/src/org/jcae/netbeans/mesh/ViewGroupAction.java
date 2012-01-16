@@ -32,6 +32,7 @@ import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
 import org.openide.util.WeakListeners;
 import org.xml.sax.SAXException;
+import org.jcae.vtk.Viewable;
 
 public class ViewGroupAction extends AbstractGroupAction
 {
@@ -86,6 +87,20 @@ public class ViewGroupAction extends AbstractGroupAction
 			ado.addPropertyChangeListener(WeakListeners.propertyChange(v, ado));
 			interactor = v;
 		}		
+		// Add listener to ado's fileObject
+		//ado.addListener();
+
+		for (Viewable v : view.getViewables())
+		{
+			if (v instanceof AmibeNViewable)
+			{
+				AmibeNViewable av = (AmibeNViewable) v;
+				if (av.equals(interactor))
+					av.addDataListener();
+				else
+					av.removeDataListener();
+			}
+		}
 		AmibeToMesh reader = new AmibeToMesh(ado.getGroups().getMeshFile(), idGroupsDisplayed);
 		interactor.addTriangles(reader.getTriangles());
 		interactor.addBeams(reader.getBeams());		

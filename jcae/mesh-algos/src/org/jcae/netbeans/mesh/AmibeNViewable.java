@@ -161,4 +161,21 @@ public class AmibeNViewable extends ViewableMesh {
 
 		highlight();
 	}
+
+	public void addDataListener()
+	{
+		if (amibeDataObject != null)
+			amibeDataObject.addListener();
+	}
+
+	public void removeDataListener()
+	{
+		if (amibeDataObject != null)
+			amibeDataObject.removeListener();
+	}
+
+	public boolean isEqualFileObject(String fileName)
+	{
+		return amibeDataObject.getPrimaryFile().getName().equals(fileName);
+	}
 }
