@@ -57,6 +57,9 @@ import org.xml.sax.SAXException;
 public class AmibeDataObject extends MultiDataObject implements SaveCookie
 {
 
+	int threshold = 400000;
+	FileObject[] amibeChildren;
+	boolean listenFlag = false;
 	/*
 	 * @author mohit
 	 */
@@ -88,6 +91,10 @@ public class AmibeDataObject extends MultiDataObject implements SaveCookie
 							AmibeToMesh reader;
 							reader = new AmibeToMesh(getGroups().getMeshFile(),
 								groupsToID(getGroups().getGroups()));
+							
+							if(reader.getNumberOfTriangles() > threshold )
+								continue;
+							
 							av.addTriangles(reader.getTriangles());
 							av.addBeams(reader.getBeams());
 							EventQueue.invokeLater(new Runnable() {
@@ -133,6 +140,7 @@ public class AmibeDataObject extends MultiDataObject implements SaveCookie
 			}
 		});
 		myListener = new AmibeListener();
+		amibeChildren = getPrimaryFile().getChildren();
 	}
 
 	@Override
@@ -264,10 +272,11 @@ public class AmibeDataObject extends MultiDataObject implements SaveCookie
 	 */
 	public void addListener()
 	{
-		FileObject[] amibeChildren = getPrimaryFile().getChildren();
+		if(!listenFlag)
 		for (int i = 0; i < amibeChildren.length; i++) {
 			if (amibeChildren[i].getName().equalsIgnoreCase("jcae3d")) {
 				amibeChildren[i].addFileChangeListener(myListener);
+				listenFlag = true;
 				break;
 			}
 		}
@@ -278,11 +287,12 @@ public class AmibeDataObject extends MultiDataObject implements SaveCookie
 	 */
 	public void removeListener()
 	{
-		FileObject[] amibeChildren = getPrimaryFile().getChildren();
+		if(listenFlag)
 		for (int i = 0; i < amibeChildren.length; i++)
 		{
 			if (amibeChildren[i].getName().equalsIgnoreCase("jcae3d")) {
 				amibeChildren[i].removeFileChangeListener(myListener);
+				listenFlag= false;
 				break;
 			}
 		}
