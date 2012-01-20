@@ -26,6 +26,9 @@ import java.beans.PropertyChangeListener;
 import java.beans.XMLEncoder;
 import java.io.File;
 import java.io.IOException;
+import java.util.prefs.PreferenceChangeEvent;
+import java.util.prefs.PreferenceChangeListener;
+import java.util.prefs.Preferences;
 import javax.swing.JOptionPane;
 import org.jcae.mesh.xmldata.Group;
 import org.jcae.mesh.xmldata.Groups;
@@ -48,6 +51,7 @@ import org.openide.loaders.MultiDataObject;
 import org.openide.loaders.MultiFileLoader;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
+import org.openide.util.NbPreferences;
 import org.xml.sax.SAXException;
 
 /**
@@ -141,6 +145,17 @@ public class AmibeDataObject extends MultiDataObject implements SaveCookie
 		});
 		myListener = new AmibeListener();
 		amibeChildren = getPrimaryFile().getChildren();
+		
+		Preferences pref = NbPreferences.forModule(org.jcae.netbeans.options.AmibePanel.class);
+		String name = pref.get("AmibeARThreshold", "");
+
+		pref.addPreferenceChangeListener(new PreferenceChangeListener() {
+			public void preferenceChange(PreferenceChangeEvent evt) {
+				if (evt.getKey().equals("AmibeARThreshold")) {
+					threshold = Integer.parseInt(evt.getNewValue());					
+				}
+			}
+		});
 	}
 
 	@Override
@@ -166,7 +181,7 @@ public class AmibeDataObject extends MultiDataObject implements SaveCookie
 				toReturn = e.getFile();
 		}
 		
-		if(create)
+		if(create && toReturn==null)
 		{
 			String name = getPrimaryFile().getName();
 			try {
