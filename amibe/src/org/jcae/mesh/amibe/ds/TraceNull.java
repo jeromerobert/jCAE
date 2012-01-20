@@ -28,6 +28,10 @@ public class TraceNull implements TraceInterface
 	{
 	}
 
+	public void setHooks(String[] commands)
+	{
+	}
+
 	public void createMesh(String meshName, Mesh mesh)
 	{
 	}
