@@ -107,7 +107,10 @@ if options.immutable_border_group:
 else:
     if options.preserveGroups:
 	liaison.getMesh().buildGroupBoundaries()
-    
+if options.recordFile:
+	cmds = [ String("assert self.m.checkNoDegeneratedTriangles()"), String("assert self.m.checkNoInvertedTriangles()"), String("assert self.m.checkVertexLinks()"), String("assert self.m.isValid()") ]
+	liaison.getMesh().getTrace().setHooks(cmds)
+
 cons = Class.forName("org.jcae.mesh.amibe.algos3d."+options.algorithm).getConstructor([ MeshLiaison, Map ])
 cons.newInstance([ liaison, opts ]).compute()
 

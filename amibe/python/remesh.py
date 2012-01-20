@@ -84,6 +84,10 @@ else:
 #0
 writeVTK(liaison)
 
+if options.recordFile:
+	cmds = [ String("assert self.m.checkNoDegeneratedTriangles()"), String("assert self.m.checkNoInvertedTriangles()"), String("assert self.m.checkVertexLinks()"), String("assert self.m.isValid()") ]
+	liaison.getMesh().getTrace().setHooks(cmds)
+
 opts = HashMap()
 opts.put("coplanarity", "0.9")
 opts.put("size", str(options.size*0.06))

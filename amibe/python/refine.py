@@ -98,6 +98,10 @@ if options.coplanarity:
 if options.preserveGroups:
 	liaison.getMesh().buildGroupBoundaries()
 
+if options.recordFile:
+	cmds = [ String("assert self.m.checkNoDegeneratedTriangles()"), String("assert self.m.checkNoInvertedTriangles()"), String("assert self.m.checkVertexLinks()"), String("assert self.m.isValid()") ]
+	liaison.getMesh().getTrace().setHooks(cmds)
+
 opts = HashMap()
 setAnalytic = False
 if options.size:
