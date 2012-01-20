@@ -1958,6 +1958,44 @@ public class Mesh implements Serializable
 		return true;
 	}
 
+	public final boolean checkVertexLinks()
+	{
+		AbstractHalfEdge ot = null;
+		if (nodeList == null)
+			return true;
+		for (Vertex v : nodeList)
+		{
+			if (v.isManifold())
+				continue;
+			Triangle [] links = (Triangle []) v.getLink();
+			HashSet triangles = new HashSet();
+			for (Triangle t : links)
+				triangles.add(t);
+			for (Triangle t : links)
+			{
+				ot = t.getAbstractHalfEdge(ot);
+				if (ot.destination() == v)
+					ot = ot.next();
+				else if (ot.apex() == v)
+					ot = ot.next().next();
+				Vertex d = ot.destination();
+				do
+				{
+					if (ot.getTri() != t && triangles.contains(ot.getTri()))
+					{
+						System.err.println("ERROR: Triangles on the same fan found for vertex "+v);
+						System.err.println(" Triangle "+t);
+						System.err.println(" Triangle "+ot.getTri());
+						return false;
+					}
+					ot = ot.nextOriginLoop();
+				}
+				while (ot.destination() != d);
+			}
+		}
+		return true;
+	}
+
 	// Useful for debugging
 	/*  Following imports must be moved at top.
 import java.io.FileOutputStream;
