@@ -149,8 +149,13 @@ class Handle_Geom_BSplineCurve : public Handle_Geom_BoundedCurve {
 
 %extend Handle_Geom_BSplineCurve
 {
-//  void movePointAndTangent(const Standard_Real U,const gp_Pnt& P,const gp_Vec& Tangent,const Standard_Real Tolerance,const Standard_Integer StartingCondition,const Standard_Integer EndingCondition,Standard_Integer& *OUTPUT);
-  
+	//TODO check that this is not a big memory leak
+	Handle_Geom_BSplineCurve(const TColgp_Array1OfPnt& Poles, const TColStd_Array1OfReal& Weights,
+		const TColStd_Array1OfReal& Knots, const TColStd_Array1OfInteger& Multiplicities,
+		const Standard_Integer Degree, const Standard_Boolean Periodic = Standard_False,
+		const Standard_Boolean CheckRational = Standard_True):self(
+		new Geom_BSplineCurve(Poles,Weights,Knots,Multiplicities,Degree,Periodic,CheckRational)){}
+
   void setKnot(const Standard_Integer Index,const Standard_Real K)
   {
     (*self)->SetKnot(Index,K);
