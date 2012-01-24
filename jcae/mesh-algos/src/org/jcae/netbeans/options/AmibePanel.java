@@ -1,17 +1,29 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Project Info:  http://jcae.sourceforge.net
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+ *
+ * (C) Copyright 2012, by EADS France
  */
 package org.jcae.netbeans.options;
 
 import org.openide.util.NbPreferences;
 
-final public class AmibePanel extends javax.swing.JPanel {
+public class AmibePanel extends javax.swing.JPanel {
 
-	private final AmibeOptionsPanelController controller;
-
-	AmibePanel(AmibeOptionsPanelController controller) {
-		this.controller = controller;
+	AmibePanel() {
 		initComponents();
 		// TODO listen to changes in form fields and call controller.changed()
 	}
@@ -23,34 +35,21 @@ final public class AmibePanel extends javax.swing.JPanel {
 	 */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
 
-        label1 = new java.awt.Label();
-        jFormattedTextField1 = new javax.swing.JFormattedTextField();
+        javax.swing.JLabel label = new javax.swing.JLabel();
+        textField = new javax.swing.JFormattedTextField();
 
-        label1.setText(org.openide.util.NbBundle.getMessage(AmibePanel.class, "AmibePanel.label1.text")); // NOI18N
+        setLayout(new java.awt.GridBagLayout());
 
-        jFormattedTextField1.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
+        org.openide.awt.Mnemonics.setLocalizedText(label, org.openide.util.NbBundle.getMessage(AmibePanel.class, "AmibePanel.label.text")); // NOI18N
+        add(label, new java.awt.GridBagConstraints());
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(24, 24, 24)
-                .addComponent(label1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(2, 2, 2)
-                .addComponent(jFormattedTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(30, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jFormattedTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(label1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(25, Short.MAX_VALUE))
-        );
+        textField.setColumns(10);
+        textField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(textField, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
 	void load() {
@@ -61,9 +60,7 @@ final public class AmibePanel extends javax.swing.JPanel {
 		// someCheckBox.setSelected(NbPreferences.forModule(AmibePanel.class).getBoolean("someFlag", false));
 		// or:
 		// someTextField.setText(SomeSystemOption.getDefault().getSomeStringProperty());
-		jFormattedTextField1.setText(NbPreferences.forModule(AmibePanel.class).get("AmibeARThreshold", ""));
-		if(jFormattedTextField1.getText().equalsIgnoreCase(""))
-			jFormattedTextField1.setText("400000");
+		textField.setValue(NbPreferences.forModule(AmibePanel.class).getInt("AmibeARThreshold", 400000));
 	}
 
 	void store() {
@@ -72,7 +69,7 @@ final public class AmibePanel extends javax.swing.JPanel {
 		// Preferences.userNodeForPackage(AmibePanel.class).putBoolean("someFlag", someCheckBox.isSelected());
 		// or for org.openide.util with API spec. version >= 7.4:
 		// Ignoring integer's sign
-		NbPreferences.forModule(AmibePanel.class).put("AmibeARThreshold", jFormattedTextField1.getText().replace("-", ""));
+		NbPreferences.forModule(AmibePanel.class).put("AmibeARThreshold", textField.getValue().toString());
 		// or:
 		// SomeSystemOption.getDefault().setSomeStringProperty(someTextField.getText());
 	}
@@ -82,7 +79,6 @@ final public class AmibePanel extends javax.swing.JPanel {
 		return true;
 	}
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JFormattedTextField jFormattedTextField1;
-    private java.awt.Label label1;
+    private javax.swing.JFormattedTextField textField;
     // End of variables declaration//GEN-END:variables
 }
