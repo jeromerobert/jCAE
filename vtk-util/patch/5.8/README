@@ -1,0 +1,6 @@
+These patches were created with git format-patch. To apply them you can do:
+
+git clone http://vtk.org/VTK.git
+cd VTK
+git am /path/to/jcae/vtk-util/patch/5.8/*.patch
+
