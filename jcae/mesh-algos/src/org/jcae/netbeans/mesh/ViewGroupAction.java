@@ -96,9 +96,9 @@ public class ViewGroupAction extends AbstractGroupAction
 			{
 				AmibeNViewable av = (AmibeNViewable) v;
 				if (av.equals(interactor))
-					av.addDataListener();
+					av.getDataObject().addListener();
 				else
-					av.removeDataListener();
+					av.getDataObject().removeListener();
 			}
 		}
 		AmibeToMesh reader = new AmibeToMesh(ado.getGroups().getMeshFile(), idGroupsDisplayed);

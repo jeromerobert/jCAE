@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.util.prefs.PreferenceChangeEvent;
 import java.util.prefs.PreferenceChangeListener;
 import java.util.prefs.Preferences;
-import javax.swing.JOptionPane;
 import org.jcae.mesh.xmldata.Group;
 import org.jcae.mesh.xmldata.Groups;
 import org.jcae.netbeans.Utilities;
@@ -60,77 +59,58 @@ import org.xml.sax.SAXException;
  */
 public class AmibeDataObject extends MultiDataObject implements SaveCookie
 {
+	private int threshold = 400000;
+	private boolean listenFlag;
 
-	int threshold = 400000;
-	FileObject[] amibeChildren;
-	boolean listenFlag = false;
-	/*
-	 * @author mohit
-	 */
-	private class AmibeListener implements FileChangeListener
+	private void refresh()
 	{
+		final View view = ViewManager.getDefault().getCurrentView();
+		for (Viewable v : view.getViewables()) {
+			if (v instanceof AmibeNViewable) {
+				AmibeNViewable av = (AmibeNViewable) v;
+				try {
+					if(av.getDataObject().equals(AmibeDataObject.this))
+					{
+						AmibeToMesh reader = new AmibeToMesh(
+							getGroups().getMeshFile(),
+							groupsToID(getGroups().getGroups()));
 
-		final View view;
+						if(reader.getNumberOfTriangles() > threshold )
+							continue;
 
-		public AmibeListener() {
-			view = ViewManager.getDefault().getCurrentView();
-		}
-
-		public void fileFolderCreated(FileEvent fe) {
-			//System.out.println("fileFolderCreated event occured");
-		}
-
-		public void fileDataCreated(FileEvent fe) {
-			//System.out.println("fileDataCreated event occured");
-		}
-
-		public void fileChanged(FileEvent fe) {
-
-			for (Viewable v : view.getViewables()) {
-				if (v instanceof AmibeNViewable) {
-					AmibeNViewable av = (AmibeNViewable) v;
-					try {
-						if(av.isEqualFileObject(getPrimaryEntry().getFile().getName()))
-						{
-							AmibeToMesh reader;
-							reader = new AmibeToMesh(getGroups().getMeshFile(),
-								groupsToID(getGroups().getGroups()));
-							
-							if(reader.getNumberOfTriangles() > threshold )
-								continue;
-							
-							av.addTriangles(reader.getTriangles());
-							av.addBeams(reader.getBeams());
-							EventQueue.invokeLater(new Runnable() {
-
-								public void run() {
-									view.Render();
-								}
-							});
-							//view.Render();
-						}
-					} catch (SAXException ex) {
-						Exceptions.printStackTrace(ex);
-					} catch (IOException ex) {
-						Exceptions.printStackTrace(ex);
+						av.addTriangles(reader.getTriangles());
+						av.addBeams(reader.getBeams());
+						view.Render();
 					}
+				} catch (SAXException ex) {
+					Exceptions.printStackTrace(ex);
+				} catch (IOException ex) {
+					Exceptions.printStackTrace(ex);
 				}
 			}
 		}
-
-		public void fileDeleted(FileEvent fe) {
-			//System.out.println("fileDeleted event occured");
-		}
-
-		public void fileRenamed(FileRenameEvent fre) {
-			//System.out.println("fileRenamed event occured");
-		}
-
-		public void fileAttributeChanged(FileAttributeEvent fae) {
-			//System.out.println("fileAttributeChanged event occured");
-		}
 	}
-	private AmibeListener myListener;
+
+	private final FileChangeListener fileListener = new FileChangeListener() {
+
+		public void fileFolderCreated(FileEvent fe) {}
+
+		public void fileDataCreated(FileEvent fe) {}
+
+		public void fileChanged(FileEvent fe) {
+			EventQueue.invokeLater(new Runnable(){
+				public void run() {
+					refresh();
+				}
+			});
+		}
+
+		public void fileDeleted(FileEvent fe) {}
+
+		public void fileRenamed(FileRenameEvent fe) {}
+
+		public void fileAttributeChanged(FileAttributeEvent fe) {}
+	};
 
 	public AmibeDataObject(FileObject arg0, MultiFileLoader arg1, Mesh mesh)
 		throws DataObjectExistsException
@@ -143,16 +123,14 @@ public class AmibeDataObject extends MultiDataObject implements SaveCookie
 				setModified(true);
 			}
 		});
-		myListener = new AmibeListener();
-		amibeChildren = getPrimaryFile().getChildren();
-		
+
 		Preferences pref = NbPreferences.forModule(org.jcae.netbeans.options.AmibePanel.class);
 		String name = pref.get("AmibeARThreshold", "");
 
 		pref.addPreferenceChangeListener(new PreferenceChangeListener() {
 			public void preferenceChange(PreferenceChangeEvent evt) {
 				if (evt.getKey().equals("AmibeARThreshold")) {
-					threshold = Integer.parseInt(evt.getNewValue());					
+					threshold = Integer.parseInt(evt.getNewValue());
 				}
 			}
 		});
@@ -269,9 +247,6 @@ public class AmibeDataObject extends MultiDataObject implements SaveCookie
 		return groups;
 	}
 
-	/*
-	 * @author mohit
-	 */
 	public void refreshHeader() {
 		FileObject[] amibeChildren = getPrimaryFile().getChildren();
 		for (int i = 0; i < amibeChildren.length; i++) {
@@ -282,40 +257,27 @@ public class AmibeDataObject extends MultiDataObject implements SaveCookie
 		}
 	}
 
-	/*
-	 * @author mohit
-	 */
 	public void addListener()
 	{
 		if(!listenFlag)
-		for (int i = 0; i < amibeChildren.length; i++) {
-			if (amibeChildren[i].getName().equalsIgnoreCase("jcae3d")) {
-				amibeChildren[i].addFileChangeListener(myListener);
+		{
+			FileObject f = getPrimaryFile().getFileObject("jcae3d");
+			if(f != null)
+			{
+				f.addFileChangeListener(fileListener);
 				listenFlag = true;
-				break;
 			}
 		}
 	}
 
-	/*
-	 * @author mohit
-	 */
 	public void removeListener()
 	{
-		if(listenFlag)
-		for (int i = 0; i < amibeChildren.length; i++)
-		{
-			if (amibeChildren[i].getName().equalsIgnoreCase("jcae3d")) {
-				amibeChildren[i].removeFileChangeListener(myListener);
-				listenFlag= false;
-				break;
-			}
-		}
+		FileObject f = getPrimaryFile().getFileObject("jcae3d");
+		if(f != null)
+			f.removeFileChangeListener(fileListener);
+		listenFlag = false;
 	}
 
-	/*
-	 * @author - mohit
-	 */
 	private String[] groupsToID(Group[] groupsToDisplay)
 	{
 		String[] idGroupsDisplayed = new String[groupsToDisplay.length];
