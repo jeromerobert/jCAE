@@ -50,8 +50,10 @@ set(CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_SOURCE_DIR}/src-java/org/jcae/opencascade/
 set(CMAKE_CXX_FLAGS -fpermissive)
 if(WIN32)
   add_definitions(-DWNT)
-  set(CMAKE_MODULE_LINKER_FLAGS "-Wl,--add-stdcall-alias ${CMAKE_MODULE_LINKER_FLAGS}")
-endif()
+  if(MINGW)
+      set(CMAKE_MODULE_LINKER_FLAGS "-Wl,--add-stdcall-alias ${CMAKE_MODULE_LINKER_FLAGS}")
+  endif(MINGW)
+endif(WIN32)
 set(CMAKE_SWIG_FLAGS -package org.jcae.opencascade.jni)
 #CMake won't create this directory it self. A bug ?
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/src)
