@@ -45,6 +45,7 @@ import vtk.vtkActor;
 import vtk.vtkAssembly;
 import vtk.vtkCanvas;
 import vtk.vtkCellArray;
+import vtk.vtkCoincidentTopologyResolutionPainter;
 import vtk.vtkConeSource;
 import vtk.vtkDataArray;
 import vtk.vtkDoubleArray;
@@ -52,10 +53,15 @@ import vtk.vtkFileOutputWindow;
 import vtk.vtkFloatArray;
 import vtk.vtkGlobalJavaHash;
 import vtk.vtkIdTypeArray;
+import vtk.vtkInformation;
+import vtk.vtkInformationDoubleVectorKey;
+import vtk.vtkInformationIntegerKey;
 import vtk.vtkIntArray;
 import vtk.vtkObjectBase;
 import vtk.vtkOutputWindow;
 import vtk.vtkPNGWriter;
+import vtk.vtkPainter;
+import vtk.vtkPainterPolyDataMapper;
 import vtk.vtkPlane;
 import vtk.vtkPlaneCollection;
 import vtk.vtkPoints;
@@ -602,6 +608,49 @@ public class Utils
 			runnable.run();
 	}
 	
+	//this 2 fields should be final. They can't be because vtk library may not
+	//have been loaded before this class
+	private static vtkInformationIntegerKey RESOLVE_COINCIDENT_TOPOLOGY;
+	private static vtkInformationDoubleVectorKey POLYGON_OFFSET_PARAMETERS;
+
+	private static  class PolygonOffsetHandler
+	{
+		private vtkPainter painter;
+		private double factor, value;
+		public PolygonOffsetHandler(vtkPainter painter, double factor, double value) {
+			this.painter = painter;
+			this.factor = factor;
+			this.value = value;
+		}
+
+		public void event()
+		{
+			vtkInformation info = painter.GetInformation();
+			if(RESOLVE_COINCIDENT_TOPOLOGY == null)
+			{
+				vtkCoincidentTopologyResolutionPainter dummy =
+					new vtkCoincidentTopologyResolutionPainter();
+				RESOLVE_COINCIDENT_TOPOLOGY = dummy.RESOLVE_COINCIDENT_TOPOLOGY();
+				POLYGON_OFFSET_PARAMETERS = dummy.POLYGON_OFFSET_PARAMETERS();
+			}
+
+			info.Set(RESOLVE_COINCIDENT_TOPOLOGY, 1);
+			info.Set(POLYGON_OFFSET_PARAMETERS, factor, value, 0);
+		}
+	}
+	/**
+	 * Set the polygon offset of a mapper.
+	 * Warning this method has a side effect. After calling it changes made on
+	 * the mapper may not be propagated to delegate painters
+	 */
+	public static void setPolygonOffset(vtkPainterPolyDataMapper pm,
+		double factor, double value)
+	{
+		vtkPainter painter = pm.GetPainter();
+		painter.AddObserver("AnyEvent",
+			new PolygonOffsetHandler(painter, factor, value), "event");
+	}
+
 	/** Create a dummy cone actor
 	 * @return 
 	 */

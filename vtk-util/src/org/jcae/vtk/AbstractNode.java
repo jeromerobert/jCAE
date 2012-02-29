@@ -173,8 +173,8 @@ public abstract class AbstractNode
 			@Override
 			public void customiseMapper(vtkPainterPolyDataMapper mapper)
 			{
-				mapper.SetResolveCoincidentTopologyToPolygonOffset();
-				mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(Utils.getOffsetFactor(), Utils.getOffsetValue());
+				Utils.setPolygonOffset(mapper, Utils.getOffsetFactor(),
+					Utils.getOffsetValue());
 			}
 		};
 

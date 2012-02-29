@@ -59,9 +59,8 @@ public class ViewableMesh extends Viewable
 		@Override
 		public void customiseMapper(vtkPainterPolyDataMapper mapper)
 		{
-			mapper.SetResolveCoincidentTopologyToPolygonOffset();
-			mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(
-				Utils.getOffsetFactor(), Utils.getOffsetValue()*2.);
+			Utils.setPolygonOffset(mapper, Utils.getOffsetFactor(),
+				Utils.getOffsetValue()*2);
 		}
 	};
 
@@ -69,9 +68,8 @@ public class ViewableMesh extends Viewable
 		@Override
 		public void customiseMapper(vtkPainterPolyDataMapper mapper)
 		{
-			mapper.SetResolveCoincidentTopologyToPolygonOffset();
-			mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(
-				Utils.getOffsetFactor(), Utils.getOffsetValue());
+			Utils.setPolygonOffset(mapper, Utils.getOffsetFactor(),
+				Utils.getOffsetValue());
 		}
 	};
 	
