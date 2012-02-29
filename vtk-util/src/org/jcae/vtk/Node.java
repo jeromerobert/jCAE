@@ -571,7 +571,7 @@ public class Node extends AbstractNode
 		getSelectionActorCustomiser().customiseActor(selectionActor);
 
 		if(selectionMapper == null)
-			selectionMapper = new vtkPolyDataMapper();
+			selectionMapper = new vtkPainterPolyDataMapper();
 		selectionMapper.ScalarVisibilityOff();
 		vtkPolyData d = selectInto(data, selection.toNativeArray());
 		selectionMapper.SetInput(d);
