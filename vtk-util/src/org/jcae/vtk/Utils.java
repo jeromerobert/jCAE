@@ -51,7 +51,6 @@ import vtk.vtkDataArray;
 import vtk.vtkDoubleArray;
 import vtk.vtkFileOutputWindow;
 import vtk.vtkFloatArray;
-import vtk.vtkGlobalJavaHash;
 import vtk.vtkIdTypeArray;
 import vtk.vtkInformation;
 import vtk.vtkInformationDoubleVectorKey;
@@ -977,8 +976,6 @@ public class Utils
 	 */
 	public static void delete(vtkObjectBase o)
 	{
-		WeakReference ref = (WeakReference)
-			vtkGlobalJavaHash.PointerToReference.get(o.GetVTKId());
-		ref.clear();
+		VTKMemoryManager.delete(o);
 	}
 }
