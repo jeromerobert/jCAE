@@ -625,7 +625,6 @@ public class Utils
 
 		public void event()
 		{
-			vtkInformation info = painter.GetInformation();
 			if(RESOLVE_COINCIDENT_TOPOLOGY == null)
 			{
 				vtkCoincidentTopologyResolutionPainter dummy =
@@ -633,9 +632,13 @@ public class Utils
 				RESOLVE_COINCIDENT_TOPOLOGY = dummy.RESOLVE_COINCIDENT_TOPOLOGY();
 				POLYGON_OFFSET_PARAMETERS = dummy.POLYGON_OFFSET_PARAMETERS();
 			}
-
-			info.Set(RESOLVE_COINCIDENT_TOPOLOGY, 1);
-			info.Set(POLYGON_OFFSET_PARAMETERS, factor, value, 0);
+			vtkInformation info = painter.GetInformation();
+			//info is null when this is called by vtkVisibleCellSelector.Select
+			if(info != null)
+			{
+				info.Set(RESOLVE_COINCIDENT_TOPOLOGY, 1);
+				info.Set(POLYGON_OFFSET_PARAMETERS, factor, value, 0);
+			}
 		}
 	}
 	/**
@@ -647,6 +650,7 @@ public class Utils
 		double factor, double value)
 	{
 		vtkPainter painter = pm.GetPainter();
+		//TODO do not call for any event but find which events are relevents
 		painter.AddObserver("AnyEvent",
 			new PolygonOffsetHandler(painter, factor, value), "event");
 	}
