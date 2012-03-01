@@ -632,6 +632,9 @@ public class Utils
 				POLYGON_OFFSET_PARAMETERS = dummy.POLYGON_OFFSET_PARAMETERS();
 			}
 			vtkInformation info = painter.GetInformation();
+			//If you want to know who call the event uncomment this line
+			//System.out.println(new Throwable().getStackTrace()[2]+ " " + (info == null));
+
 			//info is null when this is called by vtkVisibleCellSelector.Select
 			if(info != null)
 			{
@@ -649,8 +652,7 @@ public class Utils
 		double factor, double value)
 	{
 		vtkPainter painter = pm.GetPainter();
-		//TODO do not call for any event but find which events are relevents
-		painter.AddObserver("AnyEvent",
+		pm.AddObserver("StartEvent",
 			new PolygonOffsetHandler(painter, factor, value), "event");
 	}
 
