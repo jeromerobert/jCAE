@@ -173,10 +173,7 @@ public class Scene implements AbstractNode.ActorListener
 		int [] secondPoint = pickContext.getReleasePosition();
 		if (checkColorDepth)
 		{
-			canvas.lock();
-			vtkIntArray tmp = new vtkIntArray();
-			int cbs = canvas.GetRenderWindow().GetColorBufferSizes(tmp);
-			canvas.unlock();
+			int cbs = canvas.getColorModel().getPixelSize();
 			checkColorDepth = false;
 			
 			if (cbs < 24)
