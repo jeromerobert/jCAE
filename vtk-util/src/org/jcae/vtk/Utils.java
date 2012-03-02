@@ -56,6 +56,7 @@ import vtk.vtkInformation;
 import vtk.vtkInformationDoubleVectorKey;
 import vtk.vtkInformationIntegerKey;
 import vtk.vtkIntArray;
+import vtk.vtkNativeLibrary;
 import vtk.vtkObjectBase;
 import vtk.vtkOutputWindow;
 import vtk.vtkPNGWriter;
@@ -186,12 +187,10 @@ public class Utils
 	
 	public static void loadVTKLibraries()
 	{
-		System.loadLibrary("vtkCommonJava");
-		System.loadLibrary("vtkFilteringJava");
-		System.loadLibrary("vtkIOJava");
-		System.loadLibrary("vtkImagingJava");
-		System.loadLibrary("vtkGraphicsJava");
-		System.loadLibrary("vtkRenderingJava");
+		vtkNativeLibrary.LoadNativeLibraries(vtkNativeLibrary.COMMON,
+			vtkNativeLibrary.FILTERING, vtkNativeLibrary.IO,
+			vtkNativeLibrary.IMAGING, vtkNativeLibrary.GRAPHICS,
+			vtkNativeLibrary.RENDERING);
 	}
 
 	public static void main(final String[] args)
