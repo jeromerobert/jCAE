@@ -52,17 +52,5 @@
 		</delete>
 	</target>
 
-	<!-- Disable the module by default -->
-    <target name="module-xml-regular" if="is.regular">
-        <mkdir dir="${cluster}/config/Modules"/>
-        <createmodulexml xmldir="${cluster}/config/Modules">
-            <enabled dir="${cluster}">
-                <include name="${module.jar}"/>
-            </enabled>
-        </createmodulexml>
-		<!--replaceregexp file="${cluster}/config/Modules/vtk.xml"
-			match='&lt;param name="enabled"&gt;true&lt;/param&gt;'
-			replace='&lt;param name="enabled"&gt;false&lt;/param&gt;'
-			byline="true"/-->
-    </target>	
+	<target name="compile" depends="release,projectized-common.compile"/>
 </project>
