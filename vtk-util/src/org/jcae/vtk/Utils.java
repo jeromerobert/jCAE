@@ -637,8 +637,13 @@ public class Utils
 			//info is null when this is called by vtkVisibleCellSelector.Select
 			if(info != null)
 			{
-				info.Set(RESOLVE_COINCIDENT_TOPOLOGY, 1);
-				info.Set(POLYGON_OFFSET_PARAMETERS, factor, value, 0);
+				// change info may trigger rebuild events in VTK so we check if
+				// it's really necessary
+				if(info.Get(RESOLVE_COINCIDENT_TOPOLOGY) != 1)
+					info.Set(RESOLVE_COINCIDENT_TOPOLOGY, 1);
+				if(info.Get(POLYGON_OFFSET_PARAMETERS, 0) != factor ||
+					info.Get(POLYGON_OFFSET_PARAMETERS, 1) != value)
+					info.Set(POLYGON_OFFSET_PARAMETERS, factor, value, 0);
 			}
 		}
 	}
