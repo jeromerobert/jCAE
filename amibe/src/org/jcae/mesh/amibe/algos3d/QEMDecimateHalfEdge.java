@@ -149,34 +149,34 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 			if (key.equals("size"))
 			{
 				final double sizeTarget = Double.parseDouble(val);
+				LOGGER.info("Tolerance: "+sizeTarget);
 				tolerance = sizeTarget * sizeTarget;
-				LOGGER.fine("Tolerance: "+tolerance);
 			}
 			else if (key.equals("placement"))
 			{
 				placement = Quadric3DError.Placement.getByName(val);
-				LOGGER.fine("Placement: "+placement);
+				LOGGER.info("Placement: "+placement);
 			}
 			else if (key.equals("maxtriangles"))
 			{
 				nrFinal = Integer.valueOf(val).intValue();
-				LOGGER.fine("Nr max triangles: "+nrFinal);
+				LOGGER.info("Nr max triangles: "+nrFinal);
 			}
 			else if (key.equals("maxlength"))
 			{
 				maxEdgeLength = Double.parseDouble(val);
-				LOGGER.fine("Max edge length: "+maxEdgeLength);
+				LOGGER.info("Max edge length: "+maxEdgeLength);
 				maxEdgeLength = maxEdgeLength*maxEdgeLength;
 			}
 			else if (key.equals("coplanarity"))
 			{
 				minCos = Double.parseDouble(val);
-				LOGGER.fine("Minimum dot product of face normals allowed for swapping an edge: "+minCos);
+				LOGGER.info("Minimum dot product of face normals allowed for swapping an edge: "+minCos);
 			}
 			else if ("freeEdgesOnly".equals(key))
 			{
 				freeEdgesOnly = Boolean.parseBoolean(val);
-				LOGGER.fine("freeEdgesOnly: "+freeEdgesOnly);
+				LOGGER.info("freeEdgesOnly: "+freeEdgesOnly);
 			}
 			else
 				throw new RuntimeException("Unknown option: "+key);
