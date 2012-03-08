@@ -63,6 +63,8 @@ public final class DecimateAction extends AlgoAction
 				l.add("-I");
 			if(bean.isKeepBorderGroups())
 				l.add("-G");
+			l.add("--coplanarity");
+			l.add(Double.toString(bean.getCoplanarity()));
 			l.add(meshDirectory);
 			l.add(meshDirectory);
 			return l;
