@@ -48,6 +48,9 @@ parser.add_option("-G", "--immutable-border-group",
 parser.add_option("--record", metavar="PREFIX",
                   action="store", type="string", dest="recordFile",
                   help="record mesh operations in a Python file to replay this scenario")
+parser.add_option("-c", "--coplanarity", metavar="FLOAT",
+                  action="store", type="float", dest="coplanarity", default=0.9,
+                  help="dot product of face normals to detect feature edges")
 
 (options, args) = parser.parse_args(args=sys.argv[1:])
 
@@ -74,7 +77,8 @@ if options.recordFile:
 	liaison.getMesh().getTrace().createMesh("mesh", liaison.getMesh())
 if options.immutable_border:
 	liaison.mesh.tagFreeEdges(AbstractHalfEdge.IMMUTABLE)
-liaison.getMesh().buildRidges(0.9)
+
+liaison.getMesh().buildRidges(options.coplanarity)
 if options.immutable_border_group:
 	liaison.mesh.tagGroupBoundaries(AbstractHalfEdge.IMMUTABLE)
 else:
@@ -89,7 +93,7 @@ if options.recordFile:
 	liaison.getMesh().getTrace().setHooks(cmds)
 
 opts = HashMap()
-opts.put("coplanarity", "0.9")
+opts.put("coplanarity", str(options.coplanarity))
 opts.put("size", str(options.size*0.06))
 QEMDecimateHalfEdge(liaison, opts).compute()
 
@@ -104,7 +108,7 @@ Remesh(liaison, opts).compute()
 writeVTK(liaison)
 
 opts.clear()
-opts.put("coplanarity", "0.9")
+opts.put("coplanarity", str(options.coplanarity))
 SwapEdge(liaison, opts).compute()
 
 #3
@@ -119,14 +123,14 @@ LengthDecimateHalfEdge(liaison, opts).compute()
 writeVTK(liaison)
 
 opts.clear()
-opts.put("coplanarity", "0.9")
+opts.put("coplanarity", str(options.coplanarity))
 ImproveEdgeConnectivity(liaison, opts).compute()
 
 #5
 writeVTK(liaison)
 
 opts.clear()
-opts.put("coplanarity", "0.9")
+opts.put("coplanarity", str(options.coplanarity))
 opts.put("iterations", str(8))
 opts.put("size", str(options.size))
 SmoothNodes3DBg(liaison, opts).compute()
@@ -135,7 +139,7 @@ SmoothNodes3DBg(liaison, opts).compute()
 writeVTK(liaison)
 
 opts.clear()
-opts.put("coplanarity", "0.9")
+opts.put("coplanarity", str(options.coplanarity))
 opts.put("expectInsert", "false")
 SwapEdge(liaison, opts).compute()
 
@@ -143,7 +147,7 @@ SwapEdge(liaison, opts).compute()
 writeVTK(liaison)
 
 opts.clear()
-opts.put("coplanarity", "0.9")
+opts.put("coplanarity", str(options.coplanarity))
 opts.put("size", str(options.size*0.2))
 opts.put("maxlength", str(options.size*1.2))
 QEMDecimateHalfEdge(liaison, opts).compute()
@@ -151,7 +155,7 @@ QEMDecimateHalfEdge(liaison, opts).compute()
 writeVTK(liaison)
 
 opts.clear()
-opts.put("coplanarity", "0.9")
+opts.put("coplanarity", str(options.coplanarity))
 opts.put("expectInsert", "false")
 SwapEdge(liaison, opts).compute()
 
