@@ -124,7 +124,6 @@
             <file name="org-jcae-netbeans-cad-ReverseAction.instance"/>
             <file name="org-jcae-netbeans-cad-SplitFaces.instance"/>
             <file name="org-jcae-netbeans-mesh-bora-ComputeMeshAction.instance"/>            
-            <file name="org-jcae-netbeans-mesh-ImportUNV.instance"/>
             <file name="org-jcae-netbeans-mesh-UNVToUNVAction.instance">
                 <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.UNVToUNVAction"/>
             </file>
@@ -205,10 +204,6 @@
                     </file>
                     <file name="org-jcae-netbeans-mesh-OEMMMenu.instance">
                         <attr name="position" intvalue="90"/>
-                    </file>
-                    <file name="org-jcae-netbeans-mesh-ImportUNV.shadow">
-                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-ImportUNV.instance"/>
-                        <attr name="position" intvalue="120"/>
                     </file>
                 </folder>
             </folder>
