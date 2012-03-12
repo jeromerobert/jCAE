@@ -499,12 +499,14 @@ public class UNV2Amibe
 					idMapping.add(nbBeams, IDMapping.BEAMS);
 					nbBeams ++;
 					break;
+				case 22:
 				case 24:  // parabolic beam
 					Element24 b = new Element24(line, rd);
 					out.addBeam(b.getNode(0) - 1, b.getNode(2) - 1);
 					idMapping.add(nbBeams, IDMapping.BEAMS);
 					nbBeams++;
 					break;
+				case 42:
 				case 92: //parabolic triangles
 					Element92 e=new Element92(line, rd);
 					out.addTriangle(e.getNode(0)-1, e.getNode(2)-1, e.getNode(4)-1);
