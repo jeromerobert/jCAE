@@ -349,8 +349,10 @@ public class UNV2Amibe
 			// Number of elements
 			int nbelem = Integer.valueOf(snb).intValue();
 			// Read group name
-			out.nextGroup(in.readLine().trim());
-			while ((line= in.readLine().trim()).startsWith("8"))
+			String groupName = in.readLine().trim();
+			boolean groupCreated = false;
+			line = in.readLine().trim();
+			while (line.charAt(0) == '8' || line.charAt(0) == '7')
 			{
 				st = new StringTokenizer(line);
 				// read one element over two, the first one doesnt matter
@@ -361,11 +363,28 @@ public class UNV2Amibe
 					if (ind != 0)
 					{
 						ind --;
-						idMapping.seek(ind);
-						if(idMapping.getType() == IDMapping.BEAMS)
-							out.addBeamToGroup(idMapping.getID());
-						else
-							out.addTriaToGroup(idMapping.getID());
+						if(line.charAt(0) == '8')
+						{
+							if(!groupCreated)
+							{
+								out.nextGroup(groupName);
+								groupCreated = true;
+							}
+							idMapping.seek(ind);
+							if(idMapping.getType() == IDMapping.BEAMS)
+								out.addBeamToGroup(idMapping.getID());
+							else
+								out.addTriaToGroup(idMapping.getID());
+						}
+						else //line.charAt(0) == '7'
+						{
+							if(!groupCreated)
+							{
+								out.nextNodeGroup(groupName);
+								groupCreated = true;
+							}
+							out.addNodeToGroup(ind);
+						}
 					}
 					
 					nbelem--;
@@ -380,6 +399,7 @@ public class UNV2Amibe
 					line = in.readLine();
 					break;
 				}
+				line = in.readLine().trim();
 			}
 		}
 	}
