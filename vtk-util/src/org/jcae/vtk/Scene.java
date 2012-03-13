@@ -32,15 +32,14 @@ import org.jcae.geometry.BoundingBox;
 import vtk.vtkActor;
 import vtk.vtkActorCollection;
 import vtk.vtkCanvas;
+import vtk.vtkHardwareSelector;
 import vtk.vtkIdTypeArray;
 import vtk.vtkInformation;
 import vtk.vtkInformationIntegerKey;
-import vtk.vtkIntArray;
 import vtk.vtkPlaneCollection;
 import vtk.vtkProp;
 import vtk.vtkSelection;
 import vtk.vtkSelectionNode;
-import vtk.vtkVisibleCellSelector;
 
 /**
  * This class is used to make picking on a tree node. It permit to keep the association
@@ -210,22 +209,15 @@ public class Scene implements AbstractNode.ActorListener
 			}
 		}
 
-		vtkVisibleCellSelector selector = new vtkVisibleCellSelector();
+		vtkHardwareSelector selector = new vtkHardwareSelector();
 		selector.SetRenderer(canvas.GetRenderer());
-		selector.SetArea(firstPoint[0], firstPoint[1], secondPoint[0],
-				secondPoint[1]);
-		selector.SetRenderPasses(0, 1, 0, 0, 1, 0);
-
-		canvas.lock();
-		int savePreserve = canvas.GetRenderer().GetPreserveDepthBuffer();
-		canvas.GetRenderer().PreserveDepthBufferOn();
-		selector.Select();
-		canvas.GetRenderer().SetPreserveDepthBuffer(savePreserve);
-		canvas.unlock();
-
-		vtkSelection selection = new vtkSelection();
-		selection.ReleaseDataFlagOn();
-		selector.GetSelectedIds(selection);
+		int xMin = Math.min(firstPoint[0], secondPoint[0]);
+		int xMax = Math.max(firstPoint[0], secondPoint[0]);
+		int yMin = Math.min(firstPoint[1], secondPoint[1]);
+		int yMax = Math.max(firstPoint[1], secondPoint[1]);
+		selector.SetArea(xMin, yMin, xMax, yMax);
+		selector.SetFieldAssociation(1);
+		vtkSelection selection = selector.Select();
 		
 		if (actorFiltering)
 		{
@@ -237,7 +229,7 @@ public class Scene implements AbstractNode.ActorListener
 				actor.SetPickable(pickableActorBackup[j]);
 			}
 		}
-		
+
 		// Find the ID Selection of the actor
 		for (int i = 0; i < selection.GetNumberOfNodes(); ++i)
 		{
@@ -245,7 +237,7 @@ public class Scene implements AbstractNode.ActorListener
 			vtkInformation info = child.GetProperties();
 			vtkInformationIntegerKey propID = child.PROP_ID();
 			int IDActor = info.Get(propID);
-			vtkProp prop = selector.GetActorFromId(IDActor);
+			vtkProp prop = selector.GetPropFromID(IDActor);
 
 			if (prop != null)
 			{
