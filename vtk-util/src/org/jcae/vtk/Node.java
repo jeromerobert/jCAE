@@ -451,9 +451,6 @@ public class Node extends AbstractNode
 		for (int i = 0; i < numberOfLeaves; ++i)
 		{
 			LeafNode leaf = leaves.get(i);
-			if (!leaf.isVisible())
-				continue;
-
 			Color color = leaf.getColor();
 			if (LOGGER.isLoggable(Level.FINEST))
 				LOGGER.finest("Compound: set color to "+color+" (opacity="+color.getAlpha()+")");
