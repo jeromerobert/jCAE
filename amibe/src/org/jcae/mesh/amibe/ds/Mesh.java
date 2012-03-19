@@ -607,7 +607,7 @@ public class Mesh implements Serializable
 		}
 
 		int nrJunctionPoints = 0;
-		ArrayList<Vertex> freeVertices = new ArrayList<Vertex>();
+		Collection<Vertex> freeVertices = new HashSet<Vertex>();
 		for (Vertex v: tVertList.keySet())
 		{
 			if (bndNodes.contains(v))
@@ -624,6 +624,7 @@ public class Mesh implements Serializable
 			else if(v.getLink() == null)
 				freeVertices.add(v);
 		}
+		freeVertices.removeAll(beams);
 		if (nrJunctionPoints > 0)
 			logger.info("Found "+nrJunctionPoints+" junction points");
 		if (!freeVertices.isEmpty())
