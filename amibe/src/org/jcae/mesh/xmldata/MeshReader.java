@@ -295,6 +295,8 @@ public class MeshReader
 					facelist[j].setGroupId(id);
 				for(int j : g.readBeamsIds())
 					mesh.setBeamGroup(j, id);
+				for(int j : g.readNodesIds())
+					mesh.setVertexGroup(nodelist[j], g.getName());
 			}
 			//  Build adjacency relations
 			if (mesh.hasAdjacency()) {

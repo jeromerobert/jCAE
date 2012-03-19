@@ -151,6 +151,8 @@ public class Mesh implements Serializable
 	private List<Vertex> beams = new ArrayList<Vertex>();
 	private TIntArrayList beamGroups = new TIntArrayList();
 	private Map<Integer, String> groupNames = new HashMap<Integer, String>();
+	private Map<String, Collection<Vertex>> vertexGroups =
+		new HashMap<String, Collection<Vertex>>();
 
 	// Utility class to improve debugging output
 	private static class OuterVertex extends Vertex
@@ -486,6 +488,22 @@ public class Mesh implements Serializable
 		for(String name:names)
 			groupIds[i++] = invertMap.get(name);
 		return groupIds;
+	}
+
+	public void setVertexGroup(Vertex v, String group)
+	{
+		Collection<Vertex> l = vertexGroups.get(group);
+		if(l == null)
+		{
+			l = new ArrayList<Vertex>();
+			vertexGroups.put(group, l);
+		}
+		l.add(v);
+	}
+
+	public Map<String, Collection<Vertex>> getVertexGroup()
+	{
+		return Collections.unmodifiableMap(vertexGroups);
 	}
 
 	public int getNumberOfGroups()
