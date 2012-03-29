@@ -51,7 +51,12 @@ parser.add_option("--record", metavar="PREFIX",
 parser.add_option("-c", "--coplanarity", metavar="FLOAT",
                   action="store", type="float", dest="coplanarity", default=0.9,
                   help="dot product of face normals to detect feature edges")
-
+parser.add_option("-P", "--point-metric", metavar="STRING",
+                  action="store", type="string", dest="point_metric_file",
+                  help="""A CSV file containing points which to refine around. Each line must contains 5 floating point values:
+                  - x, y, z
+                  - the distance of the source where the target size is defined
+                  - the target size at the given distance""")
 (options, args) = parser.parse_args(args=sys.argv[1:])
 
 if len(args) != 2:
@@ -102,7 +107,10 @@ writeVTK(liaison)
 
 opts.clear()
 opts.put("size", str(options.size))
-Remesh(liaison, opts).compute()
+algo = Remesh(liaison, opts)
+if options.point_metric_file:
+    algo.setAnalyticMetric(PointMetric(options.point_metric_file))
+algo.compute()
 
 #2
 writeVTK(liaison)
