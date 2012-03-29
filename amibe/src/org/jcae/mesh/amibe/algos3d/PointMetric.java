@@ -26,7 +26,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An AnalyticMetric which refine mesh around a set of points
+ * An AnalyticMetric which refine mesh around a set of points.
+ * The metric around each point is:
+ * Sinf * (1 - 2 * (1 - S0 / Sinf) / (1 + (R * d + 1) ^ 3 ) )
+ * where Sinf is the mesh size far from the point, S0 is the mesh size on the
+ * point, d is the distance from the point and R a coeficient saying how fast
+ * Sinf is reached.
  * @author Jerome Robert
  */
 public class PointMetric implements Remesh.AnalyticMetricInterface {
@@ -34,10 +39,9 @@ public class PointMetric implements Remesh.AnalyticMetricInterface {
 	private class Source
 	{
 		public double sx,sy,sz;
-		/** source_distance^3/target_size */
-		public double coef;
-		/** The target size at a d distance of the source */
-		public double size;
+		/** alpha = 2 * (1 - SO / Sinf) */
+		public double alpha;
+		public double coef, sizeInf;
 
 		public double distance(double x, double y, double z)
 		{
@@ -47,19 +51,19 @@ public class PointMetric implements Remesh.AnalyticMetricInterface {
 			return Math.sqrt(dx*dx+dy*dy+dz*dz);
 		}
 	}
-	/** The inverse of the target size at an infinit distance of any source */
-	private double invHInf = 1.0;
-	private List<Source> sources = new ArrayList<Source>();
+
+	private final List<Source> sources = new ArrayList<Source>();
 
 	public PointMetric() {
 	}
 
-	public PointMetric(double defaultSize, double x, double y, double z, double d, double size) {
-		addPoint(x,y,z,d,size);
+	public PointMetric(double x, double y, double z,
+		double size0, double sizeInf, double coef)
+	{
+		addPoint(x,y,z, size0, sizeInf, coef);
 	}
 
-	public PointMetric(double defaultSize, String fileName) throws IOException {
-		setGlobalSize(defaultSize);
+	public PointMetric(String fileName) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(fileName));
 		String buffer = br.readLine();
 		while(buffer != null)
@@ -68,45 +72,41 @@ public class PointMetric implements Remesh.AnalyticMetricInterface {
 			double x = Double.parseDouble(line[0]);
 			double y = Double.parseDouble(line[1]);
 			double z = Double.parseDouble(line[2]);
-			double d = Double.parseDouble(line[3]);
-			double size = Double.parseDouble(line[4]);
-			addPoint(x, y, z, d, size);
+			double size0 = Double.parseDouble(line[3]);
+			double sizeInf = Double.parseDouble(line[4]);
+			double coef = Double.parseDouble(line[5]);
+			addPoint(x, y, z, size0, sizeInf, coef);
 			buffer = br.readLine();
 		}
 		br.close();
 	}
 
-	/** Set the target size at an infinit distance of a source */
-	public final void setGlobalSize(double s)
-	{
-		invHInf = 1/s;
-	}
-
 	/**
 	 * Add a point around which to refine
-	 * @param d Distance at which to define the target size
-	 * @param size The target size at a d distance of the source
+	 * @param size0 metric on the point
+	 * @param sizeInf metric far from the point
+	 * @param coef how fast we go from size0 to sizeInf
 	 */
-	public final void addPoint(double x, double y, double z, double d, double size)
+	public final void addPoint(double x, double y, double z, double size0, double sizeInf, double coef)
 	{
 		Source s = new Source();
-		s.coef = Math.pow(d, 3)/size;
+		s.coef = coef;
 		s.sx = x;
 		s.sy = y;
 		s.sz = z;
-		s.size = size;
+		s.sizeInf = sizeInf;
+		s.alpha = 2 * (1 - size0 / sizeInf);
 		sources.add(s);
 	}
 
 	@Override
 	public double getTargetSize(double x, double y, double z) {
-		double sum = invHInf;
 		double minSize = Double.MAX_VALUE;
-		for(Source s:sources)
-		{
-			sum += s.coef/Math.pow(s.distance(x, y, z), 3);
-			minSize = Math.min(s.size, minSize);
+		for (Source s : sources) {
+			double d = s.distance(x, y, z);
+			double v = s.sizeInf * (1 - s.alpha / (1 + Math.pow(s.coef * d + 1, 3)));
+			minSize = Math.min(v, minSize);
 		}
-		return Math.max(1.0/sum, minSize);
+		return minSize;
 	}
 }

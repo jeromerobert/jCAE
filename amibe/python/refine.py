@@ -140,7 +140,7 @@ class RemeshMetric(Remesh.AnalyticMetricInterface):
 		return min(200.0, (x - 9000.0)*(x - 9000.0) / 2250.0)
 
 if options.point_metric_file:
-    algo.setAnalyticMetric(PointMetric(options.size, options.point_metric_file))
+    algo.setAnalyticMetric(PointMetric(options.point_metric_file))
 elif setAnalytic:
 	algo.setAnalyticMetric(RemeshMetric());
 
