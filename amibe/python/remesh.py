@@ -109,7 +109,7 @@ opts.clear()
 opts.put("size", str(options.size))
 algo = Remesh(liaison, opts)
 if options.point_metric_file:
-    algo.setAnalyticMetric(PointMetric(options.point_metric_file))
+    algo.setAnalyticMetric(PointMetric(options.size, options.point_metric_file))
 algo.compute()
 
 #2

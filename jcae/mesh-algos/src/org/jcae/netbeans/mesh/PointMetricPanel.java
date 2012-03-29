@@ -78,11 +78,11 @@ public abstract class PointMetricPanel extends JPanel {
 
             },
             new String [] {
-                "x", "y", "z", "Size(d=0)", "Size(d=∞)", "Incr speed"
+                "x", "y", "z", "Size(d=0)", "Incr speed"
             }
         ) {
             Class[] types = new Class [] {
-                Double.class, Double.class, Double.class, Double.class, Double.class, Double.class
+                Double.class, Double.class, Double.class, Double.class, Double.class
             };
 
             public Class getColumnClass(int columnIndex) {

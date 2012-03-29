@@ -41,29 +41,37 @@ public class PointMetric implements Remesh.AnalyticMetricInterface {
 		public double sx,sy,sz;
 		/** alpha = 2 * (1 - SO / Sinf) */
 		public double alpha;
-		public double coef, sizeInf;
+		public double coef;
+		/** 
+		 * if the distance^2 is greater than this value this source is not
+		 * concidered
+		 */
+		public double threshold;
 
-		public double distance(double x, double y, double z)
+		public double distance2(double x, double y, double z)
 		{
 			double dx = sx-x;
 			double dy = sy-y;
 			double dz = sz-z;
-			return Math.sqrt(dx*dx+dy*dy+dz*dz);
+			return dx*dx+dy*dy+dz*dz;
 		}
 	}
 
 	private final List<Source> sources = new ArrayList<Source>();
-
-	public PointMetric() {
+	private final double sizeInf;
+	public PointMetric(double sizeInf) {
+		this.sizeInf = sizeInf;
 	}
 
-	public PointMetric(double x, double y, double z,
-		double size0, double sizeInf, double coef)
+	public PointMetric(double sizeInf, double x, double y, double z,
+		double size0, double coef)
 	{
-		addPoint(x,y,z, size0, sizeInf, coef);
+		this(sizeInf);
+		addPoint(x, y, z, size0, coef);
 	}
 
-	public PointMetric(String fileName) throws IOException {
+	public PointMetric(double sizeInf, String fileName) throws IOException {
+		this(sizeInf);
 		BufferedReader br = new BufferedReader(new FileReader(fileName));
 		String buffer = br.readLine();
 		while(buffer != null)
@@ -73,9 +81,8 @@ public class PointMetric implements Remesh.AnalyticMetricInterface {
 			double y = Double.parseDouble(line[1]);
 			double z = Double.parseDouble(line[2]);
 			double size0 = Double.parseDouble(line[3]);
-			double sizeInf = Double.parseDouble(line[4]);
-			double coef = Double.parseDouble(line[5]);
-			addPoint(x, y, z, size0, sizeInf, coef);
+			double coef = Double.parseDouble(line[4]);
+			addPoint(x, y, z, size0, coef);
 			buffer = br.readLine();
 		}
 		br.close();
@@ -87,26 +94,31 @@ public class PointMetric implements Remesh.AnalyticMetricInterface {
 	 * @param sizeInf metric far from the point
 	 * @param coef how fast we go from size0 to sizeInf
 	 */
-	public final void addPoint(double x, double y, double z, double size0, double sizeInf, double coef)
+	public final void addPoint(double x, double y, double z, double size0, double coef)
 	{
 		Source s = new Source();
 		s.coef = coef;
 		s.sx = x;
 		s.sy = y;
 		s.sz = z;
-		s.sizeInf = sizeInf;
 		s.alpha = 2 * (1 - size0 / sizeInf);
+		s.threshold = Math.pow(s.alpha-0.05, 1.0/3) - 1 / coef;
+		s.threshold = s.threshold * s.threshold;
 		sources.add(s);
 	}
 
 	@Override
 	public double getTargetSize(double x, double y, double z) {
-		double minSize = Double.MAX_VALUE;
+		double maxValue = 0;
 		for (Source s : sources) {
-			double d = s.distance(x, y, z);
-			double v = s.sizeInf * (1 - s.alpha / (1 + Math.pow(s.coef * d + 1, 3)));
-			minSize = Math.min(v, minSize);
+			double d = s.distance2(x, y, z);
+			if(d < s.threshold)
+			{
+				d = Math.sqrt(d);
+				double v = s.alpha / (1 + Math.pow(s.coef * d + 1, 3));
+				maxValue = Math.max(v, maxValue);
+			}
 		}
-		return minSize;
+		return sizeInf * (1 - maxValue);
 	}
 }
