@@ -50,7 +50,7 @@ public class AmibePolyDataWriter
 		this.groupNames = groupNames;
 	}
 
-    public void writer(String outDir) throws IOException
+    public void write(String outDir) throws IOException
     {
         // Amibe writer object for 3D elements
         AmibeWriter.Dim3 out = new AmibeWriter.Dim3(outDir);
