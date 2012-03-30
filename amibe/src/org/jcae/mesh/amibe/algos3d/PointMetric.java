@@ -97,12 +97,12 @@ public class PointMetric implements Remesh.AnalyticMetricInterface {
 	public final void addPoint(double x, double y, double z, double size0, double coef)
 	{
 		Source s = new Source();
-		s.coef = coef;
+		s.coef = 1.0 / (Math.log(sizeInf / size0) * (sizeInf + size0) * coef);
 		s.sx = x;
 		s.sy = y;
 		s.sz = z;
 		s.alpha = 2 * (1 - size0 / sizeInf);
-		s.threshold = Math.pow(s.alpha-0.05, 1.0/3) - 1 / coef;
+		s.threshold = (Math.pow(s.alpha/0.05-1, 1.0/3) - 1) / s.coef;
 		s.threshold = s.threshold * s.threshold;
 		sources.add(s);
 	}

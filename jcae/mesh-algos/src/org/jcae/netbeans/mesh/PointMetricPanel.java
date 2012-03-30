@@ -126,8 +126,7 @@ public abstract class PointMetricPanel extends JPanel {
 
 	private void buttonAddActionPerformed(ActionEvent evt) {//GEN-FIRST:event_buttonAddActionPerformed
 		DefaultTableModel m = (DefaultTableModel) table.getModel();
-		m.addRow(new Object[]{0, 0, 0,
-			getDefaultSize() / 10, getDefaultSize(), 3});
+		m.addRow(new Object[]{0, 0, 0, getDefaultSize() / 10, 1});
 	}//GEN-LAST:event_buttonAddActionPerformed
 
 	private void buttonRemoveActionPerformed(ActionEvent evt) {//GEN-FIRST:event_buttonRemoveActionPerformed
