@@ -24,6 +24,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.jcae.mesh.amibe.metrics.MetricSupport.AnalyticMetricInterface;
 
 /**
  * An AnalyticMetric which refine mesh around a set of points.
@@ -34,7 +35,7 @@ import java.util.List;
  * Sinf is reached.
  * @author Jerome Robert
  */
-public class PointMetric implements Remesh.AnalyticMetricInterface {
+public class PointMetric implements AnalyticMetricInterface {
 
 	private class Source
 	{

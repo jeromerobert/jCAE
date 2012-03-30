@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.metrics.MetricSupport.AnalyticMetricInterface;
 
 
 /**
@@ -80,7 +81,7 @@ public class RemeshPolyline
 		LOGGER.log(Level.FINE, "Polyline approximate length: {0}", abscissa);
 	}
 
-	public RemeshPolyline(Mesh m, List<Vertex> vertices, Remesh.AnalyticMetricInterface analytic)
+	public RemeshPolyline(Mesh m, List<Vertex> vertices, AnalyticMetricInterface analytic)
 	{
 		mesh = m;
 		double abscissa = 0;

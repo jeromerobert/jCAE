@@ -37,9 +37,7 @@ import org.jcae.mesh.xmldata.DoubleFileReader;
 import org.jcae.mesh.xmldata.PrimitiveFileReaderFactory;
 
 import gnu.trove.PrimeFinder;
-import gnu.trove.TIntObjectHashMap;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
 import java.util.HashMap;
@@ -51,7 +49,9 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import org.jcae.mesh.amibe.metrics.MetricSupport;
+import org.jcae.mesh.amibe.metrics.MetricSupport.AnalyticMetricInterface;
+import static org.jcae.mesh.amibe.metrics.MetricSupport.interpolatedDistance;
 /**
  * Remesh an existing mesh.
  *
@@ -68,7 +68,6 @@ public class Remesh
 	// Octree to find nearest Vertex in current mesh
 	private final KdTree<Vertex> kdTree;
 	private Map<Vertex, Vertex> neighborBgMap = new HashMap<Vertex, Vertex>();
-	private DoubleFileReader dfrMetrics;
 	private final double minlen;
 	private final double maxlen;
 	// useful to see if addCandidatePoints() does its job
@@ -85,21 +84,7 @@ public class Remesh
 	private final double coplanarity;
 	private final boolean allowNearNodes;
 	private final boolean remeshOnlyFeatureEdges;
-	private AnalyticMetricInterface analyticMetric = LATER_BINDING;
-	private final Map<Vertex, EuclidianMetric3D> metrics;
-	private static final AnalyticMetricInterface LATER_BINDING = new AnalyticMetricInterface() {
-		public double getTargetSize(double x, double y, double z)
-		{
-			throw new RuntimeException();
-		}
-	};
-	private TIntObjectHashMap<AnalyticMetricInterface> metricsPartitionMap = new TIntObjectHashMap<AnalyticMetricInterface>();
-
-	public interface AnalyticMetricInterface
-	{
-		double getTargetSize(double x, double y, double z);
-	}
-
+	private final MetricSupport metrics;
 	/**
 	 * Creates a <code>Remesh</code> instance.
 	 *
@@ -138,7 +123,6 @@ public class Remesh
 	{
 		liaison = meshLiaison;
 		mesh = m;
-		double size = 0.0;
 		double nearLengthRatio = 1.0 / Math.sqrt(2.0);
 		boolean proj = false;
 		boolean nearNodes = false;
@@ -149,13 +133,7 @@ public class Remesh
 		{
 			final String key = opt.getKey();
 			final String val = opt.getValue();
-			if (key.equals("size"))
-			{
-				size = Double.valueOf(val).doubleValue();
-				analyticMetric = null;
-				dfrMetrics = null;
-			}
-			else if (key.equals("nearLengthRatio"))
+			if (key.equals("nearLengthRatio"))
 			{
 				nearLengthRatio = Double.valueOf(val).doubleValue();
 			}
@@ -171,31 +149,18 @@ public class Remesh
 			{
 				decimateOptions.put("maxtriangles", val);
 			}
-			else if (key.equals("metricsFile"))
-			{
-				PrimitiveFileReaderFactory pfrf = new PrimitiveFileReaderFactory();
-				try {
-					dfrMetrics = pfrf.getDoubleReader(new File(val));
-				} catch (FileNotFoundException ex) {
-					LOGGER.log(Level.SEVERE, null, ex);
-				} catch (IOException ex) {
-					LOGGER.log(Level.SEVERE, null, ex);
-				}
-				analyticMetric = null;
-			}
 			else if (key.equals("project"))
 				proj = Boolean.valueOf(val).booleanValue();
 			else if (key.equals("allowNearNodes"))
 				nearNodes = Boolean.valueOf(val).booleanValue();
 			else if (key.equals("features"))
 				onlyFeatureEdges = Boolean.valueOf(val).booleanValue();
-			else
+			else if(!MetricSupport.KNOWN_OPTIONS.contains(key))
 				LOGGER.warning("Unknown option: "+key);
 		}
 		if (meshLiaison == null)
 			mesh.buildRidges(copl);
 
-		double targetSize = size;
 		minlen = nearLengthRatio;
 		maxlen = Math.sqrt(2.0);
 		project = proj;
@@ -272,35 +237,17 @@ public class Remesh
 				neighborBgMap.put(v, t.vertex[2]);
 		}
 
-		// Arbitrary size: 2*initial number of nodes
-		metrics = new HashMap<Vertex, EuclidianMetric3D>(2*nodeset.size());
-		if (dfrMetrics != null)
-		{
-			try {
-				for (Vertex v : nodeset)
-					metrics.put(v, new EuclidianMetric3D(dfrMetrics.get(v.getLabel() - 1)));
-			} catch (IOException ex) {
-					LOGGER.log(Level.SEVERE, null, ex);
-					throw new RuntimeException("Error when loading metrics map file");
-			}
-		}
-		else if (targetSize > 0.0)
-		{
-			// If targetSize is 0.0, metrics will be set by calling setAnalyticMetric()
-			// below.
-			for (Vertex v : nodeset)
-				metrics.put(v, new EuclidianMetric3D(targetSize));
-		}
+		metrics = new MetricSupport(mesh, options);
 	}
 
 	public void setAnalyticMetric(AnalyticMetricInterface m)
 	{
-		analyticMetric = m;
+		metrics.setAnalyticMetric(m);
 	}
 
 	public void setAnalyticMetric(int groupId, AnalyticMetricInterface m)
 	{
-		metricsPartitionMap.put(groupId, m);
+		metrics.setAnalyticMetric(groupId, m);
 	}
 
 	public final Mesh getOutputMesh()
@@ -338,22 +285,6 @@ public class Remesh
 			return false;
 		Matrix3D.computeNormal3D(p2, p0, pos, temp[0], temp[1], temp[3]);
 		return Matrix3D.prodSca(temp[2], temp[3]) >= 0.0;
-	}
-
-	private static double interpolatedDistance(Vertex pt1, Metric m1, Vertex pt2, Metric m2)
-	{
-		assert m1 != null : "Metric null at point "+pt1;
-		assert m2 != null : "Metric null at point "+pt2;
-		double[] p1 = pt1.getUV();
-		double[] p2 = pt2.getUV();
-		double a = Math.sqrt(m1.distance2(p1, p2));
-		double b = Math.sqrt(m2.distance2(p1, p2));
-		// Linear interpolation:
-		//double l = (2.0/3.0) * (a*a + a*b + b*b) / (a + b);
-		// Geometric interpolation
-		double l = Math.abs(a-b) < 1.e-6*(a+b) ? 0.5*(a+b) : (a - b)/Math.log(a/b);
-		
-		return l;
 	}
 
 	private Map<Triangle, Collection<Vertex>> collectVertices(AbstractHalfEdge ot)
@@ -428,29 +359,7 @@ public class Remesh
 	{
 		LOGGER.info("Run "+getClass().getName());
 		mesh.getTrace().println("# Begin Remesh");
-
-		if (analyticMetric != null || !metricsPartitionMap.isEmpty())
-		{
-			for (Triangle t : mesh.getTriangles())
-			{
-				if (!t.isReadable())
-					continue;
-				AnalyticMetricInterface metric = metricsPartitionMap.get(t.getGroupId());
-				if (metric == null)
-					metric = analyticMetric;
-				if (metric.equals(LATER_BINDING))
-					throw new RuntimeException("Cannot determine metrics, either set 'size' or 'metricsMap' arguments, or call Remesh.setAnalyticMetric()");
-				for (Vertex v : t.vertex)
-				{
-					double[] pos = v.getUV();
-					EuclidianMetric3D curMetric = metrics.get(v);
-					EuclidianMetric3D newMetric = new EuclidianMetric3D(metric.getTargetSize(pos[0], pos[1], pos[2]));
-					if (curMetric == null || curMetric.getUnitBallBBox()[0] > newMetric.getUnitBallBBox()[0])
-						metrics.put(v, newMetric);
-				}
-			}
-		}
-
+		metrics.compute();
 		ArrayList<Vertex> nodes = new ArrayList<Vertex>();
 		ArrayList<Vertex> triNodes = new ArrayList<Vertex>();
 		ArrayList<EuclidianMetric3D> triMetrics = new ArrayList<EuclidianMetric3D>();
@@ -537,9 +446,7 @@ public class Remesh
 
 					Vertex start = h.origin();
 					Vertex end = h.destination();
-					EuclidianMetric3D mS = metrics.get(start);
-					EuclidianMetric3D mE = metrics.get(end);
-					double l = interpolatedDistance(start, mS, end, mE);
+					double l = metrics.interpolatedDistance(start, end);
 					if (l < maxlen)
 					{
 						// This edge is smaller than target size and is not split
@@ -854,9 +761,7 @@ public class Remesh
 				}
 				// Compute metrics at this position
 				EuclidianMetric3D m;
-				AnalyticMetricInterface metric = metricsPartitionMap.get(ot.getTri().getGroupId());
-				if (metric == null)
-					metric = analyticMetric;
+				AnalyticMetricInterface metric = metrics.getAnalyticMetric(ot.getTri().getGroupId());
 				if (metric != null)
 					m = new EuclidianMetric3D(metric.getTargetSize(pos[0], pos[1], pos[2]));
 				else
