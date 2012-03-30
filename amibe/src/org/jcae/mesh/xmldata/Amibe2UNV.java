@@ -111,6 +111,10 @@ public class Amibe2UNV
 		writeGroups(out, sm, count);
 	}
 
+	protected String formatGroupName(String name)
+	{
+		return name;
+	}
 	/**
 	 * @param out
 	 * @param count id of the first beam
@@ -127,7 +131,7 @@ public class Amibe2UNV
 				"         0         0         0         0         0         0"+
 				FORMAT_I10.format(g.getNumberOfTrias()+g.getNumberOfBeams()));
 			
-			out.println(g.getName());
+			out.println(formatGroupName(g.getName()));
 			int countg=0;
 			for(int id:g.readTria3Ids())
 			{				
