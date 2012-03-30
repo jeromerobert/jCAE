@@ -17,7 +17,7 @@
  *
  * (C) Copyright 2010, by EADS France
  */
-package org.jcae.mesh.amibe.algos3d;
+package org.jcae.mesh.amibe.metrics;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

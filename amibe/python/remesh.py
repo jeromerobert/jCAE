@@ -4,7 +4,7 @@ from org.jcae.mesh.amibe.ds import Mesh, AbstractHalfEdge
 from org.jcae.mesh.amibe.algos3d import *
 from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.projection import MeshLiaison
-from org.jcae.mesh.amibe.metrics import EuclidianMetric3D
+from org.jcae.mesh.amibe.metrics import EuclidianMetric3D, PointMetric
 from org.jcae.mesh.xmldata import MeshReader, MeshWriter, Amibe2VTK
 from org.jcae.mesh.amibe.algos3d import SmoothNodes3DBg, RemeshPolyline
 
