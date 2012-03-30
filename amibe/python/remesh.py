@@ -20,6 +20,12 @@ from gnu.trove import TIntArrayList
 import sys
 from optparse import OptionParser
 
+def read_groups(file_name):
+    f=open(file_name)
+    r=f.read().split()
+    f.close()
+    return r
+
 debug_write_counter=1
 def writeVTK(liaison):
     global debug_write_counter
@@ -57,6 +63,10 @@ parser.add_option("-P", "--point-metric", metavar="STRING",
                   - x, y, z
                   - the distance of the source where the target size is defined
                   - the target size at the given distance""")
+parser.add_option("-M", "--immutable-groups", metavar="STRING",
+                  action="store", type="string", dest="immutable_groups_file",
+                  help="""A text file containing the list of groups which whose
+                  elements and nodes must be modified by this algorithm.""")
 (options, args) = parser.parse_args(args=sys.argv[1:])
 
 if len(args) != 2:
@@ -89,6 +99,11 @@ if options.immutable_border_group:
 else:
 	if options.preserveGroups:
 		liaison.getMesh().buildGroupBoundaries()
+
+immutable_groups = []
+if options.immutable_groups_file:
+    immutable_groups = read_groups(options.immutable_groups_file)
+    liaison.mesh.tagGroups(immutable_groups, AbstractHalfEdge.IMMUTABLE)
 
 #0
 writeVTK(liaison)
@@ -187,7 +202,10 @@ for entry in polylines.entrySet():
 		for v in polyline:
 			listM.add(EuclidianMetric3D(options.size))
 		#print "Remesh polyline of group "+str(groupId)+"/"+str(polylines.size())+" "+str(polyline.size())+" vertices"
-		result = RemeshPolyline(liaison.mesh, polyline, listM).compute()
+		if liaison.mesh.getGroupName(groupId) in immutable_groups:
+			result = polyline
+		else:
+			result = RemeshPolyline(liaison.mesh, polyline, listM).compute()
 		for i in xrange(result.size() - 1):
 			liaison.mesh.addBeam(result.get(i), result.get(i+1), groupId)
 		#print "  New polyline: "+str(result.size())+" vertices"

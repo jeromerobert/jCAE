@@ -1220,6 +1220,55 @@ public class Mesh implements Serializable
 		v.setRef(-maxLabel);
 	}
 
+	/** Tag Vertices and HalfEdges which are in a give list of groups */
+	public final void tagGroups(Collection<String> names, int attr)
+	{
+		boolean fixVertex  = (attr & AbstractHalfEdge.IMMUTABLE) != 0;
+		if(fixVertex)
+		{
+			//node groups
+			for(String gn:names)
+			{
+				Collection<Vertex> l = vertexGroups.get(gn);
+				if(l != null)
+					for(Vertex v:l)
+						v.setMutable(false);
+			}
+		}
+
+		//triangle groups
+		if (hasAdjacency() && !triangleList.isEmpty())
+		{
+			names = new HashSet<String>(names);
+			TIntHashSet groupIds = new TIntHashSet(names.size());
+			for(Entry<Integer, String> e:groupNames.entrySet())
+			{
+				if(names.contains(e.getValue()))
+					groupIds.add(e.getKey());
+			}
+			AbstractHalfEdge ot  = null;
+			AbstractHalfEdge sym = triangleList.iterator().next().getAbstractHalfEdge();
+
+			for (Triangle t: triangleList)
+			{
+				ot = t.getAbstractHalfEdge(ot);
+				if (t.hasAttributes(AbstractHalfEdge.OUTER))
+					continue;
+				if(groupIds.contains(t.getGroupId()))
+					for (int i = 0; i < 3; i++)
+					{
+						ot = ot.next();
+						sym = ot.sym(sym);
+						ot.setAttributes(attr);
+						if (fixVertex)
+						{
+							ot.origin().setMutable(false);
+							ot.destination().setMutable(false);
+						}
+					}
+			}
+		}
+	}
 	/**
 	 * Tag all edges on group boundaries with a given attribute.
 	 */
