@@ -35,6 +35,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -91,12 +92,12 @@ public class MeshLiaison
 		
 		this.currentMesh = new Mesh(mtb);
 		this.currentMesh.getTrace().setDisabled(this.backgroundMesh.getTrace().getDisabled());
-
+		Map<Vertex, String> vgGroups = createVGMap();
 		// Create vertices of currentMesh
 		Map<Vertex, Vertex> mapBgToCurrent = new HashMap<Vertex, Vertex>(backgroundNodeset.size()+1);
 		for (Vertex v : backgroundNodeset)
 		{
-			Vertex currentV = cloneVertex(v, currentMesh, mapBgToCurrent);
+			Vertex currentV = cloneVertex(v, mapBgToCurrent, vgGroups);
 			if (this.currentMesh.hasNodes())
 				this.currentMesh.add(currentV);
 		}
@@ -116,7 +117,7 @@ public class MeshLiaison
 			this.currentMesh.add(newT);
 		}
 
-		cloneBeams(backgroundMesh, currentMesh, mapBgToCurrent);
+		cloneBeams(backgroundMesh, currentMesh, mapBgToCurrent, vgGroups);
 		// Create groups of currentMesh
 		for (int i = 1; i <= this.backgroundMesh.getNumberOfGroups(); i++)
 			this.currentMesh.setGroupName(i, this.backgroundMesh.getGroupName(i));
@@ -135,7 +136,9 @@ public class MeshLiaison
 		this.currentMesh.setPersistentReferences(this.backgroundMesh.hasPersistentReferences());
 	}
 
-	private void cloneBeams(Mesh backgroundMesh, Mesh currentMesh, Map<Vertex, Vertex> map) {
+	private void cloneBeams(Mesh backgroundMesh, Mesh currentMesh,
+		Map<Vertex, Vertex> map, Map<Vertex, String> vGroups)
+	{
 		List<Vertex> beams = backgroundMesh.getBeams();
 
 		int nb = beams.size();
@@ -143,21 +146,38 @@ public class MeshLiaison
 		{
 			Vertex v1 = map.get(beams.get(i));
 			if (v1 == null)
-				v1 = cloneVertex(beams.get(i), currentMesh, map);
+				v1 = cloneVertex(beams.get(i), map, vGroups);
 			Vertex v2 = map.get(beams.get(i + 1));
 			if (v2 == null)
-				v2 = cloneVertex(beams.get(i + 1), currentMesh, map);
+				v2 = cloneVertex(beams.get(i + 1), map, vGroups);
 			currentMesh.addBeam(v1, v2, backgroundMesh.getBeamGroup(i / 2));
 		}
 	}
 
-	private Vertex cloneVertex(Vertex v, Mesh dst, Map<Vertex, Vertex> map)
+	private Vertex cloneVertex(Vertex v, Map<Vertex, Vertex> map, Map<Vertex, String> vGroups)
 	{
 			Vertex currentV = this.currentMesh.createVertex(v.getUV());
 			currentV.setRef(v.getRef());
 			currentV.setLabel(v.getLabel());
+			currentV.setMutable(v.isMutable());
+			String g = vGroups.get(v);
+			if(g != null)
+				currentMesh.setVertexGroup(currentV, g);
 			map.put(v, currentV);
 			return currentV;
+	}
+
+	private Map<Vertex, String> createVGMap()
+	{
+		Map<Vertex, String> toReturn = new HashMap<Vertex, String>();
+		for(Entry<String, Collection<Vertex>> e:backgroundMesh.getVertexGroup().entrySet())
+		{
+			for(Vertex v: e.getValue())
+			{
+				toReturn.put(v, e.getKey());
+			}
+		}
+		return toReturn;
 	}
 
 	public final Mesh getMesh()
