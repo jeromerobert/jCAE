@@ -81,8 +81,5 @@ public class JunctionConverter {
 		mesh.setVertexGroup(v, group);
 		mesh.setVertexGroup(newV, group);
 		mesh.setVertexGroup(bestOther, group);
-		System.out.println(v);
-		System.out.println(newV);
-		System.out.println(bestOther);
 	}
 }
