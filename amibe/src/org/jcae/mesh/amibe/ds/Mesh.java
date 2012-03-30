@@ -452,6 +452,11 @@ public class Mesh implements Serializable
 		return Collections.unmodifiableList(beams);
 	}
 
+	public void setBeam(int i, Vertex v)
+	{
+		beams.set(i, v);
+	}
+
 	public int getBeamGroup(int i)
 	{
 		return beamGroups.get(i);

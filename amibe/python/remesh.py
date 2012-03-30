@@ -67,6 +67,12 @@ parser.add_option("-M", "--immutable-groups", metavar="STRING",
                   action="store", type="string", dest="immutable_groups_file",
                   help="""A text file containing the list of groups which whose
                   elements and nodes must be modified by this algorithm.""")
+parser.add_option("-J", "--convert-junctions", metavar="STRING",
+                  action="store_true", dest="convert_junctions",
+                  help="""Convert junctions between beams and triangles to group
+                  of nodes. The junction vertex is duplicated and a node group
+                  is created with the 2 vertices plus the closest one from
+                  adjacent triangles.""")
 (options, args) = parser.parse_args(args=sys.argv[1:])
 
 if len(args) != 2:
@@ -212,4 +218,7 @@ for entry in polylines.entrySet():
 
 if options.recordFile:
 	liaison.getMesh().getTrace().finish()
+
+if options.convert_junctions:
+    JunctionConverter(liaison.mesh).compute()
 MeshWriter.writeObject3D(liaison.mesh, outDir, "")
