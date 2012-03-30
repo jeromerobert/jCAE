@@ -129,7 +129,7 @@ public class Amibe2UNV
 		{				
 			out.println(FORMAT_I10.format(i+1)+
 				"         0         0         0         0         0         0"+
-				FORMAT_I10.format(g.getNumberOfTrias()+g.getNumberOfBeams()));
+				FORMAT_I10.format(g.getNumberOfTrias()+g.getNumberOfBeams()+g.getNumberOfNodes()));
 			
 			out.println(formatGroupName(g.getName()));
 			int countg=0;
@@ -146,6 +146,15 @@ public class Amibe2UNV
 			{
 				out.print("         8"
 					+FORMAT_I10.format(id+count)
+					+"         0         0");
+				countg++;
+				if ((countg % 2) == 0)
+					out.println();
+			}
+			for(int id:g.readNodesIds())
+			{
+				out.print("         7"
+					+FORMAT_I10.format(id+1)
 					+"         0         0");
 				countg++;
 				if ((countg % 2) == 0)
