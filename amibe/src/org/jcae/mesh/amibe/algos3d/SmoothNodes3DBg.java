@@ -39,6 +39,7 @@ import java.io.IOException;
 import gnu.trove.TObjectDoubleHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.metrics.MetricSupport;
 
 /**
  * Node smoothing.  Triangle quality is computed for all triangles,
@@ -55,7 +56,6 @@ public class SmoothNodes3DBg
 	private final static Logger LOGGER = Logger.getLogger(SmoothNodes3DBg.class.getName());
 	private final Mesh mesh;
 	private final MeshLiaison liaison;
-	private double sizeTarget = -1.0;
 	private int nloop = 10;
 	private double tolerance = Double.MAX_VALUE / 2.0;
 	private double minCos = 0.95;
@@ -71,7 +71,7 @@ public class SmoothNodes3DBg
 	private TObjectDoubleHashMap<Triangle> qualityMap;
 	private Collection<Vertex> nodeset;
 	private final Set<Vertex> immutableNodes = new LinkedHashSet<Vertex>();
-	
+	private MetricSupport metrics;
 	/**
 	 * Creates a <code>SmoothNodes3DBg</code> instance.
 	 *
@@ -107,9 +107,7 @@ public class SmoothNodes3DBg
 		{
 			final String key = opt.getKey();
 			final String val = opt.getValue();
-			if (key.equals("size"))
-				sizeTarget = Double.valueOf(val).doubleValue();
-			else if (key.equals("iterations"))
+			if (key.equals("iterations"))
 				nloop = Integer.valueOf(val).intValue();
 			else if (key.equals("boundaries"))
 				preserveBoundaries = Boolean.valueOf(val).booleanValue();
@@ -126,23 +124,32 @@ public class SmoothNodes3DBg
 				minCos = Double.parseDouble(val);
 				LOGGER.fine("Minimum dot product of face normals allowed for swapping an edge: "+minCos);
 			}
-			else
+			else if(!MetricSupport.KNOWN_OPTIONS.contains(key))
 				throw new RuntimeException("Unknown option: "+key);
 		}
 		if (meshLiaison == null)
 			mesh.buildRidges(minCos);
 		if (LOGGER.isLoggable(Level.FINE))
 		{
-			if (sizeTarget > 0.0)
-				LOGGER.fine("Size: "+sizeTarget);
 			LOGGER.fine("Iterations: "+nloop);
 			LOGGER.fine("Refresh: "+refresh);
 			LOGGER.fine("Relaxation: "+relaxation);
 			LOGGER.fine("Tolerance: "+tolerance);
 			LOGGER.fine("Preserve boundaries: "+preserveBoundaries);
 		}
+		metrics = new MetricSupport(mesh, options);
 	}
-	
+
+	public void setAnalyticMetric(MetricSupport.AnalyticMetricInterface m)
+	{
+		metrics.setAnalyticMetric(m);
+	}
+
+	public void setAnalyticMetric(int groupId, MetricSupport.AnalyticMetricInterface m)
+	{
+		metrics.setAnalyticMetric(groupId, m);
+	}
+
 	public final Mesh getOutputMesh()
 	{
 		return mesh;
@@ -174,6 +181,7 @@ public class SmoothNodes3DBg
 		LOGGER.info("Run "+getClass().getName());
 		if (nloop > 0)
 		{
+			metrics.compute();
 			// First compute triangle quality
 			qualityMap = new TObjectDoubleHashMap<Triangle>(mesh.getTriangles().size());
 			computeTriangleQuality();
@@ -336,15 +344,18 @@ public class SmoothNodes3DBg
 			if (v != mesh.outerVertex)
 			{
 				nn++;
-				double l = n.distance3D(v);
 				double[] newp3 = v.getUV();
-				if (sizeTarget > 0.0)
+				if (!metrics.isEmpty())
 				{
 					// Find the point on this edge which has the
 					// desired length
-					double p = sizeTarget / l;
-					for (int i = 0; i < 3; i++)
-						centroid3[i] += newp3[i] + p * (oldp3[i] - newp3[i]);
+					double p = metrics.interpolatedDistance(n, v);
+					if(p < 1.0)
+						for (int i = 0; i < 3; i++)
+							centroid3[i] += newp3[i] + p * (oldp3[i] - newp3[i]);
+					else
+						for (int i = 0; i < 3; i++)
+							centroid3[i] += newp3[i];
 				}
 				else
 				{

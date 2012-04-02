@@ -111,6 +111,11 @@ if options.immutable_groups_file:
     immutable_groups = read_groups(options.immutable_groups_file)
     liaison.mesh.tagGroups(immutable_groups, AbstractHalfEdge.IMMUTABLE)
 
+if options.point_metric_file:
+    point_metric = PointMetric(options.size, options.point_metric_file)
+else:
+    point_metric = None
+
 #0
 writeVTK(liaison)
 
@@ -129,8 +134,7 @@ writeVTK(liaison)
 opts.clear()
 opts.put("size", str(options.size))
 algo = Remesh(liaison, opts)
-if options.point_metric_file:
-    algo.setAnalyticMetric(PointMetric(options.size, options.point_metric_file))
+algo.analyticMetric = point_metric
 algo.compute()
 
 #2
@@ -162,7 +166,9 @@ opts.clear()
 opts.put("coplanarity", str(options.coplanarity))
 opts.put("iterations", str(8))
 opts.put("size", str(options.size))
-SmoothNodes3DBg(liaison, opts).compute()
+algo = SmoothNodes3DBg(liaison, opts)
+algo.analyticMetric = point_metric
+algo.compute()
 
 #6
 writeVTK(liaison)
@@ -194,7 +200,9 @@ opts.clear()
 opts.put("coplanarity", "0.75")
 opts.put("tolerance", "0.6")
 opts.put("iterations", str(8))
-SmoothNodes3DBg(liaison, opts).compute()
+algo = SmoothNodes3DBg(liaison, opts)
+algo.analyticMetric = point_metric
+algo.compute()
 
 writeVTK(liaison)
 
