@@ -39,6 +39,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.metrics.EuclidianMetric3D;
+import org.jcae.mesh.amibe.metrics.MetricSupport;
 
 /**
  * Decimates a mesh.  This method is based on Michael Garland's work on
@@ -118,7 +120,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 	private final Vertex vCostOpt;
 	private final Quadric3DError qCostOpt = new Quadric3DError();
 	private static final boolean testDump = false;
-	
+	private final MetricSupport metrics;
 	/**
 	 * Creates a <code>QEMDecimateHalfEdge</code> instance.
 	 *
@@ -142,6 +144,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		super(m, meshLiaison);
 		v3 = m.createVertex(0.0, 0.0, 0.0);
 		vCostOpt = m.createVertex(0.0, 0.0, 0.0);
+		metrics = new MetricSupport(mesh, options, "maxlength");
 		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
 			final String key = opt.getKey();
@@ -162,12 +165,6 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 				nrFinal = Integer.valueOf(val).intValue();
 				LOGGER.info("Nr max triangles: "+nrFinal);
 			}
-			else if (key.equals("maxlength"))
-			{
-				maxEdgeLength = Double.parseDouble(val);
-				LOGGER.info("Max edge length: "+maxEdgeLength);
-				maxEdgeLength = maxEdgeLength*maxEdgeLength;
-			}
 			else if (key.equals("coplanarity"))
 			{
 				minCos = Double.parseDouble(val);
@@ -178,13 +175,23 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 				freeEdgesOnly = Boolean.parseBoolean(val);
 				LOGGER.info("freeEdgesOnly: "+freeEdgesOnly);
 			}
-			else
+			else if(!metrics.isKnownOption(key))
 				throw new RuntimeException("Unknown option: "+key);
 		}
 		if (meshLiaison == null)
 			mesh.buildRidges(minCos);
 		if (freeEdgesOnly)
 			setNoSwapAfterProcessing(true);
+	}
+
+	public void setAnalyticMetric(MetricSupport.AnalyticMetricInterface m)
+	{
+		metrics.setAnalyticMetric(m);
+	}
+
+	public void setAnalyticMetric(int groupId, MetricSupport.AnalyticMetricInterface m)
+	{
+		metrics.setAnalyticMetric(groupId, m);
 	}
 
 	@Override
@@ -359,18 +366,27 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		q3.optimalPlacement(v1, v2, q1, q2, placement, v3);
 		if (!mesh.canCollapseEdge(current, v3))
 			return false;
-		if (maxEdgeLength > 0.0)
+		if (!metrics.isEmpty())
 		{
-			for (Iterator<Vertex> itnv = v1.getNeighbourIteratorVertex(); itnv.hasNext(); )
-			{
-				Vertex n = itnv.next();
-				if (n != mesh.outerVertex && v3.sqrDistance3D(n) > maxEdgeLength)
-					return false;
-			}
-			for (Iterator<Vertex> itnv = v2.getNeighbourIteratorVertex(); itnv.hasNext(); )
-			{
-				Vertex n = itnv.next();
-				if (n != mesh.outerVertex && v3.sqrDistance3D(n) > maxEdgeLength)
+			EuclidianMetric3D m3 = metrics.get(v3, current.getTri());
+			if(!checkSize(v1, m3))
+				return false;
+			if(!checkSize(v2, m3))
+				return false;
+		}
+		return true;
+	}
+
+	private boolean checkSize(Vertex v1, EuclidianMetric3D m3)
+	{
+		Iterator<Vertex> itnv = v1.getNeighbourIteratorVertex();
+		while(itnv.hasNext())
+		{
+			Vertex n = itnv.next();
+			if (n != mesh.outerVertex) {
+				EuclidianMetric3D m = metrics.get(n);
+				double d = MetricSupport.interpolatedDistance(v3, m3, n, m);
+				if (d > 1.0)
 					return false;
 			}
 		}
@@ -486,6 +502,8 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		updateIncidentEdges(current);
 		if (!freeEdgesOnly && minCos >= -1.0)
 			checkAndSwapAroundOrigin(current);
+		if(!metrics.isEmpty())
+			metrics.put(v3, metrics.get(v3, current.getTri()));
 		return current.next();
 	}
 
@@ -556,7 +574,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 			redo = false;
 			while(true)
 			{
-				if (current.checkSwap3D(mesh, minCos, maxEdgeLength) >= 0.0)
+				if (current.checkSwap3D(mesh, minCos) >= 0.0)
 				{
 					// Swap edge
 					for (int i = 0; i < 3; i++)

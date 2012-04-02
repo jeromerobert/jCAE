@@ -123,6 +123,7 @@ public class Remesh
 	{
 		liaison = meshLiaison;
 		mesh = m;
+		metrics = new MetricSupport(mesh, options);
 		double nearLengthRatio = 1.0 / Math.sqrt(2.0);
 		boolean proj = false;
 		boolean nearNodes = false;
@@ -155,7 +156,7 @@ public class Remesh
 				nearNodes = Boolean.valueOf(val).booleanValue();
 			else if (key.equals("features"))
 				onlyFeatureEdges = Boolean.valueOf(val).booleanValue();
-			else if(!MetricSupport.KNOWN_OPTIONS.contains(key))
+			else if(!metrics.isKnownOption(key))
 				LOGGER.warning("Unknown option: "+key);
 		}
 		if (meshLiaison == null)
@@ -236,8 +237,6 @@ public class Remesh
 			else
 				neighborBgMap.put(v, t.vertex[2]);
 		}
-
-		metrics = new MetricSupport(mesh, options);
 	}
 
 	public void setAnalyticMetric(AnalyticMetricInterface m)
@@ -760,11 +759,8 @@ public class Remesh
 					liaison.project(np, pos, start);
 				}
 				// Compute metrics at this position
-				EuclidianMetric3D m;
-				AnalyticMetricInterface metric = metrics.getAnalyticMetric(ot.getTri().getGroupId());
-				if (metric != null)
-					m = new EuclidianMetric3D(metric.getTargetSize(pos[0], pos[1], pos[2]));
-				else
+				EuclidianMetric3D m = metrics.get(np, ot.getTri());
+				if(m == null)
 					m = new EuclidianMetric3D(hS*Math.exp(alpha*logRatio));
 				double l = interpolatedDistance(last, lastMetric, np, m);
 				if (Math.abs(l - target) < maxError)

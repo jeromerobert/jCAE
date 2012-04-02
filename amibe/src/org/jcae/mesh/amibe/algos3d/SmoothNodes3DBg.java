@@ -103,6 +103,7 @@ public class SmoothNodes3DBg
 	{
 		liaison = meshLiaison;
 		mesh = liaison.getMesh();
+		metrics = new MetricSupport(mesh, options);
 		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
 			final String key = opt.getKey();
@@ -124,7 +125,7 @@ public class SmoothNodes3DBg
 				minCos = Double.parseDouble(val);
 				LOGGER.fine("Minimum dot product of face normals allowed for swapping an edge: "+minCos);
 			}
-			else if(!MetricSupport.KNOWN_OPTIONS.contains(key))
+			else if(!metrics.isKnownOption(key))
 				throw new RuntimeException("Unknown option: "+key);
 		}
 		if (meshLiaison == null)
@@ -137,7 +138,6 @@ public class SmoothNodes3DBg
 			LOGGER.fine("Tolerance: "+tolerance);
 			LOGGER.fine("Preserve boundaries: "+preserveBoundaries);
 		}
-		metrics = new MetricSupport(mesh, options);
 	}
 
 	public void setAnalyticMetric(MetricSupport.AnalyticMetricInterface m)
@@ -403,6 +403,8 @@ public class SmoothNodes3DBg
 			}
 		}
 		liaison.backupRestore(n, false);
+		if (!metrics.isEmpty())
+			metrics.put(n, metrics.get(n, f));
 		return true;
 	}
 

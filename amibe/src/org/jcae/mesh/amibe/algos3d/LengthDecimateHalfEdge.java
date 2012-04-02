@@ -43,7 +43,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	private Vertex v3;
 	private boolean freeEdgesOnly = false;
 	private final double freeEdgeFactor;
-
+	private double maxEdgeLength = -1;
 	/**
 	 * Creates a <code>LengthDecimateHalfEdge</code> instance.
 	 *

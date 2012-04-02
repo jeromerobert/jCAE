@@ -24,10 +24,8 @@ import gnu.trove.TIntObjectHashMap;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,8 +40,6 @@ import org.jcae.mesh.xmldata.PrimitiveFileReaderFactory;
  * @author Jerome Robert
  */
 public class MetricSupport {
-	public final static Collection<String> KNOWN_OPTIONS = new HashSet<String>(
-		Arrays.asList("size", "metricsFile"));
 	private final static Logger LOGGER = Logger.getLogger(MetricSupport.class.getName());
 	private DoubleFileReader dfrMetrics;
 	private AnalyticMetricInterface analyticMetric;
@@ -51,13 +47,19 @@ public class MetricSupport {
 	private final Mesh mesh;
 	private final TIntObjectHashMap<AnalyticMetricInterface> metricsPartitionMap =
 		new TIntObjectHashMap<AnalyticMetricInterface>();
-
+	private final String sizeOptionKey;
+	private EuclidianMetric3D uniformMetric;
 	public interface AnalyticMetricInterface
 	{
 		double getTargetSize(double x, double y, double z);
 	}
 
 	public MetricSupport(Mesh mesh, Map<String, String> options) {
+		this(mesh, options, "size");
+	}
+
+	public MetricSupport(Mesh mesh, Map<String, String> options, String sizeOption) {
+		this.sizeOptionKey = sizeOption;
 		this.mesh = mesh;
 		Collection<Vertex> nodeset = mesh.getNodes();
 		double size = 0.0;
@@ -65,7 +67,7 @@ public class MetricSupport {
 		{
 			final String key = opt.getKey();
 			final String val = opt.getValue();
-			if ("size".equals(key))
+			if (sizeOption.equals(key))
 			{
 				size = Double.parseDouble(val);
 				LOGGER.log(Level.FINE, "Size: {0}", size);
@@ -87,7 +89,8 @@ public class MetricSupport {
 		}
 
 		// Arbitrary size: 2*initial number of nodes
-		metrics = new HashMap<Vertex, EuclidianMetric3D>(2*nodeset.size());
+		metrics = new HashMap<Vertex, EuclidianMetric3D>(
+			nodeset == null ? 0 : 2*nodeset.size());
 		if (dfrMetrics != null)
 		{
 			try {
@@ -102,10 +105,20 @@ public class MetricSupport {
 		{
 			// If targetSize is 0.0, metrics will be set by calling setAnalyticMetric()
 			// below.
-			for (Vertex v : nodeset)
-				metrics.put(v, new EuclidianMetric3D(size));
+			uniformMetric = new EuclidianMetric3D(size);
 		}
 	}
+
+	public boolean isKnownOption(String key)
+	{
+		return "metricsFile".equals(key) || sizeOptionKey.equals(key);
+	}
+
+	public void setSize(double size)
+	{
+		uniformMetric = new EuclidianMetric3D(size);
+	}
+
 	public void setAnalyticMetric(AnalyticMetricInterface m)
 	{
 		analyticMetric = m;
@@ -124,9 +137,7 @@ public class MetricSupport {
 			{
 				if (!t.isReadable())
 					continue;
-				AnalyticMetricInterface metric = metricsPartitionMap.get(t.getGroupId());
-				if (metric == null)
-					metric = analyticMetric;
+				AnalyticMetricInterface metric = getAnalyticMetric(t.getGroupId());
 				if (metric == null)
 					throw new NullPointerException("Cannot determine metrics, either set 'size' or 'metricsMap' arguments, or call Remesh.setAnalyticMetric()");
 				for (Vertex v : t.vertex)
@@ -148,12 +159,34 @@ public class MetricSupport {
 		metrics.put(v, m);
 	}
 
-	public EuclidianMetric3D get(Vertex v)
+	/** 
+	 * Get the metric of an unknown vertex which aims at being inserted in the
+	 * given triangle
+	 */
+	public EuclidianMetric3D get(Vertex v, Triangle t)
 	{
-		return metrics.get(v);
+		AnalyticMetricInterface metric = getAnalyticMetric(t.getGroupId());
+		EuclidianMetric3D toReturn = null;
+		if (metric == null)
+		{
+			toReturn = uniformMetric;
+		}
+		else
+		{
+			double[] uv = v.getUV();
+			toReturn = new EuclidianMetric3D(metric.getTargetSize(uv[0], uv[1], uv[2]));
+		}
+		return toReturn;
 	}
 
-	public AnalyticMetricInterface getAnalyticMetric(int groupId)
+	/** Get the metric of a known vertex */
+	public EuclidianMetric3D get(Vertex v)
+	{
+		EuclidianMetric3D r = metrics.get(v);
+		return r == null ? uniformMetric : r;
+	}
+
+	private AnalyticMetricInterface getAnalyticMetric(int groupId)
 	{
 		AnalyticMetricInterface metric = metricsPartitionMap.get(groupId);
 		if (metric == null)
@@ -163,12 +196,12 @@ public class MetricSupport {
 
 	public boolean isEmpty()
 	{
-		return metrics.isEmpty();
+		return metrics.isEmpty() && uniformMetric == null;
 	}
 
 	public double interpolatedDistance(Vertex pt1, Vertex pt2)
 	{
-		return interpolatedDistance(pt1, metrics.get(pt1), pt2, metrics.get(pt2));
+		return interpolatedDistance(pt1, get(pt1), pt2, get(pt2));
 	}
 
 	public static double interpolatedDistance(Vertex pt1, Metric m1, Vertex pt2, Metric m2)
