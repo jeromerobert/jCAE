@@ -203,6 +203,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 	@Override
 	public void preProcessAllHalfEdges()
 	{
+		metrics.compute();
 		final int roughNrNodes = mesh.getTriangles().size()/2;
 		quadricMap = new HashMap<Vertex, Quadric3DError>(roughNrNodes);
 		for (Triangle af: mesh.getTriangles())
@@ -490,6 +491,8 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		// Now current == (v3*a)
 		// Update edge costs
 		quadricMap.put(v3, q3);
+		if(!metrics.isEmpty())
+			metrics.put(v3, metrics.get(v3, current.getTri()));
 		assert current != null : v3+" not connected to "+apex;
 		assert current.origin() == v3 : ""+current+"\n"+v3+"\n"+apex;
 		assert current.apex() == apex : ""+current+"\n"+v3+"\n"+apex;
@@ -502,8 +505,6 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		updateIncidentEdges(current);
 		if (!freeEdgesOnly && minCos >= -1.0)
 			checkAndSwapAroundOrigin(current);
-		if(!metrics.isEmpty())
-			metrics.put(v3, metrics.get(v3, current.getTri()));
 		return current.next();
 	}
 
