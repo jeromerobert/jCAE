@@ -156,7 +156,6 @@ LengthDecimateHalfEdge(liaison, opts).compute()
 writeVTK(liaison)
 
 opts.clear()
-opts.put("coplanarity", str(options.coplanarity))
 ImproveEdgeConnectivity(liaison, opts).compute()
 
 #5
@@ -187,13 +186,14 @@ opts.put("size", str(options.size*0.2))
 opts.put("maxlength", str(options.size*1.2))
 QEMDecimateHalfEdge(liaison, opts).compute()
 
+#8
 writeVTK(liaison)
 
 opts.clear()
-opts.put("coplanarity", str(options.coplanarity))
 opts.put("expectInsert", "false")
 SwapEdge(liaison, opts).compute()
 
+#9
 writeVTK(liaison)
 
 opts.clear()
