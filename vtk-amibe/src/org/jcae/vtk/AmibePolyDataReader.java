@@ -64,20 +64,25 @@ public class AmibePolyDataReader {
 		((vtkDoubleArray) vp.GetData()).SetJavaArray(points);
 		points = null;
 		polyData.SetPoints(vp);
-		IntFileReader triaReader = sm.getTriangles();
-		int[] triangles = new int[sm.getNumberOfTrias()*3];
-		triaReader.get(triangles);
-		triaReader.close();
-		polyData.SetPolys(Utils.createCells(
-			sm.getNumberOfTrias(), Utils.createTriangleCells(triangles, 0)));
-		triangles = null;
-		IntFileReader beamsReader = sm.getBeams();
-		int[] beams = new int[sm.getNumberOfBeams()*2];
-		beamsReader.get(beams);
-		beamsReader.close();
-		polyData.SetLines(Utils.createCells(
-			sm.getNumberOfBeams(), Utils.createBeamCells(beams)));
-		beams = null;
+		if(sm.getNumberOfTrias() > 0)
+		{
+			IntFileReader triaReader = sm.getTriangles();
+			int[] triangles = new int[sm.getNumberOfTrias()*3];
+			triaReader.get(triangles);
+			triaReader.close();
+			polyData.SetPolys(Utils.createCells(
+				sm.getNumberOfTrias(), Utils.createTriangleCells(triangles, 0)));
+		}
+		if(sm.getNumberOfBeams() > 0)
+		{
+			IntFileReader beamsReader = sm.getBeams();
+			int[] beams = new int[sm.getNumberOfBeams()*2];
+			beamsReader.get(beams);
+			beamsReader.close();
+			polyData.SetLines(Utils.createCells(
+				sm.getNumberOfBeams(), Utils.createBeamCells(beams)));
+		}
+
 		int[] pointGroups = new int[sm.getNumberOfNodes()];
 		int[] elementGroups = new int[sm.getNumberOfBeams() + sm.getNumberOfTrias()];
 		int gid = 1;
