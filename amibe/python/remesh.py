@@ -183,8 +183,10 @@ writeVTK(liaison)
 opts.clear()
 opts.put("coplanarity", str(options.coplanarity))
 opts.put("size", str(options.size*0.2))
-opts.put("maxlength", str(options.size*1.2))
-QEMDecimateHalfEdge(liaison, opts).compute()
+opts.put("maxlength", str(options.size))
+algo = QEMDecimateHalfEdge(liaison, opts)
+algo.analyticMetric = point_metric
+algo.compute()
 
 #8
 writeVTK(liaison)
