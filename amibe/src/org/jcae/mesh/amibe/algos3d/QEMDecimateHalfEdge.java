@@ -184,6 +184,14 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 			setNoSwapAfterProcessing(true);
 	}
 
+	@Override
+	protected void preCheck()
+	{
+		//disable checkNoInvertedTriangles as most of the time such triangle
+		//are thin and removed by this algo
+		assert mesh.checkNoDegeneratedTriangles();
+	}
+
 	public void setAnalyticMetric(MetricSupport.AnalyticMetricInterface m)
 	{
 		metrics.setAnalyticMetric(m);

@@ -75,10 +75,22 @@ public abstract class AbstractAlgoHalfEdge
 		mesh = m;
 		liaison = meshLiaison;
 	}
-	public final void compute()
+
+	protected void preCheck()
 	{
 		assert mesh.checkNoDegeneratedTriangles();
 		assert mesh.checkNoInvertedTriangles();
+	}
+
+	protected void postCheck()
+	{
+		assert mesh.checkNoDegeneratedTriangles();
+		assert mesh.checkNoInvertedTriangles();
+	}
+
+	public final void compute()
+	{
+		preCheck();
 		thisLogger().info("Run "+getClass().getName());
 		mesh.getTrace().println("# Begin "+getClass().getName());
 		preProcessAllHalfEdges();
@@ -89,8 +101,7 @@ public abstract class AbstractAlgoHalfEdge
 		processAllHalfEdges();
 		thisLogger().info("Final number of triangles: "+countInnerTriangles(mesh));
 		mesh.getTrace().println("# End "+getClass().getName());
-		assert mesh.checkNoDegeneratedTriangles();
-		assert mesh.checkNoInvertedTriangles();
+		postCheck();
 	}
 
 	public void setProgressBarStatus(int n)
