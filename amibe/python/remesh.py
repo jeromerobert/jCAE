@@ -115,6 +115,7 @@ if options.point_metric_file:
     point_metric = PointMetric(options.size, options.point_metric_file)
 else:
     point_metric = None
+safe_coplanarity = str(max(options.coplanarity, 0.4))
 
 #0
 writeVTK(liaison)
@@ -141,7 +142,7 @@ algo.compute()
 writeVTK(liaison)
 
 opts.clear()
-opts.put("coplanarity", str(options.coplanarity))
+opts.put("coplanarity", safe_coplanarity)
 SwapEdge(liaison, opts).compute()
 
 #3
@@ -156,6 +157,7 @@ LengthDecimateHalfEdge(liaison, opts).compute()
 writeVTK(liaison)
 
 opts.clear()
+opts.put("coplanarity", safe_coplanarity)
 ImproveEdgeConnectivity(liaison, opts).compute()
 
 #5
@@ -173,7 +175,7 @@ algo.compute()
 writeVTK(liaison)
 
 opts.clear()
-opts.put("coplanarity", str(options.coplanarity))
+opts.put("coplanarity", safe_coplanarity)
 opts.put("expectInsert", "false")
 SwapEdge(liaison, opts).compute()
 
@@ -192,6 +194,7 @@ algo.compute()
 writeVTK(liaison)
 
 opts.clear()
+opts.put("coplanarity", safe_coplanarity)
 opts.put("expectInsert", "false")
 SwapEdge(liaison, opts).compute()
 
@@ -199,11 +202,9 @@ SwapEdge(liaison, opts).compute()
 writeVTK(liaison)
 
 opts.clear()
-opts.put("coplanarity", "0.75")
-opts.put("tolerance", "0.6")
+opts.put("coplanarity", safe_coplanarity)
 opts.put("iterations", str(8))
 algo = SmoothNodes3DBg(liaison, opts)
-algo.analyticMetric = point_metric
 algo.compute()
 
 writeVTK(liaison)
