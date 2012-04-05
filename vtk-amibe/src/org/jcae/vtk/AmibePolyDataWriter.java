@@ -52,29 +52,35 @@ public class AmibePolyDataWriter
 
     public void write(String outDir) throws IOException
     {
-        // Amibe writer object for 3D elements
-        AmibeWriter.Dim3 out = new AmibeWriter.Dim3(outDir);
+		// Amibe writer object for 3D elements
+		AmibeWriter.Dim3 out = new AmibeWriter.Dim3(outDir);
 
-        //Read Point Data
+		//Read Point Data
 		int n = polyData.GetNumberOfPoints();
-        for (int i = 0; i < n; i++)
-            out.addNode(polyData.GetPoint(i));
+		for (int i = 0; i < n; i++)
+			out.addNode(polyData.GetPoint(i));
 
 		//Beams
-        vtkIdTypeArray lineIdArray = polyData.GetLines().GetData();
+		vtkIdTypeArray lineIdArray = polyData.GetLines().GetData();
 		n = lineIdArray.GetSize();
-        for (int i = 0; i < n; i += 3)
-            out.addBeam(lineIdArray.GetValue(i+1), lineIdArray.GetValue(i+2));
+		for (int i = 0; i < n; i += 3)
+			out.addBeam(lineIdArray.GetValue(i + 1), lineIdArray.GetValue(i + 2));
 
 		//Triangles
-        vtkIdTypeArray polyIdArray = polyData.GetPolys().GetData();
+		vtkIdTypeArray polyIdArray = polyData.GetPolys().GetData();
 		n = polyIdArray.GetSize();
-        for (int j = 0; j < n; j += 4)
+		for (int j = 0; j < n; j += 4)
+		{
+			if (polyIdArray.GetValue(j) != 3)
+				throw new IllegalArgumentException(
+					"Expected cell type 3, found " + polyIdArray.GetValue(j));
+
 			out.addTriangle(polyIdArray.GetValue(j + 1),
 				polyIdArray.GetValue(j + 2), polyIdArray.GetValue(j + 3));
+		}
 
-        convertGroupData(out);
-        out.finish();
+		convertGroupData(out);
+		out.finish();
     }
 
     private void convertGroupData(AmibeWriter.Dim3 out) throws IOException
