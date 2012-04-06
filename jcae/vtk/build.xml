@@ -11,6 +11,9 @@
 	<property file="../nbproject/project.properties"/>
 	<patternset id="vtk.unix.files">
 		<include name="lib*.so"/>
+		<exclude name="libvtkhdf5*.so"/>
+		<exclude name="libvtk*Python*.so"/>
+		<include name="libvtkhdf5*.so.*"/>
 	</patternset>
 
 	<patternset id="vtk.windows.files">
