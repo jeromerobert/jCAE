@@ -1,0 +1,30 @@
+Building OpenJDK
+----------------
+
+Here are instruction to build OpenJDK 7 for glibc 2.3. Note that this configuration is not supported upstream.
+
+* Setup a Debian Etch chroot with debootstrap.
+
+* Build and install gcc 4.6 from the upstream tarball.
+
+* apt-get install unzip zip libasound2-dev libcupsys2-dev libxtst-dev libxi-dev
+
+* Install Ant and Java 6 binary distribution
+
+* hg clone http://hg.openjdk.java.net/jdk7u/jdk7u
+
+* Read README-build.html
+
+* About README-builds.html#drops, the URL of archives to download can be found in jdk7u/jaxws/jaxws.properties.
+
+* The freetype package of Debian Etch is too old so build a new one from upstream sources. Then set
+    ALT_FREETYPE_HEADERS_PATH=/usr/local/include/freetype2
+    ALT_FREETYPE_LIB_PATH=/usr/local/lib/
+
+* Revert this patch as glibc 2.3 doesn't have inotify:
+    http://hg.openjdk.java.net/jdk7/l10n/jdk/raw-diff/a0dde3ff1dfd/src/solaris/native/sun/nio/fs/LinuxWatchService.c
+
+* If when building javax.management CORBA packages cannot be find try:
+   cd build/linux-amd64/classes/
+   cp -a ../corba/classes/* .
+
