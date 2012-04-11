@@ -517,6 +517,9 @@ public class UNV2Amibe
 					//skip it
 					rd.readLine();
 					rd.readLine();
+				case 111: //tetra
+					//skip it
+					rd.readLine();
 					break;
 				default:
 					LOGGER.log(Level.WARNING, "Warning: Section 2412, type {0} unknown", type);
