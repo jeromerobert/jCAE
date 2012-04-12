@@ -41,7 +41,7 @@ public class ExportUNV extends CookieAction
 				Amibe2UNV amibe2unv=new Amibe2UNV(meshDir)
 				{
 					@Override
-					protected String formatGroupName(String name) {
+					protected String[] formatGroupName(String name) {
 						return ExportUNV.this.formatGroupName(name);
 					}
 				};
@@ -60,9 +60,9 @@ public class ExportUNV extends CookieAction
 		}
 	}
 
-	protected String formatGroupName(String name)
+	protected String[] formatGroupName(String name)
 	{
-		return name;
+		return new String[]{name};
 	}
 
 	protected int mode()

@@ -33,6 +33,11 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 import org.xml.sax.SAXException;
 
@@ -111,9 +116,40 @@ public class Amibe2UNV
 		writeGroups(out, sm, count);
 	}
 
-	protected String formatGroupName(String name)
+	/**
+	 * Match Amibe groups name to UNV group.
+	 * Return an array of groups so an amibe group can be in more than one
+	 * UNV group.
+	 */
+	protected String[] formatGroupName(String name)
 	{
-		return name;
+		return new String[]{name};
+	}
+
+	private Map<String, Collection<Group>> indexUNVGroups(Collection<Group> groups)
+	{
+		Map<String, Collection<Group>> toReturn = new HashMap<String, Collection<Group>>();
+		for(Group g:groups)
+		{
+			for(String unvG:formatGroupName(g.getName()))
+			{
+				Collection<Group> l = toReturn.get(unvG);
+				if(l == null)
+				{
+					l = new ArrayList<Group>();
+					toReturn.put(unvG, l);
+				}
+				l.add(g);
+			}
+		}
+		return toReturn;
+	}
+	private int getNumberOfItems(Collection<Group> l)
+	{
+		int r = 0;
+		for(Group g:l)
+			r += g.getNumberOfBeams()+g.getNumberOfNodes()+g.getNumberOfTrias();
+		return r;
 	}
 	/**
 	 * @param out
@@ -125,40 +161,51 @@ public class Amibe2UNV
 	{
 		out.println("    -1"+CR+"  2435");
 		int i = 0;
-		for(Group g:subMesh.getGroups())
+		for(Entry<String, Collection<Group>> e:indexUNVGroups(subMesh.getGroups()).entrySet())
 		{				
 			out.println(FORMAT_I10.format(i+1)+
 				"         0         0         0         0         0         0"+
-				FORMAT_I10.format(g.getNumberOfTrias()+g.getNumberOfBeams()+g.getNumberOfNodes()));
+				FORMAT_I10.format(getNumberOfItems(e.getValue())));
 			
-			out.println(formatGroupName(g.getName()));
+			out.println(e.getKey());
 			int countg=0;
-			for(int id:g.readTria3Ids())
-			{				
-				out.print("         8"
-					+FORMAT_I10.format(id+1)
-					+"         0         0");
-				countg++;
-				if ((countg % 2) == 0)
-					out.println();
-			}
-			for(int id:g.readBeamsIds())
+			for(Group g:e.getValue())
 			{
-				out.print("         8"
-					+FORMAT_I10.format(id+count)
-					+"         0         0");
-				countg++;
-				if ((countg % 2) == 0)
-					out.println();
+				for(int id:g.readTria3Ids())
+				{
+					out.print("         8"
+						+FORMAT_I10.format(id+1)
+						+"         0         0");
+					countg++;
+					if ((countg % 2) == 0)
+						out.println();
+				}
 			}
-			for(int id:g.readNodesIds())
+
+			for(Group g:e.getValue())
 			{
-				out.print("         7"
-					+FORMAT_I10.format(id+1)
-					+"         0         0");
-				countg++;
-				if ((countg % 2) == 0)
-					out.println();
+				for(int id:g.readBeamsIds())
+				{
+					out.print("         8"
+						+FORMAT_I10.format(id+count)
+						+"         0         0");
+					countg++;
+					if ((countg % 2) == 0)
+						out.println();
+				}
+			}
+
+			for(Group g:e.getValue())
+			{
+				for(int id:g.readNodesIds())
+				{
+					out.print("         7"
+						+FORMAT_I10.format(id+1)
+						+"         0         0");
+					countg++;
+					if ((countg % 2) == 0)
+						out.println();
+				}
 			}
 			if ((countg % 2) !=0 )
 				out.println();
