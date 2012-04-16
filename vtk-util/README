@@ -12,6 +12,8 @@ some libvtkXXXXJava.so.5.6. As symbolic link cannot be embedded in a zip
 archive, we prefere building VTK without .so version.  So adding
 VTK_NO_LIBRARY_VERSION:BOOL=ON to the CMakeCache.txt file is required.
 
+Set CMAKE_SKIP_RPATH:BOOL=YES as to avoid useless unexisting path search.
+
 Starting with VTK 5.8 the 0003-Make-different-polygon-offset-for-each-mappers.patch
 break the GeoVis module so it must be disabled with VTK_USE_GEOVIS:BOOL=OFF.
 
