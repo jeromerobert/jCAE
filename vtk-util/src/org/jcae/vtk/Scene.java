@@ -34,8 +34,6 @@ import vtk.vtkActorCollection;
 import vtk.vtkCanvas;
 import vtk.vtkHardwareSelector;
 import vtk.vtkIdTypeArray;
-import vtk.vtkInformation;
-import vtk.vtkInformationIntegerKey;
 import vtk.vtkPlaneCollection;
 import vtk.vtkProp;
 import vtk.vtkSelection;
@@ -242,11 +240,7 @@ public class Scene implements AbstractNode.ActorListener
 		for (int i = 0; i < selection.GetNumberOfNodes(); ++i)
 		{
 			vtkSelectionNode child = selection.GetNode(i);
-			vtkInformation info = child.GetProperties();
-			vtkInformationIntegerKey propID = child.PROP_ID();
-			int IDActor = info.Get(propID);
-			vtkProp prop = selector.GetPropFromID(IDActor);
-
+			vtkProp prop = (vtkProp) child.GetProperties().Get(child.PROP());
 			if (prop != null)
 			{
 				AbstractNode node = idActorToNode.get(prop.GetVTKId());
@@ -265,15 +259,6 @@ public class Scene implements AbstractNode.ActorListener
 					if(pickContext.isOneCell() && values.length > 0)
 						break;
 				}
-			}
-			else
-			{
-				child = null;
-				// FIXME: For unknown reason, garbage is sometimes
-				// appended to real data. Exit loop when an unknown
-				// actor is found, further processing is useless.
-				LOGGER.warning("No selection found for actor "+IDActor);
-				break;
 			}
 		}
 	}
