@@ -1,35 +1,6 @@
 #!/bin/sh
 
 ##################################################
-## Preliminaries
-##################################################
-
-#In addition to dependencies mentioned in the linux installer, the required packages are:
-
-
-#1. mingw-w64 debian package (http://packages.debian.org/sid/mingw-w64)
-#	- This will require editing /etc/apt/sources.list
-# Steps
-#	$ sudo echo 'deb http://ftp.de.debian.org/debian sid main' >> /etc/apt/sources.list
-#	$ sudo apt-get install mingw-w64
-#	
-
-#2. wine 1.2
-#	$ sudo apt-get install wine1.2
-
-#Some other steps need to be performed before moving ahead
-#
-#1. sudo gedit /usr/share/cmake-2.8/Modules/Platform/Windows-GNU.cmake 
-#	- This requires to be automated
-
-#
-#2. JDK
-#	- This step assumes http://download.oracle.com/otn-pub/java/jdk/6u31-b05/jdk-6u31-windows-i586.exe to be downlaoded in pwd
-#	- wget is not possible for this link as licence agreement comes before download
-
-
-
-##################################################
 ## Detect dependencies
 ##################################################
 # This does not take care of version numbers.
@@ -144,100 +115,6 @@ else
 	echo -e "\033[32m" $LIBANT_V "\033[0m"
 fi
 
-# Step 11: Check for gcc-mingw-w64
-echo "Looking for gcc-mingw-w64"
-LIBMINGW_V=$(dpkg -l | grep gcc-mingw-w64)
-if [ $? -eq 1 ]
-then
-	echo -e "\033[31m" "gcc-mingw-w64 Not found" "\033[0m"
-	exit 1
-else
-	echo -e "\033[32m" $LIBMINGW_V "\033[0m"
-fi
-
-# Step 12: Check for wine
-echo "Looking for wine"
-LIBWINE_V=$(wine --version)
-if [ $? -eq 1 ]
-then
-	echo -e "\033[31m" "wine Not found" "\033[0m"
-	exit 1
-else
-	echo -e "\033[32m" $LIBWINE_V "\033[0m"
-fi
-
-##################################################
-## Install JDK 1.6 u31  on wine
-##################################################
-#
-# This step assumes http://download.oracle.com/otn-pub/java/jdk/6u31-b05/jdk-6u31-windows-i586.exe to be downlaoded in pwd
-
-wine dummy # to initiate wine, to create ~/.wine folder
-mkdir ~/.wine/drive_c/programs/
-mkdir ~/.wine/drive_c/programs/Java
-
-wine jdk-6u31-windows-i586.exe  /s /v"/qn INSTALLDIR=$HOME/.wine/drive_c/programs/Java/"
-
-##################################################
-## Get, Patch (from jCAE) and Install VTK 
-## Get jCAE (installation later)
-##################################################
-
-export mypwd=$PWD
-
-# Get vtk-5.6.1, unzip 
-wget http://www.vtk.org/files/release/5.6/vtk-5.6.1.tar.gz
-tar -xf vtk-5.6.1.tar.gz
-
-# Get jCAE source (so early to get vtk patch)
-git clone https://github.com/mohitgargk/jCAE.git
-
-# Apply patch
-cd VTK
-./../jCAE/vtk-util/patch/5.6/apply.sh
-cd ..
-
-# Native Build
-mkdir vtkBuild
-cd vtkBuild
-
-flags="-DBUILD_SHARED_LIBS:BOOL=ON"
-flags="$flags -DVTK_WRAP_JAVA:BOOL=ON"
-cmake $flags ../VTK
-make -j4
-cd ..
-
-# Cross build
-mkdir vtkWinBuild
-mkdir vtkWinInstall
-
-cd vtkWinBuild
-cp ../jCAE/vtk-util/toolchain-i686-w64-mingw32.cmake .
-flags=" -DBUILD_SHARED_LIBS:BOOL=ON"
-flags="$flags -DVTK_WRAP_JAVA:BOOL=ON"
-flags="$flags -DBUILD_TESTING:BOOL=OFF"
-flags="$flags -DCMAKE_SHARED_LINKER_FLAGS:STRING=-Wl,--kill-at"
-flags="$flags -DJAVA_ARCHIVE:FILEPATH=/usr/bin/jar"
-
-flags="$flags -DJAVA_AWT_INCLUDE_PATH:PATH=$HOME/.wine/drive_c/programs/Java/include"
-flags="$flags -DJAVA_AWT_LIBRARY:FILEPATH=$HOME/.wine/drive_c/programs/Java/lib/jawt.lib"
-flags="$flags -DJAVA_COMPILE:FILEPATH=/usr/bin/javac"
-flags="$flags -DJAVA_INCLUDE_PATH:PATH=$HOME/.wine/drive_c/programs/Java/include"
-flags="$flags -DJAVA_INCLUDE_PATH2:PATH=$HOME/.wine/drive_c/programs/Java/include/win32"
-flags="$flags -DJAVA_JVM_LIBRARY:FILEPATH=$HOME/.wine/drive_c/programs/Java/lib/jvm.lib"
-flags="$flags -DJAVA_RUNTIME:FILEPATH=$HOME/.wine/drive_c/programs/Java/jre/bin/java.exe"
-flags="$flags -DCMAKE_INSTALL_PREFIX:FILEPATH=$mypwd/vtkWinInstall/"
-flags="$flags -DCMAKE_TOOLCHAIN_FILE:FILEPATH=toolchain-i686-w64-mingw32.cmake"
-flags="$flags -DVTKCompileTools_DIR:FILEPATH=$mypwd/vtkBuild/"
-
-cmake $flags ../VTK
-cmake $flags ../VTK
-
-make -j4
-make install
-
-cd ..
-
 
 ##################################################
 ## Get and Install OCE 0.9.0
@@ -248,25 +125,16 @@ git clone https://github.com/tpaviot/oce.git
 
 if [ $? -eq 0 ]
 then
-	mkdir oceBuild oceWinInstall
+	mkdir oceBuild
 	cd oce
-	git checkout OCE-0.9.0	
-	cd ../oceBuild
-	cp ../jCAE/vtk-util/toolchain-i686-w64-mingw32.cmake .
-	flags="-DOCE_INSTALL_PREFIX:PATH=$mypwd/oceWinInstall"
+	git checkout OCE-0.9.0
+	mkdir build
+	cd build
+	flags="-DOCE_INSTALL_PREFIX:PATH=../../oceBuild"
 	flags="$flags -DOCE_DISABLE_BSPLINE_MESHER:BOOL=ON"
 	flags="$flags -DCMAKE_CXX_FLAGS:STRING=-DMMGT_OPT_DEFAULT=0"
 	flags="$flags -DOCE_DISABLE_X11=ON"
-	flags="$flags -DJAVA_ARCHIVE:FILEPATH=/usr/bin/jar"
-	flags="$flags -DJAVA_AWT_INCLUDE_PATH:PATH=$HOME/.wine/drive_c/programs/Java/include"
-	flags="$flags -DJAVA_AWT_LIBRARY:FILEPATH=$HOME/.wine/drive_c/programs/Java/lib/jawt.lib"
-	flags="$flags -DJAVA_COMPILE:FILEPATH=/usr/bin/javac"
-	flags="$flags -DJAVA_INCLUDE_PATH:PATH=$HOME/.wine/drive_c/programs/Java/include"
-	flags="$flags -DJAVA_INCLUDE_PATH2:PATH=$HOME/.wine/drive_c/programs/Java/include/win32"
-	flags="$flags -DJAVA_JVM_LIBRARY:FILEPATH=$HOME/.wine/drive_c/programs/Java/lib/jvm.lib"
-	flags="$flags -DJAVA_RUNTIME:FILEPATH=$HOME/.wine/drive_c/programs/Java/jre/bin/java.exe"
-	flags="$flags -DCMAKE_TOOLCHAIN_FILE:FILEPATH=toolchain-i686-w64-mingw32.cmake"
-	cmake $flags ../oce	
+	cmake $flags ..	
 else
 	echo -e "\033[31m" "Unable to fetch oce" "\033[0m"
 	exit 1
@@ -275,7 +143,7 @@ fi
 if [ $? -eq 0 ]
 then
 	echo -e "\033[32m oce cmake successful \033[0m"
-	make -j4
+	make -j2
 else
 	echo -e "\033[31m" "Unable to cmake oce" "\033[0m"
 	exit 1
@@ -293,56 +161,45 @@ fi
 if [ $? -eq 0 ]
 then
 	echo -e "\033[32m oce install successful \033[0m"
+	make install
 else
 	echo -e "\033[31m" "Unable to install oce" "\033[0m"
 	exit 1
 fi
 
-cd ..
+cd ../..
+
 
 ##################################################
-## PATCH # Copy libgcc_s_sjlj-1.dll libstdc++-6.dll
+## Get, Patch (from jCAE) and Install VTK 
+## Get jCAE (installation later)
 ##################################################
 
-cd oceWinInstall/Win32/bin/
+# Get vtk-5.6.1, unzip 
+wget http://www.vtk.org/files/release/5.6/vtk-5.6.1.tar.gz
+tar -xf vtk-5.6.1.tar.gz
 
-Is64=$(objdump -f TKBO.dll | grep 64)
+# Get jCAE source (so early to get vtk patch)
+git clone -b refresh https://github.com/mohitgargk/jCAE.git
 
-if [$Is64 -eq ""]
-then
-	cp $(find /usr/lib/ -path *i686*  -iname libstdc++-6.dll) .
-	cp $(find /usr/lib/ -path *i686*  -iname libgcc_s_sjlj-1.dll) .
-else
-	cp $(find /usr/lib/ -path *x86_64*  -iname libstdc++-6.dll) .
-	cp $(find /usr/lib/ -path *x86_64*  -iname libgcc_s_sjlj-1.dll) .
-fi
+# Apply patch
+cd VTK
+./../jCAE/vtk-util/patch/5.6/apply.sh
+mkdir vtkBuild
 
-cd ../../../
+# Build vtk
+mkdir build
+cd build
 
-##################################################
-## Get and Install Netbeans 7.1
-##################################################
+flags="-DCMAKE_INSTALL_PREFIX:PATH=../../vtkBuild"
+flags="$flags -DBUILD_SHARED_LIBS:BOOL=ON"
+flags="$flags -DVTK_WRAP_JAVA:BOOL=ON"
+cmake $flags ..
 
-echo -e "\033[32m" "Fetching Netbeans 7.1" "\033[0m" 
-wget http://download.netbeans.org/netbeans/7.1/final/bundles/netbeans-7.1-ml-linux.sh
+make -j2
+make install
 
-if [ $? -eq 1 ]
-then
-     echo -e "\033[31m" "Netbeans setup Not found" "\033[0m" 
-     exit 1
-else
-	chmod a+x netbeans-7.1-ml-linux.sh
-        mkdir nb
-        ./netbeans-7.1-ml-linux.sh --silent "-J-Dnb-base.installation.location=nb/"
-fi
-
-if [ $? -eq 1 ]
-then
-     echo -e "\033[31m" "Netbeans could not be installed" "\033[0m" 
-     exit 1
-else
-     echo -e "\033[32m" "Netbeans Installed successfully" "\033[0m" 
-fi
+cd ../..
 
 ##################################################
 ## Get and Install JYTHON
@@ -414,13 +271,39 @@ else
 	echo -e "\033[32m" "trove Installed successfully" "\033[0m" 
 fi
 
+
+##################################################
+## Get and Install Netbeans 7.1
+##################################################
+
+echo -e "\033[32m" "Fetching Netbeans 7.1" "\033[0m" 
+wget http://download.netbeans.org/netbeans/7.1/final/bundles/netbeans-7.1-ml-linux.sh
+
+if [ $? -eq 1 ]
+then
+     echo -e "\033[31m" "Netbeans setup Not found" "\033[0m" 
+     exit 1
+else
+	chmod a+x netbeans-7.1-ml-linux.sh
+        mkdir nb
+        ./netbeans-7.1-ml-linux.sh --silent "-J-Dnb-base.installation.location=nb/"
+fi
+
+if [ $? -eq 1 ]
+then
+     echo -e "\033[31m" "Netbeans could not be installed" "\033[0m" 
+     exit 1
+else
+     echo -e "\033[32m" "Netbeans Installed successfully" "\033[0m" 
+fi
+
 ##################################################
 ## Get and Install XALAN
 ## Get XSLs for build-impl.xml creation
 ##################################################
 
 wget http://mirror.mkhelif.fr/apache//xml/xalan-j/xalan-j_2_7_1-bin-2jars.tar.gz
-tar xf xalan-j_2_7_1-bin-2jars.tar.gz
+tar xvf xalan-j_2_7_1-bin-2jars.tar.gz
 rm xalan-j_2_7_1-bin-2jars.tar.gz
 cd xalan-j_2_7_1
 export CLASSPATH=$CLASSPATH:$PWD/xalan.jar
@@ -446,16 +329,15 @@ cd ..
 ## jCAE INSTALLATION
 ##################################################
 
-
 #-------------------------------------------------
 ## Set envirmonment variables
 #-------------------------------------------------
 export mypwd=$PWD
 
-export jythonPath=$mypwd/$(find jython/ -iname jython.jar)
-export trovePath=$mypwd/$(find trove/ -iname trove.jar)
-export vecmathPath=$mypwd/$(find vecmath/ -iname vecmath.jar)
-export vtkPath=$mypwd/$(find vtkWinInstall/ -iname vtk.jar)
+export jythonPath=$PWD/$(find jython/ -iname jython.jar)
+export trovePath=$PWD/$(find trove/ -iname trove.jar)
+export vecmathPath=$PWD/$(find vecmath/ -iname vecmath.jar)
+export vtkPath=$PWD/$(find vtkBuild/ -iname vtk.jar)
 
 touch jcae.config
 
@@ -463,14 +345,17 @@ echo "libs.trove.classpath=$trovePath" >> jcae.config
 echo "libs.vecmath.classpath=$vecmathPath" >> jcae.config
 echo "libs.VTK.classpath=$vtkPath" >> jcae.config
 
-echo "arch.win32=true" >> jcae.config
-echo "path.occ.win32=$mypwd/oceWinInstall/Win32/bin/" >> jcae.config
-echo "path.jython.win32=$mypwd/jython/" >> jcae.config
-echo "vtk.dir.win32=$mypwd/vtkWinInstall/bin/" >> jcae.config
-echo "path.occjava.win32=$mypwd/occjavaBuild/OccJava.dll" >> jcae.config
+echo "arch.linux=true" >> jcae.config
+echo "path.occ.linux=$PWD/oceBuild/" >> jcae.config
+echo "path.jython.linux=$PWD/jython/" >> jcae.config
+echo "vtk.dir.linux=$PWD/vtkBuild/" >> jcae.config
+echo "path.occjava.linux=$PWD/occjavaBuild/libOccJava.so" >> jcae.config
+echo "libs.trove.classpath=$PWD/trove/usr/share/java/trove.jar" >> jcae.config
+echo "libs.VTK.classpath=$PWD/vtkBuild/lib/vtk-5.6/java/vtk.jar" >> jcae.config
+echo "libs.vecmath.classpath=$PWD/vecmath/usr/share/java/vecmath.jar" >> jcae.config
 
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$mypwd/oceWinInstall/Win32/bin/
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$mypwd/vtkWinInstall/bin/
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/oceBuild/lib/
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/vtkBuild/lib/vtk-5.6/
 
 #-------------------------------------------------
 ## Build jCAE projects (vtk-util, occjava, etc)
@@ -480,12 +365,10 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$mypwd/vtkWinInstall/bin/
 cd jCAE/occjava/
 mkdir build
 cd build
-cp ../../vtk-util/toolchain-i686-w64-mingw32.cmake .
-#cmake -DOCE_DIR=../../oceBuild/lib/oce-0.9.0 ..
-cmake -DJAVA_ARCHIVE:FILEPATH=/usr/bin/jar -DJAVA_AWT_INCLUDE_PATH:PATH=$HOME/.wine/drive_c/programs/Java/include/ -DJAVA_AWT_LIBRARY:FILEPATH=$HOME/.wine/drive_c/programs/Java/lib/jawt.lib -DJAVA_COMPILE:FILEPATH=/usr/bin/javac -DJAVA_INCLUDE_PATH:PATH=$HOME/.wine/drive_c/programs/Java/include -DJAVA_INCLUDE_PATH2:PATH=$HOME/.wine/drive_c/programs/Java/include/win32 -DJAVA_JVM_LIBRARY:FILEPATH=$HOME/.wine/drive_c/programs/Java/lib/jvm.lib -DJAVA_RUNTIME:FILEPATH=$HOME/.wine/drive_c/programs/Java/jre/bin/java.exe -DOCE_DIR=$mypwd/oceWinInstall/cmake/ -DCMAKE_TOOLCHAIN_FILE:FILEPATH=toolchain-i686-w64-mingw32.cmake -DSWIG_DIR=/usr/bin/ -DSWIG_EXECUTABLE=/usr/bin/swig ..
+cmake -DOCE_DIR=../../oceBuild/lib/oce-0.9.0 ..
 make
 mkdir ../../../occjavaBuild
-cp *.dll* ../../../occjavaBuild/
+cp *.so* ../../../occjavaBuild/
 cd ../../../
 
 ## building vtk-util
@@ -547,7 +430,7 @@ do
   java org.apache.xalan.xslt.Process -IN ./nbproject/project.xml -XSL ../../../xsls/module-build-impl.xsl -OUT ./nbproject/build-impl.xml
   cd ..
 done
-cd ../..
+
 
 #-------------------------------------------------
 ## Generate platform.xml.
@@ -573,7 +456,7 @@ cp nbproject/private/private.properties vecmath/nbproject/private/
 mkdir trove/nbproject/private
 cp nbproject/private/private.properties trove/nbproject/private/
 
-echo "path.jre.win32=$HOME/.wine/drive_c/programs/Java/jre/" >> nbproject/private/private.properties
+echo "path.jre.linux=$JAVA_HOME/jre" >> nbproject/private/private.properties
 
 java org.apache.xalan.xslt.Process -IN ./nbproject/project.xml -XSL ../../xsls/suite-build-impl.xsl -OUT ./nbproject/build-impl.xml
 ant -Dnbplatform.default.netbeans.dest.dir="$mypwd/nb/" -Dnbplatform.default.harness.dir="$mypwd/nb/harness/" build-zip
