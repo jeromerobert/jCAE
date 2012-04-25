@@ -18,6 +18,8 @@
 		<include name="msvcr*.dll"/>
 		<include name="Microsoft.VC*.CRT/*"/>
 		<include name="mingwm10.dll"/>
+		<include name="libgcc_s_sjlj-1.dll"/>
+		<include name="libstdc++-6.dll"/>
 	</patternset>
 
 	<target name="-release.files.linux" if="arch.linux">
