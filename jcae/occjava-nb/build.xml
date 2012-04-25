@@ -19,6 +19,8 @@
 
 	<patternset id="occ.windows.files">
 		<include name="TK*.dll"/>
+		<include name="libgcc_s_sjlj-1.dll"/>
+		<include name="libstdc++-6.dll"/>
 	</patternset>
 
 	<target name="-release.files.linux" if="arch.linux">
