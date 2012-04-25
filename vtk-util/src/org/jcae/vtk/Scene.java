@@ -218,7 +218,15 @@ public class Scene implements AbstractNode.ActorListener
 		selector.SetArea(xMin, yMin, xMax, yMax);
 		selector.SetFieldAssociation(1);
 		vtkSelection selection = selector.Select();
-		
+		if(Boolean.getBoolean("sun.java2d.opengl"))
+		{
+			//Bug of VTK or Java ? If java3d opengl is enabled the
+			//vtkHardwareSelector blank the canvas so we need to force a refresh.
+			//UpdateLight for the refresh
+			canvas.UpdateLight();
+			canvas.Render();
+		}
+
 		if (actorFiltering)
 		{
 			vtkActorCollection actors = canvas.GetRenderer().GetActors();
