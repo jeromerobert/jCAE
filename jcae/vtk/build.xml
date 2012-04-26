@@ -30,8 +30,8 @@
 			<fileset dir="${vtk.dir.linux}">
 				<patternset refid="vtk.unix.files"/>
 			</fileset>
-			<file file="${path.libstdc++}"/>
 		</copy>
+		<copy verbose="true" file="${path.libstdc++}" todir="${cluster}/modules/lib"/>
 	</target>
 
 	<target name="-release.files.win32" if="arch.win32">
