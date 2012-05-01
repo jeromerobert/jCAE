@@ -292,16 +292,16 @@ fi
 ##################################################
 
 echo -e "\033[32m" "Fetching Netbeans 7.1" "\033[0m" 
-wget http://download.netbeans.org/netbeans/7.1/final/bundles/netbeans-7.1-ml-linux.sh
+wget http://dlc.sun.com.edgesuite.net/netbeans/7.1.1/final/bundles/netbeans-7.1.1-ml-javase-linux.sh
 
 if [ $? -eq 1 ]
 then
      echo -e "\033[31m" "Netbeans setup Not found" "\033[0m" 
      exit 1
 else
-	chmod a+x netbeans-7.1-ml-linux.sh
+	chmod a+x netbeans-7.1.1-ml-javase-linux.sh
         mkdir nb
-        ./netbeans-7.1-ml-linux.sh --silent "-J-Dnb-base.installation.location=nb/"
+        ./netbeans-7.1.1-ml-javase-linux.sh --silent "-J-Dnb-base.installation.location=nb/"
 fi
 
 if [ $? -eq 1 ]
