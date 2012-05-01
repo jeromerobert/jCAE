@@ -35,15 +35,15 @@
 # This does not take care of version numbers.
 
 # Step 1: Check for gcc
-echo "Looking for GCC"
-GCC_V=$(gcc --version | grep gcc)
-if [ $? -eq 1 ]
-then
-	echo -e "\033[31m" "gcc Not found" "\033[0m"
-	exit 1
-else
-	echo -e "\033[32m" $GCC_V "\033[0m"
-fi
+#echo "Looking for GCC"
+#GCC_V=$(gcc --version | grep gcc)
+#if [ $? -eq 1 ]
+#then
+#	echo -e "\033[31m" "gcc Not found" "\033[0m"
+#	exit 1
+#else
+#	echo -e "\033[32m" $GCC_V "\033[0m"
+#fi
 
 # Step 2: Check for git
 echo "Looking for GIT"
@@ -79,37 +79,37 @@ else
 fi
 
 # Step 5: Check for mesa-common-dev
-echo "Looking for mesa-common-dev"
-MCD_V=$(dpkg -l | grep mesa-common-dev)
-if [ $? -eq 1 ]
-then
-	echo -e "\033[31m" "mesa-common-dev Not found" "\033[0m"
-	exit 1
-else
-	echo -e "\033[32m" $MCD_V "\033[0m"
-fi
+#echo "Looking for mesa-common-dev"
+#MCD_V=$(dpkg -l | grep mesa-common-dev)
+#if [ $? -eq 1 ]
+#then
+#	echo -e "\033[31m" "mesa-common-dev Not found" "\033[0m"
+#	exit 1
+#else
+#	echo -e "\033[32m" $MCD_V "\033[0m"
+#fi
 
 # Step 6: Check for libxt-dev
-echo "Looking for libxt-dev"
-LIBXT_V=$(dpkg -l | grep libxt-dev)
-if [ $? -eq 1 ]
-then
-	echo -e "\033[31m" "libxt-dev Not found" "\033[0m"
-	exit 1
-else
-	echo -e "\033[32m" $LIBXT_V "\033[0m"
-fi
+#echo "Looking for libxt-dev"
+#LIBXT_V=$(dpkg -l | grep libxt-dev)
+#if [ $? -eq 1 ]
+#then
+#	echo -e "\033[31m" "libxt-dev Not found" "\033[0m"
+#	exit 1
+#else
+#	echo -e "\033[32m" $LIBXT_V "\033[0m"
+#fi
 
 # Step 7: Check for freeglut3-dev
-echo "Looking for freeglut3-dev"
-LIBFG3_V=$(dpkg -l | grep freeglut3-dev)
-if [ $? -eq 1 ]
-then
-	echo -e "\033[31m" "freeglut3-dev Not found" "\033[0m"
-	exit 1
-else
-	echo -e "\033[32m" $LIBFG3_V "\033[0m"
-fi
+#echo "Looking for freeglut3-dev"
+#LIBFG3_V=$(dpkg -l | grep freeglut3-dev)
+#if [ $? -eq 1 ]
+#then
+#	echo -e "\033[31m" "freeglut3-dev Not found" "\033[0m"
+#	exit 1
+#else
+#	echo -e "\033[32m" $LIBFG3_V "\033[0m"
+#fi
 
 # Step 8: Check for openjdk-6-jdk
 echo "Looking for openjdk-6-jdk"
