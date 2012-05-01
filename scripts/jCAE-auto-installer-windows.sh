@@ -27,7 +27,20 @@
 #	- This step assumes http://download.oracle.com/otn-pub/java/jdk/6u31-b05/jdk-6u31-windows-i586.exe to be downlaoded in pwd
 #	- wget is not possible for this link as licence agreement comes before download
 
+##################################################
+## Script Variables
+##################################################
 
+# Installer command line arguments
+export makeSpeed;
+
+# TODO: check for supplied args
+if [ "$1" = "" ]
+then
+	makeSpeed="2"
+else
+	makeSpeed=$1
+fi
 
 ##################################################
 ## Detect dependencies
@@ -204,7 +217,7 @@ cd vtkBuild
 flags="-DBUILD_SHARED_LIBS:BOOL=ON"
 flags="$flags -DVTK_WRAP_JAVA:BOOL=ON"
 cmake $flags ../VTK
-make -j4
+make -j$makeSpeed
 cd ..
 
 # Cross build
@@ -233,7 +246,7 @@ flags="$flags -DVTKCompileTools_DIR:FILEPATH=$mypwd/vtkBuild/"
 cmake $flags ../VTK
 cmake $flags ../VTK
 
-make -j4
+make -j$makeSpeed
 make install
 
 cd ..
@@ -275,7 +288,7 @@ fi
 if [ $? -eq 0 ]
 then
 	echo -e "\033[32m oce cmake successful \033[0m"
-	make -j4
+	make -j$makeSpeed
 else
 	echo -e "\033[31m" "Unable to cmake oce" "\033[0m"
 	exit 1

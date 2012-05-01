@@ -1,6 +1,21 @@
 #!/bin/sh
 
 ##################################################
+## Script Variables
+##################################################
+
+# Installer command line arguments
+export makeSpeed;
+
+# TODO: check for supplied args
+if [ "$1" = "" ]
+then
+	makeSpeed="2"
+else
+	makeSpeed=$1
+fi
+
+##################################################
 ## Detect dependencies
 ##################################################
 # This does not take care of version numbers.
@@ -143,7 +158,7 @@ fi
 if [ $? -eq 0 ]
 then
 	echo -e "\033[32m oce cmake successful \033[0m"
-	make -j2
+	make -j$makeSpeed
 else
 	echo -e "\033[31m" "Unable to cmake oce" "\033[0m"
 	exit 1
@@ -196,7 +211,7 @@ flags="$flags -DBUILD_SHARED_LIBS:BOOL=ON"
 flags="$flags -DVTK_WRAP_JAVA:BOOL=ON"
 cmake $flags ..
 
-make -j2
+make -j$makeSpeed
 make install
 
 cd ../..
