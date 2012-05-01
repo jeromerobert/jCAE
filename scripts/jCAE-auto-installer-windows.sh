@@ -268,7 +268,7 @@ cd ..
 
 
 ##################################################
-## Get and Install OCE 0.9.0
+## Get and Install OCE 0.9.1
 ##################################################
 
 echo -e "\033[32m Fetching oce from Github \033[0m"
@@ -278,7 +278,7 @@ if [ $? -eq 0 ]
 then
 	mkdir oceBuild oceWinInstall
 	cd oce
-	git checkout OCE-0.9.0	
+	git checkout OCE-0.9.1
 	cd ../oceBuild
 	cp ../jCAE/vtk-util/toolchain-i686-w64-mingw32.cmake .
 	flags="-DOCE_INSTALL_PREFIX:PATH=$mypwd/oceWinInstall"
