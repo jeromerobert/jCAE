@@ -180,16 +180,31 @@ else
 fi
 
 ##################################################
-## Install JDK 1.6 u31  on wine
+## Install JDK 1.7  on wine
 ##################################################
-#
-# This step assumes http://download.oracle.com/otn-pub/java/jdk/6u31-b05/jdk-6u31-windows-i586.exe to be downlaoded in pwd
+wineDir=$PWD/.wine
+wineJavaDir=$wineDir/drive_c/Java
+wineJavaUrl="http://download.java.net/jdk7u6/archive/b07/binaries/jdk-7u6-ea-bin-b07-windows-i586-23_apr_2012.exe"
+wineJavaExec="jdk-7u6-ea-bin-b07-windows-i586-23_apr_2012.exe"
 
-wine dummy # to initiate wine, to create ~/.wine folder
-mkdir ~/.wine/drive_c/programs/
-mkdir ~/.wine/drive_c/programs/Java
+# check for $wineDir presence
+ret=$(ls "$wineDir")
+if [ $? -eq 1  ]
+then
+	export WINEPREFIX=$wineDir
+	winecfg
+fi
 
-wine jdk-6u31-windows-i586.exe  /s /v"/qn INSTALLDIR=$HOME/.wine/drive_c/programs/Java/"
+# check for jdk installation
+ret=$(find "$wineDir" -iname java.exe)
+if [ "$ret" = "" ];
+then
+	# Install jdk
+	mkdir $wineJavaDir
+	wget $wineJavaUrl
+	wine $wineJavaExec /s /v"/qn INSTALLDIR=$wineJavaDir"
+fi
+
 
 ##################################################
 ## Get, Patch (from jCAE) and Install VTK 
