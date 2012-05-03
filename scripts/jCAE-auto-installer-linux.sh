@@ -135,61 +135,6 @@ fi
 
 
 ##################################################
-## Get and Install OCE 0.9.1
-##################################################
-
-oceURL=https://github.com/tpaviot/oce.git
-oceDir=$mypwd/oce
-oceLinBuildDir=$mypwd/oceLinBuild
-oceLinInstallDir=$mypwd/oceLinInstall
-
-cd $mypwd
-echo -e "\033[32m Fetching oce from Github \033[0m"
-ret=$(ls $oceDir)
-if [ $? -ne 0 ]
-then
-	git clone $oceURL $oceDir
-fi
-
-cd $oceDir
-git checkout OCE-0.9.1
-cd $mypwd
-
-ret=$(ls $oceLinBuildDir)
-if [ $? -ne 0 ]
-then
-	mkdir $oceLinBuildDir	
-fi
-
-ret=$(find $oceLinBuildDir -iname *Tk*.so*)
-if [ "$ret" = "" ]
-then
-	cd $oceLinBuildDir
-	flags="-DOCE_INSTALL_PREFIX:PATH=$oceLinInstallDir"
-	flags="$flags -DOCE_DISABLE_BSPLINE_MESHER:BOOL=ON"
-	flags="$flags -DCMAKE_CXX_FLAGS:STRING=-DMMGT_OPT_DEFAULT=0"
-	flags="$flags -DOCE_DISABLE_X11=ON"
-	cmake $flags $oceDir
-	cd $mypwd
-	make -j$makeSpeed	
-fi
-
-ret=$(ls $oceLinInstallDir)
-if [ $? -ne 0 ]
-then
-	mkdir $oceLinInstallDir	
-fi
-
-ret=$(find $oceLinInstallDir -iname *Tk*.so*)
-if [ "$ret" = "" ]
-then
-	cd $oceLinBuildDir
-	make install
-fi
-
-cd $mypwd
-
-##################################################
 ## Get, Patch (from jCAE) and Install VTK 
 ## Get jCAE (installation later)
 ##################################################
@@ -262,6 +207,62 @@ then
 fi
 
 cd $mypwd
+
+##################################################
+## Get and Install OCE 0.9.1
+##################################################
+
+oceURL=https://github.com/tpaviot/oce.git
+oceDir=$mypwd/oce
+oceLinBuildDir=$mypwd/oceLinBuild
+oceLinInstallDir=$mypwd/oceLinInstall
+
+cd $mypwd
+echo -e "\033[32m Fetching oce from Github \033[0m"
+ret=$(ls $oceDir)
+if [ $? -ne 0 ]
+then
+	git clone $oceURL $oceDir
+fi
+
+cd $oceDir
+git checkout OCE-0.9.1
+cd $mypwd
+
+ret=$(ls $oceLinBuildDir)
+if [ $? -ne 0 ]
+then
+	mkdir $oceLinBuildDir	
+fi
+
+ret=$(find $oceLinBuildDir -iname *Tk*.so*)
+if [ "$ret" = "" ]
+then
+	cd $oceLinBuildDir
+	flags="-DOCE_INSTALL_PREFIX:PATH=$oceLinInstallDir"
+	flags="$flags -DOCE_DISABLE_BSPLINE_MESHER:BOOL=ON"
+	flags="$flags -DCMAKE_CXX_FLAGS:STRING=-DMMGT_OPT_DEFAULT=0"
+	flags="$flags -DOCE_DISABLE_X11=ON"
+	cmake $flags $oceDir
+	cd $mypwd
+	make -j$makeSpeed	
+fi
+
+ret=$(ls $oceLinInstallDir)
+if [ $? -ne 0 ]
+then
+	mkdir $oceLinInstallDir	
+fi
+
+ret=$(find $oceLinInstallDir -iname *Tk*.so*)
+if [ "$ret" = "" ]
+then
+	cd $oceLinBuildDir
+	make install
+fi
+
+cd $mypwd
+
 
 ##################################################
 ## Get and Install JYTHON

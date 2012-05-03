@@ -22,11 +22,6 @@
 #1. sudo gedit /usr/share/cmake-2.8/Modules/Platform/Windows-GNU.cmake 
 #	- This requires to be automated
 
-#
-#2. JDK
-#	- This step assumes http://download.oracle.com/otn-pub/java/jdk/6u31-b05/jdk-6u31-windows-i586.exe to be downlaoded in pwd
-#	- wget is not possible for this link as licence agreement comes before download
-
 ##################################################
 ## Script Variables
 ##################################################
@@ -41,6 +36,9 @@ then
 else
 	makeSpeed=$1
 fi
+
+# location variables
+export mypwd=$PWD
 
 ##################################################
 ## Detect dependencies
@@ -182,22 +180,24 @@ fi
 ##################################################
 ## Install JDK 1.7  on wine
 ##################################################
-wineDir=$PWD/.wine
+wineDir=$mypwd/.wine
 wineJavaDir=$wineDir/drive_c/Java
 wineJavaUrl="http://download.java.net/jdk7u6/archive/b07/binaries/jdk-7u6-ea-bin-b07-windows-i586-23_apr_2012.exe"
 wineJavaExec="jdk-7u6-ea-bin-b07-windows-i586-23_apr_2012.exe"
 
 # check for $wineDir presence
 ret=$(ls "$wineDir")
-if [ $? -eq 1  ]
+if [ $? -ne 0 ]
 then
-	export WINEPREFIX=$wineDir
+	mkdir $wineDir
 	winecfg
 fi
 
+export WINEPREFIX=$wineDir
+
 # check for jdk installation
 ret=$(find "$wineDir" -iname java.exe)
-if [ "$ret" = "" ];
+if [ "$ret" = "" ]
 then
 	# Install jdk
 	mkdir $wineJavaDir
@@ -205,128 +205,183 @@ then
 	wine $wineJavaExec /s /v"/qn INSTALLDIR=$wineJavaDir"
 fi
 
-
 ##################################################
 ## Get, Patch (from jCAE) and Install VTK 
 ## Get jCAE (installation later)
 ##################################################
 
-export mypwd=$PWD
+# Define abs locations
+vtkURL="http://www.vtk.org/files/release/5.6/vtk-5.6.1.tar.gz"
+vtkTar="vtk-5.6.1.tar.gz"
+vtkDir=$mypwd/VTK
+vtkLinBuildDir=$mypwd/vtkLinBuild
+vtkLinInstallDir=$mypwd/vtkLinInstall
+vtkWinBuildDir=$mypwd/vtkWinBuild
+vtkWinInstallDir=$mypwd/vtkWinInstall
+
+jcaeURL=https://github.com/jeromerobert/jCAE.git
+jcaeDir=$mypwd/jCAE
 
 # Get vtk-5.6.1, unzip 
-wget http://www.vtk.org/files/release/5.6/vtk-5.6.1.tar.gz
-tar -xf vtk-5.6.1.tar.gz
+ret=$(ls $vtkTar)
+if [ $? -ne 0 ]
+then
+	wget $vtkURL
+fi
+
+ret=$(ls $vtkDir)
+if [ $? -ne 0 ]
+then
+	tar -xf $vtkTar
+fi
 
 # Get jCAE source (so early to get vtk patch)
-git clone https://github.com/mohitgargk/jCAE.git
+ret=$(ls $jcaeDir)
+if [ $? -ne 0 ]
+then
+	git clone $jcaeURL
+fi
 
 # Apply patch
-cd VTK
-./../jCAE/vtk-util/patch/5.6/apply.sh
-cd ..
+cd $vtkDir
+$jcaeDir/vtk-util/patch/5.6/apply.sh
+cd $mypwd
 
-# Native Build
-mkdir vtkBuild
-cd vtkBuild
+ret=$(ls $vtkLinBuildDir)
+if [ $? -ne 0 ]
+then
+	mkdir $vtkLinBuildDir
+fi
 
-flags="-DBUILD_SHARED_LIBS:BOOL=ON"
-flags="$flags -DVTK_WRAP_JAVA:BOOL=ON"
-cmake $flags ../VTK
-make -j$makeSpeed
-cd ..
+ret=$(find $vtkLinBuildDir -iname vtk.jar)
+if [ "$ret" = "" ]
+then
+	cd $vtkLinBuildDir
+	flags="-DCMAKE_INSTALL_PREFIX:PATH=$vtkLinInstallDir"
+	flags="$flags -DBUILD_SHARED_LIBS:BOOL=ON"
+	flags="$flags -DVTK_WRAP_JAVA:BOOL=ON"
+	flags="$flags -DCMAKE_CXX_FLAGS:STRING=-fpermissive"
+	cmake $flags $vtkDir
+	make -j$makeSpeed
+fi
+cd $mypwd
 
 # Cross build
-mkdir vtkWinBuild
-mkdir vtkWinInstall
+ret=$(ls $vtkWinBuildDir)
+if [ $? -ne 0 ]
+then
+	mkdir $vtkWinBuildDir
+fi
 
-cd vtkWinBuild
-cp ../jCAE/vtk-util/toolchain-i686-w64-mingw32.cmake .
-flags=" -DBUILD_SHARED_LIBS:BOOL=ON"
-flags="$flags -DVTK_WRAP_JAVA:BOOL=ON"
-flags="$flags -DBUILD_TESTING:BOOL=OFF"
-flags="$flags -DCMAKE_SHARED_LINKER_FLAGS:STRING=-Wl,--kill-at"
-flags="$flags -DJAVA_ARCHIVE:FILEPATH=/usr/bin/jar"
+ret=$(find $vtkWinBuildDir -iname vtk.jar)
+if [ "$ret" = "" ]
+then
+	cd $vtkWinBuildDir
+	flags=" -DBUILD_SHARED_LIBS:BOOL=ON"
+	flags="$flags -DVTK_WRAP_JAVA:BOOL=ON"
+	flags="$flags -DBUILD_TESTING:BOOL=OFF"
+	flags="$flags -DCMAKE_SHARED_LINKER_FLAGS:STRING=-Wl,--kill-at"
+	flags="$flags -DJAVA_ARCHIVE:FILEPATH=/usr/bin/jar"
 
-flags="$flags -DJAVA_AWT_INCLUDE_PATH:PATH=$HOME/.wine/drive_c/programs/Java/include"
-flags="$flags -DJAVA_AWT_LIBRARY:FILEPATH=$HOME/.wine/drive_c/programs/Java/lib/jawt.lib"
-flags="$flags -DJAVA_COMPILE:FILEPATH=/usr/bin/javac"
-flags="$flags -DJAVA_INCLUDE_PATH:PATH=$HOME/.wine/drive_c/programs/Java/include"
-flags="$flags -DJAVA_INCLUDE_PATH2:PATH=$HOME/.wine/drive_c/programs/Java/include/win32"
-flags="$flags -DJAVA_JVM_LIBRARY:FILEPATH=$HOME/.wine/drive_c/programs/Java/lib/jvm.lib"
-flags="$flags -DJAVA_RUNTIME:FILEPATH=$HOME/.wine/drive_c/programs/Java/jre/bin/java.exe"
-flags="$flags -DCMAKE_INSTALL_PREFIX:FILEPATH=$mypwd/vtkWinInstall/"
-flags="$flags -DCMAKE_TOOLCHAIN_FILE:FILEPATH=toolchain-i686-w64-mingw32.cmake"
-flags="$flags -DVTKCompileTools_DIR:FILEPATH=$mypwd/vtkBuild/"
+	flags="$flags -DJAVA_AWT_INCLUDE_PATH:PATH=$wineJavaDir/include"
+	flags="$flags -DJAVA_AWT_LIBRARY:FILEPATH=$wineJavaDir/lib/jawt.lib"
+	flags="$flags -DJAVA_COMPILE:FILEPATH=$wineJavaDir/bin/javac.exe"
+	flags="$flags -DJAVA_INCLUDE_PATH:PATH=$wineJavaDir/include"
+	flags="$flags -DJAVA_INCLUDE_PATH2:PATH=$wineJavaDir/include/win32"
+	flags="$flags -DJAVA_JVM_LIBRARY:FILEPATH=$wineJavaDir/lib/jvm.lib"
+	flags="$flags -DJAVA_RUNTIME:FILEPATH=$wineJavaDir/bin/java.exe"
 
-cmake $flags ../VTK
-cmake $flags ../VTK
+	flags="$flags -DCMAKE_INSTALL_PREFIX:FILEPATH=$vtkWinInstallDir/"
+	flags="$flags -DCMAKE_TOOLCHAIN_FILE:FILEPATH=$jcaeDir/vtk-util/toolchain-x86_64-w64-mingw32.cmake"
+	flags="$flags -DVTKCompileTools_DIR:FILEPATH=$vtkLinBuildDir"
 
-make -j$makeSpeed
-make install
+	flags="$flags -DCMAKE_CXX_FLAGS:STRING=-fpermissive"
 
-cd ..
+	cmake $flags $vtkDir
+	cmake $flags $vtkDir
 
+	make -j$makeSpeed
+fi
+
+ret=$(ls $vtkWinInstallDir)
+if [ $? -ne 0 ]
+then
+	cd $mypwd
+	mkdir $vtkWinInstallDir
+fi
+
+ret=$(find $vtkWinInstallDir -iname vtk.jar)
+if [ "$ret" = "" ]
+then
+	cd $vtkWinBuildDir
+	make install
+fi
+
+cd $mypwd
 
 ##################################################
 ## Get and Install OCE 0.9.1
 ##################################################
 
-echo -e "\033[32m Fetching oce from Github \033[0m"
-git clone https://github.com/tpaviot/oce.git
+oceURL=https://github.com/tpaviot/oce.git
+oceDir=$mypwd/oce
+oceWinBuildDir=$mypwd/oceWinBuild
+oceWinInstallDir=$mypwd/oceWinInstall
 
-if [ $? -eq 0 ]
+cd $mypwd
+echo -e "\033[32m Fetching oce from Github \033[0m"
+ret=$(ls $oceDir)
+if [ $? -ne 0 ]
 then
-	mkdir oceBuild oceWinInstall
-	cd oce
-	git checkout OCE-0.9.1
-	cd ../oceBuild
-	cp ../jCAE/vtk-util/toolchain-i686-w64-mingw32.cmake .
-	flags="-DOCE_INSTALL_PREFIX:PATH=$mypwd/oceWinInstall"
+	git clone $oceURL $oceDir
+fi
+
+cd $oceDir
+git checkout OCE-0.9.1
+cd $mypwd
+
+ret=$(ls $oceWinBuildDir)
+if [ $? -ne 0 ]
+then
+	mkdir $oceWinBuildDir	
+fi
+
+ret=$(find $oceWinBuildDir -iname *Tk*.dll)
+if [ "$ret" = "" ]
+then
+	cd $oceWinBuildDir
+	flags="-DOCE_INSTALL_PREFIX:PATH=$oceWinInstallDir"
 	flags="$flags -DOCE_DISABLE_BSPLINE_MESHER:BOOL=ON"
 	flags="$flags -DCMAKE_CXX_FLAGS:STRING=-DMMGT_OPT_DEFAULT=0"
 	flags="$flags -DOCE_DISABLE_X11=ON"
 	flags="$flags -DJAVA_ARCHIVE:FILEPATH=/usr/bin/jar"
-	flags="$flags -DJAVA_AWT_INCLUDE_PATH:PATH=$HOME/.wine/drive_c/programs/Java/include"
-	flags="$flags -DJAVA_AWT_LIBRARY:FILEPATH=$HOME/.wine/drive_c/programs/Java/lib/jawt.lib"
-	flags="$flags -DJAVA_COMPILE:FILEPATH=/usr/bin/javac"
-	flags="$flags -DJAVA_INCLUDE_PATH:PATH=$HOME/.wine/drive_c/programs/Java/include"
-	flags="$flags -DJAVA_INCLUDE_PATH2:PATH=$HOME/.wine/drive_c/programs/Java/include/win32"
-	flags="$flags -DJAVA_JVM_LIBRARY:FILEPATH=$HOME/.wine/drive_c/programs/Java/lib/jvm.lib"
-	flags="$flags -DJAVA_RUNTIME:FILEPATH=$HOME/.wine/drive_c/programs/Java/jre/bin/java.exe"
-	flags="$flags -DCMAKE_TOOLCHAIN_FILE:FILEPATH=toolchain-i686-w64-mingw32.cmake"
-	cmake $flags ../oce	
-else
-	echo -e "\033[31m" "Unable to fetch oce" "\033[0m"
-	exit 1
-fi
-
-if [ $? -eq 0 ]
-then
-	echo -e "\033[32m oce cmake successful \033[0m"
+	flags="$flags -DJAVA_AWT_INCLUDE_PATH:PATH=$wineJavaDir/include"
+	flags="$flags -DJAVA_AWT_LIBRARY:FILEPATH=$wineJavaDir/lib/jawt.lib"
+	flags="$flags -DJAVA_COMPILE:FILEPATH=$wineJavaDir/jre/bin/javacpl.exe"
+	flags="$flags -DJAVA_INCLUDE_PATH:PATH=$wineJavaDir/include"
+	flags="$flags -DJAVA_INCLUDE_PATH2:PATH=$wineJavaDir/include/win32"
+	flags="$flags -DJAVA_JVM_LIBRARY:FILEPATH=$wineJavaDir/lib/jvm.lib"
+	flags="$flags -DJAVA_RUNTIME:FILEPATH=$wineJavaDir/jre/bin/java.exe"
+	flags="$flags -DCMAKE_TOOLCHAIN_FILE:FILEPATH=$jcaeDir/vtk-util/toolchain-x86_64-w64-mingw32.cmake"
+	flags="$flags -DCMAKE_CXX_FLAGS:STRING=-fpermissive"
+	cmake $flags $oceDir
 	make -j$makeSpeed
-else
-	echo -e "\033[31m" "Unable to cmake oce" "\033[0m"
-	exit 1
 fi
 
-if [ $? -eq 0 ]
+ret=$(ls $oceWinInstallDir)
+if [ $? -ne 0 ]
 then
-	echo -e "\033[32m oce make successful \033[0m"
+	mkdir $oceWinInstallDir
+fi
+
+ret=$(find $oceWinInstallDir -iname *Tk*.dll)
+if [ "$ret" = "" ]
+then
+	cd $oceWinBuildDir
 	make install
-else
-	echo -e "\033[31m" "Unable to make oce" "\033[0m"
-	exit 1
 fi
 
-if [ $? -eq 0 ]
-then
-	echo -e "\033[32m oce install successful \033[0m"
-else
-	echo -e "\033[31m" "Unable to install oce" "\033[0m"
-	exit 1
-fi
-
-cd ..
+cd $mypwd
 
 ##################################################
 ## PATCH # Copy libgcc_s_sjlj-1.dll libstdc++-6.dll
