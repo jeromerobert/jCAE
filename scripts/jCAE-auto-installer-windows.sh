@@ -182,18 +182,18 @@ fi
 ##################################################
 wineDir=$mypwd/.wine
 wineJavaDir=$wineDir/drive_c/Java
-wineJavaUrl="http://download.java.net/jdk7u6/archive/b07/binaries/jdk-7u6-ea-bin-b07-windows-i586-23_apr_2012.exe"
-wineJavaExec="jdk-7u6-ea-bin-b07-windows-i586-23_apr_2012.exe"
+wineJavaUrl="http://www.java.net/download/jdk6/6u32/promoted/b02/binaries/jdk-6u32-ea-bin-b02-windows-i586-30_jan_2012.exe"
+wineJavaExec="jdk-6u32-ea-bin-b02-windows-i586-30_jan_2012.exe"
 
 # check for $wineDir presence
+
+export WINEPREFIX=$wineDir
 ret=$(ls "$wineDir")
 if [ $? -ne 0 ]
 then
 	mkdir $wineDir
 	winecfg
 fi
-
-export WINEPREFIX=$wineDir
 
 # check for jdk installation
 ret=$(find "$wineDir" -iname java.exe)
@@ -292,7 +292,7 @@ then
 	flags="$flags -DJAVA_RUNTIME:FILEPATH=$wineJavaDir/bin/java.exe"
 
 	flags="$flags -DCMAKE_INSTALL_PREFIX:FILEPATH=$vtkWinInstallDir/"
-	flags="$flags -DCMAKE_TOOLCHAIN_FILE:FILEPATH=$jcaeDir/vtk-util/toolchain-x86_64-w64-mingw32.cmake"
+	flags="$flags -DCMAKE_TOOLCHAIN_FILE:FILEPATH=$jcaeDir/vtk-util/toolchain-i686-w64-mingw32.cmake"
 	flags="$flags -DVTKCompileTools_DIR:FILEPATH=$vtkLinBuildDir"
 
 	flags="$flags -DCMAKE_CXX_FLAGS:STRING=-fpermissive"
@@ -362,7 +362,7 @@ then
 	flags="$flags -DJAVA_INCLUDE_PATH2:PATH=$wineJavaDir/include/win32"
 	flags="$flags -DJAVA_JVM_LIBRARY:FILEPATH=$wineJavaDir/lib/jvm.lib"
 	flags="$flags -DJAVA_RUNTIME:FILEPATH=$wineJavaDir/jre/bin/java.exe"
-	flags="$flags -DCMAKE_TOOLCHAIN_FILE:FILEPATH=$jcaeDir/vtk-util/toolchain-x86_64-w64-mingw32.cmake"
+	flags="$flags -DCMAKE_TOOLCHAIN_FILE:FILEPATH=$jcaeDir/vtk-util/toolchain-i686-w64-mingw32.cmake"
 	flags="$flags -DCMAKE_CXX_FLAGS:STRING=-fpermissive"
 	cmake $flags $oceDir
 	make -j$makeSpeed
@@ -387,7 +387,7 @@ cd $mypwd
 ## PATCH # Copy libgcc_s_sjlj-1.dll libstdc++-6.dll
 ##################################################
 
-cd oceWinInstall/Win32/bin/
+cd $oceWinInstallDir/Win32/bin/
 
 Is64=$(objdump -f TKBO.dll | grep 64)
 
@@ -402,250 +402,319 @@ fi
 
 cd ../../../
 
-##################################################
-## Get and Install Netbeans 7.1
-##################################################
-
-echo -e "\033[32m" "Fetching Netbeans 7.1" "\033[0m" 
-wget http://dlc.sun.com.edgesuite.net/netbeans/7.1.1/final/bundles/netbeans-7.1.1-ml-javase-linux.sh
-
-if [ $? -eq 1 ]
-then
-     echo -e "\033[31m" "Netbeans setup Not found" "\033[0m" 
-     exit 1
-else
-	chmod a+x netbeans-7.1.1-ml-javase-linux.sh
-        mkdir nb
-        ./netbeans-7.1.1-ml-javase-linux.sh --silent "-J-Dnb-base.installation.location=nb/"
-fi
-
-if [ $? -eq 1 ]
-then
-     echo -e "\033[31m" "Netbeans could not be installed" "\033[0m" 
-     exit 1
-else
-     echo -e "\033[32m" "Netbeans Installed successfully" "\033[0m" 
-fi
 
 ##################################################
 ## Get and Install JYTHON
 ##################################################
 
-echo -e "\033[32m" "Fetching Jython" "\033[0m" 
-wget http://sourceforge.net/projects/jython/files/jython/2.5.2/jython_installer-2.5.2.jar
+jythonURL=http://sourceforge.net/projects/jython/files/jython/2.5.2/jython_installer-2.5.2.jar
+jythonJar=jython_installer-2.5.2.jar
+jythonDir=$mypwd/jython
 
-if [ $? -eq 1 ]
+ret=$(ls $jythonJar)
+if [ $? -ne 0 ]
 then
-     echo -e "\033[31m" "Jython server Not found" "\033[0m" 
-     exit 1
-else
-	java -jar jython_installer-2.5.2.jar -s -d jython 
+	wget $jythonURL
 fi
 
-if [ $? -eq 1 ]
+ret=$(ls $jythonDir)
+if [ $? -ne 0 ]
 then
-     echo -e "\033[31m" "Jython could not be installed" "\033[0m" 
-     exit 1
-else
-	echo -e "\033[32m" "Jython Installed successfully" "\033[0m" 
+	java -jar $jythonJar -s -d $jythonDir
 fi
+
 
 ##################################################
 ## Get and Install VECMATH
 ##################################################
+vecmathURL=http://ftp.fr.debian.org/debian/pool/main/v/vecmath/libvecmath-java_1.5.2-2_all.deb
+vecmathDebian=libvecmath-java_1.5.2-2_all.deb
+vecmathDir=$mypwd/vecmath
 
-echo -e "\033[32m" "Fetching vecmath" "\033[0m" 
-wget http://ftp.fr.debian.org/debian/pool/main/v/vecmath/libvecmath-java_1.5.2-2_all.deb
-
-if [ $? -eq 1 ]
+ret=$(ls $vecmathDebian)
+if [ $? -ne 0 ]
 then
-     echo -e "\033[31m" "Vecmath server Not found" "\033[0m" 
-     exit 1
-else
-	dpkg-deb -x libvecmath-java_1.5.2-2_all.deb vecmath
+	wget $vecmathURL
 fi
 
-if [ $? -eq 1 ]
+ret=$(ls $vecmathDir)
+if [ $? -ne 0 ]
 then
-     echo -e "\033[31m" "Vecmath could not be installed" "\033[0m" 
-     exit 1
-else
-	echo -e "\033[32m" "Vecmath Installed successfully" "\033[0m" 
+	dpkg-deb -x $vecmathDebian $vecmathDir
 fi
 
 
 ##################################################
 ## Get and Install TROVE
 ##################################################
-
-echo -e "\033[32m" "Fetching trove" "\033[0m" 
-wget http://ftp.fr.debian.org/debian/pool/main/t/trove/libtrove-java_2.1.0-2_all.deb
-
-if [ $? -eq 1 ]
+troveURL=http://ftp.fr.debian.org/debian/pool/main/t/trove/libtrove-java_2.1.0-2_all.deb
+troveDebian=libtrove-java_2.1.0-2_all.deb
+troveDir=$mypwd/trove
+ret=$(ls $troveDebian)
+if [ $? -ne 0 ]
 then
-     echo -e "\033[31m" "trove server Not found" "\033[0m" 
-     exit 1
-else
-	dpkg-deb -x libtrove-java_2.1.0-2_all.deb trove
+	wget $troveURL
 fi
 
-if [ $? -eq 1 ]
+ret=$(ls $troveDir)
+if [ $? -ne 0 ]
 then
-     echo -e "\033[31m" "trove could not be installed" "\033[0m" 
-     exit 1
-else
-	echo -e "\033[32m" "trove Installed successfully" "\033[0m" 
+	dpkg-deb -x $troveDebian $troveDir
 fi
+
+
+##################################################
+## Get and Install Netbeans 7.1
+##################################################
+nbURL=http://dlc.sun.com.edgesuite.net/netbeans/7.1.1/final/bundles/netbeans-7.1.1-ml-javase-linux.sh
+nbEx=netbeans-7.1.1-ml-javase-linux.sh
+nbDir=$mypwd/nb
+
+ret=$(ls $nbEx)
+if [ $? -ne 0 ]
+then
+	wget $nbURL
+	chmod a+x $nbEx
+fi
+
+ret=$(ls $nbDir)
+if [ $? -ne 0 ]
+then
+	mkdir $nbDir
+	./$nbEx --silent "-J-Dnb-base.installation.location=$nbDir"
+fi
+
 
 ##################################################
 ## Get and Install XALAN
 ## Get XSLs for build-impl.xml creation
 ##################################################
+xalanURL=http://mirror.mkhelif.fr/apache//xml/xalan-j/xalan-j_2_7_1-bin-2jars.tar.gz
+xalanTar=xalan-j_2_7_1-bin-2jars.tar.gz
+xalanDir=$mypwd/xalan-j_2_7_1
 
-wget http://mirror.mkhelif.fr/apache//xml/xalan-j/xalan-j_2_7_1-bin-2jars.tar.gz
-tar xf xalan-j_2_7_1-bin-2jars.tar.gz
-rm xalan-j_2_7_1-bin-2jars.tar.gz
-cd xalan-j_2_7_1
-export CLASSPATH=$CLASSPATH:$PWD/xalan.jar
-export CLASSPATH=$CLASSPATH:$PWD/serializer.jar
-export CLASSPATH=$CLASSPATH:$PWD/xercesImpl.jar
-export CLASSPATH=$CLASSPATH:$PWD/xml-apis.jar
-export CLASSPATH=$CLASSPATH:$PWD/xsltc.jar
-cd ..
+ret=$(ls $xalanTar)
+if [ $? -ne 0 ]
+then
+	wget $xalanURL
+fi
 
-mkdir xsls
-cd xsls
-wget http://hg.netbeans.org/releases/raw-file/5dfb0137e99e/java.j2seproject/src/org/netbeans/modules/java/j2seproject/resources/build-impl.xsl
-mv build-impl.xsl project-build-impl.xsl
-wget http://hg.netbeans.org/main/raw-file/c2719a24ed74/apisupport.ant/src/org/netbeans/modules/apisupport/project/suite/resources/build-impl.xsl
-mv build-impl.xsl suite-build-impl.xsl
-wget http://hg.netbeans.org/main/raw-file/c2719a24ed74/apisupport.ant/src/org/netbeans/modules/apisupport/project/resources/build-impl.xsl 
-mv build-impl.xsl module-build-impl.xsl
-wget http://hg.netbeans.org/main/raw-file/c2719a24ed74/apisupport.ant/src/org/netbeans/modules/apisupport/project/suite/resources/platform.xsl
-cd ..
+ret=$(ls $xalanDir)
+if [ $? -ne 0 ]
+then
+	tar xf $xalanTar	
+fi
+
+export CLASSPATH=$CLASSPATH:$xalanDir/xalan.jar
+export CLASSPATH=$CLASSPATH:$xalanDir/serializer.jar
+export CLASSPATH=$CLASSPATH:$xalanDir/xercesImpl.jar
+export CLASSPATH=$CLASSPATH:$xalanDir/xml-apis.jar
+export CLASSPATH=$CLASSPATH:$xalanDir/xsltc.jar
+
+################
+#XSLS
+################
+xslDir=$mypwd/xsls
+nbProjectXslURL=http://hg.netbeans.org/releases/raw-file/5dfb0137e99e/java.j2seproject/src/org/netbeans/modules/java/j2seproject/resources/build-impl.xsl
+nbSuiteXslURL=http://hg.netbeans.org/main/raw-file/c2719a24ed74/apisupport.ant/src/org/netbeans/modules/apisupport/project/suite/resources/build-impl.xsl
+nbModuleXslURL=http://hg.netbeans.org/main/raw-file/c2719a24ed74/apisupport.ant/src/org/netbeans/modules/apisupport/project/resources/build-impl.xsl
+nbPlatformXslURL=http://hg.netbeans.org/main/raw-file/c2719a24ed74/apisupport.ant/src/org/netbeans/modules/apisupport/project/suite/resources/platform.xsl
+
+ret=$(ls $xslDir)
+if [ $? -ne 0 ]
+then
+	mkdir $xslDir	
+fi
+
+ret=$(ls -1 $xslDir | wc -l)
+if [ "$ret" != "4" ]
+then
+	ret=$(ls $xslDir/project-build-impl.xsl)
+	if [ $? -ne 0 ]
+	then
+		wget $nbProjectXslURL
+		mv build-impl.xsl $xslDir/project-build-impl.xsl
+	fi
+
+	ret=$(ls $xslDir/suite-build-impl.xsl)
+	if [ $? -ne 0 ]
+	then
+		wget $nbSuiteXslURL
+		mv build-impl.xsl $xslDir/suite-build-impl.xsl
+	fi
+
+	ret=$(ls $xslDir/module-build-impl.xsl)
+	if [ $? -ne 0 ]
+	then
+		wget $nbModuleXslURL
+		mv build-impl.xsl $xslDir/module-build-impl.xsl
+	fi
+
+	ret=$(ls $xslDir/platform.xsl)
+	if [ $? -ne 0 ]
+	then
+		wget $nbPlatformXslURL
+		mv platform.xsl $xslDir/platform.xsl	
+	fi
+fi
 
 
 ##################################################
 ## jCAE INSTALLATION
 ##################################################
 
-
 #-------------------------------------------------
 ## Set envirmonment variables
 #-------------------------------------------------
-export mypwd=$PWD
 
-export jythonPath=$mypwd/$(find jython/ -iname jython.jar)
-export trovePath=$mypwd/$(find trove/ -iname trove.jar)
-export vecmathPath=$mypwd/$(find vecmath/ -iname vecmath.jar)
-export vtkPath=$mypwd/$(find vtkWinInstall/ -iname vtk.jar)
+export jythonPath=$(find $jythonDir -iname jython.jar)
+export trovePath=$(find $troveDir -iname trove.jar)
+export vecmathPath=$(find $vecmathDir -iname vecmath.jar)
+export vtkPath=$(find $vtkLinBuildDir -iname vtk.jar)
 
 touch jcae.config
+echo "" > jcae.config
 
 echo "libs.trove.classpath=$trovePath" >> jcae.config
 echo "libs.vecmath.classpath=$vecmathPath" >> jcae.config
 echo "libs.VTK.classpath=$vtkPath" >> jcae.config
 
 echo "arch.win32=true" >> jcae.config
-echo "path.occ.win32=$mypwd/oceWinInstall/Win32/bin/" >> jcae.config
-echo "path.jython.win32=$mypwd/jython/" >> jcae.config
-echo "vtk.dir.win32=$mypwd/vtkWinInstall/bin/" >> jcae.config
+echo "path.occ.win32=$oceWinInstallDir/Win32/bin/" >> jcae.config
+echo "path.jython.win32=$jythonDir" >> jcae.config
+echo "vtk.dir.win32=$vtkWinInstallDir/bin/" >> jcae.config
 echo "path.occjava.win32=$mypwd/occjavaBuild/OccJava.dll" >> jcae.config
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$mypwd/oceWinInstall/Win32/bin/
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$mypwd/vtkWinInstall/bin/
 
 #-------------------------------------------------
+## Clean jCAE and occjava 
+#-------------------------------------------------
+# Cleaning jCAE from any previous wrong built requires 
+# an extraordinary amount of checking/editing in 
+# a lot of properties files. 
+# TODO: One idea would be to run -
+# cd $mypwd; 
+# ant -Dnbplatform.default.netbeans.dest.dir="$nbDir" -Dnbplatform.default.harness.dir="$nbDir/harness/" clean
+# Will try it in the unified script
+
+# For the time being, cleaning is done like this, as it is not as time oriented task as vtk/oce/xalan/netbeans
+rm -rf $jcaeDir
+rm -rf $mypwd/occjavaInstall
+git clone $jcaeURL
+
+
+#-------------------------------------------------
 ## Build jCAE projects (vtk-util, occjava, etc)
 #-------------------------------------------------
 
 ## build OccJava
-cd jCAE/occjava/
-mkdir build
-cd build
-cp ../../vtk-util/toolchain-i686-w64-mingw32.cmake .
-#cmake -DOCE_DIR=../../oceBuild/lib/oce-0.9.0 ..
-cmake -DJAVA_ARCHIVE:FILEPATH=/usr/bin/jar -DJAVA_AWT_INCLUDE_PATH:PATH=$HOME/.wine/drive_c/programs/Java/include/ -DJAVA_AWT_LIBRARY:FILEPATH=$HOME/.wine/drive_c/programs/Java/lib/jawt.lib -DJAVA_COMPILE:FILEPATH=/usr/bin/javac -DJAVA_INCLUDE_PATH:PATH=$HOME/.wine/drive_c/programs/Java/include -DJAVA_INCLUDE_PATH2:PATH=$HOME/.wine/drive_c/programs/Java/include/win32 -DJAVA_JVM_LIBRARY:FILEPATH=$HOME/.wine/drive_c/programs/Java/lib/jvm.lib -DJAVA_RUNTIME:FILEPATH=$HOME/.wine/drive_c/programs/Java/jre/bin/java.exe -DOCE_DIR=$mypwd/oceWinInstall/cmake/ -DCMAKE_TOOLCHAIN_FILE:FILEPATH=toolchain-i686-w64-mingw32.cmake -DSWIG_DIR=/usr/bin/ -DSWIG_EXECUTABLE=/usr/bin/swig ..
+occjavaDir=$jcaeDir/occjava
+occjavaBuildDir=$mypwd/occjavaBuild
+occjavaInstallDir=$mypwd/occjavaInstall/
+
+mkdir $occjavaBuildDir
+cd $occjavaBuildDir
+
+flags=""
+flags="$flags -DSWIG_DIR=/usr/bin/"
+flags="$flags -DSWIG_EXECUTABLE=/usr/bin/swig"
+flags="$flags -DOCE_DIR=$oceWinInstallDir/cmake/"
+
+flags="$flags -DJAVA_ARCHIVE:FILEPATH=/usr/bin/jar"
+flags="$flags -DJAVA_AWT_INCLUDE_PATH:PATH=$wineJavaDir/include"
+flags="$flags -DJAVA_AWT_LIBRARY:FILEPATH=$wineJavaDir/lib/jawt.lib"
+flags="$flags -DJAVA_COMPILE:FILEPATH=$wineJavaDir/jre/bin/javacpl.exe"
+flags="$flags -DJAVA_INCLUDE_PATH:PATH=$wineJavaDir/include"
+flags="$flags -DJAVA_INCLUDE_PATH2:PATH=$wineJavaDir/include/win32"
+flags="$flags -DJAVA_JVM_LIBRARY:FILEPATH=$wineJavaDir/lib/jvm.lib"
+flags="$flags -DJAVA_RUNTIME:FILEPATH=$wineJavaDir/jre/bin/java.exe"
+flags="$flags -DCMAKE_TOOLCHAIN_FILE:FILEPATH=$jcaeDir/vtk-util/toolchain-i686-w64-mingw32.cmake"
+flags="$flags -DCMAKE_CXX_FLAGS:STRING=-fpermissive"
+
+cmake $flags $occjavaDir
 make
-mkdir ../../../occjavaBuild
-cp *.dll* ../../../occjavaBuild/
-cd ../../../
+
+mkdir $occjavaInstallDir
+cp *.dll* $occjavaInstallDir
+cd $mypwd
 
 ## building vtk-util
-cd jCAE/vtk-util/
+cd $jcaeDir/vtk-util/
 mkdir nbproject/private
 touch nbproject/private/private.properties
-cat ../../jcae.config >> nbproject/private/private.properties
+cat $mypwd/jcae.config >> nbproject/private/private.properties
 ant config
 ant clean
-ant -Dnbplatform.default.netbeans.dest.dir="$mypwd/nb/" -Dnbplatform.default.harness.dir="$mypwd/nb/harness/"  
-cd ../..
+ant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/"
+cd $mypwd
 
 ## building jcae/occjava
-cd jCAE/jcae/occjava
+cd $jcaeDir/jcae/occjava
 mkdir nbproject/private
 touch nbproject/private/private.properties
-cat ../../../jcae.config >> nbproject/private/private.properties
-java org.apache.xalan.xslt.Process -IN ./nbproject/project.xml -XSL ../../../xsls/project-build-impl.xsl -OUT ./nbproject/build-impl.xml
-ant -Dnbplatform.default.netbeans.dest.dir="$mypwd/nb/" -Dnbplatform.default.harness.dir="$mypwd/nb/harness/" jar
-cd ../../..
+cat $mypwd/jcae.config >> nbproject/private/private.properties
+java org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/project-build-impl.xsl -OUT nbproject/build-impl.xml
+ant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" jar
+cd $mypwd
 
 ## building amibe
-cd jCAE/amibe
+cd $jcaeDir/amibe
 mkdir nbproject/private
 touch nbproject/private/private.properties
-cat ../../jcae.config >> nbproject/private/private.properties
-java org.apache.xalan.xslt.Process -IN ./nbproject/project.xml -XSL ../../xsls/project-build-impl.xsl -OUT ./nbproject/build-impl.xml
-ant -Dnbplatform.default.netbeans.dest.dir="$mypwd/nb/" -Dnbplatform.default.harness.dir="$mypwd/nb/harness/" -f nbbuild.xml jar
-cd ../..
+cat $mypwd/jcae.config >> nbproject/private/private.properties
+java org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/project-build-impl.xsl -OUT nbproject/build-impl.xml
+ant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" -f nbbuild.xml jar
+cd $mypwd
 
 ## building vtk-amibe (src location at jCAE/vtk-amibe/, DONT know why?)
-cd jCAE/jcae/vtk-amibe
+cd $jcaeDir/jcae/vtk-amibe
 mkdir nbproject/private
 touch nbproject/private/private.properties
-cat ../../../jcae.config >> nbproject/private/private.properties
-java org.apache.xalan.xslt.Process -IN ./nbproject/project.xml -XSL ../../../xsls/project-build-impl.xsl -OUT ./nbproject/build-impl.xml
-ant -Dnbplatform.default.netbeans.dest.dir="$mypwd/nb/" -Dnbplatform.default.harness.dir="$mypwd/nb/harness/" jar
-cd ../../..
+cat $mypwd/jcae.config >> nbproject/private/private.properties
+java org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/project-build-impl.xsl -OUT nbproject/build-impl.xml
+ant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" jar
+cd $mypwd
 
 ## building vtk-amibe-occ
-cd jCAE/vtk-amibe-occ
+cd $jcaeDir/vtk-amibe-occ
 mkdir nbproject/private
 touch nbproject/private/private.properties
-cat ../../jcae.config >> nbproject/private/private.properties
-java org.apache.xalan.xslt.Process -IN ./nbproject/project.xml -XSL ../../xsls/project-build-impl.xsl -OUT ./nbproject/build-impl.xml
-ant -Dnbplatform.default.netbeans.dest.dir="$mypwd/nb/" -Dnbplatform.default.harness.dir="$mypwd/nb/harness/" jar
-cd ../..
+cat $mypwd/jcae.config >> nbproject/private/private.properties
+java org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/project-build-impl.xsl -OUT nbproject/build-impl.xml
+ant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" jar
+cd $mypwd
 
 #-------------------------------------------------
 ## Build jCAE modules 
 #-------------------------------------------------
 
-cd jCAE/jcae
+cd $jcaeDir/jcae
 
 modules="amibe amibe-occ core jython mesh-algos occjava-nb trove tweakui vecmath vtk vtk-util"
 for module in $modules
 do
+  cd $jcaeDir/jcae
   cd "$module"
-  java org.apache.xalan.xslt.Process -IN ./nbproject/project.xml -XSL ../../../xsls/module-build-impl.xsl -OUT ./nbproject/build-impl.xml
-  cd ..
+  java org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/module-build-impl.xsl -OUT nbproject/build-impl.xml
 done
-cd ../..
+
 
 #-------------------------------------------------
 ## Generate platform.xml.
 #-------------------------------------------------
 
 # This is a now an automated step. 
-cd jCAE/jcae
-java org.apache.xalan.xslt.Process -IN ./nbproject/project.xml -XSL ../../xsls/platform.xsl -OUT ./nbproject/platform.xml
+cd $jcaeDir/jcae
+java org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/platform.xsl -OUT nbproject/platform.xml
 
 #-------------------------------------------------
 ## Build suite as Zip distribution
 #-------------------------------------------------
 mkdir nbproject/private
 touch nbproject/private/private.properties
-cat ../../jcae.config > nbproject/private/private.properties
+cat $mypwd/jcae.config > nbproject/private/private.properties
 
 mkdir vtk/nbproject/private
 cp nbproject/private/private.properties vtk/nbproject/private/
@@ -656,23 +725,10 @@ cp nbproject/private/private.properties vecmath/nbproject/private/
 mkdir trove/nbproject/private
 cp nbproject/private/private.properties trove/nbproject/private/
 
-echo "path.jre.win32=$HOME/.wine/drive_c/programs/Java/jre/" >> nbproject/private/private.properties
+echo "path.jre.win32=$wineJavaDir/jre" >> nbproject/private/private.properties
 
-java org.apache.xalan.xslt.Process -IN ./nbproject/project.xml -XSL ../../xsls/suite-build-impl.xsl -OUT ./nbproject/build-impl.xml
-ant -Dnbplatform.default.netbeans.dest.dir="$mypwd/nb/" -Dnbplatform.default.harness.dir="$mypwd/nb/harness/" build-zip
-cd ../..
+java org.apache.xalan.xslt.Process -IN ./nbproject/project.xml -XSL $xslDir/suite-build-impl.xsl -OUT nbproject/build-impl.xml
+ant -Dnbplatform.default.netbeans.dest.dir="$nbDir" -Dnbplatform.default.harness.dir="$nbDir/harness/" build-zip
+cd $mypwd
 
-mv jCAE/jcae/dist jCAE-zipped
-
-#-------------------------------------------------
-## Clean
-#-------------------------------------------------
-
-rm jython*.jar
-rm libtrove*.deb
-rm libvecmath*.deb
-rm vtk-5.6.1.tar.gz 
-rm -rf VTK
-rm -rf oce
-rm netbeans-7.1-ml-linux.sh
-
+mv $jcaeDir/jcae/dist jCAE-zipped
