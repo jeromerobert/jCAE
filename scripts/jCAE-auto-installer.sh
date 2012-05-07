@@ -172,16 +172,16 @@ fi
 
 # Define abs locations
 
-vtkURL="http://www.vtk.org/files/release/5.6/vtk-5.6.1.tar.gz"
-vtkTar="vtk-5.6.1.tar.gz"
-vtkDir=$mypwd/VTK
+vtkURL="http://www.vtk.org/files/release/5.10/vtk-5.10.0-rc3.tar.gz"
+vtkTar="vtk-5.10.0-rc3.tar.gz"
+vtkDir=$mypwd/VTK5.10.0.RC3
 vtkLinBuildDir=$mypwd/vtkLinBuild
 vtkLinInstallDir=$mypwd/vtkLinInstall
 
 jcaeURL=https://github.com/jeromerobert/jCAE.git
 jcaeDir=$mypwd/jCAE
 
-# Get vtk-5.6.1, unzip 
+# Get vtk-5.10.0, unzip 
 ret=$(ls $vtkTar)
 if [ $? -ne 0 ]
 then
@@ -195,17 +195,17 @@ then
 fi
 
 # Get jCAE source (so early to get vtk patch)
-ret=$(ls $jcaeDir)
-if [ $? -ne 0 ]
-then
-	git clone $jcaeURL
-fi
+#ret=$(ls $jcaeDir)
+#if [ $? -ne 0 ]
+#then
+#	git clone $jcaeURL
+#fi
 
 # Apply patch
 # TODO: Forcibly applying patches without checking. No damage can 
 # happen but it would be good to have a way to check to avoid repatching
-cd $vtkDir
-$jcaeDir/vtk-util/patch/5.6/apply.sh
+#cd $vtkDir
+#$jcaeDir/vtk-util/patch/5.6/apply.sh
 cd $mypwd
 
 ret=$(ls $vtkLinBuildDir)
@@ -286,12 +286,13 @@ then
 		flags="$flags -DCMAKE_INSTALL_PREFIX:FILEPATH=$vtkWinInstallDir/"
 		flags="$flags -DCMAKE_TOOLCHAIN_FILE:FILEPATH=$jcaeDir/vtk-util/toolchain-i686-w64-mingw32.cmake"
 		flags="$flags -DVTKCompileTools_DIR:FILEPATH=$vtkLinBuildDir"
+		flags="$flags -DVTK_USE_64BIT_IDS:BOOL=ON"
 
 		flags="$flags -DCMAKE_CXX_FLAGS:STRING=-fpermissive"
 
 		cmake $flags $vtkDir
 		cmake $flags $vtkDir
-
+		set -e
 		VERBOSE=1 make -j$makeSpeed
 		echo "$green $bold\nVtk built successfully \n$normal $black"" Time="$(date +%s)
 	else
@@ -662,14 +663,14 @@ then
 	echo "arch.linux=true" >> jcae.config
 	echo "path.occ.linux=$oceLinInstallDir/lib/" >> jcae.config # TODO: Check here why TK*.so not copied to cluster
 	echo "path.jython.linux=$jythonDir" >> jcae.config
-	echo "vtk.dir.linux=$vtkLinInstallDir/lib/vtk-5.6/" >> jcae.config
+	echo "vtk.dir.linux=$vtkLinInstallDir/lib/vtk-5.10/" >> jcae.config
 	echo "path.occjava.linux=$mypwd/occjavaInstall/libOccJava.so" >> jcae.config
 
 	ret=$(find /usr/lib/ -iname libstdc++.so | head -1)
 	echo "path.libstdc++=$ret" >> jcae.config
 
 	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$oceLinInstallDir/lib/
-	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$vtkLinInstallDir/lib/vtk-5.6/
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$vtkLinInstallDir/lib/vtk-5.10/
 fi
 
 if [ "$targetOS" = "windows" ]
