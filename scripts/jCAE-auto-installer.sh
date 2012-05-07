@@ -698,10 +698,10 @@ fi
 # Will try it in the unified script
 
 # For the time being, cleaning is done like this, as it is not as time oriented task as vtk/oce/xalan/netbeans
-echo "$green $bold\nCleaning previous jCAE(if any)... \n$normal $black"" Time="$(date +%s)
-rm -rf $jcaeDir
+#echo "$green $bold\nCleaning previous jCAE(if any)... \n$normal $black"" Time="$(date +%s)
+#rm -rf $jcaeDir
 rm -rf $mypwd/occjavaInstall
-git clone $jcaeURL
+#git clone $jcaeURL
 
 
 #-------------------------------------------------
@@ -761,7 +761,7 @@ echo "$green $bold\nBuilding vtk-util... \n$normal $black"" Time="$(date +%s)
 cd $jcaeDir/vtk-util/
 mkdir nbproject/private
 touch nbproject/private/private.properties
-cat $mypwd/jcae.config >> nbproject/private/private.properties
+cat $mypwd/jcae.config > nbproject/private/private.properties
 ant config
 ant clean
 ant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/"
@@ -772,7 +772,7 @@ echo "$green $bold\nBuilding jcae/occjava... \n$normal $black"" Time="$(date +%s
 cd $jcaeDir/jcae/occjava
 mkdir nbproject/private
 touch nbproject/private/private.properties
-cat $mypwd/jcae.config >> nbproject/private/private.properties
+cat $mypwd/jcae.config > nbproject/private/private.properties
 java org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/project-build-impl.xsl -OUT nbproject/build-impl.xml
 ant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" jar
 cd $mypwd
@@ -782,7 +782,7 @@ echo "$green $bold\nBuilding amibe... \n$normal $black"" Time="$(date +%s)
 cd $jcaeDir/amibe
 mkdir nbproject/private
 touch nbproject/private/private.properties
-cat $mypwd/jcae.config >> nbproject/private/private.properties
+cat $mypwd/jcae.config > nbproject/private/private.properties
 java org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/project-build-impl.xsl -OUT nbproject/build-impl.xml
 ant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" -f nbbuild.xml jar
 cd $mypwd
@@ -792,7 +792,7 @@ echo "$green $bold\nBuilding vtk-amibe... \n$normal $black"" Time="$(date +%s)
 cd $jcaeDir/jcae/vtk-amibe
 mkdir nbproject/private
 touch nbproject/private/private.properties
-cat $mypwd/jcae.config >> nbproject/private/private.properties
+cat $mypwd/jcae.config > nbproject/private/private.properties
 java org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/project-build-impl.xsl -OUT nbproject/build-impl.xml
 ant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" jar
 cd $mypwd
@@ -802,7 +802,7 @@ echo "$green $bold\nBuilding vtk-amibe-occ... \n$normal $black"" Time="$(date +%
 cd $jcaeDir/vtk-amibe-occ
 mkdir nbproject/private
 touch nbproject/private/private.properties
-cat $mypwd/jcae.config >> nbproject/private/private.properties
+cat $mypwd/jcae.config > nbproject/private/private.properties
 java org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/project-build-impl.xsl -OUT nbproject/build-impl.xml
 ant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" jar
 cd $mypwd
