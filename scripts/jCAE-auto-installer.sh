@@ -124,7 +124,8 @@ package="ant"; useDpkg=0; checkPackage
 
 if [ "$targetOS" = "windows" ]
 then
-	package="gcc-mingw-w64-x86-64"; useDpkg=1; checkPackage
+	package="gcc-mingw-w64-i686"; useDpkg=1; checkPackage
+	package="g++-mingw-w64-i686"; useDpkg=1; checkPackage
 	package="wine"; useDpkg=0; checkPackage
 fi
 
