@@ -861,6 +861,14 @@ ant -Dnbplatform.default.netbeans.dest.dir="$nbDir" -Dnbplatform.default.harness
 echo "$green $bold\njCAE built successfully \n$normal $black"" Time="$(date +%s)
 cd $mypwd
 
+#-------------------------------------------------
+## Copy Zip distro to jCAE-zipped
+#-------------------------------------------------
+ret=$(ls jCAE-zipped)
+if [ $? -ne 0 ]
+then
+	mkdir jCAE-zipped
+fi
 rm jCAE-zipped/*
 mv $jcaeDir/jcae/dist/* jCAE-zipped/
 echo "$green $bold\njCAE Zipped successfully in $mypwd/jCAE-zipped  \n$normal $black"" Time="$(date +%s)
