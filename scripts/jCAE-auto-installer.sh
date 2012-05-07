@@ -11,7 +11,7 @@
 #	- This will require editing /etc/apt/sources.list
 # Steps
 #	$ sudo echo 'deb http://ftp.de.debian.org/debian sid main' >> /etc/apt/sources.list
-#	$ sudo apt-get install mingw-w64
+#	$ sudo apt-get install mingw-w64 gcc-mingw-w64-i686 g++-mingw-w64-i686
 #	
 
 #2. wine 1.2
