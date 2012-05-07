@@ -83,7 +83,7 @@ checkPackage()
 	then
 		#echo "\n dpkg"
 		ret=$(dpkg -l | grep $package)
-		if [ $? -eq 1 ]
+		if [ $? -ne 0 ]
 		then
 			echo "$red$bold\nNot Found $package \n$normal $black"
 			exit 1
@@ -93,12 +93,12 @@ checkPackage()
 	else
 		#echo "\n version"
 		ret=$($package --version )
-		if [ $? -eq 1 ]
+		if [ $? -ne 0 ]
 		then
 			echo "--version failed"
 			ret2=$($package -version)
 			echo $ret2
-			if [ $? -eq 1 ]
+			if [ $? -ne 0 ]
 			then
 				echo "$red $bold\nNot Found $package \n$normal $black"
 				exit 1
@@ -118,7 +118,7 @@ package="swig"; useDpkg=0; checkPackage
 #package="mesa-common-dev"; useDpkg=1; checkPackage
 #package="libxt-dev"; useDpkg=1; checkPackage
 #package="freeglut3-dev"; useDpkg=1; checkPackage
-package="openjdk-6-jdk"; useDpkg=1; checkPackage
+package="openjdk-7-jdk"; useDpkg=1; checkPackage
 package="quilt"; useDpkg=0; checkPackage
 package="ant"; useDpkg=0; checkPackage
 
@@ -222,7 +222,7 @@ then
 	flags="$flags -DBUILD_SHARED_LIBS:BOOL=ON"
 	flags="$flags -DVTK_WRAP_JAVA:BOOL=ON"
 	cmake $flags $vtkDir
-	make -j$makeSpeed
+	VERBOSE=1 make -j$makeSpeed
 	echo "$green $bold\nVtk built successfully \n$normal $black"" Time="$(date +%s)
 else
 	echo "$green $bold\nVtk already built \n$normal $black"
@@ -291,7 +291,7 @@ then
 		cmake $flags $vtkDir
 		cmake $flags $vtkDir
 
-		make -j$makeSpeed
+		VERBOSE=1 make -j$makeSpeed
 		echo "$green $bold\nVtk built successfully \n$normal $black"" Time="$(date +%s)
 	else
 		echo "$green $bold\nVtk already built \n$normal $black"
