@@ -79,8 +79,7 @@ public class GeomUtils
 		NbShape shape = getShape(node);		
 		if (shape == null)
 		{
-			FileObject objDir = getParentBrep(node).getParentNode().
-				getLookup().lookup(DataFolder.class).getPrimaryFile();
+			FileObject objDir = node.getLookup().lookup(FileObject.class);
 			String name = Utilities.getFreeName(objDir, newName, ".brep");			
 			String fn=new File(FileUtil.toFile(objDir),name).getPath();
 			BRepTools.write(newShape, fn);
