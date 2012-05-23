@@ -27,6 +27,7 @@ import java.util.Enumeration;
 import javax.swing.Action;
 import org.jcae.mesh.xmldata.Group;
 import org.jcae.mesh.xmldata.Groups;
+import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataFolder;
 import org.openide.loaders.DataObject;
@@ -37,6 +38,9 @@ import org.openide.nodes.Children;
 import org.openide.nodes.Node.Cookie;
 import org.openide.nodes.PropertySupport;
 import org.openide.util.Exceptions;
+import org.openide.util.Lookup;
+import org.openide.util.lookup.AbstractLookup;
+import org.openide.util.lookup.InstanceContent;
 
 public class GroupNode extends AbstractNode implements Cookie
 {
@@ -68,13 +72,22 @@ public class GroupNode extends AbstractNode implements Cookie
 	private Group group;
 	private Groups groups;
 
-	public GroupNode(Group group, Groups groups)
+	public static GroupNode create(Group group, Groups groups, FileObject fileObject)
 	{
-		super(Children.LEAF);
-		setName(group.getName());
-		this.group=group;
-		this.groups=groups;
-		getCookieSet().add(this);
+		InstanceContent instanceContent = new InstanceContent();
+		Lookup lookup  = new AbstractLookup(instanceContent);
+		GroupNode toReturn = new GroupNode(lookup);
+		instanceContent.add(toReturn);
+		instanceContent.add(fileObject);
+		toReturn.setName(group.getName());
+		toReturn.group=group;
+		toReturn.groups=groups;
+		return toReturn;
+	}
+
+	private GroupNode(Lookup lookup)
+	{
+		super(Children.LEAF, lookup);
 	}
 	
 	@Override

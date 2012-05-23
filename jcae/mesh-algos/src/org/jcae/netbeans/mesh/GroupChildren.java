@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import org.jcae.mesh.xmldata.Group;
 import org.jcae.mesh.xmldata.Groups;
+import org.openide.filesystems.FileObject;
 import org.openide.nodes.Children.Array;
 import org.openide.nodes.Node;
 
@@ -36,10 +37,14 @@ import org.openide.nodes.Node;
 public class GroupChildren extends Array {
 
 	private final Groups groups;
+	private final FileObject fileObject;
 
-	public GroupChildren(Groups groups)
+	// fileObject is need to ensure that the node is visible in the favorites
+	// tab
+	public GroupChildren(Groups groups, FileObject fileObject)
 	{
 		this.groups=groups;
+		this.fileObject = fileObject;
 	}
 
 	@Override
@@ -54,7 +59,7 @@ public class GroupChildren extends Array {
 		ArrayList<Node> toReturn = new ArrayList<Node>(gps.length);
 		for(int i=0; i<gps.length; i++)
 		{
-			toReturn.add(new GroupNode(gps[i], groups));
+			toReturn.add(GroupNode.create(gps[i], groups, fileObject));
 		}
 		return toReturn;
 	}
