@@ -43,21 +43,7 @@ public class GeomUtils
 	 */
 	static public NbShape getShape(Node n)
 	{
-		NbShape toReturn = null;
-		if(n != null)
-		{
-			BrepDataObject b = n.getLookup().lookup(BrepDataObject.class);
-			if(b != null)
-			{
-				if(b.isLoaded())
-					toReturn = b.getShape();
-			}
-			else
-			{
-				toReturn = n.getLookup().lookup(NbShape.class);
-			}
-		}
-		return toReturn;
+		return n.getLookup().lookup(NbShape.class);
 	}
 	
 	/**
