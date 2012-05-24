@@ -669,7 +669,7 @@ then
 	echo "vtk.dir.linux=$vtkLinInstallDir/lib/vtk-5.10/" >> jcae.config
 	echo "path.occjava.linux=$mypwd/occjavaInstall/libOccJava.so" >> jcae.config
 
-	ret=$(find /usr/lib/ -iname libstdc++.so | head -1)
+	ret=$(find /usr/lib/ -iname libstdc++.so.6 | head -1)
 	echo "path.libstdc++=$ret" >> jcae.config
 
 	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$oceLinInstallDir/lib/
