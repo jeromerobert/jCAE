@@ -222,6 +222,8 @@ then
 	flags="-DCMAKE_INSTALL_PREFIX:PATH=$vtkLinInstallDir"
 	flags="$flags -DBUILD_SHARED_LIBS:BOOL=ON"
 	flags="$flags -DVTK_WRAP_JAVA:BOOL=ON"
+	flags="$flags -DVTK_NO_LIBRARY_VERSION:BOOL=ON"
+	flags="$flags -DCMAKE_SKIP_RPATH:BOOL=YES"
 	cmake $flags $vtkDir
 	VERBOSE=1 make -j$makeSpeed
 	echo "$green $bold\nVtk built successfully \n$normal $black"" Time="$(date +%s)
@@ -361,6 +363,7 @@ then
 		flags="$flags -DOCE_DISABLE_BSPLINE_MESHER:BOOL=ON"
 		flags="$flags -DCMAKE_CXX_FLAGS:STRING=-DMMGT_OPT_DEFAULT=0"
 		flags="$flags -DOCE_DISABLE_X11=ON"
+		flags="$flags -DOCE_NO_LIBRARY_VERSION:BOOL=ON"
 		cmake $flags $oceDir
 		cd $mypwd
 		make -j$makeSpeed	
