@@ -195,11 +195,15 @@ then
 fi
 
 # Get jCAE source (so early to get vtk patch)
-#ret=$(ls $jcaeDir)
-#if [ $? -ne 0 ]
-#then
-#	git clone $jcaeURL
-#fi
+ret=$(ls $jcaeDir)
+if [ $? -ne 0 ]
+then
+	git clone $jcaeURL
+fi
+
+cd $jcaeDir
+export jcaeTagName=$(git describe --tags)
+
 
 # Apply patch
 # TODO: Forcibly applying patches without checking. No damage can 
@@ -657,6 +661,7 @@ export vtkPath=$(find $vtkLinBuildDir -iname vtk.jar)
 touch jcae.config
 echo "" > jcae.config
 
+echo "app.version=$jcaeTagName" >> jcae.config
 echo "libs.trove.classpath=$trovePath" >> jcae.config
 echo "libs.vecmath.classpath=$vecmathPath" >> jcae.config
 echo "libs.VTK.classpath=$vtkPath" >> jcae.config
