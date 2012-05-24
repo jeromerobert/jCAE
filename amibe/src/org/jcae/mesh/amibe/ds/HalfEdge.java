@@ -882,7 +882,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 				f = f.next;
 			else if (f.apex() == o)
 				f = f.next.next;
-			assert f.origin() == o;
+			assert f.origin() == o: f.origin()+" not the same as "+o;
 			if (!f.checkNewRingNormalsSameFanNonManifoldVertex(mesh, newpt, ignored))
 				return false;
 		}
