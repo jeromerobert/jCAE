@@ -563,7 +563,7 @@ fi
 ## Get and Install XALAN
 ## Get XSLs for build-impl.xml creation
 ##################################################
-xalanURL=http://mirror.mkhelif.fr/apache//xml/xalan-j/xalan-j_2_7_1-bin-2jars.tar.gz
+xalanURL=http://apache.multidist.com/xml/xalan-j/xalan-j_2_7_1-bin-2jars.tar.gz
 xalanTar=xalan-j_2_7_1-bin-2jars.tar.gz
 xalanDir=$mypwd/xalan-j_2_7_1
 
