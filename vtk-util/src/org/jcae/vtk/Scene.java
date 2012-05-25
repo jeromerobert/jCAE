@@ -215,7 +215,10 @@ public class Scene implements AbstractNode.ActorListener
 		int yMax = Math.max(firstPoint[1], secondPoint[1]);
 		selector.SetArea(xMin, yMin, xMax, yMax);
 		selector.SetFieldAssociation(1);
+		canvas.lock();
 		vtkSelection selection = selector.Select();
+		canvas.unlock();
+
 		if(Boolean.getBoolean("sun.java2d.opengl"))
 		{
 			//Bug of VTK or Java ? If java3d opengl is enabled the
