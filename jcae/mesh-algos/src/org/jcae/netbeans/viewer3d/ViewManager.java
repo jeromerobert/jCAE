@@ -143,6 +143,9 @@ public class ViewManager
 
 	public ViewManager()
 	{
+		//Starting with Java 7, jawt is not automatically loaded and it's
+		//required by VTK.
+		System.loadLibrary("jawt");
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
 	}
