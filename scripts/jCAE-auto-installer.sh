@@ -138,8 +138,8 @@ if [ "$targetOS" = "windows" ]
 then
 	wineDir=$mypwd/.wine
 	wineJavaDir=$wineDir/drive_c/Java
-	wineJavaUrl="http://www.java.net/download/jdk6/6u32/promoted/b02/binaries/jdk-6u32-ea-bin-b02-windows-i586-30_jan_2012.exe"
-	wineJavaExec="jdk-6u32-ea-bin-b02-windows-i586-30_jan_2012.exe"
+	wineJavaUrl="http://download.java.net/jdk7u6/archive/b07/binaries/jdk-7u6-ea-bin-b07-windows-i586-23_apr_2012.exe"
+	wineJavaExec="jdk-7u6-ea-bin-b07-windows-i586-23_apr_2012.exe"
 	export WINEPREFIX=$wineDir
 
 	echo "$green $bold\n Wine configuration and JDK installing ... \n$normal $black"" Time="$(date +%s)
