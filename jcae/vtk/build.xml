@@ -18,6 +18,7 @@
 
 	<patternset id="vtk.windows.files">
 		<include name="vtk*.dll"/>
+		<include name="LSDyna.dll"/>
 		<include name="msvcr*.dll"/>
 		<include name="Microsoft.VC*.CRT/*"/>
 		<include name="mingwm10.dll"/>
