@@ -37,6 +37,7 @@ import org.jcae.mesh.xmldata.DoubleFileReader;
 import org.jcae.mesh.xmldata.PrimitiveFileReaderFactory;
 
 import gnu.trove.PrimeFinder;
+import gnu.trove.TIntArrayList;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -363,7 +364,7 @@ public class Remesh
 		ArrayList<Vertex> triNodes = new ArrayList<Vertex>();
 		ArrayList<EuclidianMetric3D> triMetrics = new ArrayList<EuclidianMetric3D>();
 		ArrayList<Vertex> triNeighbor = new ArrayList<Vertex>();
-
+		TIntArrayList triGroups = new TIntArrayList();
 		LinkedHashSet<Vertex> boundaryNodes = new LinkedHashSet<Vertex>();
 		int nrIter = 0;
 		int processed = 0;
@@ -411,6 +412,7 @@ public class Remesh
 				h = t.getAbstractHalfEdge(h);
 				sym = t.getAbstractHalfEdge(sym);
 				triNodes.clear();
+				triGroups.clear();
 				triMetrics.clear();
 				triNeighbor.clear();
 				Collection<Vertex> newVertices = mapTriangleVertices.get(t);
@@ -453,7 +455,7 @@ public class Remesh
 						continue;
 					}
 					int nrNodes = addCandidatePoints(h, l, reversed,
-						triNodes, triMetrics, triNeighbor, boundaryNodes);
+						triNodes, triGroups, triMetrics, triNeighbor, boundaryNodes);
 					if (nrNodes > nrTriNodes)
 					{
 						nrTriNodes = nrNodes;
@@ -475,12 +477,15 @@ public class Remesh
 					for (int i = 0; i < imax; i++)
 					{
 						Vertex v = triNodes.get(index);
+						int group = triGroups.get(index);
 						EuclidianMetric3D metric = triMetrics.get(index);
 						assert metric != null;
 						double localSize = 0.5 * metric.getUnitBallBBox()[0];
 						double localSize2 = localSize * localSize;
 						Vertex bgNear = neighborBgMap.get(triNeighbor.get(index));
-						Triangle bgT = liaison.findSurroundingTriangle(v, bgNear, localSize2, true).getTri();
+						Triangle bgT = liaison.findSurroundingTriangle(v, bgNear, localSize2, true, group).getTri();
+						assert bgT.getGroupId() == group || group < 0:
+							mesh.getGroupName(group)+" "+mesh.getGroupName(bgT.getGroupId())+" "+v;
 						liaison.addVertex(v, bgT);
 						liaison.move(v, v.getUV());
 
@@ -677,11 +682,24 @@ public class Remesh
 		return this;
 	}
 
+	private int getGroup(AbstractHalfEdge halfEdge)
+	{
+		int toReturn = halfEdge.getTri().getGroupId();
+		if(halfEdge.hasSymmetricEdge())
+		{
+			if(halfEdge.sym().getTri().getGroupId() != toReturn)
+				toReturn = -1;
+		}
+		return toReturn;
+	}
+
 	private int addCandidatePoints(AbstractHalfEdge ot, double edgeLength, boolean reversed,
-		ArrayList<Vertex> triNodes, ArrayList<EuclidianMetric3D> triMetrics,
-		ArrayList<Vertex> triNeighbor, Set<Vertex> boundaryNodes)
+		ArrayList<Vertex> triNodes, TIntArrayList triGroups,
+		ArrayList<EuclidianMetric3D> triMetrics, ArrayList<Vertex> triNeighbor,
+		Set<Vertex> boundaryNodes)
 	{
 		int nrNodes = 0;
+		int group = getGroup(ot);
 		Vertex start = ot.origin();
 		Vertex end = ot.destination();
 		EuclidianMetric3D mS = metrics.get(start);
@@ -781,6 +799,7 @@ public class Remesh
 					else
 						boundaryNodes.add(last);
 					triNodes.add(last);
+					triGroups.add(group);
 					triMetrics.add(m);
 					if (start.getRef() == 0 && end.getRef() != 0)
 						triNeighbor.add(start);
