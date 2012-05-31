@@ -115,7 +115,7 @@ if options.point_metric_file:
     point_metric = PointMetric(options.size, options.point_metric_file)
 else:
     point_metric = None
-safe_coplanarity = str(max(options.coplanarity, 0.4))
+safe_coplanarity = str(max(options.coplanarity, 0.8))
 
 #0
 writeVTK(liaison)
