@@ -197,9 +197,18 @@ public class MeshLiaison
 		location.isCached = false;
 	}
 
-	public final boolean backupAndMove(Vertex v, double [] target)
+	/**
+	 *
+	 * @param v The vertex to project
+	 * @param target Where the vertex should be projected
+	 * @param checkGroup Whether or not to ensure that the point is projected on
+	 * a triangle of the same group as the group of the vertex. The test is only
+	 * made if all triangles adjacent to the point are from the same group.
+	 * @return Whether or not the projection succeeded.
+	 */
+	public final boolean backupAndMove(Vertex v, double [] target, boolean checkGroup)
 	{
-		return move(v, target, true);
+		return move(v, target, true, checkGroup);
 	}
 
 	/**
@@ -212,9 +221,9 @@ public class MeshLiaison
 	 */
 	public final boolean move(Vertex v, double [] target)
 	{
-		return move(v, target, false);
+		return move(v, target, false, false);
 	}
-	private boolean move(Vertex v, double [] target, boolean backup)
+	private boolean move(Vertex v, double [] target, boolean backup, boolean checkGroup)
 	{
 		if (LOGGER.isLoggable(Level.FINER))
 			LOGGER.log(Level.FINER, "Trying to move vertex "+v+" to ("+target[0]+", "+target[1]+", "+target[2]+")");
@@ -229,14 +238,18 @@ public class MeshLiaison
 		}
 		if (LOGGER.isLoggable(Level.FINEST))
 			LOGGER.log(Level.FINEST, "Old projection: "+location);
-		LocationFinder lf = new LocationFinder(target);
+		Integer group = checkGroup ? getGroup(v) : null;
+		LocationFinder lf;
+		if(group == null)
+			lf = new LocationFinder(target);
+		else
+			lf = new LocationFinder(target, group);
 		AbstractHalfEdge ot = location.t.getAbstractHalfEdge();
 		if (ot.apex() == location.t.vertex[location.vIndex])
 			ot = ot.prev();
 		else if (ot.destination() == location.t.vertex[location.vIndex])
 			ot = ot.next();
-		lf.walkAroundOrigin(ot);
-		lf.walkFlipFlop();
+		lf.walkFlipFlop(ot);
 		// Now lf contains the new location.
 		// Update location
 		location.updateTriangle(lf.current);
@@ -321,6 +334,24 @@ public class MeshLiaison
 		ProjectedLocation location = mapCurrentVertexProjection.get(v);
 		assert location != null : "Vertex "+v+" not found";
 		return location.normal;
+	}
+
+	/**
+	 * If all adjacent triangles of the vertex are in the same group, return
+	 * this group, else return null.
+	 */
+	private Integer getGroup(Vertex v)
+	{
+		Iterator<Triangle> it = v.getNeighbourIteratorTriangle();
+		Integer group = null;
+		if(it.hasNext())
+			group = it.next().getGroupId();
+		while(it.hasNext())
+		{
+			if(group != it.next().getGroupId())
+				return null;
+		}
+		return group;
 	}
 
 	/**
@@ -446,8 +477,7 @@ public class MeshLiaison
 				ot = ot.next();
 			else if (lf.localEdgeIndex == 2)
 				ot = ot.prev();
-			lf.walkAroundOrigin(ot);
-			lf.walkFlipFlop();
+			lf.walkFlipFlop(ot);
 
 			ot = lf.current.getAbstractHalfEdge(ot);
 			if (ot.origin() == lf.current.vertex[lf.localEdgeIndex])
@@ -985,6 +1015,15 @@ public class MeshLiaison
 		int localEdgeIndex = -1;
 		int region = -1;
 		int[] index = new int[2];
+		private int groupID;
+		private boolean checkGroup;
+
+		LocationFinder(double[] pos, int groupID)
+		{
+			System.arraycopy(pos, 0, target, 0, 3);
+			this.groupID = groupID;
+			this.checkGroup = true;
+		}
 
 		LocationFinder(double[] pos)
 		{
@@ -1007,6 +1046,11 @@ public class MeshLiaison
 	
 		boolean walkAroundOrigin(AbstractHalfEdge ot)
 		{
+			return walkAroundOrigin(ot, false);
+		}
+
+		private boolean walkAroundOrigin(AbstractHalfEdge ot, boolean checkGroup)
+		{
 			AbstractHalfEdge loop = ot.getTri().getAbstractHalfEdge();
 			if (loop.origin() == ot.destination())
 				loop = loop.prev();
@@ -1021,15 +1065,27 @@ public class MeshLiaison
 					loop = loop.nextOriginLoop();
 					continue;
 				}
-				modified |= walkOnTriangle(loop.getTri());
+				if(!checkGroup || loop.getTri().getGroupId() == groupID)
+					modified |= walkOnTriangle(loop.getTri());
 				loop = loop.nextOriginLoop();
 			}
 			while (loop.destination() != d);
 			return modified;
 		}
 
-		boolean walkFlipFlop()
+		/**
+		 * @param initEdge From where to start the flip flop
+		 */
+		boolean walkFlipFlop(AbstractHalfEdge initEdge)
 		{
+			if(checkGroup)
+			{
+				if(!walkAroundOrigin(initEdge, true))
+					walkAroundOrigin(initEdge);
+			}
+			else
+				walkAroundOrigin(initEdge);
+
 			AbstractHalfEdge ot = current.getAbstractHalfEdge();
 			if (ot.origin() == current.vertex[localEdgeIndex])
 				ot = ot.next();
