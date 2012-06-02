@@ -161,4 +161,9 @@ public class AmibeNViewable extends ViewableMesh {
 
 		highlight();
 	}
+
+	public AmibeDataObject getDataObject()
+	{
+		return amibeDataObject;
+	}
 }

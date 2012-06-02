@@ -279,6 +279,7 @@ public class Canvas extends vtkCanvas
 			iren.MiddleButtonPressEvent();
 		
 		UnLock();
+		VTKMemoryManager.GC.SetAutoGarbageCollection(false);
 	}
 
 	@Override
@@ -311,5 +312,6 @@ public class Canvas extends vtkCanvas
 			iren.MiddleButtonReleaseEvent();
 			UnLock();
 		}
+		VTKMemoryManager.GC.SetAutoGarbageCollection(true);
 	}
 }

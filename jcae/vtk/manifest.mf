@@ -1,6 +1,7 @@
 Manifest-Version: 1.0
 AutoUpdate-Show-In-Client: false
 OpenIDE-Module: vtk
+OpenIDE-Module-Install: vtk/Installer.class
 OpenIDE-Module-Localizing-Bundle: vtk/Bundle.properties
 OpenIDE-Module-Specification-Version: 1.0
 

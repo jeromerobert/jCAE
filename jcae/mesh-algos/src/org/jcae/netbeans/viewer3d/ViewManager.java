@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
 import org.jcae.netbeans.viewer3d.actions.SelectViewable;
@@ -143,6 +145,18 @@ public class ViewManager
 
 	public ViewManager()
 	{
+		try
+		{
+			//Starting with Java 7, jawt is not automatically loaded and it's
+			//required by VTK.
+			System.loadLibrary("jawt");
+		}
+		catch(UnsatisfiedLinkError e)
+		{
+			if(e.getMessage() == null ||
+				!e.getMessage().contains("already loaded in another classloader"))
+				Logger.getLogger(ViewManager.class.getName()).log(Level.SEVERE, null, e);
+		}
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
 	}

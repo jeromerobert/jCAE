@@ -27,12 +27,9 @@ import java.util.logging.Logger;
 import vtk.vtkActor;
 import vtk.vtkCellArray;
 import vtk.vtkFloatArray;
-import vtk.vtkMapper;
 import vtk.vtkPainterPolyDataMapper;
 import vtk.vtkPointData;
-import vtk.vtkPoints;
 import vtk.vtkPolyData;
-import vtk.vtkPolyDataMapper;
 import vtk.vtkPolyDataNormals;
 import vtk.vtkProperty;
 
@@ -117,7 +114,7 @@ public abstract class AbstractNode
 
 	/** Actor used for selection */
 	protected vtkActor selectionActor;
-	protected vtkPolyDataMapper selectionMapper;
+	protected vtkPainterPolyDataMapper selectionMapper;
 
 	/** Last time this actor had been updated */
 	protected long lastUpdate;
@@ -154,7 +151,7 @@ public abstract class AbstractNode
 	 */
 	public interface MapperCustomiser
 	{
-		void customiseMapper(vtkMapper mapper);
+		void customiseMapper(vtkPainterPolyDataMapper mapper);
 	}
 	
 	/**
@@ -174,10 +171,10 @@ public abstract class AbstractNode
 		new MapperCustomiser()
 		{
 			@Override
-			public void customiseMapper(vtkMapper mapper)
+			public void customiseMapper(vtkPainterPolyDataMapper mapper)
 			{
-				mapper.SetResolveCoincidentTopologyToPolygonOffset();
-				mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(Utils.getOffsetFactor(), Utils.getOffsetValue());
+				Utils.setPolygonOffset(mapper, Utils.getOffsetFactor(),
+					Utils.getOffsetValue());
 			}
 		};
 
@@ -198,7 +195,7 @@ public abstract class AbstractNode
 		new MapperCustomiser()
 		{
 			@Override
-			public void customiseMapper(vtkMapper mapper) {}
+			public void customiseMapper(vtkPainterPolyDataMapper mapper) {}
 		};
 	
 	protected ActorCustomiser actorCustomiser;

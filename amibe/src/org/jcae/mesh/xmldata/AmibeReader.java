@@ -143,6 +143,18 @@ public abstract class AmibeReader extends XMLReader implements JCAEXMLData {
 			ifrG.close();
 			return toReturn;
 		}
+
+		public int[] readNodesIds() throws IOException {
+			if (numberOfNodes == 0)
+				return new int[0];
+			PrimitiveFileReaderFactory pfrf = new PrimitiveFileReaderFactory();
+			IntFileReader ifrG = pfrf.getIntReader(getBinFile("nodeGroups.bin"));
+			int[] toReturn = new int[numberOfNodes];
+			for (int i = 0; i < numberOfNodes; i++)
+				toReturn[i] = ifrG.get(nodesOffset+i);
+			ifrG.close();
+			return toReturn;
+		}
 	}
 
 	public class SubMesh
@@ -390,6 +402,19 @@ public abstract class AmibeReader extends XMLReader implements JCAEXMLData {
 					g.beamsOffset = readFile(beg).offset;
 				}
 				sm.groups.put(g.getName(), g);
+			}
+			for(Element eg:getElements(e, "nodeGroups", "group"))
+			{
+				String name = getElement(eg, "name").getTextContent();
+				Group g = sm.groups.get(name);
+				if(g == null)
+				{
+					g = new Group();
+					g.name = name;
+					sm.groups.put(g.getName(), g);
+					g.numberOfNodes = readInt(eg, "number");
+					g.nodesOffset = readFile(eg).offset;
+				}
 			}
 			submeshes.add(sm);
 		}

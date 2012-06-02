@@ -35,8 +35,10 @@ import org.jcae.netbeans.BeanProperty;
 import org.openide.ErrorManager;
 import org.openide.actions.DeleteAction;
 import org.openide.actions.PropertiesAction;
+import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataNode;
+import org.openide.loaders.DataObject;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
@@ -80,11 +82,23 @@ public class AmibeNode extends DataNode
 		return groupsNode;
 	}
 
+	private FileObject getFileObject() {
+		//Since NB 7.1 http://netbeans.org/bugzilla/show_bug.cgi?id=199391
+		//DataObject may not be ready so we look for FileObject
+		FileObject fo = getLookup().lookup(FileObject.class);
+		if (fo == null)
+		//but in NB 7.0 the node may only contains DataObject and not FileObject
+			fo = getLookup().lookup(DataObject.class).getPrimaryFile();
+		return fo;
+	}
+
 	private AbstractNode createGeomNode(String geomFile)
 	{
 		int i=geomFile.lastIndexOf('.');
 		final String s=geomFile.substring(0, i);
-		return new AbstractNode(Children.LEAF)
+		// fileObject is need to ensure that the node is visible in the
+		// favorites tab
+		return new AbstractNode(Children.LEAF, Lookups.singleton(getFileObject()))
 		{
 			public String getDisplayName()
 			{
@@ -248,8 +262,10 @@ public class AmibeNode extends DataNode
 
         if(groups != null)
         {
-			GroupChildren groupChildren = new GroupChildren(groups);
-        	groupsNode=new AbstractNode(groupChildren, Lookups.fixed(groupChildren));
+			// fileObject is need to ensure that the node is visible in the
+			// favorites tab
+			GroupChildren groupChildren = new GroupChildren(groups, getFileObject());
+			groupsNode=new AbstractNode(groupChildren, Lookups.fixed(groupChildren, getFileObject()));
         	groupsNode.setDisplayName("Groups");
         	getChildren().add(new Node[]{groupsNode});
         }

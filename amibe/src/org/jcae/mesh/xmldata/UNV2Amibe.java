@@ -349,8 +349,10 @@ public class UNV2Amibe
 			// Number of elements
 			int nbelem = Integer.valueOf(snb).intValue();
 			// Read group name
-			out.nextGroup(in.readLine().trim());
-			while ((line= in.readLine().trim()).startsWith("8"))
+			String groupName = in.readLine().trim();
+			boolean groupCreated = false;
+			line = in.readLine().trim();
+			while (line.charAt(0) == '8' || line.charAt(0) == '7')
 			{
 				st = new StringTokenizer(line);
 				// read one element over two, the first one doesnt matter
@@ -361,11 +363,28 @@ public class UNV2Amibe
 					if (ind != 0)
 					{
 						ind --;
-						idMapping.seek(ind);
-						if(idMapping.getType() == IDMapping.BEAMS)
-							out.addBeamToGroup(idMapping.getID());
-						else
-							out.addTriaToGroup(idMapping.getID());
+						if(line.charAt(0) == '8')
+						{
+							if(!groupCreated)
+							{
+								out.nextGroup(groupName);
+								groupCreated = true;
+							}
+							idMapping.seek(ind);
+							if(idMapping.getType() == IDMapping.BEAMS)
+								out.addBeamToGroup(idMapping.getID());
+							else
+								out.addTriaToGroup(idMapping.getID());
+						}
+						else //line.charAt(0) == '7'
+						{
+							if(!groupCreated)
+							{
+								out.nextNodeGroup(groupName);
+								groupCreated = true;
+							}
+							out.addNodeToGroup(ind);
+						}
 					}
 					
 					nbelem--;
@@ -380,6 +399,7 @@ public class UNV2Amibe
 					line = in.readLine();
 					break;
 				}
+				line = in.readLine().trim();
 			}
 		}
 	}
@@ -479,12 +499,14 @@ public class UNV2Amibe
 					idMapping.add(nbBeams, IDMapping.BEAMS);
 					nbBeams ++;
 					break;
+				case 22:
 				case 24:  // parabolic beam
 					Element24 b = new Element24(line, rd);
 					out.addBeam(b.getNode(0) - 1, b.getNode(2) - 1);
 					idMapping.add(nbBeams, IDMapping.BEAMS);
 					nbBeams++;
 					break;
+				case 42:
 				case 92: //parabolic triangles
 					Element92 e=new Element92(line, rd);
 					out.addTriangle(e.getNode(0)-1, e.getNode(2)-1, e.getNode(4)-1);
@@ -494,6 +516,9 @@ public class UNV2Amibe
 				case 118: //tetra
 					//skip it
 					rd.readLine();
+					rd.readLine();
+				case 111: //tetra
+					//skip it
 					rd.readLine();
 					break;
 				default:

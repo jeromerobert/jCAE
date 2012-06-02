@@ -143,12 +143,23 @@ anymore</xs:documentation>
         <xs:element minOccurs="0" ref="triangles" />
         <xs:element minOccurs="0" maxOccurs="unbounded" ref="result" />
         <xs:element minOccurs="0" ref="groups" />
+        <xs:element minOccurs="0" ref="nodeGroups" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="groups">
     <xs:annotation>
       <xs:documentation> List of groups </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:choice>
+        <xs:element maxOccurs="unbounded" ref="group" />
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="nodeGroups">
+    <xs:annotation>
+      <xs:documentation> List of node groups </xs:documentation>
     </xs:annotation>
     <xs:complexType>
       <xs:choice>

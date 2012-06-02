@@ -92,7 +92,7 @@ public class UNVToMesh
 
 		String[] groupNames = parser.getGroupNames();
 		// If the set is empty it means that all the groups have to be extracted
-		if(groupExtraction == null)
+		if(groupExtraction == null || groupExtraction.isEmpty())
 		{
 			int nbOfGroups = groupNames.length;
 			groupExtraction = new ArrayList<Integer>(nbOfGroups);

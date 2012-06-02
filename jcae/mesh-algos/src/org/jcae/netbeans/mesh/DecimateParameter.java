@@ -42,6 +42,7 @@ public class DecimateParameter extends PropertySheet
 	private double maxLength = 1.0;
 	private boolean keepBorder = true;
 	private boolean keepBorderGroups = true;
+	private double coplanarity = 0.95;
 
 
 	
@@ -80,6 +81,8 @@ public class DecimateParameter extends PropertySheet
 		Sheet.Set r = new Sheet.Set();
 		r.setName("Parameters");
 		try {
+			r.put(new MyProperty<Double>(Double.TYPE, "coplanarity",
+				"Coplanarity", "Dot product of face normals to detect feature edges"));
 			r.put(new MyProperty<Boolean>(Boolean.TYPE, "useTolerance", "Use tolerance",
 				"Use tolerance parameter instead of triangle number parameter."));
 			r.put(new MyProperty<Double>(Double.TYPE, "tolerance",
@@ -196,5 +199,13 @@ public class DecimateParameter extends PropertySheet
 
 	public void setKeepBorderGroups(boolean keepBorderGroups) {
 		this.keepBorderGroups = keepBorderGroups;
+	}
+
+	public double getCoplanarity() {
+		return coplanarity;
+	}
+
+	public void setCoplanarity(double coplanarity) {
+		this.coplanarity = coplanarity;
 	}
 }

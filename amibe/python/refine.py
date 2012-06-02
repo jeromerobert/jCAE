@@ -1,11 +1,12 @@
 
 # jCAE
 from org.jcae.mesh.amibe.ds import Mesh, AbstractHalfEdge
-from org.jcae.mesh.amibe.algos3d import Remesh, QEMDecimateHalfEdge, SwapEdge, PointMetric, RemeshPolyline
+from org.jcae.mesh.amibe.algos3d import Remesh, QEMDecimateHalfEdge, SwapEdge, RemeshPolyline
 from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.projection import MeshLiaison
-from org.jcae.mesh.amibe.metrics import EuclidianMetric3D
+from org.jcae.mesh.amibe.metrics import EuclidianMetric3D, PointMetric
 from org.jcae.mesh.xmldata import MeshReader, MeshWriter
+from org.jcae.mesh.amibe.metrics.MetricSupport import AnalyticMetricInterface
 
 # Java
 from java.util import HashMap
@@ -98,6 +99,10 @@ if options.coplanarity:
 if options.preserveGroups:
 	liaison.getMesh().buildGroupBoundaries()
 
+if options.recordFile:
+	cmds = [ String("assert self.m.checkNoDegeneratedTriangles()"), String("assert self.m.checkNoInvertedTriangles()"), String("assert self.m.checkVertexLinks()"), String("assert self.m.isValid()") ]
+	liaison.getMesh().getTrace().setHooks(cmds)
+
 opts = HashMap()
 setAnalytic = False
 if options.size:
@@ -131,7 +136,7 @@ if options.decimateSize or options.decimateTarget:
 	SwapEdge(liaison, swapOptions).compute()
 
 algo = Remesh(liaison, opts)
-class RemeshMetric(Remesh.AnalyticMetricInterface):
+class RemeshMetric(AnalyticMetricInterface):
 	def getTargetSize(self, x, y, z):
 		return min(200.0, (x - 9000.0)*(x - 9000.0) / 2250.0)
 

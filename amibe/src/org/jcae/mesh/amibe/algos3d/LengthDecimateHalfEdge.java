@@ -43,7 +43,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	private Vertex v3;
 	private boolean freeEdgesOnly = false;
 	private final double freeEdgeFactor;
-
+	private double maxEdgeLength = -1;
 	/**
 	 * Creates a <code>LengthDecimateHalfEdge</code> instance.
 	 *
@@ -188,7 +188,12 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 			return v1;
 		else if (v2.getRef() != 0 || !v2.isMutable())
 			return v2;
-		return v1;
+		double[] uv1 = v1.getUV();
+		double[] uv2 = v2.getUV();
+		return mesh.createVertex(
+			(uv1[0] + uv2[0]) / 2.0,
+			(uv1[1] + uv2[1]) / 2.0,
+			(uv1[2] + uv2[2]) / 2.0);
 	}
 
 	@Override

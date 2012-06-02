@@ -25,9 +25,11 @@ package org.jcae.mesh.amibe.ds;
 public interface TraceInterface
 {
 	public void setLogFile(String logName);
-	public abstract void createMesh(String meshName, Mesh mesh);
+	public void setHooks(String[] commands);
 	boolean getDisabled();
 	void setDisabled(boolean b);
+
+	public abstract void createMesh(String meshName, Mesh mesh);
 
 	void add(Vertex v);
 	void add(Vertex v, int id);

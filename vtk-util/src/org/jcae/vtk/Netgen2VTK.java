@@ -24,7 +24,6 @@ import java.awt.EventQueue;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import vtk.vtkGlobalJavaHash;
 import vtk.vtkUnstructuredGrid;
 import vtk.vtkXMLUnstructuredGridWriter;
 
@@ -117,7 +116,7 @@ public class Netgen2VTK {
 		w.Write();
 		EventQueue.invokeLater(new Runnable(){
 			public void run() {
-				vtkGlobalJavaHash.GC();
+				VTKMemoryManager.deleteAll();
 			}
 		});
 	}

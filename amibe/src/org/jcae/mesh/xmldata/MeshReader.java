@@ -256,27 +256,31 @@ public class MeshReader
 					mesh.add(nodelist[i]);
 				}
 			}
-			IntFileReader ifrT = subMesh.getTriangles();
+
 			int numberOfTriangles = subMesh.getNumberOfTrias();
 			Triangle[] facelist = new Triangle[numberOfTriangles];
-			int[] ind = new int[3];
-			Vertex[] pts = new Vertex[3];
-			for (int i = 0; i < numberOfTriangles; i++) {
-				boolean outer = false;
-				for (int j = 0; j < 3; j++) {
-					ind[j] = ifrT.get();
-					if (ind[j] < 0) {
-						ind[j] = -ind[j];
-						outer = true;
+			if(numberOfTriangles > 0)
+			{
+				IntFileReader ifrT = subMesh.getTriangles();
+				int[] ind = new int[3];
+				Vertex[] pts = new Vertex[3];
+				for (int i = 0; i < numberOfTriangles; i++) {
+					boolean outer = false;
+					for (int j = 0; j < 3; j++) {
+						ind[j] = ifrT.get();
+						if (ind[j] < 0) {
+							ind[j] = -ind[j];
+							outer = true;
+						}
+						pts[j] = nodelist[ind[j]];
 					}
-					pts[j] = nodelist[ind[j]];
+					if (!outer) {
+						facelist[i] = mesh.createTriangle(pts[0], pts[1], pts[2]);
+						mesh.add(facelist[i]);
+					}
 				}
-				if (!outer) {
-					facelist[i] = mesh.createTriangle(pts[0], pts[1], pts[2]);
-					mesh.add(facelist[i]);
-				}
-			}		
-			ifrT.close();
+				ifrT.close();
+			}
 
 			int numberOfBeams = subMesh.getNumberOfBeams();
 			if (numberOfBeams > 0)
@@ -295,6 +299,8 @@ public class MeshReader
 					facelist[j].setGroupId(id);
 				for(int j : g.readBeamsIds())
 					mesh.setBeamGroup(j, id);
+				for(int j : g.readNodesIds())
+					mesh.setVertexGroup(nodelist[j], g.getName());
 			}
 			//  Build adjacency relations
 			if (mesh.hasAdjacency()) {

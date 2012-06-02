@@ -4,7 +4,7 @@ from org.jcae.mesh.amibe.ds import Mesh, AbstractHalfEdge
 from org.jcae.mesh.amibe.algos3d import *
 from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.projection import MeshLiaison
-from org.jcae.mesh.amibe.metrics import EuclidianMetric3D
+from org.jcae.mesh.amibe.metrics import EuclidianMetric3D, PointMetric
 from org.jcae.mesh.xmldata import MeshReader, MeshWriter, Amibe2VTK
 from org.jcae.mesh.amibe.algos3d import SmoothNodes3DBg, RemeshPolyline
 
@@ -19,6 +19,12 @@ from gnu.trove import TIntArrayList
 # Python
 import sys
 from optparse import OptionParser
+
+def read_groups(file_name):
+    f=open(file_name)
+    r=f.read().split()
+    f.close()
+    return r
 
 debug_write_counter=1
 def writeVTK(liaison):
@@ -48,7 +54,25 @@ parser.add_option("-G", "--immutable-border-group",
 parser.add_option("--record", metavar="PREFIX",
                   action="store", type="string", dest="recordFile",
                   help="record mesh operations in a Python file to replay this scenario")
-
+parser.add_option("-c", "--coplanarity", metavar="FLOAT",
+                  action="store", type="float", dest="coplanarity", default=0.9,
+                  help="dot product of face normals to detect feature edges")
+parser.add_option("-P", "--point-metric", metavar="STRING",
+                  action="store", type="string", dest="point_metric_file",
+                  help="""A CSV file containing points which to refine around. Each line must contains 5 floating point values:
+                  - x, y, z
+                  - the distance of the source where the target size is defined
+                  - the target size at the given distance""")
+parser.add_option("-M", "--immutable-groups", metavar="STRING",
+                  action="store", type="string", dest="immutable_groups_file",
+                  help="""A text file containing the list of groups which whose
+                  elements and nodes must be modified by this algorithm.""")
+parser.add_option("-J", "--convert-junctions", metavar="STRING",
+                  action="store_true", dest="convert_junctions",
+                  help="""Convert junctions between beams and triangles to group
+                  of nodes. The junction vertex is duplicated and a node group
+                  is created with the 2 vertices plus the closest one from
+                  adjacent triangles.""")
 (options, args) = parser.parse_args(args=sys.argv[1:])
 
 if len(args) != 2:
@@ -74,18 +98,34 @@ if options.recordFile:
 	liaison.getMesh().getTrace().createMesh("mesh", liaison.getMesh())
 if options.immutable_border:
 	liaison.mesh.tagFreeEdges(AbstractHalfEdge.IMMUTABLE)
-liaison.getMesh().buildRidges(0.9)
+
+liaison.getMesh().buildRidges(options.coplanarity)
 if options.immutable_border_group:
 	liaison.mesh.tagGroupBoundaries(AbstractHalfEdge.IMMUTABLE)
 else:
 	if options.preserveGroups:
 		liaison.getMesh().buildGroupBoundaries()
 
+immutable_groups = []
+if options.immutable_groups_file:
+    immutable_groups = read_groups(options.immutable_groups_file)
+    liaison.mesh.tagGroups(immutable_groups, AbstractHalfEdge.IMMUTABLE)
+
+if options.point_metric_file:
+    point_metric = PointMetric(options.size, options.point_metric_file)
+else:
+    point_metric = None
+safe_coplanarity = str(max(options.coplanarity, 0.8))
+
 #0
 writeVTK(liaison)
 
+if options.recordFile:
+	cmds = [ String("assert self.m.checkNoDegeneratedTriangles()"), String("assert self.m.checkNoInvertedTriangles()"), String("assert self.m.checkVertexLinks()"), String("assert self.m.isValid()") ]
+	liaison.getMesh().getTrace().setHooks(cmds)
+
 opts = HashMap()
-opts.put("coplanarity", "0.9")
+opts.put("coplanarity", str(options.coplanarity))
 opts.put("size", str(options.size*0.06))
 QEMDecimateHalfEdge(liaison, opts).compute()
 
@@ -94,13 +134,15 @@ writeVTK(liaison)
 
 opts.clear()
 opts.put("size", str(options.size))
-Remesh(liaison, opts).compute()
+algo = Remesh(liaison, opts)
+algo.analyticMetric = point_metric
+algo.compute()
 
 #2
 writeVTK(liaison)
 
 opts.clear()
-opts.put("coplanarity", "0.9")
+opts.put("coplanarity", safe_coplanarity)
 SwapEdge(liaison, opts).compute()
 
 #3
@@ -115,23 +157,25 @@ LengthDecimateHalfEdge(liaison, opts).compute()
 writeVTK(liaison)
 
 opts.clear()
-opts.put("coplanarity", "0.9")
+opts.put("coplanarity", safe_coplanarity)
 ImproveEdgeConnectivity(liaison, opts).compute()
 
 #5
 writeVTK(liaison)
 
 opts.clear()
-opts.put("coplanarity", "0.9")
+opts.put("coplanarity", str(options.coplanarity))
 opts.put("iterations", str(8))
 opts.put("size", str(options.size))
-SmoothNodes3DBg(liaison, opts).compute()
+algo = SmoothNodes3DBg(liaison, opts)
+algo.analyticMetric = point_metric
+algo.compute()
 
 #6
 writeVTK(liaison)
 
 opts.clear()
-opts.put("coplanarity", "0.9")
+opts.put("coplanarity", safe_coplanarity)
 opts.put("expectInsert", "false")
 SwapEdge(liaison, opts).compute()
 
@@ -139,25 +183,29 @@ SwapEdge(liaison, opts).compute()
 writeVTK(liaison)
 
 opts.clear()
-opts.put("coplanarity", "0.9")
+opts.put("coplanarity", str(options.coplanarity))
 opts.put("size", str(options.size*0.2))
-opts.put("maxlength", str(options.size*1.2))
-QEMDecimateHalfEdge(liaison, opts).compute()
+opts.put("maxlength", str(options.size))
+algo = QEMDecimateHalfEdge(liaison, opts)
+algo.analyticMetric = point_metric
+algo.compute()
 
+#8
 writeVTK(liaison)
 
 opts.clear()
-opts.put("coplanarity", "0.9")
+opts.put("coplanarity", safe_coplanarity)
 opts.put("expectInsert", "false")
 SwapEdge(liaison, opts).compute()
 
+#9
 writeVTK(liaison)
 
 opts.clear()
-opts.put("coplanarity", "0.75")
-opts.put("tolerance", "0.6")
+opts.put("coplanarity", safe_coplanarity)
 opts.put("iterations", str(8))
-SmoothNodes3DBg(liaison, opts).compute()
+algo = SmoothNodes3DBg(liaison, opts)
+algo.compute()
 
 writeVTK(liaison)
 
@@ -171,11 +219,17 @@ for entry in polylines.entrySet():
 		for v in polyline:
 			listM.add(EuclidianMetric3D(options.size))
 		#print "Remesh polyline of group "+str(groupId)+"/"+str(polylines.size())+" "+str(polyline.size())+" vertices"
-		result = RemeshPolyline(liaison.mesh, polyline, listM).compute()
+		if liaison.mesh.getGroupName(groupId) in immutable_groups:
+			result = polyline
+		else:
+			result = RemeshPolyline(liaison.mesh, polyline, listM).compute()
 		for i in xrange(result.size() - 1):
 			liaison.mesh.addBeam(result.get(i), result.get(i+1), groupId)
 		#print "  New polyline: "+str(result.size())+" vertices"
 
 if options.recordFile:
 	liaison.getMesh().getTrace().finish()
+
+if options.convert_junctions:
+    JunctionConverter(liaison.mesh).compute()
 MeshWriter.writeObject3D(liaison.mesh, outDir, "")

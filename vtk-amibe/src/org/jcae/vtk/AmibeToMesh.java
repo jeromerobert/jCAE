@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.mesh.xmldata.AmibeReader;
@@ -48,6 +49,8 @@ public class AmibeToMesh
 	private Map<String, LeafNode.DataProvider> beams =
 		new HashMap<String, LeafNode.DataProvider>();
 
+	int triaCount = 0;
+	
 	public Map<String, LeafNode.DataProvider> getTriangles()
 	{
 		return Collections.unmodifiableMap(triangles);
@@ -150,6 +153,7 @@ public class AmibeToMesh
 	public AmibeToMesh(String filePath, String[] groupExtraction)
 		throws SAXException, IOException
 	{		
+		triaCount = 0;
 		AmibeReader.Dim3 reader = new AmibeReader.Dim3(filePath);
 		SubMesh sm = reader.getSubmeshes().get(0);
 		List<Group> grps = sm.getGroups();
@@ -166,10 +170,18 @@ public class AmibeToMesh
 			if(g != null)
 			{
 				if(g.getNumberOfTrias() > 0)
+				{
+					triaCount += g.getNumberOfTrias();	
 					triangles.put(id, new TriaData(reader, id));
+				}
 				if(g.getNumberOfBeams() > 0)
 					beams.put(id, new BeamData(reader, id));
 			}
 		}
+	}
+	
+	public int getNumberOfTriangles()
+	{
+		return triaCount;
 	}
 }

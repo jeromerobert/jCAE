@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2005-2012, by EADS France
  */
 
 package org.jcae.netbeans.cad;
@@ -30,14 +30,17 @@ import org.openide.actions.CopyAction;
 import org.openide.actions.ViewAction;
 import org.openide.awt.Actions;
 import org.openide.awt.Mnemonics;
+import org.openide.filesystems.FileObject;
 import org.openide.nodes.AbstractNode;
+import org.openide.nodes.Children;
 import org.openide.nodes.Node;
-import org.openide.nodes.Node.Cookie;
 import org.openide.nodes.Sheet;
 import org.openide.util.HelpCtx;
+import org.openide.util.Lookup;
 import org.openide.util.actions.NodeAction;
 import org.openide.util.actions.SystemAction;
 import org.openide.util.datatransfer.NewType;
+import org.openide.util.lookup.Lookups;
 
 public class ShapeNode extends AbstractNode
 {	
@@ -91,15 +94,24 @@ public class ShapeNode extends AbstractNode
 			return null;
 		}
 	}	
-	
-	public ShapeNode(NbShape shape)
-	{		
-		super(new ShapeChildren());
-		shape.setNode(this);
-		setIconBaseWithExtension("org/jcae/netbeans/cad/ShapeNode.png");
-		getCookieSet().add(new ViewShapeCookie(this));
-		getCookieSet().add((Cookie) getChildren());
-		getCookieSet().add(shape);
+
+	// fileObject is need to ensure that the node is visible in the favorite
+	// tab
+	public static ShapeNode create(NbShape shape, FileObject fileObject)
+	{
+		ShapeChildren children = new ShapeChildren(fileObject);
+		ViewShapeCookie viewShapeCookie = new ViewShapeCookie();
+		Lookup lookup = Lookups.fixed(children, shape, viewShapeCookie, fileObject);
+		ShapeNode toReturn = new ShapeNode(children, lookup);
+		shape.setNode(toReturn);
+		viewShapeCookie.setNode(toReturn);
+		toReturn.setIconBaseWithExtension("org/jcae/netbeans/cad/ShapeNode.png");
+		return toReturn;
+	}
+
+	private ShapeNode(Children children, Lookup lookup)
+	{
+		super(children, lookup);
 	}
 	
 	@Override

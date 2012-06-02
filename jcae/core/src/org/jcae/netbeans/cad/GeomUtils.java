@@ -43,21 +43,7 @@ public class GeomUtils
 	 */
 	static public NbShape getShape(Node n)
 	{
-		NbShape toReturn = null;
-		if(n != null)
-		{
-			BrepDataObject b = n.getLookup().lookup(BrepDataObject.class);
-			if(b != null)
-			{
-				if(b.isLoaded())
-					toReturn = b.getShape();
-			}
-			else
-			{
-				toReturn = n.getLookup().lookup(NbShape.class);
-			}
-		}
-		return toReturn;
+		return n.getLookup().lookup(NbShape.class);
 	}
 	
 	/**
@@ -93,8 +79,7 @@ public class GeomUtils
 		NbShape shape = getShape(node);		
 		if (shape == null)
 		{
-			FileObject objDir = getParentBrep(node).getParentNode().
-				getLookup().lookup(DataFolder.class).getPrimaryFile();
+			FileObject objDir = node.getLookup().lookup(FileObject.class);
 			String name = Utilities.getFreeName(objDir, newName, ".brep");			
 			String fn=new File(FileUtil.toFile(objDir),name).getPath();
 			BRepTools.write(newShape, fn);

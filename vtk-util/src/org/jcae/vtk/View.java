@@ -26,13 +26,15 @@ import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-import vtk.vtkGlobalJavaHash;
 import vtk.vtkInteractorStyleRubberBand3D;
 import vtk.vtkInteractorStyleTrackballCamera;
 import vtk.vtkPlaneCollection;
+import vtk.vtkRenderer;
 
 /**
  *
@@ -53,8 +55,8 @@ public class View extends Canvas {
 	{
 		Utils.setVTKLogFile(new File(System.getProperty("user.home"),
 			".vtk.log").getPath());
-		vtkGlobalJavaHash.GarbageCollector.SetDebug(Boolean.getBoolean("vtk.gc.debug"));
-		vtkGlobalJavaHash.GarbageCollector.SetAutoGarbageCollection(true);
+		VTKMemoryManager.GC.SetDebug(Boolean.getBoolean("vtk.gc.debug"));
+		VTKMemoryManager.GC.SetAutoGarbageCollection(true);
 	}
 	public enum MouseMode
 	{
@@ -66,8 +68,18 @@ public class View extends Canvas {
 	
 	public View()
 	{
-		// By default the translucent objects can be picked
-		GetRenderer().PickTranslucentOn();
+		try {
+			// By default the translucent objects can be picked
+			vtkRenderer r = GetRenderer();
+			Method m = r.getClass().getMethod("PickTranslucentOn");
+			m.invoke(r);
+		} catch (NoSuchMethodException ex) {
+			LOGGER.log(Level.INFO, "vtkRenderer.PickTranslucentOn not available."+
+				" Picking on translucent actors may not work");
+		} catch(Exception ex)
+		{
+			LOGGER.log(Level.SEVERE, null, ex);
+		}
 	}
 
 	@Override

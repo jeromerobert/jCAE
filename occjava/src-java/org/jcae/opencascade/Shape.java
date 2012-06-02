@@ -168,8 +168,8 @@ public abstract class Shape<T extends Shape<T>> implements Comparable<T>
 	}
 	
 	protected TopoDS_Shape impl;
-	private T[] children;
-	private T[] parents;
+	protected T[] children;
+	protected T[] parents;
 
 	protected Shape()
 	{
@@ -343,7 +343,7 @@ public abstract class Shape<T extends Shape<T>> implements Comparable<T>
 		writer.println("</geometry>");
 	}
 
-	private void dump(PrintWriter writer, Set<T> shapeSet, int[] id)
+	protected void dump(PrintWriter writer, Set<T> shapeSet, int[] id)
 	{
 		T shape = getDerived();
 		if (!shapeSet.contains(shape))
@@ -447,7 +447,7 @@ public abstract class Shape<T extends Shape<T>> implements Comparable<T>
 	 * @param maxsize the maximum number of returned shapes
 	 * @param shape exploration will end when this shape will be found
 	 */
-	private T explore(Collection<T> result, TopAbs_ShapeEnum wantedType, int maxsize,
+	protected T explore(Collection<T> result, TopAbs_ShapeEnum wantedType, int maxsize,
 		TopoDS_Shape shape)
 	{
 		if(impl.shapeType().equals(wantedType))

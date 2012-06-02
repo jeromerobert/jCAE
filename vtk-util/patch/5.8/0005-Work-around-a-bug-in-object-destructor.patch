@@ -1,0 +1,25 @@
+From 66a0d6bfb5811d90470dc392caba2f11d0ba4953 Mon Sep 17 00:00:00 2001
+From: Jerome Robert <jeromerobert@users.sf.net>
+Date: Thu, 26 Jan 2012 16:56:42 +0100
+Subject: [PATCH 5/6] Work around a bug in object destructor
+
+---
+ Common/vtkObject.cxx |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/Common/vtkObject.cxx b/Common/vtkObject.cxx
+index 8f7fc6a..7ddf18e 100644
+--- a/Common/vtkObject.cxx
++++ b/Common/vtkObject.cxx
+@@ -157,7 +157,7 @@ vtkObject::~vtkObject()
+   // by another object
+   if ( this->ReferenceCount > 0)
+     {
+-    vtkErrorMacro(<< "Trying to delete object with non-zero reference count.");
++    vtkWarningMacro(<< "Trying to delete object with non-zero reference count.");
+     }
+   delete this->SubjectHelper;
+   this->SubjectHelper = NULL;
+-- 
+1.7.8.3
+

@@ -24,7 +24,9 @@ import gnu.trove.TObjectIntHashMap;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import java.util.logging.Level;
@@ -38,6 +40,7 @@ public class TraceRecord implements TraceInterface
         private static final Logger LOGGER=Logger.getLogger(TraceRecord.class.getName());
 	private static final String MANY_SPACES = "                                                                                  ";
 	private String logName;
+	private List<String> commands = new ArrayList<String>();
 	private PrintStream out = System.out;
 	private boolean disabled;
 	private int indentLevel;
@@ -62,6 +65,13 @@ public class TraceRecord implements TraceInterface
 		} catch (FileNotFoundException ex) {
 			LOGGER.log(Level.SEVERE, null, ex);
 		}
+	}
+
+	public void setHooks(String[] commands)
+	{
+		this.commands = new ArrayList<String>(commands.length);
+		for (String s : commands)
+			this.commands.add(s);
 	}
 
 	public void createMesh(String meshName, Mesh mesh)
@@ -107,8 +117,10 @@ public class TraceRecord implements TraceInterface
 		println("class c():");
 		startScope();
 		println("def startMethodHook(self):");
-		println("    assert self.m.checkNoDegeneratedTriangles()");
-		println("    assert self.m.checkNoInvertedTriangles()");
+		if (commands.isEmpty())
+			commands.add("pass");
+		for (String cmd : commands)
+			println("    "+cmd);
 		println("def __init__(self, m):");
 		startScope();
 		println("self.m = m");
@@ -434,8 +446,10 @@ public class TraceRecord implements TraceInterface
 			out.println(tab+"class c():");
 			startScope();
 			out.println(tab+"def startMethodHook(self):");
-			out.println(tab+"    assert self.m.checkNoDegeneratedTriangles()");
-			out.println(tab+"    assert self.m.checkNoInvertedTriangles()");
+			if (commands.isEmpty())
+				commands.add("pass");
+			for (String cmd : commands)
+				out.println(tab+"    "+cmd);
 			out.println(tab+"def __init__(self, m):");
 			startScope();
 			out.println(tab+"self.m = m");

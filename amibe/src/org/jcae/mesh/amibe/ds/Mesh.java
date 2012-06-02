@@ -151,6 +151,8 @@ public class Mesh implements Serializable
 	private List<Vertex> beams = new ArrayList<Vertex>();
 	private TIntArrayList beamGroups = new TIntArrayList();
 	private Map<Integer, String> groupNames = new HashMap<Integer, String>();
+	private Map<String, Collection<Vertex>> vertexGroups =
+		new HashMap<String, Collection<Vertex>>();
 
 	// Utility class to improve debugging output
 	private static class OuterVertex extends Vertex
@@ -450,6 +452,11 @@ public class Mesh implements Serializable
 		return Collections.unmodifiableList(beams);
 	}
 
+	public void setBeam(int i, Vertex v)
+	{
+		beams.set(i, v);
+	}
+
 	public int getBeamGroup(int i)
 	{
 		return beamGroups.get(i);
@@ -486,6 +493,22 @@ public class Mesh implements Serializable
 		for(String name:names)
 			groupIds[i++] = invertMap.get(name);
 		return groupIds;
+	}
+
+	public void setVertexGroup(Vertex v, String group)
+	{
+		Collection<Vertex> l = vertexGroups.get(group);
+		if(l == null)
+		{
+			l = new ArrayList<Vertex>();
+			vertexGroups.put(group, l);
+		}
+		l.add(v);
+	}
+
+	public Map<String, Collection<Vertex>> getVertexGroup()
+	{
+		return Collections.unmodifiableMap(vertexGroups);
 	}
 
 	public int getNumberOfGroups()
@@ -607,7 +630,7 @@ public class Mesh implements Serializable
 		}
 
 		int nrJunctionPoints = 0;
-		ArrayList<Vertex> freeVertices = new ArrayList<Vertex>();
+		Collection<Vertex> freeVertices = new HashSet<Vertex>();
 		for (Vertex v: tVertList.keySet())
 		{
 			if (bndNodes.contains(v))
@@ -624,6 +647,7 @@ public class Mesh implements Serializable
 			else if(v.getLink() == null)
 				freeVertices.add(v);
 		}
+		freeVertices.removeAll(beams);
 		if (nrJunctionPoints > 0)
 			logger.info("Found "+nrJunctionPoints+" junction points");
 		if (!freeVertices.isEmpty())
@@ -1201,6 +1225,55 @@ public class Mesh implements Serializable
 		v.setRef(-maxLabel);
 	}
 
+	/** Tag Vertices and HalfEdges which are in a give list of groups */
+	public final void tagGroups(Collection<String> names, int attr)
+	{
+		boolean fixVertex  = (attr & AbstractHalfEdge.IMMUTABLE) != 0;
+		if(fixVertex)
+		{
+			//node groups
+			for(String gn:names)
+			{
+				Collection<Vertex> l = vertexGroups.get(gn);
+				if(l != null)
+					for(Vertex v:l)
+						v.setMutable(false);
+			}
+		}
+
+		//triangle groups
+		if (hasAdjacency() && !triangleList.isEmpty())
+		{
+			names = new HashSet<String>(names);
+			TIntHashSet groupIds = new TIntHashSet(names.size());
+			for(Entry<Integer, String> e:groupNames.entrySet())
+			{
+				if(names.contains(e.getValue()))
+					groupIds.add(e.getKey());
+			}
+			AbstractHalfEdge ot  = null;
+			AbstractHalfEdge sym = triangleList.iterator().next().getAbstractHalfEdge();
+
+			for (Triangle t: triangleList)
+			{
+				ot = t.getAbstractHalfEdge(ot);
+				if (t.hasAttributes(AbstractHalfEdge.OUTER))
+					continue;
+				if(groupIds.contains(t.getGroupId()))
+					for (int i = 0; i < 3; i++)
+					{
+						ot = ot.next();
+						sym = ot.sym(sym);
+						ot.setAttributes(attr);
+						if (fixVertex)
+						{
+							ot.origin().setMutable(false);
+							ot.destination().setMutable(false);
+						}
+					}
+			}
+		}
+	}
 	/**
 	 * Tag all edges on group boundaries with a given attribute.
 	 */
@@ -1953,6 +2026,44 @@ public class Mesh implements Serializable
 			{
 				System.err.println("ERROR: degenerated triangle: "+t);
 				return false;
+			}
+		}
+		return true;
+	}
+
+	public final boolean checkVertexLinks()
+	{
+		AbstractHalfEdge ot = null;
+		if (nodeList == null)
+			return true;
+		for (Vertex v : nodeList)
+		{
+			if (v.isManifold())
+				continue;
+			Triangle [] links = (Triangle []) v.getLink();
+			HashSet triangles = new HashSet();
+			for (Triangle t : links)
+				triangles.add(t);
+			for (Triangle t : links)
+			{
+				ot = t.getAbstractHalfEdge(ot);
+				if (ot.destination() == v)
+					ot = ot.next();
+				else if (ot.apex() == v)
+					ot = ot.next().next();
+				Vertex d = ot.destination();
+				do
+				{
+					if (ot.getTri() != t && triangles.contains(ot.getTri()))
+					{
+						System.err.println("ERROR: Triangles on the same fan found for vertex "+v);
+						System.err.println(" Triangle "+t);
+						System.err.println(" Triangle "+ot.getTri());
+						return false;
+					}
+					ot = ot.nextOriginLoop();
+				}
+				while (ot.destination() != d);
 			}
 		}
 		return true;

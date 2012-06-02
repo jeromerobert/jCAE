@@ -27,6 +27,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import javax.swing.event.ChangeListener;
 import org.jcae.mesh.xmldata.AmibeWriter;
+import org.jcae.netbeans.mesh.AmibeDataObject;
 import org.openide.WizardDescriptor;
 import org.openide.WizardDescriptor.Panel;
 import org.openide.filesystems.FileObject;

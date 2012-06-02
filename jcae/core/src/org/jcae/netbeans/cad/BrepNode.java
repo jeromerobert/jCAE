@@ -74,7 +74,7 @@ public class BrepNode extends DataNode implements Node.Cookie, OpenCookie
 	private final InstanceContent instanceContent = new InstanceContent();
 	public BrepNode(DataObject arg0)
 	{
-		super(arg0, new ShapeChildren(), new MyLookup());
+		super(arg0, new ShapeChildren(arg0.getPrimaryFile()), new MyLookup());
 		((MyLookup)getLookup()).setDelegates(new AbstractLookup(instanceContent));
 		setIconBaseWithExtension("org/jcae/netbeans/cad/BRepNode.png");
 		instanceContent.add(this);

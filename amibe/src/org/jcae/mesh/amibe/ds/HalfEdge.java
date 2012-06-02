@@ -395,12 +395,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	
 	public final double checkSwap3D(Mesh mesh, double minCos)
 	{
-		return checkSwap3D(mesh, minCos, 0.0);
+		return checkSwap3D(mesh, minCos, 0.0, 0.0, true);
 	}
-	public final double checkSwap3D(Mesh mesh, double minCos, double maxLength)
-	{
-		return checkSwap3D(mesh, minCos, 0.0, 0, true);
-	}
+
 	/**
 	 * Checks the dihedral angle of an edge.
 	 * Warning: this method uses temp[0], temp[1], temp[2] and temp[3] temporary arrays.
@@ -885,7 +882,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 				f = f.next;
 			else if (f.apex() == o)
 				f = f.next.next;
-			assert f.origin() == o;
+			assert f.origin() == o: f.origin()+" not the same as "+o;
 			if (!f.checkNewRingNormalsSameFanNonManifoldVertex(mesh, newpt, ignored))
 				return false;
 		}

@@ -142,6 +142,22 @@
         </folder>
     </folder>
 
+    <folder name="Templates">
+        <folder name="jCAE">
+            <folder name="Amibe mesh">
+				<file name="jcae3d"/>
+                <attr name="template" boolvalue="true"/>
+                <attr name="instantiatingIterator" newvalue="org.jcae.netbeans.mesh.AmibeNewWizard"/>
+            </folder>
+        </folder>
+        <folder name="Privileged">
+            <file name="Amibe mesh.shadow">
+                <attr name="originalFile" stringvalue="Templates/jCAE/Amibe mesh"/>
+                <attr name="position" intvalue="100"/>
+            </file>
+        </folder>
+    </folder>
+
     <folder name="Services">
         <folder name="MIMEResolver">
             <file name="org-jcae-netbeans-mesh-MIMEResolver.instance"/>

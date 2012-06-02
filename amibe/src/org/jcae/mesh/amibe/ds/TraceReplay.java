@@ -39,6 +39,11 @@ public class TraceReplay implements TraceInterface
 		// Do nothing
 	}
 
+	public void setHooks(String[] commands)
+	{
+		// Do nothing
+	}
+
 	public void createMesh(String meshName, Mesh mesh)
 	{
 		// Do nothing

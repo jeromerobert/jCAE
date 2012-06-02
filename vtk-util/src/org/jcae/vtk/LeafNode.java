@@ -394,7 +394,7 @@ public class LeafNode extends AbstractNode
 		getSelectionActorCustomiser().customiseActor(selectionActor);
 
 		if(selectionMapper == null)
-			selectionMapper = new vtkPolyDataMapper();
+			selectionMapper = new vtkPainterPolyDataMapper();
 		selectionActor.SetMapper(selectionMapper);
 		getSelectionMapperCustomiser().customiseMapper(selectionMapper);
 

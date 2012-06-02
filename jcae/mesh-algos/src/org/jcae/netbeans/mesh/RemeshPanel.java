@@ -58,7 +58,8 @@ public class RemeshPanel extends JPanel {
 
 	private double targetSize = 1.0;
 	private boolean preserveGroups = true;
-	
+	private double coplanarity = 0.9;
+
     /** Creates new form RemeshPanel */
     public RemeshPanel() {
 		setLayout(new BorderLayout());
@@ -85,6 +86,8 @@ public class RemeshPanel extends JPanel {
 			r.put(new MyProperty<Boolean>(Boolean.TYPE, "preserveGroups",
 				"Preserve groups",
 				"Edges adjacent to two different groups are handled like free edges."));
+			r.put(new MyProperty<Double>(Double.TYPE, "coplanarity",
+				"Coplanarity", "Dot product of face normals to detect feature edges"));
 		} catch (NoSuchMethodException ex) {
 			Exceptions.printStackTrace(ex);
 		}
@@ -95,7 +98,7 @@ public class RemeshPanel extends JPanel {
 	{
         final JOptionPane jp = new JOptionPane(this,
              JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
-		JDialog d = jp.createDialog("Refine options");
+		JDialog d = jp.createDialog("Re-mesh options");
 		d.setResizable(true);
 		d.setVisible(true);
         return Integer.valueOf(JOptionPane.OK_OPTION).equals(jp.getValue());
@@ -116,5 +119,11 @@ public class RemeshPanel extends JPanel {
 	public void setPreserveGroups(boolean preserveGroups) {
 		this.preserveGroups = preserveGroups;
 	}
+	public double getCoplanarity() {
+		return coplanarity;
+	}
 
+	public void setCoplanarity(double coplanarity) {
+		this.coplanarity = coplanarity;
+	}
 }

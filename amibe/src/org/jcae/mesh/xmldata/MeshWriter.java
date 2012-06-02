@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 
@@ -270,12 +271,23 @@ public class MeshWriter
 		writeObjectNodes(nodelist, submesh.outerVertex, aw, nodeIndex);
 		writeObjectTriangles(trianglelist, nodeIndex, aw, false);
 		writeObjectGroups(submesh, aw);
+		writeObjectNodeGroups(submesh, aw, nodeIndex);
 		List<Vertex> beams = submesh.getBeams();
 		for(int i = 0; i<beams.size(); i+=2)
 			aw.addBeam(
 				nodeIndex.get(beams.get(i)),
 				nodeIndex.get(beams.get(i+1)));
 		aw.finish();
+	}
+
+	private static void writeObjectNodeGroups(Mesh submesh, AmibeWriter.Dim3 aw,
+		TObjectIntHashMap<Vertex> nodeIndex) throws IOException {
+		for(Entry<String, Collection<Vertex>> e: submesh.getVertexGroup().entrySet())
+		{
+			aw.nextNodeGroup(e.getKey());
+			for(Vertex v:e.getValue())
+				aw.addNodeToGroup(nodeIndex.get(v));
+		}
 	}
 }
 
