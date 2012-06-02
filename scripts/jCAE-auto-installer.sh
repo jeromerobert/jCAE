@@ -298,7 +298,7 @@ then
 
 		cmake $flags $vtkDir
 		cmake $flags $vtkDir
-		set -e
+
 		VERBOSE=1 make -j$makeSpeed
 		echo "$green $bold\nVtk built successfully \n$normal $black"" Time="$(date +%s)
 	else
