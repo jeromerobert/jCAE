@@ -48,7 +48,7 @@ else
 	exit 1
 fi
 
-if [ $2 -eq "" ]
+if [ "$2" -eq "" ]
 then
 	makeSpeed="2"
 else
