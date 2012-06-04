@@ -111,7 +111,7 @@ checkPackage()
 	fi
 }
 
-#package="gcc"; useDpkg=0; checkPackage
+package="gcc"; useDpkg=0; checkPackage
 package="git" ; useDpkg=0; checkPackage
 package="cmake"; useDpkg=0; checkPackage
 package="swig"; useDpkg=0; checkPackage
