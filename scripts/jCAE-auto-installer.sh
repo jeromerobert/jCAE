@@ -173,9 +173,9 @@ fi
 
 # Define abs locations
 
-vtkURL="http://www.vtk.org/files/release/5.10/vtk-5.10.0-rc3.tar.gz"
-vtkTar="vtk-5.10.0-rc3.tar.gz"
-vtkDir=$mypwd/VTK5.10.0.RC3
+vtkURL="http://www.vtk.org/files/release/5.10/vtk-5.10.0.tar.gz"
+vtkTar="vtk-5.10.0.tar.gz"
+vtkDir=$mypwd/VTK
 vtkLinBuildDir=$mypwd/vtkLinBuild
 vtkLinInstallDir=$mypwd/vtkLinInstall
 
