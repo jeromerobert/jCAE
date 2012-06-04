@@ -48,14 +48,14 @@ else
 	exit 1
 fi
 
-if [ "$2" -eq "" ]
+if [ x$2 = x ]
 then
 	makeSpeed="2"
 else
 	makeSpeed=$2
 fi
 
-if [ "$1" = "linux" ] && [ "$JAVA_HOME" = "" ] 
+if [ "$1" = "linux" ] && [ x$JAVA_HOME = x ] 
 then	
 	echo "$red$bold\nPlease specify \$JAVA_HOME environment variable \n$normal $black"
 	exit 1
@@ -153,7 +153,7 @@ then
 
 	# check for jdk installation
 	ret=$(find "$wineDir" -iname java.exe)
-	if [ "$ret" = "" ]
+	if [ x$ret = x ]
 	then
 		# Install jdk
 		mkdir $wineJavaDir
@@ -219,7 +219,7 @@ then
 fi
 
 ret=$(find $vtkLinBuildDir -iname vtk.jar)
-if [ "$ret" = "" ]
+if [ x$ret = x ]
 then
 	echo "$green $bold\n Vtk native building... \n$normal $black"" Time="$(date +%s)
 	cd $vtkLinBuildDir
@@ -246,7 +246,7 @@ then
 	fi
 
 	ret=$(find $vtkLinInstallDir -iname vtk.jar)
-	if [ "$ret" = "" ]
+	if [ x$ret = x ]
 	then
 		echo "$green $bold\nVtk installing... \n$normal $black"" Time="$(date +%s)
 		cd $vtkLinBuildDir
@@ -271,7 +271,7 @@ then
 	fi
 
 	ret=$(find $vtkWinBuildDir -iname vtk.jar)
-	if [ "$ret" = "" ]
+	if [ x$ret = x ]
 	then
 		echo "$green $bold\nVtk ($targetOS) building... \n$normal $black"" Time="$(date +%s)
 		cd $vtkWinBuildDir
@@ -313,7 +313,7 @@ then
 	fi
 
 	ret=$(find $vtkWinInstallDir -iname vtk.jar)
-	if [ "$ret" = "" ]
+	if [ x$ret = x ]
 	then
 		echo "$green $bold\nVtk installing... \n$normal $black"" Time="$(date +%s)
 		cd $vtkWinBuildDir
@@ -359,7 +359,7 @@ then
 	fi
 
 	ret=$(find $oceLinBuildDir -iname *Tk*.so*)
-	if [ "$ret" = "" ]
+	if [ x$ret = x ]
 	then
 		echo "$green $bold\nOce building... \n$normal $black"" Time="$(date +%s)
 		cd $oceLinBuildDir
@@ -383,7 +383,7 @@ then
 	fi
 
 	ret=$(find $oceLinInstallDir -iname *Tk*.so*)
-	if [ "$ret" = "" ]
+	if [ x$ret = x ]
 	then
 		echo "$green $bold\nOce installing... \n$normal $black"" Time="$(date +%s)
 		cd $oceLinBuildDir
@@ -406,7 +406,7 @@ then
 	fi
 
 	ret=$(find $oceWinBuildDir -iname *Tk*.dll)
-	if [ "$ret" = "" ]
+	if [ x$ret = x ]
 	then
 		echo "$green $bold\nOce building... \n$normal $black"" Time="$(date +%s)
 		cd $oceWinBuildDir
@@ -438,7 +438,7 @@ then
 	fi
 
 	ret=$(find $oceWinInstallDir -iname *Tk*.dll)
-	if [ "$ret" = "" ]
+	if [ x$ret = x ]
 	then
 		echo "$green $bold\nOce installing... \n$normal $black"" Time="$(date +%s)
 		cd $oceWinBuildDir
