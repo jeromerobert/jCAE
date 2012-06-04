@@ -97,7 +97,7 @@ checkPackage()
 		then
 			echo "--version failed"
 			ret2=$($package -version)
-			echo $ret2
+			#echo $ret2
 			if [ $? -ne 0 ]
 			then
 				echo "$red $bold\nNot Found $package \n$normal $black"
