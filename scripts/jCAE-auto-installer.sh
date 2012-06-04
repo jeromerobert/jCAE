@@ -119,7 +119,7 @@ package="swig"; useDpkg=0; checkPackage
 #package="libxt-dev"; useDpkg=1; checkPackage
 #package="freeglut3-dev"; useDpkg=1; checkPackage
 package="openjdk-7-jdk"; useDpkg=1; checkPackage
-package="quilt"; useDpkg=0; checkPackage
+#package="quilt"; useDpkg=0; checkPackage
 package="ant"; useDpkg=0; checkPackage
 
 if [ "$targetOS" = "windows" ]
