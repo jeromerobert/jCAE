@@ -164,6 +164,10 @@ then
 	else
 		echo "$green $bold\nJDK-6 on wine already Installed \n$normal $black"
 	fi
+
+	# Patch to remove unnecessary classes.jsa from jdk
+	ret=$(find "$wineJavaDir" -iname classes.jsa -exec rm -f {} \;)
+	
 fi
 
 ##################################################
