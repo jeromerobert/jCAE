@@ -148,7 +148,7 @@ then
 	if [ $? -ne 0 ]
 	then
 		mkdir $wineDir
-		winecfg
+		wine cmd /C rem
 	fi
 
 	# check for jdk installation
