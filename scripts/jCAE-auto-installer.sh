@@ -113,6 +113,7 @@ checkPackage()
 
 package="gcc"; useDpkg=0; checkPackage
 package="git" ; useDpkg=0; checkPackage
+package="make"; useDpkg=0; checkPackage
 package="cmake"; useDpkg=0; checkPackage
 package="swig"; useDpkg=0; checkPackage
 #package="mesa-common-dev"; useDpkg=1; checkPackage
