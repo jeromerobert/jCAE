@@ -116,12 +116,12 @@ package="git" ; useDpkg=0; checkPackage
 package="make"; useDpkg=0; checkPackage
 package="cmake"; useDpkg=0; checkPackage
 package="swig"; useDpkg=0; checkPackage
-#package="mesa-common-dev"; useDpkg=1; checkPackage
-#package="libxt-dev"; useDpkg=1; checkPackage
-#package="freeglut3-dev"; useDpkg=1; checkPackage
+package="mesa-common-dev"; useDpkg=1; checkPackage
+package="libxt-dev"; useDpkg=1; checkPackage
+package="freeglut3-dev"; useDpkg=1; checkPackage
 package="openjdk-7-jdk"; useDpkg=1; checkPackage
 #package="quilt"; useDpkg=0; checkPackage
-package="ant"; useDpkg=0; checkPackage
+#package="ant"; useDpkg=0; checkPackage
 
 if [ "$targetOS" = "windows" ]
 then
@@ -570,6 +570,11 @@ else
 	echo "$green $bold\nNetbeans already installed \n$normal $black"
 fi
 
+##################################################
+## Define ant
+##################################################
+myant=$nbDir/java/ant/bin/ant
+
 
 ##################################################
 ## Get and Install XALAN
@@ -775,9 +780,9 @@ cd $jcaeDir/vtk-util/
 mkdir nbproject/private
 touch nbproject/private/private.properties
 cat $mypwd/jcae.config > nbproject/private/private.properties
-ant config
-ant clean
-ant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/"
+$myant config
+$myant clean
+$myant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/"
 cd $mypwd
 
 ## building jcae/occjava
@@ -787,7 +792,7 @@ mkdir nbproject/private
 touch nbproject/private/private.properties
 cat $mypwd/jcae.config > nbproject/private/private.properties
 java org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/project-build-impl.xsl -OUT nbproject/build-impl.xml
-ant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" jar
+$myant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" jar
 cd $mypwd
 
 ## building amibe
@@ -797,7 +802,7 @@ mkdir nbproject/private
 touch nbproject/private/private.properties
 cat $mypwd/jcae.config > nbproject/private/private.properties
 java org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/project-build-impl.xsl -OUT nbproject/build-impl.xml
-ant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" -f nbbuild.xml jar
+$myant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" -f nbbuild.xml jar
 cd $mypwd
 
 ## building vtk-amibe (src location at jCAE/vtk-amibe/, DONT know why?)
@@ -807,7 +812,7 @@ mkdir nbproject/private
 touch nbproject/private/private.properties
 cat $mypwd/jcae.config > nbproject/private/private.properties
 java org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/project-build-impl.xsl -OUT nbproject/build-impl.xml
-ant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" jar
+$myant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" jar
 cd $mypwd
 
 ## building vtk-amibe-occ
@@ -817,7 +822,7 @@ mkdir nbproject/private
 touch nbproject/private/private.properties
 cat $mypwd/jcae.config > nbproject/private/private.properties
 java org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/project-build-impl.xsl -OUT nbproject/build-impl.xml
-ant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" jar
+$myant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" jar
 cd $mypwd
 
 #-------------------------------------------------
@@ -870,7 +875,7 @@ then
 fi
 
 java org.apache.xalan.xslt.Process -IN ./nbproject/project.xml -XSL $xslDir/suite-build-impl.xsl -OUT nbproject/build-impl.xml
-ant -Dnbplatform.default.netbeans.dest.dir="$nbDir" -Dnbplatform.default.harness.dir="$nbDir/harness/" build-zip
+$myant -Dnbplatform.default.netbeans.dest.dir="$nbDir" -Dnbplatform.default.harness.dir="$nbDir/harness/" build-zip
 echo "$green $bold\njCAE built successfully \n$normal $black"" Time="$(date +%s)
 cd $mypwd
 
