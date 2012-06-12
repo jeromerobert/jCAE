@@ -183,8 +183,8 @@ vtkDir=$mypwd/VTK
 vtkLinBuildDir=$mypwd/vtkLinBuild
 vtkLinInstallDir=$mypwd/vtkLinInstall
 
-jcaeURL=https://github.com/jeromerobert/jCAE.git
-jcaeDir=$mypwd/jCAE
+#jcaeURL=https://github.com/jeromerobert/jCAE.git
+jcaeDir=$mypwd/../
 
 # Get vtk-5.10.0, unzip 
 ret=$(ls $vtkTar)
@@ -200,11 +200,11 @@ then
 fi
 
 # Get jCAE source (so early to get vtk patch)
-ret=$(ls $jcaeDir)
-if [ $? -ne 0 ]
-then
-	git clone $jcaeURL
-fi
+#ret=$(ls $jcaeDir)
+#if [ $? -ne 0 ]
+#then
+#	git clone $jcaeURL
+#fi
 
 cd $jcaeDir
 export jcaeTagName=$(git describe --tags)
