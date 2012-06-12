@@ -38,6 +38,7 @@ black="\033[0m "
 
 export targetOS;
 export makeSpeed;
+export myjava;
 
 echo "$1"
 if [ "$1" = "linux" ] || [ "$1" = "windows" ]
@@ -59,6 +60,13 @@ if [ "$1" = "linux" ] && [ x$JAVA_HOME = x ]
 then	
 	echo "$red$bold\nPlease specify \$JAVA_HOME environment variable \n$normal $black"
 	exit 1
+fi
+
+if [ "$1" = "linux" ] 
+then	
+	myjava=$JAVA_HOME/bin/java
+else
+	myjava=java
 fi
 
 startTime=$(date +%s)
@@ -485,7 +493,7 @@ fi
 ret=$(ls $jythonDir)
 if [ $? -ne 0 ]
 then
-	java -jar $jythonJar -s -d $jythonDir
+	$myjava -jar $jythonJar -s -d $jythonDir
 	echo "$green $bold\nJython installed successfully \n$normal $black"" Time="$(date +%s)
 else
 	echo "$green $bold\nJython already installed \n$normal $black"
@@ -791,7 +799,7 @@ cd $jcaeDir/jcae/occjava
 mkdir nbproject/private
 touch nbproject/private/private.properties
 cat $mypwd/jcae.config > nbproject/private/private.properties
-java org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/project-build-impl.xsl -OUT nbproject/build-impl.xml
+$myjava org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/project-build-impl.xsl -OUT nbproject/build-impl.xml
 $myant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" jar
 cd $mypwd
 
@@ -801,7 +809,7 @@ cd $jcaeDir/amibe
 mkdir nbproject/private
 touch nbproject/private/private.properties
 cat $mypwd/jcae.config > nbproject/private/private.properties
-java org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/project-build-impl.xsl -OUT nbproject/build-impl.xml
+$myjava org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/project-build-impl.xsl -OUT nbproject/build-impl.xml
 $myant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" -f nbbuild.xml jar
 cd $mypwd
 
@@ -811,7 +819,7 @@ cd $jcaeDir/jcae/vtk-amibe
 mkdir nbproject/private
 touch nbproject/private/private.properties
 cat $mypwd/jcae.config > nbproject/private/private.properties
-java org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/project-build-impl.xsl -OUT nbproject/build-impl.xml
+$myjava org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/project-build-impl.xsl -OUT nbproject/build-impl.xml
 $myant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" jar
 cd $mypwd
 
@@ -821,7 +829,7 @@ cd $jcaeDir/vtk-amibe-occ
 mkdir nbproject/private
 touch nbproject/private/private.properties
 cat $mypwd/jcae.config > nbproject/private/private.properties
-java org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/project-build-impl.xsl -OUT nbproject/build-impl.xml
+$myjava org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/project-build-impl.xsl -OUT nbproject/build-impl.xml
 $myant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" jar
 cd $mypwd
 
@@ -836,7 +844,7 @@ modules="amibe amibe-occ core jython mesh-algos occjava-nb trove tweakui vecmath
 for module in $modules
 do
 	cd $jcaeDir/jcae/"$module"
-	java org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/module-build-impl.xsl -OUT nbproject/build-impl.xml
+	$myjava org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/module-build-impl.xsl -OUT nbproject/build-impl.xml
 done
 
 
@@ -847,7 +855,7 @@ done
 # This is a now an automated step. 
 echo "$green $bold\nGenerating platform.xml for jCAE... \n$normal $black"" Time="$(date +%s)
 cd $jcaeDir/jcae
-java org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/platform.xsl -OUT nbproject/platform.xml
+$myjava org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/platform.xsl -OUT nbproject/platform.xml
 
 #-------------------------------------------------
 ## Build suite as Zip distribution
@@ -874,7 +882,7 @@ then
 	echo "path.jre.win32=$wineJavaDir/jre" >> nbproject/private/private.properties 
 fi
 
-java org.apache.xalan.xslt.Process -IN ./nbproject/project.xml -XSL $xslDir/suite-build-impl.xsl -OUT nbproject/build-impl.xml
+$myjava org.apache.xalan.xslt.Process -IN ./nbproject/project.xml -XSL $xslDir/suite-build-impl.xsl -OUT nbproject/build-impl.xml
 $myant -Dnbplatform.default.netbeans.dest.dir="$nbDir" -Dnbplatform.default.harness.dir="$nbDir/harness/" build-zip
 echo "$green $bold\njCAE built successfully \n$normal $black"" Time="$(date +%s)
 cd $mypwd
