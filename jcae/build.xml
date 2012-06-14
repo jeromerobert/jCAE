@@ -31,7 +31,7 @@
 	<!-- When we switch from win32 to linux, arch specific files will stay in
 	in the cluster directory, so we need to clean it.
 	-->
-	<target name="clean-cluster">
+	<target name="clean-cluster" depends="-init">
 		<delete dir="${cluster}"/>
 	</target>
 
