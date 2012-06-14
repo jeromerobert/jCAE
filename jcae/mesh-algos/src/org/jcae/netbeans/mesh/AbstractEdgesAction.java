@@ -67,6 +67,8 @@ public abstract class AbstractEdgesAction extends BooleanStateAction
 		currentSelection =
 			org.openide.util.Utilities.actionsGlobalContext().lookupResult(
 			AmibeDataObject.class);
+		if(currentSelection.allInstances().size() == 1)
+			amibeDataObject = currentSelection.allInstances().iterator().next();
 		//listen to node selection
 		currentSelection.addLookupListener(new LookupListener() {
 			public void resultChanged(LookupEvent ev) {
