@@ -790,7 +790,7 @@ touch nbproject/private/private.properties
 cat $mypwd/jcae.config > nbproject/private/private.properties
 $myant config
 $myant clean
-$myant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/"
+#$myant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/"
 cd $mypwd
 
 ## building jcae/occjava
@@ -800,7 +800,7 @@ mkdir nbproject/private
 touch nbproject/private/private.properties
 cat $mypwd/jcae.config > nbproject/private/private.properties
 $myjava org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/project-build-impl.xsl -OUT nbproject/build-impl.xml
-$myant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" jar
+#$myant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" jar
 cd $mypwd
 
 ## building amibe
@@ -810,7 +810,7 @@ mkdir nbproject/private
 touch nbproject/private/private.properties
 cat $mypwd/jcae.config > nbproject/private/private.properties
 $myjava org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/project-build-impl.xsl -OUT nbproject/build-impl.xml
-$myant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" -f nbbuild.xml jar
+#$myant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" -f nbbuild.xml jar
 cd $mypwd
 
 ## building vtk-amibe (src location at jCAE/vtk-amibe/, DONT know why?)
@@ -820,7 +820,7 @@ mkdir nbproject/private
 touch nbproject/private/private.properties
 cat $mypwd/jcae.config > nbproject/private/private.properties
 $myjava org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/project-build-impl.xsl -OUT nbproject/build-impl.xml
-$myant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" jar
+#$myant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" jar
 cd $mypwd
 
 ## building vtk-amibe-occ
@@ -830,7 +830,7 @@ mkdir nbproject/private
 touch nbproject/private/private.properties
 cat $mypwd/jcae.config > nbproject/private/private.properties
 $myjava org.apache.xalan.xslt.Process -IN nbproject/project.xml -XSL $xslDir/project-build-impl.xsl -OUT nbproject/build-impl.xml
-$myant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" jar
+#$myant -Dnbplatform.default.netbeans.dest.dir="$nbDir/" -Dnbplatform.default.harness.dir="$nbDir/harness/" jar
 cd $mypwd
 
 #-------------------------------------------------
