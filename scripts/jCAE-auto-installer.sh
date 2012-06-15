@@ -499,7 +499,8 @@ else
 	echo "$green $bold\nJython already installed \n$normal $black"
 fi
 
-
+#Removing doc , demos
+rm -rf $jythonDir/Demo $jythonDir/Doc
 
 ##################################################
 ## Get and Install VECMATH
