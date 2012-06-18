@@ -502,6 +502,14 @@ fi
 #Removing doc , demos
 rm -rf $jythonDir/Demo $jythonDir/Doc
 
+#Fetching jython.bat
+if [ "$targetOS" = "windows" ]
+then
+	cd $jythonDir/bin
+	wget -nc http://jython.svn.sourceforge.net/viewvc/jython/tags/Release_2_5_2/jython/src/shell/jython.bat
+	cd $mypwd
+fi
+
 ##################################################
 ## Get and Install VECMATH
 ##################################################
