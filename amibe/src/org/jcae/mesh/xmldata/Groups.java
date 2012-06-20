@@ -32,8 +32,6 @@ import javax.swing.*;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import org.jcae.mesh.xmldata.AmibeReader.SubMesh;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
@@ -97,7 +95,6 @@ public class Groups
 	{
 		String xmlDir=meshFile;
 		Group fuseGroup = new Group();
-		int id = 0;
 		int number = 0;
 		int offset = 0;
 		int trianglesNumber = 0;
@@ -137,10 +134,6 @@ public class Groups
 		for (int i = 0; i < groups.size(); i++)
 		{
 			Group g = groups.get(i);
-			if (g.getId() > id)
-			{
-				id = g.getId();
-			}
 			if (i == 0)
 			{
 				g.setOffset(0);
@@ -175,8 +168,7 @@ public class Groups
 		{
 			offset = 0;
 		}
-		
-		fuseGroup.setId(id + 1);
+
 		fuseGroup.setNumberOfElements(number);
 		fuseGroup.setOffset(offset);
 		fuseGroup.setName(name);
@@ -209,11 +201,34 @@ public class Groups
 		return fuseGroup;
 	}
 
+	private String getFreeName(String template)
+	{
+		boolean valid;
+		String current = template;
+		int n = 1;
+		do
+		{
+			valid = true;
+			for(Group g: groups)
+			{
+				if(current.equals(g.getName()))
+				{
+					valid = false;
+					current = template + n;
+					n++;
+					break;
+				}
+			}
+		}
+		while(!valid);
+		return current;
+	}
+
 	public void fuse(Collection<Group> toFuse)
 		throws TransformerException,
 		ParserConfigurationException, SAXException, IOException
 	{
-		fuse(toFuse, "fused_groups");
+		fuse(toFuse, getFreeName("fused_groups"));
 	}
 
 	/**
