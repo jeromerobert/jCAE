@@ -227,46 +227,6 @@ public class Groups
 	}
 
 	/**
-	 *@param xmlGroups the xml element of DOM tree corresponding to the tag "groups".
-	 *@param g a group.
-	 *@return the xml element of DOM tree corresponding to the group.
-	 */
-	public Element getXmlGroup(Element xmlGroups, Group g)
-	{
-		NodeList list = xmlGroups.getElementsByTagName("group");
-		Element elt = null;
-		int length=list.getLength();
-		int i = 0;
-		boolean found = false;
-		while (!found && i < length)
-		{
-			elt = (Element) list.item(i);
-			int id = -1;
-			try
-			{
-				id = Integer.parseInt(elt.getAttribute("id"));
-			} catch (Exception e)
-			{
-				e.printStackTrace(System.out);
-			}
-			if (id == g.getId())
-			{
-				found = true;
-			} else
-			{
-				i++;
-			}
-		}
-		if (found)
-		{
-			return elt;
-		} else
-		{
-			return null;
-		}
-	}
-
-	/**
 	 * It writes the file jcae3d.xml to update the groups, after a fusion for example.
 	 *
 	 *@param xmlDoc the xml document of DOM. It should comes from the parsing of jcae3d.xml.
@@ -413,10 +373,10 @@ public class Groups
 		if(jfc.showSaveDialog(null)==JFileChooser.APPROVE_OPTION)
 		{
 			Object[] os=list.getSelectedValues();
-			int[] ids=new int[os.length];
+			String[] ids=new String[os.length];
 			for(int i=0; i<os.length; i++)
 			{
-				ids[i]=((Group)os[i]).getId();
+				ids[i]=((Group)os[i]).getName();
 			}			
 			PrintStream stream=new PrintStream(new BufferedOutputStream(new FileOutputStream(jfc.getSelectedFile())));
 			MeshExporter.UNV exporter=new MeshExporter.UNV(new File(meshFile), ids);

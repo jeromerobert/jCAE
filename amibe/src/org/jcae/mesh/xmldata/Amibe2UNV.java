@@ -216,27 +216,21 @@ public class Amibe2UNV
 	
 	private void writeNodes(PrintStream out) throws IOException
 	{
-		File f=unvWriter.getNodeFile();
-		// Open the file and then get a channel from the stream
-		FileInputStream fis = new FileInputStream(f);
-		FileChannel fc = fis.getChannel();
-	
-		ByteBuffer bb=ByteBuffer.allocate(3*8);
+		DoubleFileReader f=unvWriter.getSubMesh().getNodes();
 		int count = 1;
 		out.println("    -1"+CR+"  2411");
-		
-		while(fc.read(bb)!=-1)
+		double[] buffer = new double[3];
+		while(!f.isEOF())
 		{
-			bb.rewind();
+			f.get(buffer);
 			MeshExporter.UNV.writeSingleNode(out, count,
-				bb.getDouble()*scale, bb.getDouble()*scale, bb.getDouble()*scale);
-			bb.rewind();
+				buffer[0]*scale, buffer[1]*scale, buffer[2]*scale);
 			count ++;
 		}
-		
+
 		out.println("    -1");
 		
-		fc.close();
+		f.close();
 		logger.info("Total number of nodes: "+count);
 	}
 	
