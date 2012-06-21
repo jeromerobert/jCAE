@@ -373,7 +373,7 @@ public class SmoothNodes3DBg
 		double saveX = oldp3[0];
 		double saveY = oldp3[1];
 		double saveZ = oldp3[2];
-		if (!liaison.backupAndMove(n, centroid3, true))
+		if (!liaison.backupAndMove(n, centroid3, -1))
 		{
 			LOGGER.finer("Point not moved, projection failed");
 			liaison.backupRestore(n, true);

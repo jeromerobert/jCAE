@@ -206,9 +206,9 @@ public class MeshLiaison
 	 * made if all triangles adjacent to the point are from the same group.
 	 * @return Whether or not the projection succeeded.
 	 */
-	public final boolean backupAndMove(Vertex v, double [] target, boolean checkGroup)
+	public final boolean backupAndMove(Vertex v, double [] target, int group)
 	{
-		return move(v, target, true, checkGroup);
+		return move(v, target, true, group);
 	}
 
 	/**
@@ -221,12 +221,16 @@ public class MeshLiaison
 	 */
 	public final boolean move(Vertex v, double [] target)
 	{
-		return move(v, target, false, false);
+		return move(v, target, false, -1);
 	}
-	private boolean move(Vertex v, double [] target, boolean backup, boolean checkGroup)
+	public final boolean move(Vertex v, double [] target, int group)
+	{
+		return move(v, target, false, group);
+	}
+	private boolean move(Vertex v, double [] target, boolean backup, int group)
 	{
 		if (LOGGER.isLoggable(Level.FINER))
-			LOGGER.log(Level.FINER, "Trying to move vertex "+v+" to ("+target[0]+", "+target[1]+", "+target[2]+")");
+			LOGGER.log(Level.FINER, "Trying to move vertex "+v+" to ("+target[0]+", "+target[1]+", "+target[2]+") in group "+group);
 		// Old projection
 		ProjectedLocation location = mapCurrentVertexProjection.get(v);
 		if (backup)
@@ -238,7 +242,6 @@ public class MeshLiaison
 		}
 		if (LOGGER.isLoggable(Level.FINEST))
 			LOGGER.log(Level.FINEST, "Old projection: "+location);
-		int group = checkGroup ? getGroup(v) : -1;
 		LocationFinder lf;
 		if(group >= 0)
 			lf = new LocationFinder(target);
@@ -249,6 +252,9 @@ public class MeshLiaison
 			ot = ot.prev();
 		else if (ot.destination() == location.t.vertex[location.vIndex])
 			ot = ot.next();
+		lf.walkAroundOrigin(ot);
+		if (null == lf.current)
+			return false;
 		lf.walkFlipFlop(ot);
 		// Now lf contains the new location.
 		// Update location
@@ -1037,13 +1043,11 @@ public class MeshLiaison
 		int region = -1;
 		int[] index = new int[2];
 		private int groupID;
-		private boolean checkGroup;
 
 		LocationFinder(double[] pos, int groupID)
 		{
 			System.arraycopy(pos, 0, target, 0, 3);
 			this.groupID = groupID;
-			this.checkGroup = true;
 		}
 
 		LocationFinder(double[] pos)
@@ -1051,6 +1055,11 @@ public class MeshLiaison
 			System.arraycopy(pos, 0, target, 0, 3);
 		}
 
+		/*
+		 * Finds the best approximated point on this triangle.
+		 * This method initializes the {#current} member and must be
+		 * called before other methods.
+		 */
 		boolean walkOnTriangle(Triangle t)
 		{
 			double dist = sqrDistanceVertexTriangle(target, t, index);
@@ -1065,12 +1074,7 @@ public class MeshLiaison
 			return false;
 		}
 	
-		boolean walkAroundOrigin(AbstractHalfEdge ot)
-		{
-			return walkAroundOrigin(ot, false);
-		}
-
-		private boolean walkAroundOrigin(AbstractHalfEdge ot, boolean checkGroup)
+		private boolean walkAroundOrigin(AbstractHalfEdge ot)
 		{
 			AbstractHalfEdge loop = ot.getTri().getAbstractHalfEdge();
 			if (loop.origin() == ot.destination())
@@ -1086,7 +1090,7 @@ public class MeshLiaison
 					loop = loop.nextOriginLoop();
 					continue;
 				}
-				if(!checkGroup || loop.getTri().getGroupId() == groupID)
+				if(groupID == -1 || loop.getTri().getGroupId() == groupID)
 					modified |= walkOnTriangle(loop.getTri());
 				loop = loop.nextOriginLoop();
 			}
@@ -1099,13 +1103,7 @@ public class MeshLiaison
 		 */
 		boolean walkFlipFlop(AbstractHalfEdge initEdge)
 		{
-			if(checkGroup)
-			{
-				if(!walkAroundOrigin(initEdge, true))
-					walkAroundOrigin(initEdge);
-			}
-			else
-				walkAroundOrigin(initEdge);
+			walkAroundOrigin(initEdge);
 
 			AbstractHalfEdge ot = current.getAbstractHalfEdge();
 			if (ot.origin() == current.vertex[localEdgeIndex])
@@ -1117,7 +1115,7 @@ public class MeshLiaison
 			int countdown = 2;
 			while (true)
 			{
-				if (walkAroundOrigin(ot, checkGroup))
+				if (walkAroundOrigin(ot))
 				{
 					modified = true;
 					countdown = 2;
@@ -1182,8 +1180,9 @@ public class MeshLiaison
 		{
 			for (Triangle f : mesh.getTriangles())
 			{
-				if (f.hasAttributes(AbstractHalfEdge.OUTER) ||
-					(group >= 0 && f.getGroupId() != group))
+				if (f.hasAttributes(AbstractHalfEdge.OUTER))
+					continue;
+				if (group >= 0 && f.getGroupId() != group)
 					continue;
 				double dist = sqrDistanceVertexTriangle(target, f, index);
 				if (dist < dmin)
