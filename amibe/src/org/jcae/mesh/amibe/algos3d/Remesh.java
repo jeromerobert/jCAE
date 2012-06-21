@@ -724,7 +724,6 @@ public class Remesh
 		double [] lower = new double[3];
 		double [] upper = new double[3];
 		boolean border = ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD | AbstractHalfEdge.SHARP);
-		int borderGroup = ot.getTri().getGroupId();
 		int nr;
 		double maxError, target;
 		if (edgeLength < ONE_PLUS_SQRT2)
@@ -790,7 +789,7 @@ public class Remesh
 						// Check that point is not near of a border
 						double localSize = 0.9 * minlen * m.getUnitBallBBox()[0];
 						double localSize2 = localSize * localSize;
-						if (liaison.isNearSkeleton(np, borderGroup, localSize2))
+						if (liaison.isNearSkeleton(np, group, localSize2))
 						{
 							r--;
 							break;
