@@ -1217,6 +1217,8 @@ public class MeshLiaison
 		{
 			if (!mesh.hasAdjacency())
 				throw new IllegalArgumentException("Mesh does not contain adjacency relations");
+			// Always add group -1
+			mapGroupBorder.put(-1, new ArrayList<Line>());
 			AbstractHalfEdge ot = null;
 			for (Triangle t : mesh.getTriangles())
 			{
