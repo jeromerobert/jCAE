@@ -242,11 +242,7 @@ public class MeshLiaison
 		}
 		if (LOGGER.isLoggable(Level.FINEST))
 			LOGGER.log(Level.FINEST, "Old projection: "+location);
-		LocationFinder lf;
-		if(group >= 0)
-			lf = new LocationFinder(target);
-		else
-			lf = new LocationFinder(target, group);
+		LocationFinder lf = new LocationFinder(target, group);
 		AbstractHalfEdge ot = location.t.getAbstractHalfEdge();
 		if (ot.apex() == location.t.vertex[location.vIndex])
 			ot = ot.prev();
@@ -398,12 +394,13 @@ public class MeshLiaison
 		LOGGER.config("Update projections");
 		for (Vertex v : mapCurrentVertexProjection.keySet())
 			move(v, v.getUV());
+		LOGGER.config("Finish updating projections");
 	}
 
 	public static AbstractHalfEdge findSurroundingTriangleDebug(
 		Vertex v, Mesh mesh, int group)
 	{
-		LocationFinder lf = new LocationFinder(v.getUV());
+		LocationFinder lf = new LocationFinder(v.getUV(), group);
 		lf.walkDebug(mesh, group);
 		AbstractHalfEdge ret = lf.current.getAbstractHalfEdge();
 		if (ret.origin() == lf.current.vertex[lf.localEdgeIndex])
@@ -415,7 +412,7 @@ public class MeshLiaison
 
 	public static AbstractHalfEdge findNearestEdge(Vertex v, Triangle t)
 	{
-		LocationFinder lf = new LocationFinder(v.getUV());
+		LocationFinder lf = new LocationFinder(v.getUV(), t.getGroupId());
 		lf.walkOnTriangle(t);
 		AbstractHalfEdge ret = lf.current.getAbstractHalfEdge();
 		if (ret.origin() == lf.current.vertex[lf.localEdgeIndex])
@@ -495,11 +492,7 @@ public class MeshLiaison
 	{
 		double[] pos = v.getUV();
 		boolean redo = true;
-		LocationFinder lf;
-		if(group >= 0)
-			lf= new LocationFinder(pos, group);
-		else
-			lf= new LocationFinder(pos);
+		LocationFinder lf = new LocationFinder(pos, group);
 
 		Triangle t = start;
 		AbstractHalfEdge ot = t.getAbstractHalfEdge();
@@ -556,7 +549,7 @@ public class MeshLiaison
 			if (seen.contains(t) || t.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			double dist = sqrDistanceVertexTriangle(pos, t, index);
-			if (group >= 0 || dist < maxError)
+			if (group >= 0 && dist < maxError)
 			{
 				seen.clear();
 				int i = index[0];
@@ -1053,17 +1046,12 @@ public class MeshLiaison
 		int localEdgeIndex = -1;
 		int region = -1;
 		int[] index = new int[2];
-		private int groupID;
+		private final int groupID;
 
 		LocationFinder(double[] pos, int groupID)
 		{
 			System.arraycopy(pos, 0, target, 0, 3);
 			this.groupID = groupID;
-		}
-
-		LocationFinder(double[] pos)
-		{
-			System.arraycopy(pos, 0, target, 0, 3);
 		}
 
 		/*
