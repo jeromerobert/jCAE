@@ -25,7 +25,10 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
+import gnu.trove.TIntIntHashMap;
+import gnu.trove.TIntIntIterator;
 import gnu.trove.TIntObjectHashMap;
+import gnu.trove.TIntObjectIterator;
 import java.io.FileNotFoundException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,7 +49,8 @@ public class MeshLiaison
 	private final Mesh backgroundMesh;
 	private final Mesh currentMesh;
 	// Map between vertices of currentMesh and their projection on backgroundMesh
-	private final Map<Vertex, ProjectedLocation> mapCurrentVertexProjection;
+	// Each group has its own map
+	private final TIntObjectHashMap<Map<Vertex, ProjectedLocation>> mapCurrentVertexProjection;
 	private Skeleton skeleton;
 	
 	private final double [] work1 = new double[3];
@@ -90,9 +94,17 @@ public class MeshLiaison
 			}
 		}
 		
+		// count the number of vertices for each group
 		this.currentMesh = new Mesh(mtb);
 		this.currentMesh.getTrace().setDisabled(this.backgroundMesh.getTrace().getDisabled());
 		Map<Vertex, String> vgGroups = createVGMap();
+		TIntIntHashMap numberOfTriangles = new TIntIntHashMap();
+		for (Triangle t : this.backgroundMesh.getTriangles())
+		{
+			numberOfTriangles.putIfAbsent(t.getGroupId(), 0);
+			numberOfTriangles.increment(t.getGroupId());
+		}
+
 		// Create vertices of currentMesh
 		Map<Vertex, Vertex> mapBgToCurrent = new HashMap<Vertex, Vertex>(backgroundNodeset.size()+1);
 		for (Vertex v : backgroundNodeset)
@@ -124,7 +136,14 @@ public class MeshLiaison
 		this.currentMesh.buildAdjacency();
 		
 		// Compute projections of vertices from currentMesh
-		this.mapCurrentVertexProjection = new HashMap<Vertex, ProjectedLocation>(backgroundNodeset.size());
+		this.mapCurrentVertexProjection = new TIntObjectHashMap<Map<Vertex, ProjectedLocation>>(numberOfTriangles.size());
+		this.mapCurrentVertexProjection.put(-1, new HashMap<Vertex, ProjectedLocation>(backgroundNodeset.size()));
+		for (TIntIntIterator it = numberOfTriangles.iterator(); it.hasNext(); )
+		{
+			it.advance();
+			System.out.println("groupe "+it.key());
+			this.mapCurrentVertexProjection.put(it.key(), new HashMap<Vertex, ProjectedLocation>(it.value() / 2));
+		}
 		for (Vertex v: backgroundNodeset)
 		{
 			Iterator<Triangle> it = v.getNeighbourIteratorTriangle();
@@ -185,9 +204,9 @@ public class MeshLiaison
 		return currentMesh;
 	}
 
-	public final void backupRestore(Vertex v, boolean restore)
+	public final void backupRestore(Vertex v, boolean restore, int group)
 	{
-		ProjectedLocation location = mapCurrentVertexProjection.get(v);
+		ProjectedLocation location = mapCurrentVertexProjection.get(group).get(v);
 		if (!location.isCached)
 			throw new IllegalStateException();
 		if (restore)
@@ -232,7 +251,7 @@ public class MeshLiaison
 		if (LOGGER.isLoggable(Level.FINER))
 			LOGGER.log(Level.FINER, "Trying to move vertex "+v+" to ("+target[0]+", "+target[1]+", "+target[2]+") in group "+group);
 		// Old projection
-		ProjectedLocation location = mapCurrentVertexProjection.get(v);
+		ProjectedLocation location = mapCurrentVertexProjection.get(group).get(v);
 		if (backup)
 		{
 			if (location.isCached)
@@ -337,14 +356,14 @@ public class MeshLiaison
 
 	public final Triangle getBackgroundTriangle(Vertex v)
 	{
-		ProjectedLocation location = mapCurrentVertexProjection.get(v);
+		ProjectedLocation location = mapCurrentVertexProjection.get(-1).get(v);
 		assert location != null : "Vertex "+v+" not found";
 		return location.t;
 	}
 
 	public final double[] getBackgroundNormal(Vertex v)
 	{
-		ProjectedLocation location = mapCurrentVertexProjection.get(v);
+		ProjectedLocation location = mapCurrentVertexProjection.get(-1).get(v);
 		assert location != null : "Vertex "+v+" not found";
 		return location.normal;
 	}
@@ -375,7 +394,9 @@ public class MeshLiaison
 	 */
 	public final void addVertex(Vertex v, Triangle bgT)
 	{
-		mapCurrentVertexProjection.put(v, new ProjectedLocation(v.getUV(), bgT));
+		mapCurrentVertexProjection.get(-1).put(v, new ProjectedLocation(v.getUV(), bgT));
+		if (bgT.getGroupId() != -1)
+			mapCurrentVertexProjection.get(bgT.getGroupId()).put(v, new ProjectedLocation(v.getUV(), bgT));
 	}
 
 	/**
@@ -386,13 +407,19 @@ public class MeshLiaison
 	 */
 	public final Triangle removeVertex(Vertex v)
 	{
-		return mapCurrentVertexProjection.remove(v).t;
+		for (TIntObjectIterator<Map<Vertex, ProjectedLocation>> it = mapCurrentVertexProjection.iterator(); it.hasNext(); )
+		{
+			it.advance();
+			if (it.key() != -1)
+				it.value().remove(v);
+		}
+		return mapCurrentVertexProjection.get(-1).remove(v).t;
 	}
 
 	public final void updateAll()
 	{
 		LOGGER.config("Update projections");
-		for (Vertex v : mapCurrentVertexProjection.keySet())
+		for (Vertex v : mapCurrentVertexProjection.get(-1).keySet())
 			move(v, v.getUV());
 		LOGGER.config("Finish updating projections");
 	}
