@@ -265,53 +265,64 @@ public class MeshLiaison
 			LOGGER.log(Level.FINEST, "New projection: "+location);
 		double [] newPosition = new double[3];
 		location.projectOnTriangle(target, newPosition);
-		if (!location.computeBarycentricCoordinates(newPosition))
+		// There are 2 distinct cases:
+		//   1. The projected vertex should be on the background mesh, and
+		//      we try hard to project vertex onto the background mesh
+		//   2. We want to compute the best projected vertex, but it may
+		//      be at a small distance from the background mesh
+		// The first case is important when smoothing, in which case
+		// backup parameter is true.  We use it to distinguish between
+		// both use cases, but adding a new parameter wpuld be better.
+		if (backup)
 		{
-			int[] index = new int[2];
-			double maxError = sqrDistanceVertexTriangle(target, lf.current, index);
-			AbstractHalfEdge newEdge = ot;
-			do
+			if (!location.computeBarycentricCoordinates(newPosition))
 			{
-				ot = newEdge;
-				newEdge = findBetterTriangleInNeighborhood(target, ot, maxError, group);
-				maxError *= 0.5;
-			} while (newEdge != null);
-			if (ot != null)
+				int[] index = new int[2];
+				double maxError = sqrDistanceVertexTriangle(target, lf.current, index);
+				AbstractHalfEdge newEdge = ot;
+				do
+				{
+					ot = newEdge;
+					newEdge = findBetterTriangleInNeighborhood(target, ot, maxError, group);
+					maxError *= 0.5;
+				} while (newEdge != null);
+				if (ot != null)
+				{
+					location.updateTriangle(ot.getTri());
+					location.updateVertexIndex(target);
+				}
+			}
+			if (!location.computeBarycentricCoordinates(newPosition))
 			{
-				location.updateTriangle(ot.getTri());
+				// FIXME: this should not happen. Try all triangles to find the best projection
+				LOGGER.log(Level.CONFIG, "Position found outside triangle: " + newPosition[0] + " " + newPosition[1] + " " + newPosition[2] + "; checking all triangles, this may be slow");
+				lf.walkDebug(backgroundMesh, group);
+				location.updateTriangle(lf.current);
 				location.updateVertexIndex(target);
 			}
-		}
-		if (!location.computeBarycentricCoordinates(newPosition))
-		{
-			/* FIXME: this should not happen. Try all triangles to find the best projection */
-			LOGGER.log(Level.CONFIG, "Position found outside triangle: "+newPosition[0]+" "+newPosition[1]+" "+newPosition[2]+"; checking all triangles, this may be slow");
-			lf.walkDebug(backgroundMesh, group);
-			location.updateTriangle(lf.current);
-			location.updateVertexIndex(target);
-		}
-		if (!location.computeBarycentricCoordinates(newPosition))
-		{
-/* FIXME: this should not happen. For now, do not move in such a case
-			double [] p0 = location.t.vertex[0].getUV();
-			double [] p1 = location.t.vertex[1].getUV();
-			double [] p2 = location.t.vertex[2].getUV();
-			for (int i = 0; i < 3; i++)
+			if (!location.computeBarycentricCoordinates(newPosition))
 			{
-				if (location.b[i] < 0.0)
-					location.b[i] = 0.0;
+/* FIXME: this should not happen. For now, do not move in such a case
+				double [] p0 = location.t.vertex[0].getUV();
+				double [] p1 = location.t.vertex[1].getUV();
+				double [] p2 = location.t.vertex[2].getUV();
+				for (int i = 0; i < 3; i++)
+				{
+					if (location.b[i] < 0.0)
+						location.b[i] = 0.0;
+				}
+				// Values have been truncated
+				double invSum = 1.0 / (location.b[0] + location.b[1] + location.b[2]);
+				for (int i = 0; i < 3; i++)
+					location.b[i] *= invSum;
+				LOGGER.log(Level.WARNING, "Position found outside triangle: "+newPosition[0]+" "+newPosition[1]+" "+newPosition[2]);
+				// Move vertex on triangle boundary
+				newPosition[0] = location.b[0]*p0[0] + location.b[1]*p1[0] + location.b[2]*p2[0];
+				newPosition[1] = location.b[0]*p0[1] + location.b[1]*p1[1] + location.b[2]*p2[1];
+				newPosition[2] = location.b[0]*p0[2] + location.b[1]*p1[2] + location.b[2]*p2[2];
+				 */
+				return false;
 			}
-			// Values have been truncated
-			double invSum = 1.0 / (location.b[0] + location.b[1] + location.b[2]);
-			for (int i = 0; i < 3; i++)
-				location.b[i] *= invSum;
-			LOGGER.log(Level.WARNING, "Position found outside triangle: "+newPosition[0]+" "+newPosition[1]+" "+newPosition[2]);
-			// Move vertex on triangle boundary
-			newPosition[0] = location.b[0]*p0[0] + location.b[1]*p1[0] + location.b[2]*p2[0];
-			newPosition[1] = location.b[0]*p0[1] + location.b[1]*p1[1] + location.b[2]*p2[1];
-			newPosition[2] = location.b[0]*p0[2] + location.b[1]*p1[2] + location.b[2]*p2[2];
-*/
-			return false;
 		}
 		v.moveTo(newPosition[0], newPosition[1], newPosition[2]);
 		if (!backup)
@@ -1178,6 +1189,7 @@ public class MeshLiaison
 
 		void walkDebug(Mesh mesh, int group)
 		{
+			LOGGER2.fine("Before walkDebug(): "+toString());
 			for (Triangle f : mesh.getTriangles())
 			{
 				if (f.hasAttributes(AbstractHalfEdge.OUTER))
@@ -1192,7 +1204,7 @@ public class MeshLiaison
 					localEdgeIndex = index[0];
 				}
 			}
-			LOGGER2.fine("Minimum squared distance after walkDebug(): "+dmin);
+			LOGGER2.fine("After walkDebug(): "+toString());
 		}
 
 		@Override
