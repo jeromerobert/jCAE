@@ -101,6 +101,8 @@ public class MeshLiaison
 		TIntIntHashMap numberOfTriangles = new TIntIntHashMap();
 		for (Triangle t : this.backgroundMesh.getTriangles())
 		{
+			if (t.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
 			numberOfTriangles.putIfAbsent(t.getGroupId(), 0);
 			numberOfTriangles.increment(t.getGroupId());
 		}
@@ -418,8 +420,15 @@ public class MeshLiaison
 	public final void updateAll()
 	{
 		LOGGER.config("Update projections");
-		for (Vertex v : mapCurrentVertexProjection.get(-1).keySet())
-			move(v, v.getUV());
+		for (TIntObjectIterator<Map<Vertex, ProjectedLocation>> it = mapCurrentVertexProjection.iterator(); it.hasNext(); )
+		{
+			it.advance();
+			if (it.key() != -1)
+			{
+				for (Vertex v : it.value().keySet())
+					move(v, v.getUV(), it.key());
+			}
+		}
 		LOGGER.config("Finish updating projections");
 	}
 
@@ -479,7 +488,7 @@ public class MeshLiaison
 		// Iterate over all triangles to find the best one.
 		// FIXME: This is obviously very slow!
 		if (LOGGER.isLoggable(Level.FINE))
-			LOGGER.log(Level.FINE, "Maximum error reached, search into the whole "+(background ? "background " : "")+"mesh for vertex "+v);
+			LOGGER.log(Level.FINE, "Maximum error reached, search into the whole "+(background ? "background " : "")+"mesh for vertex "+v+" into group "+group);
 		return findSurroundingTriangleDebug(v, (background ? backgroundMesh : currentMesh), group);
 	}
 

@@ -1083,7 +1083,7 @@ public class Mesh implements Serializable
 					continue;
 				sym = ot.sym(sym);
 				int symGroupId = sym.getTri().getGroupId();
-				if (groupId != symGroupId && (groupSet.isEmpty() || groupSet.contains(symGroupId)))
+				if (groupId != symGroupId && (groupSet.isEmpty() || groupSet.contains(groupId)))
 					bindSymEdgesToVirtualTriangles(ot, sym, temp0, temp1, newTriangles);
 			}
 		}
@@ -2041,6 +2041,9 @@ public class Mesh implements Serializable
 			if (v.isManifold())
 				continue;
 			Triangle [] links = (Triangle []) v.getLink();
+			// Fail gracefully if called before buildAdjacency()
+			if (links == null)
+				continue;
 			HashSet triangles = new HashSet();
 			for (Triangle t : links)
 				triangles.add(t);
