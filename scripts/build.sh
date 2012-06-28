@@ -353,11 +353,11 @@ then
 	git clone $oceURL $oceDir
 fi
 
-ret=$(git describe | grep OCE-0.9.1)
+ret=$(git describe | grep OCE-0.10)
 if [ $? -ne 0 ]
 then
 	cd $oceDir
-	git checkout OCE-0.9.1
+	git checkout OCE-0.10
 	cd $mypwd
 fi
 
@@ -377,7 +377,6 @@ then
 		echo "$green $bold\nOce building... \n$normal $black"" Time="$(date +%s)
 		cd $oceLinBuildDir
 		flags="-DOCE_INSTALL_PREFIX:PATH=$oceLinInstallDir"
-		flags="$flags -DOCE_DISABLE_BSPLINE_MESHER:BOOL=ON"
 		flags="$flags -DCMAKE_CXX_FLAGS:STRING=-DMMGT_OPT_DEFAULT=0"
 		flags="$flags -DOCE_DISABLE_X11=ON"
 		flags="$flags -DOCE_NO_LIBRARY_VERSION:BOOL=ON"
