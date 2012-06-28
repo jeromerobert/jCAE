@@ -68,7 +68,7 @@ public class Groups
 	/** The absolute path to the mesh directory */
 	private String meshFile = null;
 
-	Groups(String xmlPath)
+	public Groups(String xmlPath)
 	{
 		meshFile = xmlPath;
 	}
