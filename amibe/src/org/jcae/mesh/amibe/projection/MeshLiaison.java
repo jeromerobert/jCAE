@@ -141,7 +141,6 @@ public class MeshLiaison
 		for (TIntIntIterator it = numberOfTriangles.iterator(); it.hasNext(); )
 		{
 			it.advance();
-			System.out.println("groupe "+it.key());
 			this.mapCurrentVertexProjection.put(it.key(), new HashMap<Vertex, ProjectedLocation>(it.value() / 2));
 		}
 		for (Vertex v: backgroundNodeset)
