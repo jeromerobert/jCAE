@@ -243,8 +243,11 @@ public class Remesh
 		}
 		LOGGER.fine("Bounding box: lower("+bbox[0]+", "+bbox[1]+", "+bbox[2]+"), upper("+bbox[3]+", "+bbox[4]+", "+bbox[5]+")");
 		kdTrees = new TIntObjectHashMap<KdTree<Vertex>>();
-		kdTrees.put(-1, new KdTree<Vertex>(bbox));
+		KdTree<Vertex> globalKdTree = new KdTree<Vertex>(bbox);
+		kdTrees.put(-1, globalKdTree);
 		TIntObjectHashMap<HashSet<Vertex>> seenByGroup = new TIntObjectHashMap<HashSet<Vertex>>(numberOfTriangles.size());
+		HashSet<Vertex> globalSeen = new HashSet(nodeset.size());
+		seenByGroup.put(-1, globalSeen);
 		for (TIntIntIterator it = numberOfTriangles.iterator(); it.hasNext(); )
 		{
 			it.advance();
@@ -266,6 +269,10 @@ public class Remesh
 					continue;
 				seen.add(v);
 				kdTree.add(v);
+				if (globalSeen.contains(v))
+					continue;
+				globalSeen.add(v);
+				globalKdTree.add(v);
 			}
 		}
 		for (TIntIntIterator it = numberOfTriangles.iterator(); it.hasNext(); )
@@ -637,7 +644,9 @@ public class Remesh
 				//  they must be removed, otherwise getSurroundingOTriangle
 				//  may return a null pointer.
 				for (int group : groups.get(v))
+				{
 					kdTrees.get(group).remove(v);
+				}
 			}
 			LOGGER.fine("Try to insert "+nodes.size()+" nodes");
 			//  Process in pseudo-random order.  There are at most maxNodes nodes
@@ -932,6 +941,7 @@ public class Remesh
 
 	private void addGroups(Map<Vertex, int[]> groups, AbstractHalfEdge ot, Vertex v)
 	{
+		assert !groups.containsKey(v);
 		if (!ot.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 		{
 			int g1 = ot.getTri().getGroupId();
