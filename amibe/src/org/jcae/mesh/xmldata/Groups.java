@@ -32,8 +32,6 @@ import javax.swing.*;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import org.jcae.mesh.xmldata.AmibeReader.SubMesh;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
@@ -70,7 +68,7 @@ public class Groups
 	/** The absolute path to the mesh directory */
 	private String meshFile = null;
 
-	Groups(String xmlPath)
+	public Groups(String xmlPath)
 	{
 		meshFile = xmlPath;
 	}
@@ -97,7 +95,6 @@ public class Groups
 	{
 		String xmlDir=meshFile;
 		Group fuseGroup = new Group();
-		int id = 0;
 		int number = 0;
 		int offset = 0;
 		int trianglesNumber = 0;
@@ -137,10 +134,6 @@ public class Groups
 		for (int i = 0; i < groups.size(); i++)
 		{
 			Group g = groups.get(i);
-			if (g.getId() > id)
-			{
-				id = g.getId();
-			}
 			if (i == 0)
 			{
 				g.setOffset(0);
@@ -175,8 +168,7 @@ public class Groups
 		{
 			offset = 0;
 		}
-		
-		fuseGroup.setId(id + 1);
+
 		fuseGroup.setNumberOfElements(number);
 		fuseGroup.setOffset(offset);
 		fuseGroup.setName(name);
@@ -209,11 +201,34 @@ public class Groups
 		return fuseGroup;
 	}
 
+	private String getFreeName(String template)
+	{
+		boolean valid;
+		String current = template;
+		int n = 1;
+		do
+		{
+			valid = true;
+			for(Group g: groups)
+			{
+				if(current.equals(g.getName()))
+				{
+					valid = false;
+					current = template + n;
+					n++;
+					break;
+				}
+			}
+		}
+		while(!valid);
+		return current;
+	}
+
 	public void fuse(Collection<Group> toFuse)
 		throws TransformerException,
 		ParserConfigurationException, SAXException, IOException
 	{
-		fuse(toFuse, "fused_groups");
+		fuse(toFuse, getFreeName("fused_groups"));
 	}
 
 	/**
@@ -224,46 +239,6 @@ public class Groups
 		Group[] toReturn = new Group[groups.size()];
 		groups.toArray(toReturn);
 		return toReturn;
-	}
-
-	/**
-	 *@param xmlGroups the xml element of DOM tree corresponding to the tag "groups".
-	 *@param g a group.
-	 *@return the xml element of DOM tree corresponding to the group.
-	 */
-	public Element getXmlGroup(Element xmlGroups, Group g)
-	{
-		NodeList list = xmlGroups.getElementsByTagName("group");
-		Element elt = null;
-		int length=list.getLength();
-		int i = 0;
-		boolean found = false;
-		while (!found && i < length)
-		{
-			elt = (Element) list.item(i);
-			int id = -1;
-			try
-			{
-				id = Integer.parseInt(elt.getAttribute("id"));
-			} catch (Exception e)
-			{
-				e.printStackTrace(System.out);
-			}
-			if (id == g.getId())
-			{
-				found = true;
-			} else
-			{
-				i++;
-			}
-		}
-		if (found)
-		{
-			return elt;
-		} else
-		{
-			return null;
-		}
 	}
 
 	/**
@@ -413,10 +388,10 @@ public class Groups
 		if(jfc.showSaveDialog(null)==JFileChooser.APPROVE_OPTION)
 		{
 			Object[] os=list.getSelectedValues();
-			int[] ids=new int[os.length];
+			String[] ids=new String[os.length];
 			for(int i=0; i<os.length; i++)
 			{
-				ids[i]=((Group)os[i]).getId();
+				ids[i]=((Group)os[i]).getName();
 			}			
 			PrintStream stream=new PrintStream(new BufferedOutputStream(new FileOutputStream(jfc.getSelectedFile())));
 			MeshExporter.UNV exporter=new MeshExporter.UNV(new File(meshFile), ids);

@@ -231,6 +231,12 @@ public abstract class AmibeReader extends XMLReader implements JCAEXMLData {
 			return new PrimitiveFileReaderFactory().getDoubleReader(f);
 		}
 
+		public DoubleFileReader getNormals() throws IOException
+		{
+			File f = getBinFile("normals"+dim()+"d.bin");
+			return new PrimitiveFileReaderFactory().getDoubleReader(f);
+		}
+
 		public IntFileReader getBeams() throws IOException
 		{
 			return new PrimitiveFileReaderFactory().getIntReader(

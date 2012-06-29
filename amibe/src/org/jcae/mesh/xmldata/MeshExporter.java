@@ -23,30 +23,27 @@ package org.jcae.mesh.xmldata;
 import gnu.trove.TIntHashSet;
 import gnu.trove.TIntArrayList;
 import gnu.trove.TIntIntHashMap;
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.DataOutputStream;
 import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
-import java.io.FileInputStream;
 import java.io.PrintStream;
 import java.text.FieldPosition;
 import java.text.ParsePosition;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Level;
 import java.util.zip.GZIPOutputStream;
 import javax.xml.parsers.ParserConfigurationException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import java.util.logging.Logger;
-import java.util.logging.Level;
+import org.jcae.mesh.xmldata.AmibeReader.Group;
+import org.jcae.mesh.xmldata.AmibeReader.SubMesh;
 
 /**
  * Extract groups from the full mesh and write them to a UNV file.
@@ -180,166 +177,61 @@ abstract public class MeshExporter
 	private final static NumberFormat FORMAT_D25_16=new FormatD25_16();
 	private final static NumberFormat FORMAT_I10=new FormatI10();
 	
-	private final File directory;
-	private final Document document;
-	private final int[] groupIds;
-	int[][] groups;
-	String[] names;
+	private AmibeReader.Dim3 amibeReader;
+	protected SubMesh subMesh;
+	protected List<Group> groupsToExport;
+	protected int[][] groups;
 	private int numberOfTriangles;
-	
 	/**
 	 * @param directory The directory which contains 3d files
 	 * @param groupIds The list of ids of groups to convert
 	 */
-	MeshExporter(File directory, int[] groupIds)
+	protected MeshExporter(File directory, String[] groupIds)
 	{
-		this.directory=directory;
-		Document d = null;
 		try {
-			d = XMLHelper.parseXML(new File(directory, JCAEXMLData.xml3dFilename));
+			amibeReader = new AmibeReader.Dim3(directory.getPath());
+			subMesh = amibeReader.getSubmeshes().get(0);
+			if(groupIds==null)
+			{
+				groupsToExport=subMesh.getGroups();
+			} else
+			{
+				groupsToExport = new ArrayList<Group>(groupIds.length);
+				for(String s:groupIds)
+					groupsToExport.add(subMesh.getGroup(s));
+			}
 		} catch (SAXException ex) {
 			logger.log(Level.SEVERE, null, ex);
 		} catch (IOException ex) {
 			logger.log(Level.SEVERE, null, ex);
-		} catch (ParserConfigurationException ex)	{
-			logger.log(Level.SEVERE, null, ex);
 		}
-		document = d;
-		if(groupIds!=null)
-		{
-			this.groupIds=new int[groupIds.length];
-			System.arraycopy(groupIds, 0, this.groupIds, 0, groupIds.length);
-		} else
-			this.groupIds=getAllGroupIDs();
 	}
 
-	/**
-	 * Convert all groups to UNV
-	 * @param directory The directory which contains 3d files
-	 */
-	MeshExporter(String directory)
+	protected MeshExporter(String directory)
 	{
 		this(new File(directory), null);
 	}
-	
-	private int[] getAllGroupIDs()
+
+	public SubMesh getSubMesh()
 	{
-		Element xmlGroups=(Element) document.getElementsByTagName("groups").item(0);
-		NodeList nl=xmlGroups.getElementsByTagName("group");
-		int[] toReturn=new int[nl.getLength()];
-		for(int i=0; i<toReturn.length; i++)
-		{
-			Element e=(Element) nl.item(i);
-			toReturn[i]=Integer.parseInt(e.getAttribute("id"));
-		}
-		return toReturn;
-	}
-	
-	final File getNodeFile()
-	{
-		Element xmlNodes = (Element) document.getElementsByTagName(
-			"nodes").item(0);
-		String a=((Element)xmlNodes.getElementsByTagName("file").item(0)).getAttribute("location");
-		return new File(directory, a);
-	}
-	
-	final File getTriaFile()
-	{
-		Element xmlNodes = (Element) document.getElementsByTagName(
-			"triangles").item(0);
-		Node fn = xmlNodes.getElementsByTagName("file").item(0);
-		String a=((Element)fn).getAttribute("location");
-		return new File(directory, a);
-	}
-	
-	final File getNormalFile()
-	{
-		Element xmlNormals = (Element) document.getElementsByTagName("normals").item(0);
-		if (xmlNormals == null)
-			return null;
-		String a=((Element)xmlNormals.getElementsByTagName("file").item(0)).getAttribute("location");
-		return new File(directory, a);
+		return subMesh;
 	}
 
-	final File getGroupFile()
-	{
-		Element xmlGroups = (Element) document.getElementsByTagName("group").item(0);
-		if (xmlGroups == null)
-			return null;
-		String a=((Element)xmlGroups.getElementsByTagName("file").item(0)).getAttribute("location");
-		return new File(directory, a);
-	}
-
-	/**
-	 * @param xmlGroups the xml element of DOM tree corresponding to the tag "groups".
-	 * @param id a group id.
-	 * @return the xml element of DOM tree corresponding to the group.
-	 */
-	private Element getXmlGroup(Element xmlGroups, int id)
-	{
-		NodeList list = xmlGroups.getElementsByTagName("group");
-		Element elt = null;
-		int i = 0;
-		boolean found = false;
-		int length=list.getLength();
-		while (!found && i < length)
-		{
-			elt = (Element) list.item(i);
-			int aId = -1;
-			try
-			{
-				aId = Integer.parseInt(elt.getAttribute("id"));
-			} catch (Exception e)
-			{
-				e.printStackTrace(System.out);
-			}
-			if (id == aId)
-			{
-				found = true;
-			} else
-			{
-				i++;
-			}
-		}
-		if (found)
-		{
-			return elt;
-		}
-		return null;
-	}
-	
 	private void readGroups() throws IOException
 	{
-		IntFileReader ifrG = new PrimitiveFileReaderFactory().getIntReader(getGroupFile());
-		Element xmlGroups=(Element) document.getElementsByTagName("groups").item(0);
-		groups=new int[groupIds.length][];
 		numberOfTriangles=0;
-		names=new String[groupIds.length];
-		for(int i=0; i<groupIds.length; i++)
+		groups=new int[groupsToExport.size()][];
+		int i = 0;
+		for(Group g:groupsToExport)
 		{
-			Element e=getXmlGroup(xmlGroups, groupIds[i]);
-			
-			Element nameNode=(Element)e.getElementsByTagName("name").item(0);
-			names[i]=nameNode.getChildNodes().item(0).getNodeValue();			
-			
-			Element numberNode=(Element)e.getElementsByTagName("number").item(0);
-			String v=numberNode.getChildNodes().item(0).getNodeValue();
-			int number=Integer.parseInt(v);
-			groups[i]=new int[number];
-			numberOfTriangles+=number;
-			if(number==0)
-				continue;
-			
-			String os=((Element)e.getElementsByTagName("file").item(0)).getAttribute("offset");
-			int offset=os.isEmpty() ? 0 : Integer.parseInt(os);
-			
-			ifrG.get(offset, groups[i]);
+			numberOfTriangles += g.getNumberOfTrias();
+			groups[i++] = g.readTria3Ids();
 		}
 	}
-	
+
 	private int[] readTriangles() throws IOException
 	{
-		IntFileReader ifrT = new PrimitiveFileReaderFactory().getIntReader(getTriaFile());
+		IntFileReader ifrT = subMesh.getTriangles();
 		int[] toReturn = new int[numberOfTriangles * 3];
 		int count = 0;
 		for (int i = 0; i < groups.length; i++)
@@ -462,7 +354,7 @@ abstract public class MeshExporter
 		}
 		private Unit unit = Unit.METER;
 		
-		public UNV(File directory, int[] groupIds)
+		public UNV(File directory, String[] groupIds)
 		{
 			super(directory, groupIds);
 		}
@@ -561,8 +453,7 @@ abstract public class MeshExporter
 		@Override
 		public void writeNodes(PrintStream out, int[] nodesID, TIntIntHashMap amibeToUNV) throws IOException
 		{
-			File f=getNodeFile();
-			DoubleFileReader dfrN = new PrimitiveFileReaderFactory().getDoubleReader(f);
+			DoubleFileReader dfrN = subMesh.getNodes();
 
 			out.println("    -1"+CR+"  2411");
 			int count =  0;
@@ -623,7 +514,7 @@ abstract public class MeshExporter
 					"         0         0         0         0         0         0"+
 					FORMAT_I10.format(groups[i].length));
 				
-				out.println(names[i]);
+				out.println(groupsToExport.get(i).getName());
 				int countg=0;
 				for(int j=0; j<groups[i].length; j++)
 				{
@@ -643,7 +534,7 @@ abstract public class MeshExporter
 	
 	public static class STL extends MeshExporter
 	{		
-		public STL(File directory, int[] groupIds)
+		public STL(File directory, String[] groupIds)
 		{
 			super(directory, groupIds);
 		}
@@ -662,8 +553,7 @@ abstract public class MeshExporter
 			TIntIntHashMap amibeNodeToUNVNode, TIntIntHashMap amibeTriaToUNVTria)
 			throws IOException
 		{
-			File f=getNodeFile();
-			DoubleFileReader dfrN = new PrimitiveFileReaderFactory().getDoubleReader(f);
+			DoubleFileReader dfrN = subMesh.getNodes();
 			
 			out.println("solid export");
 			int count=0;
@@ -701,7 +591,7 @@ abstract public class MeshExporter
 	
 	public static class MESH extends MeshExporter
 	{
-		public MESH(File directory, int[] groupIds)
+		public MESH(File directory, String[] groupIds)
 		{
 			super(directory, groupIds);
 		}
@@ -726,8 +616,7 @@ abstract public class MeshExporter
 		@Override
 		public void writeNodes(PrintStream out, int[] nodesID, TIntIntHashMap amibeToUNV) throws IOException
 		{
-			File f=getNodeFile();
-			DoubleFileReader dfrN = new PrimitiveFileReaderFactory().getDoubleReader(f);
+			DoubleFileReader dfrN = subMesh.getNodes();
 			
 			int count =  0;
 			double x,y,z;
@@ -777,12 +666,7 @@ abstract public class MeshExporter
 		public void writeNormals(PrintStream out, int[] triangles,
 			TIntIntHashMap amibeNodeToUNVNode, TIntIntHashMap amibeTriaToUNVTria) throws IOException
 		{
-			//  Open the input file first so that an exception is
-			//  raised if it is not found.
-			File f=getNormalFile();
-			if (f == null)
-				throw new IOException();
-			DoubleFileReader dfrN = new PrimitiveFileReaderFactory().getDoubleReader(f);
+			DoubleFileReader dfrN = subMesh.getNormals();
 			
 			int count=0;
 			for(int i=0; i<groups.length; i++)
@@ -824,7 +708,7 @@ abstract public class MeshExporter
 	
 	public static class POLY extends MeshExporter
 	{
-		public POLY(File directory, int[] groupIds)
+		public POLY(File directory, String[] groupIds)
 		{
 			super(directory, groupIds);
 		}
@@ -846,8 +730,7 @@ abstract public class MeshExporter
 		@Override
 		public void writeNodes(PrintStream out, int[] nodesID, TIntIntHashMap amibeToUNV) throws IOException
 		{
-			File f=getNodeFile();
-			DoubleFileReader dfrN = new PrimitiveFileReaderFactory().getDoubleReader(f);
+			DoubleFileReader dfrN = subMesh.getNodes();
 			
 			int count =  0;
 			double x,y,z;
@@ -910,7 +793,7 @@ abstract public class MeshExporter
 	{
 		private boolean dummyData = true;
 		
-		public VTK(File directory, int[] groupIds)
+		public VTK(File directory, String[] groupIds)
 		{
 			super(directory, groupIds);
 		}
@@ -918,21 +801,6 @@ abstract public class MeshExporter
 		public VTK(String file)
 		{
 			super(file);
-		}
-
-		private static long computeNumberOfTriangle(File triaFile) throws IOException
-		{
-			DataInputStream in = new DataInputStream(
-				new BufferedInputStream(new FileInputStream(triaFile)));
-			long nbt = triaFile.length()/4/3;
-			long toReturn = 0;
-			for(int i=0; i<nbt; i++)
-			{
-				if(in.readInt()>=0)
-					toReturn++;
-				in.skipBytes(8);
-			}
-			return toReturn;
 		}
 
 		/**
@@ -943,8 +811,8 @@ abstract public class MeshExporter
 		public void writeInit(PrintStream out)
 			throws IOException
 		{
-			long numberOfNodes=getNodeFile().length()/8/3;
-			long numberOfTriangles=computeNumberOfTriangle(getTriaFile());
+			long numberOfNodes=subMesh.getNumberOfNodes();
+			long numberOfTriangles=subMesh.getNumberOfTrias();
 			//This is Java so we write in big endian		
 			out.println("<VTKFile type=\"PolyData\" version=\"0.1\" byte_order=\"BigEndian\">");
 			out.println("<PolyData>");
@@ -1004,8 +872,7 @@ abstract public class MeshExporter
 			DataOutputStream dos=new DataOutputStream(new BufferedOutputStream(out));
 			//Write the size of the array in octets
 			dos.writeInt(nodesID.length*8*3);
-			File f=getNodeFile();
-			DoubleFileReader dfrN = new PrimitiveFileReaderFactory().getDoubleReader(f);
+			DoubleFileReader dfrN = subMesh.getNodes();
 			
 			int count =  0;
 			double x,y,z;
@@ -1072,7 +939,7 @@ abstract public class MeshExporter
 			DataOutputStream dos=new DataOutputStream(new BufferedOutputStream(out));
 			if(dummyData)
 			{
-				long nbt=getTriaFile().length()/4/3;
+				long nbt=subMesh.getNumberOfTrias();
 				//Write the size of the array in octets
 				dos.writeInt((int) nbt*8);		
 				for(int i=0; i<nbt; i++)

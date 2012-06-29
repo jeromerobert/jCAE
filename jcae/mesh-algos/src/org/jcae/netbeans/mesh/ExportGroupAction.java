@@ -132,11 +132,11 @@ public class ExportGroupAction extends CookieAction
 			jfc.setCurrentDirectory(FileUtil.toFile(meshDirFile));
 			if(jfc.showSaveDialog(null)==JFileChooser.APPROVE_OPTION)
 			{
-				int[] ids=new int[arg0.length];
+				String[] ids=new String[arg0.length];
 				for(int i=0; i<arg0.length; i++)
 				{
 					GroupNode n=arg0[i].getCookie(GroupNode.class);
-					ids[i]=n.getGroup().getId();
+					ids[i]=n.getGroup().getName();
 				}			
 				String unvFile=jfc.getSelectedFile().getPath();
 				

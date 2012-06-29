@@ -30,8 +30,6 @@ import org.w3c.dom.Element;
 public class Group
 {
 	private static final Logger LOGGER = Logger.getLogger(Group.class.getCanonicalName());
-	@Deprecated
-	private int id;
 	private String name;
 	private int number;
 	private int offset;
@@ -45,15 +43,6 @@ public class Group
 			Boolean.valueOf(this.visible),
 			Boolean.valueOf(visible));
 		this.visible = visible;
-	}
-	
-	/**
-	 * @return Returns the id of the group
-	 */
-	@Deprecated
-	public final int getId()
-	{
-		return id;
 	}
 
 	/**
@@ -70,15 +59,6 @@ public class Group
 	public final int getNumberOfElements()
 	{
 		return number;
-	}
-
-	/**
-	 * @param newId The new id to set
-	 */
-	@Deprecated
-	public final void setId(int newId)
-	{
-		this.id = newId;
 	}
 
 	/**
@@ -123,52 +103,6 @@ public class Group
 	}
 
 	/**
-	 * test
-	 */
-	public void writeXMLName(String xmlPath)
-	{
-		java.io.File f = new java.io.File(xmlPath);
-		org.w3c.dom.Document xmlDoc = null;
-		if (f.exists())
-		{
-			try
-			{
-				xmlDoc = org.jcae.mesh.xmldata.XMLHelper.parseXML(f);
-				org.w3c.dom.NodeList groups = xmlDoc
-					.getElementsByTagName("group");
-				org.w3c.dom.Element group = null;
-				if (groups.getLength() > 0)
-				{
-					boolean found = false;
-					int i = 0;
-					while (!found && i < groups.getLength())
-					{
-						group = (org.w3c.dom.Element) groups.item(i);
-						int idGroup = Integer.valueOf(group.getAttribute("id"))
-							.intValue();
-						if (idGroup == id)
-						{
-							found = true;
-						}
-						i++;
-					}
-				}
-				org.w3c.dom.Element eltName = org.jcae.mesh.xmldata.XMLHelper
-					.parseXMLString(xmlDoc, "<name>" + name + "</name>");
-				group.appendChild(eltName);
-				org.jcae.mesh.xmldata.XMLHelper.writeXML(xmlDoc, f);				
-			}
-			catch (Exception e)
-			{
-				LOGGER.log(Level.SEVERE, e.getMessage(), e);
-			}
-		} else
-		{
-			LOGGER.warning("Mesh (" + f.getPath() + ") not found.");
-		}
-	}
-
-	/**
 	 * It creates a DOM element from the document of jcae3d.xml corresponding to this group.
 	 *
 	 *@param xmlDoc the xml DOM document which comes from the parse of jcae3d.xml.
@@ -183,7 +117,7 @@ public class Group
 		try
 		{
 			newElt = org.jcae.mesh.xmldata.XMLHelper.parseXMLString(xmlDoc,
-				"<group id=\"" + id + "\">"
+				"<group>"
 				+ "<name>" + name + "</name>" 
 				+ "<number>" + number + "</number>"
 				+ "<file format=\"integerstream\" location=\""
