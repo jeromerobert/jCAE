@@ -25,7 +25,10 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
+import gnu.trove.TIntIntHashMap;
+import gnu.trove.TIntIntIterator;
 import gnu.trove.TIntObjectHashMap;
+import gnu.trove.TIntObjectIterator;
 import java.io.FileNotFoundException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,7 +49,8 @@ public class MeshLiaison
 	private final Mesh backgroundMesh;
 	private final Mesh currentMesh;
 	// Map between vertices of currentMesh and their projection on backgroundMesh
-	private final Map<Vertex, ProjectedLocation> mapCurrentVertexProjection;
+	// Each group has its own map
+	private final TIntObjectHashMap<Map<Vertex, ProjectedLocation>> mapCurrentVertexProjection;
 	private Skeleton skeleton;
 	
 	private final double [] work1 = new double[3];
@@ -90,9 +94,19 @@ public class MeshLiaison
 			}
 		}
 		
+		// count the number of vertices for each group
 		this.currentMesh = new Mesh(mtb);
 		this.currentMesh.getTrace().setDisabled(this.backgroundMesh.getTrace().getDisabled());
 		Map<Vertex, String> vgGroups = createVGMap();
+		TIntIntHashMap numberOfTriangles = new TIntIntHashMap();
+		for (Triangle t : this.backgroundMesh.getTriangles())
+		{
+			if (t.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
+			numberOfTriangles.putIfAbsent(t.getGroupId(), 0);
+			numberOfTriangles.increment(t.getGroupId());
+		}
+
 		// Create vertices of currentMesh
 		Map<Vertex, Vertex> mapBgToCurrent = new HashMap<Vertex, Vertex>(backgroundNodeset.size()+1);
 		for (Vertex v : backgroundNodeset)
@@ -124,7 +138,13 @@ public class MeshLiaison
 		this.currentMesh.buildAdjacency();
 		
 		// Compute projections of vertices from currentMesh
-		this.mapCurrentVertexProjection = new HashMap<Vertex, ProjectedLocation>(backgroundNodeset.size());
+		this.mapCurrentVertexProjection = new TIntObjectHashMap<Map<Vertex, ProjectedLocation>>(numberOfTriangles.size());
+		this.mapCurrentVertexProjection.put(-1, new HashMap<Vertex, ProjectedLocation>(backgroundNodeset.size()));
+		for (TIntIntIterator it = numberOfTriangles.iterator(); it.hasNext(); )
+		{
+			it.advance();
+			this.mapCurrentVertexProjection.put(it.key(), new HashMap<Vertex, ProjectedLocation>(it.value() / 2));
+		}
 		for (Vertex v: backgroundNodeset)
 		{
 			Iterator<Triangle> it = v.getNeighbourIteratorTriangle();
@@ -185,9 +205,9 @@ public class MeshLiaison
 		return currentMesh;
 	}
 
-	public final void backupRestore(Vertex v, boolean restore)
+	public final void backupRestore(Vertex v, boolean restore, int group)
 	{
-		ProjectedLocation location = mapCurrentVertexProjection.get(v);
+		ProjectedLocation location = mapCurrentVertexProjection.get(group).get(v);
 		if (!location.isCached)
 			throw new IllegalStateException();
 		if (restore)
@@ -197,9 +217,18 @@ public class MeshLiaison
 		location.isCached = false;
 	}
 
-	public final boolean backupAndMove(Vertex v, double [] target)
+	/**
+	 *
+	 * @param v The vertex to project
+	 * @param target Where the vertex should be projected
+	 * @param checkGroup Whether or not to ensure that the point is projected on
+	 * a triangle of the same group as the group of the vertex. The test is only
+	 * made if all triangles adjacent to the point are from the same group.
+	 * @return Whether or not the projection succeeded.
+	 */
+	public final boolean backupAndMove(Vertex v, double [] target, int group)
 	{
-		return move(v, target, true);
+		return move(v, target, true, group);
 	}
 
 	/**
@@ -212,14 +241,18 @@ public class MeshLiaison
 	 */
 	public final boolean move(Vertex v, double [] target)
 	{
-		return move(v, target, false);
+		return move(v, target, false, -1);
 	}
-	private boolean move(Vertex v, double [] target, boolean backup)
+	public final boolean move(Vertex v, double [] target, int group)
+	{
+		return move(v, target, false, group);
+	}
+	private boolean move(Vertex v, double [] target, boolean backup, int group)
 	{
 		if (LOGGER.isLoggable(Level.FINER))
-			LOGGER.log(Level.FINER, "Trying to move vertex "+v+" to ("+target[0]+", "+target[1]+", "+target[2]+")");
+			LOGGER.log(Level.FINER, "Trying to move vertex "+v+" to ("+target[0]+", "+target[1]+", "+target[2]+") in group "+group);
 		// Old projection
-		ProjectedLocation location = mapCurrentVertexProjection.get(v);
+		ProjectedLocation location = mapCurrentVertexProjection.get(group).get(v);
 		if (backup)
 		{
 			if (location.isCached)
@@ -229,14 +262,16 @@ public class MeshLiaison
 		}
 		if (LOGGER.isLoggable(Level.FINEST))
 			LOGGER.log(Level.FINEST, "Old projection: "+location);
-		LocationFinder lf = new LocationFinder(target);
+		LocationFinder lf = new LocationFinder(target, group);
 		AbstractHalfEdge ot = location.t.getAbstractHalfEdge();
 		if (ot.apex() == location.t.vertex[location.vIndex])
 			ot = ot.prev();
 		else if (ot.destination() == location.t.vertex[location.vIndex])
 			ot = ot.next();
 		lf.walkAroundOrigin(ot);
-		lf.walkFlipFlop();
+		if (null == lf.current)
+			return false;
+		lf.walkFlipFlop(ot);
 		// Now lf contains the new location.
 		// Update location
 		location.updateTriangle(lf.current);
@@ -246,53 +281,64 @@ public class MeshLiaison
 			LOGGER.log(Level.FINEST, "New projection: "+location);
 		double [] newPosition = new double[3];
 		location.projectOnTriangle(target, newPosition);
-		if (!location.computeBarycentricCoordinates(newPosition))
+		// There are 2 distinct cases:
+		//   1. The projected vertex should be on the background mesh, and
+		//      we try hard to project vertex onto the background mesh
+		//   2. We want to compute the best projected vertex, but it may
+		//      be at a small distance from the background mesh
+		// The first case is important when smoothing, in which case
+		// backup parameter is true.  We use it to distinguish between
+		// both use cases, but adding a new parameter wpuld be better.
+		if (backup)
 		{
-			int[] index = new int[2];
-			double maxError = sqrDistanceVertexTriangle(target, lf.current, index);
-			AbstractHalfEdge newEdge = ot;
-			do
+			if (!location.computeBarycentricCoordinates(newPosition))
 			{
-				ot = newEdge;
-				newEdge = findBetterTriangleInNeighborhood(target, ot, maxError);
-				maxError *= 0.5;
-			} while (newEdge != null);
-			if (ot != null)
+				int[] index = new int[2];
+				double maxError = sqrDistanceVertexTriangle(target, lf.current, index);
+				AbstractHalfEdge newEdge = ot;
+				do
+				{
+					ot = newEdge;
+					newEdge = findBetterTriangleInNeighborhood(target, ot, maxError, group);
+					maxError *= 0.5;
+				} while (newEdge != null);
+				if (ot != null)
+				{
+					location.updateTriangle(ot.getTri());
+					location.updateVertexIndex(target);
+				}
+			}
+			if (!location.computeBarycentricCoordinates(newPosition))
 			{
-				location.updateTriangle(ot.getTri());
+				// FIXME: this should not happen. Try all triangles to find the best projection
+				LOGGER.log(Level.CONFIG, "Position found outside triangle: " + newPosition[0] + " " + newPosition[1] + " " + newPosition[2] + "; checking all triangles, this may be slow");
+				lf.walkDebug(backgroundMesh, group);
+				location.updateTriangle(lf.current);
 				location.updateVertexIndex(target);
 			}
-		}
-		if (!location.computeBarycentricCoordinates(newPosition))
-		{
-			/* FIXME: this should not happen. Try all triangles to find the best projection */
-			LOGGER.log(Level.CONFIG, "Position found outside triangle: "+newPosition[0]+" "+newPosition[1]+" "+newPosition[2]+"; checking all triangles, this may be slow");
-			lf.walkDebug(backgroundMesh);
-			location.updateTriangle(lf.current);
-			location.updateVertexIndex(target);
-		}
-		if (!location.computeBarycentricCoordinates(newPosition))
-		{
-/* FIXME: this should not happen. For now, do not move in such a case
-			double [] p0 = location.t.vertex[0].getUV();
-			double [] p1 = location.t.vertex[1].getUV();
-			double [] p2 = location.t.vertex[2].getUV();
-			for (int i = 0; i < 3; i++)
+			if (!location.computeBarycentricCoordinates(newPosition))
 			{
-				if (location.b[i] < 0.0)
-					location.b[i] = 0.0;
+/* FIXME: this should not happen. For now, do not move in such a case
+				double [] p0 = location.t.vertex[0].getUV();
+				double [] p1 = location.t.vertex[1].getUV();
+				double [] p2 = location.t.vertex[2].getUV();
+				for (int i = 0; i < 3; i++)
+				{
+					if (location.b[i] < 0.0)
+						location.b[i] = 0.0;
+				}
+				// Values have been truncated
+				double invSum = 1.0 / (location.b[0] + location.b[1] + location.b[2]);
+				for (int i = 0; i < 3; i++)
+					location.b[i] *= invSum;
+				LOGGER.log(Level.WARNING, "Position found outside triangle: "+newPosition[0]+" "+newPosition[1]+" "+newPosition[2]);
+				// Move vertex on triangle boundary
+				newPosition[0] = location.b[0]*p0[0] + location.b[1]*p1[0] + location.b[2]*p2[0];
+				newPosition[1] = location.b[0]*p0[1] + location.b[1]*p1[1] + location.b[2]*p2[1];
+				newPosition[2] = location.b[0]*p0[2] + location.b[1]*p1[2] + location.b[2]*p2[2];
+				 */
+				return false;
 			}
-			// Values have been truncated
-			double invSum = 1.0 / (location.b[0] + location.b[1] + location.b[2]);
-			for (int i = 0; i < 3; i++)
-				location.b[i] *= invSum;
-			LOGGER.log(Level.WARNING, "Position found outside triangle: "+newPosition[0]+" "+newPosition[1]+" "+newPosition[2]);
-			// Move vertex on triangle boundary
-			newPosition[0] = location.b[0]*p0[0] + location.b[1]*p1[0] + location.b[2]*p2[0];
-			newPosition[1] = location.b[0]*p0[1] + location.b[1]*p1[1] + location.b[2]*p2[1];
-			newPosition[2] = location.b[0]*p0[2] + location.b[1]*p1[2] + location.b[2]*p2[2];
-*/
-			return false;
 		}
 		v.moveTo(newPosition[0], newPosition[1], newPosition[2]);
 		if (!backup)
@@ -311,16 +357,34 @@ public class MeshLiaison
 
 	public final Triangle getBackgroundTriangle(Vertex v)
 	{
-		ProjectedLocation location = mapCurrentVertexProjection.get(v);
+		ProjectedLocation location = mapCurrentVertexProjection.get(-1).get(v);
 		assert location != null : "Vertex "+v+" not found";
 		return location.t;
 	}
 
 	public final double[] getBackgroundNormal(Vertex v)
 	{
-		ProjectedLocation location = mapCurrentVertexProjection.get(v);
+		ProjectedLocation location = mapCurrentVertexProjection.get(-1).get(v);
 		assert location != null : "Vertex "+v+" not found";
 		return location.normal;
+	}
+
+	/**
+	 * If all adjacent triangles of the vertex are in the same group, return
+	 * this group, else return null.
+	 */
+	private int getGroup(Vertex v)
+	{
+		Iterator<Triangle> it = v.getNeighbourIteratorTriangle();
+		int group = -1;
+		if(it.hasNext())
+			group = it.next().getGroupId();
+		while(it.hasNext())
+		{
+			if(group != it.next().getGroupId())
+				return -1;
+		}
+		return group;
 	}
 
 	/**
@@ -331,7 +395,9 @@ public class MeshLiaison
 	 */
 	public final void addVertex(Vertex v, Triangle bgT)
 	{
-		mapCurrentVertexProjection.put(v, new ProjectedLocation(v.getUV(), bgT));
+		mapCurrentVertexProjection.get(-1).put(v, new ProjectedLocation(v.getUV(), bgT));
+		if (bgT.getGroupId() != -1)
+			mapCurrentVertexProjection.get(bgT.getGroupId()).put(v, new ProjectedLocation(v.getUV(), bgT));
 	}
 
 	/**
@@ -342,20 +408,35 @@ public class MeshLiaison
 	 */
 	public final Triangle removeVertex(Vertex v)
 	{
-		return mapCurrentVertexProjection.remove(v).t;
+		for (TIntObjectIterator<Map<Vertex, ProjectedLocation>> it = mapCurrentVertexProjection.iterator(); it.hasNext(); )
+		{
+			it.advance();
+			if (it.key() != -1)
+				it.value().remove(v);
+		}
+		return mapCurrentVertexProjection.get(-1).remove(v).t;
 	}
 
 	public final void updateAll()
 	{
 		LOGGER.config("Update projections");
-		for (Vertex v : mapCurrentVertexProjection.keySet())
-			move(v, v.getUV());
+		for (TIntObjectIterator<Map<Vertex, ProjectedLocation>> it = mapCurrentVertexProjection.iterator(); it.hasNext(); )
+		{
+			it.advance();
+			if (it.key() != -1)
+			{
+				for (Vertex v : it.value().keySet())
+					move(v, v.getUV(), it.key());
+			}
+		}
+		LOGGER.config("Finish updating projections");
 	}
 
-	public static AbstractHalfEdge findSurroundingTriangleDebug(Vertex v, Mesh mesh)
+	public static AbstractHalfEdge findSurroundingTriangleDebug(
+		Vertex v, Mesh mesh, int group)
 	{
-		LocationFinder lf = new LocationFinder(v.getUV());
-		lf.walkDebug(mesh);
+		LocationFinder lf = new LocationFinder(v.getUV(), group);
+		lf.walkDebug(mesh, group);
 		AbstractHalfEdge ret = lf.current.getAbstractHalfEdge();
 		if (ret.origin() == lf.current.vertex[lf.localEdgeIndex])
 			ret = ret.next();
@@ -366,7 +447,7 @@ public class MeshLiaison
 
 	public static AbstractHalfEdge findNearestEdge(Vertex v, Triangle t)
 	{
-		LocationFinder lf = new LocationFinder(v.getUV());
+		LocationFinder lf = new LocationFinder(v.getUV(), t.getGroupId());
 		lf.walkOnTriangle(t);
 		AbstractHalfEdge ret = lf.current.getAbstractHalfEdge();
 		if (ret.origin() == lf.current.vertex[lf.localEdgeIndex])
@@ -378,19 +459,28 @@ public class MeshLiaison
 
 	public AbstractHalfEdge findSurroundingTriangle(Vertex v, Vertex start, double maxError, boolean background)
 	{
+		return findSurroundingTriangle(v, start, maxError, background, -1);
+	}
+
+	public AbstractHalfEdge findSurroundingTriangle(Vertex v, Vertex start,
+		double maxError, boolean background, int group)
+	{
 		Triangle t = null;
 		for (Iterator<Triangle> itf = start.getNeighbourIteratorTriangle(); itf.hasNext(); )
 		{
 			Triangle f = itf.next();
 			if (!f.hasAttributes(AbstractHalfEdge.OUTER))
 			{
-				t = f;
-				break;
+				if((group >= 0 && f.getGroupId() == group) || (group < 0) || !itf.hasNext())
+				{
+					t = f;
+					break;
+				}
 			}
 		}
 		if (t != null)
 		{
-			AbstractHalfEdge ret = findSurroundingTriangle(v, t, maxError);
+			AbstractHalfEdge ret = findSurroundingTriangle(v, t, maxError, group);
 			if (ret != null)
 				return ret;
 		}
@@ -398,8 +488,8 @@ public class MeshLiaison
 		// Iterate over all triangles to find the best one.
 		// FIXME: This is obviously very slow!
 		if (LOGGER.isLoggable(Level.FINE))
-			LOGGER.log(Level.FINE, "Maximum error reached, search into the whole "+(background ? "background " : "")+"mesh for vertex "+v);
-		return findSurroundingTriangleDebug(v, (background ? backgroundMesh : currentMesh));
+			LOGGER.log(Level.FINE, "Maximum error reached, search into the whole "+(background ? "background " : "")+"mesh for vertex "+v+" into group "+group);
+		return findSurroundingTriangleDebug(v, (background ? backgroundMesh : currentMesh), group);
 	}
 
 	public static Triangle findSurroundingInAdjacentTriangles(Vertex v, Triangle start)
@@ -432,11 +522,13 @@ public class MeshLiaison
 	 * @return an AbstractHalfEdge whose distance to vertex v is lower than maxError.
 	 *     If no edge is found, null is returned.
 	 */
-	public static AbstractHalfEdge findSurroundingTriangle(Vertex v, Triangle start, double maxError)
+	public static AbstractHalfEdge findSurroundingTriangle(Vertex v,
+		Triangle start, double maxError, int group)
 	{
 		double[] pos = v.getUV();
 		boolean redo = true;
-		LocationFinder lf = new LocationFinder(pos);
+		LocationFinder lf = new LocationFinder(pos, group);
+
 		Triangle t = start;
 		AbstractHalfEdge ot = t.getAbstractHalfEdge();
 		while(true)
@@ -446,23 +538,25 @@ public class MeshLiaison
 				ot = ot.next();
 			else if (lf.localEdgeIndex == 2)
 				ot = ot.prev();
-			lf.walkAroundOrigin(ot);
-			lf.walkFlipFlop();
+			lf.walkFlipFlop(ot);
 
-			ot = lf.current.getAbstractHalfEdge(ot);
-			if (ot.origin() == lf.current.vertex[lf.localEdgeIndex])
-				ot = ot.next();
-			else if (ot.destination() == lf.current.vertex[lf.localEdgeIndex])
-				ot = ot.prev();
-			if (lf.dmin < maxError)
-				return ot;
+			if((group >= 0 && lf.current.getGroupId() == group) || group < 0)
+			{
+				ot = lf.current.getAbstractHalfEdge(ot);
+				if (ot.origin() == lf.current.vertex[lf.localEdgeIndex])
+					ot = ot.next();
+				else if (ot.destination() == lf.current.vertex[lf.localEdgeIndex])
+					ot = ot.prev();
+				if (lf.dmin < maxError)
+					return ot;
+			}
 
 			if (!redo)
 				break;
 			// Check a better start edge in neighborhood
 			if (LOGGER.isLoggable(Level.FINER))
 				LOGGER.log(Level.FINER, "Error too large: "+lf.dmin+" > "+maxError);
-			ot = findBetterTriangleInNeighborhood(pos, ot, maxError);
+			ot = findBetterTriangleInNeighborhood(pos, ot, maxError, group);
 			if (ot == null)
 				return null;
 			redo = false;
@@ -476,7 +570,7 @@ public class MeshLiaison
 		return null;
 	}
 
-	private static AbstractHalfEdge findBetterTriangleInNeighborhood(double[] pos, AbstractHalfEdge ot, double maxError)
+	private static AbstractHalfEdge findBetterTriangleInNeighborhood(double[] pos, AbstractHalfEdge ot, double maxError, int group)
 	{
 		int[] index = new int[2];
 		Triangle.List seen = new Triangle.List();
@@ -485,10 +579,12 @@ public class MeshLiaison
 		while (!queue.isEmpty())
 		{
 			Triangle t = queue.poll();
+			if(group >= 0 && t.getGroupId() != group)
+				continue;
 			if (seen.contains(t) || t.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			double dist = sqrDistanceVertexTriangle(pos, t, index);
-			if (dist < maxError)
+			if (group >= 0 && dist < maxError)
 			{
 				seen.clear();
 				int i = index[0];
@@ -985,12 +1081,19 @@ public class MeshLiaison
 		int localEdgeIndex = -1;
 		int region = -1;
 		int[] index = new int[2];
+		private final int groupID;
 
-		LocationFinder(double[] pos)
+		LocationFinder(double[] pos, int groupID)
 		{
 			System.arraycopy(pos, 0, target, 0, 3);
+			this.groupID = groupID;
 		}
 
+		/*
+		 * Finds the best approximated point on this triangle.
+		 * This method initializes the {#current} member and must be
+		 * called before other methods.
+		 */
 		boolean walkOnTriangle(Triangle t)
 		{
 			double dist = sqrDistanceVertexTriangle(target, t, index);
@@ -1005,7 +1108,7 @@ public class MeshLiaison
 			return false;
 		}
 	
-		boolean walkAroundOrigin(AbstractHalfEdge ot)
+		private boolean walkAroundOrigin(AbstractHalfEdge ot)
 		{
 			AbstractHalfEdge loop = ot.getTri().getAbstractHalfEdge();
 			if (loop.origin() == ot.destination())
@@ -1021,15 +1124,21 @@ public class MeshLiaison
 					loop = loop.nextOriginLoop();
 					continue;
 				}
-				modified |= walkOnTriangle(loop.getTri());
+				if(groupID == -1 || loop.getTri().getGroupId() == groupID)
+					modified |= walkOnTriangle(loop.getTri());
 				loop = loop.nextOriginLoop();
 			}
 			while (loop.destination() != d);
 			return modified;
 		}
 
-		boolean walkFlipFlop()
+		/**
+		 * @param initEdge From where to start the flip flop
+		 */
+		boolean walkFlipFlop(AbstractHalfEdge initEdge)
 		{
+			walkAroundOrigin(initEdge);
+
 			AbstractHalfEdge ot = current.getAbstractHalfEdge();
 			if (ot.origin() == current.vertex[localEdgeIndex])
 				ot = ot.next();
@@ -1101,11 +1210,14 @@ public class MeshLiaison
 			return modified;
 		}
 
-		void walkDebug(Mesh mesh)
+		void walkDebug(Mesh mesh, int group)
 		{
+			LOGGER2.fine("Before walkDebug(): "+toString());
 			for (Triangle f : mesh.getTriangles())
 			{
 				if (f.hasAttributes(AbstractHalfEdge.OUTER))
+					continue;
+				if (group >= 0 && f.getGroupId() != group)
 					continue;
 				double dist = sqrDistanceVertexTriangle(target, f, index);
 				if (dist < dmin)
@@ -1115,7 +1227,7 @@ public class MeshLiaison
 					localEdgeIndex = index[0];
 				}
 			}
-			LOGGER2.fine("Minimum squared distance after walkDebug(): "+dmin);
+			LOGGER2.fine("After walkDebug(): "+toString());
 		}
 
 		@Override
@@ -1140,6 +1252,8 @@ public class MeshLiaison
 		{
 			if (!mesh.hasAdjacency())
 				throw new IllegalArgumentException("Mesh does not contain adjacency relations");
+			// Always add group -1
+			mapGroupBorder.put(-1, new ArrayList<Line>());
 			AbstractHalfEdge ot = null;
 			for (Triangle t : mesh.getTriangles())
 			{
