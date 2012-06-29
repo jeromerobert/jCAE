@@ -38,6 +38,7 @@ import org.jcae.mesh.xmldata.PrimitiveFileReaderFactory;
 
 import gnu.trove.PrimeFinder;
 import gnu.trove.TIntArrayList;
+import gnu.trove.TIntHashSet;
 import gnu.trove.TIntIntHashMap;
 import gnu.trove.TIntIntIterator;
 import gnu.trove.TIntObjectHashMap;
@@ -49,6 +50,7 @@ import java.util.LinkedHashSet;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Level;
@@ -70,7 +72,7 @@ public class Remesh
 	private final Mesh mesh;
 	private final MeshLiaison liaison;
 	// Octree to find nearest Vertex in current mesh
-	private final KdTree<Vertex> kdTree;
+	private final TIntObjectHashMap<KdTree<Vertex>> kdTrees;
 	// Map to keep track of a near point in background mesh, used as a starting point of locators
 	private final TIntObjectHashMap<Map<Vertex, Vertex>> neighborBgMap;
 	private final double minlen;
@@ -240,9 +242,38 @@ public class Remesh
 			}
 		}
 		LOGGER.fine("Bounding box: lower("+bbox[0]+", "+bbox[1]+", "+bbox[2]+"), upper("+bbox[3]+", "+bbox[4]+", "+bbox[5]+")");
-		kdTree = new KdTree<Vertex>(bbox);
-		for (Vertex v : nodeset)
-			kdTree.add(v);
+		kdTrees = new TIntObjectHashMap<KdTree<Vertex>>();
+		kdTrees.put(-1, new KdTree<Vertex>(bbox));
+		TIntObjectHashMap<HashSet<Vertex>> seenByGroup = new TIntObjectHashMap<HashSet<Vertex>>(numberOfTriangles.size());
+		for (TIntIntIterator it = numberOfTriangles.iterator(); it.hasNext(); )
+		{
+			it.advance();
+			kdTrees.put(it.key(), new KdTree<Vertex>(bbox));
+			seenByGroup.put(it.key(), new HashSet(it.value() / 2));
+		}
+		
+		for (Triangle f : mesh.getTriangles())
+		{
+			if (f.hasAttributes(AbstractHalfEdge.OUTER))
+					continue;
+			int group = f.getGroupId();
+			KdTree<Vertex> kdTree = kdTrees.get(group);
+			for (int i = 0; i < 3; ++i)
+			{
+				Vertex v = f.vertex[i];
+				HashSet<Vertex> seen = seenByGroup.get(group);
+				if (seen.contains(v))
+					continue;
+				seen.add(v);
+				kdTree.add(v);
+			}
+		}
+		for (TIntIntIterator it = numberOfTriangles.iterator(); it.hasNext(); )
+		{
+			it.advance();
+			seenByGroup.get(it.key()).clear();
+		}
+		seenByGroup.clear();
 
 		for (Vertex v : nodeset)
 		{
@@ -427,10 +458,12 @@ public class Remesh
 		//   F. Go to A if at least one node had been inserted
 
 		//  The nodes variable contains the list of valid candidate points.
+		ArrayList<Vertex> nodes = new ArrayList<Vertex>();
 		//  We keep track of the background triangle so that it is not
 		//  searched again.
-		ArrayList<Vertex> nodes = new ArrayList<Vertex>();
 		ArrayList<Triangle> bgTriangles = new ArrayList<Triangle>();
+		//  Map to keep track of all groups near a vertex
+		Map<Vertex, int[]> groups = new HashMap<Vertex, int[]>();
 		//  These 3 variables are used during stages B to D
 		ArrayList<Vertex> triNodes = new ArrayList<Vertex>();
 		ArrayList<EuclidianMetric3D> triMetrics = new ArrayList<EuclidianMetric3D>();
@@ -471,6 +504,7 @@ public class Remesh
 			int tooNearNodes = 0;
 			nodes.clear();
 			bgTriangles.clear();
+			groups.clear();
 			surroundingTriangle.clear();
 			mapTriangleVertices.clear();
 			boundaryNodes.clear();
@@ -525,7 +559,7 @@ public class Remesh
 						continue;
 					}
 					int nrNodes = addCandidatePoints(h, l, reversed,
-						triNodes, triMetrics, triNeighbor, boundaryNodes);
+						triNodes, triMetrics, triNeighbor, groups, boundaryNodes);
 					if (nrNodes > nrTriNodes)
 					{
 						nrTriNodes = nrNodes;
@@ -568,12 +602,13 @@ public class Remesh
 						}
 						if (!validCandidate)
 						{
-							Vertex n = kdTree.getNearestVertex(metric, uv);
+							Vertex n = kdTrees.get(group).getNearestVertex(metric, uv);
 							validCandidate = interpolatedDistance(v, metric, n, metrics.get(n)) > minlen;
 						}
 						if (validCandidate)
 						{
-							kdTree.add(v);
+							for (int g : groups.get(v))
+								kdTrees.get(g).add(v);
 							metrics.put(v, metric);
 							nodes.add(v);
 							bgTriangles.add(bgT);
@@ -601,7 +636,8 @@ public class Remesh
 				//  These vertices are not bound to any triangles, so
 				//  they must be removed, otherwise getSurroundingOTriangle
 				//  may return a null pointer.
-				kdTree.remove(v);
+				for (int group : groups.get(v))
+					kdTrees.get(group).remove(v);
 			}
 			LOGGER.fine("Try to insert "+nodes.size()+" nodes");
 			//  Process in pseudo-random order.  There are at most maxNodes nodes
@@ -670,7 +706,8 @@ public class Remesh
 
 				dispatchVertices(v, verticesToDispatch);
 
-				kdTree.add(v);
+				for (int group : groups.get(v))
+					kdTrees.get(group).add(v);
 				processed++;
 				afterSplitHook();
 				// Swap edges
@@ -746,6 +783,7 @@ public class Remesh
 	private int addCandidatePoints(AbstractHalfEdge ot, double edgeLength, boolean reversed,
 		ArrayList<Vertex> triNodes,
 		ArrayList<EuclidianMetric3D> triMetrics, ArrayList<Vertex> triNeighbor,
+		Map<Vertex, int[]> groups,
 		Set<Vertex> boundaryNodes)
 	{
 		int nrNodes = 0;
@@ -857,6 +895,7 @@ public class Remesh
 						triNeighbor.add(start);
 					else
 						triNeighbor.add(end);
+					addGroups(groups, ot, last);
 					nrNodes++;
 					r--;
 					break;
@@ -889,6 +928,45 @@ public class Remesh
 			}
 		}
 		return nrNodes;
+	}
+
+	private void addGroups(Map<Vertex, int[]> groups, AbstractHalfEdge ot, Vertex v)
+	{
+		if (!ot.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+		{
+			int g1 = ot.getTri().getGroupId();
+			int g2 = g1;
+			if (ot.hasSymmetricEdge())
+			{
+				g2 = ot.sym().getTri().getGroupId();
+			}
+			if (g1 == g2 && g1 == -1)
+			{
+				groups.put(v, new int[] {-1});
+			}
+			if (g1 == g2 && g1 != -1)
+			{
+				groups.put(v, new int[] {-1, g1});
+			}
+			else if (g1 == -1 || g2 == -1)
+			{
+				groups.put(v, new int[] {g1, g2});
+			}
+			else
+			{
+				groups.put(v, new int[] {-1, g1, g2});
+			}
+		}
+		else
+		{
+			TIntHashSet groupSet = new TIntHashSet();
+			for (Iterator<AbstractHalfEdge> it = ot.fanIterator(); it.hasNext(); )
+			{
+				groupSet.add(it.next().getTri().getGroupId());
+			}
+			groupSet.add(-1);
+			groups.put(v, groupSet.toArray());
+		}
 	}
 
 	protected void postProcessIteration(Mesh mesh, int i)
