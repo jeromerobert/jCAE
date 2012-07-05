@@ -770,7 +770,7 @@ public class Remesh
 		LOGGER.config("currentScale="+currentScale);
 
 		double nextScale = currentScale;
-		if (maxLength > 80.0 && currentScale > 2.0)
+		if (maxLength > 80.0 && currentScale > 3.0)
 		{
 			nextScale =  maxLength / 10.0;
 			// Scaling should decrease significantly
@@ -781,7 +781,7 @@ public class Remesh
 		}
 		else
 			nextScale = 1.0;
-		if (currentScale - nextScale > 0.5)
+		if (currentScale - nextScale > 0.4)
 		{
 			currentScale = nextScale;
 			LOGGER.config("Set scaling to "+currentScale);
