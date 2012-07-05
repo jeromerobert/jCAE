@@ -803,8 +803,9 @@ public class Remesh
 	{
 		if (currentScale < 1.01)
 			return true;
-		if (updateCurrentScale())
-			resetMarkedTags();
+		if (!updateCurrentScale())
+			return true;
+		resetMarkedTags();
 		return false;
 	}
 
