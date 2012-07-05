@@ -4,7 +4,7 @@ from org.jcae.mesh.amibe.ds import Mesh, AbstractHalfEdge
 from org.jcae.mesh.amibe.algos3d import Remesh, QEMDecimateHalfEdge, SwapEdge, RemeshPolyline
 from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.projection import MeshLiaison
-from org.jcae.mesh.amibe.metrics import EuclidianMetric3D, PointMetric
+from org.jcae.mesh.amibe.metrics import EuclidianMetric3D, DistanceMetric
 from org.jcae.mesh.xmldata import MeshReader, MeshWriter
 from org.jcae.mesh.amibe.metrics.MetricSupport import AnalyticMetricInterface
 
@@ -46,7 +46,8 @@ parser.add_option("-m", "--metricsFile", metavar="STRING",
                   help="name of a file containing metrics map")
 parser.add_option("-P", "--point-metric", metavar="STRING",
                   action="store", type="string", dest="point_metric_file",
-                  help="""A CSV file containing points which to refine around. Each line must contains 5 floating point values:
+                  help="""A CSV file containing points which to refine around. Each line must contains 6 values:
+                  - 1
                   - x, y, z
                   - the distance of the source where the target size is defined
                   - the target size at the given distance""")
@@ -141,7 +142,7 @@ class RemeshMetric(AnalyticMetricInterface):
 		return min(200.0, (x - 9000.0)*(x - 9000.0) / 2250.0)
 
 if options.point_metric_file:
-    algo.setAnalyticMetric(PointMetric(options.size, options.point_metric_file))
+    algo.setAnalyticMetric(DistanceMetric(options.size, options.point_metric_file))
 elif setAnalytic:
 	algo.setAnalyticMetric(RemeshMetric());
 

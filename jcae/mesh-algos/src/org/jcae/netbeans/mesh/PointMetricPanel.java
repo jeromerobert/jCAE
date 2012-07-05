@@ -169,6 +169,7 @@ public abstract class PointMetricPanel extends JPanel {
 		int colCount = m.getColumnCount();
 		for(int i = 0; i<rowCount; i++)
 		{
+			out.print("1 ");
 			for(int j = 0; j<colCount; j++)
 			{
 				out.print(m.getValueAt(i, j));

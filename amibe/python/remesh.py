@@ -4,7 +4,7 @@ from org.jcae.mesh.amibe.ds import Mesh, AbstractHalfEdge
 from org.jcae.mesh.amibe.algos3d import *
 from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.projection import MeshLiaison
-from org.jcae.mesh.amibe.metrics import EuclidianMetric3D, PointMetric
+from org.jcae.mesh.amibe.metrics import EuclidianMetric3D, DistanceMetric
 from org.jcae.mesh.xmldata import MeshReader, MeshWriter, Amibe2VTK
 from org.jcae.mesh.amibe.algos3d import SmoothNodes3DBg, RemeshPolyline
 
@@ -59,7 +59,8 @@ parser.add_option("-c", "--coplanarity", metavar="FLOAT",
                   help="dot product of face normals to detect feature edges")
 parser.add_option("-P", "--point-metric", metavar="STRING",
                   action="store", type="string", dest="point_metric_file",
-                  help="""A CSV file containing points which to refine around. Each line must contains 5 floating point values:
+                  help="""A CSV file containing points which to refine around. Each line must contains 6 values:
+                  - 1
                   - x, y, z
                   - the distance of the source where the target size is defined
                   - the target size at the given distance""")
@@ -112,7 +113,7 @@ if options.immutable_groups_file:
     liaison.mesh.tagGroups(immutable_groups, AbstractHalfEdge.IMMUTABLE)
 
 if options.point_metric_file:
-    point_metric = PointMetric(options.size, options.point_metric_file)
+    point_metric = DistanceMetric(options.size, options.point_metric_file)
 else:
     point_metric = None
 safe_coplanarity = str(max(options.coplanarity, 0.8))
