@@ -770,9 +770,9 @@ public class Remesh
 		LOGGER.config("currentScale="+currentScale);
 
 		double nextScale = currentScale;
-		if (maxLength > 80.0 && currentScale > 80.0)
+		if (maxLength > 80.0 && currentScale > 2.0)
 		{
-			nextScale =  maxLength / 50.0;
+			nextScale =  maxLength / 10.0;
 			// Scaling should decrease significantly
 			// If not, this means that long edges could not be splitted,
 			// try with a smaller scale
@@ -797,7 +797,6 @@ public class Remesh
 			f.clearAttributes(AbstractHalfEdge.MARKED);
 		// Tag IMMUTABLE edges
 		mesh.tagIf(AbstractHalfEdge.IMMUTABLE, AbstractHalfEdge.MARKED);
-
 	}
 
 	private boolean meshingDone()
