@@ -136,8 +136,7 @@ public class AmibeDataObject extends MultiDataObject implements SaveCookie
 		});
 	}
 
-	@Override
-	public String getName() {
+	public String getDisplayName() {
 		FileObject xmlMesh = getXMLMesh(false);
 		if(xmlMesh == null)
 			return getPrimaryFile().getName();
@@ -222,6 +221,14 @@ public class AmibeDataObject extends MultiDataObject implements SaveCookie
 			if(l!=null)
 				l.releaseLock();
 		}
+	}
+
+	@Override
+	protected FileObject handleRename(String name) throws IOException {
+		FileObject toReturn = super.handleRename(name);
+		mesh.setMeshFile(toReturn.getNameExt());
+		refreshGroups();
+		return toReturn;
 	}
 
 	public void refreshGroups()

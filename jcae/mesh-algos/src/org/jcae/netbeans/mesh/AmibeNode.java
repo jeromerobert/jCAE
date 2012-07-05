@@ -64,7 +64,7 @@ public class AmibeNode extends DataNode
 	public AmibeNode(AmibeDataObject arg0)
 	{
 		super(arg0, new Children.Array());
-		setDisplayName(getName());
+		setDisplayName(arg0.getDisplayName());
 	}
 
 	@Override
@@ -269,5 +269,16 @@ public class AmibeNode extends DataNode
         	groupsNode.setDisplayName("Groups");
         	getChildren().add(new Node[]{groupsNode});
         }
+	}
+
+	@Override
+	public String getName() {
+		return ((AmibeDataObject)getDataObject()).getDisplayName();
+	}
+
+	@Override
+	public void setName(String name) {
+		super.setName(name);
+		setDisplayName(name);
 	}
 }
