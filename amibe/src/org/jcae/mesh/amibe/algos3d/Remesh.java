@@ -109,6 +109,7 @@ public class Remesh
 	//  We keep track of the background triangle so that it is not
 	//  searched again.
 	private ArrayList<Triangle> bgTriangles = new ArrayList<Triangle>();
+	private double currentScale = Double.MAX_VALUE;
 
 	/**
 	 * Creates a <code>Remesh</code> instance.
@@ -489,6 +490,10 @@ public class Remesh
 		AbstractHalfEdge sym = null;
 
 		double[][] temp = new double[4][3];
+
+		updateCurrentScale();
+		resetMarkedTags();
+
 		// We try to insert new nodes by splitting large edges.  As edge collapse
 		// is costful, nodes are inserted only if it does not create small edges,
 		// which means that nodes are not deleted.
@@ -496,12 +501,6 @@ public class Remesh
 		// If an edge has no candidates, either because it is small or because no
 		// nodes can be inserted, it is tagged and will not have to be checked
 		// during next iterations.
-
-		// Clear MARKED attribute
-		for (Triangle f : mesh.getTriangles())
-			f.clearAttributes(AbstractHalfEdge.MARKED);
-		// Tag IMMUTABLE edges
-		mesh.tagIf(AbstractHalfEdge.IMMUTABLE, AbstractHalfEdge.MARKED);
 
 		boolean reversed = true;
 		while (true)
@@ -586,7 +585,10 @@ public class Remesh
 			}
 			if (nodes.isEmpty())
 			{
-				break;
+				if (meshingDone())
+					break;
+				else
+					continue;
 			}
 
 			// Step E. Iterate over the 'nodes' list and insert all vertices.
@@ -731,7 +733,10 @@ public class Remesh
 					LOGGER.fine(totNrSwap+" edges have been swapped during processing");
 			}
 			if (nodes.size() == skippedNodes)
-				break;
+			{
+				if (meshingDone())
+					break;
+			}
 		}
 		LOGGER.info("Number of inserted vertices: "+processed);
 		LOGGER.fine("Number of iterations to insert all nodes: "+nrIter);
@@ -743,6 +748,67 @@ public class Remesh
 		return this;
 	}
 
+	private boolean updateCurrentScale()
+	{
+		double maxLength = 0.0;
+		AbstractHalfEdge h = null;
+		for (Triangle f : mesh.getTriangles())
+		{
+			if (f.hasAttributes(AbstractHalfEdge.OUTER))
+					continue;
+			f.clearAttributes(AbstractHalfEdge.MARKED);
+			h = f.getAbstractHalfEdge(h);
+			for (int i = 0; i < 3; i++)
+			{
+				h = h.next();
+				double edgeLength = metrics.interpolatedDistance(h.origin(), h.destination());
+				if (edgeLength > maxLength)
+					maxLength = edgeLength;
+			}
+		}
+		LOGGER.config("Maximal edge length: "+maxLength);
+		LOGGER.config("currentScale="+currentScale);
+
+		double nextScale = currentScale;
+		if (maxLength > 80.0 && currentScale > 80.0)
+		{
+			nextScale =  maxLength / 50.0;
+			// Scaling should decrease significantly
+			// If not, this means that long edges could not be splitted,
+			// try with a smaller scale
+			if (nextScale > 0.8 * currentScale)
+				nextScale = currentScale / 2.0;
+		}
+		else
+			nextScale = 1.0;
+		if (currentScale - nextScale > 0.5)
+		{
+			currentScale = nextScale;
+			LOGGER.config("Set scaling to "+currentScale);
+			return true;
+		}
+		return false;
+	}
+
+	private void resetMarkedTags()
+	{
+		// Clear MARKED attribute
+		for (Triangle f : mesh.getTriangles())
+			f.clearAttributes(AbstractHalfEdge.MARKED);
+		// Tag IMMUTABLE edges
+		mesh.tagIf(AbstractHalfEdge.IMMUTABLE, AbstractHalfEdge.MARKED);
+
+	}
+
+	private boolean meshingDone()
+	{
+		if (currentScale < 1.01)
+			return true;
+		if (updateCurrentScale())
+			resetMarkedTags();
+		return false;
+	}
+
 	private int collectCandidatesOnEdge(AbstractHalfEdge ot, boolean reversed)
 	{
 		int nrNodes = 0;
@@ -752,7 +818,7 @@ public class Remesh
 		// Step C. Compute nodes which would be at the right distance
 		//         and store them into a bag.
 		double edgeLength = metrics.interpolatedDistance(start, end);
-		if (edgeLength < maxlen)
+		if (edgeLength < currentScale * maxlen)
 		{
 			// This edge is smaller than target size and is not split
 			ot.setAttributes(AbstractHalfEdge.MARKED);
@@ -782,14 +848,15 @@ public class Remesh
 		boolean border = ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD | AbstractHalfEdge.SHARP);
 		int nr;
 		double maxError, target;
-		if (edgeLength < ONE_PLUS_SQRT2)
+		double scaledEdgeLength = edgeLength / currentScale;
+		if (scaledEdgeLength < ONE_PLUS_SQRT2)
 		{
 			//  Add middle point; otherwise point would be too near from end point
 			nr = 1;
 			target = 0.5*edgeLength;
 			maxError = Math.min(0.02, 0.9*Math.abs(target - 0.5*Math.sqrt(2)));
 		}
-		else if (edgeLength > 4.0)
+		else if (scaledEdgeLength > 4.0)
 		{
 			//  Long edges are discretized, but do not create more than 4 subsegments
 			nr = 3;
@@ -798,8 +865,8 @@ public class Remesh
 		}
 		else
 		{
-			nr = (int) edgeLength;
-			target = 1.0;
+			nr = (int) scaledEdgeLength;
+			target = currentScale;
 			maxError = 0.05;
 		}
 		// One could take nrDichotomy = 1-log(maxError)/log(2), but this
@@ -843,7 +910,7 @@ public class Remesh
 					if (!border)
 					{
 						// Check that point is not near of a border
-						double localSize = 0.9 * minlen * m.getUnitBallBBox()[0];
+						double localSize = 0.9 * currentScale * minlen * m.getUnitBallBBox()[0];
 						double localSize2 = localSize * localSize;
 						if (liaison.isNearSkeleton(np, group, localSize2))
 						{
@@ -929,7 +996,7 @@ public class Remesh
 			if (!validCandidate)
 			{
 				Vertex n = kdTreeGroup.getNearestVertex(metric, v.getUV());
-				validCandidate = interpolatedDistance(v, metric, n, metrics.get(n)) > minlen;
+				validCandidate = interpolatedDistance(v, metric, n, metrics.get(n)) > currentScale * minlen;
 			}
 			if (validCandidate)
 			{
