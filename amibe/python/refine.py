@@ -190,7 +190,7 @@ for bId in bgroupMap.keySet():
 	for numPoly in xrange(nrPoly):
 		polyline = listOfPolylines.get(numPoly)
 		if options.point_metric_file:
-			met = PointMetric(options.size, options.point_metric_file)
+			met = DistanceMetric(options.size, options.point_metric_file)
 		elif setAnalytic:
 			met = RemeshMetric()
 		else:
