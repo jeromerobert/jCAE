@@ -150,25 +150,26 @@ SwapEdge(liaison, opts).compute()
 writeVTK(liaison)
 
 opts.clear()
-opts.put("size", str(options.size*0.3))
-opts.put("freeEdgesOnly", "true")
-LengthDecimateHalfEdge(liaison, opts).compute()
+opts.put("coplanarity", str(options.coplanarity))
+opts.put("iterations", "2")
+opts.put("size", str(options.size))
+algo = SmoothNodes3DBg(liaison, opts)
+algo.compute()
 
 #4
 writeVTK(liaison)
 
 opts.clear()
-opts.put("coplanarity", safe_coplanarity)
-ImproveEdgeConnectivity(liaison, opts).compute()
+opts.put("coplanarity", str(options.coplanarity))
+opts.put("minCosAfterSwap", "0.3")
+SwapEdge(liaison, opts).compute()
 
 #5
 writeVTK(liaison)
 
 opts.clear()
-opts.put("coplanarity", str(options.coplanarity))
-opts.put("iterations", str(8))
 opts.put("size", str(options.size))
-algo = SmoothNodes3DBg(liaison, opts)
+algo = Remesh(liaison, opts)
 algo.analyticMetric = point_metric
 algo.compute()
 
@@ -176,15 +177,15 @@ algo.compute()
 writeVTK(liaison)
 
 opts.clear()
-opts.put("coplanarity", safe_coplanarity)
-opts.put("expectInsert", "false")
-SwapEdge(liaison, opts).compute()
+opts.put("size", str(options.size*0.3))
+opts.put("freeEdgesOnly", "true")
+LengthDecimateHalfEdge(liaison, opts).compute()
 
 #7
 writeVTK(liaison)
 
 opts.clear()
-opts.put("coplanarity", str(options.coplanarity))
+opts.put("coplanarity", safe_coplanarity)
 opts.put("size", str(options.size*0.2))
 opts.put("maxlength", str(options.size))
 algo = QEMDecimateHalfEdge(liaison, opts)
@@ -195,9 +196,10 @@ algo.compute()
 writeVTK(liaison)
 
 opts.clear()
+opts.put("coplanarity", "0.97")
+ImproveEdgeConnectivity(liaison, opts).compute()
 opts.put("coplanarity", safe_coplanarity)
-opts.put("expectInsert", "false")
-SwapEdge(liaison, opts).compute()
+ImproveVertexValence(liaison, opts).compute()
 
 #9
 writeVTK(liaison)
