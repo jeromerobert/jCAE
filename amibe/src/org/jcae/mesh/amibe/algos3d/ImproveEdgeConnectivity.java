@@ -161,6 +161,8 @@ public class ImproveEdgeConnectivity extends AbstractAlgoHalfEdge
 			return false;
 		if (current.hasAttributes(AbstractHalfEdge.MARKED) && current.sym().hasAttributes(AbstractHalfEdge.MARKED))
 			return false;
+		if(!current.apex().isManifold() && !current.sym().apex().isManifold())
+			return false;
 		Vertex v = current.origin();
 		double [] tNormal = liaison.getBackgroundNormal(v);
 		double checkNormal = current.checkSwapNormal(mesh, minCos, tNormal);
