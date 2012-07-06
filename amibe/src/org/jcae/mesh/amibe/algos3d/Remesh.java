@@ -93,7 +93,7 @@ public class Remesh
 	private final boolean allowNearNodes;
 	private final boolean remeshOnlyFeatureEdges;
 	private final MetricSupport metrics;
-
+	private double minCosAfterSwap = -2;
 	// Number of nodes which are too near from existing vertices
 	int tooNearNodes = 0;
 	private final ArrayList<Vertex> triNodes = new ArrayList<Vertex>();
@@ -167,6 +167,10 @@ public class Remesh
 			else if (key.equals("coplanarity"))
 			{
 				copl = Double.valueOf(val).doubleValue();
+			}
+			else if(key.equals("minCosAfterSwap"))
+			{
+				minCosAfterSwap = Double.parseDouble(val);
 			}
 			else if (key.equals("decimateSize"))
 			{
@@ -686,12 +690,13 @@ public class Remesh
 					advance = true;
 					edge.getTri().clearAttributes(AbstractHalfEdge.MARKED);
 					double checkNormal = edge.checkSwapNormal(mesh, coplanarity, tNormal);
-					if (checkNormal < -1.0)
+					if (checkNormal < -1.0 || !edge.canSwapTopology())
 					{
 						edge = edge.nextApexLoop();
 						continue;
 					}
-					if (edge.checkSwap3D(mesh, -2.0) > 0.0)
+					if (edge.checkSwap3D(mesh, -2.0) > 0.0 &&
+						(minCosAfterSwap < -1.0 || edge.afterSwap(mesh) > minCosAfterSwap))
 					{
 						edge.sym().getTri().clearAttributes(AbstractHalfEdge.MARKED);
 						Map<Triangle, Collection<Vertex>> vTri = collectVertices(edge);
