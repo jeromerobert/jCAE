@@ -784,6 +784,34 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		return true;
 	}
 	
+	/**
+	 * Check that this halfedge is not in the case of DC in the following schema
+	 * <pre>
+	 * A
+	 * |\
+	 * | \D____C
+	 * | /
+	 * |/
+	 * B
+	 * </pre>
+	 * @return
+	 */
+	public boolean canSwapTopology()
+	{
+		//check triangles around D
+		TriangleHE t1 = next.sym.tri;
+		TriangleHE t2 = sym.prev().sym.tri;
+		boolean toReturn = t1 != t2;
+		if(toReturn)
+		{
+			//check triangles around C
+			t1 = prev().sym.tri;
+			t2 = sym.next.sym.tri;
+			toReturn = t1 != t2;
+		}
+		return toReturn;
+	}
+
 	final boolean canMoveOrigin(Mesh mesh, double [] newpt)
 	{
 		assert origin().isManifold() && origin().isMutable();

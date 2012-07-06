@@ -121,7 +121,10 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 	@Override
 	public boolean canProcessEdge(HalfEdge current)
 	{
-		return counter > 0 && !current.hasAttributes(AbstractHalfEdge.IMMUTABLE | AbstractHalfEdge.OUTER | AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD);
+		boolean attr = current.hasAttributes(AbstractHalfEdge.IMMUTABLE |
+			AbstractHalfEdge.OUTER | AbstractHalfEdge.SHARP |
+			AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD);
+		return counter > 0 && !attr && current.canSwapTopology() ;
 	}
 
 	@Override
