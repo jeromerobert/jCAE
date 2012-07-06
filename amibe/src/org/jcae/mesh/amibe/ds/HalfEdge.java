@@ -398,6 +398,19 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		return checkSwap3D(mesh, minCos, 0.0, 0.0, true);
 	}
 
+	/** Return the dihedral of the edge if it was swapped */
+	public double afterSwap(Mesh mesh)
+	{
+		Vertex origin = origin();
+		Vertex destination = destination();
+		Vertex apex1 = apex();
+		Vertex apex2 = sym.apex();
+		Matrix3D.computeNormal3D(apex1.getUV(), apex2.getUV(), destination.getUV(),
+			mesh.temp.t3_0, mesh.temp.t3_1, mesh.temp.t3_2);
+		Matrix3D.computeNormal3D(apex2.getUV(), apex1.getUV(), origin.getUV(),
+			mesh.temp.t3_0, mesh.temp.t3_1, mesh.temp.t3_3);
+		return Matrix3D.prodSca(mesh.temp.t3_2, mesh.temp.t3_3);
+	}
 	/**
 	 * Checks the dihedral angle of an edge.
 	 * Warning: this method uses temp[0], temp[1], temp[2] and temp[3] temporary arrays.
