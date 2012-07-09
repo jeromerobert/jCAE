@@ -760,7 +760,7 @@ then
 	flags=""
 	flags="$flags -DSWIG_DIR=/usr/bin/"
 	flags="$flags -DSWIG_EXECUTABLE=/usr/bin/swig"
-	flags="$flags -DOCE_DIR=$oceLinInstallDir/lib/oce-0.9.1"
+	flags="$flags -DOCE_DIR=$oceLinInstallDir/lib/oce-0.10"
 
 	cmake $flags $occjavaDir
 	make
