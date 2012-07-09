@@ -1,3 +1,7 @@
+Version 0.17 (2012-07-09)
+
+* Too many changes to be describes here (see git)
+
 Version 0.16.0 (2008-08-18)
 
 * Replace Java3D by VTK
