@@ -45,6 +45,8 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 	private int valence3;
 	private int valence4;
 	private int inserted;
+	private int minValence = 1, maxValence = Integer.MAX_VALUE;
+	private boolean checkNormals = true;
 	
 	/**
 	 * Creates a <code>ImproveConnectivity</code> instance.
@@ -74,6 +76,18 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 			{
 				minCos = Double.parseDouble(val);
 				LOGGER.fine("Coplanar value: "+minCos);
+			}
+			else if("checkNormals".equals(key))
+			{
+				checkNormals = Boolean.parseBoolean(val);
+			}
+			else if("minValence".equals(key))
+			{
+				minValence = Integer.parseInt(val);
+			}
+			else if("maxValence".equals(key))
+			{
+				maxValence = Integer.parseInt(val);
 			}
 			else
 				throw new RuntimeException("Unknown option: "+key);
@@ -120,6 +134,8 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 		if (!v.isManifold() || !v.isMutable())
 			return 100.0;
 		int q = map.get(v);
+		if(q < minValence || q > maxValence)
+			return 100.0;
 		if (q > 10)
 			return -q;
 		switch(q)
@@ -148,16 +164,21 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 	{
 		if (!v.isManifold() || !v.isMutable() || immutableNodes.contains(v))
 			return false;
-		double [] tNormal = liaison.getBackgroundNormal(v);
-		Triangle t = (Triangle) v.getLink();
-		HalfEdge ot = (HalfEdge) t.getAbstractHalfEdge();
-		if (ot.destination() == v)
-			ot = ot.next();
-		else if (ot.apex() == v)
-			ot = ot.prev();
-		assert ot.origin() == v;
-		double checkNormal = ot.checkSwapNormal(mesh, minCos, tNormal);
-		return (checkNormal > -1.0);
+		if(checkNormals)
+		{
+			double [] tNormal = liaison.getBackgroundNormal(v);
+			Triangle t = (Triangle) v.getLink();
+			HalfEdge ot = (HalfEdge) t.getAbstractHalfEdge();
+			if (ot.destination() == v)
+				ot = ot.next();
+			else if (ot.apex() == v)
+				ot = ot.prev();
+			assert ot.origin() == v;
+			double checkNormal = ot.checkSwapNormal(mesh, minCos, tNormal);
+			return (checkNormal > -1.0);
+		}
+		else
+			return true;
 	}
 
 	@Override
