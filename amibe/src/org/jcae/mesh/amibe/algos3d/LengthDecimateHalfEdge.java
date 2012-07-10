@@ -31,9 +31,11 @@ import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 import java.io.IOException;
 import java.io.File;
+import java.util.Collection;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -161,7 +163,9 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 			return false;
 		if (!v1.isMutable() && !v2.isMutable())
 			return false;
-		v3 = optimalPlacement(v1, v2);
+		v3 = optimalPlacementGroups(v1, v2);
+		if(v3 == null)
+			return false;
 		if (!mesh.canCollapseEdge(current, v3))
 			return false;
 		if (maxEdgeLength > 0.0)
@@ -180,6 +184,48 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 			}
 		}
 		return true;
+	}
+
+	private Collection<Integer> getGroups(Vertex v)
+	{
+		Iterator<Triangle> it = v.getNeighbourIteratorTriangle();
+		TreeSet<Integer> r = new TreeSet<Integer>();
+		while(it.hasNext())
+			r.add(it.next().getGroupId());
+		return r;
+	}
+
+	/**
+	 * Compute the optimal point if we are on differents borders of groups.
+	 * Delegate to optimalPlacement in other cases.
+	 */
+	private Vertex optimalPlacementGroups(Vertex v1, Vertex v2)
+	{
+		Vertex toReturn;
+		if(v1.isManifold() && v2.isManifold())
+			toReturn = optimalPlacement(v1, v2);
+		else
+		{
+			Collection<Integer> grps1 = getGroups(v1);
+			Collection<Integer> grps2 = getGroups(v2);
+			if(grps1.containsAll(grps2))
+			{
+				if(grps1.size() == grps2.size())
+				{
+					//both points are on the same group border so we delegate to
+					//optimalPlacement as if it was manifold
+					toReturn = optimalPlacement(v1, v2);
+				}
+				else
+					toReturn = v1;
+			}
+			else if(grps2.containsAll(grps1))
+				toReturn = v2;
+			else
+				//group set are disjoin so collapse is forbidden
+				toReturn = null;
+		}
+		return toReturn;
 	}
 
 	private Vertex optimalPlacement(Vertex v1, Vertex v2)
