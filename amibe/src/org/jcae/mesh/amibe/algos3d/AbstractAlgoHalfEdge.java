@@ -281,7 +281,7 @@ public abstract class AbstractAlgoHalfEdge
 				redo = false;
 				while(true)
 				{
-					if (current.checkSwap3D(mesh, minCos) >= 0.0)
+					if (current.checkSwap3D(mesh, minCos) >= 0.0 && current.canSwapTopology())
 					{
 						// Swap edge
 						for (int i = 0; i < 3; i++)
