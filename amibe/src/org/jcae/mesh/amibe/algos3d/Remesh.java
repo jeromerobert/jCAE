@@ -695,8 +695,8 @@ public class Remesh
 						edge = edge.nextApexLoop();
 						continue;
 					}
-					if (edge.checkSwap3D(mesh, -2.0) > 0.0 &&
-						(minCosAfterSwap < -1.0 || edge.afterSwap(mesh) > minCosAfterSwap))
+					if (edge.checkSwap3D(mesh, -2.0, 0, 0, true,
+						minCosAfterSwap, minCosAfterSwap) > 0.0)
 					{
 						edge.sym().getTri().clearAttributes(AbstractHalfEdge.MARKED);
 						Map<Triangle, Collection<Vertex>> vTri = collectVertices(edge);

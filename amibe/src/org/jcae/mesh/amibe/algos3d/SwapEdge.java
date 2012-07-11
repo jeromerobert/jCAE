@@ -120,7 +120,8 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 			coplanarity = -2.0;
 		}
 
-		return - e.checkSwap3D(mesh, coplanarity, 0, minQualityFactor, expectInsert);
+		return - e.checkSwap3D(mesh, coplanarity, 0, minQualityFactor,
+			expectInsert, minCosAfterSwap, -2.0);
 	}
 	
 	@Override
@@ -129,8 +130,7 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 		boolean attr = current.hasAttributes(AbstractHalfEdge.IMMUTABLE |
 			AbstractHalfEdge.OUTER | AbstractHalfEdge.SHARP |
 			AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD);
-		return counter > 0 && !attr && current.canSwapTopology() &&
-			(minCosAfterSwap < -1.0 || current.afterSwap(mesh) > minCosAfterSwap);
+		return counter > 0 && !attr && current.canSwapTopology();
 	}
 
 	@Override

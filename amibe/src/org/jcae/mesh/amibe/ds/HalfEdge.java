@@ -395,22 +395,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	
 	public final double checkSwap3D(Mesh mesh, double minCos)
 	{
-		return checkSwap3D(mesh, minCos, 0.0, 0.0, true);
+		return checkSwap3D(mesh, minCos, 0.0, 0.0, true, -2.0, -2.0);
 	}
 
-	/** Return the dihedral of the edge if it was swapped */
-	public double afterSwap(Mesh mesh)
-	{
-		Vertex origin = origin();
-		Vertex destination = destination();
-		Vertex apex1 = apex();
-		Vertex apex2 = sym.apex();
-		Matrix3D.computeNormal3D(apex1.getUV(), apex2.getUV(), destination.getUV(),
-			mesh.temp.t3_0, mesh.temp.t3_1, mesh.temp.t3_2);
-		Matrix3D.computeNormal3D(apex2.getUV(), apex1.getUV(), origin.getUV(),
-			mesh.temp.t3_0, mesh.temp.t3_1, mesh.temp.t3_3);
-		return Matrix3D.prodSca(mesh.temp.t3_2, mesh.temp.t3_3);
-	}
 	/**
 	 * Checks the dihedral angle of an edge.
 	 * Warning: this method uses temp[0], temp[1], temp[2] and temp[3] temporary arrays.
@@ -422,11 +409,18 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 *    at least multiplied by this factor, the returned value is -1
 	 * @param expectInsert Set it to true if later point insertion are expected.
 	 *    This is typically the case before and during ReMesh.
+	 * @param minCosAfter  if the dot product of the normals to adjacent
+	 *    triangles after the swap, is lower than minCos, then <code>-1.0</code>
+	 *    is returned.
+	 * @param minCosForceSwap if the dot product of the normals to adjacent
+	 *    is lower than minCosForceSwap return 1.0 if swaping would increase the
+	 *    angle cosinus, even if quality is not improved.
 	 * @return the minimum quality of the two triangles generated
 	 *    by swapping this edge or -1 if the swap must not be done
 	 */
 	public final double checkSwap3D(Mesh mesh, double minCos, double maxLength,
-		double minQualityFactor, boolean expectInsert)
+		double minQualityFactor, boolean expectInsert, double minCosAfter,
+		double minCosForceSwap)
 	{
 		double invalid = -1.0;
 		if (hasAttributes(IMMUTABLE))
@@ -452,15 +446,28 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		double[] temp2 = mesh.temp.t3_2;
 		double[] temp3 = mesh.temp.t3_3;
 		double[] temp4 = mesh.temp.t3_4;
+		//normals of current side triangles
 		double s1 = Matrix3D.computeNormal3D(o.getUV(), d.getUV(), a.getUV(), temp0, temp1, temp2);
 		double s2 = Matrix3D.computeNormal3D(d.getUV(), o.getUV(), n.getUV(), temp0, temp1, temp3);
-		// Make sure that edge swap does not create inverted triangles
+		double cos = Matrix3D.prodSca(temp2, temp3);
+		if (cos < minCos)
+			return invalid;
+
+		// Normals between swaped side triangles
 		double s3 = Matrix3D.computeNormal3D(o.getUV(), n.getUV(), a.getUV(), temp0, temp1, temp2);
 		double s4 = Matrix3D.computeNormal3D(d.getUV(), a.getUV(), n.getUV(), temp0, temp1, temp3);
+		if(minCosForceSwap >= -1.0 || minCosAfter >= -1.0)
+		{
+			double cosAfter = Matrix3D.prodSca(temp2, temp3);
+			if(cos < minCosForceSwap && cosAfter > cos)
+				return 1.0;
+			if(cosAfter < minCosAfter)
+				return invalid;
+		}
+
+		// Make sure that edge swap does not create inverted triangles
 		if (minCos > -1.0)
 		{
-			if (Matrix3D.prodSca(temp2, temp3) < minCos)
-				return invalid;
 			for (int i = 0; i < 4; i++)
 			{
 				HalfEdge h = (i == 0 ? next.next : (i == 1 ? sym.next : (i == 2 ? next : sym.next.next)));
