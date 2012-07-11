@@ -182,7 +182,10 @@ writeVTK(liaison)
 opts.clear()
 opts.put("size", str(options.size*0.3))
 opts.put("freeEdgesOnly", "true")
-LengthDecimateHalfEdge(liaison, opts).compute()
+algo = LengthDecimateHalfEdge(liaison, opts)
+if options.point_metric_file:
+    algo.analyticMetric = DistanceMetric(options.size*0.3, options.point_metric_file)
+algo.compute()
 
 #7
 writeVTK(liaison)

@@ -38,6 +38,7 @@ import java.util.Iterator;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.metrics.MetricSupport;
 
 public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 {
@@ -46,6 +47,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	private boolean freeEdgesOnly = false;
 	private final double freeEdgeFactor;
 	private double maxEdgeLength = -1;
+	private final MetricSupport metrics;
 	/**
 	 * Creates a <code>LengthDecimateHalfEdge</code> instance.
 	 *
@@ -70,17 +72,13 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 		v3 = null;
 		m.createVertex(0.0, 0.0, 0.0);
 		double freeEdgeTol = Double.NaN;
+		tolerance = 1;
+		metrics = new MetricSupport(mesh, options, "size");
 		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
 			String key = opt.getKey();
 			String val = opt.getValue();
-			if ("size".equals(key))
-			{
-				tolerance = Double.parseDouble(val);
-				LOGGER.fine("Tolerance: "+tolerance);
-				tolerance = tolerance*tolerance;
-			}
-			else if ("maxtriangles".equals(key))
+			if ("maxtriangles".equals(key))
 			{
 				nrFinal = Integer.parseInt(val);
 				LOGGER.fine("Nr max triangles: "+nrFinal);
@@ -106,8 +104,8 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 				minCos = Double.parseDouble(val);
 				LOGGER.fine("Minimum dot product of face normals allowed for swapping an edge: "+minCos);
 			}
-			else
-				throw new IllegalArgumentException("Unknown option: "+key);
+			else if(!metrics.isKnownOption(key))
+				throw new RuntimeException("Unknown option: "+key);
 		}
 		if(Double.isNaN(freeEdgeTol))
 			freeEdgeFactor = 1.0;
@@ -119,6 +117,16 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 			setNoSwapAfterProcessing(true);
 	}
 	
+	public void setAnalyticMetric(MetricSupport.AnalyticMetricInterface m)
+	{
+		metrics.setAnalyticMetric(m);
+	}
+
+	public void setAnalyticMetric(int groupId, MetricSupport.AnalyticMetricInterface m)
+	{
+		metrics.setAnalyticMetric(groupId, m);
+	}
+
 	@Override
 	public Logger thisLogger()
 	{
@@ -128,6 +136,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	@Override
 	protected void preProcessAllHalfEdges()
 	{
+		metrics.compute();
 	}
 
 	@Override
@@ -137,7 +146,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 		if (freeEdgesOnly && !e.hasAttributes(AbstractHalfEdge.IMMUTABLE | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 			return 4.0 * tolerance;
 		
-		double toReturn = e.origin().sqrDistance3D(e.destination());
+		double toReturn = metrics.interpolatedDistance(e.origin(), e.destination());
 		
 		//Handle the case of specific tolerance for free edges
 		if(freeEdgeFactor != 1.0 &&
