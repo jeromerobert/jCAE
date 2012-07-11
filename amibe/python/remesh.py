@@ -188,6 +188,14 @@ LengthDecimateHalfEdge(liaison, opts).compute()
 writeVTK(liaison)
 
 opts.clear()
+opts.put("coplanarity", str(options.coplanarity))
+opts.put("minCosAfterSwap", "0.3")
+SwapEdge(liaison, opts).compute()
+
+#8
+writeVTK(liaison)
+
+opts.clear()
 opts.put("coplanarity", safe_coplanarity)
 opts.put("size", str(options.size*0.3))
 opts.put("maxlength", str(options.size*sqrt(2)))
@@ -196,7 +204,7 @@ if options.point_metric_file:
     algo.analyticMetric = DistanceMetric(options.size*sqrt(2), options.point_metric_file)
 algo.compute()
 
-#8
+#9
 writeVTK(liaison)
 
 opts.clear()
@@ -211,7 +219,7 @@ opts.put("maxValence", "3")
 ImproveVertexValence(liaison, opts).compute()
 
 
-#9
+#10
 writeVTK(liaison)
 
 opts.clear()
