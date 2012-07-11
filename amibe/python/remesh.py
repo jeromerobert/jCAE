@@ -18,6 +18,7 @@ from gnu.trove import TIntArrayList
 
 # Python
 import sys
+from math import sqrt
 from optparse import OptionParser
 
 def read_groups(file_name):
@@ -188,10 +189,11 @@ writeVTK(liaison)
 
 opts.clear()
 opts.put("coplanarity", safe_coplanarity)
-opts.put("size", str(options.size*0.2))
-opts.put("maxlength", str(options.size))
+opts.put("size", str(options.size*0.3))
+opts.put("maxlength", str(options.size*sqrt(2)))
 algo = QEMDecimateHalfEdge(liaison, opts)
-algo.analyticMetric = point_metric
+if options.point_metric_file:
+    algo.analyticMetric = DistanceMetric(options.size*sqrt(2), options.point_metric_file)
 algo.compute()
 
 #8
