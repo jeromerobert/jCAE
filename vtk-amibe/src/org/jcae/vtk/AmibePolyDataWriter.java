@@ -54,7 +54,7 @@ public class AmibePolyDataWriter
     {
 		// Amibe writer object for 3D elements
 		AmibeWriter.Dim3 out = new AmibeWriter.Dim3(outDir);
-
+		out.setFixNoGroup(true);
 		//Read Point Data
 		int n = polyData.GetNumberOfPoints();
 		for (int i = 0; i < n; i++)
@@ -67,6 +67,7 @@ public class AmibePolyDataWriter
 			out.addBeam(lineIdArray.GetValue(i + 1), lineIdArray.GetValue(i + 2));
 
 		//Triangles
+		polyData.GetPolys().Squeeze();
 		vtkIdTypeArray polyIdArray = polyData.GetPolys().GetData();
 		n = polyIdArray.GetSize();
 		for (int j = 0; j < n; j += 4)

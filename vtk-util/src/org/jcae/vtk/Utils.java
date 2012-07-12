@@ -922,6 +922,9 @@ public class Utils
 
 	public static int[] getValues(vtkCellArray array)
 	{
+		//The underlying vtkIdTypeArray may be longer the expected and
+		//getValues(vtkIdTypeArray) won't know it, so we squeeze it before.
+		array.Squeeze();
 		vtkIdTypeArray data = array.GetData();
 		int[] toReturn = getValues(data);
 		return toReturn;
