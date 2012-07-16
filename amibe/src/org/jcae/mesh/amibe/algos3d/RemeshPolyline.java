@@ -89,8 +89,7 @@ public class RemeshPolyline
 		for (Vertex v : vertices)
 		{
 			bgWire.add(v);
-			double [] pos = v.getUV();
-			metricsMap.put(v, new EuclidianMetric3D(analytic.getTargetSize(pos[0], pos[1], pos[2])));
+			metricsMap.put(v, new EuclidianMetric3D(analytic.getTargetSizeTopo(m, v)));
 			if (last != null)
 				abscissa += v.distance3D(last);
 			last = v;

@@ -51,7 +51,17 @@ public class MetricSupport {
 	private EuclidianMetric3D uniformMetric;
 	public interface AnalyticMetricInterface
 	{
+		/**
+		 * Return the target size when topology information are available.
+		 * This is used for exemple before inserting a point into the mesh.
+		 */
 		double getTargetSize(double x, double y, double z);
+
+		/**
+		 * Return the target size when topology information are available.
+		 * This is only used at the initialization of algorithms
+		 */
+		double getTargetSizeTopo(Mesh mesh, Vertex v);
 	}
 
 	public MetricSupport(Mesh mesh, Map<String, String> options) {
@@ -142,10 +152,9 @@ public class MetricSupport {
 					throw new NullPointerException("Cannot determine metrics, either set 'size' or 'metricsMap' arguments, or call Remesh.setAnalyticMetric()");
 				for (Vertex v : t.vertex)
 				{
-					double[] pos = v.getUV();
 					EuclidianMetric3D curMetric = metrics.get(v);
 					EuclidianMetric3D newMetric = new EuclidianMetric3D(
-						metric.getTargetSize(pos[0], pos[1], pos[2]));
+						metric.getTargetSizeTopo(mesh, v));
 					if (curMetric == null ||
 						curMetric.getUnitBallBBox()[0] > newMetric.getUnitBallBBox()[0])
 						metrics.put(v, newMetric);

@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.Vertex;
 
 /**
  * An AnalyticMetric which refine mesh around a set of points and lines.
@@ -257,5 +259,11 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 			minValue = Math.min(s.getTargetSize(x, y, z), minValue);
 		}
 		return minValue;
+	}
+
+	public double getTargetSizeTopo(Mesh mesh, Vertex v)
+	{
+		double[] uv = v.getUV();
+		return getTargetSize(uv[0], uv[1], uv[2]);
 	}
 }
