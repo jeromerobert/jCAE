@@ -725,16 +725,52 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			return false;
 		ignored.clear();
 
-		//  Topology check.
-		//  See in AbstractHalfEdgeTest.buildMeshTopo() why this
-		//  check is needed.
-		//  When edge is non manifold, we do not use Vertex.getNeighbourIteratorVertex()
-		//  because checks have to be performed by fans.
-		for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )
+		if(hasAttributes(NONMANIFOLD))
 		{
-			HalfEdge f = (HalfEdge) it.next();
-			if (!f.canCollapseTopology())
-				return false;
+			//  Topology check.
+			//  See in AbstractHalfEdgeTest.buildMeshTopo() why this
+			//  check is needed.
+			//  When edge is non manifold, we do not use Vertex.getNeighbourIteratorVertex()
+			//  because checks have to be performed by fans.
+			for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )
+			{
+				HalfEdge f = (HalfEdge) it.next();
+				if (!f.canCollapseTopology())
+					return false;
+			}
+			return true;
+		}
+		else
+			return canCollapseTopology2(mesh);
+	}
+
+	/**
+	 * Same as canCollapseTopology but for manifold edges with non-manifold
+	 * vertices.
+	 */
+	private boolean canCollapseTopology2(Mesh mesh)
+	{
+		Vertex origin = origin();
+		Vertex destination = destination();
+		Iterator<Vertex> it =  origin.getNeighbourIteratorVertex();
+		Collection<Vertex> neighbours = new HashSet<Vertex>();
+		while(it.hasNext())
+		{
+			Vertex v = it.next();
+			if(v != mesh.outerVertex && v != destination)
+				neighbours.add(v);
+		}
+		it =  destination.getNeighbourIteratorVertex();
+		int cnt = 0;
+		while(it.hasNext())
+		{
+			Vertex v = it.next();
+			if(v != origin && mesh.outerVertex != v && neighbours.remove(v))
+			{
+				if(cnt > 1)
+					return false;
+				cnt ++;
+			}
 		}
 		return true;
 	}
