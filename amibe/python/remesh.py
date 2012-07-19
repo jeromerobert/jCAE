@@ -138,6 +138,7 @@ opts.clear()
 opts.put("size", str(options.size))
 opts.put("coplanarity", str(options.coplanarity))
 opts.put("minCosAfterSwap", "0.3")
+opts.put("nearLengthRatio", "0.6")
 algo = Remesh(liaison, opts)
 algo.analyticMetric = point_metric
 algo.compute()
