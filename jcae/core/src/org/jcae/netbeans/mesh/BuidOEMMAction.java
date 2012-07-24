@@ -20,14 +20,15 @@
 
 package org.jcae.netbeans.mesh;
 
-import java.beans.*;
 import org.jcae.netbeans.ProcessExecutor;
 import org.jcae.netbeans.Utilities;
+import org.jcae.netbeans.options.JCAEPanel;
 import org.openide.filesystems.FileUtil;
 import org.openide.modules.InstalledFileLocator;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
+import org.openide.util.NbPreferences;
 import org.openide.util.actions.CookieAction;
 
 public final class BuidOEMMAction extends CookieAction
@@ -50,7 +51,7 @@ public final class BuidOEMMAction extends CookieAction
 				getAbsolutePath();
 
 			String className="org.jcae.mesh.MeshOEMMIndex";
-			String[] cmdLinePre=Settings.getDefault().getCommandLineAlgo();
+			String[] cmdLinePre=NbPreferences.forModule(JCAEPanel.class).get("commandLineAlgo", "").split(" ");
 			String[] cmdLine=new String[cmdLinePre.length+7];
 
 			System.arraycopy(cmdLinePre, 0, cmdLine, 0, cmdLinePre.length);

@@ -129,14 +129,6 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.openide.options</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <specification-version>6.13.1</specification-version>
-                    </run-dependency>
-                </dependency>
-                <dependency>
                     <code-name-base>org.openide.text</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
@@ -180,6 +172,7 @@
             <public-packages>
                 <package>org.jcae.netbeans</package>
                 <package>org.jcae.netbeans.mesh</package>
+                <package>org.jcae.netbeans.options</package>
                 <package>org.jcae.netbeans.viewer3d</package>
                 <package>org.jcae.netbeans.viewer3d.actions</package>
             </public-packages>

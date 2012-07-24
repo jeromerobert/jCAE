@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.TreeSet;
@@ -36,16 +35,13 @@ import java.util.logging.LogRecord;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import org.jcae.mesh.JCAEFormatter;
-import org.jcae.mesh.xmldata.Group;
+import org.jcae.netbeans.options.JCAEPanel;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.filesystems.FileUtil;
 import org.openide.modules.InstalledFileLocator;
 import org.openide.nodes.Node;
-import org.openide.util.Cancellable;
-import org.openide.util.Exceptions;
-import org.openide.util.HelpCtx;
-import org.openide.util.Utilities;
+import org.openide.util.*;
 import org.openide.util.actions.CookieAction;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
@@ -210,7 +206,7 @@ public abstract class AlgoAction extends CookieAction {
 						"amibe-python/" + command + ".py",
 						"org.jcae.netbeans", false);
 				InputOutput io = IOProvider.getDefault().getIO(getName(), true);
-				if (Settings.getDefault().isRunInSameJVM())
+				if (NbPreferences.forModule(JCAEPanel.class).getBoolean("runInSameJVM", true))
 					runInSameVM(args, pyFile, io);
 				else
 					runInOtherVM(activatedNodes[0], args, pyFile, io);
@@ -277,7 +273,8 @@ public abstract class AlgoAction extends CookieAction {
 			File f = InstalledFileLocator.getDefault().locate(
 					"modules/jython/bin/jython" + ext, "org.jcae.netbeans.mesh", false);
 			pb.command().add(f.getPath());
-			for (String s : Settings.getDefault().parameters()) {
+                        JCAEPanel j = new JCAEPanel(null);
+			for (String s : j.parameters()) {
 				if (s.startsWith("-") && !s.startsWith("-D")) {
 					s = "-J" + s;
 				}
