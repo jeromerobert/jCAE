@@ -174,7 +174,16 @@ public class MetricSupport {
 	 */
 	public EuclidianMetric3D get(Vertex v, Triangle t)
 	{
-		AnalyticMetricInterface metric = getAnalyticMetric(t.getGroupId());
+		return get(v, t.getGroupId());
+	}
+
+	/**
+	 * Get the metric of an unknown vertex which aims at being inserted in the
+	 * given triangle
+	 */
+	public EuclidianMetric3D get(Vertex v, int groupId)
+	{
+		AnalyticMetricInterface metric = getAnalyticMetric(groupId);
 		EuclidianMetric3D toReturn = null;
 		if (metric == null)
 		{
