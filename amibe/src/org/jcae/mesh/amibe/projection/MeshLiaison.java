@@ -462,6 +462,17 @@ public class MeshLiaison
 		return findSurroundingTriangle(v, start, maxError, background, -1);
 	}
 
+	/**
+	 *
+	 * @param v The vertex around which to search.
+	 * @param start A vertex from witch to start the search
+	 * @param maxError Maximum acceptable distance between v and it's projection
+	 * @param background must be true if start is on the background mesh, false
+	 * if it's on the forground mesh
+	 * @param group Search only in this group (-1 to search in all groups)
+	 * @return The closest HalfEdge of vertex, on the background mesh whose
+	 * triangle contains the projection of v.
+	 */
 	public AbstractHalfEdge findSurroundingTriangle(Vertex v, Vertex start,
 		double maxError, boolean background, int group)
 	{
@@ -647,6 +658,8 @@ public class MeshLiaison
 	/**
 	 * Compute squared distance between a point and a triangle.  See
 	 *   http://www.geometrictools.com/Documentation/DistancePoint3Triangle3.pdf
+	 * @param index index[0] is the local id of the closest edge and index[1]
+	 * the region.
 	 */
 	private static double sqrDistanceVertexTriangle(double[] pos, Triangle tri, int[] index)
 	{
