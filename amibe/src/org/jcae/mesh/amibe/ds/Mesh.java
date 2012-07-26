@@ -45,6 +45,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -2070,6 +2071,47 @@ public class Mesh implements Serializable
 			}
 		}
 		return true;
+	}
+
+	public Iterable<Vertex> getManifoldVertices()
+	{
+		return new Iterable<Vertex>(){
+			public Iterator<Vertex> iterator() {
+				return new Iterator<Vertex>(){
+					private Iterator<Vertex> delegateIt = nodeList.iterator();
+					private Vertex next;
+					private void nextImpl()
+					{
+						if(next == null)
+						{
+							while(delegateIt.hasNext())
+							{
+								next = delegateIt.next();
+								if(next.isManifold())
+									break;
+							}
+						}
+					}
+					public boolean hasNext() {
+						nextImpl();
+						return next != null;
+					}
+
+					public Vertex next() {
+						nextImpl();
+						if(next == null)
+							throw new NoSuchElementException();
+						Vertex toReturn = next;
+						next = null;
+						return toReturn;
+					}
+
+					public void remove() {
+						throw new UnsupportedOperationException();
+					}
+				};
+			}
+		};
 	}
 
 	// Useful for debugging
