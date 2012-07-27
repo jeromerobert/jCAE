@@ -83,24 +83,31 @@ public class XMLWriter {
 		filename = f;
 	}
 
-	public void close() throws SAXException, IOException
+	public static void writeDocument(Document document, String fileName) throws IOException
 	{
 		try {
-			out.flush();
 			DOMSource source = new DOMSource(document);
 			TransformerFactory tf = TransformerFactory.newInstance();
 			tf.setAttribute("indent-number", 2);
 			Transformer t = tf.newTransformer();
 			t.setOutputProperty(OutputKeys.INDENT, "yes");
-			StreamResult streamResult = new StreamResult(new FileWriter(filename));
+			StreamResult streamResult = new StreamResult(new FileWriter(fileName));
 			t.transform(source, streamResult);
 			streamResult.getWriter().close();
+		} catch (TransformerException ex) {
+			LOGGER.log(Level.SEVERE, null, ex);
+		}
+	}
+
+	public void close() throws SAXException, IOException
+	{
+		try {
+			out.flush();
+			writeDocument(document, filename);
 			//We validate after writting the file to be able to debug it.
 			validator.validate(new DOMSource(XMLHelper.parseXML(new File(filename))));
 		} catch (ParserConfigurationException ex) {
 			Logger.getLogger(XMLWriter.class.getName()).log(Level.SEVERE, null, ex);
-		} catch (TransformerException ex) {
-			LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
 		} catch (XMLStreamException ex) {
 			LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
 		}
