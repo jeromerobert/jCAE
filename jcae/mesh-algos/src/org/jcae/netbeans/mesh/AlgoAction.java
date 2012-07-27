@@ -214,9 +214,14 @@ public abstract class AlgoAction extends CookieAction {
 					runInSameVM(args, pyFile, io);
 				else
 					runInOtherVM(activatedNodes[0], args, pyFile, io);
+				postProcess(ado);
 				ado.refreshGroups();
 			}
 		}
+	}
+
+	protected void postProcess(AmibeDataObject ado)
+	{
 	}
 
 	private void runInSameVM(List<String> args, File pyFile, final InputOutput io) {
