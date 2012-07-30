@@ -548,6 +548,13 @@ public class Vertex implements Location, Serializable
 		mutable = m;
 	}
 
+	/** Fast setMutable for jython */
+	public static void setMutable(Iterable<Vertex> vertices, boolean m)
+	{
+		for(Vertex v:vertices)
+			v.mutable = m;
+	}
+
 	/**
 	 * Returns the discrete Gaussian curvature and the mean normal.
 	 * These discrete operators are described in "Discrete
