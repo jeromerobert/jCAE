@@ -445,16 +445,83 @@ public class MeshLiaison
 		return ret;
 	}
 
+	/** Square of the distance between v and it's orthogonal projection on e */
+	private static double sqrOrthoDistance(Vertex v, AbstractHalfEdge e)
+	{
+		double[] o = e.origin().getUV();
+		double[] d = e.destination().getUV();
+		double[] vv = v.getUV();
+		double[] od = new double[3];
+		double[] ov = new double[3];
+		//norm of od
+		double n2 = 0;
+		//dot product od.ov
+		double dot = 0;
+		for(int i = 0; i < 3; i++)
+		{
+			od[i] = d[i] - o[i];
+			ov[i] = vv[i] - o[i];
+			n2 += od[i] * od[i];
+			dot += od[i] * ov[i];
+		}
+		dot /= n2;
+		n2 = 0;
+		for(int i = 0; i < 3; i++)
+		{
+			double tmp = od[i] * dot - ov[i];
+			n2 += tmp * tmp;
+		}
+		return n2;
+	}
+
+	/**
+	 *
+	 * @param v The vertex whose to find the nearest edge
+	 * @param t The triangle where to take the edges
+	 * @param excludeAttr Edges which have this attribut will be excluded from
+	 * the search
+	 * @param dist a 2 sized array containing the squared distance between v and
+	 * the returnd edge and the squared distance between v and closest edge
+	 * included excluded edges. Can be null.
+	 * @return the found vertex or null if all edges were excluded by excludeAttr
+	 */
+	public static AbstractHalfEdge findNearestEdge(Vertex v, Triangle t,
+		int excludeAttr, double[] dist)
+	{
+		double minDistance = Double.MAX_VALUE;
+		double minExDistance = Double.MAX_VALUE;
+		AbstractHalfEdge minEdge = null;
+		AbstractHalfEdge e1 = t.getAbstractHalfEdge();
+		for(int i = 0; i < 3; i++)
+		{
+			boolean hasAttr = e1.hasAttributes(excludeAttr);
+			if(!hasAttr || dist != null)
+			{
+				double d = sqrOrthoDistance(v, e1);
+				if(hasAttr)
+				{
+					if(dist != null && d < minExDistance)
+						minExDistance = d;
+				}
+				else if(d < minDistance)
+				{
+					minDistance = d;
+					minEdge = e1;
+				}
+			}
+			e1 = e1.next();
+		}
+		if(dist != null)
+		{
+			dist[0] = minDistance;
+			dist[1] = minExDistance;
+		}
+		return minEdge;
+	}
+
 	public static AbstractHalfEdge findNearestEdge(Vertex v, Triangle t)
 	{
-		LocationFinder lf = new LocationFinder(v.getUV(), t.getGroupId());
-		lf.walkOnTriangle(t);
-		AbstractHalfEdge ret = lf.current.getAbstractHalfEdge();
-		if (ret.origin() == lf.current.vertex[lf.localEdgeIndex])
-			ret = ret.next();
-		else if (ret.destination() == lf.current.vertex[lf.localEdgeIndex])
-			ret = ret.prev();
-		return ret;
+		return findNearestEdge(v, t, 0, null);
 	}
 
 	public AbstractHalfEdge findSurroundingTriangle(Vertex v, Vertex start, double maxError, boolean background)
