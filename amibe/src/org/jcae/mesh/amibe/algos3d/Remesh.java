@@ -1018,7 +1018,7 @@ public class Remesh
 			assert bgT.getGroupId() == group || group < 0:
 				mesh.getGroupName(group)+" "+mesh.getGroupName(bgT.getGroupId())+" "+v;
 			liaison.addVertex(v, bgT);
-			liaison.move(v, v.getUV(), group);
+			liaison.move(v, v.getUV(), group, false);
 
 			boolean validCandidate = allowNearNodes;
 			if (!validCandidate)

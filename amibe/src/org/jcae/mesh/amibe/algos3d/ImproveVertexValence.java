@@ -236,7 +236,7 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 				newPt[i] = 0.5*(p1[i] + p2[i]);
 			Vertex newV = mesh.createVertex(newPt);
 			liaison.addVertex(newV, liaison.getBackgroundTriangle(v));
-			liaison.move(newV, newV.getUV());
+			liaison.move(newV, newV.getUV(), false);
 			Vertex a = ot.apex();
 			Vertex n = ot.sym().apex();
 			double [] tNormal = liaison.getBackgroundNormal(v);

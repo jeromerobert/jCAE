@@ -228,7 +228,7 @@ public class MeshLiaison
 	 */
 	public final boolean backupAndMove(Vertex v, double [] target, int group)
 	{
-		return move(v, target, true, group);
+		return move(v, target, true, group, true);
 	}
 
 	/**
@@ -239,15 +239,15 @@ public class MeshLiaison
 	 * @return <code>true</code> if a projection has been found, <code>false</code> otherwise.
 	 * In this case, vertex is not moved to the target position.
 	 */
-	public final boolean move(Vertex v, double [] target)
+	public final boolean move(Vertex v, double [] target, boolean doCheck)
 	{
-		return move(v, target, false, -1);
+		return move(v, target, false, -1, doCheck);
 	}
-	public final boolean move(Vertex v, double [] target, int group)
+	public final boolean move(Vertex v, double [] target, int group, boolean doCheck)
 	{
-		return move(v, target, false, group);
+		return move(v, target, false, group, doCheck);
 	}
-	private boolean move(Vertex v, double [] target, boolean backup, int group)
+	private boolean move(Vertex v, double [] target, boolean backup,  int group, boolean doCheck)
 	{
 		if (LOGGER.isLoggable(Level.FINER))
 			LOGGER.log(Level.FINER, "Trying to move vertex "+v+" to ("+target[0]+", "+target[1]+", "+target[2]+") in group "+group);
@@ -289,7 +289,7 @@ public class MeshLiaison
 		// The first case is important when smoothing, in which case
 		// backup parameter is true.  We use it to distinguish between
 		// both use cases, but adding a new parameter wpuld be better.
-		if (backup)
+		if (doCheck)
 		{
 			if (!location.computeBarycentricCoordinates(newPosition))
 			{
@@ -302,7 +302,7 @@ public class MeshLiaison
 					newEdge = findBetterTriangleInNeighborhood(target, ot, maxError, group);
 					maxError *= 0.5;
 				} while (newEdge != null);
-				if (ot != null)
+				if (ot != null && backup)
 				{
 					location.updateTriangle(ot.getTri());
 					location.updateVertexIndex(target);
@@ -313,8 +313,11 @@ public class MeshLiaison
 				// FIXME: this should not happen. Try all triangles to find the best projection
 				LOGGER.log(Level.CONFIG, "Position found outside triangle: " + newPosition[0] + " " + newPosition[1] + " " + newPosition[2] + "; checking all triangles, this may be slow");
 				lf.walkDebug(backgroundMesh, group);
-				location.updateTriangle(lf.current);
-				location.updateVertexIndex(target);
+				if(backup)
+				{
+					location.updateTriangle(lf.current);
+					location.updateVertexIndex(target);
+				}
 			}
 			if (!location.computeBarycentricCoordinates(newPosition))
 			{
@@ -426,7 +429,7 @@ public class MeshLiaison
 			if (it.key() != -1)
 			{
 				for (Vertex v : it.value().keySet())
-					move(v, v.getUV(), it.key());
+					move(v, v.getUV(), it.key(), false);
 			}
 		}
 		LOGGER.config("Finish updating projections");
