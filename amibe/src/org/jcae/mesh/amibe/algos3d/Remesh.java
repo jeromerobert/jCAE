@@ -52,6 +52,7 @@ import java.util.LinkedHashSet;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -627,7 +628,7 @@ public class Remesh
 					kdTrees.get(group).remove(v);
 				}
 			}
-			insertNodes(maxNodes);
+			insertNodes(maxNodes, true, 0, 0);
 			afterIterationHook();
 			assert mesh.isValid();
 			if (hasRidges)
@@ -663,8 +664,91 @@ public class Remesh
 		return this;
 	}
 
+	/**
+	 * Insert vertices from another mesh
+	 * @param vertices the vertices to insert
+	 * @param group insert vertices only in triangles of this group. Use -1
+	 * to try to insert in all groups
+	 * @param liaisonError the maximal acceptable distance between the
+	 * inserted point and it's projection.
+	 * @param insertionTol Do not the insert point if a point  already exist at
+	 * a distance lower than this value
+	 */
+	public Collection<Vertex> insertNodes(Iterable<Vertex> vertices, int group,
+		double liaisonError, double insertionTol)
+	{
+		nodes.clear();
+		bgTriangles.clear();
+		surroundingTriangle.clear();
+		double liaisonError2 = liaisonError * liaisonError;
+		double insertionTol2 = insertionTol * insertionTol;
+		KdTree<Vertex> kdTree = kdTrees.get(group);
+		int attr = AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD | AbstractHalfEdge.SHARP;
+		ArrayList<Vertex> alreadyIn = new ArrayList<Vertex>();
+		for(Vertex v:vertices)
+		{
+			Vertex foregroundNear = kdTree.getNearestVertex(
+				metrics.get(v, group), v.getUV());
 
-	private void insertNodes(int maxNodes)
+			if(foregroundNear.sqrDistance3D(v) < insertionTol2)
+			{
+				alreadyIn.add(foregroundNear);
+				continue;
+			}
+
+			AbstractHalfEdge foregroundEdge = liaison.findSurroundingTriangle(
+				v, foregroundNear, liaisonError2, false, group);
+			Triangle nearBgTriangle = liaison.getBackgroundTriangle(foregroundNear);
+
+			AbstractHalfEdge backGroundEdge = MeshLiaison.findSurroundingTriangle(
+				v, nearBgTriangle, liaisonError2, group);
+
+			if(backGroundEdge == null)
+				// the backGroundEdge cannot be found because we are very close
+				// to a group boundary, so we do not insert the point.
+				continue;
+
+			liaison.addVertex(v, backGroundEdge.getTri());
+			if(liaison.move(v, v.getUV(), group, true))
+			{
+				addGroups(foregroundEdge, v);
+				nodes.add(v);
+				bgTriangles.add(backGroundEdge.getTri());
+				surroundingTriangle.put(v, foregroundEdge.getTri());
+				Collection<Vertex> newVerts = mapTriangleVertices.get(foregroundEdge.getTri());
+				if(newVerts == null)
+				{
+					newVerts = new ArrayList<Vertex>();
+					mapTriangleVertices.put(foregroundEdge.getTri(), newVerts);
+				}
+				newVerts.add(v);
+			}
+			else
+			{
+				liaison.removeVertex(v);
+				AbstractHalfEdge e = MeshLiaison.findNearestEdge(v, foregroundEdge.getTri());
+				if(!e.hasAttributes(attr))
+					LOGGER.info("Unable to project "+v);
+			}
+		}
+		if(!nodes.isEmpty())
+			insertNodes(7, false, attr, insertionTol2);
+		nodes.addAll(alreadyIn);
+		return Collections.unmodifiableList(nodes);
+	}
+
+	/**
+	 *
+	 * @param maxNodes maximum number by triangles
+	 * @param checkNormalSplit check normal before splitting
+	 * @param excludeAttr Try to insert point on edges which do not have this
+	 * attributes.
+	 * @param excludeTol If a point is closer than sqrt(excludeTol) of an
+	 * excluded edge, do not insert it. This parametrer have no effect if
+	 * excludeAttr is 0.
+	 */
+	private void insertNodes(int maxNodes, boolean checkNormalSplit,
+		int excludeAttr, double excludeTol)
 	{
 		LOGGER.fine("Try to insert "+nodes.size()+" nodes");
 		//  Process in pseudo-random order.  There are at most maxNodes nodes
@@ -678,6 +762,7 @@ public class Remesh
 			prime = 1;
 		int index = imax / 2 - prime;
 		int totNrSwap = 0;
+		double[] nearEdgeDist = new double[2];
 		for (int i = 0; i < imax; i++)
 		{
 			index += prime;
@@ -686,9 +771,10 @@ public class Remesh
 			Vertex v = nodes.get(index);
 			Triangle bgT = bgTriangles.get(index);
 			Triangle curStart = surroundingTriangle.remove(v);
-			AbstractHalfEdge ot = MeshLiaison.findNearestEdge(v, curStart);
-			AbstractHalfEdge sym = ot.sym();
-			if (ot.hasAttributes(AbstractHalfEdge.IMMUTABLE))
+			AbstractHalfEdge ot = MeshLiaison.findNearestEdge(v, curStart,
+				excludeAttr, nearEdgeDist);
+			if (ot == null || ot.hasAttributes(AbstractHalfEdge.IMMUTABLE) ||
+				nearEdgeDist[1] < excludeTol)
 			{
 				// Vertex is not inserted
 				skippedNodes++;
@@ -698,20 +784,24 @@ public class Remesh
 			}
 			if (!ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD | AbstractHalfEdge.SHARP))
 			{
-				// Check whether edge can be split
-				Vertex o = ot.origin();
-				Vertex d = ot.destination();
-				Vertex n = sym.apex();
-				double[] pos = v.getUV();
-				Matrix3D.computeNormal3D(o.getUV(), n.getUV(), pos, temp[0], temp[1], temp[2]);
-				Matrix3D.computeNormal3D(n.getUV(), d.getUV(), pos, temp[0], temp[1], temp[3]);
-				if (Matrix3D.prodSca(temp[2], temp[3]) <= 0.0)
+				if(checkNormalSplit)
 				{
-					// Vertex is not inserted
-					skippedNodes++;
-					mapTriangleVertices.get(curStart).remove(v);
-					liaison.removeVertex(v);
-					continue;
+					AbstractHalfEdge sym = ot.sym();
+					// Check whether edge can be split
+					Vertex o = ot.origin();
+					Vertex d = ot.destination();
+					Vertex n = sym.apex();
+					double[] pos = v.getUV();
+					Matrix3D.computeNormal3D(o.getUV(), n.getUV(), pos, temp[0], temp[1], temp[2]);
+					Matrix3D.computeNormal3D(n.getUV(), d.getUV(), pos, temp[0], temp[1], temp[3]);
+					if (Matrix3D.prodSca(temp[2], temp[3]) <= 0.0)
+					{
+						// Vertex is not inserted
+						skippedNodes++;
+						mapTriangleVertices.get(curStart).remove(v);
+						liaison.removeVertex(v);
+						continue;
+					}
 				}
 			}
 			else if (!boundaryNodes.contains(v))
