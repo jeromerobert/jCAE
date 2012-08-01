@@ -122,6 +122,8 @@ public abstract class AlgoAction extends CookieAction {
 		ph.start();
 		try {
 			p.waitFor();
+			if(p.exitValue() != 0)
+				throw new IOException("The process returned "+p.exitValue());
 		} catch (InterruptedException ex) {
 			Exceptions.printStackTrace(ex);
 		} finally {
@@ -192,30 +194,37 @@ public abstract class AlgoAction extends CookieAction {
 			String groupNames = groupNames(activatedNodes, ado);
 			List<String> args = getArguments(ado);
 			if (args != null) {
-				String command;
-				if(!groupNames.isEmpty())
+				try
 				{
-					args.remove(args.size()-1); //inputdir
-					args.remove(args.size()-1); //outputdir
-					args.add(0,"--immutable-border");
-					args.add(0, getCommand());
-					args.add(0, groupNames);
-					args.add(0, ado.getMeshDirectory());
-					args.add(0, ado.getMeshDirectory());
-					command="submesh";
+					String command;
+					if(!groupNames.isEmpty())
+					{
+						args.remove(args.size()-1); //inputdir
+						args.remove(args.size()-1); //outputdir
+						args.add(0,"--immutable-border");
+						args.add(0, getCommand());
+						args.add(0, groupNames);
+						args.add(0, ado.getMeshDirectory());
+						args.add(0, ado.getMeshDirectory());
+						command="submesh";
+					}
+					else
+						command=getCommand();
+					File pyFile = InstalledFileLocator.getDefault().locate(
+							"amibe-python/" + command + ".py",
+							"org.jcae.netbeans", false);
+					InputOutput io = IOProvider.getDefault().getIO(getName(), true);
+					if (Settings.getDefault().isRunInSameJVM())
+						runInSameVM(args, pyFile, io);
+					else
+						runInOtherVM(activatedNodes[0], args, pyFile, io);
+					postProcess(ado);
+					ado.refreshGroups();
 				}
-				else
-					command=getCommand();
-				File pyFile = InstalledFileLocator.getDefault().locate(
-						"amibe-python/" + command + ".py",
-						"org.jcae.netbeans", false);
-				InputOutput io = IOProvider.getDefault().getIO(getName(), true);
-				if (Settings.getDefault().isRunInSameJVM())
-					runInSameVM(args, pyFile, io);
-				else
-					runInOtherVM(activatedNodes[0], args, pyFile, io);
-				postProcess(ado);
-				ado.refreshGroups();
+				catch(IOException ex)
+				{
+					Exceptions.printStackTrace(ex);
+				}
 			}
 		}
 	}
@@ -275,31 +284,29 @@ public abstract class AlgoAction extends CookieAction {
 			"modules/ext/amibe.jar", "org.jcae.netbeans", false).getPath();
 	}
 	
-	private void runInOtherVM(Node node, List<String> args, File pyFile, InputOutput io) {
-		try {
-			ProcessBuilder pb = new ProcessBuilder();
-			String ext = Utilities.isWindows() ? ".bat" : "";
-			File f = InstalledFileLocator.getDefault().locate(
-					"modules/jython/bin/jython" + ext, "org.jcae.netbeans.mesh", false);
-			pb.command().add(f.getPath());
-			for (String s : Settings.getDefault().parameters()) {
-				if (s.startsWith("-") && !s.startsWith("-D")) {
-					s = "-J" + s;
-				}
-				pb.command().add(s);
+	private void runInOtherVM(Node node, List<String> args, File pyFile, InputOutput io)
+		throws IOException
+	{
+		ProcessBuilder pb = new ProcessBuilder();
+		String ext = Utilities.isWindows() ? ".bat" : "";
+		File f = InstalledFileLocator.getDefault().locate(
+				"modules/jython/bin/jython" + ext, "org.jcae.netbeans.mesh", false);
+		pb.command().add(f.getPath());
+		for (String s : Settings.getDefault().parameters()) {
+			if (s.startsWith("-") && !s.startsWith("-D")) {
+				s = "-J" + s;
 			}
-			String home = System.getProperty("netbeans.user");
-			File dir = new File(new File(new File(new File(home), "var"), "cache"), "jython");
-			pb.command().add("-Dpython.cachedir="+dir.getPath());
-			pb.environment().put("CLASSPATH", getClassPath());			
-			pb.command().add(pyFile.getPath());
-			pb.command().addAll(args);
-			pb.environment().put("JAVA_HOME", System.getProperty("java.home"));
-			customizeProcessBuilder(node, pb);
-			runProcess(pb, io);
-		} catch (IOException ex) {
-			Exceptions.printStackTrace(ex);
+			pb.command().add(s);
 		}
+		String home = System.getProperty("netbeans.user");
+		File dir = new File(new File(new File(new File(home), "var"), "cache"), "jython");
+		pb.command().add("-Dpython.cachedir="+dir.getPath());
+		pb.environment().put("CLASSPATH", getClassPath());
+		pb.command().add(pyFile.getPath());
+		pb.command().addAll(args);
+		pb.environment().put("JAVA_HOME", System.getProperty("java.home"));
+		customizeProcessBuilder(node, pb);
+		runProcess(pb, io);
 	}
 
 	@Override
