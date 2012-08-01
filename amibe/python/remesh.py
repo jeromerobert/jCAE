@@ -1,11 +1,12 @@
 
 # jCAE
-from org.jcae.mesh.amibe.ds import Mesh, AbstractHalfEdge
+from org.jcae.mesh.amibe.ds import Mesh, AbstractHalfEdge, Vertex
 from org.jcae.mesh.amibe.algos3d import *
 from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.projection import MeshLiaison
 from org.jcae.mesh.amibe.metrics import EuclidianMetric3D, DistanceMetric
 from org.jcae.mesh.xmldata import MeshReader, MeshWriter, Amibe2VTK
+from org.jcae.mesh.xmldata import Amibe2OFF, AFront2Amibe, AmibeReader
 from org.jcae.mesh.amibe.algos3d import SmoothNodes3DBg, RemeshPolyline
 
 # Java
@@ -20,6 +21,9 @@ from gnu.trove import TIntArrayList
 import sys
 from math import sqrt
 from optparse import OptionParser
+import tempfile
+import subprocess
+import os
 
 def read_groups(file_name):
     f=open(file_name)
@@ -33,6 +37,42 @@ def writeVTK(liaison):
     """MeshWriter.writeObject3D(liaison.mesh, "/tmp/tmp.amibe", "")
     Amibe2VTK("/tmp/tmp.amibe").write("/tmp/m%i.vtp" % debug_write_counter);"""
     debug_write_counter=debug_write_counter+1
+
+def read_mesh(path):
+    mtb = MeshTraitsBuilder.getDefault3D()
+    mtb.addNodeSet()
+    mesh = Mesh(mtb)
+    MeshReader.readObject3D(mesh, path)
+    return mesh
+
+def afront(afront_path, liaison, tmp_dir, mesh_dir, size):
+    """ Run afront, insert point into mesh, and return the list of inserted points """
+    ar = AmibeReader.Dim3(mesh_dir)
+    opts = HashMap()
+    opts.put("size", str(size))
+    opts.put("minCosAfterSwap", "0.3")
+    opts.put("coplanarity", "-2")
+    remesh = Remesh(liaison, opts)
+    inserted_vertices = ArrayList()
+    number_of_groups = liaison.mesh.getNumberOfGroups()
+    for g_id in xrange(1, number_of_groups+1):
+        g_name = liaison.mesh.getGroupName(g_id)
+        print g_name
+        off_fn = tmp_dir+"/"+g_name+".off"
+        m_fn = tmp_dir+"/"+g_name+".m"
+        amibe_fn = tmp_dir+"/"+g_name+".amibe"
+        vtk_fn = tmp_dir+"/"+g_name+".vtp"
+        Amibe2OFF(ar).write(off_fn, g_name)
+        cmd = [afront_path, '-nogui', off_fn, '-failsafe','false', '-min_step',
+            str(size), '-max_step', str(size), '-outname', m_fn, '-tri_mesh']
+        print " ".join(cmd)
+        subprocess.call(cmd)
+        if os.path.isfile(m_fn):
+            AFront2Amibe(amibe_fn).read(m_fn)
+            Amibe2VTK(amibe_fn).write(vtk_fn)
+            vertices = read_mesh(amibe_fn).manifoldVertices
+            inserted_vertices.addAll(remesh.insertNodes(vertices, g_id, size, size/100.0))
+    return inserted_vertices
 
 """
 Remesh an existing mesh.
@@ -75,6 +115,9 @@ parser.add_option("-J", "--convert-junctions", metavar="STRING",
                   of nodes. The junction vertex is duplicated and a node group
                   is created with the 2 vertices plus the closest one from
                   adjacent triangles.""")
+parser.add_option("--afront", metavar="PATH",
+                  action="store", type="string", dest="afront_path",
+                  help="Path to the afront (http://afront.sf.net) executable.")
 (options, args) = parser.parse_args(args=sys.argv[1:])
 
 if len(args) != 2:
@@ -118,6 +161,12 @@ if options.point_metric_file:
 else:
     point_metric = None
 safe_coplanarity = str(max(options.coplanarity, 0.8))
+
+afront_frozen = None
+if options.afront_path:
+    tmp_dir = tempfile.mkdtemp()
+    afront_frozen = afront(options.afront_path, liaison, tmp_dir, xmlDir, options.size)
+    Vertex.setMutable(afront_frozen, False)
 
 #0
 writeVTK(liaison)
@@ -170,12 +219,12 @@ SwapEdge(liaison, opts).compute()
 
 #5
 writeVTK(liaison)
-
-opts.clear()
-opts.put("size", str(options.size))
-algo = Remesh(liaison, opts)
-algo.analyticMetric = point_metric
-algo.compute()
+if not options.afront_path:
+    opts.clear()
+    opts.put("size", str(options.size))
+    algo = Remesh(liaison, opts)
+    algo.analyticMetric = point_metric
+    algo.compute()
 
 #6
 writeVTK(liaison)
@@ -224,6 +273,8 @@ ImproveVertexValence(liaison, opts).compute()
 
 #10
 writeVTK(liaison)
+if afront_frozen:
+    Vertex.setMutable(afront_frozen, False)
 
 opts.clear()
 opts.put("coplanarity", safe_coplanarity)
