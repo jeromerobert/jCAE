@@ -124,12 +124,10 @@ public class AmibeDataObject extends MultiDataObject implements SaveCookie
 			}
 		});
 
-		Preferences pref = NbPreferences.forModule(org.jcae.netbeans.options.AmibePanel.class);
-		String name = pref.get("AmibeARThreshold", "");
-
+		Preferences pref = NbPreferences.forModule(org.jcae.netbeans.options.JCAEPanel.class);
 		pref.addPreferenceChangeListener(new PreferenceChangeListener() {
 			public void preferenceChange(PreferenceChangeEvent evt) {
-				if (evt.getKey().equals("AmibeARThreshold")) {
+				if (evt.getKey().equals("jcae.AmibeARThreshold")) {
 					threshold = Integer.parseInt(evt.getNewValue());
 				}
 			}

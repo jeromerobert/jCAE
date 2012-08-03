@@ -447,16 +447,6 @@
                 <attr name="SystemFileSystem.localizingBundle" stringvalue="org.jcae.netbeans.Bundle"/>
             </file>
         </folder>        
-        <file name="org-jcae-netbeans-Settings.settings" url="Settings.settings"/>
     </folder>
 
-    <folder name="UI">
-        <folder name="Services">
-            <folder name="jCAE">
-                <file name="org-jcae-netbeans-Settings.shadow">
-                    <attr name="originalFile" stringvalue="Services/org-jcae-netbeans-Settings.settings"/>
-                </file>
-            </folder>
-        </folder>
-    </folder>
 </filesystem>

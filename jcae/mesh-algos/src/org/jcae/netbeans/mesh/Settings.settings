@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<!DOCTYPE settings PUBLIC "-//NetBeans//DTD Session settings 1.0//EN" "http://www.netbeans.org/dtds/sessionsettings-1_0.dtd">
-<settings version="1.0">
-<module name="org.jcae.netbeans.mesh"/>
-	<instanceof class="org.openide.util.SharedClassObject"/>
-	<instanceof class="org.openide.options.SystemOption"/>
-	<instanceof class="org.jcae.netbeans.mesh.Settings"/>
-	<instance class="org.jcae.netbeans.mesh.Settings"/>
-</settings> 

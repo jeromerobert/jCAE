@@ -162,17 +162,6 @@
         <folder name="MIMEResolver">
             <file name="org-jcae-netbeans-mesh-MIMEResolver.instance"/>
         </folder>
-        <file name="org-jcae-netbeans-mesh-Settings.settings" url="Settings.settings"/>
-    </folder>
-
-    <folder name="UI">
-        <folder name="Services">
-            <folder name="jCAE">
-                <file name="org-jcae-netbeans-mesh-Settings.shadow">
-                    <attr name="originalFile" stringvalue="Services/org-jcae-netbeans-mesh-Settings.settings"/>
-                </file>
-            </folder>
-        </folder>
     </folder>
 
 	<!-- Not a standard Netbeans Platform directory -->
