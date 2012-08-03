@@ -32,11 +32,8 @@ import org.openide.util.Lookup;
  * @author Mohit Garg
  *
  */
-@OptionsPanelController.TopLevelRegistration(categoryName = "#OptionsCategory_Name_jCAE",
-iconBase = "org/jcae/netbeans/options/amibe.png",
-keywords = "#OptionsCategory_Keywords_jCAE",
-keywordsCategory = "jCAE")
-@org.openide.util.NbBundle.Messages({"OptionsCategory_Name_jCAE=jCAE", "OptionsCategory_Keywords_jCAE=jcae"})
+@OptionsPanelController.TopLevelRegistration(categoryName = "jCAE",
+iconBase = "org/jcae/netbeans/options/frame32.gif")
 public final class JCAEOptionsPanelController extends OptionsPanelController {
 
 	private JCAEPanel panel;
