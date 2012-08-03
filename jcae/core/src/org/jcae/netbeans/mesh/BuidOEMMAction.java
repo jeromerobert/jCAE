@@ -50,7 +50,7 @@ public final class BuidOEMMAction extends CookieAction
 				getAbsolutePath();
 
 			String className="org.jcae.mesh.MeshOEMMIndex";
-                        String[] cmdLinePre= (String[]) JCAEPanel.getDefault().getOption("CommandLineAlgo", String[].class);
+			String[] cmdLinePre= (String[]) JCAEPanel.getDefault().getOption("CommandLineAlgo", String[].class);
 			String[] cmdLine=new String[cmdLinePre.length+7];
 
 			System.arraycopy(cmdLinePre, 0, cmdLine, 0, cmdLinePre.length);

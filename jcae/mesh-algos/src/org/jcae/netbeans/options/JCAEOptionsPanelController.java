@@ -39,58 +39,59 @@ keywordsCategory = "jCAE")
 @org.openide.util.NbBundle.Messages({"OptionsCategory_Name_jCAE=jCAE", "OptionsCategory_Keywords_jCAE=jcae"})
 public final class JCAEOptionsPanelController extends OptionsPanelController {
 
-    private JCAEPanel panel;
-    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
-    private boolean changed;
+	private JCAEPanel panel;
+	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+	private boolean changed;
 
-    public void update() {        
-        changed = false;
-    }
+	public void update() {
+		changed = false;
+	}
 
-    public void applyChanges() {        
-        changed = false;
-    }
+	public void applyChanges() {
+		changed = false;
+	}
 
-    public void cancel() {
-        // need not do anything special, if no changes have been persisted yet
-    }
+	public void cancel() {
+		// need not do anything special, if no changes have been persisted yet
+	}
 
-    public boolean isValid() {
-        return true;
-    }
+	public boolean isValid() {
+		return true;
+	}
 
-    public boolean isChanged() {
-        return changed;
-    }
+	public boolean isChanged() {
+		return changed;
+	}
 
-    public HelpCtx getHelpCtx() {
-        return null; // new HelpCtx("...ID") if you have a help set
-    }
+	public HelpCtx getHelpCtx() {
+		return null; // new HelpCtx("...ID") if you have a help set
+	}
 
-    public JComponent getComponent(Lookup masterLookup) {
-        return getPanel();
-    }
+	public JComponent getComponent(Lookup masterLookup) {
+		return getPanel();
+	}
 
-    public void addPropertyChangeListener(PropertyChangeListener l) {
-        pcs.addPropertyChangeListener(l);
-    }
+	public void addPropertyChangeListener(PropertyChangeListener l) {
+		pcs.addPropertyChangeListener(l);
+	}
 
-    public void removePropertyChangeListener(PropertyChangeListener l) {
-        pcs.removePropertyChangeListener(l);
-    }
+	public void removePropertyChangeListener(PropertyChangeListener l) {
+		pcs.removePropertyChangeListener(l);
+	}
 
-    private JCAEPanel getPanel() {
-        if (panel == null) {
-            panel = new JCAEPanel();
-        }
-        return panel;
-    }
+	private JCAEPanel getPanel() {
+		if (panel == null) {
+			panel = new JCAEPanel();
+		}
+		return panel;
+	}
 
-    void changed() {
-        if (!changed) {
-            changed = true;
-            pcs.firePropertyChange(OptionsPanelController.PROP_CHANGED, false, true);
-        }
-        pcs.firePropertyChange(OptionsPanelController.PROP_VALID, null, null);
-    }
+	void changed() {
+		if (!changed) {
+			changed = true;
+			pcs.firePropertyChange(OptionsPanelController.PROP_CHANGED, false,
+				true);
+		}
+		pcs.firePropertyChange(OptionsPanelController.PROP_VALID, null, null);
+	}
 }
