@@ -21,40 +21,37 @@
 package org.jcae.netbeans.options;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
-import org.openide.nodes.PropertySupport;
+import org.openide.nodes.Node.Property;
 import org.openide.util.Exceptions;
 import org.openide.util.NbPreferences;
 
 /**
  *
  * @author Mohit Garg
- *
  */
-public class PrefProperty extends PropertySupport.Reflection {
+public class PrefProperty extends Property {
 
-	private final String prefName;
 	private final Object defValue;
 	private final Preferences preferences;
-	private final String jCAEPrefName;
+	private final String prefName;
 
 	public PrefProperty(String prefName, String name, Object defValue,
-		String description, Class moduleClass) throws NoSuchMethodException {
-		super(defValue, moduleClass, name);
+		String description, Class<Object> moduleClass)
+	{
+		super(defValue.getClass());
 		setName(name);
-		this.prefName = prefName;
-		this.jCAEPrefName = "jcae." + prefName;
+		this.prefName = "jcae." + prefName;
 		this.defValue = defValue;
 		this.setShortDescription(description);
-		preferences = NbPreferences.forModule(defValue.getClass());
+		preferences = NbPreferences.forModule(moduleClass);
 	}
 
 	public PrefProperty(String prefName, String name, Object defValue,
-		Class moduleClass) throws NoSuchMethodException {
+		Class<Object> moduleClass) throws NoSuchMethodException {
 		this(prefName, name, defValue, null, moduleClass);
 	}
 
@@ -70,86 +67,46 @@ public class PrefProperty extends PropertySupport.Reflection {
 
 	@Override
 	public Object getValue() {
-		Class cls;
-		Method meth;
-		Object retobj = null;
-		try {
-			String metPrefix = "";
-			if (getValueType().isAssignableFrom(boolean.class)) {
-				metPrefix = "is";
-			} else {
-				metPrefix = "get";
-			}
-
-			char firstChar = prefName.charAt(0);
-			String metName = prefName.replaceFirst(String.valueOf(firstChar),
-				String.valueOf(firstChar).toUpperCase());
-			metName = metPrefix + metName;
-			cls = Class.forName(defValue.getClass().getCanonicalName());
-			try {
-				meth = cls.getMethod(metName, (Class[]) null);
-				retobj = meth.invoke(defValue, (Object[]) null);
-			} catch (IllegalAccessException ex) {
-				Exceptions.printStackTrace(ex);
-			} catch (IllegalArgumentException ex) {
-				Exceptions.printStackTrace(ex);
-			} catch (InvocationTargetException ex) {
-				Exceptions.printStackTrace(ex);
-			} catch (NoSuchMethodException ex) {
-				Exceptions.printStackTrace(ex);
-			} catch (SecurityException ex) {
-				Exceptions.printStackTrace(ex);
-			}
-		} catch (ClassNotFoundException ex) {
-			Exceptions.printStackTrace(ex);
-		}
-
 		if (Double.class.isAssignableFrom(getValueType())) {
-			return (Double) preferences.getDouble(jCAEPrefName, (Double) retobj);
-		} else if (boolean.class.isAssignableFrom(getValueType())) {
-			return (boolean) preferences.getBoolean(jCAEPrefName,
-				(Boolean) retobj);
+			return Double.valueOf(preferences.getDouble(prefName, (Double) defValue));
+		} else if (Boolean.class.isAssignableFrom(getValueType())) {
+			return (Boolean) preferences.getBoolean(prefName, (Boolean) defValue);
 		} else if (Integer.class.isAssignableFrom(getValueType())) {
-			return (Integer) preferences.getInt(jCAEPrefName, (Integer) retobj);
-		} else if (int.class.isAssignableFrom(getValueType())) {
-			return preferences.getInt(jCAEPrefName,
-				Integer.parseInt((retobj.toString())));
+			return (Integer) preferences.getInt(prefName, (Integer) defValue);
 		} else if (File.class.isAssignableFrom(getValueType())) {
-			return new File(preferences.get(jCAEPrefName, retobj.toString()));
+			return new File(preferences.get(prefName, defValue.toString()));
 		} else if (String.class.isAssignableFrom(getValueType())) {
-			return preferences.get(jCAEPrefName, (String) retobj);
+			return preferences.get(prefName, (String) defValue);
 		} else if (String[].class.isAssignableFrom(getValueType())) {
 			List<String> l = new ArrayList<String>();
 			//Check if preference available as prefName.0, prefName.1, ...
 			int i = 0;
-			while (true) {
-				String prefVal = preferences.get(jCAEPrefName + "." + i, "NA");
-				if (prefVal.compareTo("NA") != 0) {
-					l.add(i++, prefVal);
-				} else {
-					break;
-				}
+			String prefVal = preferences.get(prefName + "." + i, null);
+			while (prefVal != null) {
+				l.add(i++, prefVal);
+				prefVal = preferences.get(prefName + "." + i, null);
 			}
-			if (!l.isEmpty()) {
-				return l.toArray(new String[l.size()]);
-			} else {
-				return (String[]) retobj;
-			}
+			return l.toArray(new String[l.size()]);
 		}
 
-		return null;
+		throw new IllegalStateException("Unhandled class: "+getValueType());
 	}
 
 	@Override
-	public void setValue(Object val) throws IllegalAccessException,
-		IllegalArgumentException, InvocationTargetException {
-		if (val.getClass().isAssignableFrom(String[].class)) {
+	public void setValue(Object val) {
+		if (String[].class.isAssignableFrom(val.getClass())) {
+			try {
+				for(String k: preferences.keys())
+					if(k.startsWith(prefName))
+						preferences.remove(k);
+			} catch (BackingStoreException ex) {
+				Exceptions.printStackTrace(ex);
+			}
 			for (int i = 0; i < ((String[]) val).length; i++) {
-				preferences.put(jCAEPrefName + "." + i,
-					((String[]) val)[i].toString());
+				preferences.put(prefName + "." + i, ((String[]) val)[i]);
 			}
 		} else {
-			preferences.put(jCAEPrefName, val.toString());
+			preferences.put(prefName, val.toString());
 		}
 	}
 }
