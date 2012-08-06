@@ -37,7 +37,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import org.jcae.mesh.JCAEFormatter;
 import org.jcae.mesh.xmldata.Group;
-import org.jcae.netbeans.options.JCAEPanel;
+import org.jcae.netbeans.options.OptionNode;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.filesystems.FileUtil;
@@ -215,7 +215,7 @@ public abstract class AlgoAction extends CookieAction {
 							"amibe-python/" + command + ".py",
 							"org.jcae.netbeans", false);
 					InputOutput io = IOProvider.getDefault().getIO(getName(), true);
-					if ((Boolean) JCAEPanel.getDefault().getOption("RunInSameJVM", boolean.class))
+					if ((Boolean) OptionNode.SAME_JVM.getValue())
 						runInSameVM(args, pyFile, io);
 					else
 						runInOtherVM(activatedNodes[0], args, pyFile, io);
@@ -293,7 +293,7 @@ public abstract class AlgoAction extends CookieAction {
 		File f = InstalledFileLocator.getDefault().locate(
 				"modules/jython/bin/jython" + ext, "org.jcae.netbeans.mesh", false);
 		pb.command().add(f.getPath());
-		for (String s:JCAEPanel.getDefault().newParameters()) {
+		for (String s:OptionNode.getJVMOptions()) {
 			if (s.startsWith("-") && !s.startsWith("-D")) {
 				s = "-J" + s;
 			}

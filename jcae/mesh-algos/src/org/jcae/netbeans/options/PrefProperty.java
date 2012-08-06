@@ -40,19 +40,18 @@ public class PrefProperty extends Property {
 	private final String prefName;
 
 	public PrefProperty(String prefName, String name, Object defValue,
-		String description, Class<Object> moduleClass)
+		String description)
 	{
 		super(defValue.getClass());
 		setName(name);
 		this.prefName = "jcae." + prefName;
 		this.defValue = defValue;
 		this.setShortDescription(description);
-		preferences = NbPreferences.forModule(moduleClass);
+		preferences = NbPreferences.forModule(getClass());
 	}
 
-	public PrefProperty(String prefName, String name, Object defValue,
-		Class<Object> moduleClass) throws NoSuchMethodException {
-		this(prefName, name, defValue, null, moduleClass);
+	public PrefProperty(String prefName, String name, Object defValue) {
+		this(prefName, name, defValue, null);
 	}
 
 	@Override
@@ -63,6 +62,16 @@ public class PrefProperty extends Property {
 	@Override
 	public boolean canWrite() {
 		return true;
+	}
+
+	public Preferences getPreferences()
+	{
+		return preferences;
+	}
+
+	public String getPreferenceName()
+	{
+		return prefName;
 	}
 
 	@Override
