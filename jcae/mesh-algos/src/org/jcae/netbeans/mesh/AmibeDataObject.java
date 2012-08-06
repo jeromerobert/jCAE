@@ -270,7 +270,7 @@ public class AmibeDataObject extends MultiDataObject implements SaveCookie
 			FileObject f = getPrimaryFile().getFileObject("jcae3d");
 			if(f != null)
 			{
-				f.addFileChangeListener(fileListener);
+				FileUtil.addFileChangeListener(fileListener, FileUtil.toFile(f));
 				listenFlag = true;
 			}
 		}
@@ -280,7 +280,7 @@ public class AmibeDataObject extends MultiDataObject implements SaveCookie
 	{
 		FileObject f = getPrimaryFile().getFileObject("jcae3d");
 		if(f != null)
-			f.removeFileChangeListener(fileListener);
+			FileUtil.removeFileChangeListener(fileListener, FileUtil.toFile(f));
 		listenFlag = false;
 	}
 
