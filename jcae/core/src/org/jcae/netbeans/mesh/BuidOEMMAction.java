@@ -15,14 +15,17 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2006, by EADS CRC
+ * (C) Copyright 2006-2012, by EADS France
  */
 
 package org.jcae.netbeans.mesh;
 
-import java.beans.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import org.jcae.netbeans.ProcessExecutor;
 import org.jcae.netbeans.Utilities;
+import org.jcae.netbeans.options.OptionNode;
 import org.openide.filesystems.FileUtil;
 import org.openide.modules.InstalledFileLocator;
 import org.openide.nodes.Node;
@@ -32,6 +35,16 @@ import org.openide.util.actions.CookieAction;
 
 public final class BuidOEMMAction extends CookieAction
 {
+	private static String[] getCommandLineAlgo()
+	{
+		String javaExe = new File(new File(System.getProperty("java.home"),
+			"bin"), "java").getPath();
+		List<String> toReturn = new ArrayList<String>();
+		toReturn.add(javaExe);
+		toReturn.addAll(OptionNode.getJVMOptions());
+		return toReturn.toArray(new String[toReturn.size()]);
+	}
+
 	protected void performAction(Node[] activatedNodes)
 	{
 		OEMMParameters bean=new OEMMParameters();
@@ -50,7 +63,7 @@ public final class BuidOEMMAction extends CookieAction
 				getAbsolutePath();
 
 			String className="org.jcae.mesh.MeshOEMMIndex";
-			String[] cmdLinePre=Settings.getDefault().getCommandLineAlgo();
+			String[] cmdLinePre = getCommandLineAlgo();
 			String[] cmdLine=new String[cmdLinePre.length+7];
 
 			System.arraycopy(cmdLinePre, 0, cmdLine, 0, cmdLinePre.length);

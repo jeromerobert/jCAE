@@ -17,33 +17,29 @@
  *
  * (C) Copyright 2012, by EADS France
  */
+
 package org.jcae.netbeans.options;
 
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import javax.swing.JComponent;
 import org.netbeans.spi.options.OptionsPanelController;
+import org.openide.explorer.propertysheet.PropertySheet;
+import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 import org.openide.util.Lookup;
 
-@OptionsPanelController.SubRegistration(location = "Advanced",
-displayName = "#AdvancedOption_DisplayName_Amibe",
-keywords = "#AdvancedOption_Keywords_Amibe",
-keywordsCategory = "Advanced/Amibe")
-public final class AmibeOptionsPanelController extends OptionsPanelController {
-
-	private AmibePanel panel;
-	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
-	private boolean changed;
+/**
+ *
+ * @author Mohit Garg
+ */
+@OptionsPanelController.TopLevelRegistration(categoryName = "jCAE",
+iconBase = "org/jcae/netbeans/options/frame32.gif")
+public final class JCAEOptionsPanelController extends OptionsPanelController {
 
 	public void update() {
-		getPanel().load();
-		changed = false;
 	}
 
 	public void applyChanges() {
-		getPanel().store();
-		changed = false;
 	}
 
 	public void cancel() {
@@ -51,11 +47,11 @@ public final class AmibeOptionsPanelController extends OptionsPanelController {
 	}
 
 	public boolean isValid() {
-		return getPanel().valid();
+		return true;
 	}
 
 	public boolean isChanged() {
-		return changed;
+		return false;
 	}
 
 	public HelpCtx getHelpCtx() {
@@ -63,29 +59,14 @@ public final class AmibeOptionsPanelController extends OptionsPanelController {
 	}
 
 	public JComponent getComponent(Lookup masterLookup) {
-		return getPanel();
+		PropertySheet ps = new PropertySheet();
+		ps.setNodes(new Node[]{new OptionNode()});
+		return ps;
 	}
 
 	public void addPropertyChangeListener(PropertyChangeListener l) {
-		pcs.addPropertyChangeListener(l);
 	}
 
 	public void removePropertyChangeListener(PropertyChangeListener l) {
-		pcs.removePropertyChangeListener(l);
-	}
-
-	private AmibePanel getPanel() {
-		if (panel == null) {
-			panel = new AmibePanel();
-		}
-		return panel;
-	}
-
-	void changed() {
-		if (!changed) {
-			changed = true;
-			pcs.firePropertyChange(OptionsPanelController.PROP_CHANGED, false, true);
-		}
-		pcs.firePropertyChange(OptionsPanelController.PROP_VALID, null, null);
 	}
 }

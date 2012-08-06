@@ -32,6 +32,7 @@ import java.util.prefs.Preferences;
 import org.jcae.mesh.xmldata.Group;
 import org.jcae.mesh.xmldata.Groups;
 import org.jcae.netbeans.Utilities;
+import org.jcae.netbeans.options.OptionNode;
 import org.jcae.netbeans.viewer3d.ViewManager;
 import org.jcae.vtk.AmibeToMesh;
 import org.jcae.vtk.View;
@@ -124,12 +125,10 @@ public class AmibeDataObject extends MultiDataObject implements SaveCookie
 			}
 		});
 
-		Preferences pref = NbPreferences.forModule(org.jcae.netbeans.options.AmibePanel.class);
-		String name = pref.get("AmibeARThreshold", "");
-
+		Preferences pref = OptionNode.REFRESH_THRESHOLD.getPreferences();
 		pref.addPreferenceChangeListener(new PreferenceChangeListener() {
 			public void preferenceChange(PreferenceChangeEvent evt) {
-				if (evt.getKey().equals("AmibeARThreshold")) {
+				if (evt.getKey().equals(OptionNode.REFRESH_THRESHOLD.getPreferenceName())) {
 					threshold = Integer.parseInt(evt.getNewValue());
 				}
 			}
