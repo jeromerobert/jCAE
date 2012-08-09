@@ -63,8 +63,9 @@ def afront(afront_path, liaison, tmp_dir, mesh_dir, size):
         amibe_fn = tmp_dir+"/"+g_name+".amibe"
         vtk_fn = tmp_dir+"/"+g_name+".vtp"
         Amibe2OFF(ar).write(off_fn, g_name)
-        cmd = [afront_path, '-nogui', off_fn, '-failsafe','false', '-min_step',
-            str(size), '-max_step', str(size), '-outname', m_fn, '-tri_mesh']
+        cmd = [afront_path, '-nogui', off_fn, '-failsafe','false', '-target_size',
+            str(size), '-lf_progress', 'true', '-stop_every', '1000',
+			'-quiet', 'true', '-outname', m_fn, '-tri_mesh']
         print " ".join(cmd)
         subprocess.call(cmd)
         if os.path.isfile(m_fn):
