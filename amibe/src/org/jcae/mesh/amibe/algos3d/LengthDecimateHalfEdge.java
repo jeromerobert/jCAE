@@ -87,7 +87,6 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 			{
 				maxEdgeLength = Double.parseDouble(val);
 				LOGGER.fine("Max edge length: "+maxEdgeLength);
-				maxEdgeLength = maxEdgeLength*maxEdgeLength;
 			}
 			else if ("freeEdgesOnly".equals(key))
 			{
@@ -179,17 +178,20 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 			return false;
 		if (maxEdgeLength > 0.0)
 		{
+			metrics.put(v3);
 			for (Iterator<Vertex> itnv = v1.getNeighbourIteratorVertex(); itnv.hasNext(); )
 			{
 				Vertex n = itnv.next();
-				if (n != mesh.outerVertex && v3.sqrDistance3D(n) > maxEdgeLength)
-					return false;
+				if (n != mesh.outerVertex && (!freeEdgesOnly || n.isManifold()))
+					if(metrics.interpolatedDistance(n, v3) > maxEdgeLength)
+						return false;
 			}
 			for (Iterator<Vertex> itnv = v2.getNeighbourIteratorVertex(); itnv.hasNext(); )
 			{
 				Vertex n = itnv.next();
-				if (n != mesh.outerVertex && v3.sqrDistance3D(n) > maxEdgeLength)
-					return false;
+				if (n != mesh.outerVertex && (!freeEdgesOnly || n.isManifold()))
+					if(metrics.interpolatedDistance(n, v3) > maxEdgeLength)
+						return false;
 			}
 		}
 		return true;
