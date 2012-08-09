@@ -255,7 +255,6 @@ public class Remesh
 			assert !t.hasAttributes(AbstractHalfEdge.OUTER);
 			addVertexInNeighborBgMap(v, t);
 		}
-		metrics.compute();
 	}
 
 	/** Return the number of triangles in each groups */
@@ -493,6 +492,7 @@ public class Remesh
 	{
 		LOGGER.info("Run "+getClass().getName());
 		mesh.getTrace().println("# Begin Remesh");
+		metrics.compute();
 		
 		//  All edges of the current mesh are checked; and large edges
 		//  are splitted.  In order to avoid bad geometrical patterns,
@@ -677,6 +677,7 @@ public class Remesh
 	public Collection<Vertex> insertNodes(Iterable<Vertex> vertices, int group,
 		double liaisonError, double insertionTol)
 	{
+		metrics.compute();
 		nodes.clear();
 		bgTriangles.clear();
 		surroundingTriangle.clear();
