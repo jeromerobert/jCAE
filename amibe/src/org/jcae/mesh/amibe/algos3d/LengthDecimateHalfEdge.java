@@ -313,6 +313,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 			liaison.removeVertex(v2);
 			liaison.addVertex(v3, bgT);
 		}
+		metrics.put(v3);
 		// Update edge costs
 		assert current != null : v3+" not connected to "+apex;
 		assert current.origin() == v3 : ""+current+"\n"+v3+"\n"+apex;

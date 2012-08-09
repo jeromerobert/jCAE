@@ -163,6 +163,13 @@ public class MetricSupport {
 		}
 	}
 
+	public void put(Vertex v)
+	{
+		if(analyticMetric != null)
+			metrics.put(v, new EuclidianMetric3D(
+				analyticMetric.getTargetSizeTopo(mesh, v)));
+	}
+
 	public void put(Vertex v, EuclidianMetric3D m)
 	{
 		metrics.put(v, m);
