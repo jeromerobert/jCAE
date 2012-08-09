@@ -274,7 +274,7 @@ ImproveVertexValence(liaison, opts).compute()
 #10
 writeVTK(liaison)
 if afront_frozen:
-    Vertex.setMutable(afront_frozen, False)
+    Vertex.setMutable(afront_frozen, True)
 
 opts.clear()
 opts.put("coplanarity", safe_coplanarity)
