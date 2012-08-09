@@ -178,9 +178,12 @@ if options.recordFile:
 
 opts = HashMap()
 opts.put("coplanarity", str(options.coplanarity))
-opts.put("size", str(options.size*0.06))
-QEMDecimateHalfEdge(liaison, opts).compute()
-
+opts.put("size", str(options.size*0.3))
+opts.put("maxlength", str(options.size*sqrt(2)))
+algo = QEMDecimateHalfEdge(liaison, opts)
+if options.point_metric_file:
+    algo.analyticMetric = DistanceMetric(options.size*sqrt(2), options.point_metric_file)
+algo.compute()
 #1
 writeVTK(liaison)
 
