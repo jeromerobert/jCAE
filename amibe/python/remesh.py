@@ -71,7 +71,7 @@ def afront(afront_path, liaison, tmp_dir, mesh_dir, size):
         if os.path.isfile(m_fn):
             AFront2Amibe(amibe_fn).read(m_fn)
             Amibe2VTK(amibe_fn).write(vtk_fn)
-            vertices = read_mesh(amibe_fn).manifoldVertices
+            vertices = read_mesh(amibe_fn).nodes
             inserted_vertices.addAll(remesh.insertNodes(vertices, g_id, size, size/100.0))
     return inserted_vertices
 
