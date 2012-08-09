@@ -28,6 +28,7 @@ import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.projection.MeshLiaison;
 import org.jcae.mesh.amibe.metrics.Metric;
 import gnu.trove.TObjectIntHashMap;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.LinkedHashSet;
@@ -47,7 +48,7 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 	private int inserted;
 	private int minValence = 1, maxValence = Integer.MAX_VALUE;
 	private boolean checkNormals = true;
-	
+	private boolean pattern75 = true;
 	/**
 	 * Creates a <code>ImproveConnectivity</code> instance.
 	 *
@@ -89,6 +90,10 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 			{
 				maxValence = Integer.parseInt(val);
 			}
+			else if("pattern75".equals(key))
+			{
+				pattern75 = Boolean.parseBoolean(val);
+			}
 			else
 				throw new RuntimeException("Unknown option: "+key);
 		}
@@ -127,6 +132,66 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 			}
 		}
 	}
+	/** Check that v neighbours have 7, 5, 7, 5, 7, 5 as connectivity */
+	private boolean isPattern75(Vertex v)
+	{
+		if(!v.isManifold())
+			return false;
+		Iterator<Vertex> it = v.getNeighbourIteratorVertex();
+		int nb5 = 0;
+		int nb7 = 0;
+		int previous = 0;
+		while(it.hasNext())
+		{
+			Vertex nv = it.next();
+			if(!nv.isManifold())
+				return false;
+			int c = map.get(nv);
+			if(c == previous)
+				return false;
+			if(c == 5)
+				nb5 ++;
+			else if(c == 7)
+				nb7 ++;
+		}
+
+		return nb5 == 3 && nb7 == 3;
+	}
+
+	private boolean processPattern75(Vertex v)
+	{
+		Iterator<AbstractHalfEdge> it = v.getNeighbourIteratorAbstractHalfEdge();
+		AbstractHalfEdge he5 = null;
+		ArrayList<AbstractHalfEdge> he7 = new ArrayList<AbstractHalfEdge>(3);
+		ArrayList<Vertex> neighBVerts = new ArrayList<Vertex>(6);
+		while(it.hasNext())
+		{
+			AbstractHalfEdge he = it.next();
+			Vertex dest = he.destination();
+			neighBVerts.add(dest);
+			int conn = map.get(dest);
+			switch(conn)
+			{
+				case 5:
+					he5 = he;
+					break;
+				case 7:
+					he7.add(he);
+					break;
+				default:
+					throw new IllegalStateException("unexpected connectivity: "+conn);
+			}
+		}
+		for(AbstractHalfEdge he:he7)
+			mesh.edgeSwap(he);
+		mesh.edgeCollapse(he5, he5.destination());
+		for(Vertex nv:neighBVerts)
+		{
+			tree.remove(v);
+			map.put(nv, 6);
+		}
+		return true;
+	}
 
 	@Override
 	protected final double cost(final Vertex v)
@@ -134,6 +199,8 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 		if (!v.isManifold() || !v.isMutable())
 			return 100.0;
 		int q = map.get(v);
+		if(q == 6 && pattern75 && isPattern75(v))
+			return 7.5;
 		if(q < minValence || q > maxValence)
 			return 100.0;
 		if (q > 10)
@@ -195,6 +262,10 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 		else if (ot.apex() == v)
 			ot = ot.prev();
 		assert ot.origin() == v;
+
+		if(cost == 7.5)
+			return processPattern75(v);
+
 		if (cost > 3.0 && cost < 5.0)
 		{
 			// Very low valence, try to remove vertex
