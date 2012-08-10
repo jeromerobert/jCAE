@@ -211,9 +211,11 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 			case 2:
 				return 100.0;
 			case 3:
-				return 3.1;
-			case 4:
+				//This case doesn't modify the neighbourhood so it must be
+				//performed after case 4.
 				return 4.1;
+			case 4:
+				return 3.1;
 			case 5:
 			case 6:
 			case 7:
@@ -269,11 +271,15 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 		if (cost > 3.0 && cost < 5.0)
 		{
 			// Very low valence, try to remove vertex
-			int iVal = (cost > 3.0 && cost < 4.0 ? 3 : 4);
-			ot = checkLowValence(ot, iVal);
+			int iVal = (cost == 4.1 ? 3 : 4);
+			// For valence 3, the edge to collapse does not matter
+			ot = iVal == 3 ? ot : checkLowValence(ot, iVal);
 			if (ot == null)
 				return false;
-			if (!mesh.canCollapseEdge(ot, ot.destination()))
+
+			//no need to check collapse if the valence is 3 as collapse is
+			//equivalent to remove 3 triangles and create a new one.
+			if (iVal != 3 && !mesh.canCollapseEdge(ot, ot.destination()))
 				return false;
 			// Fix valence of incident vertices
 			fixIncidentVertices(ot, iVal);

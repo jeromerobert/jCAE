@@ -264,21 +264,15 @@ SwapEdge(liaison, opts).compute()
 #9
 writeVTK(liaison)
 
+if afront_frozen:
+    Vertex.setMutable(afront_frozen, True)
+
 opts.clear()
 opts.put("checkNormals", "false")
-opts.put("minValence", "5")
-ImproveVertexValence(liaison, opts).compute()
-opts.put("minValence", "4")
-opts.put("maxValence", "4")
-ImproveVertexValence(liaison, opts).compute()
-opts.put("minValence", "3")
-opts.put("maxValence", "3")
 ImproveVertexValence(liaison, opts).compute()
 
 #10
 writeVTK(liaison)
-if afront_frozen:
-    Vertex.setMutable(afront_frozen, True)
 
 opts.clear()
 opts.put("coplanarity", safe_coplanarity)
