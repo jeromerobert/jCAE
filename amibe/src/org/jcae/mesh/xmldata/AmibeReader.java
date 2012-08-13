@@ -20,9 +20,19 @@
 
 package org.jcae.mesh.xmldata;
 
+import gnu.trove.TIntArrayList;
+import gnu.trove.TIntHashSet;
+import gnu.trove.TIntIntHashMap;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.channels.FileChannel;
+import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,7 +45,7 @@ import org.xml.sax.SAXException;
  * @author Jerome Robert
  */
 public abstract class AmibeReader extends XMLReader implements JCAEXMLData {
-	
+
 	public class Group
 	{
 		private String name;
@@ -281,6 +291,52 @@ public abstract class AmibeReader extends XMLReader implements JCAEXMLData {
 		
 		public int getNumberOfReferences() {
 			return numberOfReferences;
+		}
+
+		private void flushByteBuffer(ByteBuffer bb, WritableByteChannel out)
+			throws IOException
+		{
+			bb.limit(bb.position());
+			bb.rewind();
+			out.write(bb);
+			bb.clear();
+		}
+
+		/** Read a group and write it to a channel */
+		public void readGroup(Group group, WritableByteChannel out)
+			throws IOException
+		{
+			int[] trias = group.readTria3();
+			int[] nodesIds = new TIntHashSet(trias).toArray();
+			Arrays.sort(nodesIds);
+			ByteBuffer bb = ByteBuffer.allocate(128*1024);
+			bb.order(ByteOrder.nativeOrder());
+			bb.putInt(nodesIds.length * 3);
+			TIntIntHashMap nodeMap = new TIntIntHashMap(nodesIds.length);
+			DoubleFileReader nodes = getNodes();
+			double[] coords = new double[3];
+			int k = 0;
+			for(int id:nodesIds)
+			{
+				nodes.get(3*id, coords);
+				if(bb.remaining() < 24)
+					flushByteBuffer(bb, out);
+				for(int i = 0; i < 3; i++)
+					bb.putDouble(coords[i]);
+				nodeMap.put(id, k++);
+			}
+			nodesIds = null;
+			nodes.close();
+			flushByteBuffer(bb, out);
+			bb.putInt(group.getNumberOfTrias() * 3);
+			for(int i = 0; i < trias.length / 3; i++)
+			{
+				if(bb.remaining() < 12)
+					flushByteBuffer(bb, out);
+				for(int j = 0; j < 3; j++)
+					bb.putInt(nodeMap.get(trias[3*i+j]));
+			}
+			flushByteBuffer(bb, out);
 		}
 	}
 

@@ -46,6 +46,8 @@ import gnu.trove.TIntIntIterator;
 import gnu.trove.TIntObjectHashMap;
 import java.io.File;
 import java.io.IOException;
+import java.nio.DoubleBuffer;
+import java.util.AbstractList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -662,6 +664,27 @@ public class Remesh
 
 		mesh.getTrace().println("# End Remesh");
 		return this;
+	}
+
+	public Collection<Vertex> insertNodes(final DoubleBuffer vertices, int group,
+		double liaisonError, double insertionTol)
+	{
+		final int size = vertices.limit() / 3;
+		AbstractList<Vertex> l = new AbstractList<Vertex>() {
+
+			@Override
+			public Vertex get(int index) {
+				int n = index * 3;
+				return new Vertex(null, vertices.get(n), vertices.get(n + 1),
+					vertices.get(n + 2));
+			}
+
+			@Override
+			public int size() {
+				return size;
+			}
+		};
+		return insertNodes(l, group, liaisonError, insertionTol);
 	}
 
 	/**

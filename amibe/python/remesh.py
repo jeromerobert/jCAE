@@ -6,7 +6,6 @@ from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.projection import MeshLiaison
 from org.jcae.mesh.amibe.metrics import EuclidianMetric3D, DistanceMetric
 from org.jcae.mesh.xmldata import MeshReader, MeshWriter, Amibe2VTK
-from org.jcae.mesh.xmldata import Amibe2OFF, AFront2Amibe, AmibeReader
 from org.jcae.mesh.amibe.algos3d import SmoothNodes3DBg, RemeshPolyline
 
 # Java
@@ -45,8 +44,9 @@ def read_mesh(path):
     MeshReader.readObject3D(mesh, path)
     return mesh
 
-def afront(afront_path, liaison, tmp_dir, mesh_dir, size):
-    """ Run afront, insert point into mesh, and return the list of inserted points """
+def afront_debug(afront_path, liaison, tmp_dir, mesh_dir, size):
+    from org.jcae.mesh.xmldata import Amibe2OFF, AFront2Amibe, AmibeReader
+    """ Same as afront but with temporary files to help debugging """
     ar = AmibeReader.Dim3(mesh_dir)
     opts = HashMap()
     opts.put("size", str(size))
@@ -73,6 +73,43 @@ def afront(afront_path, liaison, tmp_dir, mesh_dir, size):
             Amibe2VTK(amibe_fn).write(vtk_fn)
             vertices = read_mesh(amibe_fn).nodes
             inserted_vertices.addAll(remesh.insertNodes(vertices, g_id, size, size/100.0))
+    return inserted_vertices
+
+def afront(afront_path, tmp_dir, mesh_dir, size):
+    from org.jcae.mesh.xmldata import AmibeReader, MultiDoubleFileReader
+    """ Run afront and return a MultiDoubleFileReader allowing to read created
+    nodes """
+    ar = AmibeReader.Dim3(mesh_dir)
+    sm = ar.submeshes[0]
+    nodes_file = os.path.join(tmp_dir, "nodes.bin")
+    for g in sm.groups:
+        if g.numberOfTrias == 0:
+            f = open(nodes_file, 'ab')
+            f.write('\0'*4)
+            f.close()
+            continue
+        cmd = [afront_path, '-nogui', ':stdin', '-failsafe','false', '-target_size',
+            str(size), '-lf_progress', 'true', '-stop_every', '1000',
+            '-quiet', 'true', '-outname', nodes_file, '-tri_mesh']
+        print " ".join(cmd)
+        p = subprocess.Popen(cmd, stdin = subprocess.PIPE, cwd = tmp_dir)
+        sm.readGroup(g, p.stdin.fileno().channel)
+        p.stdin.flush()
+        return_code = p.wait()
+        if return_code != 0:
+            print "Exit code: "+str(return_code)
+    return MultiDoubleFileReader(nodes_file)
+
+def afront_insert(liaison, nodes_reader, size):
+    opts = HashMap()
+    opts.put("size", str(size))
+    opts.put("minCosAfterSwap", "0.3")
+    opts.put("coplanarity", "-2")
+    remesh = Remesh(liaison, opts)
+    inserted_vertices = ArrayList()
+    for g_id in xrange(1, liaison.mesh.getNumberOfGroups()+1):
+        vs = nodes_reader.next()
+        inserted_vertices.addAll(remesh.insertNodes(vs, g_id, size, size/100.0))
     return inserted_vertices
 
 """
@@ -128,6 +165,11 @@ if len(args) != 2:
 xmlDir = args[0]
 outDir = args[1]
 
+afront_nodes_reader = None
+if options.afront_path:
+    tmp_dir = tempfile.mkdtemp()
+    afront_nodes_reader = afront(options.afront_path, tmp_dir, xmlDir, options.size)
+
 mtb = MeshTraitsBuilder.getDefault3D()
 if options.recordFile:
 	mtb.addTraceRecord()
@@ -164,9 +206,8 @@ else:
 safe_coplanarity = str(max(options.coplanarity, 0.8))
 
 afront_frozen = None
-if options.afront_path:
-    tmp_dir = tempfile.mkdtemp()
-    afront_frozen = afront(options.afront_path, liaison, tmp_dir, xmlDir, options.size)
+if afront_nodes_reader:
+    afront_frozen = afront_insert(liaison, afront_nodes_reader, options.size)
     Vertex.setMutable(afront_frozen, False)
 
 #0
