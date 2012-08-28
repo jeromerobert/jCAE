@@ -73,10 +73,11 @@ public class RandomizeGroups {
 		{
 			if(g.getNumberOfBeams() == 0 && g.getNumberOfTrias() == 0)
 				continue;
+			boolean canRandom = canRandomize(g.getName());
 			int currentSize = 0;
 			for(int triID:g.readTria3Ids())
 			{
-				if(random.nextDouble() < ratio)
+				if(canRandom && random.nextDouble() < ratio)
 				{
 					newGroup.add(triID);
 				}
@@ -163,7 +164,7 @@ public class RandomizeGroups {
 	 * Override to specify which groups can be changed.
 	 * Default allow to change any groups
 	 */
-	protected boolean filter(String groupName)
+	protected boolean canRandomize(String groupName)
 	{
 		return true;
 	}
