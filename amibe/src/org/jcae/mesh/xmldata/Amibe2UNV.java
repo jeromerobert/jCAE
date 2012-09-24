@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2007,2008,2009, by EADS France
+ * (C) Copyright 2007-2012 by EADS France
  */
 
 package org.jcae.mesh.xmldata;
@@ -26,12 +26,9 @@ import org.jcae.mesh.xmldata.AmibeReader.SubMesh;
 import org.jcae.mesh.xmldata.MeshExporter.UNV.Unit;
 import java.io.File;
 import java.io.PrintStream;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -73,19 +70,24 @@ public class Amibe2UNV
 			e.printStackTrace();
 		}
 	}
-	private final File directory;
+	private final String directory;
 	private final MeshExporter.UNV unvWriter;
 	private double scale = 1.0;
 	
 	/**
 	 * @param directory The directory which contain 3d files
 	 */
-	public Amibe2UNV(File directory)
+	public Amibe2UNV(String directory)
 	{
 		this.directory=directory;
-		this.unvWriter = new MeshExporter.UNV(directory.getPath());
+		this.unvWriter = new MeshExporter.UNV(directory);
 	}
-	
+
+	public Amibe2UNV(File directory)
+	{
+		this(directory.getPath());
+	}
+
 	public void setUnit(Unit unit)
 	{
 		unvWriter.setUnit(unit);
@@ -105,7 +107,7 @@ public class Amibe2UNV
 
 	public void write(PrintStream out) throws SAXException, IOException
 	{
-		AmibeReader.Dim3 ar = new AmibeReader.Dim3(directory.getPath());
+		AmibeReader.Dim3 ar = new AmibeReader.Dim3(directory);
 		SubMesh sm = ar.getSubmeshes().get(0);
 		unvWriter.writeInit(out);
 		writeNodes(out);
