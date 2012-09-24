@@ -83,9 +83,13 @@ public class GPure2Amibe extends XMLReader {
 		}
 
 		for(Element e:partitionElements)
-		{			
-			out.nextGroup(getElement(e, "GPure:name").getTextContent());
-			addToGroup(getElement(e, "GPure:faces").getTextContent());
+		{
+			Element dataGroup = getElement(e, "GPure:dataGroup");
+			if(dataGroup != null && "partitionDataSet".equals(dataGroup.getTextContent()))
+			{
+				out.nextGroup(getElement(e, "GPure:name").getTextContent());
+				addToGroup(getElement(e, "GPure:faces").getTextContent());
+			}
 		}
 
 		int beamOffset = 0;
