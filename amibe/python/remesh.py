@@ -162,6 +162,8 @@ def __remesh(xmlDir, outDir, options):
 
     if options.point_metric_file:
         point_metric = DistanceMetric(options.size, options.point_metric_file)
+    elif options.point_metric:
+        point_metric = options.point_metric
     else:
         point_metric = None
     safe_coplanarity = str(max(options.coplanarity, 0.8))
@@ -183,8 +185,9 @@ def __remesh(xmlDir, outDir, options):
     opts.put("size", str(options.size*0.3))
     opts.put("maxlength", str(options.size*sqrt(2)))
     algo = QEMDecimateHalfEdge(liaison, opts)
-    if options.point_metric_file:
-        algo.analyticMetric = DistanceMetric(options.size*sqrt(2), options.point_metric_file)
+    if point_metric:
+        point_metric.sizeInf = options.size*sqrt(2)
+        algo.analyticMetric = point_metric
     algo.compute()
     #1
     writeVTK(liaison)
@@ -195,7 +198,9 @@ def __remesh(xmlDir, outDir, options):
     opts.put("minCosAfterSwap", "0.3")
     opts.put("nearLengthRatio", "0.6")
     algo = Remesh(liaison, opts)
-    algo.analyticMetric = point_metric
+    if point_metric:
+        point_metric.sizeInf = options.size
+        algo.analyticMetric = point_metric
     algo.compute()
 
     #2
@@ -239,8 +244,9 @@ def __remesh(xmlDir, outDir, options):
     opts.put("size", str(options.size*0.3))
     opts.put("freeEdgesOnly", "true")
     algo = LengthDecimateHalfEdge(liaison, opts)
-    if options.point_metric_file:
-        algo.analyticMetric = DistanceMetric(options.size*0.3, options.point_metric_file)
+    if point_metric:
+        point_metric.sizeInf = options.size*0.3
+        algo.analyticMetric = point_metric
     algo.compute()
 
     #7
@@ -251,8 +257,9 @@ def __remesh(xmlDir, outDir, options):
     opts.put("size", str(options.size*0.3))
     opts.put("maxlength", str(options.size*sqrt(2)))
     algo = QEMDecimateHalfEdge(liaison, opts)
-    if options.point_metric_file:
-        algo.analyticMetric = DistanceMetric(options.size*sqrt(2), options.point_metric_file)
+    if point_metric:
+        point_metric.sizeInf = options.size * sqrt(2)
+        algo.analyticMetric = point_metric
     algo.compute()
 
     #8
