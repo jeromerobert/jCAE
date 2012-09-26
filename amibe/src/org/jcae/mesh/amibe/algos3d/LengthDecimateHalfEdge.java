@@ -212,13 +212,17 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	 */
 	private Vertex optimalPlacementGroups(Vertex v1, Vertex v2)
 	{
+		TreeSet<Integer> grps1 = new TreeSet<Integer>();
+		TreeSet<Integer> grps2 = new TreeSet<Integer>();
 		Vertex toReturn;
 		if(v1.isManifold() && v2.isManifold())
 			toReturn = optimalPlacement(v1, v2);
 		else
 		{
-			Collection<Integer> grps1 = getGroups(v1);
-			Collection<Integer> grps2 = getGroups(v2);
+			grps1.clear();
+			grps2.clear();
+			v1.getGroups(grps1);
+			v2.getGroups(grps2);
 			if(grps1.containsAll(grps2))
 			{
 				if(grps1.size() == grps2.size())

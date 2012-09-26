@@ -26,6 +26,8 @@ import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.metrics.Location;
 import java.util.Iterator;
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.TreeSet;
 
 /**
  * Vertex of a mesh.
@@ -868,5 +870,15 @@ public class Vertex implements Location, Serializable
 			r.append(" !M");
 		return r.toString();
 	}
-	
+
+	/**
+	 * Fill the groups collection with the list of groups adjacent to this
+	 * vertex
+	 */
+	public void getGroups(Collection<Integer> groups)
+	{
+		Iterator<Triangle> it = getNeighbourIteratorTriangle();
+		while(it.hasNext())
+			groups.add(it.next().getGroupId());
+	}
 }
