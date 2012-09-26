@@ -222,7 +222,8 @@ public class Amibe2UNV
 		int count = 1;
 		out.println("    -1"+CR+"  2411");
 		double[] buffer = new double[3];
-		while(!f.isEOF())
+		int nbNodes = (int) (f.size() / 3);
+		for(int i = 0; i < nbNodes; i++)
 		{
 			f.get(buffer);
 			MeshExporter.UNV.writeSingleNode(out, count,
