@@ -3,7 +3,7 @@
 from org.jcae.mesh.amibe.ds import Mesh, Vertex
 from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.metrics import EuclidianMetric3D
-from org.jcae.mesh.amibe.algos3d import RemeshPolyline
+from org.jcae.mesh.amibe.algos3d import PolylineFactory, RemeshPolyline
 from org.jcae.mesh.xmldata import MeshReader, MeshWriter
 
 from gnu.trove import TIntArrayList
@@ -56,7 +56,7 @@ for entry in polylines.entrySet():
 			listM.add(EuclidianMetric3D(size))
 		#for v in polyline:
 		#	print v
-		print "Remesh polyline "+str(numPoly+1)+"/"+str(nrPoly)+" of group "+str(bId)+"/"+str(bgroupMap.size())+" "+str(polyline.size())+" vertices"
+		#print "Remesh polyline "+str(numPoly+1)+"/"+str(nrPoly)+" of group "+str(bId)+"/"+str(bgroupMap.size())+" "+str(polyline.size())+" vertices"
 		result = RemeshPolyline(mesh, polyline, listM).compute()
 		for i in xrange(result.size() - 1):
 			mesh.addBeam(result.get(i), result.get(i+1), groupId)
