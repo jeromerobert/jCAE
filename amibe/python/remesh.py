@@ -312,8 +312,8 @@ def __remesh(xmlDir, outDir, options):
     if options.recordFile:
         liaison.getMesh().getTrace().finish()
 
-    if options.convert_junctions:
-        JunctionConverter(liaison.mesh).compute()
+    if options.post_script:
+        execfile(options.post_script)
     MeshWriter.writeObject3D(liaison.mesh, outDir, "")
 
 if __name__ == "__main__":
@@ -352,15 +352,12 @@ if __name__ == "__main__":
                       action="store", type="string", dest="immutable_groups_file",
                       help="""A text file containing the list of groups which whose
                       elements and nodes must be modified by this algorithm.""")
-    parser.add_option("-J", "--convert-junctions", metavar="STRING",
-                      action="store_true", dest="convert_junctions",
-                      help="""Convert junctions between beams and triangles to group
-                      of nodes. The junction vertex is duplicated and a node group
-                      is created with the 2 vertices plus the closest one from
-                      adjacent triangles.""")
     parser.add_option("--afront", metavar="PATH",
                       action="store", type="string", dest="afront_path",
                       help="Path to the afront (http://afront.sf.net) executable.")
+    parser.add_option("--post-script", metavar="PATH",
+                      action="store", type="string", dest="post_script",
+                      help="Execute the given script in the context of the __remesh method.")
     (options, args) = parser.parse_args(args=sys.argv[1:])
 
     if len(args) != 2:
