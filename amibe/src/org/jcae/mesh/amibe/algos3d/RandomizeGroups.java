@@ -26,11 +26,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.xpath.XPathExpressionException;
+import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.xmldata.AmibeReader;
 import org.jcae.mesh.xmldata.JCAEXMLData;
 import org.jcae.mesh.xmldata.XMLReader;
@@ -48,11 +53,43 @@ public class RandomizeGroups {
 	private final double ratio;
 	private final String newGroupName;
 
+	public RandomizeGroups(double ratio, String newGroupName)
+	{
+		this(null, ratio, newGroupName);
+	}
+
 	public RandomizeGroups(String amibeDir, double ratio, String newGroupName)
 	{
 		this.amibeDir = amibeDir;
 		this.ratio = ratio;
 		this.newGroupName = newGroupName;
+	}
+
+	/**
+	 * same as compute but do not change group of non-manifold elements and
+	 * work in-core.
+	 */
+	public void compute(Mesh mesh) throws IOException, SAXException
+	{
+		Random random = new Random(0);
+		HashSet<Vertex> vertices = new HashSet<Vertex>();
+		for(Collection<Vertex> l:mesh.getVertexGroup().values())
+			vertices.addAll(l);
+		vertices.addAll(mesh.getBeams());
+		int newGroupId =  mesh.getNumberOfGroups();
+		mesh.setGroupName(newGroupId, newGroupName);
+		triangles: for(Triangle t:mesh.getTriangles())
+		{
+			String groupName = mesh.getGroupName(t.getGroupId());
+			if(groupName != null && canRandomize(groupName))
+			{
+				for(int i = 0; i < 3; i++)
+					if(!t.vertex[i].isManifold() || vertices.contains(t.vertex[i]))
+						continue triangles;
+				if(random.nextDouble() < ratio)
+					t.setGroupId(newGroupId);
+			}
+		}
 	}
 
 	public void compute() throws IOException, SAXException
