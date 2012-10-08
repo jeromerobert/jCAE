@@ -279,7 +279,7 @@ public abstract class AlgoAction extends CookieAction {
 		}
 	}
 
-	private String getClassPath()
+	protected String getClassPath()
 	{
 		return InstalledFileLocator.getDefault().locate(
 			"modules/ext/amibe.jar", "org.jcae.netbeans", false).getPath();
