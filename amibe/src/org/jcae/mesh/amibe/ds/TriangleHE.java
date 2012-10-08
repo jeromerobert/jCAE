@@ -133,4 +133,47 @@ public class TriangleHE extends Triangle
 		return r.toString();
 	}
 
+	/** Replace this triangle by t in v link */
+	private void replaceTriangle(Vertex v, Triangle t)
+	{
+		if(v.getLink() == this)
+			v.setLink(t);
+		else if(!v.isManifold())
+		{
+			Triangle[] ts = (Triangle[])v.getLink();
+			for(int i = 0; i < ts.length; i++)
+				if(ts[i] == this)
+					ts[i] = t;
+		}
+	}
+
+	/** Split at barycenter */
+	public void split(Mesh mesh)
+	{
+		double[] uv = new double[3];
+		for(int i = 0; i < 3; i++)
+		{
+			for(int j = 0; j < 3; j++)
+				uv[i] += vertex[j].getUV()[i];
+			uv[i] /= 3;
+		}
+		split(mesh, mesh.createVertex(uv));
+	}
+
+	public void split(Mesh mesh, Vertex v)
+	{
+		Triangle t1 = mesh.createTriangle(v, vertex[0], vertex[1]);
+		replaceTriangle(vertex[0], t1);
+		Triangle t2 = mesh.createTriangle(v, vertex[1], vertex[2]);
+		replaceTriangle(vertex[1], t2);
+		Triangle t3 = mesh.createTriangle(v, vertex[2], vertex[0]);
+		replaceTriangle(vertex[2], t3);
+		v.setLink(t1);
+		AbstractHalfEdge t1he = t1.getAbstractHalfEdge().next();
+		AbstractHalfEdge t2he = t2.getAbstractHalfEdge().next();
+		AbstractHalfEdge t3he = t3.getAbstractHalfEdge().next();
+		t1he.glue(t2he.next());
+		t2he.glue(t3he.next());
+		t3he.glue(t1he.next());
+	}
 }
