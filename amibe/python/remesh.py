@@ -162,7 +162,7 @@ def __remesh(xmlDir, outDir, options):
 
     if options.point_metric_file:
         point_metric = DistanceMetric(options.size, options.point_metric_file)
-    elif options.point_metric:
+    elif getattr(options, 'point_metric', None):
         point_metric = options.point_metric
     else:
         point_metric = None
