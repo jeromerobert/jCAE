@@ -1,0 +1,31 @@
+#! /bin/sh
+
+#
+# On Debian install the g++-mingw-w64-i686 package, then set OCE_DIR
+# JAVA_DIR in this script, then run this script.
+#
+
+OCE_DIR=/home/robert/occ6.3/oce-win32-install/cmake
+JAVA_DIR=/home/robert/windows/jdk1.6.0_30
+BUILD_DIR=build-win32
+
+curDir=$PWD
+jcaeDir=$(dirname $0)/..
+cd $jcaeDir
+jcaeDir=$PWD
+cd $curDir
+
+mkdir $BUILD_DIR
+cd $BUILD_DIR
+cmake -DOCE_DIR=$OCE_DIR \
+  -DCMAKE_TOOLCHAIN_FILE=$jcaeDir/vtk-util/toolchain-i686-w64-mingw32.cmake \
+  -DSWIG_DIR=/usr/bin \
+  -DSWIG_EXECUTABLE=/usr/bin/swig \
+  -DJAVA_AWT_LIBRARY=$JAVA_DIR/lib/jawt.lib \
+  -DJAVA_INCLUDE_PATH=$JAVA_DIR/include \
+  -DJAVA_INCLUDE_PATH2=$JAVA_DIR/include/win32 \
+  -DJAVA_JVM_LIBRARY=$JAVA_DIR/lib/jvm.lib \
+  -DJAVA_AWT_INCLUDE_PATH==$JAVA_DIR/include \
+  $jcaeDir/occjava
+make
+
