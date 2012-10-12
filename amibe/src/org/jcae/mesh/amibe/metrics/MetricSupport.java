@@ -55,7 +55,7 @@ public class MetricSupport {
 		 * Return the target size when topology information are available.
 		 * This is used for exemple before inserting a point into the mesh.
 		 */
-		double getTargetSize(double x, double y, double z);
+		double getTargetSize(double x, double y, double z, int groupId);
 
 		/**
 		 * Return the target size when topology information are available.
@@ -199,7 +199,8 @@ public class MetricSupport {
 		else
 		{
 			double[] uv = v.getUV();
-			toReturn = new EuclidianMetric3D(metric.getTargetSize(uv[0], uv[1], uv[2]));
+			toReturn = new EuclidianMetric3D(
+				metric.getTargetSize(uv[0], uv[1], uv[2], groupId));
 		}
 		return toReturn;
 	}

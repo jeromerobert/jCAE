@@ -489,7 +489,7 @@ public class Mesh implements Serializable
 		return groupNames.get(id);
 	}
 
-	public int[] getGroupIDs(String[] names)
+	public int[] getGroupIDs(String ... names)
 	{
 		Map<String, Integer> invertMap = new HashMap<String, Integer>();
 		for(Entry<Integer, String> e:groupNames.entrySet())

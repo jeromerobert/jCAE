@@ -23,9 +23,12 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 
 /**
@@ -248,8 +251,9 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 		for (DistanceMetricInterface s : sources)
 			s.update();
 	}
+
 	@Override
-	public double getTargetSize(double x, double y, double z) {
+	public double getTargetSize(double x, double y, double z, int groupId) {
 		double minValue = sizeInf;
 		for (DistanceMetricInterface s : sources) {
 			double d2 = s.getSqrDistance(x, y, z);
@@ -259,9 +263,13 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 		return minValue;
 	}
 
+	@Override
 	public double getTargetSizeTopo(Mesh mesh, Vertex v)
 	{
 		double[] uv = v.getUV();
-		return getTargetSize(uv[0], uv[1], uv[2]);
+		int groupId = -1;
+		if(v.isManifold())
+			groupId = ((Triangle)v.getLink()).getGroupId();
+		return getTargetSize(uv[0], uv[1], uv[2], groupId);
 	}
 }
