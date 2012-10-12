@@ -526,7 +526,6 @@ public class Vertex implements Location, Serializable
 		if (link instanceof Triangle)
 			return new NeighbourIteratorAbstractHalfEdge((Triangle) link);
 		// Non-manifold vertex
-		logger.fine("Non-manifold vertex: "+this);
 		Triangle [] t = (Triangle []) link;
 		Iterator<AbstractHalfEdge> [] iterators = new NeighbourIteratorAbstractHalfEdge[t.length];
 		for (int i = 0; i < t.length; i++)
