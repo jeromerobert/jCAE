@@ -112,35 +112,41 @@ def afront_insert(liaison, nodes_reader, size):
         inserted_vertices.addAll(remesh.insertNodes(vs, g_id, size, size/100.0))
     return inserted_vertices
 
-def remesh(xmlDir, outDir, **kwargs):
+def remesh(**kwargs):
     """
     Remesh the amibe mesh in xmlDir and save it to outDir.
     See parser.add_option code at the end of this file for kwargs details
     """
-    class ArgsWrapper(object):
+    class ArgsWrapper(dict):
         def __init__(self, kwargs):
-            self.kwargs = kwargs
+            self.update(kwargs)
         def __getattr__(self, name):
-            return self.kwargs.get(name)
+            return self.get(name)
 
-    __remesh(xmlDir, outDir, ArgsWrapper(kwargs))
+    __remesh(ArgsWrapper(kwargs))
 
-def __remesh(xmlDir, outDir, options):
-    afront_nodes_reader = None
-    if options.afront_path:
-        tmp_dir = tempfile.mkdtemp()
-        afront_nodes_reader = afront(options.afront_path, tmp_dir, xmlDir, options.size)
-
+def create_mesh(**kwargs):
     mtb = MeshTraitsBuilder.getDefault3D()
-    if options.recordFile:
+    if kwargs.get('recordFile'):
         mtb.addTraceRecord()
     mtb.addNodeSet()
     mesh = Mesh(mtb)
-    if options.recordFile:
+    if kwargs.get('recordFile'):
         mesh.getTrace().setDisabled(True)
-    MeshReader.readObject3D(mesh, xmlDir)
+    MeshReader.readObject3D(mesh, kwargs['in_dir'])
+    return mesh
 
-    liaison = MeshLiaison(mesh, mtb)
+def __remesh(options):
+    afront_nodes_reader = None
+    if options.afront_path:
+        tmp_dir = tempfile.mkdtemp()
+        afront_nodes_reader = afront(options.afront_path, tmp_dir, options.in_dir, options.size)
+
+    mesh = getattr(options, 'mesh', None)
+    if not mesh:
+        mesh = create_mesh(**options)
+
+    liaison = MeshLiaison(mesh)
     if options.recordFile:
         liaison.getMesh().getTrace().setDisabled(False)
         liaison.getMesh().getTrace().setLogFile(options.recordFile)
@@ -314,7 +320,7 @@ def __remesh(xmlDir, outDir, options):
 
     if options.post_script:
         execfile(options.post_script)
-    MeshWriter.writeObject3D(liaison.mesh, outDir, "")
+    MeshWriter.writeObject3D(liaison.mesh, options.out_dir, "")
 
 if __name__ == "__main__":
     """
@@ -363,7 +369,6 @@ if __name__ == "__main__":
     if len(args) != 2:
         parser.print_usage()
         sys.exit(1)
-
-    xmlDir = args[0]
-    outDir = args[1]
-    __remesh(xmlDir, outDir, options)
+    options.in_dir = args[0]
+    options.out_dir = args[1]
+    __remesh(options)

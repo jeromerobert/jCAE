@@ -212,7 +212,12 @@ public class Mesh implements Serializable
 		for (int i = 0; i < tempHE.length; i++)
 			tempHE[i] = new HalfEdge(traitsBuilder.getHalfEdgeTraitsBuilder(), (TriangleHE) null, (byte) 0, (byte) 0);
 	}
-	
+
+	public MeshTraitsBuilder getBuilder()
+	{
+		return traitsBuilder;
+	}
+
 	public final MeshParameters getMeshParameters()
 	{
 		return meshParameters;

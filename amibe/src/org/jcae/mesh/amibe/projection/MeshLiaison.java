@@ -60,7 +60,7 @@ public class MeshLiaison
 	
 	public MeshLiaison(Mesh backgroundMesh)
 	{
-		this(backgroundMesh, MeshTraitsBuilder.getDefault3D());
+		this(backgroundMesh, backgroundMesh.getBuilder());
 	}
 
 	public MeshLiaison(Mesh backgroundMesh, MeshTraitsBuilder mtb)
