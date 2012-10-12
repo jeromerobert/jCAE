@@ -217,6 +217,8 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 	 * Add a line around which to refine
 	 * @param size0 metric on the point
 	 * @param coef how fast we go from size0 to sizeInf
+	 * @param closed0 true for segment, false for an infinit line, or half
+	 * infinit line, depending on closed1
 	 */
 	public final void addLine(
 		final double x0, final double y0, final double z0, final boolean closed0,
