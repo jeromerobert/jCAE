@@ -58,14 +58,6 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 		public double beta;
 		/** cache for coef / (size0 -sizeInf) ^ 2 */
 		public double ccoef;
-
-		/** Must be called with sizeInf is changed */
-		public void update()
-		{
-			beta = sizeInf - size0;
-			ccoef = coef / beta / beta;
-			threshold = (beta / 0.05 / sizeInf - 1) / ccoef;
-		}
 	}
 
 	private class PointSource extends DistanceMetricInterface
@@ -88,7 +80,7 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 		}
 	}
 
-	private class LineSource extends DistanceMetricInterface
+	protected class LineSource extends DistanceMetricInterface
 	{
 		private final double sx0,sy0,sz0;
 		private final double sx1,sy1,sz1;
@@ -146,8 +138,8 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 	}
 
 
-	private final List<DistanceMetricInterface> sources = new ArrayList<DistanceMetricInterface>();
-	private double sizeInf;
+	protected final List<DistanceMetricInterface> sources = new ArrayList<DistanceMetricInterface>();
+	protected double sizeInf;
 	public DistanceMetric(double sizeInf) {
 		this.sizeInf = sizeInf;
 	}
@@ -202,7 +194,7 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 		PointSource ps = new PointSource(x, y, z);
 		ps.size0 = size0;
 		ps.coef = coef;
-		ps.update();
+		update(ps);
 		if(ps.threshold > 0)
 		{
 			sources.add(ps);
@@ -231,7 +223,7 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 		LineSource ps = new LineSource(x0, y0, z0, closed0, x1, y1, z1, closed1);
 		ps.size0 = size0;
 		ps.coef = coef;
-		ps.update();
+		update(ps);
 		if(ps.threshold > 0)
 		{
 			sources.add(ps);
@@ -249,7 +241,15 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 	{
 		this.sizeInf = v;
 		for (DistanceMetricInterface s : sources)
-			s.update();
+			update(s);
+	}
+
+	/** Must be called with sizeInf is changed */
+	protected void update(DistanceMetricInterface i)
+	{
+		i.beta = sizeInf - i.size0;
+		i.ccoef = i.coef / i.beta / i.beta;
+		i.threshold = (i.beta / 0.05 / sizeInf - 1) / i.ccoef;
 	}
 
 	@Override
