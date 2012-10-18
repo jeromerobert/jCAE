@@ -371,4 +371,4 @@ if __name__ == "__main__":
         sys.exit(1)
     options.in_dir = args[0]
     options.out_dir = args[1]
-    __remesh(options)
+    remesh(**options.__dict__)
