@@ -45,7 +45,7 @@ outDir = args[1]
 
 mesh = Mesh()
 MeshReader.readObject3D(mesh, xmlDir)
-liaison = MeshLiaison(mesh)
+liaison = MeshLiaison.create(mesh)
 if options.immutable_border:
     liaison.mesh.tagFreeEdges(AbstractHalfEdge.IMMUTABLE)
 if options.coplanarity:

@@ -40,6 +40,7 @@ import gnu.trove.TObjectDoubleHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.mesh.amibe.metrics.MetricSupport;
+import org.jcae.mesh.amibe.projection.MapMeshLiaison;
 
 /**
  * Node smoothing.  Triangle quality is computed for all triangles,
@@ -96,7 +97,7 @@ public class SmoothNodes3DBg
 	@Deprecated
 	public SmoothNodes3DBg(final Mesh bgMesh, final Map<String, String> options)
 	{
-		this(new MeshLiaison(bgMesh), options);
+		this(new MapMeshLiaison(bgMesh), options);
 	}
 
 	public SmoothNodes3DBg(final MeshLiaison meshLiaison, final Map<String, String> options)

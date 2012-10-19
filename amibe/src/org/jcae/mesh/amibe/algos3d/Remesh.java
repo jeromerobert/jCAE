@@ -60,6 +60,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.projection.MapMeshLiaison;
 
 /**
  * Remesh an existing mesh.
@@ -145,7 +146,7 @@ public class Remesh
 	 */
 	private Remesh(final Mesh bgMesh, final MeshTraitsBuilder mtb, final Map<String, String> options)
 	{
-		this(new MeshLiaison(bgMesh, mtb), options);
+		this(new MapMeshLiaison(bgMesh, mtb), options);
 	}
 
 	public Remesh(final MeshLiaison liaison, final Map<String, String> options)

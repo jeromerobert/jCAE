@@ -146,7 +146,7 @@ def __remesh(options):
     if not mesh:
         mesh = create_mesh(**options)
 
-    liaison = MeshLiaison(mesh)
+    liaison = MeshLiaison.create(mesh)
     if options.recordFile:
         liaison.getMesh().getTrace().setDisabled(False)
         liaison.getMesh().getTrace().setLogFile(options.recordFile)

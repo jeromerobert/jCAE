@@ -40,7 +40,7 @@ outDir = args[1]
 mtb = MeshTraitsBuilder.getDefault3D()
 mesh = Mesh(mtb)
 MeshReader.readObject3D(mesh, xmlDir)
-liaison = MeshLiaison(mesh, mtb)
+liaison = MeshLiaison.create(mesh, mtb)
 
 if options.coplanarity:
 	liaison.getMesh().buildRidges(options.coplanarity)

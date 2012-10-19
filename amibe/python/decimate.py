@@ -92,7 +92,7 @@ if options.recordFile:
 MeshReader.readObject3D(mesh, xmlDir)
 assert mesh.isValid()
 
-liaison = MeshLiaison(mesh, mtb)
+liaison = MeshLiaison.create(mesh, mtb)
 if options.recordFile:
 	liaison.getMesh().getTrace().setDisabled(False)
 	liaison.getMesh().getTrace().setLogFile(options.recordFile)
