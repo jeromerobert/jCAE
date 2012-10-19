@@ -19,17 +19,22 @@
  */
 package org.jcae.mesh.amibe.algos3d;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.MetricSupport.AnalyticMetricInterface;
 import org.jcae.mesh.amibe.projection.MeshLiaison;
+import org.jcae.mesh.xmldata.MeshReader;
+import org.jcae.mesh.xmldata.MeshWriter;
 
 /**
  *
@@ -77,12 +82,7 @@ public class RemeshSkeleton {
 		{
 			AbstractHalfEdge e = it.next();
 			if(e.destination() == v2)
-			{
-				if(e.hasAttributes(AbstractHalfEdge.OUTER))
-					return e.sym();
-				else
-					return e;
-			}
+				return e;
 		}
 		//TODO in some cases v1.getNeighbourIteratorAbstractHalfEdge does not
 		//return all HE. Check why. Star with vertex with more than one outer
@@ -92,14 +92,26 @@ public class RemeshSkeleton {
 		{
 			AbstractHalfEdge e = it.next();
 			if(e.destination() == v1)
-			{
-				if(e.hasAttributes(AbstractHalfEdge.OUTER))
-					return e.sym();
-				else
-					return e;
-			}
+				return e.sym();
 		}
 		throw new NoSuchElementException(v1+" "+v2);
+	}
+
+	private static double dot(double[] v1, double[] v2)
+	{
+		return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
+	}
+
+	private static double getAbscissa(Vertex v, AbstractHalfEdge edge)
+	{
+		double[] diff = new double[3];
+		double[] seg = new double[3];
+		for(int i = 0; i < 3; i++)
+		{
+			diff[i] = v.getUV()[i] - edge.origin().getUV()[i];
+			seg[i] = edge.destination().getUV()[i] - edge.origin().getUV()[i];
+		}
+		return dot(seg, diff) / edge.origin().sqrDistance3D(edge.destination());
 	}
 
 	public void compute()
@@ -151,13 +163,17 @@ public class RemeshSkeleton {
 					}
 				}
 			}
-			HashSet<Vertex> toCollapse = new HashSet<Vertex>(polyline);
+			for(Vertex v:toKeep)
+				v.setMutable(false);
+			/*HashSet<Vertex> toCollapse = new HashSet<Vertex>(polyline);
 			toCollapse.removeAll(toKeep);
-			collapse(toKeep, toCollapse);
+			int nbNotCollapsed = collapse(toKeep, toCollapse);
+			if(nbNotCollapsed > 0)
+				System.err.println(nbNotCollapsed+" were not "+nbNotCollapsed);*/
 		}
 	}
 
-	private void collapse(final Set<Vertex> toKeep, Set<Vertex> toCollapse)
+	private int collapse(final Set<Vertex> toKeep, Set<Vertex> toCollapse)
 	{
 		boolean changed = true;
 		while(changed)
@@ -183,6 +199,21 @@ public class RemeshSkeleton {
 					}
 				}
 			}
+		}
+		return toCollapse.size();
+	}
+
+	public static void main(final String[] args) {
+		try {
+			Mesh mesh = new Mesh();
+			MeshReader.readObject3D(mesh, "/home/robert/ast-a319-neo/demo-anabelle/demo/amibe.dir");
+			MeshLiaison liaison = MeshLiaison.create(mesh);
+			liaison.getMesh().buildGroupBoundaries();
+			new RemeshSkeleton(liaison, 0, 1.0, 300).compute();
+			MeshWriter.writeObject3D(liaison.getMesh(), "/home/robert/ast-a319-neo/demo-anabelle/demo/amibe2.amibe", null);
+		} catch (IOException ex) {
+			Logger.getLogger(RemeshSkeleton.class.getName()).log(Level.SEVERE,
+				null, ex);
 		}
 	}
 }

@@ -6,7 +6,7 @@ from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.projection import MeshLiaison
 from org.jcae.mesh.amibe.metrics import EuclidianMetric3D, DistanceMetric
 from org.jcae.mesh.xmldata import MeshReader, MeshWriter, Amibe2VTK
-from org.jcae.mesh.amibe.algos3d import SmoothNodes3DBg, RemeshPolyline
+from org.jcae.mesh.amibe.algos3d import SmoothNodes3DBg, RemeshPolyline, RemeshSkeleton
 
 # Java
 from java.util import HashMap
@@ -246,16 +246,22 @@ def __remesh(options):
     #6
     writeVTK(liaison)
 
+    if point_metric:
+        RemeshSkeleton(liaison, 1.57, options.size / 100.0, point_metric).compute()
+    else:
+        RemeshSkeleton(liaison, 1.57, options.size / 100.0, options.size).compute()
+
+    #7
+    writeVTK(liaison)
     opts.clear()
-    opts.put("size", str(options.size*0.3))
+    opts.put("size", str(options.size))
     opts.put("freeEdgesOnly", "true")
     algo = LengthDecimateHalfEdge(liaison, opts)
     if point_metric:
-        point_metric.sizeInf = options.size*0.3
         algo.analyticMetric = point_metric
     algo.compute()
 
-    #7
+    #9
     writeVTK(liaison)
 
     opts.clear()
@@ -268,7 +274,7 @@ def __remesh(options):
         algo.analyticMetric = point_metric
     algo.compute()
 
-    #8
+    #10
     writeVTK(liaison)
 
     opts.clear()
@@ -276,7 +282,7 @@ def __remesh(options):
     opts.put("minCosAfterSwap", "0.3")
     SwapEdge(liaison, opts).compute()
 
-    #9
+    #11
     writeVTK(liaison)
 
     if afront_frozen:
@@ -286,7 +292,7 @@ def __remesh(options):
     opts.put("checkNormals", "false")
     ImproveVertexValence(liaison, opts).compute()
 
-    #10
+    #12
     writeVTK(liaison)
 
     opts.clear()
