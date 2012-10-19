@@ -98,10 +98,59 @@ public class Skeleton {
 		return toReturn;
 	}
 
+	/** Wrap List&ltVertex&gt to ensure polyline unicity */
+	private class VertexPolyline
+	{
+		public final List<Vertex> vertices;
+
+		public VertexPolyline(List<AbstractHalfEdge> edges) {
+			vertices = new ArrayList<Vertex>(edges.size() + 1);
+			for(AbstractHalfEdge e:edges)
+				vertices.add(e.origin());
+			vertices.add(edges.get(edges.size()-1).destination());
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			List<Vertex> o = ((VertexPolyline) obj).vertices;
+			int s = vertices.size() - 1;
+			int os = o.size() - 1;
+			return s == os &&
+				((vertices.get(0) == o.get(0) &&
+				vertices.get(1) == o.get(1) &&
+				vertices.get(s) == o.get(s) &&
+				vertices.get(s - 1) == o.get(s - 1)) ||
+				(vertices.get(0) == o.get(s) &&
+				vertices.get(1) == o.get(s-1) &&
+				vertices.get(s) == o.get(0) &&
+				vertices.get(1) == o.get(s - 1)));
+		}
+
+		@Override
+		public int hashCode() {
+			return vertices.get(0).hashCode() +
+				vertices.get(vertices.size()-1).hashCode();
+		}
+	}
+
 	/**
-	 * Return all polylines
-	 * @param groupIds
-	 * @return
+	 * Return all polylines as vertices.
+	 *
+	 */
+	public Collection<List<Vertex>> getPolylinesVertices()
+	{
+		HashSet<VertexPolyline> hs = new HashSet<VertexPolyline>(polylines.size() * 4 / 3);
+		for(List<AbstractHalfEdge> l:polylines)
+			hs.add(new VertexPolyline(l));
+		ArrayList<List<Vertex>> toReturn = new ArrayList<List<Vertex>>(hs.size());
+		for(VertexPolyline l:hs)
+			toReturn.add(l.vertices);
+		return toReturn;
+	}
+
+	/**
+	 * Return all polylines as half edges.
+	 * One polyline is returned by fan (ex 3 polyline for a T junction).
 	 */
 	public Collection<List<AbstractHalfEdge>> getPolylines()
 	{
