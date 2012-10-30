@@ -577,56 +577,101 @@ public abstract class MeshLiaison
 	 */
 	protected static double sqrDistanceVertexTriangle(double[] pos, Triangle tri, int[] index)
 	{
-		double[] t0 = tri.vertex[0].getUV();
-		double[] t1 = tri.vertex[1].getUV();
-		double[] t2 = tri.vertex[2].getUV();
-		double a = tri.vertex[0].sqrDistance3D(tri.vertex[1]);
-		double b =
-			(t1[0] - t0[0]) * (t2[0] - t0[0]) +
-			(t1[1] - t0[1]) * (t2[1] - t0[1]) +
-			(t1[2] - t0[2]) * (t2[2] - t0[2]);
-		double c = tri.vertex[0].sqrDistance3D(tri.vertex[2]);
-		double d =
-			(t1[0] - t0[0]) * (t0[0] - pos[0]) +
-			(t1[1] - t0[1]) * (t0[1] - pos[1]) +
-			(t1[2] - t0[2]) * (t0[2] - pos[2]);
-		double e =
-			(t2[0] - t0[0]) * (t0[0] - pos[0]) +
-			(t2[1] - t0[1]) * (t0[1] - pos[1]) +
-			(t2[2] - t0[2]) * (t0[2] - pos[2]);
-		double f =
-			(pos[0] - t0[0]) * (pos[0] - t0[0]) +
-			(pos[1] - t0[1]) * (pos[1] - t0[1]) +
-			(pos[2] - t0[2]) * (pos[2] - t0[2]);
-		// Minimize Q(s,t) = a*s*s + 2.0*b*s*t + c*t*t + 2.0*d*s + 2.0*e*t + f
-		double det = a*c - b*b;
-		double s = b*e - c*d;
-		double t = b*d - a*e;
-		index[0] = index[1] = -1;
-		if ( s+t <= det )
+		return TRIANGLE_DISTANCE.compute(pos, tri, index);
+	}
+
+	public final static TriangleDistance TRIANGLE_DISTANCE = new TriangleDistance();
+	private static double norm2(double[] v)
+	{
+		return v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+	}
+
+	private static double dot(double[] v1, double[] v2)
+	{
+		return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
+	}
+
+	public static class TriangleDistance
+	{
+		private double s, t;
+		private double[] edge0 = new double[3];
+		private double[] edge1 = new double[3];
+		private double[] diff = new double[3];
+		private double[] t0;
+		public void getProjection(double[] out)
 		{
-			if ( s < 0.0 )
+			for(int i = 0; i < 3; i++)
+				out[i] = t0[i] + s*edge0[i] + t*edge1[i];
+		}
+
+		public double compute(double[] pos, Triangle tri, int[] index)
+		{
+			t0 = tri.vertex[0].getUV();
+			double[] t1 = tri.vertex[1].getUV();
+			double[] t2 = tri.vertex[2].getUV();
+			for(int i = 0; i < 3; i++)
 			{
-				if ( t < 0.0 )
+				edge0[i] = t1[i] - t0[i];
+				edge1[i] = t2[i] - t0[i];
+				diff[i] = t0[i] - pos[i];
+			}
+			double a = norm2(edge0);
+			double b = dot(edge0, edge1);
+			double c = norm2(edge1);
+			double d = dot(edge0, diff);
+			double e = dot(edge1, diff);
+			double f = norm2(diff);
+			// Minimize Q(s,t) = a*s*s + 2.0*b*s*t + c*t*t + 2.0*d*s + 2.0*e*t + f
+			double det = a*c - b*b;
+			s = b*e - c*d;
+			t = b*d - a*e;
+			index[0] = index[1] = -1;
+			if ( s+t <= det )
+			{
+				if ( s < 0.0 )
 				{
-					// region 4
-					if (d < 0.0)
+					if ( t < 0.0 )
 					{
-						t = 0.0;
-						index[0] = 2;
-						if (-d >= a)
+						// region 4
+						if (d < 0.0)
 						{
-							index[1] = 6;
-							s = 1.0;
+							t = 0.0;
+							index[0] = 2;
+							if (-d >= a)
+							{
+								index[1] = 6;
+								s = 1.0;
+							}
+							else
+							{
+								index[1] = 5;
+								s = -d/a;
+							}
 						}
 						else
 						{
-							index[1] = 5;
-							s = -d/a;
+							s = 0.0;
+							index[0] = 1;
+							if (e >= 0.0)
+							{
+								index[1] = 4;
+								t = 0.0;
+							}
+							else if (-e >= c)
+							{
+								index[1] = 2;
+								t = 1.0;
+							}
+							else
+							{
+								index[1] = 3;
+								t = -e/c;
+							}
 						}
 					}
 					else
 					{
+						// region 3
 						s = 0.0;
 						index[0] = 1;
 						if (e >= 0.0)
@@ -646,135 +691,9 @@ public abstract class MeshLiaison
 						}
 					}
 				}
-				else
+				else if ( t < 0.0 )
 				{
-					// region 3
-					s = 0.0;
-					index[0] = 1;
-					if (e >= 0.0)
-					{
-						index[1] = 4;
-						t = 0.0;
-					}
-					else if (-e >= c)
-					{
-						index[1] = 2;
-						t = 1.0;
-					}
-					else
-					{
-						index[1] = 3;
-						t = -e/c;
-					}
-				}
-			}
-			else if ( t < 0.0 )
-			{
-				// region 5
-				t = 0.0;
-				index[0] = 2;
-				if (d >= 0.0)
-				{
-					index[1] = 4;
-					s = 0.0;
-				}
-				else if (-d >= a)
-				{
-					index[1] = 6;
-					s = 1.0;
-				}
-				else
-				{
-					index[1] = 5;
-					s = -d/a;
-				}
-			}
-			else
-			{
-				// region 0
-				double invDet = 1.0 / det;
-				s *= invDet;
-				t *= invDet;
-				if (t <= s && t <= 1.0 - s - t)
-					index[1] = 5;
-				else if (s <= t && s <= 1.0 - s - t)
-					index[1] = 3;
-				else if (s >= 1.0 - s - t && t >= 1.0 - s -t)
-					index[1] = 1;
-				else
-					throw new RuntimeException("Illegal arguments: s="+s+" t="+t+" "+det+"\n"+tri);
-				index[0] = index[1] / 2;
-			}
-		}
-		else
-		{
-			if ( s < 0.0 )
-			{
-				// region 2
-				if (c+e > b+d)
-				{
-					// minimum on edge s+t = 1
-					double numer = (c+e) - (b+d);
-					double denom = (a-b) + (c-b);
-					index[0] = 0;
-					if (numer >= denom)
-					{
-						index[1] = 6;
-						s = 1.0;
-					}
-					else
-					{
-						index[1] = 1;
-						s = numer / denom;
-					}
-					t = 1.0 - s;
-				}
-				else
-				{
-					// minimum on edge s = 0
-					s = 0.0;
-					index[0] = 1;
-					if (e >= 0.0)
-					{
-						index[1] = 4;
-						t = 0.0;
-					}
-					else if (-e >= c)
-					{
-						index[1] = 2;
-						t = 1.0;
-					}
-					else
-					{
-						index[1] = 3;
-						t = -e/c;
-					}
-				}
-			}
-			else if ( t < 0.0 )
-			{
-				// region 6
-				if (a+d > b+e)
-				{
-					// minimum on edge s+t = 1
-					double numer = (a+d) - (b+e);
-					double denom = (a-b) + (c-b);
-					index[0] = 0;
-					if (numer >= denom)
-					{
-						index[1] = 2;
-						t = 1.0;
-					}
-					else
-					{
-						index[1] = 1;
-						t = numer / denom;
-					}
-					s = 1.0 - t;
-				}
-				else
-				{
-					// minimum on edge t=0
+					// region 5
 					t = 0.0;
 					index[0] = 2;
 					if (d >= 0.0)
@@ -793,39 +712,144 @@ public abstract class MeshLiaison
 						s = -d/a;
 					}
 				}
+				else
+				{
+					// region 0
+					double invDet = 1.0 / det;
+					s *= invDet;
+					t *= invDet;
+					if (t <= s && t <= 1.0 - s - t)
+						index[1] = 5;
+					else if (s <= t && s <= 1.0 - s - t)
+						index[1] = 3;
+					else if (s >= 1.0 - s - t && t >= 1.0 - s -t)
+						index[1] = 1;
+					else
+						throw new RuntimeException("Illegal arguments: s="+s+" t="+t+" "+det+"\n"+tri);
+					index[0] = index[1] / 2;
+				}
 			}
 			else
 			{
-				// region 1
-				double numer = (c+e) - (b+d);
-				index[0] = 0;
-				if (numer <= 0.0)
+				if ( s < 0.0 )
 				{
-					index[1] = 2;
-					s = 0.0;
-				}
-				else
-				{
-					double denom = (a-b)+(c-b);
-					if (numer >= denom)
+					// region 2
+					if (c+e > b+d)
 					{
-						index[1] = 6;
-						s = 1.0;
+						// minimum on edge s+t = 1
+						double numer = (c+e) - (b+d);
+						double denom = (a-b) + (c-b);
+						index[0] = 0;
+						if (numer >= denom)
+						{
+							index[1] = 6;
+							s = 1.0;
+						}
+						else
+						{
+							index[1] = 1;
+							s = numer / denom;
+						}
+						t = 1.0 - s;
 					}
 					else
 					{
-						index[1] = 1;
-						s = numer/denom;
+						// minimum on edge s = 0
+						s = 0.0;
+						index[0] = 1;
+						if (e >= 0.0)
+						{
+							index[1] = 4;
+							t = 0.0;
+						}
+						else if (-e >= c)
+						{
+							index[1] = 2;
+							t = 1.0;
+						}
+						else
+						{
+							index[1] = 3;
+							t = -e/c;
+						}
 					}
 				}
-				t = 1.0 - s;
+				else if ( t < 0.0 )
+				{
+					// region 6
+					if (a+d > b+e)
+					{
+						// minimum on edge s+t = 1
+						double numer = (a+d) - (b+e);
+						double denom = (a-b) + (c-b);
+						index[0] = 0;
+						if (numer >= denom)
+						{
+							index[1] = 2;
+							t = 1.0;
+						}
+						else
+						{
+							index[1] = 1;
+							t = numer / denom;
+						}
+						s = 1.0 - t;
+					}
+					else
+					{
+						// minimum on edge t=0
+						t = 0.0;
+						index[0] = 2;
+						if (d >= 0.0)
+						{
+							index[1] = 4;
+							s = 0.0;
+						}
+						else if (-d >= a)
+						{
+							index[1] = 6;
+							s = 1.0;
+						}
+						else
+						{
+							index[1] = 5;
+							s = -d/a;
+						}
+					}
+				}
+				else
+				{
+					// region 1
+					double numer = (c+e) - (b+d);
+					index[0] = 0;
+					if (numer <= 0.0)
+					{
+						index[1] = 2;
+						s = 0.0;
+					}
+					else
+					{
+						double denom = (a-b)+(c-b);
+						if (numer >= denom)
+						{
+							index[1] = 6;
+							s = 1.0;
+						}
+						else
+						{
+							index[1] = 1;
+							s = numer/denom;
+						}
+					}
+					t = 1.0 - s;
+				}
 			}
+			double ret = a*s*s + 2.0*b*s*t + c*t*t + 2.0*d*s + 2.0*e*t + f;
+			// Fix possible numerical errors
+			if (ret < 0.0)
+				ret = 0.0;
+			return ret;
 		}
-		double ret = a*s*s + 2.0*b*s*t + c*t*t + 2.0*d*s + 2.0*e*t + f;
-		// Fix possible numerical errors
-		if (ret < 0.0)
-			ret = 0.0;
-		return ret;
 	}
 
 	public static void checkFindSurroundingTriangle(String[] args) throws FileNotFoundException
