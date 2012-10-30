@@ -37,12 +37,22 @@
 #endif
 %}
 
-class BRepBuilderAPI_MakeShape
+class BRepBuilderAPI_Command
+{
+	%rename(isDone) IsDone;
+	BRepBuilderAPI_Command()=0;
+	public:
+	virtual Standard_Boolean  IsDone() const;
+};
+
+class BRepBuilderAPI_MakeShape: public BRepBuilderAPI_Command
 {
 	//Hide the constructor to make this class abstract
 	BRepBuilderAPI_MakeShape()=0;
 	public:
+	%rename(build) Build;
 	%rename(shape) Shape;
+	virtual void Build();
 	const TopoDS_Shape& Shape() const;
 };
 
