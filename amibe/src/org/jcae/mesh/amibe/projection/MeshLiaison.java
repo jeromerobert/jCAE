@@ -54,17 +54,12 @@ public abstract class MeshLiaison
 
 	public static MeshLiaison create(Mesh backgroundMesh)
 	{
-		return new MapMeshLiaison(backgroundMesh);
+		return create(backgroundMesh, backgroundMesh.getBuilder());
 	}
 
 	public static MeshLiaison create(Mesh backgroundMesh, MeshTraitsBuilder mtb)
 	{
-		return new MapMeshLiaison(backgroundMesh, mtb);
-	}
-
-	protected MeshLiaison(Mesh backgroundMesh)
-	{
-		this(backgroundMesh, backgroundMesh.getBuilder());
+		return new KdTreeLiaison(backgroundMesh, mtb);
 	}
 
 	protected MeshLiaison(Mesh backgroundMesh, MeshTraitsBuilder mtb)
@@ -563,19 +558,13 @@ public abstract class MeshLiaison
 		return skeleton.isNearer(v, groupId, distance2);
 	}
 
-	public static double getDistanceVertexTriangle(Vertex v, Triangle tri)
-	{
-		int[] index = new int[2];
-		return Math.sqrt(sqrDistanceVertexTriangle(v.getUV(), tri, index));
-	}
-
 	/**
 	 * Compute squared distance between a point and a triangle.  See
 	 *   http://www.geometrictools.com/Documentation/DistancePoint3Triangle3.pdf
 	 * @param index index[0] is the local id of the closest edge and index[1]
 	 * the region.
 	 */
-	protected static double sqrDistanceVertexTriangle(double[] pos, Triangle tri, int[] index)
+	public static double sqrDistanceVertexTriangle(double[] pos, Triangle tri, int[] index)
 	{
 		return TRIANGLE_DISTANCE.compute(pos, tri, index);
 	}
