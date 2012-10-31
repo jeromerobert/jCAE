@@ -169,8 +169,6 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 		// performed.
 		if (!v1.isWritable() || !v2.isWritable())
 			return false;
-		if (!v1.isMutable() && !v2.isMutable())
-			return false;
 		v3 = optimalPlacementGroups(v1, v2);
 		if(v3 == null)
 			return false;
@@ -212,13 +210,19 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	 */
 	private Vertex optimalPlacementGroups(Vertex v1, Vertex v2)
 	{
-		TreeSet<Integer> grps1 = new TreeSet<Integer>();
-		TreeSet<Integer> grps2 = new TreeSet<Integer>();
 		Vertex toReturn;
-		if(v1.isManifold() && v2.isManifold())
+		if(v1.isMutable() && !v2.isMutable())
+			toReturn = v2;
+		else if(v2.isMutable() && !v1.isMutable())
+			toReturn = v1;
+		else if(!v1.isMutable() && !v2.isMutable())
+			toReturn = null;
+		else if(v1.isManifold() && v2.isManifold())
 			toReturn = optimalPlacement(v1, v2);
 		else
 		{
+			TreeSet<Integer> grps1 = new TreeSet<Integer>();
+			TreeSet<Integer> grps2 = new TreeSet<Integer>();
 			grps1.clear();
 			grps2.clear();
 			v1.getGroups(grps1);
