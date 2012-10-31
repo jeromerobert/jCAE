@@ -32,6 +32,7 @@ import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.xmldata.Amibe2VTK;
 import org.jcae.mesh.xmldata.MeshReader;
@@ -228,7 +229,9 @@ public class Skeleton {
 		HashSet<Integer> g2 = new HashSet<Integer>();
 		getGroups(edge, g1);
 		getGroups(next, g2);
-		return !g1.equals(g2);
+		if(!g1.equals(g2))
+			return true;
+		return edge.destination().angle3D(edge.origin(), next.destination()) > angle;
 	}
 
 	private List<AbstractHalfEdge> createPolyline(AbstractHalfEdge startEdge,
