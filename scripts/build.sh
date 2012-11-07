@@ -596,7 +596,7 @@ myant=$nbDir/java/ant/bin/ant
 ## Get and Install XALAN
 ## Get XSLs for build-impl.xml creation
 ##################################################
-xalanURL=http://apache.multidist.com/xml/xalan-j/xalan-j_2_7_1-bin-2jars.tar.gz
+xalanURL=http://archive.apache.org/dist/xml/xalan-j/xalan-j_2_7_1-bin-2jars.tar.gz
 xalanTar=xalan-j_2_7_1-bin-2jars.tar.gz
 xalanDir=$mypwd/xalan-j_2_7_1
 
