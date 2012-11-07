@@ -197,9 +197,9 @@ public class CameraManager
 		this.isVisibleRelativeAxis = visibility;		
 		canvas.lock();
 		marker.SetEnabled(Utils.booleanToInt(visibility));
-		canvas.unlock();
 		relativeAxes.SetVisibility(Utils.booleanToInt(visibility));
 		canvas.RenderSecured();
+		canvas.unlock();
 	}
 
 	public void setRotationCenter(double x, double y, double z) 
