@@ -38,8 +38,19 @@ import org.jcae.mesh.xmldata.MeshReader;
  *
  * @author Jerome Robert
  */
+// TODO possible optimizations:
+// - store boundaries in nodes
+// - store cut plance in nodes
+// - have Node and Leaf node classes
+
 public class TriangleKdTree {
-	/** Same as arraylist but keep removed instances for futur use */
+
+	/**
+	 * Same as ArrayList&lt;double[]&gt; but keep removed instances for futur
+	 * use.
+	 * System.arraycopy(x,x,x,x,6) is more than 10 time faster than
+	 * new double[6];
+	 */
 	private static class BoundaryPool extends ArrayList<double[]>
 	{
 		private int poolSize;
@@ -138,7 +149,18 @@ public class TriangleKdTree {
 
 	private final transient Set<Triangle> seen = new THashSet<Triangle>();
 	private final transient List<Node> closeNodes = new ArrayList<Node>();
+	private final transient BoundaryPool closeBoundaries = new BoundaryPool();
 	private final int[] closeIndex = new int[2];
+
+	/**
+	 * Get the closest triangle for coords
+	 * @param coords
+	 * @param projection The projection of coords on the triangle. If null the
+	 * projection is not computed
+	 * @param group Only look for triangles in the given groups. If negative
+	 * look for all triangles.
+	 * @return
+	 */
 	public Triangle getClosestTriangle(double[] coords, double[] projection, int group)
 	{
 		Node n = getNode(coords, workBoundary1);
@@ -171,9 +193,8 @@ public class TriangleKdTree {
 			aabbDistance = Math.sqrt(aabbDistance);
 			triangleDistance = aabbDistance;
 		}
-		long t2 = System.nanoTime();
-		closeNodes.clear();
-		getNodes(createCenteredAABB(coords, 1.01*aabbDistance), closeNodes, null);
+
+		getNodes(createCenteredAABB(coords, 1.01*aabbDistance), null, false);
 		for(Node nn: closeNodes)
 		{
 			if(nn != n && nn.triangles != null)
@@ -196,7 +217,39 @@ public class TriangleKdTree {
 				}
 			}
 		}
+		closeNodes.clear();
 		return toReturn;
+	}
+
+	/**
+	 * Get all triangles present in this kdTree.
+	 * It's mainly used to check the concistancy of the kdTree while debugging.
+	 */
+	public void getTriangles(Set<Triangle> result)
+	{
+		if(nodeStack == null)
+			nodeStack = new ArrayList<Node>();
+		else
+			nodeStack.clear();
+
+		nodeStack.add(root);
+		while(!nodeStack.isEmpty())
+		{
+			int n = nodeStack.size() - 1;
+			Node current = nodeStack.remove(n);
+			if(current.triangles != null)
+			{
+				for(Triangle t:current.triangles)
+					result.add(t);
+			}
+			else
+			{
+				if(current.left != null)
+					nodeStack.add(current.left);
+				if(current.right != null)
+					nodeStack.add(current.right);
+			}
+		}
 	}
 
 	/** Non zero Manhattan distance between a point and an AABB */
@@ -273,7 +326,14 @@ public class TriangleKdTree {
 		return bounds;
 	}
 
-	private void getNodes(double[] aabb, List<Node> result, List<double[]> resultBounds)
+	/**
+	 * Return the nodes intersecting the given AABB
+	 * @param aabb
+	 * @param resultBounds
+	 * @param emptyNodes if true empty nodes (not existing) node are returned.
+	 * Set true when filling the KdTree, and to false when consulting it.
+	 */
+	private void getNodes(double[] aabb, BoundaryPool resultBounds, boolean emptyNodes)
 	{
 		if(nodeStack == null)
 			nodeStack = new ArrayList<Node>();
@@ -287,80 +347,93 @@ public class TriangleKdTree {
 
 		nodeStack.add(root);
 		boundaryPool.push(globalBounds);
+		assert closeNodes.isEmpty();
+		assert resultBounds == null || resultBounds.isEmpty();
+		if(resultBounds != null)
+			resultBounds.clear();
 		assert intersect(aabb, globalBounds): Arrays.toString(aabb)+" doesn't intersect "+Arrays.toString(globalBounds);
 		while(!nodeStack.isEmpty())
 		{
 			int n = nodeStack.size() - 1;
 			Node current = nodeStack.remove(n);
 			double[] cBounds = boundaryPool.last();
-			if(current.left != null || current.right != null)
+			if(current.left == null && current.right == null)
+			{
+				//this is a leaf node
+				boundaryPool.removeLast();
+				closeNodes.add(current);
+				if(resultBounds != null)
+					resultBounds.push(cBounds);
+			}
+			else
 			{
 				double newB = (cBounds[current.direction] + cBounds[3+current.direction]) / 2.0;
 				boolean inLeft = aabb[current.direction] < newB;
 				boolean inRight = aabb[current.direction+3] >= newB;
+				if(emptyNodes)
+				{
+					if(inLeft && current.left == null)
+						current.left = new Node();
+					if(inRight && current.right == null)
+						current.right = new Node();
+				}
+				boolean leafLeft = current.left == null;
+				boolean leafRight = current.right == null;
 				if(inLeft && !inRight)
 				{
-					cBounds[3 + current.direction] = newB;
-					if(current.left == null)
-						current.left = new Node();
-					nodeStack.add(current.left);
+					if(leafLeft)
+						boundaryPool.removeLast();
+					else
+					{
+						cBounds[3 + current.direction] = newB;
+						nodeStack.add(current.left);
+					}
 				}
 				else if(!inLeft && inRight)
 				{
-					cBounds[current.direction] = newB;
-					if(current.right == null)
-						current.right = new Node();
-					nodeStack.add(current.right);
+					if(leafRight)
+						boundaryPool.removeLast();
+					else
+					{
+						cBounds[current.direction] = newB;
+						nodeStack.add(current.right);
+					}
 				}
 				else if(inLeft && inRight)
 				{
-					double[] rightBounds = boundaryPool.push(cBounds);
-					cBounds[3 + current.direction] = newB;
-					if(current.left == null)
-						current.left = new Node();
-					nodeStack.add(current.left);
-					rightBounds[current.direction] = newB;
-					if(current.right == null)
-						current.right = new Node();
-					nodeStack.add(current.right);
+					double[] rightBounds = null;
+					if(leafLeft)
+					{
+						if(leafRight)
+							//leaf node so we though the boundary array away
+							boundaryPool.removeLast();
+						else
+							//reuse left bounds as right bounds
+							rightBounds = cBounds;
+					}
+					else
+					{
+						//copy left boundaries to right boundaries before
+						//changing it
+						if(current.right != null)
+						rightBounds = boundaryPool.push(cBounds);
+						cBounds[3 + current.direction] = newB;
+						nodeStack.add(current.left);
+					}
+
+					if(!leafRight)
+					{
+						rightBounds[current.direction] = newB;
+						nodeStack.add(current.right);
+					}
 				}
 				else
 				{
 					boundaryPool.removeLast();
 				}
 			}
-			else
-			{
-				boundaryPool.removeLast();
-				result.add(current);
-				if(resultBounds != null)
-					resultBounds.add(Arrays.copyOf(cBounds, cBounds.length));
-			}
 		}
-		assert !result.isEmpty(): bounds2String(aabb);
-	}
-
-	private boolean validBounds(double[] bounds)
-	{
-		for(int i = 0; i < 3; i++)
-		{
-			if(bounds[i] >= bounds[3+i])
-				return false;
-			if(Double.isInfinite(bounds[i]) || Double.isInfinite(bounds[3+i]))
-				return false;
-		}
-		return true;
-	}
-
-	private void splitBounds(double[] aabb, byte direction, double[] right)
-	{
-		assert aabb != right;
-		double newB = (aabb[direction] + aabb[3+direction]) / 2.0;
-		System.arraycopy(aabb, 0, right, 0, 6);
-		aabb[3+direction] = newB;
-		right[direction] = newB;
-		assert validBounds(right): bounds2String(right)+" "+Arrays.toString(right);
-		assert validBounds(aabb): bounds2String(aabb)+" "+Arrays.toString(aabb);
+		assert !closeNodes.isEmpty(): bounds2String(aabb);
 	}
 
 	private boolean intersect(double[] aabb1, double[] aabb2)
@@ -424,21 +497,21 @@ public class TriangleKdTree {
 		}
 	}
 
-	private double[] triangleBounds = new double[6];
-	private void addTriangle(Triangle triangle)
+	private final double[] triangleBounds = new double[6];
+	public void addTriangle(Triangle triangle)
 	{
 		bounds(triangle, triangleBounds);
-		ArrayList<Node> nodes = new ArrayList<Node>();
-		ArrayList<double[]> nBounds = new ArrayList<double[]>();
-		getNodes(triangleBounds, nodes, nBounds);
+		getNodes(triangleBounds, closeBoundaries, true);
 		triangleInterAABB1.setTriangle(triangle);
-		for(int i = 0; i < nodes.size(); i++)
+		for(int i = 0; i < closeNodes.size(); i++)
 		{
-			double[] b = nBounds.get(i);
+			double[] b = closeBoundaries.get(i);
 
 			if(triangleInterAABB1.triBoxOverlap(b, true))
-				addTriange(triangle, nodes.get(i), b);
+				addTriange(triangle, closeNodes.get(i), b);
 		}
+		closeNodes.clear();
+		closeBoundaries.clear();
 	}
 
 	private void addTriange(Triangle triangle, Node node, double[] bounds)
@@ -572,18 +645,16 @@ public class TriangleKdTree {
 
 	public Object[] getPolyData()
 	{
-		ArrayList<Node> nodes = new ArrayList<Node>();
-		ArrayList<double[]> bounds = new ArrayList<double[]>();
-		getNodes(createCenteredAABB(new double[3], Double.POSITIVE_INFINITY), nodes, bounds);
+		getNodes(createCenteredAABB(new double[3], Double.POSITIVE_INFINITY), closeBoundaries, false);
 
 		int vertexCounter = 0;
 		ArrayList<int[]> quads = new ArrayList<int[]>();
 		ArrayList<double[]> coords = new ArrayList<double[]>();
-		int n = nodes.size();
+		int n = closeNodes.size();
 		for(int i = 0; i < n; i++)
 		{
-			Node node = nodes.get(i);
-			double[] nBounds = bounds.get(i);
+			Node node = closeNodes.get(i);
+			double[] nBounds = closeBoundaries.get(i);
 			if(node.triangles != null && node.triangles.length > 0)
 			{
 				int[] quad = new int[24];
@@ -604,6 +675,8 @@ public class TriangleKdTree {
 				}
 			}
 		}
+		closeNodes.clear();
+		closeBoundaries.clear();
 		int[] quadArray = new int[quads.size() * 24];
 		int k = 0;
 		for(int[] q:quads)

@@ -32,6 +32,10 @@ import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
  *
  * @author Jerome Robert
  */
+//TODO possible optimization:
+// - one TriangleKdTree by group ?
+// - check how MeshLiaison methods calls sequence to limit the number of call
+//   to getClosestTriangle
 public class KdTreeLiaison extends MeshLiaison{
 	private final TriangleKdTree kdTree;
 	private transient double[] tmpCoords = new double[3];
