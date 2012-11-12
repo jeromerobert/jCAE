@@ -630,17 +630,16 @@ public class TriangleKdTree {
 				if (a0 < a2) {
 					directions[0] = 0;
 					directions[1] = 2;
-					return a0;
 				} else {
 					directions[0] = 2;
 					directions[1] = 0;
-					return a2;
 				}
+				return a1;
 			} else {
 				directions[0] = 0;
 				directions[1] = 1;
 				directions[2] = 2;
-				return a0;
+				return a2;
 			}
 		} else {
 			if (a0 > a2) {
@@ -648,17 +647,16 @@ public class TriangleKdTree {
 				if (a1 < a2) {
 					directions[0] = 1;
 					directions[1] = 2;
-					return a1;
 				} else {
 					directions[0] = 2;
 					directions[1] = 1;
-					return a2;
 				}
+				return a0;
 			} else {
 				directions[0] = 1;
 				directions[1] = 0;
 				directions[2] = 2;
-				return a1;
+				return a2;
 			}
 		}
 	}
