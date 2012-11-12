@@ -24,6 +24,7 @@ import gnu.trove.THashSet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -154,10 +155,81 @@ public class TriangleKdTree {
 	private final int[] closeIndex = new int[2];
 
 	/**
+	 * Replace a triangle by a set of triangles which are located in the same
+	 * place as the original triangle.
+	 * This is expected to be used to update the kdtree after splitting a
+	 * triangle.
+	 * @param toReplace
+	 * @param newTriangles
+	 */
+	public void replace(Triangle toReplace, Triangle ... newTriangles)
+	{
+		bounds(toReplace, triangleBounds);
+		getNodes(triangleBounds, closeBoundaries, false);
+		Triangle[] toAdd = new Triangle[newTriangles.length];
+		int toAddIndex = 0;
+		for(int i = 0; i < closeNodes.size(); i++)
+		{
+			double[] b = closeBoundaries.get(i);
+			Node n = closeNodes.get(i);
+			if(n.triangles != null)
+			{
+				int oldSize = n.triangles.length;
+				for(int j = 0; j < oldSize;  j++)
+				{
+					// measures show that testing all nodes triangles is faster
+					// than checking the node/triangles intersection.
+					if(n.triangles[j] == toReplace)
+					{
+						for(Triangle newT:newTriangles)
+						{
+							triangleInterAABB1.setTriangle(newT);
+							if(triangleInterAABB1.triBoxOverlap(b, true))
+								toAdd[toAddIndex++] = newT;
+						}
+						switch(toAddIndex)
+						{
+							case 0:
+								if(oldSize > 1)
+								{
+									Triangle[] newA = new Triangle[oldSize - 1];
+									System.arraycopy(n.triangles, 0, newA, 0, j);
+									System.arraycopy(n.triangles, j+1, newA, j, oldSize - j - 1);
+									n.triangles = newA;
+								}
+								else
+									n.triangles = null;
+								break;
+							case 1: n.triangles[j] = toAdd[0];
+								break;
+							default:
+								n.triangles = Arrays.copyOf(n.triangles, oldSize + toAddIndex - 1);
+								n.triangles[j] = toAdd[0];
+								System.arraycopy(toAdd, 1, n.triangles, oldSize, toAddIndex - 1);
+								break;
+						}
+						toAddIndex = 0;
+						break;
+					}
+				}
+			}
+		}
+
+		for(int i = 0; i < closeNodes.size(); i++)
+		{
+			Node n = closeNodes.get(i);
+			if(n.triangles != null && n.triangles.length > bucketSize)
+				split(n, closeBoundaries.get(i));
+		}
+		closeBoundaries.clear();
+		closeNodes.clear();
+	}
+	/**
 	 * Get the closest triangle for coords
 	 * @param coords
 	 * @param projection The projection of coords on the triangle. If null the
-	 * projection is not computed
+	 * projection is not computed. It must be different of coords else strange
+	 * things will happen.
 	 * @param group Only look for triangles in the given groups. If negative
 	 * look for all triangles.
 	 * @return
@@ -792,6 +864,7 @@ public class TriangleKdTree {
 			MeshReader.readObject3D(mesh, "/tmp/bidule.amibe");
 			System.out.println(mesh.getTriangles().size());
 			int[] bucketSize = new int[]{7,8,9,10,11,12,13,14};
+			HashSet<Triangle> tmp2 = new HashSet<Triangle>();
 			for(int bs: bucketSize)
 			{
 				System.out.println("******** "+bs+" **********");
@@ -801,7 +874,7 @@ public class TriangleKdTree {
 				double[] coords = new double[3];
 				loop: for(Triangle tria:mesh.getTriangles())
 				{
-					if(tria.hasAttributes(AbstractHalfEdge.BOUNDARY))
+					if(tria.hasAttributes(AbstractHalfEdge.OUTER))
 						continue;
 					for(int i = 0; i < 3; i++)
 					{
@@ -818,7 +891,19 @@ public class TriangleKdTree {
 				System.out.println(t.getClosestTriangle(new double[]{400, -800, 0}, null, -1));
 				long l3 = System.nanoTime();
 				t.stats();
-				System.out.println((l2-l1)/1E9+" "+(l3-l2)/1E9);
+				long l4 = System.nanoTime();
+				loop: for(Triangle tria:mesh.getTriangles())
+				{
+					if(tria.hasAttributes(AbstractHalfEdge.OUTER))
+						continue;
+					t.replace(tria);
+				}
+				long l5 = System.nanoTime();
+				tmp2.clear();
+				t.getTriangles(tmp2);
+				if(!tmp2.isEmpty())
+					throw new IllegalStateException(""+tmp2.size()+" "+tmp2.iterator().next());
+				System.out.println((l2-l1)/1E9+" "+(l3-l2)/1E9+" "+(l5-l4)/1E9);
 			}
 		} catch (IOException ex) {
 			Logger.getLogger(TriangleKdTree.class.getName()).log(Level.SEVERE, null, ex);
