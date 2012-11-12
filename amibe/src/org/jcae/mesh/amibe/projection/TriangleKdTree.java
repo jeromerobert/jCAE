@@ -101,7 +101,7 @@ public class TriangleKdTree {
 		public Triangle[] triangles;
 	}
 	private final Node root = new Node();
-	private double[] globalBounds;
+	private double[] globalBounds, globalSize = new double[3];
 	private final int bucketSize;
 	private final TriangleInterAABB triangleInterAABB1 = new TriangleInterAABB();
 	private final TriangleInterAABB triangleInterAABB2 = new TriangleInterAABB();
@@ -126,6 +126,7 @@ public class TriangleKdTree {
 			double offset = 0.01*(globalBounds[i+3]-globalBounds[i]);
 			globalBounds[i] -= offset;
 			globalBounds[i+3] += offset;
+			globalSize[i] = globalBounds[i+3] - globalBounds[i];
 		}
 		for(Triangle t:mesh.getTriangles())
 			if(!t.hasAttributes(AbstractHalfEdge.OUTER))
@@ -545,15 +546,78 @@ public class TriangleKdTree {
 		}
 		return maxDir;
 	}
+
+	private byte[] directions = new byte[3];
+	private double sort3Direction(double[] bounds) {
+		double a0 = bounds[3] - bounds[0];
+		double a1 = bounds[4] - bounds[1];
+		double a2 = bounds[5] - bounds[2];
+		if (a0 <= a1) {
+			if (a1 > a2) {
+				directions[2] = 1;
+				if (a0 < a2) {
+					directions[0] = 0;
+					directions[1] = 2;
+					return a0;
+				} else {
+					directions[0] = 2;
+					directions[1] = 0;
+					return a2;
+				}
+			} else {
+				directions[0] = 0;
+				directions[1] = 1;
+				directions[2] = 2;
+				return a0;
+			}
+		} else {
+			if (a0 > a2) {
+				directions[2] = 0;
+				if (a1 < a2) {
+					directions[0] = 1;
+					directions[1] = 2;
+					return a1;
+				} else {
+					directions[0] = 2;
+					directions[1] = 1;
+					return a2;
+				}
+			} else {
+				directions[0] = 1;
+				directions[1] = 0;
+				directions[2] = 2;
+				return a1;
+			}
+		}
+	}
 	private double[] splitBoundsLeft = new double[6];
 	private double[] splitBoundsRight = new double[6];
 	private void split(Node node, double[] bounds)
 	{
-		node.direction = getSplitDirection(bounds);
+		double mainSize = sort3Direction(bounds);
+		if(mainSize < globalSize[directions[2]] / 1024.0)
+			return;
+		boolean found = false;
+		for(int i = 2; i >= 0; i--)
+		{
+			if(split(node, bounds, directions[i], false))
+			{
+				found =true;
+				break;
+			}
+		}
+		if(!found)
+			split(node, bounds, directions[2], true);
+	}
+
+	private boolean split(Node node, double[] bounds, byte direction, boolean force)
+	{
+		node.direction = direction;
 		node.left = new Node();
 		node.right = new Node();
-		node.left.triangles = new Triangle[node.triangles.length];
-		node.right.triangles = new Triangle[node.triangles.length];
+		int nTriangles = node.triangles.length;
+		node.left.triangles = new Triangle[nTriangles];
+		node.right.triangles = new Triangle[nTriangles];
 		int iLeft = 0, iRight = 0;
 		double cut = (bounds[node.direction] + bounds[node.direction+3]) / 2.0;
 		System.arraycopy(bounds, 0, splitBoundsLeft, 0, 6);
@@ -587,17 +651,39 @@ public class TriangleKdTree {
 			if(inRight && triangleInterAABB2.triBoxOverlap(splitBoundsRight, false))
 				node.right.triangles[iRight++] = t;
 		}
-		if(iLeft > 0)
-			node.left.triangles = Arrays.copyOf(node.left.triangles, iLeft);
+		if(force || iLeft == 0 || iRight == 0 ||
+			(iLeft < nTriangles && iRight < nTriangles) ||
+			isLargeNode(bounds, direction))
+		{
+			if(iLeft > 0)
+				node.left.triangles = Arrays.copyOf(node.left.triangles, iLeft);
+			else
+				node.left = null;
+
+			if(iRight > 0)
+				node.right.triangles = Arrays.copyOf(node.right.triangles, iRight);
+			else
+				node.right = null;
+
+			node.triangles = null;
+			return true;
+		}
 		else
+		{
 			node.left = null;
-
-		if(iRight > 0)
-			node.right.triangles = Arrays.copyOf(node.right.triangles, iRight);
-		else
 			node.right = null;
+			return false;
+		}
+	}
 
-		node.triangles = null;
+	/**
+	 * Large node are splitted even if a child have the same number
+	 * of triangles as the parent
+	 */
+	private boolean isLargeNode(double[] bounds, byte dir)
+	{
+		double nodeSize = bounds[dir + 3] - bounds[dir];
+		return nodeSize > globalSize[dir] / 128.0;
 	}
 
 	private void stats()
@@ -606,6 +692,7 @@ public class TriangleKdTree {
 		nodes.add(root);
 		int nbLeaf = 0;
 		int maxDepth = 0;
+		int maxTriangles = 0;
 		while(!nodes.isEmpty())
 		{
 			Node n = nodes.remove(nodes.size() - 1);
@@ -614,10 +701,13 @@ public class TriangleKdTree {
 			if(n.right != null)
 				nodes.add(n.right);
 			if(n.triangles != null)
+			{
 				nbLeaf++;
+				maxTriangles = Math.max(n.triangles.length, maxTriangles);
+			}
 			maxDepth = Math.max(nodes.size(), maxDepth);
 		}
-		System.out.println("number of leaves: "+nbLeaf+" max depth: "+maxDepth);
+		System.out.println("number of leaves: "+nbLeaf+" max depth: "+maxDepth+" largest node: "+maxTriangles);
 	}
 	/** The 8 vertices of a voxel */
 	private static int[][] VOXEL_VERTICES = new int[][]
