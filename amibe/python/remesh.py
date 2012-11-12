@@ -101,15 +101,11 @@ def afront(afront_path, tmp_dir, mesh_dir, size):
     return MultiDoubleFileReader(nodes_file)
 
 def afront_insert(liaison, nodes_reader, size):
-    opts = HashMap()
-    opts.put("size", str(size))
-    opts.put("minCosAfterSwap", "0.3")
-    opts.put("coplanarity", "-2")
-    remesh = Remesh(liaison, opts)
+    remesh = VertexInsertion(liaison)
     inserted_vertices = ArrayList()
     for g_id in xrange(1, liaison.mesh.getNumberOfGroups()+1):
         vs = nodes_reader.next()
-        inserted_vertices.addAll(remesh.insertNodes(vs, g_id, size, size/100.0))
+        inserted_vertices.addAll(remesh.insertNodes(vs, g_id, size/100.0))
     return inserted_vertices
 
 def remesh(**kwargs):
