@@ -264,11 +264,22 @@ public class TriangleKdTree {
 						MeshLiaison.TRIANGLE_DISTANCE.getProjection(projection);
 				}
 				seen.add(t);
+				//It seems to happen often so let's optimize
+				if(aabbDistance == 0)
+					break;
 			}
-			aabbDistance = Math.sqrt(aabbDistance);
-			triangleDistance = aabbDistance;
+			if(seen.isEmpty())
+			{
+				//all triangles are from an other group
+				aabbDistance = distanceAABB(coords, workBoundary1);
+				triangleDistance = Double.POSITIVE_INFINITY;
+			}
+			else
+			{
+				aabbDistance = Math.sqrt(aabbDistance);
+				triangleDistance = aabbDistance;
+			}
 		}
-
 		getNodes(createCenteredAABB(coords, 1.01*aabbDistance), null, false);
 		for(Node nn: closeNodes)
 		{
