@@ -103,6 +103,7 @@ public class TriangleKdTree {
 	}
 	private final Node root = new Node();
 	private double[] globalBounds, globalSize = new double[3];
+	private double[] minNodeSize = new double[3];
 	private final int bucketSize;
 	private final TriangleInterAABB triangleInterAABB1 = new TriangleInterAABB();
 	private final TriangleInterAABB triangleInterAABB2 = new TriangleInterAABB();
@@ -112,10 +113,10 @@ public class TriangleKdTree {
 
 	public TriangleKdTree(Mesh mesh)
 	{
-		this(mesh, 10);
+		this(mesh, 10, 4096.0);
 	}
 
-	public TriangleKdTree(Mesh mesh, int bucketSize)
+	public TriangleKdTree(Mesh mesh, int bucketSize, double minNodeRatio)
 	{
 		this.bucketSize = bucketSize;
 		if(mesh.hasNodes())
@@ -128,6 +129,7 @@ public class TriangleKdTree {
 			globalBounds[i] -= offset;
 			globalBounds[i+3] += offset;
 			globalSize[i] = globalBounds[i+3] - globalBounds[i];
+			minNodeSize[i] = globalSize[i] / minNodeRatio;
 		}
 		for(Triangle t:mesh.getTriangles())
 			if(!t.hasAttributes(AbstractHalfEdge.OUTER))
@@ -624,60 +626,74 @@ public class TriangleKdTree {
 		double a0 = bounds[3] - bounds[0];
 		double a1 = bounds[4] - bounds[1];
 		double a2 = bounds[5] - bounds[2];
+		byte d0 = (byte) (a0 < minNodeSize[0] ? -1 : 0);
+		byte d1 = (byte) (a1 < minNodeSize[1] ? -1 : 1);
+		byte d2 = (byte) (a2 < minNodeSize[2] ? -1 : 2);
+
+		double max = 0;
 		if (a0 <= a1) {
 			if (a1 > a2) {
-				directions[2] = 1;
+				directions[2] = d1;
+				max = a2;
 				if (a0 < a2) {
-					directions[0] = 0;
-					directions[1] = 2;
+					directions[0] = d0;
+					directions[1] = d2;
 				} else {
-					directions[0] = 2;
-					directions[1] = 0;
+					directions[0] = d2;
+					directions[1] = d0;
 				}
-				return a1;
+				max = a1;
 			} else {
-				directions[0] = 0;
-				directions[1] = 1;
-				directions[2] = 2;
-				return a2;
+				directions[0] = d0;
+				directions[1] = d1;
+				directions[2] = d2;
 			}
 		} else {
 			if (a0 > a2) {
-				directions[2] = 0;
+				directions[2] = d0;
+				max = a0;
 				if (a1 < a2) {
-					directions[0] = 1;
-					directions[1] = 2;
+					directions[0] = d1;
+					directions[1] = d2;
 				} else {
-					directions[0] = 2;
-					directions[1] = 1;
+					directions[0] = d2;
+					directions[1] = d1;
 				}
-				return a0;
 			} else {
-				directions[0] = 1;
-				directions[1] = 0;
-				directions[2] = 2;
-				return a2;
+				directions[0] = d1;
+				directions[1] = d0;
+				directions[2] = d2;
+				max = a2;
 			}
 		}
+		return max;
 	}
+
 	private double[] splitBoundsLeft = new double[6];
 	private double[] splitBoundsRight = new double[6];
 	private void split(Node node, double[] bounds)
 	{
-		double mainSize = sort3Direction(bounds);
-		if(mainSize < globalSize[directions[2]] / 1024.0)
-			return;
+		sort3Direction(bounds);
 		boolean found = false;
 		for(int i = 2; i >= 0; i--)
 		{
-			if(split(node, bounds, directions[i], false))
+			if(directions[i] >= 0 && split(node, bounds, directions[i], false))
 			{
 				found =true;
 				break;
 			}
 		}
 		if(!found)
-			split(node, bounds, directions[2], true);
+		{
+			for(int i = 2; i >= 0; i--)
+			{
+				if(directions[i] >= 0)
+				{
+					split(node, bounds, directions[i], true);
+					break;
+				}
+			}
+		}
 	}
 
 	private boolean split(Node node, double[] bounds, byte direction, boolean force)
@@ -723,7 +739,7 @@ public class TriangleKdTree {
 		}
 		if(force || iLeft == 0 || iRight == 0 ||
 			(iLeft < nTriangles && iRight < nTriangles) ||
-			isLargeNode(bounds, direction))
+			isLargeNode(bounds, direction, 128.0))
 		{
 			if(iLeft > 0)
 				node.left.triangles = Arrays.copyOf(node.left.triangles, iLeft);
@@ -750,10 +766,10 @@ public class TriangleKdTree {
 	 * Large node are splitted even if a child have the same number
 	 * of triangles as the parent
 	 */
-	private boolean isLargeNode(double[] bounds, byte dir)
+	private boolean isLargeNode(double[] bounds, byte dir, double ratio)
 	{
 		double nodeSize = bounds[dir + 3] - bounds[dir];
-		return nodeSize > globalSize[dir] / 128.0;
+		return nodeSize > globalSize[dir] / ratio;
 	}
 
 	public String stats()
