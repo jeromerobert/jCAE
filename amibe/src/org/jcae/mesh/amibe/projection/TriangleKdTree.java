@@ -756,13 +756,15 @@ public class TriangleKdTree {
 		return nodeSize > globalSize[dir] / 128.0;
 	}
 
-	private void stats()
+	public String stats()
 	{
 		ArrayList<Node> nodes =new ArrayList<Node>();
 		nodes.add(root);
 		int nbLeaf = 0;
 		int maxDepth = 0;
 		int maxTriangles = 0;
+		Triangle nearMaxTriangle = null;
+		Node maxNode =null;
 		while(!nodes.isEmpty())
 		{
 			Node n = nodes.remove(nodes.size() - 1);
@@ -773,12 +775,24 @@ public class TriangleKdTree {
 			if(n.triangles != null)
 			{
 				nbLeaf++;
-				maxTriangles = Math.max(n.triangles.length, maxTriangles);
+				if(n.triangles.length > maxTriangles)
+				{
+					nearMaxTriangle = n.triangles[0];
+					maxTriangles = n.triangles.length;
+					maxNode = n;
+				}
 			}
 			maxDepth = Math.max(nodes.size(), maxDepth);
 		}
-		System.out.println("number of leaves: "+nbLeaf+" max depth: "+maxDepth+" largest node: "+maxTriangles);
+		if(maxNode.triangles.length != new HashSet<Triangle>(Arrays.asList(
+			maxNode.triangles)).size())
+			throw new IllegalArgumentException();
+
+		return "number of leaves: " + nbLeaf + " max depth: " + maxDepth +
+			" largest node: " + maxTriangles + " near " +
+			Arrays.toString(nearMaxTriangle.vertex);
 	}
+
 	/** The 8 vertices of a voxel */
 	private static int[][] VOXEL_VERTICES = new int[][]
 	{
@@ -811,12 +825,31 @@ public class TriangleKdTree {
 		ArrayList<int[]> quads = new ArrayList<int[]>();
 		ArrayList<double[]> coords = new ArrayList<double[]>();
 		int n = closeNodes.size();
+		double[] maxBounds = null;
+		Node maxNode = null;
+		int maxTriangles = 0;
+		Node smallestBox = null;
+		double smallestSize = Double.MAX_VALUE;
+		double[] smallBounds = null;
 		for(int i = 0; i < n; i++)
 		{
 			Node node = closeNodes.get(i);
 			double[] nBounds = closeBoundaries.get(i);
 			if(node.triangles != null && node.triangles.length > 0)
 			{
+				if(node.triangles.length > maxTriangles)
+				{
+					maxBounds = nBounds;
+					maxTriangles = node.triangles.length;
+					maxNode = node;
+				}
+				double nodeSize = sort3Direction(nBounds);
+				if(nodeSize < smallestSize)
+				{
+					smallestBox = node;
+					smallestSize = nodeSize;
+					smallBounds = nBounds;
+				}
 				int[] quad = new int[24];
 				quads.add(quad);
 				int voxelVertexId = 0;
@@ -853,6 +886,8 @@ public class TriangleKdTree {
 			k += q.length;
 		}
 		coords = null;
+		System.err.println("max triangle node: "+maxTriangles+"\n"+bounds2String(maxBounds)+"\n"+Arrays.toString(maxBounds));
+		System.err.println("smallest node: "+bounds2String(smallBounds)+" "+smallestBox.triangles.length);
 		return new Object[]{coordArray, quadArray};
 	}
 
@@ -888,7 +923,7 @@ public class TriangleKdTree {
 				}
 				System.out.println(t.getClosestTriangle(new double[]{400, -800, 0}, null, -1));
 				long l3 = System.nanoTime();
-				t.stats();
+				System.out.println(t.stats());
 				long l4 = System.nanoTime();
 				loop: for(Triangle tria:mesh.getTriangles())
 				{
