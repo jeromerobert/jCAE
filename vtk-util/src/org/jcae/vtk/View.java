@@ -22,6 +22,7 @@ package org.jcae.vtk;
 
 
 import java.awt.AWTEvent;
+import java.awt.Color;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -71,6 +72,8 @@ public class View extends Canvas {
 		try {
 			// By default the translucent objects can be picked
 			vtkRenderer r = GetRenderer();
+			Color bgCol = Color.getColor("org.jcae.vtk.color.background", Color.BLACK);
+			r.SetBackground(bgCol.getRed() / 255.0, bgCol.getGreen() / 255.0, bgCol.getBlue() / 255.0);
 			Method m = r.getClass().getMethod("PickTranslucentOn");
 			m.invoke(r);
 		} catch (NoSuchMethodException ex) {

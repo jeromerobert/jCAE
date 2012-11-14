@@ -21,6 +21,7 @@
 package org.jcae.vtk;
 
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.geom.AffineTransform;
@@ -99,6 +100,25 @@ public class CameraManager
 		TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK
 	}
 
+	public void setAxisLabelColor(Color c)
+	{
+		double r = c.getRed() / 255.0;
+		double g = c.getGreen() / 255.0;
+		double b = c.getBlue() / 255.0;
+		relativeAxes.GetXAxisCaptionActor2D().GetCaptionTextProperty().SetColor(
+			r, g, b);
+		originAxes.GetXAxisCaptionActor2D().GetCaptionTextProperty().SetColor(
+			r, g, b);
+		relativeAxes.GetYAxisCaptionActor2D().GetCaptionTextProperty().SetColor(
+			r, g, b);
+		originAxes.GetYAxisCaptionActor2D().GetCaptionTextProperty().SetColor(
+			r, g, b);
+		relativeAxes.GetZAxisCaptionActor2D().GetCaptionTextProperty().SetColor(
+			r, g, b);
+		originAxes.GetZAxisCaptionActor2D().GetCaptionTextProperty().SetColor(
+			r, g, b);
+	}
+
 	public CameraManager(Canvas canvas)
 	{
 		this.canvas = canvas;
@@ -107,11 +127,11 @@ public class CameraManager
 		originAxes = new vtkAxesActor();
 		originAxes.AxisLabelsOff();
 		renderer.AddActor(originAxes);
-		
 		// A display orientation
 		relativeAxes = new vtkAxesActor();
 		relativeAxes.AxisLabelsOn();
-		
+
+		setAxisLabelColor(Color.getColor("org.jcae.vtk.color.label", Color.WHITE));
 		// FIXME: I do not know why, but originAxes has 6
 		// pickable actors whereas relativeAxes has none.
 		// As originAxes.PickableOff() does nothing, try
