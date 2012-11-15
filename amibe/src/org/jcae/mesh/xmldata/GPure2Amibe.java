@@ -23,6 +23,8 @@ package org.jcae.mesh.xmldata;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,6 +41,8 @@ public class GPure2Amibe extends XMLReader {
 	private final String outputDir;
 	private Dim3 out;
 	private int nodeCounter;
+	private final Set<String> groupNames = new HashSet<String>();
+
 	public GPure2Amibe(String outputDir) {
 		this.outputDir = outputDir;
 	}
@@ -87,7 +91,8 @@ public class GPure2Amibe extends XMLReader {
 			Element dataGroup = getElement(e, "GPure:dataGroup");
 			if(dataGroup != null && "partitionDataSet".equals(dataGroup.getTextContent()))
 			{
-				out.nextGroup(getElement(e, "GPure:name").getTextContent());
+				String gn = getFreeName(getElement(e, "GPure:name").getTextContent());
+				out.nextGroup(gn);
 				addToGroup(getElement(e, "GPure:faces").getTextContent());
 			}
 		}
@@ -102,6 +107,27 @@ public class GPure2Amibe extends XMLReader {
 			beamOffset += addBeams(edges.getTextContent(), nodeOffset, beamOffset);
 		}
 		out.finish();
+	}
+
+	private String getFreeName(String root)
+	{
+		String toReturn;
+		if(groupNames.contains(root))
+		{
+			int i = 1;
+			String name;
+			do
+			{
+				name = root + i;
+				i++;
+			}
+			while(groupNames.contains(name));
+			toReturn = name;
+		}
+		else
+			toReturn = root;
+		groupNames.add(toReturn);
+		return toReturn;
 	}
 
 	@Override
