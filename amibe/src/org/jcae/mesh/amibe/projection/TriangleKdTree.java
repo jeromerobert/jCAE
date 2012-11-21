@@ -24,8 +24,10 @@ import gnu.trove.THashSet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -312,11 +314,114 @@ public class TriangleKdTree {
 	}
 
 	/**
+	 * Check that getNodes(double[], ...) return at least the nodes returned
+	 * by getNodes(Triangle)
+	 */
+	public void heavyCheck()
+	{
+		List<Node> backup = new ArrayList<Node>(closeNodes);
+		closeNodes.clear();
+		for(Triangle t: getTriangles())
+		{
+			bounds(t, triangleBounds);
+			getNodes(triangleBounds, null, false);
+			Collection<Node> ns = getNodes(t);
+			if(!closeNodes.containsAll(ns))
+			{
+				System.err.println(t);
+				System.err.println("triangle bounds:" + bounds2String(triangleBounds));
+				System.err.println("triangle bounds:" + Arrays.toString(triangleBounds));
+				ns.removeAll(closeNodes);
+				Map<Node, double[]> nb = getNodeBounds();
+				for(Node n:ns)
+				{
+					TriangleInterAABB ti = new TriangleInterAABB();
+					ti.setTriangle(t);
+					System.err.println(ti.triBoxOverlap(nb.get(n), true));
+					System.err.println(intersect(triangleBounds, nb.get(n)));
+					System.err.println("n :"+Arrays.toString(nb.get(n)));
+				}
+				throw new IllegalStateException();
+			}
+			closeNodes.clear();
+		}
+		closeNodes.addAll(backup);
+	}
+
+	/** Slow and memory consuming debug method that build node boundaries */
+	private Map<Node, double[]> getNodeBounds()
+	{
+		HashMap<Node, double[]> toReturn = new HashMap<Node, double[]>();
+		List<Node> backup = new ArrayList<Node>(closeNodes);
+		closeNodes.clear();
+		BoundaryPool bp = new BoundaryPool();
+		getNodes(createCenteredAABB(new double[3], Double.POSITIVE_INFINITY), bp, false);
+		for(int i = 0; i < closeNodes.size(); i++)
+			toReturn.put(closeNodes.get(i), bp.get(i));
+
+		closeNodes.clear();
+		closeNodes.addAll(backup);
+		return toReturn;
+	}
+
+	/**
+	 * Slow and memory consuming method to check that all triangles in a node
+	 * are really intersecting this node
+	 */
+	private void checkNode(Node n)
+	{
+		if(n.triangles == null)
+			return;
+		double[] bounds = getNodeBounds().get(n);
+		TriangleInterAABB ti = new TriangleInterAABB();
+		for(Triangle t: n.triangles)
+		{
+			ti.setTriangle(t);
+			assert ti.triBoxOverlap(bounds, true);
+		}
+	}
+
+	/** Slow debugging function to get all nodes containing a triangle */
+	private Collection<Node> getNodes(Triangle triangle)
+	{
+		ArrayList<Node> result = new ArrayList<Node>();
+		if(nodeStack == null)
+			nodeStack = new ArrayList<Node>();
+		else
+			nodeStack.clear();
+
+		nodeStack.add(root);
+		while(!nodeStack.isEmpty())
+		{
+			int n = nodeStack.size() - 1;
+			Node current = nodeStack.remove(n);
+			if(current.triangles != null)
+			{
+				for(Triangle t:current.triangles)
+					if(t == triangle)
+					{
+						result.add(current);
+						break;
+					}
+			}
+			else
+			{
+				if(current.left != null)
+					nodeStack.add(current.left);
+				if(current.right != null)
+					nodeStack.add(current.right);
+			}
+		}
+		return result;
+	}
+
+	/**
 	 * Get all triangles present in this kdTree.
 	 * It's mainly used to check the concistancy of the kdTree while debugging.
 	 */
-	public void getTriangles(Set<Triangle> result)
+	public Set<Triangle> getTriangles()
 	{
+		HashSet<Triangle> result = new HashSet<Triangle>();
 		if(nodeStack == null)
 			nodeStack = new ArrayList<Node>();
 		else
@@ -340,6 +445,7 @@ public class TriangleKdTree {
 					nodeStack.add(current.right);
 			}
 		}
+		return result;
 	}
 
 	/** Non zero Manhattan distance between a point and an AABB */
@@ -817,7 +923,7 @@ public class TriangleKdTree {
 		}
 		if(maxNode.triangles.length != new HashSet<Triangle>(Arrays.asList(
 			maxNode.triangles)).size())
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException(Arrays.toString(maxNode.triangles));
 
 		return "number of leaves: " + nbLeaf + " max depth: " + maxDepth +
 			" largest node: " + maxTriangles + " near " +
@@ -928,7 +1034,6 @@ public class TriangleKdTree {
 			MeshReader.readObject3D(mesh, "/tmp/bidule.amibe");
 			System.out.println(mesh.getTriangles().size());
 			int[] bucketSize = new int[]{7,8,9,10,11,12,13,14};
-			HashSet<Triangle> tmp2 = new HashSet<Triangle>();
 			for(int bs: bucketSize)
 			{
 				System.out.println("******** "+bs+" **********");
@@ -963,8 +1068,7 @@ public class TriangleKdTree {
 					t.replace(tria);
 				}
 				long l5 = System.nanoTime();
-				tmp2.clear();
-				t.getTriangles(tmp2);
+				Set<Triangle> tmp2 = t.getTriangles();
 				if(!tmp2.isEmpty())
 					throw new IllegalStateException(""+tmp2.size()+" "+tmp2.iterator().next());
 				System.out.println((l2-l1)/1E9+" "+(l3-l2)/1E9+" "+(l5-l4)/1E9);
