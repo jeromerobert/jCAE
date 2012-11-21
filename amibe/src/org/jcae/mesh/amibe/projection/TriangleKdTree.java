@@ -185,9 +185,13 @@ public class TriangleKdTree {
 					{
 						for(Triangle newT:newTriangles)
 						{
-							triangleInterAABB1.setTriangle(newT);
-							if(triangleInterAABB1.triBoxOverlap(b, true))
-								toAdd[toAddIndex++] = newT;
+							bounds(newT, triangleBounds);
+							if(intersect(triangleBounds, b))
+							{
+								triangleInterAABB1.setTriangle(newT);
+								if(triangleInterAABB1.triBoxOverlap(b, true))
+									toAdd[toAddIndex++] = newT;
+							}
 						}
 						switch(toAddIndex)
 						{
