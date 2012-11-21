@@ -24,10 +24,19 @@ import java.nio.DoubleBuffer;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
+import org.jcae.mesh.amibe.ds.HalfEdge;
+import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.TriangleHE;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.projection.MeshLiaison;
 import org.jcae.mesh.amibe.projection.TriangleKdTree;
+import org.jcae.mesh.xmldata.MeshReader;
+import org.jcae.mesh.xmldata.MultiDoubleFileReader;
 
 /**
  *
@@ -35,9 +44,16 @@ import org.jcae.mesh.amibe.projection.TriangleKdTree;
  */
 public class VertexInsertion {
 	private final MeshLiaison liaison;
+	private final static Logger LOGGER = Logger.getLogger(VertexInsertion.class.getName());
+	private final TriangleKdTree kdTree;
+	/** triangles added when inserting a point in the middle of a triangle */
+	private final Collection<Triangle> tmp = new ArrayList<Triangle>(3);
 
 	public VertexInsertion(MeshLiaison liaison) {
 		this.liaison = liaison;
+		LOGGER.info("Start creating kd-tree");
+		kdTree = new TriangleKdTree(liaison.getMesh());
+		LOGGER.info(kdTree.stats());
 	}
 
 	public Collection<Vertex> insertNodes(final DoubleBuffer vertices, int group,
@@ -75,7 +91,6 @@ public class VertexInsertion {
 		double insertionTol)
 	{
 		double tol2 = insertionTol * insertionTol;
-		TriangleKdTree kdTree = new TriangleKdTree(liaison.getMesh());
 		double[] projection = new double[3];
 		ArrayList<Vertex> toReturn = new ArrayList<Vertex>(vertices.size());
 		main: for(Vertex v: vertices)
@@ -90,10 +105,109 @@ public class VertexInsertion {
 					continue main;
 				}
 			}
+
 			liaison.move(v, projection, true);
-			t.split(liaison.getMesh(), v);
+			if(!edgeSplit(t, tol2, v))
+			{
+				t.split(liaison.getMesh(), v, tmp);
+				kdTree.replace(t, tmp);
+				tmp.clear();
+			}
 			toReturn.add(v);
+			swap(v);
 		}
+		LOGGER.info("End of insertion");
 		return toReturn;
+	}
+
+	private void swap(Vertex v)
+	{
+		Mesh mesh = liaison.getMesh();
+		HalfEdge current = (HalfEdge) v.getIncidentAbstractHalfEdge((Triangle)v.getLink(), null);
+		current = current.next();
+		Vertex o = current.origin();
+		assert current.apex() == v;
+		boolean redo = true;
+		while(redo)
+		{
+			redo = false;
+			while(true)
+			{
+				if (!current.hasAttributes(AbstractHalfEdge.NONMANIFOLD |
+					AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.OUTER) &&
+					current.checkSwap3D(mesh, -2.0, 0, 0, true, 0.3, 0.3) > 0.0
+					&& current.canSwapTopology())
+				{
+					kdTree.remove(current.getTri());
+					kdTree.remove(current.sym().getTri());
+					current = (HalfEdge) mesh.edgeSwap(current);
+					HalfEdge swapped = current.next();
+					kdTree.addTriangle(swapped.getTri());
+					kdTree.addTriangle(swapped.sym().getTri());
+					redo = true;
+				}
+				else
+				{
+					current = current.nextApexLoop();
+					if (current.origin() == o)
+						break;
+				}
+			}
+		}
+	}
+	/**
+	 * Try to insert a vertex into an edge of the given triangle
+	 * @param t
+	 * @param tol2
+	 * @param v
+	 * @return The number of created triangles
+	 */
+	private boolean edgeSplit(Triangle t, double tol2, Vertex v)
+	{
+		AbstractHalfEdge e = t.getAbstractHalfEdge();
+		for(int i = 0; i < 3; i++)
+		{
+			if(MeshLiaison.sqrOrthoDistance(v, e) < tol2)
+			{
+				if(e.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+				{
+					Iterator<AbstractHalfEdge> rit = e.fanIterator();
+					while(rit.hasNext())
+						kdTree.remove(rit.next().getTri());
+				}
+				else
+				{
+					kdTree.remove(t);
+					kdTree.remove(e.sym().getTri());
+				}
+				liaison.getMesh().vertexSplit(e, v);
+				Iterator<Triangle> it = v.getNeighbourIteratorTriangle();
+				while(it.hasNext())
+					kdTree.addTriangle(it.next());
+				return true;
+			}
+			e = e.next();
+			assert e != null;
+		}
+		return false;
+	}
+
+	public static void main(final String[] args) {
+		try {
+			MultiDoubleFileReader mdf = new MultiDoubleFileReader("/tmp/tmps2zXh3/nodes.bin");
+			Mesh mesh = new Mesh();
+			MeshReader.readObject3D(mesh, "/tmp/debug2.zebra/amibe.dir");
+			MeshLiaison ml = MeshLiaison.create(mesh);
+			ml.getMesh().buildGroupBoundaries();
+			VertexInsertion vi = new VertexInsertion(ml);
+			for(int gId = 1; gId <= ml.getMesh().getNumberOfGroups(); gId++)
+			{
+				DoubleBuffer vs = mdf.next();
+				vi.insertNodes(vs, gId, 0.3);
+			}
+		} catch (Exception ex) {
+			Logger.getLogger(VertexInsertion.class.getName()).log(Level.SEVERE,
+				null, ex);
+		}
 	}
 }

@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -158,6 +160,10 @@ public class TriangleKdTree {
 	private final transient BoundaryPool closeBoundaries = new BoundaryPool();
 	private final int[] closeIndex = new int[2];
 
+	public void remove(Triangle triangle)
+	{
+		replace(triangle, Collections.<Triangle>emptyList());
+	}
 	/**
 	 * Replace a triangle by a set of triangles which are located in the same
 	 * place as the original triangle.
@@ -166,11 +172,12 @@ public class TriangleKdTree {
 	 * @param toReplace
 	 * @param newTriangles
 	 */
-	public void replace(Triangle toReplace, Triangle ... newTriangles)
+	public void replace(Triangle toReplace, Collection<Triangle> newTriangles)
 	{
 		bounds(toReplace, triangleBounds);
 		getNodes(triangleBounds, closeBoundaries, false);
-		Triangle[] toAdd = new Triangle[newTriangles.length];
+		//TODO remove the array allocation (make it a class field)
+		Triangle[] toAdd = new Triangle[newTriangles.size()];
 		int toAddIndex = 0;
 		for(int i = 0; i < closeNodes.size(); i++)
 		{
@@ -1038,7 +1045,7 @@ public class TriangleKdTree {
 			{
 				System.out.println("******** "+bs+" **********");
 				long l1 = System.nanoTime();
-				TriangleKdTree t = new TriangleKdTree(mesh, bs);
+				TriangleKdTree t = new TriangleKdTree(mesh, bs, 4096);
 				long l2 = System.nanoTime();
 				double[] coords = new double[3];
 				loop: for(Triangle tria:mesh.getTriangles())
@@ -1065,7 +1072,7 @@ public class TriangleKdTree {
 				{
 					if(tria.hasAttributes(AbstractHalfEdge.OUTER))
 						continue;
-					t.replace(tria);
+					t.replace(tria, Collections.<Triangle>emptyList());
 				}
 				long l5 = System.nanoTime();
 				Set<Triangle> tmp2 = t.getTriangles();

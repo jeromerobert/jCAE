@@ -288,7 +288,7 @@ public abstract class MeshLiaison
 	}
 
 	/** Square of the distance between v and it's orthogonal projection on e */
-	private static double sqrOrthoDistance(Vertex v, AbstractHalfEdge e)
+	public static double sqrOrthoDistance(Vertex v, AbstractHalfEdge e)
 	{
 		double[] o = e.origin().getUV();
 		double[] d = e.destination().getUV();
