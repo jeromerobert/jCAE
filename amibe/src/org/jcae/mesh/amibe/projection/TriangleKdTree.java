@@ -294,8 +294,8 @@ public class TriangleKdTree {
 			}
 			else
 			{
-				aabbDistance = Math.sqrt(aabbDistance);
 				triangleDistance = aabbDistance;
+				aabbDistance = Math.sqrt(aabbDistance);
 			}
 		}
 		getNodes(createCenteredAABB(coords, 1.01*aabbDistance), null, false);
