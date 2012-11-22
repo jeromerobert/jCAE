@@ -320,6 +320,46 @@ public class TriangleKdTree {
 		return toReturn;
 	}
 
+	public Triangle getClosestTriangleDebug(double[] coords, double[] projection, int group)
+	{
+		double minDist2 = Double.POSITIVE_INFINITY;
+		Triangle toReturn = null;
+		for(Triangle t:getTriangles())
+		{
+			if(t.getGroupId() == group || group < 0)
+			{
+				double d = MeshLiaison.TRIANGLE_DISTANCE.compute(coords, t, closeIndex);
+				if(d < minDist2)
+				{
+					minDist2 = d;
+					toReturn = t;
+					MeshLiaison.TRIANGLE_DISTANCE.getProjection(projection);
+				}
+			}
+		}
+		double[] otherProj = new double[3];
+		Triangle other = getClosestTriangle(coords, otherProj, group);
+		if(other != toReturn)
+		{
+			System.err.println("--- real solution ---");
+			System.err.println(toReturn);
+			System.err.println(Math.sqrt(minDist2));
+			System.err.println(Arrays.toString(projection));
+			System.err.println("--- kdtree solution ---");
+			System.err.println(other);
+			int n = 0;
+			for(int i = 0; i < 3; i++)
+			{
+				double d = otherProj[i] - coords[i];
+				n += d * d;
+			}
+			System.err.println(Math.sqrt(n));
+			System.err.println(Arrays.toString(otherProj));
+			throw new IllegalStateException();
+		}
+		return toReturn;
+	}
+
 	/**
 	 * Check that getNodes(double[], ...) return at least the nodes returned
 	 * by getNodes(Triangle)
