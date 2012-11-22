@@ -104,6 +104,11 @@ public class TriangleKdTree {
 		public byte direction;
 		public Node left, right;
 		public Triangle[] triangles;
+		public boolean isEmptyLeaf()
+		{
+			return left == null && right == null &&
+				(triangles == null || triangles.length == 0);
+		}
 	}
 	private final Node root = new Node();
 	private double[] globalBounds, globalSize = new double[3];
@@ -700,6 +705,11 @@ public class TriangleKdTree {
 				{
 					return current;
 				}
+				else if(current.left.isEmptyLeaf())
+				{
+					current.left = null;
+					return current;
+				}
 				else
 				{
 					current = current.left;
@@ -710,6 +720,11 @@ public class TriangleKdTree {
 			{
 				if(current.right == null)
 				{
+					return current;
+				}
+				else if(current.right.isEmptyLeaf())
+				{
+					current.right = null;
 					return current;
 				}
 				else
