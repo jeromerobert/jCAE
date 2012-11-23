@@ -48,6 +48,7 @@ public class VertexInsertion {
 	private final TriangleKdTree kdTree;
 	/** triangles added when inserting a point in the middle of a triangle */
 	private final Collection<Triangle> tmp = new ArrayList<Triangle>(3);
+	private double[] qualities = new double[4];
 
 	public VertexInsertion(MeshLiaison liaison) {
 		this.liaison = liaison;
@@ -97,6 +98,7 @@ public class VertexInsertion {
 		{
 			TriangleHE t = (TriangleHE) kdTree.getClosestTriangle(
 				v.getUV(), projection, group);
+			liaison.move(v, projection, true);
 			for(Vertex tv:t.vertex)
 			{
 				if(tv.sqrDistance3D(v) < tol2)
@@ -106,13 +108,11 @@ public class VertexInsertion {
 				}
 			}
 
-			liaison.move(v, projection, true);
-			if(!edgeSplit(t, tol2, v))
-			{
-				t.split(liaison.getMesh(), v, tmp);
-				kdTree.replace(t, tmp);
-				tmp.clear();
-			}
+			// We could check that we are close from an edge but we don't
+			// because swaping will properly handle this case
+			t.split(liaison.getMesh(), v, tmp);
+			kdTree.replace(t, tmp);
+			tmp.clear();
 			toReturn.add(v);
 			swap(v);
 		}
@@ -133,20 +133,30 @@ public class VertexInsertion {
 			redo = false;
 			while(true)
 			{
+				boolean isSwapped = false;
 				if (!current.hasAttributes(AbstractHalfEdge.NONMANIFOLD |
-					AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.OUTER) &&
-					current.checkSwap3D(mesh, -2.0, 0, 0, true, 0.3, 0.3) > 0.0
+					AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.OUTER)
 					&& current.canSwapTopology())
 				{
-					kdTree.remove(current.getTri());
-					kdTree.remove(current.sym().getTri());
-					current = (HalfEdge) mesh.edgeSwap(current);
-					HalfEdge swapped = current.next();
-					kdTree.addTriangle(swapped.getTri());
-					kdTree.addTriangle(swapped.sym().getTri());
-					redo = true;
+					current.getQualities(mesh, qualities);
+					//swapped_angle > angle && swapped_quality > q && q < 1E-3
+					//q < 1E-3 to avoid to have triangle far from the background
+					//mesh
+					if(qualities[3] > qualities[2] &&
+						qualities[1] > qualities[0] && qualities[0] < 1E-3)
+					{
+						kdTree.remove(current.getTri());
+						kdTree.remove(current.sym().getTri());
+						current = (HalfEdge) mesh.edgeSwap(current);
+						HalfEdge swapped = current.next();
+						kdTree.addTriangle(swapped.getTri());
+						kdTree.addTriangle(swapped.sym().getTri());
+						redo = true;
+						isSwapped = true;
+					}
 				}
-				else
+
+				if(!isSwapped)
 				{
 					current = current.nextApexLoop();
 					if (current.origin() == o)
