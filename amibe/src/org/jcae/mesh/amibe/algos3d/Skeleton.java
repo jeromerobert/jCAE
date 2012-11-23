@@ -231,7 +231,7 @@ public class Skeleton {
 		getGroups(next, g2);
 		if(!g1.equals(g2))
 			return true;
-		return edge.destination().angle3D(edge.origin(), next.destination()) > angle;
+		return edge.destination().angle3D(edge.origin(), next.destination()) < angle;
 	}
 
 	private List<AbstractHalfEdge> createPolyline(AbstractHalfEdge startEdge,

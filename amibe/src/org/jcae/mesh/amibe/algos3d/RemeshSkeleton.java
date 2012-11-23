@@ -81,7 +81,7 @@ public class RemeshSkeleton {
 		while(it.hasNext())
 		{
 			AbstractHalfEdge e = it.next();
-			if(e.destination() == v2)
+			if(e.destination() == v2 && !e.hasAttributes(AbstractHalfEdge.OUTER))
 				return e;
 		}
 		//TODO in some cases v1.getNeighbourIteratorAbstractHalfEdge does not
@@ -91,7 +91,7 @@ public class RemeshSkeleton {
 		while(it.hasNext())
 		{
 			AbstractHalfEdge e = it.next();
-			if(e.destination() == v1)
+			if(e.destination() == v1 && !e.sym().hasAttributes(AbstractHalfEdge.OUTER))
 				return e.sym();
 		}
 		throw new NoSuchElementException(v1+" "+v2);
@@ -133,12 +133,12 @@ public class RemeshSkeleton {
 			{
 				int segId = bgLink.get(k++);
 				AbstractHalfEdge toSplit = edgeIndex.get(segId);
-				if(v.sqrDistance3D(toSplit.origin()) < tolerance)
+				if(v.sqrDistance3D(toSplit.origin()) <= tolerance)
 				{
 					toKeep.remove(v);
 					toKeep.add(toSplit.origin());
 				}
-				else if(v.sqrDistance3D(toSplit.destination()) < tolerance)
+				else if(v.sqrDistance3D(toSplit.destination()) <= tolerance)
 				{
 					toKeep.remove(v);
 					toKeep.add(toSplit.destination());
@@ -151,16 +151,8 @@ public class RemeshSkeleton {
 					//TODO this will be slow as as toSplit.getTri() may be far
 					//from the wanted triangle so we will loop on all triangles
 					liaison.move(v, v.getUV(), true);
-					Iterator<AbstractHalfEdge> it = v.getNeighbourIteratorAbstractHalfEdge();
-					while(it.hasNext())
-					{
-						AbstractHalfEdge newEdge = it.next();
-						if(newEdge.destination() == oldDestination)
-						{
-							edgeIndex.set(segId, newEdge);
-							break;
-						}
-					}
+					AbstractHalfEdge e = getEdge(v, oldDestination);
+					edgeIndex.set(segId, e);
 				}
 			}
 			for(Vertex v:toKeep)
