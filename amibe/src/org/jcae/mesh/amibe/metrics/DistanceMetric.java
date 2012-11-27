@@ -20,8 +20,14 @@
 package org.jcae.mesh.amibe.metrics;
 
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
+import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -271,5 +277,56 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 		if(v.isManifold())
 			groupId = ((Triangle)v.getLink()).getGroupId();
 		return getTargetSize(uv[0], uv[1], uv[2], groupId);
+	}
+
+	public void save(String fileName) throws IOException
+	{
+		FileChannel fc = new FileOutputStream(fileName).getChannel();
+		save(fc);
+		fc.close();
+	}
+
+	public void save(WritableByteChannel out) throws IOException
+	{
+		ArrayList<PointSource> ps = new ArrayList<PointSource>();
+		ArrayList<LineSource> ls = new ArrayList<LineSource>();
+		for(DistanceMetricInterface s:sources)
+		{
+			if(s instanceof PointSource)
+				ps.add((PointSource)s);
+			else
+				ls.add((LineSource)s);
+		}
+		ByteBuffer bb = ByteBuffer.allocate(
+			ps.size() * 5 * 8 + ls.size() * 8 * 8 + 2 * 4);
+		bb.order(ByteOrder.nativeOrder());
+		bb.putInt(ps.size());
+		for(PointSource s:ps)
+		{
+			bb.putDouble(s.coef);
+			bb.putDouble(s.size0);
+			bb.putDouble(s.sx);
+			bb.putDouble(s.sy);
+			bb.putDouble(s.sz);
+		}
+		bb.putInt(ls.size());
+		for(LineSource s:ls)
+		{
+			bb.putDouble(s.coef);
+			bb.putDouble(s.size0);
+			bb.putDouble(s.sx0);
+			bb.putDouble(s.sy0);
+			bb.putDouble(s.sz0);
+			bb.putDouble(s.sx1);
+			bb.putDouble(s.sy1);
+			bb.putDouble(s.sz1);
+		}
+		bb.rewind();
+		out.write(bb);
+	}
+
+	public double getSize(int group)
+	{
+		return sizeInf;
 	}
 }

@@ -101,4 +101,9 @@ public class GroupMetric extends DistanceMetric {
 		}
 		return minValue;
 	}
+
+	@Override
+	public double getSize(int group) {
+		return groupsMetric.get(group);
+	}
 }

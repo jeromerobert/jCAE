@@ -75,10 +75,16 @@ def afront_debug(afront_path, liaison, tmp_dir, mesh_dir, size):
             inserted_vertices.addAll(remesh.insertNodes(vertices, g_id, size, size/100.0))
     return inserted_vertices
 
-def afront(afront_path, tmp_dir, mesh_dir, size):
+def afront(afront_path, tmp_dir, mesh, size, point_metric):
     from org.jcae.mesh.xmldata import AmibeReader, MultiDoubleFileReader
     """ Run afront and return a MultiDoubleFileReader allowing to read created
     nodes """
+    mesh_dir = os.path.join(tmp_dir, "mesh.amibe")
+    if point_metric:
+        metric_file = os.path.join(tmp_dir, "metric.bin")
+        point_metric.save(metric_file)
+        g_id = 1
+    MeshWriter.writeObject3D(mesh, mesh_dir, "")
     ar = AmibeReader.Dim3(mesh_dir)
     sm = ar.submeshes[0]
     nodes_file = os.path.join(tmp_dir, "nodes.bin")
@@ -88,9 +94,16 @@ def afront(afront_path, tmp_dir, mesh_dir, size):
             f.write('\0'*4)
             f.close()
             continue
-        cmd = [afront_path, '-nogui', ':stdin', '-failsafe','false', '-target_size',
-            str(size), '-lf_progress', 'true', '-stop_every', '1000',
-            '-quiet', 'true', '-outname', nodes_file, '-tri_mesh']
+        cmd = [afront_path, '-nogui', ':stdin', '-failsafe','false',
+            '-resamp_bounds', 'false', '-lf_progress', 'true',
+            '-stop_every', '1000', '-quiet', 'true', '-outname', nodes_file]
+        if point_metric:
+            cmd.extend(['-target_size', str(point_metric.getSize(g_id)),
+                '-metric_file', metric_file])
+            g_id = g_id + 1
+        else:
+            cmd.extend(['-target_size', str(size)])
+        cmd.append('-tri_mesh')
         print " ".join(cmd)
         p = subprocess.Popen(cmd, stdin = subprocess.PIPE, cwd = tmp_dir)
         sm.readGroup(g, p.stdin.fileno().channel)
@@ -133,11 +146,6 @@ def create_mesh(**kwargs):
     return mesh
 
 def __remesh(options):
-    afront_nodes_reader = None
-    if options.afront_path:
-        tmp_dir = tempfile.mkdtemp()
-        afront_nodes_reader = afront(options.afront_path, tmp_dir, options.in_dir, options.size)
-
     mesh = getattr(options, 'mesh', None)
     if not mesh:
         mesh = create_mesh(**options)
@@ -170,11 +178,6 @@ def __remesh(options):
         point_metric = None
     safe_coplanarity = str(max(options.coplanarity, 0.8))
 
-    afront_frozen = None
-    if afront_nodes_reader:
-        afront_frozen = afront_insert(liaison, afront_nodes_reader, options.size)
-        Vertex.setMutable(afront_frozen, False)
-
     #0
     writeVTK(liaison)
 
@@ -191,9 +194,46 @@ def __remesh(options):
         point_metric.sizeInf = options.size*sqrt(2)
         algo.analyticMetric = point_metric
     algo.compute()
+
     #1
     writeVTK(liaison)
 
+    if point_metric:
+        RemeshSkeleton(liaison, 1.57, options.size / 100.0, point_metric).compute()
+    else:
+        RemeshSkeleton(liaison, 1.57, options.size / 100.0, options.size).compute()
+
+    #2
+    writeVTK(liaison)
+    opts.clear()
+    opts.put("size", str(options.size))
+    opts.put("freeEdgesOnly", "true")
+    opts.put("coplanarity", "-2")
+    algo = LengthDecimateHalfEdge(liaison, opts)
+    if point_metric:
+        algo.analyticMetric = point_metric
+    algo.compute()
+
+    #3
+    # afront call
+    writeVTK(liaison)
+    afront_nodes_reader = None
+    afront_frozen = None
+    if options.afront_path:
+        tmp_dir = tempfile.mkdtemp()
+        afront_nodes_reader = afront(options.afront_path, tmp_dir, liaison.mesh,
+            options.size, point_metric)
+        afront_frozen = afront_insert(liaison, afront_nodes_reader, options.size)
+        Vertex.setMutable(afront_frozen, False)
+
+	#4
+    writeVTK(liaison)
+    opts.clear()
+    opts.put("coplanarity", safe_coplanarity)
+    SwapEdge(liaison, opts).compute()
+
+    #5
+    writeVTK(liaison)
     opts.clear()
     opts.put("size", str(options.size))
     opts.put("coplanarity", str(options.coplanarity))
@@ -205,14 +245,14 @@ def __remesh(options):
         algo.analyticMetric = point_metric
     algo.compute()
 
-    #2
+    #6
     writeVTK(liaison)
 
     opts.clear()
     opts.put("coplanarity", safe_coplanarity)
     SwapEdge(liaison, opts).compute()
 
-    #3
+    #7
     writeVTK(liaison)
 
     opts.clear()
@@ -222,7 +262,7 @@ def __remesh(options):
     algo = SmoothNodes3DBg(liaison, opts)
     algo.compute()
 
-    #4
+    #8
     writeVTK(liaison)
 
     opts.clear()
@@ -230,7 +270,7 @@ def __remesh(options):
     opts.put("minCosAfterSwap", "0.3")
     SwapEdge(liaison, opts).compute()
 
-    #5
+    #9
     writeVTK(liaison)
     if not options.afront_path:
         opts.clear()
@@ -239,25 +279,7 @@ def __remesh(options):
         algo.analyticMetric = point_metric
         algo.compute()
 
-    #6
-    writeVTK(liaison)
-
-    if point_metric:
-        RemeshSkeleton(liaison, 1.57, options.size / 100.0, point_metric).compute()
-    else:
-        RemeshSkeleton(liaison, 1.57, options.size / 100.0, options.size).compute()
-
-    #7
-    writeVTK(liaison)
-    opts.clear()
-    opts.put("size", str(options.size))
-    opts.put("freeEdgesOnly", "true")
-    algo = LengthDecimateHalfEdge(liaison, opts)
-    if point_metric:
-        algo.analyticMetric = point_metric
-    algo.compute()
-
-    #9
+    #10
     writeVTK(liaison)
 
     opts.clear()
@@ -270,7 +292,7 @@ def __remesh(options):
         algo.analyticMetric = point_metric
     algo.compute()
 
-    #10
+    #11
     writeVTK(liaison)
 
     opts.clear()
@@ -278,7 +300,7 @@ def __remesh(options):
     opts.put("minCosAfterSwap", "0.3")
     SwapEdge(liaison, opts).compute()
 
-    #11
+    #12
     writeVTK(liaison)
 
     if afront_frozen:
