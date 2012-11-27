@@ -47,13 +47,6 @@ public class GroupMetric extends DistanceMetric {
 	}
 
 	/**
-	 * Disable parent update as we use DistanceMetricInterface field in a
-	 * different way.
-	 */
-	@Override
-	protected void update(DistanceMetricInterface i) { }
-
-	/**
 	 * @param groupNames
 	 * @param size0 size of edges when distance is between zero and d0
 	 * @param d0
@@ -66,16 +59,7 @@ public class GroupMetric extends DistanceMetric {
 		{
 			double[] o = edge.origin().getUV();
 			double[] d = edge.destination().getUV();
-			//use coef as d0
-			DistanceMetric.LineSource s = new DistanceMetric.LineSource(
-				o[0], o[1], o[2], true, d[0], d[1], d[2], true);
-			sources.add(s);
-			s.size0 = size0;
-			//d0 = d0*d0
-			s.coef = s.coef * s.coef;
-			s.threshold = d1 * d1;
-			s.beta =  d1*d1 - s.coef;
-			s.ccoef = s.coef / s.beta;
+			addLine(o[0], o[1], o[2], true, d[0], d[1], d[2], true, size0, d0, d1);
 		}
 	}
 
@@ -83,23 +67,9 @@ public class GroupMetric extends DistanceMetric {
 	public double getTargetSize(double x, double y, double z, int groupId) {
 		Double gm = groupsMetric.get(groupId);
 		if(gm == null)
-			gm = sizeInf;
-		double minValue = Double.MAX_VALUE;
-		for (DistanceMetricInterface s : sources) {
-			double d2 = s.getSqrDistance(x, y, z);
-			double v;
-			if(d2 > s.threshold)
-				v = gm;
-			else if(d2 < s.coef)
-				v = s.size0;
-			else
-			{
-				double deltaS = gm - s.size0;
-				v = deltaS * d2 / s.beta + (s.size0 - s.ccoef / deltaS);
-			}
-			minValue = Math.min(v, minValue);
-		}
-		return minValue;
+			return super.getTargetSize(x, y, z, groupId);
+		else
+			return gm;
 	}
 
 	@Override
