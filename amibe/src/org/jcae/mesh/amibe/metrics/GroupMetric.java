@@ -64,16 +64,8 @@ public class GroupMetric extends DistanceMetric {
 	}
 
 	@Override
-	public double getTargetSize(double x, double y, double z, int groupId) {
-		Double gm = groupsMetric.get(groupId);
-		if(gm == null)
-			return super.getTargetSize(x, y, z, groupId);
-		else
-			return gm;
-	}
-
-	@Override
 	public double getSize(int group) {
-		return groupsMetric.get(group);
+		Double toReturn = groupsMetric.get(group);
+		return toReturn == null ? sizeInf : toReturn;
 	}
 }

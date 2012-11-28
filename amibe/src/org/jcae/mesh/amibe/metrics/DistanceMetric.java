@@ -241,7 +241,7 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 
 	@Override
 	public double getTargetSize(double x, double y, double z, int groupId) {
-		double minValue = sizeInf;
+		double minValue = getSize(groupId);
 		for (DistanceMetricInterface s : sources) {
 			double d2 = s.getSqrDistance(x, y, z);
 			double v;
@@ -252,7 +252,7 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 			else
 			{
 				double deltaS = sizeInf - s.size0;
-				v = deltaS * d2 / s.delta + (s.size0 - s.ratio / deltaS);
+				v = deltaS * d2 / s.delta + (s.size0 - s.ratio * deltaS);
 			}
 			minValue = Math.min(v, minValue);
 		}

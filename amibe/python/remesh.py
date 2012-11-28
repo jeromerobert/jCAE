@@ -104,7 +104,8 @@ def afront(afront_path, tmp_dir, mesh, size, point_metric):
         else:
             cmd.extend(['-target_size', str(size)])
         cmd.append('-tri_mesh')
-        print " ".join(cmd)
+        sys.stderr.write("meshing %s\n" % g.name)
+        sys.stderr.write(" ".join(cmd)+"\n")
         p = subprocess.Popen(cmd, stdin = subprocess.PIPE, cwd = tmp_dir)
         sm.readGroup(g, p.stdin.fileno().channel)
         p.stdin.flush()
@@ -199,6 +200,7 @@ def __remesh(options):
     writeVTK(liaison)
 
     if point_metric:
+        point_metric.sizeInf = options.size
         RemeshSkeleton(liaison, 1.57, options.size / 100.0, point_metric).compute()
     else:
         RemeshSkeleton(liaison, 1.57, options.size / 100.0, options.size).compute()
