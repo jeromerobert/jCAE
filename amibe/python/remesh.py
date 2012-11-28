@@ -203,9 +203,9 @@ def __remesh(options):
 
     if point_metric:
         point_metric.sizeInf = options.size
-        RemeshSkeleton(liaison, 1.57, options.size / 100.0, point_metric).compute()
+        RemeshSkeleton(liaison, 1.66, options.size / 100.0, point_metric).compute()
     else:
-        RemeshSkeleton(liaison, 1.57, options.size / 100.0, options.size).compute()
+        RemeshSkeleton(liaison, 1.66, options.size / 100.0, options.size).compute()
 
     #2
     writeVTK(liaison)
