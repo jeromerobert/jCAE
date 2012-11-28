@@ -115,11 +115,13 @@ def afront(afront_path, tmp_dir, mesh, size, point_metric):
     return MultiDoubleFileReader(nodes_file)
 
 def afront_insert(liaison, nodes_reader, size):
+    """ Return the list of mutable nodes which have been inserted """
     remesh = VertexInsertion(liaison)
     inserted_vertices = ArrayList()
     for g_id in xrange(1, liaison.mesh.getNumberOfGroups()+1):
         vs = nodes_reader.next()
-        inserted_vertices.addAll(remesh.insertNodes(vs, g_id, size/100.0))
+        remesh.insertNodes(vs, g_id, size/100.0)
+        inserted_vertices.addAll(remesh.mutableInserted)
     return inserted_vertices
 
 def remesh(**kwargs):

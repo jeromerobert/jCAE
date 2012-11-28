@@ -49,7 +49,7 @@ public class VertexInsertion {
 	/** triangles added when inserting a point in the middle of a triangle */
 	private final Collection<Triangle> tmp = new ArrayList<Triangle>(3);
 	private double[] qualities = new double[4];
-
+	private Collection<Vertex> notMutableInserted, mutableInserted;
 	public VertexInsertion(MeshLiaison liaison) {
 		this.liaison = liaison;
 		LOGGER.info("Start creating kd-tree");
@@ -57,7 +57,7 @@ public class VertexInsertion {
 		LOGGER.info(kdTree.stats());
 	}
 
-	public Collection<Vertex> insertNodes(final DoubleBuffer vertices, int group,
+	public void insertNodes(final DoubleBuffer vertices, int group,
 		double insertionTol)
 	{
 		final int size = vertices.limit() / 3;
@@ -75,7 +75,7 @@ public class VertexInsertion {
 				return size;
 			}
 		};
-		return insertNodes(l, group, insertionTol);
+		insertNodes(l, group, insertionTol);
 	}
 
 	/**
@@ -88,12 +88,13 @@ public class VertexInsertion {
 	 * @param insertionTol Do not the insert point if a point  already exist at
 	 * a distance lower than this value
 	 */
-	public Collection<Vertex> insertNodes(Collection<Vertex> vertices, int group,
+	public void insertNodes(Collection<Vertex> vertices, int group,
 		double insertionTol)
 	{
 		double tol2 = insertionTol * insertionTol;
 		double[] projection = new double[3];
-		ArrayList<Vertex> toReturn = new ArrayList<Vertex>(vertices.size());
+		mutableInserted = new ArrayList<Vertex>(vertices.size());
+		notMutableInserted = new ArrayList<Vertex>();
 		main: for(Vertex v: vertices)
 		{
 			TriangleHE t = (TriangleHE) kdTree.getClosestTriangle(
@@ -103,7 +104,10 @@ public class VertexInsertion {
 			{
 				if(tv.sqrDistance3D(v) < tol2)
 				{
-					toReturn.add(tv);
+					if(tv.isMutable())
+						mutableInserted.add(tv);
+					else
+						notMutableInserted.add(tv);
 					continue main;
 				}
 			}
@@ -113,11 +117,18 @@ public class VertexInsertion {
 			t.split(liaison.getMesh(), v, tmp);
 			kdTree.replace(t, tmp);
 			tmp.clear();
-			toReturn.add(v);
+			mutableInserted.add(v);
 			swap(v);
 		}
 		LOGGER.info("End of insertion");
-		return toReturn;
+	}
+
+	public Collection<Vertex> getNotMutableInserted() {
+		return notMutableInserted;
+	}
+
+	public Collection<Vertex> getMutableInserted() {
+		return mutableInserted;
 	}
 
 	private void swap(Vertex v)
