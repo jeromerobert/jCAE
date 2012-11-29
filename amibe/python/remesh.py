@@ -114,13 +114,16 @@ def afront(afront_path, tmp_dir, mesh, size, point_metric):
             print "Exit code: "+str(return_code)
     return MultiDoubleFileReader(nodes_file)
 
-def afront_insert(liaison, nodes_reader, size):
+def afront_insert(liaison, nodes_reader, size, point_metric):
     """ Return the list of mutable nodes which have been inserted """
-    remesh = VertexInsertion(liaison)
+    if point_metric:
+        remesh = VertexInsertion(liaison, point_metric)
+    else:
+        remesh = VertexInsertion(liaison, size)
     inserted_vertices = ArrayList()
     for g_id in xrange(1, liaison.mesh.getNumberOfGroups()+1):
         vs = nodes_reader.next()
-        remesh.insertNodes(vs, g_id, size/100.0)
+        remesh.insertNodes(vs, g_id)
         inserted_vertices.addAll(remesh.mutableInserted)
     return inserted_vertices
 
@@ -227,7 +230,7 @@ def __remesh(options):
         tmp_dir = tempfile.mkdtemp()
         afront_nodes_reader = afront(options.afront_path, tmp_dir, liaison.mesh,
             options.size, point_metric)
-        afront_frozen = afront_insert(liaison, afront_nodes_reader, options.size)
+        afront_frozen = afront_insert(liaison, afront_nodes_reader, options.size, point_metric)
         Vertex.setMutable(afront_frozen, False)
 
 	#4

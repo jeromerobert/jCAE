@@ -20,11 +20,14 @@
 
 package org.jcae.mesh.amibe.algos3d;
 
+import gnu.trove.PrimeFinder;
 import java.nio.DoubleBuffer;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
@@ -33,9 +36,11 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.TriangleHE;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.metrics.MetricSupport.AnalyticMetricInterface;
 import org.jcae.mesh.amibe.projection.MeshLiaison;
 import org.jcae.mesh.amibe.projection.TriangleKdTree;
 import org.jcae.mesh.xmldata.MeshReader;
+import org.jcae.mesh.xmldata.MeshWriter;
 import org.jcae.mesh.xmldata.MultiDoubleFileReader;
 
 /**
@@ -48,17 +53,35 @@ public class VertexInsertion {
 	private final TriangleKdTree kdTree;
 	/** triangles added when inserting a point in the middle of a triangle */
 	private final Collection<Triangle> tmp = new ArrayList<Triangle>(3);
-	private double[] qualities = new double[4];
+	private final double[] qualities = new double[4];
 	private Collection<Vertex> notMutableInserted, mutableInserted;
-	public VertexInsertion(MeshLiaison liaison) {
+	private Vertex projectedMiddle, middle;
+	private final AnalyticMetricInterface metric;
+	public VertexInsertion(MeshLiaison liaison, final double size) {
+		this(liaison, new AnalyticMetricInterface() {
+
+			public double getTargetSize(double x, double y, double z,
+				int groupId) {
+				return size;
+			}
+
+			public double getTargetSizeTopo(Mesh mesh, Vertex v) {
+				return size;
+			}
+		});
+	}
+
+	public VertexInsertion(MeshLiaison liaison, AnalyticMetricInterface metric) {
 		this.liaison = liaison;
 		LOGGER.info("Start creating kd-tree");
 		kdTree = new TriangleKdTree(liaison.getMesh());
 		LOGGER.info(kdTree.stats());
+		projectedMiddle = liaison.getMesh().createVertex(0, 0, 0);
+		middle = liaison.getMesh().createVertex(0, 0, 0);
+		this.metric = metric;
 	}
 
-	public void insertNodes(final DoubleBuffer vertices, int group,
-		double insertionTol)
+	public void insertNodes(final DoubleBuffer vertices, int group)
 	{
 		final int size = vertices.limit() / 3;
 		AbstractList<Vertex> l = new AbstractList<Vertex>() {
@@ -75,7 +98,7 @@ public class VertexInsertion {
 				return size;
 			}
 		};
-		insertNodes(l, group, insertionTol);
+		insertNodes(l, group);
 	}
 
 	/**
@@ -88,15 +111,29 @@ public class VertexInsertion {
 	 * @param insertionTol Do not the insert point if a point  already exist at
 	 * a distance lower than this value
 	 */
-	public void insertNodes(Collection<Vertex> vertices, int group,
-		double insertionTol)
+	public void insertNodes(List<Vertex> vertices, int group)
 	{
-		double tol2 = insertionTol * insertionTol;
+		if(vertices.isEmpty())
+		{
+			mutableInserted = Collections.emptyList();
+			notMutableInserted = Collections.emptyList();
+			return;
+		}
 		double[] projection = new double[3];
 		mutableInserted = new ArrayList<Vertex>(vertices.size());
 		notMutableInserted = new ArrayList<Vertex>();
-		main: for(Vertex v: vertices)
+		int n = vertices.size();
+		int step = PrimeFinder.nextPrime(n+1);
+		int k = 0;
+		int nbInserted = 0;
+		main: for(int i = 0; i < n; i++)
 		{
+			k = (k + step) % n;
+			Vertex v = vertices.get(k);
+			double localMetric = metric.getTargetSize(
+				v.getUV()[0], v.getUV()[1], v.getUV()[2], group);
+			double localMetric2 = localMetric * localMetric;
+			double tol2 = localMetric2 / (40 * 40);
 			TriangleHE t = (TriangleHE) kdTree.getClosestTriangle(
 				v.getUV(), projection, group);
 			liaison.move(v, projection, true);
@@ -118,9 +155,10 @@ public class VertexInsertion {
 			kdTree.replace(t, tmp);
 			tmp.clear();
 			mutableInserted.add(v);
-			swap(v);
+			swap(v, localMetric2 / 2);
+			nbInserted ++;
 		}
-		LOGGER.info("End of insertion");
+		LOGGER.info(nbInserted+" / "+vertices.size()+" inserted nodes on group "+group);
 	}
 
 	public Collection<Vertex> getNotMutableInserted() {
@@ -131,7 +169,7 @@ public class VertexInsertion {
 		return mutableInserted;
 	}
 
-	private void swap(Vertex v)
+	private void swap(Vertex v, double sqrDeflection)
 	{
 		Mesh mesh = liaison.getMesh();
 		HalfEdge current = (HalfEdge) v.getIncidentAbstractHalfEdge((Triangle)v.getLink(), null);
@@ -150,20 +188,25 @@ public class VertexInsertion {
 					&& current.canSwapTopology())
 				{
 					current.getQualities(mesh, qualities);
-					//swapped_angle > angle && swapped_quality > q && q < 1E-3
-					//q < 1E-3 to avoid to have triangle far from the background
-					//mesh
-					if(qualities[3] > qualities[2] &&
-						qualities[1] > qualities[0] && qualities[0] < 1E-3)
+					//swapped_angle > 0 && swapped_quality > quality
+					if(qualities[3] > 0 && qualities[1] > qualities[0])
 					{
-						kdTree.remove(current.getTri());
-						kdTree.remove(current.sym().getTri());
-						current = (HalfEdge) mesh.edgeSwap(current);
-						HalfEdge swapped = current.next();
-						kdTree.addTriangle(swapped.getTri());
-						kdTree.addTriangle(swapped.sym().getTri());
-						redo = true;
-						isSwapped = true;
+						double[] apex1 = current.apex().getUV();
+						double[] apex2 = current.sym().apex().getUV();
+						for(int i = 0; i < 3; i++)
+							middle.getUV()[i] = (apex1[i] + apex2[i]) / 2.0;
+						liaison.move(projectedMiddle, middle.getUV(), true);
+						if(projectedMiddle.sqrDistance3D(middle) < sqrDeflection)
+						{
+							kdTree.remove(current.getTri());
+							kdTree.remove(current.sym().getTri());
+							current = (HalfEdge) mesh.edgeSwap(current);
+							HalfEdge swapped = current.next();
+							kdTree.addTriangle(swapped.getTri());
+							kdTree.addTriangle(swapped.sym().getTri());
+							redo = true;
+							isSwapped = true;
+						}
 					}
 				}
 
@@ -220,11 +263,12 @@ public class VertexInsertion {
 			MeshReader.readObject3D(mesh, "/tmp/debug2.zebra/amibe.dir");
 			MeshLiaison ml = MeshLiaison.create(mesh);
 			ml.getMesh().buildGroupBoundaries();
-			VertexInsertion vi = new VertexInsertion(ml);
+			VertexInsertion vi = new VertexInsertion(ml, 300);
 			for(int gId = 1; gId <= ml.getMesh().getNumberOfGroups(); gId++)
 			{
 				DoubleBuffer vs = mdf.next();
-				vi.insertNodes(vs, gId, 0.3);
+				if(gId == 65)
+					vi.insertNodes(vs, gId);
 			}
 		} catch (Exception ex) {
 			Logger.getLogger(VertexInsertion.class.getName()).log(Level.SEVERE,
