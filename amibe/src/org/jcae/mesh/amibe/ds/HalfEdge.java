@@ -418,6 +418,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @return the minimum quality of the two triangles generated
 	 *    by swapping this edge or -1 if the swap must not be done
 	 */
+	//TODO: Code factorization with AbstractHalfEdge.Quality
 	public final double checkSwap3D(Mesh mesh, double minCos, double maxLength,
 		double minQualityFactor, boolean expectInsert, double minCosAfter,
 		double minCosForceSwap)
@@ -504,40 +505,6 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			o.getRef() != 0 && d.getRef() != 0)
 			return Qafter;
 		return invalid;
-	}
-
-	/**
-	 * Return {quality, swapped quality, dieheadral angle, swapped dihedral angle}.
-	 * This method is similar to checkSwap3D but allows to implement custom
-	 * policy.
-	 */
-	public void getQualities(Mesh mesh, double[] out)
-	{
-		Vertex o = origin();
-		Vertex d = destination();
-		Vertex a = apex();
-		Vertex n = sym.apex();
-		double[] temp0 = mesh.temp.t3_0;
-		double[] temp1 = mesh.temp.t3_1;
-		double[] temp2 = mesh.temp.t3_2;
-		double[] temp3 = mesh.temp.t3_3;
-		//normals of current side triangles
-		double s1 = Matrix3D.computeNormal3D(o.getUV(), d.getUV(), a.getUV(), temp0, temp1, temp2);
-		double s2 = Matrix3D.computeNormal3D(d.getUV(), o.getUV(), n.getUV(), temp0, temp1, temp3);
-		out[2] = Matrix3D.prodSca(temp2, temp3);
-
-		// Normals between swaped side triangles
-		double s3 = Matrix3D.computeNormal3D(o.getUV(), n.getUV(), a.getUV(), temp0, temp1, temp2);
-		double s4 = Matrix3D.computeNormal3D(d.getUV(), a.getUV(), n.getUV(), temp0, temp1, temp3);
-		out[3] = Matrix3D.prodSca(temp2, temp3);
-
-		double p1 = o.distance3D(d) + d.distance3D(a) + a.distance3D(o);
-		double p2 = d.distance3D(o) + o.distance3D(n) + n.distance3D(d);
-		out[0] = Math.min(s1/p1/p1, s2/p2/p2);
-
-		double p3 = o.distance3D(n) + n.distance3D(a) + a.distance3D(o);
-		double p4 = d.distance3D(a) + a.distance3D(n) + n.distance3D(d);
-		out[1] = Math.min(s3/p3/p3, s4/p4/p4);
 	}
 
 	public final double checkSwapNormal(Mesh mesh, double coplanarity, double[] normal)

@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge.Quality;
 import org.jcae.mesh.amibe.ds.HalfEdge;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
@@ -53,10 +54,11 @@ public class VertexInsertion {
 	private final TriangleKdTree kdTree;
 	/** triangles added when inserting a point in the middle of a triangle */
 	private final Collection<Triangle> tmp = new ArrayList<Triangle>(3);
-	private final double[] qualities = new double[4];
 	private Collection<Vertex> notMutableInserted, mutableInserted;
 	private Vertex projectedMiddle, middle;
 	private final AnalyticMetricInterface metric;
+	private final Quality quality = new Quality();
+
 	public VertexInsertion(MeshLiaison liaison, final double size) {
 		this(liaison, new AnalyticMetricInterface() {
 
@@ -187,9 +189,9 @@ public class VertexInsertion {
 					AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.OUTER)
 					&& current.canSwapTopology())
 				{
-					current.getQualities(mesh, qualities);
-					//swapped_angle > 0 && swapped_quality > quality
-					if(qualities[3] > 0 && qualities[1] > qualities[0])
+					quality.setEdge(current);
+					if(quality.getSwappedAngle() > 0 &&
+						quality.getSwappedQuality() > quality.getQuality())
 					{
 						double[] apex1 = current.apex().getUV();
 						double[] apex2 = current.sym().apex().getUV();
