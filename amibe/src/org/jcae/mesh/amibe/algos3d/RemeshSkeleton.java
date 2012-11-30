@@ -127,7 +127,12 @@ public class RemeshSkeleton {
 			final HashSet<Vertex> toKeep = new HashSet<Vertex>(toInsert);
 			ArrayList<AbstractHalfEdge> edgeIndex = new ArrayList<AbstractHalfEdge>(polyline.size()-1);
 			for(int i = 0; i < polyline.size() - 1; i++)
-				edgeIndex.add(getEdge(polyline, i));
+			{
+				AbstractHalfEdge e = getEdge(polyline, i);
+				if(e.hasAttributes(AbstractHalfEdge.IMMUTABLE))
+					continue main;
+				edgeIndex.add(e);
+			}
 
 			for(Vertex v:toInsert)
 			{

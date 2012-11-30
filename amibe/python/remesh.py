@@ -75,7 +75,7 @@ def afront_debug(afront_path, liaison, tmp_dir, mesh_dir, size):
             inserted_vertices.addAll(remesh.insertNodes(vertices, g_id, size, size/100.0))
     return inserted_vertices
 
-def afront(afront_path, tmp_dir, mesh, size, point_metric):
+def afront(afront_path, tmp_dir, mesh, size, point_metric, immutable_groups):
     from org.jcae.mesh.xmldata import AmibeReader, MultiDoubleFileReader
     """ Run afront and return a MultiDoubleFileReader allowing to read created
     nodes """
@@ -89,7 +89,7 @@ def afront(afront_path, tmp_dir, mesh, size, point_metric):
     sm = ar.submeshes[0]
     nodes_file = os.path.join(tmp_dir, "nodes.bin")
     for g in sm.groups:
-        if g.numberOfTrias == 0:
+        if g.numberOfTrias == 0 or g.name in immutable_groups:
             f = open(nodes_file, 'ab')
             f.write('\0'*4)
             f.close()
@@ -229,7 +229,7 @@ def __remesh(options):
     if options.afront_path:
         tmp_dir = tempfile.mkdtemp()
         afront_nodes_reader = afront(options.afront_path, tmp_dir, liaison.mesh,
-            options.size, point_metric)
+            options.size, point_metric, immutable_groups)
         afront_frozen = afront_insert(liaison, afront_nodes_reader, options.size, point_metric)
         Vertex.setMutable(afront_frozen, False)
 
