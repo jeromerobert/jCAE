@@ -318,7 +318,7 @@ def __remesh(options):
     opts.put("checkNormals", "false")
     ImproveVertexValence(liaison, opts).compute()
 
-    #12
+    #13
     writeVTK(liaison)
 
     opts.clear()
