@@ -44,36 +44,45 @@ def read_mesh(path):
     MeshReader.readObject3D(mesh, path)
     return mesh
 
-def afront_debug(afront_path, liaison, tmp_dir, mesh_dir, size):
-    from org.jcae.mesh.xmldata import Amibe2OFF, AFront2Amibe, AmibeReader
+def afront_debug(afront_path, tmp_dir, mesh, size, point_metric, immutable_groups):
+    from org.jcae.mesh.xmldata import Amibe2OFF, AFront2Amibe, AmibeReader, MultiDoubleFileReader
     """ Same as afront but with temporary files to help debugging """
+    mesh_dir = os.path.join(tmp_dir, "mesh.amibe")
+    if point_metric:
+        metric_file = os.path.join(tmp_dir, "metric.bin")
+        point_metric.save(metric_file)
+        g_id = 1
+    MeshWriter.writeObject3D(mesh, mesh_dir, "")
     ar = AmibeReader.Dim3(mesh_dir)
-    opts = HashMap()
-    opts.put("size", str(size))
-    opts.put("minCosAfterSwap", "0.3")
-    opts.put("coplanarity", "-2")
-    remesh = Remesh(liaison, opts)
-    inserted_vertices = ArrayList()
-    number_of_groups = liaison.mesh.getNumberOfGroups()
-    for g_id in xrange(1, number_of_groups+1):
-        g_name = liaison.mesh.getGroupName(g_id)
-        print g_name
-        off_fn = tmp_dir+"/"+g_name+".off"
-        m_fn = tmp_dir+"/"+g_name+".m"
-        amibe_fn = tmp_dir+"/"+g_name+".amibe"
-        vtk_fn = tmp_dir+"/"+g_name+".vtp"
-        Amibe2OFF(ar).write(off_fn, g_name)
-        cmd = [afront_path, '-nogui', off_fn, '-failsafe','false', '-target_size',
-            str(size), '-lf_progress', 'true', '-stop_every', '1000',
-			'-quiet', 'true', '-outname', m_fn, '-tri_mesh']
-        print " ".join(cmd)
-        subprocess.call(cmd)
-        if os.path.isfile(m_fn):
-            AFront2Amibe(amibe_fn).read(m_fn)
-            Amibe2VTK(amibe_fn).write(vtk_fn)
-            vertices = read_mesh(amibe_fn).nodes
-            inserted_vertices.addAll(remesh.insertNodes(vertices, g_id, size, size/100.0))
-    return inserted_vertices
+    sm = ar.submeshes[0]
+    nodes_file = os.path.join(tmp_dir, "nodes.bin")
+    for g in sm.groups:
+        if g.numberOfTrias == 0 or g.name in immutable_groups:
+            f = open(nodes_file, 'ab')
+            f.write('\0'*4)
+            f.close()
+            continue
+        off_fn = tmp_dir+"/"+g.name+".off"
+        m_fn = tmp_dir+"/"+g.name+".m"
+        amibe_fn = tmp_dir+"/"+g.name+".amibe"
+        vtk_fn = tmp_dir+"/"+g.name+".vtp"
+        Amibe2OFF(ar).write(off_fn, g.name)
+        cmd = [afront_path, '-nogui', off_fn, '-failsafe','false',
+            '-resamp_bounds', 'false', '-lf_progress', 'true',
+            '-stop_every', '1000', '-quiet', 'true', '-outname', nodes_file]
+        if point_metric:
+            cmd.extend(['-target_size', str(point_metric.getSize(g_id)),
+                '-metric_file', metric_file])
+            g_id = g_id + 1
+        else:
+            cmd.extend(['-target_size', str(size)])
+        cmd.append('-tri_mesh')
+        sys.stderr.write("meshing %s\n" % g.name)
+        sys.stderr.write(" ".join(cmd)+"\n")
+        return_code = subprocess.call(cmd, cwd = tmp_dir)
+        if return_code != 0:
+            print "Exit code: "+str(return_code)
+    return MultiDoubleFileReader(nodes_file)
 
 def afront(afront_path, tmp_dir, mesh, size, point_metric, immutable_groups):
     from org.jcae.mesh.xmldata import AmibeReader, MultiDoubleFileReader
