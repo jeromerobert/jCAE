@@ -386,6 +386,8 @@ public abstract class MeshLiaison
 		double maxError, boolean background, int group)
 	{
 		Triangle t = null;
+		if(start == null)
+			throw new NullPointerException("Wrong background start vertex for "+v);
 		for (Iterator<Triangle> itf = start.getNeighbourIteratorTriangle(); itf.hasNext(); )
 		{
 			Triangle f = itf.next();
