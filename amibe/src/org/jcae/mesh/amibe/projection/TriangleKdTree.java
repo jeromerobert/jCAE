@@ -110,6 +110,7 @@ public class TriangleKdTree {
 				(triangles == null || triangles.length == 0);
 		}
 	}
+	private final static Logger LOGGER = Logger.getLogger(TriangleKdTree.class.getName());
 	private final Node root = new Node();
 	private double[] globalBounds, globalSize = new double[3];
 	private double[] minNodeSize = new double[3];
@@ -298,31 +299,42 @@ public class TriangleKdTree {
 				aabbDistance = Math.sqrt(aabbDistance);
 			}
 		}
-		getNodes(createCenteredAABB(coords, 1.01*aabbDistance), null, false);
-		for(Node nn: closeNodes)
+		while(true)
 		{
-			if(nn != n && nn.triangles != null)
+			getNodes(createCenteredAABB(coords, 1.01*aabbDistance), null, false);
+			for(Node nn: closeNodes)
 			{
-				for(Triangle t:nn.triangles)
+				if(nn != n && nn.triangles != null)
 				{
-					if(group >= 0 && t.getGroupId() != group)
-						continue;
-					if(!seen.contains(t))
+					for(Triangle t:nn.triangles)
 					{
-						double d = MeshLiaison.TRIANGLE_DISTANCE.compute(coords, t, closeIndex);
-						if(d < triangleDistance)
+						if(group >= 0 && t.getGroupId() != group)
+							continue;
+						if(!seen.contains(t))
 						{
-							triangleDistance = d;
-							toReturn = t;
-							if(projection != null)
-								MeshLiaison.TRIANGLE_DISTANCE.getProjection(projection);
+							double d = MeshLiaison.TRIANGLE_DISTANCE.compute(coords, t, closeIndex);
+							if(d < triangleDistance)
+							{
+								triangleDistance = d;
+								toReturn = t;
+								if(projection != null)
+									MeshLiaison.TRIANGLE_DISTANCE.getProjection(projection);
+							}
 						}
 					}
 				}
 			}
+			closeNodes.clear();
+			if(toReturn != null)
+				return toReturn;
+			else
+			{
+				LOGGER.warning(Arrays.toString(coords)+"from group "+group+
+					" cannot be projected at "+aabbDistance+". Trying "+
+					(aabbDistance * 1.4)+".");
+				aabbDistance = aabbDistance * 1.4;
+			}
 		}
-		closeNodes.clear();
-		return toReturn;
 	}
 
 	public Triangle getClosestTriangleDebug(double[] coords, double[] projection, int group)
