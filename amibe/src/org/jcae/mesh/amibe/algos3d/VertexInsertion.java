@@ -138,7 +138,7 @@ public class VertexInsertion {
 			double tol2 = localMetric2 / (40 * 40);
 			TriangleHE t = (TriangleHE) kdTree.getClosestTriangle(
 				v.getUV(), projection, group);
-			liaison.move(v, projection, true);
+			liaison.move(v, projection, group, true);
 			for(Vertex tv:t.vertex)
 			{
 				if(tv.sqrDistance3D(v) < tol2)
@@ -157,7 +157,7 @@ public class VertexInsertion {
 			kdTree.replace(t, tmp);
 			tmp.clear();
 			mutableInserted.add(v);
-			swap(v, localMetric2 / 2);
+			swap(v, localMetric2 / 2, group);
 			nbInserted ++;
 		}
 		LOGGER.info(nbInserted+" / "+vertices.size()+" inserted nodes on group "+group);
@@ -171,7 +171,7 @@ public class VertexInsertion {
 		return mutableInserted;
 	}
 
-	private void swap(Vertex v, double sqrDeflection)
+	private void swap(Vertex v, double sqrDeflection, int group)
 	{
 		Mesh mesh = liaison.getMesh();
 		HalfEdge current = (HalfEdge) v.getIncidentAbstractHalfEdge((Triangle)v.getLink(), null);
@@ -197,7 +197,7 @@ public class VertexInsertion {
 						double[] apex2 = current.sym().apex().getUV();
 						for(int i = 0; i < 3; i++)
 							middle.getUV()[i] = (apex1[i] + apex2[i]) / 2.0;
-						liaison.move(projectedMiddle, middle.getUV(), true);
+						liaison.move(projectedMiddle, middle.getUV(), group, true);
 						if(projectedMiddle.sqrDistance3D(middle) < sqrDeflection)
 						{
 							kdTree.remove(current.getTri());
