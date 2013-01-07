@@ -50,6 +50,7 @@ public class ExportUNV extends CookieAction
 					amibe2unv.setUnit(MeshExporter.UNV.Unit.METER);
 				else
 					amibe2unv.setUnit(MeshExporter.UNV.Unit.MM);
+				amibe2unv.setScale(unitPanel.getScale());
 				amibe2unv.write(stream);				
 				stream.close();				
 			}
