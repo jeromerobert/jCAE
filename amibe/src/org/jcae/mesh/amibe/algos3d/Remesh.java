@@ -36,31 +36,27 @@ import static org.jcae.mesh.amibe.metrics.MetricSupport.interpolatedDistance;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
-import org.jcae.mesh.xmldata.DoubleFileReader;
-import org.jcae.mesh.xmldata.PrimitiveFileReaderFactory;
 
 import gnu.trove.PrimeFinder;
 import gnu.trove.TIntHashSet;
 import gnu.trove.TIntIntHashMap;
 import gnu.trove.TIntIntIterator;
 import gnu.trove.TIntObjectHashMap;
-import java.io.File;
 import java.io.IOException;
-import java.nio.DoubleBuffer;
-import java.util.AbstractList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.mesh.amibe.projection.MapMeshLiaison;
+import org.jcae.mesh.xmldata.Amibe2VTK;
 
 /**
  * Remesh an existing mesh.
@@ -81,41 +77,37 @@ public class Remesh
 	private TIntObjectHashMap<Map<Vertex, Vertex>> neighborBgMap;
 	private final double minlen;
 	private final double maxlen;
-	// useful to see if addCandidatePoints() does its job
-	private int nrInterpolations;
 	private int nrFailedInterpolations;
 
-	Map<Triangle, Collection<Vertex>> mapTriangleVertices = new HashMap<Triangle, Collection<Vertex>>();
+	private final Map<Triangle, Collection<Vertex>> mapTriangleVertices =
+		new HashMap<Triangle, Collection<Vertex>>();
 	// Keeps track of surrounding triangle
-	Map<Vertex, Triangle> surroundingTriangle = new HashMap<Vertex, Triangle>();
+	private final Map<Vertex, Triangle> surroundingTriangle = new HashMap<Vertex, Triangle>();
 
 	private final boolean project;
 	private final boolean hasRidges;
-	// true if mesh has free edges, ridges or nonmanifold edges, false otherwise
-	private final boolean hasFeatureEdges;
 	private final double coplanarity;
 	private final boolean allowNearNodes;
-	private final boolean remeshOnlyFeatureEdges;
 	private final MetricSupport metrics;
 	private double minCosAfterSwap = -2;
 	// Number of nodes which are too near from existing vertices
-	int tooNearNodes = 0;
-	private final ArrayList<Vertex> triNodes = new ArrayList<Vertex>();
-	private final ArrayList<EuclidianMetric3D> triMetrics = new ArrayList<EuclidianMetric3D>();
-	private final ArrayList<Vertex> triNeighbor = new ArrayList<Vertex>();
+	private int tooNearNodes = 0;
+	private final List<Vertex> triNodes = new ArrayList<Vertex>();
+	private final List<EuclidianMetric3D> triMetrics = new ArrayList<EuclidianMetric3D>();
+	private final List<Vertex> triNeighbor = new ArrayList<Vertex>();
 	//  Map to keep track of all groups near a vertex
 	private final Map<Vertex, int[]> groups = new HashMap<Vertex, int[]>();
-	private Set<Vertex> boundaryNodes = new LinkedHashSet<Vertex>();
+	private final Set<Vertex> boundaryNodes = new LinkedHashSet<Vertex>();
 	// Number of checked edges
 	private int edgesCheckedDuringIteration;
 	//  The nodes variable contains the list of valid candidate points.
-	private ArrayList<Vertex> nodes = new ArrayList<Vertex>();
+	private final List<Vertex> nodes = new ArrayList<Vertex>();
 	//  We keep track of the background triangle so that it is not
 	//  searched again.
-	private ArrayList<Triangle> bgTriangles = new ArrayList<Triangle>();
+	private final List<Triangle> bgTriangles = new ArrayList<Triangle>();
 	private double currentScale = Double.MAX_VALUE;
 
-	private double[][] temp = new double[4][3];
+	private final double[][] temp = new double[4][3];
 	private int processed = 0;
 	// Number of nodes which were skipped
 	private int skippedNodes = 0;
@@ -162,7 +154,6 @@ public class Remesh
 		double nearLengthRatio = 1.0 / Math.sqrt(2.0);
 		boolean proj = false;
 		boolean nearNodes = false;
-		boolean onlyFeatureEdges = false;
 		double copl = 0.8;
 		Map<String, String> decimateOptions = new HashMap<String, String>();
 		for (final Map.Entry<String, String> opt: options.entrySet())
@@ -193,8 +184,6 @@ public class Remesh
 				proj = Boolean.valueOf(val).booleanValue();
 			else if (key.equals("allowNearNodes"))
 				nearNodes = Boolean.valueOf(val).booleanValue();
-			else if (key.equals("features"))
-				onlyFeatureEdges = Boolean.valueOf(val).booleanValue();
 			else if(!metrics.isKnownOption(key))
 				LOGGER.warning("Unknown option: "+key);
 		}
@@ -206,8 +195,6 @@ public class Remesh
 		project = proj;
 		coplanarity = copl;
 		allowNearNodes = nearNodes;
-		remeshOnlyFeatureEdges = onlyFeatureEdges;
-
 		liaison.buildSkeleton();
 
 		if (!decimateOptions.isEmpty())
@@ -227,7 +214,6 @@ public class Remesh
 				features = true;
 		}
 		hasRidges = ridges;
-		hasFeatureEdges = ridges | features;
 
 		Collection<Vertex> nodeset = mesh.getNodes();
 		if (nodeset == null)
@@ -667,101 +653,6 @@ public class Remesh
 		return this;
 	}
 
-	public Collection<Vertex> insertNodes(final DoubleBuffer vertices, int group,
-		double liaisonError, double insertionTol)
-	{
-		final int size = vertices.limit() / 3;
-		AbstractList<Vertex> l = new AbstractList<Vertex>() {
-
-			@Override
-			public Vertex get(int index) {
-				int n = index * 3;
-				return new Vertex(null, vertices.get(n), vertices.get(n + 1),
-					vertices.get(n + 2));
-			}
-
-			@Override
-			public int size() {
-				return size;
-			}
-		};
-		return insertNodes(l, group, liaisonError, insertionTol);
-	}
-
-	/**
-	 * Insert vertices from another mesh
-	 * @param vertices the vertices to insert
-	 * @param group insert vertices only in triangles of this group. Use -1
-	 * to try to insert in all groups
-	 * @param liaisonError the maximal acceptable distance between the
-	 * inserted point and it's projection.
-	 * @param insertionTol Do not the insert point if a point  already exist at
-	 * a distance lower than this value
-	 */
-	public Collection<Vertex> insertNodes(Iterable<Vertex> vertices, int group,
-		double liaisonError, double insertionTol)
-	{
-		metrics.compute();
-		nodes.clear();
-		bgTriangles.clear();
-		surroundingTriangle.clear();
-		double liaisonError2 = liaisonError * liaisonError;
-		double insertionTol2 = insertionTol * insertionTol;
-		KdTree<Vertex> kdTree = kdTrees.get(group);
-		int attr = AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD | AbstractHalfEdge.SHARP;
-		ArrayList<Vertex> alreadyIn = new ArrayList<Vertex>();
-		for(Vertex v:vertices)
-		{
-			Vertex foregroundNear = kdTree.getNearestVertex(
-				metrics.get(v, group), v.getUV());
-
-			if(foregroundNear.sqrDistance3D(v) < insertionTol2)
-			{
-				alreadyIn.add(foregroundNear);
-				continue;
-			}
-
-			AbstractHalfEdge foregroundEdge = liaison.findSurroundingTriangle(
-				v, foregroundNear, liaisonError2, false, group);
-			Triangle nearBgTriangle = liaison.getBackgroundTriangle(foregroundNear);
-
-			AbstractHalfEdge backGroundEdge = MeshLiaison.findSurroundingTriangle(
-				v, nearBgTriangle, liaisonError2, group);
-
-			if(backGroundEdge == null)
-				// the backGroundEdge cannot be found because we are very close
-				// to a group boundary, so we do not insert the point.
-				continue;
-
-			liaison.addVertex(v, backGroundEdge.getTri());
-			if(liaison.move(v, v.getUV(), group, true))
-			{
-				addGroups(foregroundEdge, v);
-				nodes.add(v);
-				bgTriangles.add(backGroundEdge.getTri());
-				surroundingTriangle.put(v, foregroundEdge.getTri());
-				Collection<Vertex> newVerts = mapTriangleVertices.get(foregroundEdge.getTri());
-				if(newVerts == null)
-				{
-					newVerts = new ArrayList<Vertex>();
-					mapTriangleVertices.put(foregroundEdge.getTri(), newVerts);
-				}
-				newVerts.add(v);
-			}
-			else
-			{
-				liaison.removeVertex(v);
-				AbstractHalfEdge e = MeshLiaison.findNearestEdge(v, foregroundEdge.getTri());
-				if(!e.hasAttributes(attr))
-					LOGGER.info("Unable to project "+v);
-			}
-		}
-		if(!nodes.isEmpty())
-			insertNodes(7, false, attr, insertionTol2);
-		nodes.addAll(alreadyIn);
-		return Collections.unmodifiableList(nodes);
-	}
-
 	/**
 	 *
 	 * @param maxNodes maximum number by triangles
@@ -1039,7 +930,6 @@ public class Remesh
 			while(cnt >= 0)
 			{
 				cnt--;
-				nrInterpolations++;
 				// Update vertex position if 'project' flag was set
 				double [] pos = np.getUV();
 				if (project && !ot.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
@@ -1245,26 +1135,6 @@ public class Remesh
 		opts.put("size", args[1]);
 		opts.put("coplanarity", "0.9");
 
-if(false) {
-		String metricsFile = args[0]+File.separator+"metricsMap";
-		opts.put("metricsFile", metricsFile);
-
-		PrimitiveFileReaderFactory pfrf = new PrimitiveFileReaderFactory();
-		DoubleFileReader dfr = pfrf.getDoubleReader(new File(args[0]+File.separator+"jcae3d.files"+File.separator+"nodes3d.bin"));
-		long n = dfr.size();
-		java.io.DataOutputStream out = new java.io.DataOutputStream(new java.io.BufferedOutputStream(new java.io.FileOutputStream(metricsFile)));
-		for (long i = 0; i < n; i += 3)
-		{
-			double x = dfr.get();
-			double y = dfr.get();
-			double z = dfr.get();
-			double val = (x - 9000.0)*(x - 9000.0) / 2250.0;
-			if (val > 200.0)
-				val = 200.0;
-			out.writeDouble(val);
-		}
-		out.close();
-}
 		System.out.println("Running "+args[0]+" "+args[1]+" "+args[2]);
 		try
 		{
