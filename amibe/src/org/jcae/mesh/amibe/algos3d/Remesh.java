@@ -95,6 +95,8 @@ public class Remesh
 	private final List<Vertex> triNodes = new ArrayList<Vertex>();
 	private final List<EuclidianMetric3D> triMetrics = new ArrayList<EuclidianMetric3D>();
 	private final List<Vertex> triNeighbor = new ArrayList<Vertex>();
+	private Map <Triangle, Collection<Vertex>> verticesToDispatch =
+		new HashMap<Triangle, Collection<Vertex>>();
 	//  Map to keep track of all groups near a vertex
 	private final Map<Vertex, int[]> groups = new HashMap<Vertex, int[]>();
 	private final Set<Vertex> boundaryNodes = new LinkedHashSet<Vertex>();
@@ -409,9 +411,10 @@ public class Remesh
 		return Matrix3D.prodSca(temp[2], temp[3]) >= 0.0;
 	}
 
-	private Map<Triangle, Collection<Vertex>> collectVertices(AbstractHalfEdge ot)
+	/** Fill verticesToDispatch with vertices to dispatch */
+	private void collectVertices(AbstractHalfEdge ot)
 	{
-		Map <Triangle, Collection<Vertex>> verticesToDispatch = new HashMap<Triangle, Collection<Vertex>>();
+		verticesToDispatch.clear();
 		if (ot.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 		{
 			for (Iterator<AbstractHalfEdge> itf = ot.fanIterator(); itf.hasNext(); )
@@ -448,7 +451,6 @@ public class Remesh
 				}
 			}
 		}
-		return verticesToDispatch;
 	}
 
 	private void dispatchVertices(Vertex newVertex, Map<Triangle, Collection<Vertex>> verticesToDispatch)
@@ -729,7 +731,7 @@ public class Remesh
 				continue;
 			}
 
-			Map<Triangle, Collection<Vertex>> verticesToDispatch = collectVertices(ot);
+			collectVertices(ot);
 
 			ot = mesh.vertexSplit(ot, v);
 			assert ot.destination() == v : v+" "+ot;
@@ -763,9 +765,9 @@ public class Remesh
 					minCosAfterSwap, minCosAfterSwap) > 0.0)
 				{
 					edge.sym().getTri().clearAttributes(AbstractHalfEdge.MARKED);
-					Map<Triangle, Collection<Vertex>> vTri = collectVertices(edge);
+					collectVertices(edge);
 					edge = (HalfEdge) mesh.edgeSwap(edge);
-					dispatchVertices(null, vTri);
+					dispatchVertices(null, verticesToDispatch);
 					totNrSwap++;
 					advance = false;
 				}
