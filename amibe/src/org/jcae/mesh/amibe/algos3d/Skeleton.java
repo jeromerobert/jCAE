@@ -86,7 +86,7 @@ public class Skeleton {
 					while(it.hasNext())
 					{
 						AbstractHalfEdge ne = it.next();
-						if(ne.getTri().getGroupId() != groupIds[k++])
+						if(k >= groupIds.length || ne.getTri().getGroupId() != groupIds[k++])
 							continue main;
 					}
 				}
