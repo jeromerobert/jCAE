@@ -1175,9 +1175,11 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			{
 				if (tArray[i] == oldT1 || tArray[i] == oldT2)
 				{
-					logger.fine("replaceVertexLinks: "+i+" "+o+" "+tArray[i]);
+					if(logger.isLoggable(Level.FINE))
+						logger.fine("replaceVertexLinks: "+i+" "+o+" "+tArray[i]);
 					tArray[i] = newT;
-					logger.fine(" --> "+newT);
+					if(logger.isLoggable(Level.FINE))
+						logger.fine(" --> "+newT);
 				}
 			}
 		}
