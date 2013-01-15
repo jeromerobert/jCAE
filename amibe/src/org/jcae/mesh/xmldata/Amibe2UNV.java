@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 import org.xml.sax.SAXException;
 
@@ -130,7 +131,7 @@ public class Amibe2UNV
 
 	private Map<String, Collection<Group>> indexUNVGroups(Collection<Group> groups)
 	{
-		Map<String, Collection<Group>> toReturn = new HashMap<String, Collection<Group>>();
+		Map<String, Collection<Group>> toReturn = new TreeMap<String, Collection<Group>>();
 		for(Group g:groups)
 		{
 			for(String unvG:formatGroupName(g.getName()))
