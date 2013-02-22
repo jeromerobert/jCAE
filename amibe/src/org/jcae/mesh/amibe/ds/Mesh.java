@@ -1257,26 +1257,26 @@ public class Mesh implements Serializable
 				if(names.contains(e.getValue()))
 					groupIds.add(e.getKey());
 			}
-			AbstractHalfEdge ot  = null;
-			AbstractHalfEdge sym = triangleList.iterator().next().getAbstractHalfEdge();
 
 			for (Triangle t: triangleList)
 			{
-				ot = t.getAbstractHalfEdge(ot);
+				AbstractHalfEdge ot = t.getAbstractHalfEdge();
 				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
 				if(groupIds.contains(t.getGroupId()))
+				{
 					for (int i = 0; i < 3; i++)
 					{
-						ot = ot.next();
-						sym = ot.sym(sym);
 						ot.setAttributes(attr);
 						if (fixVertex)
 						{
+							ot.sym().setAttributes(attr);
 							ot.origin().setMutable(false);
 							ot.destination().setMutable(false);
 						}
+						ot = ot.next();
 					}
+				}
 			}
 		}
 	}

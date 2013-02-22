@@ -20,13 +20,16 @@
 package org.jcae.mesh.amibe.metrics;
 
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.channels.FileChannel;
+import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
-import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
@@ -34,10 +37,9 @@ import org.jcae.mesh.amibe.ds.Vertex;
 /**
  * An AnalyticMetric which refine mesh around a set of points and lines.
  * The metric around each point is:
- * S0 + (S0 - Sinf) / (1 + R * d ^ 2)
- * where Sinf is the mesh size far from the point, S0 is the mesh size on the
- * point, d is the distance from the point and R a coeficient saying how fast
- * Sinf is reached.
+ * S0 if d &lt; d0, Sinf if d &gt; d1 and quadradic interpolation between both.
+ * Sinf is the mesh size far from the point, S0 is the mesh size on the
+ * point, d is the distance from the point
  * @author Jerome Robert
  */
 public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
@@ -47,17 +49,17 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 	public abstract class DistanceMetricInterface
 	{
 		public abstract double getSqrDistance(double x, double y, double z);
-		public double coef;
+		public double sqrD0;
 		public double size0;
 		/**
 		 * if the distance^2 is greater than this value this source is not
 		 * concidered
 		 */
-		public double threshold;
-		/** cache for size0 - sizeInf */
-		public double beta;
-		/** cache for coef / (size0 -sizeInf) ^ 2 */
-		public double ccoef;
+		public double sqrD1;
+		/** cache for sqrD0 - sqrD1 */
+		public double delta;
+		/** cache for sqrD0 / delta */
+		public double ratio;
 	}
 
 	private class PointSource extends DistanceMetricInterface
@@ -159,9 +161,10 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 				double x = Double.parseDouble(line[1]);
 				double y = Double.parseDouble(line[2]);
 				double z = Double.parseDouble(line[3]);
-				double size0 = Double.parseDouble(line[4]);
-				double coef = Double.parseDouble(line[5]);
-				addPoint(x, y, z, size0, coef);
+				double d0 = Double.parseDouble(line[4]);
+				double d1 = Double.parseDouble(line[6]);
+				double size0 = Double.parseDouble(line[5]);
+				addPoint(x, y, z, d0, size0, d1);
 			} else if (type == 2)
 			{
 				double x0 = Double.parseDouble(line[1]);
@@ -172,9 +175,10 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 				double y1 = Double.parseDouble(line[6]);
 				double z1 = Double.parseDouble(line[7]);
 				boolean closed1 = (Integer.parseInt(line[8]) != 0);
-				double size0 = Double.parseDouble(line[9]);
-				double coef = Double.parseDouble(line[10]);
-				addLine(x0, y0, z0, closed0, x1, y1, z1, closed1, size0, coef);
+				double d0 = Double.parseDouble(line[9]);
+				double d1 = Double.parseDouble(line[10]);
+				double size0 = Double.parseDouble(line[11]);
+				addLine(x0, y0, z0, closed0, x1, y1, z1, closed1, d0, size0, d1);
 			}
 			else
 				throw new IllegalArgumentException("Invalid line found in file "+fileName+": "+line);
@@ -188,24 +192,15 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 	 * @param sizeInf metric far from the point
 	 * @param coef how fast we go from size0 to sizeInf
 	 */
-	public final void addPoint(final double x, final double y, final double z,
-		final double size0, final double coef)
+	public final void addPoint(double x, double y, double z, double size0,
+		double d0, double d1)
 	{
 		PointSource ps = new PointSource(x, y, z);
 		ps.size0 = size0;
-		ps.coef = coef;
+		ps.sqrD0 = d0 * d0;
+		ps.sqrD1 = d1 * d1;
+		sources.add(ps);
 		update(ps);
-		if(ps.threshold > 0)
-		{
-			sources.add(ps);
-		}
-		else
-		{
-			// Do nothing
-			LOGGER.warning(String.format("Source point ignored, size (%g) "+
-				"should be lower than target size at infinity (%g)",
-				size0, sizeInf)+" "+ps.threshold+" "+ps.ccoef);
-		}
 	}
 
 	/**
@@ -218,23 +213,14 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 	public final void addLine(
 		final double x0, final double y0, final double z0, final boolean closed0,
 		final double x1, final double y1, final double z1, final boolean closed1,
-		final double size0, final double coef)
+		double size0, double d0, double d1)
 	{
 		LineSource ps = new LineSource(x0, y0, z0, closed0, x1, y1, z1, closed1);
 		ps.size0 = size0;
-		ps.coef = coef;
+		ps.sqrD0 = d0 * d0;
+		ps.sqrD1 = d1 * d1;
+		sources.add(ps);
 		update(ps);
-		if(ps.threshold > 0)
-		{
-			sources.add(ps);
-		}
-		else
-		{
-			// Do nothing
-			LOGGER.warning(String.format("Source point ignored, size (%g) "+
-				"should be lower than target size at infinity (%g)",
-				size0, sizeInf));
-		}
 	}
 
 	public void setSizeInf(double v)
@@ -245,20 +231,30 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 	}
 
 	/** Must be called with sizeInf is changed */
-	protected void update(DistanceMetricInterface i)
+	private void update(DistanceMetricInterface ps)
 	{
-		i.beta = sizeInf - i.size0;
-		i.ccoef = i.coef / i.beta / i.beta;
-		i.threshold = (i.beta / 0.05 / sizeInf - 1) / i.ccoef;
+		if(ps.sqrD1 < ps.sqrD0)
+			ps.sqrD1 = sizeInf * sizeInf * 4;
+		ps.delta = ps.sqrD1 - ps.sqrD0;
+		ps.ratio = ps.sqrD0 / ps.delta;
 	}
 
 	@Override
 	public double getTargetSize(double x, double y, double z, int groupId) {
-		double minValue = sizeInf;
+		double minValue = getSize(groupId);
 		for (DistanceMetricInterface s : sources) {
 			double d2 = s.getSqrDistance(x, y, z);
-			if(d2 < s.threshold)
-				minValue = Math.min(sizeInf - s.beta / (1 + s.ccoef * d2), minValue);
+			double v;
+			if(d2 > s.sqrD1)
+				v = sizeInf;
+			else if(d2 < s.sqrD0)
+				v = s.size0;
+			else
+			{
+				double deltaS = sizeInf - s.size0;
+				v = deltaS * d2 / s.delta + (s.size0 - s.ratio * deltaS);
+			}
+			minValue = Math.min(v, minValue);
 		}
 		return minValue;
 	}
@@ -271,5 +267,58 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 		if(v.isManifold())
 			groupId = ((Triangle)v.getLink()).getGroupId();
 		return getTargetSize(uv[0], uv[1], uv[2], groupId);
+	}
+
+	public void save(String fileName) throws IOException
+	{
+		FileChannel fc = new FileOutputStream(fileName).getChannel();
+		save(fc);
+		fc.close();
+	}
+
+	public void save(WritableByteChannel out) throws IOException
+	{
+		ArrayList<PointSource> ps = new ArrayList<PointSource>();
+		ArrayList<LineSource> ls = new ArrayList<LineSource>();
+		for(DistanceMetricInterface s:sources)
+		{
+			if(s instanceof PointSource)
+				ps.add((PointSource)s);
+			else
+				ls.add((LineSource)s);
+		}
+		ByteBuffer bb = ByteBuffer.allocate(
+			ps.size() * 6 * 8 + ls.size() * 9 * 8 + 2 * 4);
+		bb.order(ByteOrder.nativeOrder());
+		bb.putInt(ps.size());
+		for(PointSource s:ps)
+		{
+			bb.putDouble(s.size0);
+			bb.putDouble(s.sqrD0);
+			bb.putDouble(s.sqrD1);
+			bb.putDouble(s.sx);
+			bb.putDouble(s.sy);
+			bb.putDouble(s.sz);
+		}
+		bb.putInt(ls.size());
+		for(LineSource s:ls)
+		{
+			bb.putDouble(s.size0);
+			bb.putDouble(s.sqrD0);
+			bb.putDouble(s.sqrD1);
+			bb.putDouble(s.sx0);
+			bb.putDouble(s.sy0);
+			bb.putDouble(s.sz0);
+			bb.putDouble(s.sx1);
+			bb.putDouble(s.sy1);
+			bb.putDouble(s.sz1);
+		}
+		bb.rewind();
+		out.write(bb);
+	}
+
+	public double getSize(int group)
+	{
+		return sizeInf;
 	}
 }

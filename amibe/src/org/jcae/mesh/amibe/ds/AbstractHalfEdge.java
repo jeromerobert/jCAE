@@ -22,6 +22,7 @@ package org.jcae.mesh.amibe.ds;
 
 import org.jcae.mesh.amibe.traits.HalfEdgeTraitsBuilder;
 import java.util.Iterator;
+import org.jcae.mesh.amibe.metrics.Matrix3D;
 
 /**
  * Abstract class to define common methods on edges.
@@ -335,6 +336,79 @@ import java.util.Iterator;
  */
 public abstract class AbstractHalfEdge
 {
+	/** Helper class to compute the quality of a HaldEdge */
+	public static class Quality
+	{
+		private double[] normal1 = new double[3];
+		private double[] normal2 = new double[3];
+		private double[] swappedNormal1 = new double[3];
+		private double[] swappedNormal2 = new double[3];
+		private double[] temp1 = new double[3];
+		private double[] temp2 = new double[3];
+		private double area1, area2, swappedArea1, swappedArea2;
+		private Vertex o, d, apex, symApex;
+		private boolean normalComputed, swappedNormalComputed;
+		public void setEdge(AbstractHalfEdge edge)
+		{
+			o = edge.origin();
+			d = edge.destination();
+			apex = edge.apex();
+			symApex = edge.sym().apex();
+			normalComputed = false;
+			swappedNormalComputed = false;
+		}
+
+		private void computeNormal()
+		{
+			if(!normalComputed)
+			{
+				area1 = Matrix3D.computeNormal3D(
+					o.getUV(), d.getUV(), apex.getUV(), temp1, temp2, normal1);
+				area2 = Matrix3D.computeNormal3D(
+					d.getUV(), o.getUV(), symApex.getUV(), temp1, temp2, normal2);
+				normalComputed = true;
+			}
+		}
+		private void computeSwappedNormal()
+		{
+			if(!swappedNormalComputed)
+			{
+				swappedArea1 = Matrix3D.computeNormal3D(
+					o.getUV(), symApex.getUV(), apex.getUV(), temp1, temp2, swappedNormal1);
+				swappedArea2 = Matrix3D.computeNormal3D(
+					d.getUV(), apex.getUV(), symApex.getUV(), temp1, temp2, swappedNormal2);
+				swappedNormalComputed = true;
+			}
+		}
+
+		public double getQuality()
+		{
+			computeNormal();
+			double p1 = o.distance3D(d) + d.distance3D(apex) + apex.distance3D(o);
+			double p2 = d.distance3D(o) + o.distance3D(symApex) + symApex.distance3D(d);
+			return  Math.min(area1/p1/p1, area2/p2/p2);
+		}
+
+		public double getAngle()
+		{
+			computeNormal();
+			return Matrix3D.prodSca(normal1, normal2);
+		}
+
+		public double getSwappedQuality()
+		{
+			computeSwappedNormal();
+			double p3 = o.distance3D(symApex) + symApex.distance3D(apex) + apex.distance3D(o);
+			double p4 = d.distance3D(apex) + apex.distance3D(symApex) + symApex.distance3D(d);
+			return Math.min(swappedArea1/p3/p3, swappedArea2/p4/p4);
+		}
+
+		public double getSwappedAngle()
+		{
+			computeSwappedNormal();
+			return Matrix3D.prodSca(swappedNormal1, swappedNormal2);
+		}
+	}
 	/**
 	 * User-defined traits.  There are currently no traits for half-edges.
 	 */

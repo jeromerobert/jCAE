@@ -20,6 +20,7 @@
 
 package org.jcae.mesh.amibe.ds;
 
+import java.util.Collection;
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 
 public class TriangleHE extends Triangle
@@ -157,17 +158,28 @@ public class TriangleHE extends Triangle
 				uv[i] += vertex[j].getUV()[i];
 			uv[i] /= 3;
 		}
-		split(mesh, mesh.createVertex(uv));
+		split(mesh, mesh.createVertex(uv), null);
 	}
 
-	public void split(Mesh mesh, Vertex v)
+	private void glue(HalfEdge oldHE, Triangle t)
 	{
+		AbstractHalfEdge newHE = t.getAbstractHalfEdge();
+		oldHE.sym().glue(newHE);
+		newHE.setAttributes(oldHE.getAttributes());
+	}
+	public void split(Mesh mesh, Vertex v, Collection<Triangle> output)
+	{
+		assert v != null;
+		//TODO reuse the current instance and create only 2 new triangles
 		Triangle t1 = mesh.createTriangle(v, vertex[0], vertex[1]);
 		replaceTriangle(vertex[0], t1);
+		t1.setGroupId(getGroupId());
 		Triangle t2 = mesh.createTriangle(v, vertex[1], vertex[2]);
 		replaceTriangle(vertex[1], t2);
+		t2.setGroupId(getGroupId());
 		Triangle t3 = mesh.createTriangle(v, vertex[2], vertex[0]);
 		replaceTriangle(vertex[2], t3);
+		t3.setGroupId(getGroupId());
 		v.setLink(t1);
 		AbstractHalfEdge t1he = t1.getAbstractHalfEdge().next();
 		AbstractHalfEdge t2he = t2.getAbstractHalfEdge().next();
@@ -175,5 +187,25 @@ public class TriangleHE extends Triangle
 		t1he.glue(t2he.next());
 		t2he.glue(t3he.next());
 		t3he.glue(t1he.next());
+
+		HalfEdge oldHE = e0;
+		glue(oldHE, t2);
+		oldHE = oldHE.next();
+		glue(oldHE, t3);
+		oldHE = oldHE.next();
+		glue(oldHE, t1);
+
+		if(output != null)
+		{
+			output.add(t1);
+			output.add(t2);
+			output.add(t3);
+		}
+		if(mesh.hasNodes())
+			mesh.add(v);
+		mesh.add(t1);
+		mesh.add(t2);
+		mesh.add(t3);
+		mesh.remove(this);
 	}
 }

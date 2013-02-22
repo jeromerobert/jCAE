@@ -27,12 +27,20 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.projection.MeshLiaison;
 import org.jcae.mesh.amibe.metrics.Metric;
-import gnu.trove.TObjectIntHashMap;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
+import org.jcae.mesh.amibe.util.QSortedTree.Node;
+import org.jcae.mesh.xmldata.MeshReader;
+import org.jcae.mesh.xmldata.MeshWriter;
 
 /**
  * Remove vertices with low valence, and duplicate vertices with high valence.
@@ -41,14 +49,24 @@ import java.util.logging.Logger;
 public class ImproveVertexValence extends AbstractAlgoVertex
 {
 	private static final Logger LOGGER=Logger.getLogger(ImproveVertexValence.class.getName());
-	private TObjectIntHashMap<Vertex> map;
 	private final LinkedHashSet<Vertex> immutableNodes = new LinkedHashSet<Vertex>();
 	private int valence3;
 	private int valence4;
 	private int inserted;
 	private int minValence = 1, maxValence = Integer.MAX_VALUE;
 	private boolean checkNormals = true;
-	private boolean pattern75 = true;
+	/** valences for alternate pattern  */
+	private int[] valences = new int[6];
+	/** neighbourgs edges for alternate pattern */
+	private List<AbstractHalfEdge> aPEdges = new ArrayList<AbstractHalfEdge>(6);
+	private List<Vertex> aPVertices = new ArrayList<Vertex>(6);
+	/**
+	 * Level neighbours from a node.
+	 * This is needed to update the tree. Level 1 is not enough because of
+	 * alternate and 55 patterns.
+	 */
+	private Collection<Vertex> level2Neighbours = new HashSet<Vertex>(18 * 4 / 3);
+
 	/**
 	 * Creates a <code>ImproveConnectivity</code> instance.
 	 *
@@ -90,10 +108,6 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 			{
 				maxValence = Integer.parseInt(val);
 			}
-			else if("pattern75".equals(key))
-			{
-				pattern75 = Boolean.parseBoolean(val);
-			}
 			else
 				throw new RuntimeException("Unknown option: "+key);
 		}
@@ -112,15 +126,12 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 	@Override
 	public void preProcessAllVertices()
 	{
-		map = new TObjectIntHashMap<Vertex>(mesh.getTriangles().size() / 2);
  		AbstractHalfEdge ot = null;
 		for (Triangle t: mesh.getTriangles())
 		{
 			if (t.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			ot = t.getAbstractHalfEdge(ot);
-			for (Vertex v: t.vertex)
-				map.put(v, map.get(v) + 1);
 			for (int i = 0; i < 3; i++)
 			{
 				ot = ot.next();
@@ -132,99 +143,217 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 			}
 		}
 	}
-	/** Check that v neighbours have 7, 5, 7, 5, 7, 5 as connectivity */
-	private boolean isPattern75(Vertex v)
+
+	/** Just a debugging method */
+	private int getValence(Vertex v)
+	{
+		if(!v.isManifold())
+			return -1;
+		AbstractHalfEdge start = v.getIncidentAbstractHalfEdge((Triangle)v.getLink(), null);
+		AbstractHalfEdge edge = start;
+		int r = 0;
+		do
+		{
+			r++;
+			edge = edge.nextOrigin();
+			if(edge == null)
+				//border or non-manifold vertex
+				return -1;
+		}
+		while(edge != start);
+		return r;
+	}
+
+	private int getAPValences(Vertex v, boolean withNeighbours)
+	{
+		assert getValence(v) == 6: getValence(v);
+		AbstractHalfEdge start = v.getIncidentAbstractHalfEdge((Triangle)v.getLink(), null);
+		AbstractHalfEdge edge = start;
+		int k = 0;
+		int min = Integer.MAX_VALUE;
+		int imin = 0;
+		if(withNeighbours)
+		{
+			aPEdges.clear();
+			aPVertices.clear();
+		}
+		do
+		{
+			if(withNeighbours)
+			{
+				aPEdges.add(edge);
+				aPVertices.add(edge.destination());
+			}
+			int valence = getValence(edge.destination());
+			if(valence < 0)
+				return -1;
+			valences[k] = valence;
+			if(valence < min)
+			{
+				min = valence;
+				imin = k;
+			}
+			k++;
+			edge = edge.nextOrigin();
+		}
+		while(edge != start);
+		return imin;
+	}
+
+	/**
+	 * Assuming that v have a valence of 6, check that v neighbours have
+	 * &gt;6, &lt6, &gt;6, &lt6, &gt;6, &lt6 as connectivity
+	 */
+	private boolean isAlternatePattern(Vertex v)
 	{
 		if(!v.isManifold())
 			return false;
-		Iterator<Vertex> it = v.getNeighbourIteratorVertex();
-		int nb5 = 0;
-		int nb7 = 0;
-		int previous = 0;
-		while(it.hasNext())
+		int imin = getAPValences(v, false);
+		if(imin < 0)
+			return false;
+		int currentCost = 0;
+		int swappedCost = 0;
+		for(int i = 0; i < 6; i+=2)
 		{
-			Vertex nv = it.next();
-			if(!nv.isManifold())
+			int valence = valences[(imin + i) % 6];
+			if(valence > 6)
 				return false;
-			int c = map.get(nv);
-			if(c == previous)
-				return false;
-			if(c == 5)
-				nb5 ++;
-			else if(c == 7)
-				nb7 ++;
+			currentCost += Math.abs(6 - valence);
+			swappedCost += Math.abs(6 - (valence + 1));
+			valence = valences[(imin + i + 1) % 6];
+			currentCost += Math.abs(valence - 6);
+			swappedCost += Math.abs(valence - 1 - 6);
 		}
-
-		return nb5 == 3 && nb7 == 3;
+		return swappedCost < currentCost;
 	}
 
-	private boolean processPattern75(Vertex v)
+	private boolean processAlternatePattern(Vertex v)
 	{
-		Iterator<AbstractHalfEdge> it = v.getNeighbourIteratorAbstractHalfEdge();
-		AbstractHalfEdge he5 = null;
-		ArrayList<AbstractHalfEdge> he7 = new ArrayList<AbstractHalfEdge>(3);
-		ArrayList<Vertex> neighBVerts = new ArrayList<Vertex>(6);
-		while(it.hasNext())
+		getLevel2Neighbors(v);
+		int imin = getAPValences(v, true);
+		for(int i = 0; i < 3; i++)
 		{
-			AbstractHalfEdge he = it.next();
-			Vertex dest = he.destination();
-			neighBVerts.add(dest);
-			int conn = map.get(dest);
-			switch(conn)
-			{
-				case 5:
-					he5 = he;
-					break;
-				case 7:
-					he7.add(he);
-					break;
-				default:
-					throw new IllegalStateException("unexpected connectivity: "+conn);
-			}
+			AbstractHalfEdge toSwap = aPEdges.get((imin + 2 * i + 1) % 6);
+			mesh.edgeSwap(toSwap);
 		}
-		for(AbstractHalfEdge he:he7)
-			mesh.edgeSwap(he);
+		AbstractHalfEdge he5 = aPEdges.get(imin);
 		mesh.edgeCollapse(he5, he5.destination());
-		for(Vertex nv:neighBVerts)
+		tree.remove(v);
+		for(Vertex mv:level2Neighbours)
 		{
-			tree.remove(v);
-			map.put(nv, 6);
+			if(canProcessVertex(mv))
+			{
+				if(tree.contains(mv))
+					tree.update(mv, cost(mv));
+				else
+					tree.insert(mv, cost(mv));
+			}
+			else
+				tree.remove(mv);
 		}
 		return true;
+	}
+
+	private AbstractHalfEdge get55Pattern(Vertex v)
+	{
+		AbstractHalfEdge start = v.getIncidentAbstractHalfEdge((Triangle)v.getLink(), null);
+		AbstractHalfEdge edge = start;
+		for(int i = 0; i < 5; i++)
+		{
+			if(getValence(edge.destination()) == 5)
+			{
+				double v1 = getValence(edge.apex());
+				double v2 = getValence(edge.sym().apex());
+				if((v1 > 6 && v2 >= 6) || (v1 >= 6 && v2 > 6))
+					return edge;
+			}
+			edge = edge.nextOrigin();
+		}
+		return null;
+	}
+	/**
+	 * Assuming that v have a valence of 5 check that is has a neightbour with a
+	 * valence of 5, and that the 2 apex of this edges have valences greater
+	 * than 6
+	 */
+	private boolean is55Pattern(Vertex v)
+	{
+		return get55Pattern(v) != null;
+	}
+
+	private boolean process55Pattern(Vertex v)
+	{
+		AbstractHalfEdge edge = get55Pattern(v);
+		assert edge.origin() == v;
+		getLevel2Neighbors(edge.origin());
+		mesh.edgeCollapse(edge, edge.destination());
+		tree.remove(v);
+		for(Vertex mv:level2Neighbours)
+		{
+			if(canProcessVertex(mv))
+			{
+				if(tree.contains(mv))
+					tree.update(mv, cost(mv));
+				else
+					tree.insert(mv, cost(mv));
+			}
+			else
+				tree.remove(mv);
+		}
+		return true;
+	}
+
+	private void getLevel2Neighbors(Vertex v)
+	{
+		level2Neighbours.clear();
+		AbstractHalfEdge start = v.getIncidentAbstractHalfEdge((Triangle)v.getLink(), null);
+		AbstractHalfEdge edge = start;
+		do
+		{
+			Vertex d = edge.destination();
+			level2Neighbours.add(d);
+			if(d.isManifold())
+			{
+				AbstractHalfEdge start2 = d.getIncidentAbstractHalfEdge((Triangle)d.getLink(), null);
+				AbstractHalfEdge edge2 = start2;
+				do
+				{
+					level2Neighbours.add(edge2.destination());
+					edge2 = edge2.nextOrigin();
+				}
+				while(edge2 != start2 && edge2 != null);
+			}
+			edge = edge.nextOrigin();
+		}
+		while(edge != start);
+		level2Neighbours.remove(v);
 	}
 
 	@Override
 	protected final double cost(final Vertex v)
 	{
 		if (!v.isManifold() || !v.isMutable())
-			return 100.0;
-		int q = map.get(v);
-		if(q == 6 && pattern75 && isPattern75(v))
-			return 7.5;
+			return Double.MAX_VALUE;
+		int q = getValence(v);
 		if(q < minValence || q > maxValence)
-			return 100.0;
-		if (q > 10)
-			return -q;
+			return Double.MAX_VALUE;
 		switch(q)
 		{
 			case 1:
 			case 2:
-				return 100.0;
+				return tolerance + 1;
 			case 3:
-				//This case doesn't modify the neighbourhood so it must be
-				//performed after case 4.
-				return 4.1;
+				return 4;
 			case 4:
-				return 3.1;
+				return 3;
 			case 5:
+				return is55Pattern(v) ? 5 : tolerance + 1;
 			case 6:
+				return isAlternatePattern(v) ? 6 : tolerance + 1;
 			case 7:
-				return 50.0;
-			case 8: return 2.9;
-			case 9: return 1.9;
-			case 10: return 0.5;
+				return tolerance + 1;
 			default:
-				throw new IllegalStateException();
+				return 7 + (tolerance - 7) / (q - 7);
 		}
 	}
 
@@ -264,44 +393,48 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 		else if (ot.apex() == v)
 			ot = ot.prev();
 		assert ot.origin() == v;
-
-		if(cost == 7.5)
-			return processPattern75(v);
-
-		if (cost > 3.0 && cost < 5.0)
+		if(cost == 6)
+			return processAlternatePattern(v);
+		else if(cost == 5)
+			return process55Pattern(v);
+		else if (cost == 4 || cost == 3)
 		{
 			// Very low valence, try to remove vertex
-			int iVal = (cost == 4.1 ? 3 : 4);
+			int iVal = (cost == 4 ? 3 : 4);
 			// For valence 3, the edge to collapse does not matter
 			ot = iVal == 3 ? ot : checkLowValence(ot, iVal);
 			if (ot == null)
 				return false;
-
 			//no need to check collapse if the valence is 3 as collapse is
 			//equivalent to remove 3 triangles and create a new one.
 			if (iVal != 3 && !mesh.canCollapseEdge(ot, ot.destination()))
 				return false;
-			// Fix valence of incident vertices
-			fixIncidentVertices(ot, iVal);
-			ot = mesh.edgeCollapse(ot, ot.destination());
+			Vertex destination = ot.destination();
+			Vertex origin = ot.origin();
+			getLevel2Neighbors(origin);
+			tree.remove(origin);
+			ot = mesh.edgeCollapse(ot, destination);
 			if (iVal == 3)
 				valence3++;
 			else
 				valence4++;
-			for (Iterator<Vertex> it = ot.origin().getNeighbourIteratorVertex(); it.hasNext(); )
+			for(Vertex o: level2Neighbours)
 			{
-				Vertex o = it.next();
-				if (!canProcessVertex(o))
-					continue;
-				double val = cost(o);
-				if (!tree.contains(o))
-					tree.insert(o, val);
+				if (canProcessVertex(o))
+				{
+					double val = cost(o);
+					if (tree.contains(o))
+						tree.update(o, val);
+					else
+						tree.insert(o, val);
+				}
 				else
-					tree.update(o, val);
+					tree.remove(o);
 			}
 		}
-		else if (cost < 3.0)
+		else if (cost >= 7.0)
 		{
+			getLevel2Neighbors(v);
 			// Valence is 8 or more, try to insert a vertex
 			ot = checkLargeValence(ot);
 			if (ot == null)
@@ -335,43 +468,23 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 
 			}
 			assert h.origin() == v;
-			map.put(a, map.get(a) + 1);
-			map.put(n, map.get(n) + 1);
-			map.put(newV, 4);
-			map.put(v, map.get(v) - 1);
-			map.put(h.destination(), map.get(h.destination()) - 1);
-			map.put(h.apex(), map.get(h.apex()) + 1);
-			map.put(h.sym().apex(), map.get(h.sym().apex()) + 1);
-			Vertex [] modified = new Vertex[] {
-				a, n, newV, v, h.destination(), h.apex(), h.sym().apex()
-			};
 			mesh.edgeSwap(h);
-			for (Vertex o : modified)
+			for(Vertex o: level2Neighbours)
 			{
-				if (!canProcessVertex(o))
-					continue;
-				double val = cost(o);
-				if (!tree.contains(o))
-					tree.insert(o, val);
+				if (canProcessVertex(o))
+				{
+					double val = cost(o);
+					if (tree.contains(o))
+						tree.update(o, val);
+					else
+						tree.insert(o, val);
+				}
 				else
-					tree.update(o, val);
+					tree.remove(o);
 			}
 			inserted++;
 		}
-
 		return true;
-	}
-
-	private void fixIncidentVertices(AbstractHalfEdge ot, int valence)
-	{
-		for (int i = valence; i > 0; --i)
-		{
-			Vertex d = ot.destination();
-			if (valence == 3)
-				map.put(d, map.get(d) - 1);
-			else if (valence == 4 && i%2 != 0)
-				map.put(d, map.get(d) - 1);
-		}
 	}
 
 	private AbstractHalfEdge checkLowValence(AbstractHalfEdge ot, int valence)
@@ -441,4 +554,40 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 		LOGGER.info("Number of vertices still present in the binary tree: "+tree.size());
 	}
 
+	/** Debugging method to check that the tree has been properly updated */
+	private void checkTree()
+	{
+		Iterator<Node<Vertex>> it = tree.iterator();
+		while(it.hasNext())
+		{
+			Node<Vertex> n = it.next();
+			if(n.getValue() != cost(n.getData()))
+			{
+				System.err.println(n.getData());
+				System.err.println(n.getValue());
+				System.err.println(getValence(n.getData()));
+				System.err.println(cost(n.getData()));
+				throw new IllegalStateException();
+			}
+		}
+	}
+
+	public static void main(final String[] args) {
+		try {
+			MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault3D();
+			mtb.addNodeSet();
+			Mesh mesh = new Mesh(mtb);
+			MeshReader.readObject3D(mesh, "/home/robert/ast-a319-neo/demo-anabelle/demo/AST_mesh.amibe");
+			MeshLiaison ml = MeshLiaison.create(mesh);
+			ml.getMesh().buildGroupBoundaries();			
+			HashMap opts = new HashMap();
+			opts.put("checkNormals", "false");
+			opts.put("maxValence", "7");
+			new ImproveVertexValence(ml, opts).compute();
+			MeshWriter.writeObject3D(ml.getMesh(), "/home/robert/ast-a319-neo/demo-anabelle/demo/AST_mesh3.amibe", null);
+		} catch (Exception ex) {
+			Logger.getLogger(VertexInsertion.class.getName()).log(Level.SEVERE,
+				null, ex);
+		}
+	}
 }

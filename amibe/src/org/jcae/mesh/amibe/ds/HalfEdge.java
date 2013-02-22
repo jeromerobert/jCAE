@@ -418,6 +418,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @return the minimum quality of the two triangles generated
 	 *    by swapping this edge or -1 if the swap must not be done
 	 */
+	//TODO: Code factorization with AbstractHalfEdge.Quality
 	public final double checkSwap3D(Mesh mesh, double minCos, double maxLength,
 		double minQualityFactor, boolean expectInsert, double minCosAfter,
 		double minCosForceSwap)
@@ -1174,9 +1175,11 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			{
 				if (tArray[i] == oldT1 || tArray[i] == oldT2)
 				{
-					logger.fine("replaceVertexLinks: "+i+" "+o+" "+tArray[i]);
+					if(logger.isLoggable(Level.FINE))
+						logger.fine("replaceVertexLinks: "+i+" "+o+" "+tArray[i]);
 					tArray[i] = newT;
-					logger.fine(" --> "+newT);
+					if(logger.isLoggable(Level.FINE))
+						logger.fine(" --> "+newT);
 				}
 			}
 		}
