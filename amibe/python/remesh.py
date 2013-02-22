@@ -84,7 +84,8 @@ def afront_debug(afront_path, tmp_dir, mesh, size, point_metric, immutable_group
             print "Exit code: "+str(return_code)
     return MultiDoubleFileReader(nodes_file)
 
-def afront(afront_path, tmp_dir, mesh, size, point_metric, immutable_groups):
+def afront(afront_path, tmp_dir, mesh, size, point_metric, immutable_groups,
+    afront_stderr = None):
     from org.jcae.mesh.xmldata import AmibeReader, MultiDoubleFileReader
     """ Run afront and return a MultiDoubleFileReader allowing to read created
     nodes """
@@ -115,7 +116,8 @@ def afront(afront_path, tmp_dir, mesh, size, point_metric, immutable_groups):
         cmd.append('-tri_mesh')
         sys.stderr.write("meshing %s\n" % g.name)
         sys.stderr.write(" ".join(cmd)+"\n")
-        p = subprocess.Popen(cmd, stdin = subprocess.PIPE, cwd = tmp_dir)
+        p = subprocess.Popen(cmd, stdin = subprocess.PIPE, cwd = tmp_dir,
+             stderr = afront_stderr)
         sm.readGroup(g, p.stdin.fileno().channel)
         p.stdin.flush()
         return_code = p.wait()
@@ -161,6 +163,7 @@ def create_mesh(**kwargs):
     return mesh
 
 def __remesh(options):
+    afront_stderr = getattr(options, 'afront_stderr', None)
     mesh = getattr(options, 'mesh', None)
     if not mesh:
         mesh = create_mesh(**options)
@@ -238,7 +241,7 @@ def __remesh(options):
     if options.afront_path:
         tmp_dir = tempfile.mkdtemp()
         afront_nodes_reader = afront(options.afront_path, tmp_dir, liaison.mesh,
-            options.size, point_metric, immutable_groups)
+            options.size, point_metric, immutable_groups, afront_stderr = afront_stderr)
         afront_frozen = afront_insert(liaison, afront_nodes_reader, options.size, point_metric)
         Vertex.setMutable(afront_frozen, False)
 
