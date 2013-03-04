@@ -161,10 +161,10 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 				double x = Double.parseDouble(line[1]);
 				double y = Double.parseDouble(line[2]);
 				double z = Double.parseDouble(line[3]);
-				double d0 = Double.parseDouble(line[4]);
+				double size0 = Double.parseDouble(line[4]);
+				double d0 = Double.parseDouble(line[5]);
 				double d1 = Double.parseDouble(line[6]);
-				double size0 = Double.parseDouble(line[5]);
-				addPoint(x, y, z, d0, size0, d1);
+				addPoint(x, y, z, size0, d0, d1);
 			} else if (type == 2)
 			{
 				double x0 = Double.parseDouble(line[1]);
@@ -175,10 +175,10 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 				double y1 = Double.parseDouble(line[6]);
 				double z1 = Double.parseDouble(line[7]);
 				boolean closed1 = (Integer.parseInt(line[8]) != 0);
-				double d0 = Double.parseDouble(line[9]);
-				double d1 = Double.parseDouble(line[10]);
-				double size0 = Double.parseDouble(line[11]);
-				addLine(x0, y0, z0, closed0, x1, y1, z1, closed1, d0, size0, d1);
+				double size0 = Double.parseDouble(line[9]);
+				double d0 = Double.parseDouble(line[10]);
+				double d1 = Double.parseDouble(line[11]);
+				addLine(x0, y0, z0, closed0, x1, y1, z1, closed1, size0, d0, d1);
 			}
 			else
 				throw new IllegalArgumentException("Invalid line found in file "+fileName+": "+line);
