@@ -21,6 +21,7 @@
 
 package org.jcae.netbeans.mesh;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,6 +56,12 @@ public class RemeshAction extends AlgoAction {
 			l.add(Double.toString(p.getCoplanarity()));
 			if(p.isPreserveGroups())
 				l.add("--preserveGroups");
+			File metricFile = new File(ado.getMeshDirectory(), "metric.txt");
+			if(metricFile.exists())
+			{
+				l.add("--point-metric");
+				l.add(metricFile.getAbsolutePath());
+			}
 			if(AFRONT != null)
 			{
 				l.add("--afront");
