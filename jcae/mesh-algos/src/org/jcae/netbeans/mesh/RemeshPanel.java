@@ -58,7 +58,7 @@ public class RemeshPanel extends JPanel {
 
 	private double targetSize = 1.0;
 	private boolean preserveGroups = true;
-	private double coplanarity = 0.9;
+	private double coplanarity = -2;
 
     /** Creates new form RemeshPanel */
     public RemeshPanel() {
