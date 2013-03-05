@@ -296,7 +296,15 @@ public class MeshReader
 				int id = i++;
 				mesh.setGroupName(id, g.getName());
 				for (int j : g.readTria3Ids())
-					facelist[j].setGroupId(id);
+				{
+					Triangle f = facelist[j];
+					int prevId = f.getGroupId();
+					if(prevId > 0)
+						logger.warning("Trying to tag triangle "+j+" as "+
+							g.getName()+"/"+id+" while it's alread tagged as "+
+							mesh.getGroupName(prevId)+"/"+prevId+".");
+					f.setGroupId(id);
+				}
 				for(int j : g.readBeamsIds())
 					mesh.setBeamGroup(j, id);
 				for(int j : g.readNodesIds())
