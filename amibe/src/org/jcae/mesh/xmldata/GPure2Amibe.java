@@ -24,8 +24,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.xpath.XPathExpressionException;
@@ -85,18 +88,7 @@ public class GPure2Amibe extends XMLReader {
 			//free some memory
 			GPure:faces.setTextContent("");
 		}
-
-		for(Element e:partitionElements)
-		{
-			Element dataGroup = getElement(e, "GPure:dataGroup");
-			if(dataGroup != null && "partitionDataSet".equals(dataGroup.getTextContent()))
-			{
-				String gn = getFreeName(getElement(e, "GPure:name").getTextContent());
-				out.nextGroup(gn);
-				addToGroup(getElement(e, "GPure:faces").getTextContent());
-			}
-		}
-
+		writeGroups(partitionElements);
 		int beamOffset = 0;
 		for(Element e:edgeElements)
 		{
@@ -107,6 +99,26 @@ public class GPure2Amibe extends XMLReader {
 			beamOffset += addBeams(edges.getTextContent(), nodeOffset, beamOffset);
 		}
 		out.finish();
+	}
+
+	private void writeGroups(List<Element> partitionElements) throws IOException
+	{
+		// sort group alphabetically
+		TreeMap<String, Element> sortedPartitions = new TreeMap<String, Element>();
+		for(Element e:partitionElements)
+		{
+			Element dataGroup = getElement(e, "GPure:dataGroup");
+			if(dataGroup != null && "partitionDataSet".equals(dataGroup.getTextContent()))
+			{
+				String name = getFreeName(getElement(e, "GPure:name").getTextContent());
+				sortedPartitions.put(name, e);
+			}
+		}
+		for(Entry<String, Element> e:sortedPartitions.entrySet())
+		{
+			out.nextGroup(e.getKey());
+			addToGroup(getElement(e.getValue(), "GPure:faces").getTextContent());
+		}
 	}
 
 	private String getFreeName(String root)
