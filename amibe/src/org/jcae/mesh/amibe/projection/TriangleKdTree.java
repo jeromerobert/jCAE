@@ -113,6 +113,7 @@ public class TriangleKdTree {
 	private final static Logger LOGGER = Logger.getLogger(TriangleKdTree.class.getName());
 	private final Node root = new Node();
 	private double[] globalBounds, globalSize = new double[3];
+	private double globalRadius;
 	private double[] minNodeSize = new double[3];
 	private final int bucketSize;
 	private final TriangleInterAABB triangleInterAABB1 = new TriangleInterAABB();
@@ -139,6 +140,8 @@ public class TriangleKdTree {
 			globalBounds[i] -= offset;
 			globalBounds[i+3] += offset;
 			globalSize[i] = globalBounds[i+3] - globalBounds[i];
+			if(globalSize[i] > globalRadius)
+				globalRadius = globalSize[i];
 			minNodeSize[i] = globalSize[i] / minNodeRatio;
 		}
 		for(Triangle t:mesh.getTriangles())
@@ -329,10 +332,12 @@ public class TriangleKdTree {
 				return toReturn;
 			else
 			{
-				LOGGER.warning(Arrays.toString(coords)+"from group "+group+
+				LOGGER.warning(Arrays.toString(coords)+" from group "+group+
 					" cannot be projected at "+aabbDistance+". Trying "+
 					(aabbDistance * 1.4)+".");
 				aabbDistance = aabbDistance * 1.4;
+				if(aabbDistance > globalRadius)
+					return null;
 			}
 		}
 	}
@@ -356,7 +361,7 @@ public class TriangleKdTree {
 		}
 		double[] otherProj = new double[3];
 		Triangle other = getClosestTriangle(coords, otherProj, group);
-		if(other != toReturn)
+		if(other != toReturn || other == null)
 		{
 			System.err.println("--- real solution ---");
 			System.err.println(toReturn);
@@ -364,14 +369,17 @@ public class TriangleKdTree {
 			System.err.println(Arrays.toString(projection));
 			System.err.println("--- kdtree solution ---");
 			System.err.println(other);
-			int n = 0;
-			for(int i = 0; i < 3; i++)
+			if(other != null)
 			{
-				double d = otherProj[i] - coords[i];
-				n += d * d;
+				int n = 0;
+				for(int i = 0; i < 3; i++)
+				{
+					double d = otherProj[i] - coords[i];
+					n += d * d;
+				}
+				System.err.println(Math.sqrt(n));
+				System.err.println(Arrays.toString(otherProj));
 			}
-			System.err.println(Math.sqrt(n));
-			System.err.println(Arrays.toString(otherProj));
 			throw new IllegalStateException();
 		}
 		return toReturn;
@@ -412,6 +420,19 @@ public class TriangleKdTree {
 		closeNodes.addAll(backup);
 	}
 
+	/**
+	 * Debugging method to check that all triangles of the mesh are in this
+	 * kdTree
+	 */
+	public void checkContainsAllTriangles(Mesh mesh)
+	{
+		Set<Triangle> triangles = getTriangles();
+		for(Triangle t:mesh.getTriangles())
+		{
+			if(!t.hasAttributes(AbstractHalfEdge.OUTER) && !triangles.contains(t))
+				throw new IllegalStateException(t+" cannot be found in the kdTree");
+		}
+	}
 	/** Slow and memory consuming debug method that build node boundaries */
 	private Map<Node, double[]> getNodeBounds()
 	{
