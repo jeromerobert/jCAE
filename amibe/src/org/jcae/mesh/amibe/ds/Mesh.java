@@ -1090,7 +1090,13 @@ public class Mesh implements Serializable
 				sym = ot.sym(sym);
 				int symGroupId = sym.getTri().getGroupId();
 				if (groupId != symGroupId && (groupSet.isEmpty() || groupSet.contains(groupId)))
+				{
 					bindSymEdgesToVirtualTriangles(ot, sym, temp0, temp1, newTriangles);
+					if (0 == ot.origin().getRef())
+						setRefVertexOnBoundary(ot.origin());
+					if (0 == ot.destination().getRef())
+						setRefVertexOnBoundary(ot.destination());
+				}
 			}
 		}
 		int toReturn = newTriangles.size() / 2;
