@@ -154,7 +154,10 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 		{
 			if (buffer.startsWith("#"))
 				continue;
-			String[] line = buffer.trim().split("[\\s,;]+");
+			buffer = buffer.trim();
+			if(buffer.isEmpty())
+				continue;
+			String[] line = buffer.split("[\\s,;]+");
 			int type = Integer.parseInt(line[0]);
 			if (type == 1)
 			{
