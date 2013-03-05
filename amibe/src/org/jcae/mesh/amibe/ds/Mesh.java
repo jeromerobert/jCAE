@@ -2119,6 +2119,39 @@ public class Mesh implements Serializable
 		};
 	}
 
+	public int getNumberOfTrianglesByGroup(int group)
+	{
+		int n = 0;
+		for(Triangle t:getTriangles())
+		{
+			if(t.getGroupId() == group)
+				n ++;
+		}
+		return n;
+	}
+
+	public void checkVerticesRef()
+	{
+		for(Triangle t:getTriangles())
+		{
+			for(Vertex v:t.vertex)
+			{
+				Iterator<AbstractHalfEdge> it = v.getNeighbourIteratorAbstractHalfEdge();
+				boolean nonManifold = false;
+				while(it.hasNext())
+				{
+					AbstractHalfEdge e = it.next();
+					nonManifold = nonManifold || e.hasAttributes(
+						AbstractHalfEdge.BOUNDARY |
+						AbstractHalfEdge.NONMANIFOLD |
+						AbstractHalfEdge.SHARP);
+				}
+				if((v.getRef() == 0) == nonManifold)
+					throw new IllegalStateException("Invalid ref "+v.getRef()+
+						" for "+v+". Manifold="+!nonManifold);
+			}
+		}
+	}
 	// Useful for debugging
 	/*  Following imports must be moved at top.
 import java.io.FileOutputStream;
