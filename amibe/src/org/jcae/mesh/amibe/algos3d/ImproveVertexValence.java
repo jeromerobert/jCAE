@@ -233,10 +233,18 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 		int imin = getAPValences(v, true);
 		for(int i = 0; i < 3; i++)
 		{
+			HalfEdge toSwap = (HalfEdge) aPEdges.get((imin + 2 * i + 1) % 6);
+			if(toSwap.checkSwap3D(mesh, -2.0, 0, 0, false, 0, -2.0) < 0)
+				return false;
+		}
+		AbstractHalfEdge he5 = aPEdges.get(imin);
+		if(!mesh.canCollapseEdge(he5, he5.destination()))
+			return false;
+		for(int i = 0; i < 3; i++)
+		{
 			AbstractHalfEdge toSwap = aPEdges.get((imin + 2 * i + 1) % 6);
 			mesh.edgeSwap(toSwap);
 		}
-		AbstractHalfEdge he5 = aPEdges.get(imin);
 		mesh.edgeCollapse(he5, he5.destination());
 		tree.remove(v);
 		for(Vertex mv:level2Neighbours)
@@ -286,7 +294,10 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 		AbstractHalfEdge edge = get55Pattern(v);
 		assert edge.origin() == v;
 		getLevel2Neighbors(edge.origin());
-		mesh.edgeCollapse(edge, edge.destination());
+		if(mesh.canCollapseEdge(edge, edge.destination()))
+			mesh.edgeCollapse(edge, edge.destination());
+		else
+			return false;
 		tree.remove(v);
 		for(Vertex mv:level2Neighbours)
 		{
