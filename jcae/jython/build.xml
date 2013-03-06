@@ -24,12 +24,13 @@
 	-->
 	<target name="release" depends="-release.files.linux,-release.files.win32,up-to-date"
 		unless="is.jar.uptodate">
-		<copy todir="${cluster}/modules/jython">
+		<copy verbose="true" todir="${cluster}/modules/jython">
 			<fileset dir="${jython.path}">
 				<exclude name="tests/**"/>
 				<exclude name="Lib/test/**"/>
 				<exclude name="Lib/**/*.class"/>
 				<exclude name="Lib/email/test/**"/>
+                <exclude name="**/cachedir/**"/>
 			</fileset>
 		</copy>
 		<chmod file="${cluster}/modules/jython/bin/jython${script.ext}" perm="755"/>
