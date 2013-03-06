@@ -231,12 +231,6 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 	{
 		getLevel2Neighbors(v);
 		int imin = getAPValences(v, true);
-		for(int i = 0; i < 3; i++)
-		{
-			HalfEdge toSwap = (HalfEdge) aPEdges.get((imin + 2 * i + 1) % 6);
-			if(toSwap.checkSwap3D(mesh, -2.0, 0, 0, false, 0, -2.0) < 0)
-				return false;
-		}
 		AbstractHalfEdge he5 = aPEdges.get(imin);
 		if(!mesh.canCollapseEdge(he5, he5.destination()))
 			return false;
