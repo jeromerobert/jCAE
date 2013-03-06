@@ -358,9 +358,9 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 			case 4:
 				return 3;
 			case 5:
-				return is55Pattern(v) ? 5 : tolerance + 1;
+				return is55Pattern(v) ? 6 : tolerance + 1;
 			case 6:
-				return isAlternatePattern(v) ? 6 : tolerance + 1;
+				return isAlternatePattern(v) ? 5 : tolerance + 1;
 			case 7:
 				return tolerance + 1;
 			default:
@@ -404,9 +404,9 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 		else if (ot.apex() == v)
 			ot = ot.prev();
 		assert ot.origin() == v;
-		if(cost == 6)
+		if(cost == 5)
 			return processAlternatePattern(v);
-		else if(cost == 5)
+		else if(cost == 6)
 			return process55Pattern(v);
 		else if (cost == 4 || cost == 3)
 		{
