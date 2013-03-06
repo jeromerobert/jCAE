@@ -39,7 +39,10 @@ import org.jcae.mesh.amibe.ds.Vertex;
  * The metric around each point is:
  * S0 if d &lt; d0, Sinf if d &gt; d1 and quadradic interpolation between both.
  * Sinf is the mesh size far from the point, S0 is the mesh size on the
- * point, d is the distance from the point
+ * point, d is the distance from the point.
+ * A scaling may be applied using the setScaling method. Only the getTargetSize
+ * and getTargetSizeTopo will take scaling into account. The getSize method
+ * won't.
  * @author Jerome Robert
  */
 public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
@@ -142,6 +145,7 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 
 	protected final List<DistanceMetricInterface> sources = new ArrayList<DistanceMetricInterface>();
 	protected double sizeInf;
+	protected double scaling = 1.0;
 	public DistanceMetric(double sizeInf) {
 		this.sizeInf = sizeInf;
 	}
@@ -226,11 +230,9 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 		update(ps);
 	}
 
-	public void setSizeInf(double v)
+	public void setScaling(double v)
 	{
-		this.sizeInf = v;
-		for (DistanceMetricInterface s : sources)
-			update(s);
+		this.scaling = v;
 	}
 
 	/** Must be called with sizeInf is changed */
@@ -259,7 +261,7 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 			}
 			minValue = Math.min(v, minValue);
 		}
-		return minValue;
+		return minValue * scaling;
 	}
 
 	@Override

@@ -209,7 +209,7 @@ def __remesh(options):
     opts.put("maxlength", str(options.size*sqrt(2)))
     algo = QEMDecimateHalfEdge(liaison, opts)
     if point_metric:
-        point_metric.sizeInf = options.size*sqrt(2)
+        point_metric.scaling = sqrt(2)
         algo.analyticMetric = point_metric
     algo.compute()
 
@@ -217,7 +217,7 @@ def __remesh(options):
     writeVTK(liaison)
 
     if point_metric:
-        point_metric.sizeInf = options.size
+        point_metric.scaling = 1
         RemeshSkeleton(liaison, 1.66, options.size / 100.0, point_metric).compute()
     else:
         RemeshSkeleton(liaison, 1.66, options.size / 100.0, options.size).compute()
@@ -261,7 +261,7 @@ def __remesh(options):
     opts.put("nearLengthRatio", "0.6")
     algo = Remesh(liaison, opts)
     if point_metric:
-        point_metric.sizeInf = options.size
+        point_metric.scaling = 1
         algo.analyticMetric = point_metric
     algo.compute()
 
@@ -308,7 +308,7 @@ def __remesh(options):
     opts.put("maxlength", str(options.size*sqrt(2)))
     algo = QEMDecimateHalfEdge(liaison, opts)
     if point_metric:
-        point_metric.sizeInf = options.size * sqrt(2)
+        point_metric.scaling = sqrt(2)
         algo.analyticMetric = point_metric
     algo.compute()
 
