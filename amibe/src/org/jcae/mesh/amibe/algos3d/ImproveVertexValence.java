@@ -143,25 +143,36 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 			}
 		}
 	}
-
-	/** Just a debugging method */
 	private int getValence(Vertex v)
 	{
-		if(!v.isManifold())
-			return -1;
-		AbstractHalfEdge start = v.getIncidentAbstractHalfEdge((Triangle)v.getLink(), null);
-		AbstractHalfEdge edge = start;
-		int r = 0;
-		do
+		if(v.isManifold())
 		{
-			r++;
-			edge = edge.nextOrigin();
-			if(edge == null)
-				//border or non-manifold vertex
-				return -1;
+			AbstractHalfEdge start = v.getIncidentAbstractHalfEdge((Triangle)v.getLink(), null);
+			AbstractHalfEdge edge = start;
+			int r = 0;
+			do
+			{
+				r++;
+				edge = edge.nextOrigin();
+				if(edge == null)
+					//border or non-manifold vertex
+					return -1;
+			}
+			while(edge != start);
+			return r;
 		}
-		while(edge != start);
-		return r;
+		else
+		{
+			Iterator<AbstractHalfEdge> it = v.getNeighbourIteratorAbstractHalfEdge();
+			int r = 0;
+			while(it.hasNext())
+			{
+				AbstractHalfEdge e = it.next();
+				if(!e.hasAttributes(AbstractHalfEdge.OUTER))
+					r++;
+			}
+			return r;
+		}
 	}
 
 	private int getAPValences(Vertex v, boolean withNeighbours)
@@ -264,8 +275,8 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 		{
 			if(getValence(edge.destination()) == 5)
 			{
-				double v1 = getValence(edge.apex());
-				double v2 = getValence(edge.sym().apex());
+				int v1 = getValence(edge.apex());
+				int v2 = getValence(edge.sym().apex());
 				if((v1 > 6 && v2 >= 6) || (v1 >= 6 && v2 > 6))
 					return edge;
 			}
