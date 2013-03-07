@@ -123,7 +123,7 @@ public class RemeshTest
 		createMxNShell(m, n);
 		bgMesh.buildAdjacency();
 		assertTrue("Mesh is not valid", bgMesh.isValid());
-		Mesh newMesh = new Remesh(new MeshLiaison(bgMesh), options).compute().getOutputMesh();
+		Mesh newMesh = new Remesh(MeshLiaison.create(bgMesh), options).compute().getOutputMesh();
 		assertTrue("Mesh is not valid", newMesh.isValid());
 	}
 
@@ -139,7 +139,7 @@ public class RemeshTest
 		assertTrue("Original mesh contains inverted triangles", bgMesh.checkNoInvertedTriangles());
 		final Map<String, String> options = new HashMap<String, String>();
 		options.put("size", "0.02");
-		Mesh newMesh = new Remesh(new MeshLiaison(bgMesh), options).compute().getOutputMesh();
+		Mesh newMesh = new Remesh(MeshLiaison.create(bgMesh), options).compute().getOutputMesh();
 		assertTrue("Mesh is not valid", newMesh.isValid());
 		assertTrue("Mesh contains inverted triangles", newMesh.checkNoInvertedTriangles());
 	}
@@ -165,7 +165,7 @@ public class RemeshTest
 
 		final Map<String, String> options = new HashMap<String, String>();
 		options.put("size", "0.01");
-		Mesh newMesh = new Remesh(new MeshLiaison(bgMesh), options).compute().getOutputMesh();
+		Mesh newMesh = new Remesh(MeshLiaison.create(bgMesh), options).compute().getOutputMesh();
 		assertTrue("Mesh is not valid", newMesh.isValid());
 	}
 
@@ -185,7 +185,7 @@ public class RemeshTest
 		final Map<String, String> options = new HashMap<String, String>();
 		options.put("size", "0.05");
 		options.put("coplanarity", "0.9");
-		Mesh newMesh = new Remesh(new MeshLiaison(bgMesh, mtb), options).compute().getOutputMesh();
+		Mesh newMesh = new Remesh(MeshLiaison.create(bgMesh, mtb), options).compute().getOutputMesh();
 // try { org.jcae.mesh.xmldata.MeshWriter.writeObject3D(newMesh, "XXX", null); } catch (IOException ex) { ex.printStackTrace(); throw new RuntimeException(ex); }
 
 		assertTrue("Mesh is not valid", newMesh.isValid());

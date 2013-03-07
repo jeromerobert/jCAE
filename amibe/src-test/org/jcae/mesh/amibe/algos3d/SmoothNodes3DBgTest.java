@@ -126,7 +126,7 @@ public class SmoothNodes3DBgTest
 		createMxNShell(m, n);
 		mesh.buildAdjacency();
 		assertTrue("Mesh is not valid", mesh.isValid());
-		Mesh smoothedMesh = new SmoothNodes3DBg(new MeshLiaison(mesh), options).compute().getOutputMesh();
+		Mesh smoothedMesh = new SmoothNodes3DBg(MeshLiaison.create(mesh), options).compute().getOutputMesh();
 		assertTrue("Mesh is not valid", smoothedMesh.isValid());
 	}
 
@@ -144,7 +144,7 @@ public class SmoothNodes3DBgTest
 		options.put("check", "false");
 		options.put("refresh", "true");
 		options.put("relaxation", "1.0");
-		Mesh smoothedMesh = new SmoothNodes3DBg(new MeshLiaison(mesh), options).compute().getOutputMesh();
+		Mesh smoothedMesh = new SmoothNodes3DBg(MeshLiaison.create(mesh), options).compute().getOutputMesh();
 		assertTrue("Mesh is not valid", smoothedMesh.isValid());
 		MinAngleFace qproc = new MinAngleFace();
 		QualityFloat data = new QualityFloat(1000);
@@ -179,7 +179,7 @@ public class SmoothNodes3DBgTest
 		final Map<String, String> options = new HashMap<String, String>();
 		options.put("iterations", "1");
 		options.put("relaxation", "1.0");
-		Mesh smoothedMesh = new SmoothNodes3DBg(new MeshLiaison(mesh), options).compute().getOutputMesh();
+		Mesh smoothedMesh = new SmoothNodes3DBg(MeshLiaison.create(mesh), options).compute().getOutputMesh();
 		assertTrue("Mesh is not valid", smoothedMesh.isValid());
 
 		MinAngleFace qproc = new MinAngleFace();
@@ -239,7 +239,7 @@ public class SmoothNodes3DBgTest
 		final Map<String, String> options = new HashMap<String, String>();
 		options.put("iterations", "1");
 		options.put("relaxation", "1.0");
-		CheckSmoothNodes3DBg algo = new CheckSmoothNodes3DBg(new MeshLiaison(mesh), options);
+		CheckSmoothNodes3DBg algo = new CheckSmoothNodes3DBg(MeshLiaison.create(mesh), options);
 		Mesh smoothedMesh = algo.compute().getOutputMesh();
 		assertTrue("Mesh is not valid", smoothedMesh.isValid());
 		assertTrue("Singular quadric detected", algo.hasMoved());
@@ -264,7 +264,7 @@ public class SmoothNodes3DBgTest
 		options.put("check", "false");
 		options.put("refresh", "true");
 		options.put("relaxation", "0.9");
-		Mesh smoothedMesh = new SmoothNodes3DBg(new MeshLiaison(mesh, mtb), options).compute().getOutputMesh();
+		Mesh smoothedMesh = new SmoothNodes3DBg(MeshLiaison.create(mesh, mtb), options).compute().getOutputMesh();
 		assertTrue("Mesh is not valid", smoothedMesh.isValid());
 		MinAngleFace qproc = new MinAngleFace();
 		QualityFloat data = new QualityFloat(1000);

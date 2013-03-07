@@ -103,7 +103,7 @@ public class MeshLiaisonTest
 		createMxNShell(3, 3);
 		mesh.buildAdjacency();
 		assertTrue("Wrong number of triangles after buildAdjacency: "+mesh.getTriangles().size(), 16 == mesh.getTriangles().size());
-		MeshLiaison liaison = new MeshLiaison(mesh);
+		MeshLiaison liaison = MeshLiaison.create(mesh);
 		Mesh newMesh = liaison.getMesh();
 		Vertex vTest = newMesh.createVertex(2.1, 1.8, 0.1);
 		AbstractHalfEdge ref = liaison.findSurroundingTriangle(vTest, v[0], -1.0, true);
@@ -117,7 +117,7 @@ public class MeshLiaisonTest
 	{
 		mesh = SphereBuilder.createShuffledSphereMesh(3);
 		assertTrue("Mesh is not valid", mesh.isValid());
-		MeshLiaison liaison = new MeshLiaison(mesh, MeshTraitsBuilder.getDefault3D().addNodeList());
+		MeshLiaison liaison = MeshLiaison.create(mesh, MeshTraitsBuilder.getDefault3D().addNodeList());
 		Mesh newMesh = liaison.getMesh();
 		// Find poles
 		Vertex northPole = null;
