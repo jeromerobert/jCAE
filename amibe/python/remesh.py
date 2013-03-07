@@ -12,6 +12,7 @@ from org.jcae.mesh.amibe.algos3d import SmoothNodes3DBg, RemeshPolyline, RemeshS
 from java.util import HashMap
 from java.util import ArrayList
 from java.util import LinkedHashMap
+from java.lang import String
 
 # Python
 import sys
