@@ -373,6 +373,44 @@ public class QEMDecimateHalfEdgeTest
 		assertTrue("Mesh is not valid", mesh.isValid());
 	}
 
+	@Test public void testShellWithImmutableInteriorNodes()
+	{
+		final Map<String, String> options = new HashMap<String, String>();
+		options.put("size", "0.1");
+		mesh = new Mesh();
+		int m = 10;
+		createMxNShell(m, m);
+		rotateMxNShellAroundY(m, m, 90);
+		for (Triangle t: mesh.getTriangles())
+			t.setGroupId(2);
+		for (Triangle t: T)
+			t.setGroupId(1);
+		mesh.buildAdjacency();
+		mesh.buildGroupBoundaries();
+		// Make interior vertices non mutable
+		int cnt = 0;
+		for(Triangle t: mesh.getTriangles())
+		{
+			if (t.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
+			for(Vertex vertex : t.vertex)
+			{
+				if(vertex.getRef() == 0)
+				{
+					vertex.setMutable(false);
+					cnt++;
+				}
+			}
+		}
+		assertTrue("Mesh is not valid", mesh.isValid());
+		new QEMDecimateHalfEdge(mesh, options).compute();
+		assertTrue("Mesh is not valid", mesh.isValid());
+		int expected = 2 * (2*(m-3)*(m-3) + 4*(m-2));
+		int res = AbstractAlgoHalfEdge.countInnerTriangles(mesh);
+		assertTrue("Final number of triangles: "+res, res == expected);
+// try { org.jcae.mesh.xmldata.MeshWriter.writeObject3D(mesh, "XXX-0", null); } catch (java.io.IOException ex) { ex.printStackTrace(); throw new RuntimeException(ex); }
+	}
+
 	@Test public void testShellWithNonManifoldCorner()
 	{
 		final Map<String, String> options = new HashMap<String, String>();
