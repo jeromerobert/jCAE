@@ -24,7 +24,7 @@ import org.jcae.mesh.amibe.metrics.Location;
 
 public class TangentPlaneProjection implements LocalSurfaceProjection
 {
-	private final double[] origin = new double[3];
+	private final Location origin = new Location();
 	private final double[] normal;
 
 	public TangentPlaneProjection(Vertex o)
@@ -41,8 +41,7 @@ public class TangentPlaneProjection implements LocalSurfaceProjection
 			return;
 		}
 		normal = avgNormal;
-		double [] param = o.getUV();
-		System.arraycopy(param, 0, origin, 0, 3);
+		origin.moveTo(o);
 	}
 
 	/**
@@ -55,15 +54,13 @@ public class TangentPlaneProjection implements LocalSurfaceProjection
 	public boolean project(Location pt)
 	{
 		double [] loc = new double[3];
-		double [] param = pt.getUV();
-		for (int i = 0; i < 3; i++)
-			loc[i] = param[i] - origin[i];
+		pt.sub(origin, loc);
 
 		double dist = loc[0] * normal[0] + loc[1] * normal[1] + loc[2] * normal[2];
 		for (int i = 0; i < 3; i++)
 			loc[i] -= dist * normal[i];
- 
-		pt.moveTo(origin[0] + loc[0], origin[1] + loc[1], origin[2] + loc[2]);
+
+		pt.moveTo(origin.getX() + loc[0], origin.getY() + loc[1], origin.getZ() + loc[2]);
 		return true;
 	}
 	

@@ -252,7 +252,7 @@ public class MeshReader extends Storage
 				for(int nr = 0; nr < nf; nr ++)
 				{
 					bbD.get(xyz);
-					vert[index] = mesh.createVertex(xyz);
+					vert[index] = mesh.createVertex(xyz[0], xyz[1], xyz[2]);
 					vert[index].setLabel(current.minIndex + index);
 					vert[index].setReadable(true);
 					boolean writable = listAdjacentLeaves.get(index).isEmpty();
@@ -385,7 +385,7 @@ public class MeshReader extends Storage
 	{
 		assert mapNodeToNonReadVertexList != null;
 		int lastLimit = buffer.limit();
-		
+		double[] vertexBuffer = new double[3];
 		try {
 			buffer.limit(VERTEX_SIZE);
 			buffer.rewind();
@@ -406,7 +406,8 @@ public class MeshReader extends Storage
 						buffer.rewind();
 						fch.read(buffer);
 						dbb.rewind();
-						dbb.get(vertex.getUV());
+						dbb.get(vertexBuffer);
+						vertex.moveTo(vertexBuffer[0], vertexBuffer[1], vertexBuffer[2]);
 						vertex.setReadable(true);
 					}
 				} catch (FileNotFoundException e) {

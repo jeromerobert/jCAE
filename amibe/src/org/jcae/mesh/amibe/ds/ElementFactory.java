@@ -20,6 +20,7 @@
 
 package org.jcae.mesh.amibe.ds;
 
+import org.jcae.mesh.amibe.metrics.Location;
 import org.jcae.mesh.amibe.traits.VertexTraitsBuilder;
 import org.jcae.mesh.amibe.traits.HalfEdgeTraitsBuilder;
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
@@ -48,10 +49,9 @@ class ElementFactory implements ElementFactoryInterface
 		return new Vertex(vertexTraitsBuilder, x, y, z);
 	}
 
-	public Vertex createVertex(double [] x)
+	public Vertex createVertex(Location x)
 	{
-		assert x.length == 3;
-		return new Vertex(vertexTraitsBuilder, x[0], x[1], x[2]);
+		return new Vertex(vertexTraitsBuilder, x.getX(), x.getY(), x.getZ());
 	}
 
 	private AbstractHalfEdge createHalfEdge(TriangleHE t, byte orientation, byte attributes)

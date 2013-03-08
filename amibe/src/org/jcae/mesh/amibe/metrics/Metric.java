@@ -28,7 +28,7 @@ public interface Metric
 	 * @param p2  coordinates of the second node
 	 * @return square distance between two points with this metric.
 	 */
-	double distance2(double [] p1, double [] p2);
+	double distance2(Location p1, Location p2);
 
 	/**
 	 * Return dimensions of the unit ball transformed by this metric.

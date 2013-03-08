@@ -171,6 +171,7 @@ public class AbstractHalfEdgeTest
 	{
 		// Create new vertices and append them to current mesh
 		assert originalVertexCount == m*n;
+		double [] xyz = new double[3];
 		Vertex [] vy = new Vertex[originalVertexCount];
 		double ct = Math.cos(angle*Math.PI / 180.0);
 		double st = Math.sin(angle*Math.PI / 180.0);
@@ -180,7 +181,7 @@ public class AbstractHalfEdgeTest
 				vy[i]   = v[i];
 			else
 			{
-				double [] xyz = v[i].getUV();
+				v[i].get(xyz);
 				vy[i]   = mesh.createVertex(ct*xyz[0]+st*xyz[2], xyz[1], -st*xyz[0]+ct*xyz[2]);
 				vy[i].setLabel(vertexLabel);
 				vertexLabel++;

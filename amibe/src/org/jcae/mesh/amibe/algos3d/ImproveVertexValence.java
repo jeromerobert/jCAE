@@ -37,6 +37,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.metrics.Location;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.util.QSortedTree.Node;
 import org.jcae.mesh.xmldata.MeshReader;
@@ -455,14 +456,11 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 			ot = checkLargeValence(ot);
 			if (ot == null)
 				return false;
-			double[] newPt = new double[3];
-			double [] p1 = v.getUV();
-			double [] p2 = ot.destination().getUV();
-			for (int i = 0; i < 3; i++)
-				newPt[i] = 0.5*(p1[i] + p2[i]);
+			Location newPt = new Location();
+			newPt.middle(ot.destination(), v);
 			Vertex newV = mesh.createVertex(newPt);
 			liaison.addVertex(newV, liaison.getBackgroundTriangle(v));
-			liaison.move(newV, newV.getUV(), false);
+			liaison.move(newV, newV, false);
 			Vertex a = ot.apex();
 			Vertex n = ot.sym().apex();
 			double [] tNormal = liaison.getBackgroundNormal(v);
@@ -506,7 +504,6 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 	private AbstractHalfEdge checkLowValence(AbstractHalfEdge ot, int valence)
 	{
 		Vertex o = ot.origin();
-		double[] xyz = o.getUV();
 		Metric mo = mesh.getMetric(o);
 		Vertex d = ot.destination();
 		double dMin = Double.MAX_VALUE;
@@ -515,7 +512,7 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 		{
 			if (ot == null || ot.hasAttributes(AbstractHalfEdge.OUTER))
 				return null;
-			double dist = mo.distance2(xyz, ot.destination().getUV());
+			double dist = mo.distance2(o, ot.destination());
 			if (dist < dMin)
 			{
 				dMin = dist;
@@ -533,7 +530,6 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 	private AbstractHalfEdge checkLargeValence(AbstractHalfEdge ot)
 	{
 		Vertex o = ot.origin();
-		double[] xyz = o.getUV();
 		Metric mo = mesh.getMetric(o);
 		Vertex d = ot.destination();
 		double dMax = Double.MIN_VALUE;
@@ -543,7 +539,7 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 		{
 			if (ot == null || ot.hasAttributes(AbstractHalfEdge.OUTER))
 				return null;
-			double dist = mo.distance2(xyz, ot.destination().getUV());
+			double dist = mo.distance2(o, ot.destination());
 			if (dist > dMax)
 			{
 				dMax = dist;

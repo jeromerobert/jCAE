@@ -253,12 +253,9 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 			return v1;
 		else if (v2.getRef() != 0 || !v2.isMutable())
 			return v2;
-		double[] uv1 = v1.getUV();
-		double[] uv2 = v2.getUV();
-		return mesh.createVertex(
-			(uv1[0] + uv2[0]) / 2.0,
-			(uv1[1] + uv2[1]) / 2.0,
-			(uv1[2] + uv2[2]) / 2.0);
+		Vertex toReturn = mesh.createVertex(0, 0, 0);
+		toReturn.middle(v1, v2);
+		return toReturn;
 	}
 
 	@Override

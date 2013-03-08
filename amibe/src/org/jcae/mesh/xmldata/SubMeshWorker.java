@@ -117,7 +117,7 @@ public class SubMeshWorker
 				if (null == vn)
 				{
 					Vertex v = t.vertex[i];
-					vn = meshExt.createVertex(v.getUV());
+					vn = meshExt.createVertex(v);
 					vn.copy(v);
 					mapVertexIntToExt.put(v, vn);
 				}
@@ -194,7 +194,7 @@ public class SubMeshWorker
 				else
 				{
 					// New boundary point
-					vInt[i] = meshInt.createVertex(t.vertex[i].getUV());
+					vInt[i] = meshInt.createVertex(t.vertex[i]);
 					vInt[i].copy(t.vertex[i]);
 					ref2Vertex.put(ref1d, vInt[i]);
 				}

@@ -90,6 +90,7 @@ public class SplitEdgeTest
 		// Create new vertices and append them to current mesh
 		assert v.length == m*n;
 		Vertex [] vy = new Vertex[v.length];
+		double[] xyz = new double[3];
 		vertexLabel = v.length;
 		double ct = Math.cos(angle*Math.PI / 180.0);
 		double st = Math.sin(angle*Math.PI / 180.0);
@@ -99,7 +100,7 @@ public class SplitEdgeTest
 				vy[i]   = v[i];
 			else
 			{
-				double [] xyz = v[i].getUV();
+				v[i].get(xyz);
 				vy[i]   = mesh.createVertex(ct*xyz[0]+st*xyz[2], xyz[1], -st*xyz[0]+ct*xyz[2]);
 				vy[i].setLabel(vertexLabel);
 				vertexLabel++;

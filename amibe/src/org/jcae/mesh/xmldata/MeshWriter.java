@@ -60,7 +60,7 @@ public class MeshWriter
 			int ref1d = v.getRef();
 			if (0 == ref1d)
 			{
-				out.addNode(v.getUV());
+				out.addNode(v);
 				nodeIndex.put(v, i);
 				i++;
 			}
@@ -86,7 +86,7 @@ public class MeshWriter
 				if (!refs.contains(ref1d))
 				{
 					refs.add(ref1d);
-					out.addNode(v.getUV());
+					out.addNode(v);
 					out.addNodeRef(Math.abs(ref1d));
 					nodeIndex.put(v, i);
 					i++;
@@ -97,7 +97,7 @@ public class MeshWriter
 			}
 			for (Vertex v: duplicate3DNodes)
 			{
-				out.addNode(v.getUV());
+				out.addNode(v);
 				out.addNodeRef(Math.abs(v.getRef()));
 				nodeIndex.put(v, i);
 				i++;

@@ -21,6 +21,7 @@
 package org.jcae.mesh.amibe.ds;
 
 import java.util.Collection;
+import org.jcae.mesh.amibe.metrics.Location;
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 
 public class TriangleHE extends Triangle
@@ -151,14 +152,11 @@ public class TriangleHE extends Triangle
 	/** Split at barycenter */
 	public void split(Mesh mesh)
 	{
-		double[] uv = new double[3];
-		for(int i = 0; i < 3; i++)
-		{
-			for(int j = 0; j < 3; j++)
-				uv[i] += vertex[j].getUV()[i];
-			uv[i] /= 3;
-		}
-		split(mesh, mesh.createVertex(uv), null);
+		Vertex uv = mesh.createVertex(0,0,0);
+		for(int j = 0; j < 3; j++)
+			uv.add(vertex[j]);
+		uv.scale(1/3.0);
+		split(mesh, uv, null);
 	}
 
 	private void glue(HalfEdge oldHE, Triangle t)

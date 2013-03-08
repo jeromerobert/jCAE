@@ -31,6 +31,7 @@ import java.util.NoSuchElementException;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.metrics.Location;
 
 /**
  * A handle to abstract half-edge instances.  When triangles are instances of
@@ -553,15 +554,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 */
 	private double computeNormal3DT()
 	{
-		double [] p0 = origin().getUV();
-		double [] p1 = destination().getUV();
-		double [] p2 = apex().getUV();
-		tempD1[0] = p1[0] - p0[0];
-		tempD1[1] = p1[1] - p0[1];
-		tempD1[2] = p1[2] - p0[2];
-		tempD[0] = p2[0] - p0[0];
-		tempD[1] = p2[1] - p0[1];
-		tempD[2] = p2[2] - p0[2];
+		destination().sub(origin(), tempD1);
+		apex().sub(origin(), tempD);
 		Matrix3D.prodVect3D(tempD1, tempD, tempD2);
 		double norm = Matrix3D.norm(tempD2);
 		if (norm != 0.0)
@@ -583,15 +577,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 */
 	public final double computeNormal3D()
 	{
-		double [] p0 = origin().getUV();
-		double [] p1 = destination().getUV();
-		double [] p2 = apex().getUV();
-		tempD1[0] = p1[0] - p0[0];
-		tempD1[1] = p1[1] - p0[1];
-		tempD1[2] = p1[2] - p0[2];
-		tempD2[0] = p2[0] - p0[0];
-		tempD2[1] = p2[1] - p0[1];
-		tempD2[2] = p2[2] - p0[2];
+		destination().sub(origin(), tempD1);
+		apex().sub(origin(), tempD2);
 		Matrix3D.prodVect3D(tempD1, tempD2, tempD);
 		double norm = Matrix3D.norm(tempD);
 		if (norm != 0.0)
@@ -612,15 +599,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	@Override
 	public final double area(Mesh m)
 	{
-		double [] p0 = origin().getUV();
-		double [] p1 = destination().getUV();
-		double [] p2 = apex().getUV();
-		tempD1[0] = p1[0] - p0[0];
-		tempD1[1] = p1[1] - p0[1];
-		tempD1[2] = p1[2] - p0[2];
-		tempD2[0] = p2[0] - p0[0];
-		tempD2[1] = p2[1] - p0[1];
-		tempD2[2] = p2[2] - p0[2];
+		destination().sub(origin(), tempD1);
+		apex().sub(origin(), tempD2);
 		Matrix3D.prodVect3D(tempD1, tempD2, tempD);
 		return 0.5 * Matrix3D.norm(tempD);
 	}
@@ -790,7 +770,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * Warning: this method uses m.tempVH[0] and m.tempVH[1] temporary arrays.
 	 */
 	@Override
-	final boolean checkNewRingNormals(Mesh m, double [] newpt)
+	final boolean checkNewRingNormals(Mesh m, Location newpt)
 	{
 		Vertex o = origin();
 		if (o.isManifold())
@@ -809,7 +789,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		return true;
 	}
 	
-	final boolean canMoveOrigin(Mesh m, double [] newpt)
+	final boolean canMoveOrigin(Mesh m, Location newpt)
 	{
 		return checkNewRingNormals(m, newpt);
 	}
@@ -817,7 +797,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/*
 	 * Warning: this method uses m.tempVH[0] temporary array.
 	 */
-	private boolean checkNewRingNormalsSameFan(Mesh m, double [] newpt, TriangleVH t1, TriangleVH t2)
+	private boolean checkNewRingNormalsSameFan(Mesh m, Location newpt, TriangleVH t1, TriangleVH t2)
 	{
 		Vertex d = destination();
 		copyOTri(this, m.tempVH[0]);
@@ -825,13 +805,12 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		{
 			if (m.tempVH[0].tri != t1 && m.tempVH[0].tri != t2 && !m.tempVH[0].hasAttributes(OUTER))
 			{
-				double [] x1 = m.tempVH[0].destination().getUV();
+				Vertex x1 = m.tempVH[0].destination();
 				m.tempVH[0].next();
 				double area  = m.tempVH[0].computeNormal3DT();
 				double [] nu = m.tempVH[0].getTempVector();
 				m.tempVH[0].prev();
-				for (int i = 0; i < 3; i++)
-					tempD1[i] = newpt[i] - x1[i];
+				newpt.sub(x1, tempD1);
 				// Two triangles are removed when an edge is contracted.
 				// So normally triangle areas should increase.  If they
 				// decrease significantly, there may be a problem.
@@ -860,7 +839,6 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			return false;
 		if (logger.isLoggable(Level.FINE))
 			logger.fine("can contract? ("+origin()+" "+destination()+") into "+n);
-		double [] xn = n.getUV();
 		if (origin().isManifold() && destination().isManifold())
 		{
 			// Mesh is locally manifold.  This is the most common
@@ -870,10 +848,10 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			symOTri(this, m.tempVH[1]);
 			TriangleVH t2 = m.tempVH[1].tri;
 			// Check that origin vertex can be moved
-			if (!checkNewRingNormalsSameFan(m, xn, t1, t2))
+			if (!checkNewRingNormalsSameFan(m, n, t1, t2))
 				return false;
 			// Check that destination vertex can be moved
-			if (!m.tempVH[1].checkNewRingNormalsSameFan(m, xn, t1, t2))
+			if (!m.tempVH[1].checkNewRingNormalsSameFan(m, n, t1, t2))
 				return false;
 			//  Topology check.
 			return canCollapseTopology(m);
@@ -892,11 +870,11 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		}
 		
 		// Check that origin vertex can be moved
-		if (!checkNewRingNormalsNonManifoldVertex(m, xn, ignored))
+		if (!checkNewRingNormalsNonManifoldVertex(m, n, ignored))
 			return false;
 		// Check that destination vertex can be moved
 		symOTri(this, m.tempVH[2]);
-		if (!m.tempVH[2].checkNewRingNormalsNonManifoldVertex(m, xn, ignored))
+		if (!m.tempVH[2].checkNewRingNormalsNonManifoldVertex(m, n, ignored))
 			return false;
 		ignored.clear();
 
@@ -916,7 +894,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/*
 	 * Warning: this method uses m.tempVH[0] and m.tempVH[1] temporary arrays.
 	 */
-	private boolean checkNewRingNormalsNonManifoldVertex(Mesh m, double [] newpt, Collection<TriangleVH> ignored)
+	private boolean checkNewRingNormalsNonManifoldVertex(Mesh m, Location newpt, Collection<TriangleVH> ignored)
 	{
 		Vertex o = origin();
 		if (o.isManifold())
@@ -937,7 +915,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/*
 	 * Warning: this method uses m.tempVH[0] temporary array.
 	 */
-	private boolean checkNewRingNormalsSameFanNonManifoldVertex(Mesh m, double [] newpt, Collection<TriangleVH> ignored)
+	private boolean checkNewRingNormalsSameFanNonManifoldVertex(Mesh m, Location newpt, Collection<TriangleVH> ignored)
 	{
 		// Loop around origin.  We need to copy current instance
 		// into m.tempVH[0] because loop may be interrupted.
@@ -947,13 +925,12 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		{
 			if (!ignored.contains(m.tempVH[0].tri) && !m.tempVH[0].hasAttributes(OUTER))
 			{
-				double [] x1 = m.tempVH[0].destination().getUV();
+				Vertex x1 = m.tempVH[0].destination();
 				m.tempVH[0].next();
 				double area  = m.tempVH[0].computeNormal3DT();
 				double [] nu = m.tempVH[0].getTempVector();
 				m.tempVH[0].prev();
-				for (int i = 0; i < 3; i++)
-					tempD1[i] = newpt[i] - x1[i];
+				newpt.sub(x1, tempD1);
 				// Two triangles are removed when an edge is contracted.
 				// So normally triangle areas should increase.  If they
 				// decrease significantly, there may be a problem.

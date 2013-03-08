@@ -493,10 +493,8 @@ public class MMesh1D extends MMesh0D
 					if (canSkip && hasDeflection)
 					{
 						assert lastPoint != null;
-						double [] uv = lastPoint.getUV();
-						double [] start = face.getGeomSurface().value(uv[0], uv[1]);
-						uv = p2.getUV();
-						double [] end = face.getGeomSurface().value(uv[0], uv[1]);
+						double [] start = face.getGeomSurface().value(lastPoint.getX(), lastPoint.getY());
+						double [] end = face.getGeomSurface().value(p2.getX(), p2.getY());
 						double dist = Math.sqrt(
 						  (start[0] - end[0]) * (start[0] - end[0]) +
 						  (start[1] - end[1]) * (start[1] - end[1]) +

@@ -34,6 +34,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+import org.jcae.mesh.amibe.metrics.Location;
 import org.xml.sax.SAXException;
 
 /**
@@ -223,6 +224,14 @@ public abstract class AmibeWriter {
 			return;
 		refChan.writeInt(n);
 		numberOfRef++;
+	}
+
+	public void addNode(Location location) throws IOException
+	{
+		assert location.dim() == dim();
+		for(int i = 0; i<location.dim(); i++)
+			nodeChan.writeDouble(location.get(i));
+		numberOfNodes ++;
 	}
 
 	public void addNode(double[] coords) throws IOException

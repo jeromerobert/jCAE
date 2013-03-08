@@ -37,11 +37,11 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.TriangleHE;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.metrics.Location;
 import org.jcae.mesh.amibe.metrics.MetricSupport.AnalyticMetricInterface;
 import org.jcae.mesh.amibe.projection.MeshLiaison;
 import org.jcae.mesh.amibe.projection.TriangleKdTree;
 import org.jcae.mesh.xmldata.MeshReader;
-import org.jcae.mesh.xmldata.MeshWriter;
 import org.jcae.mesh.xmldata.MultiDoubleFileReader;
 
 /**
@@ -121,7 +121,7 @@ public class VertexInsertion {
 			notMutableInserted = Collections.emptyList();
 			return;
 		}
-		double[] projection = new double[3];
+		Location projection = new Location();
 		mutableInserted = new ArrayList<Vertex>(vertices.size());
 		notMutableInserted = new ArrayList<Vertex>();
 		int n = vertices.size();
@@ -133,11 +133,11 @@ public class VertexInsertion {
 			k = (k + step) % n;
 			Vertex v = vertices.get(k);
 			double localMetric = metric.getTargetSize(
-				v.getUV()[0], v.getUV()[1], v.getUV()[2], group);
+				v.getX(), v.getY(), v.getZ(), group);
 			double localMetric2 = localMetric * localMetric;
 			double tol2 = localMetric2 / (40 * 40);
 			TriangleHE t = (TriangleHE) kdTree.getClosestTriangle(
-				v.getUV(), projection, group);
+				v, projection, group);
 			liaison.move(v, projection, group, true);
 			for(Vertex tv:t.vertex)
 			{
@@ -193,11 +193,8 @@ public class VertexInsertion {
 					if(quality.getSwappedAngle() > 0 &&
 						quality.getSwappedQuality() > quality.getQuality())
 					{
-						double[] apex1 = current.apex().getUV();
-						double[] apex2 = current.sym().apex().getUV();
-						for(int i = 0; i < 3; i++)
-							middle.getUV()[i] = (apex1[i] + apex2[i]) / 2.0;
-						liaison.move(projectedMiddle, middle.getUV(), group, true);
+						middle.middle(current.apex(), current.sym().apex());
+						liaison.move(projectedMiddle, middle, group, true);
 						if(projectedMiddle.sqrDistance3D(middle) < sqrDeflection)
 						{
 							kdTree.remove(current.getTri());

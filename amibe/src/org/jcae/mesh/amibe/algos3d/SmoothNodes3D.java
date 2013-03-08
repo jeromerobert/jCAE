@@ -287,12 +287,10 @@ public class SmoothNodes3D
 		else if (ot.apex() == n)
 			ot = ot.prev();
 		assert ot.origin() == n;
-		double [] oldp3 = n.getUV();
 		
 		//  Compute 3D coordinates centroid
 		int nn = 0;
-		double [] centroid3 = c.getUV();
-		centroid3[0] = centroid3[1] = centroid3[2] = 0.0;
+		c.moveTo(0, 0, 0);
 		assert n.isManifold();
 		Vertex d = ot.destination();
 		do
@@ -303,7 +301,6 @@ public class SmoothNodes3D
 			{
 				nn++;
 				double l = n.distance3D(v);
-				double[] newp3 = v.getUV();
 				if (sizeTarget > 0.0)
 				{
 					if (l > 1.0)
@@ -311,29 +308,26 @@ public class SmoothNodes3D
 						// Find the point on this edge which has the
 						// desired length
 						l = sizeTarget / l;
-						for (int i = 0; i < 3; i++)
-							centroid3[i] += newp3[i] + l * (oldp3[i] - newp3[i]);
+						c.moveTo(
+							c.getX() + v.getX() + l * (n.getX() - v.getX()),
+							c.getY() + v.getY() + l * (n.getY() - v.getY()),
+							c.getZ() + v.getZ() + l * (n.getZ() - v.getZ()));
 					}
 					else
-					{
-						for (int i = 0; i < 3; i++)
-							centroid3[i] += newp3[i];
-					}
+						c.add(v);
 				}
 				else
-				{
-					for (int i = 0; i < 3; i++)
-						centroid3[i] += newp3[i];
-				}
+					c.add(v);
 			}
 		}
 		while (ot.destination() != d);
 		assert (nn > 0);
-		for (int i = 0; i < 3; i++)
-			centroid3[i] /= nn;
-		for (int i = 0; i < 3; i++)
-			centroid3[i] = oldp3[i] + relaxation * (centroid3[i] - oldp3[i]);
-		if (!mesh.checkNewRingNormals(ot, centroid3))
+		c.scale(1.0/nn);
+		c.moveTo(
+			n.getX() + relaxation * (c.getX() - n.getX()),
+			n.getY() + relaxation * (c.getY() - n.getY()),
+			n.getZ() + relaxation * (c.getZ() - n.getZ()));
+		if (!mesh.checkNewRingNormals(ot, c))
 		{
 			LOGGER.finer("Point not moved, some triangles would become inverted");
 			return false;
@@ -346,10 +340,10 @@ public class SmoothNodes3D
 		}
 		tr.project(c);
 
-		double saveX = oldp3[0];
-		double saveY = oldp3[1];
-		double saveZ = oldp3[2];
-		n.moveTo(centroid3[0], centroid3[1], centroid3[2]);
+		double saveX = c.getX();
+		double saveY = c.getY();
+		double saveZ = c.getZ();
+		n.moveTo(c);
 		if (checkQuality)
 		{
 			// Check that quality has not been degraded

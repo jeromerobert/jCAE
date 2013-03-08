@@ -56,25 +56,16 @@ public class AbsoluteDeflection2D extends QualityProcedure
 			throw new IllegalArgumentException();
 		Triangle t = (Triangle) o;
 		mesh.moveVertexToCentroid(c, t);
-		double [] uv = c.getUV();
-		double [] xyz = mesh.getGeomSurface().value(uv[0], uv[1]);
-		p[3] = mesh.createVertex(xyz);
+		double [] xyz = mesh.getGeomSurface().value(c.getX(), c.getY());
+		p[3] = mesh.createVertex(xyz[0], xyz[1], xyz[3]);
 		for (int i = 0; i < 3; i++)
 		{
-			uv = t.vertex[i].getUV();
-			xyz = mesh.getGeomSurface().value(uv[0], uv[1]);
-			p[i] = mesh.createVertex(xyz);
+			xyz = mesh.getGeomSurface().value(t.vertex[i].getX(), t.vertex[i].getY());
+			p[i] = mesh.createVertex(xyz[0], xyz[1], xyz[3]);
 		}
-		double [] xyz0 = p[0].getUV();
-		double [] xyz1 = p[1].getUV();
-		double [] xyz2 = p[2].getUV();
-		double [] xyz3 = p[3].getUV();
-		for (int i = 0; i < 3; i++)
-		{
-			v1[i] = xyz1[i] - xyz0[i];
-			v2[i] = xyz2[i] - xyz0[i];
-			v3[i] = xyz3[i] - xyz0[i];
-		}
+		p[1].sub(p[0], v1);
+		p[2].sub(p[0], v2);
+		p[3].sub(p[0], v3);
 		Matrix3D.prodVect3D(v1, v2, v4);
 		double norm = Matrix3D.norm(v4);
 		double dist = 0.0;

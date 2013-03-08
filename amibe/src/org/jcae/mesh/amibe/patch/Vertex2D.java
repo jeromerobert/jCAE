@@ -64,8 +64,7 @@ public class Vertex2D extends Vertex
 	Vertex2D(VertexTraitsBuilder vtb, double u, double v)
 	{
 		super(vtb);
-		param[0] = u;
-		param[1] = v;
+		moveTo(u, v);
 	}
 	
 	/**
@@ -77,8 +76,8 @@ public class Vertex2D extends Vertex
 	static Vertex2D middle(Vertex2D pt1, Vertex2D pt2)
 	{
 		return new Vertex2D(null,
-			0.5 * (pt1.param[0] + pt2.param[0]),
-			0.5 * (pt1.param[1] + pt2.param[1])
+			0.5 * (pt1.getX() + pt2.getX()),
+			0.5 * (pt1.getY() + pt2.getY())
 		);
 	}
 	
@@ -96,8 +95,7 @@ public class Vertex2D extends Vertex
 		if (null != C2d)
 		{
 			double [] uv = C2d.value(pt.getParameter());
-			ret.param[0] = uv[0];
-			ret.param[1] = uv[1];
+			ret.moveTo(uv[0], uv[1]);
 		}
 		else
 		{
@@ -105,8 +103,7 @@ public class Vertex2D extends Vertex
 			if (null == V)
 				throw new java.lang.RuntimeException("Error in Vertex()");
 			double [] uv = V.parameters(F);
-			ret.param[0] = uv[0];
-			ret.param[1] = uv[1];
+			ret.moveTo(uv[0], uv[1]);
 		}
 		return ret;
 	}
@@ -117,17 +114,9 @@ public class Vertex2D extends Vertex
 	 * @param u  first coordinate of the new position
 	 * @param v  second coordinate of the new position
 	 */
-	@Override
 	public final void moveTo(double u, double v)
 	{
-		param[0] = u;
-		param[1] = v;
-	}
-
-	@Override
-	public void moveTo(double x, double y, double z)
-	{
-		throw new RuntimeException();
+		moveTo(u, v, 0);
 	}
 
 	/**
@@ -139,7 +128,7 @@ public class Vertex2D extends Vertex
 	private double [] getNormal(Mesh2D mesh)
 	{
 		CADGeomSurface surface = mesh.getGeomSurface();
-		surface.setParameter(param[0], param[1]);
+		surface.setParameter(getX(), getY());
 		return surface.normal();
 	}
 	
@@ -167,7 +156,7 @@ public class Vertex2D extends Vertex
 		if (logger.isLoggable(Level.FINE))
 			logger.fine("Searching for the triangle surrounding "+this);
 		KdTree<Vertex> kdTree = mesh.getKdTree();
-		TriangleVH t = (TriangleVH) kdTree.getNearVertex(mesh.getMetric(this), param).getLink();
+		TriangleVH t = (TriangleVH) kdTree.getNearVertex(mesh.getMetric(this), this).getLink();
 		VirtualHalfEdge2D current = new VirtualHalfEdge2D(t, 0);
 		boolean redo = false;
 		Vertex2D o = (Vertex2D) current.origin();
@@ -270,7 +259,7 @@ public class Vertex2D extends Vertex
 	 */
 	public final long onLeft(KdTree kdTree, Vertex2D v1, Vertex2D v2)
 	{
-		return kdTree.k2D.onLeft(param, v1.param, v2.param);
+		return kdTree.k2D.onLeft(this, v1, v2);
  	}
 	
 	//  Current vertex is symmetric apical vertex
@@ -320,17 +309,14 @@ public class Vertex2D extends Vertex
 	private static Vertex2D circumcenter(Metric2D m2d, Vertex2D v1, Vertex2D v2, Vertex2D v3, double[] po)
 		throws RuntimeException
 	{
-		double [] p1 = v1.getUV();
-		double [] p2 = v2.getUV();
-		double [] p3 = v3.getUV();
 		//  Metrics on current vertex
-		double x12 = p2[0] - p1[0];
-		double y12 = p2[1] - p1[1];
-		double x23 = p3[0] - p2[0];
-		double y23 = p3[1] - p2[1];
-		double x31 = p1[0] - p3[0];
-		double y31 = p1[1] - p3[1];
-		
+		double x12 = v2.getX()-v1.getX();
+		double y12 = v2.getY() - v1.getY();
+		double x23 = v3.getX() - v2.getX();
+		double y23 = v3.getY() - v2.getY();
+		double x31 = v1.getX() - v3.getX();
+		double y31 = v1.getY() - v3.getY();
+
 		double num = m2d.dot(x23, y23, x31, y31);
 		m2d.computeOrthogonalVector(x12, y12, po);
 		double den = 2.0 * m2d.dot(po[0], po[1], x31, y31);
@@ -341,8 +327,9 @@ public class Vertex2D extends Vertex
 		//     <=> num * num * det(M) < 1000000 * den * den
 		if (den != 0.0 && num * num * m2d.det() < 1000000.0 * den * den)
 		{
-			circumcenter.param[0] = 0.5*(p1[0]+p2[0]) + po[0] * num / den;
-			circumcenter.param[1] = 0.5*(p1[1]+p2[1]) + po[1] * num / den;
+			circumcenter.moveTo(
+				0.5*(v1.getX()+v2.getX()) + po[0] * num / den,
+				0.5*(v1.getY()+v2.getY()) + po[1] * num / den);
 			return circumcenter;
 		}
 		throw new RuntimeException("Circumcenter cannot be computed");
@@ -384,12 +371,12 @@ public class Vertex2D extends Vertex
 			Metric2D mB = mesh.getMetric(va3);
 			Vertex2D C3 = circumcenter(mB, vc1, vc2, va3, orth);
 			double ret = Math.sqrt(
-				mB.distance2(C3.param, param) /
-				mB.distance2(C3.param, va3.param));
+				mB.distance2(C3, this) /
+				mB.distance2(C3, va3));
 			Vertex2D C0 = circumcenter(mA, vc1, vc2, va3, orth);
 			ret += Math.sqrt(
-				mA.distance2(C0.param, param) /
-				mA.distance2(C0.param, va3.param));
+				mA.distance2(C0, this) /
+				mA.distance2(C0, va3));
 			return (ret < 2.0);
 		}
 		catch (RuntimeException ex)
@@ -402,15 +389,15 @@ public class Vertex2D extends Vertex
 			Metric2D mB = mesh.getMetric(vc1);
 			Vertex2D C3 = circumcenter(mB, this, va3, vc1, orth);
 			double ret = Math.sqrt(
-				mB.distance2(C3.param, vc2.param) /
-				mB.distance2(C3.param, vc1.param));
+				mB.distance2(C3, vc2) /
+				mB.distance2(C3, vc1));
 			// FIXME: mesh.getMetric(this) gives better results than mA,
 			// see for instance sphere.brep with an edge length of 0.005
 			// That sounds wrong, it needs to be investigated.
 			Vertex2D C0 = circumcenter(mesh.getMetric(this), this, va3, vc1, orth);
 			ret += Math.sqrt(
-				mA.distance2(C0.param, vc2.param) /
-				mA.distance2(C0.param, vc1.param));
+				mA.distance2(C0, vc2) /
+				mA.distance2(C0, vc1));
 			return (ret > 2.0);
 		}
 		catch (RuntimeException ex)
@@ -442,10 +429,10 @@ public class Vertex2D extends Vertex
 		Metric2D mc2 = mesh.getMetric(vc2);
 		Metric2D ma3 = mesh.getMetric(va3);
 		Metric2D m0 = mesh.getMetric(this);
-		return (Math.sqrt(mc1.distance2(va3.param, param)) +
-		        Math.sqrt(mc2.distance2(va3.param, param)) > 0.5 * (
-		        Math.sqrt(ma3.distance2(vc1.param, vc2.param)) +
-		        Math.sqrt(m0.distance2(vc1.param, vc2.param))));
+		return (Math.sqrt(mc1.distance2(va3, this)) +
+		        Math.sqrt(mc2.distance2(va3, this)) > 0.5 * (
+		        Math.sqrt(ma3.distance2(vc1, vc2)) +
+		        Math.sqrt(m0.distance2(vc1, vc2))));
 	}
 	
 	final boolean isPseudoIsotropic(Mesh2D mesh)
@@ -455,19 +442,21 @@ public class Vertex2D extends Vertex
 	
 	private long distance2(KdTree kdTree, Vertex2D that)
 	{
-		return kdTree.k2D.distance2(param, that.param);
+		return kdTree.k2D.distance2(this, that);
 	}
 	private long distance2cached(KdTree kdTree, Vertex2D that)
 	{
-		return kdTree.k2D.distance2cached(that.param);
+		return kdTree.k2D.distance2cached(that);
 	}
 	
 	@Override
 	public String toString ()
 	{
 		StringBuilder r = new StringBuilder("UV:");
-		for (int i = 0; i < param.length; i++)
-			r.append(" ").append(param[i]);
+		r.append(' ');
+		r.append(getX());
+		r.append(' ');
+		r.append(getY());
 		if (ref1d != 0)
 			r.append(" ref1d: ").append(ref1d);
 		r.append(" hash: ").append(hashCode());
@@ -475,5 +464,9 @@ public class Vertex2D extends Vertex
 			r.append(" link: ").append(link.hashCode());
 		return r.toString();
 	}
-	
+
+	@Override
+	public int dim() {
+		return 2;
+	}
 }

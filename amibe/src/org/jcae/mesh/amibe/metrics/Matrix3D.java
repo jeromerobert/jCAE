@@ -156,6 +156,10 @@ public class Matrix3D implements Serializable
 		return ((A[0]*B[0])+(A[1]*B[1])+(A[2]*B[2]));
 	}
 
+	public static double prodSca(double [] a, Location b)
+	{
+		return a[0] * b.getX() + a[1] * b.getY() + a[2] * b.getZ();
+	}
 	/**
 	 * Return the Euclidian norm of a 3D vector.
 	 *
@@ -189,14 +193,10 @@ public class Matrix3D implements Serializable
 		ret[offset+2] = v1[offset1]   * v2[offset2+1] - v1[offset1+1] * v2[offset2];
 	}
 
-	public static double computeNormal3D(double [] p0, double [] p1, double [] p2, double [] tempD1, double [] tempD2, double [] ret)
+	public static double computeNormal3D(Location p0, Location p1, Location p2, double [] tempD1, double [] tempD2, double [] ret)
 	{
-		tempD1[0] = p1[0] - p0[0];
-		tempD1[1] = p1[1] - p0[1];
-		tempD1[2] = p1[2] - p0[2];
-		tempD2[0] = p2[0] - p0[0];
-		tempD2[1] = p2[1] - p0[1];
-		tempD2[2] = p2[2] - p0[2];
+		p1.sub(p0, tempD1);
+		p2.sub(p0, tempD2);
 		prodVect3D(tempD1, tempD2, ret);
 		double norm = norm(ret);
 		if (norm*norm > 1.e-12 * (
@@ -216,14 +216,10 @@ public class Matrix3D implements Serializable
 		return 0.5 * norm;
 	}
 
-	public static double computeNormal3DT(double [] p0, double [] p1, double [] p2, double [] tempD1, double [] tempD2, double [] ret)
+	public static double computeNormal3DT(Location p0, Location p1, Location p2, double [] tempD1, double [] tempD2, double [] ret)
 	{
-		tempD1[0] = p1[0] - p0[0];
-		tempD1[1] = p1[1] - p0[1];
-		tempD1[2] = p1[2] - p0[2];
-		ret[0] = p2[0] - p0[0];
-		ret[1] = p2[1] - p0[1];
-		ret[2] = p2[2] - p0[2];
+		p1.sub(p0, tempD1);
+		p2.sub(p0, ret);
 		prodVect3D(tempD1, ret, tempD2);
 		double norm = norm(tempD2);
 		if (norm*norm > 1.e-12 * (

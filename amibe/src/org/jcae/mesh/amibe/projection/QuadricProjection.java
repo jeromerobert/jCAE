@@ -55,7 +55,7 @@ public class QuadricProjection implements LocalSurfaceProjection
 	private static final Logger LOGGER = Logger.getLogger(QuadricProjection.class.getName());
 	
 	private final Matrix3D qP;
-	private final double[] origin = new double[3];
+	private final Location origin = new Location();
 	private final double[] qD;
 	private final boolean discardHyperbolic;
 
@@ -67,8 +67,7 @@ public class QuadricProjection implements LocalSurfaceProjection
 	public QuadricProjection(Vertex o, boolean d)
 	{
 		discardHyperbolic = d;
-		double [] param = o.getUV();
-		System.arraycopy(param, 0, origin, 0, 3);
+		origin.moveTo(o);
 
 		// Transformation matrix
 		qP = getMatrix3DLocalFrame(o);
@@ -90,9 +89,7 @@ public class QuadricProjection implements LocalSurfaceProjection
 	public final boolean project(Location pt)
 	{
 		double [] glob = new double[3];
-		double [] param = pt.getUV();
-		for (int i = 0; i < 3; i++)
-			glob[i] = param[i] - origin[i];
+		pt.sub(origin, glob);
 
 		// Local coordinates
 		double [] loc = new double[3];
@@ -103,7 +100,7 @@ public class QuadricProjection implements LocalSurfaceProjection
 		qP.transp();
 		qP.apply(loc, glob);
 		qP.transp();
-		pt.moveTo(origin[0] + glob[0], origin[1] + glob[1], origin[2] + glob[2]);
+		pt.moveTo(origin.getX() + glob[0], origin.getY() + glob[1], origin.getZ() + glob[2]);
 		return true;
 	}
 	
@@ -169,7 +166,6 @@ public class QuadricProjection implements LocalSurfaceProjection
 		for (int i = 0; i < 3; i++)
 			g0[i] = g1[i] = g2[i] = h[i] = 0.0;
 
-		double [] param = o.getUV();
 		AbstractHalfEdge ot = o.getIncidentAbstractHalfEdge(o.getNeighbourIteratorTriangle().next(), null);
 		Vertex d = ot.destination();
 		do
@@ -179,9 +175,7 @@ public class QuadricProjection implements LocalSurfaceProjection
 			if (ot.hasAttributes(AbstractHalfEdge.OUTER))
 				return null;
 			// Destination point
-			double [] p1 = ot.destination().getUV();
-			for (int i = 0; i < 3; i++)
-				vect1[i] = p1[i] - param[i];
+			ot.destination().sub(o, vect1);
 			// Find coordinates in the local frame (t1,t2,n)
 			P.apply(vect1, loc);
 			// Compute right hand side
@@ -223,10 +217,11 @@ public class QuadricProjection implements LocalSurfaceProjection
 				if (ot.hasAttributes(AbstractHalfEdge.OUTER))
 					return null;
 				// Middle point of opposite edge
-				double [] p1 = ot.destination().getUV();
-				double [] p2 = ot.apex().getUV();
-				for (int i = 0; i < 3; i++)
-					vect1[i] = 0.5*(p1[i] + p2[i])- param[i];
+				Vertex p1 = ot.destination();
+				Vertex p2 = ot.apex();
+				vect1[0] = 0.5*(p1.getX() + p2.getX()) - o.getX();
+				vect1[1] = 0.5*(p1.getY() + p2.getY()) - o.getY();
+				vect1[2] = 0.5*(p1.getZ() + p2.getZ()) - o.getZ();
 				// Find coordinates in the local frame (t1,t2,n)
 				P.apply(vect1, loc);
 				// Compute right hand side

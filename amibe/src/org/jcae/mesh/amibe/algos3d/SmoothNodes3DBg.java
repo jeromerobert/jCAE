@@ -39,6 +39,7 @@ import java.io.IOException;
 import gnu.trove.TObjectDoubleHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.metrics.Location;
 import org.jcae.mesh.amibe.metrics.MetricSupport;
 import org.jcae.mesh.amibe.projection.MapMeshLiaison;
 
@@ -332,11 +333,9 @@ public class SmoothNodes3DBg
 		else if (ot.apex() == n)
 			ot = ot.prev();
 		assert ot.origin() == n;
-		double [] oldp3 = n.getUV();
-		
 		//  Compute 3D coordinates centroid
 		int nn = 0;
-		double [] centroid3 = new double[3];
+		Location centroid3 = new Location();
 		assert n.isManifold();
 		Vertex d = ot.destination();
 		do
@@ -346,35 +345,33 @@ public class SmoothNodes3DBg
 			if (v != mesh.outerVertex)
 			{
 				nn++;
-				double[] newp3 = v.getUV();
 				if (!metrics.isEmpty())
 				{
 					// Find the point on this edge which has the
 					// desired length
 					double p = metrics.interpolatedDistance(n, v);
 					if(p < 1.0)
-						for (int i = 0; i < 3; i++)
-							centroid3[i] += newp3[i] + p * (oldp3[i] - newp3[i]);
+						centroid3.moveTo(
+							centroid3.getX() + v.getX() + p * (n.getX() - v.getX()),
+							centroid3.getY() + v.getY() + p * (n.getY() - v.getY()),
+							centroid3.getZ() + v.getZ() + p * (n.getZ() - v.getZ()));
 					else
-						for (int i = 0; i < 3; i++)
-							centroid3[i] += newp3[i];
+						centroid3.add(v);
 				}
 				else
-				{
-					for (int i = 0; i < 3; i++)
-						centroid3[i] += newp3[i];
-				}
+					centroid3.add(v);
 			}
 		}
 		while (ot.destination() != d);
 		assert (nn > 0);
-		for (int i = 0; i < 3; i++)
-			centroid3[i] /= nn;
-		for (int i = 0; i < 3; i++)
-			centroid3[i] = oldp3[i] + relaxation * (centroid3[i] - oldp3[i]);
-		double saveX = oldp3[0];
-		double saveY = oldp3[1];
-		double saveZ = oldp3[2];
+		centroid3.scale(1.0/nn);
+		centroid3.moveTo(
+			n.getX() + relaxation * (centroid3.getX() - n.getX()),
+			n.getY() + relaxation * (centroid3.getY() - n.getY()),
+			n.getZ() + relaxation * (centroid3.getZ() - n.getZ()));
+		double saveX = n.getX();
+		double saveY = n.getY();
+		double saveZ = n.getZ();
 		if (!liaison.backupAndMove(n, centroid3, group))
 		{
 			LOGGER.finer("Point not moved, projection failed");
@@ -382,8 +379,8 @@ public class SmoothNodes3DBg
 			return false;
 		}
 		// Temporarily reset n to its previous location, but do not
-		// modify liaison, this is not needed
-		System.arraycopy(n.getUV(), 0, centroid3, 0, 3);
+		// modify liaison, this is not
+		centroid3.moveTo(n);
 		n.moveTo(saveX, saveY, saveZ);
 		if (!mesh.canMoveOrigin(ot, centroid3))
 		{
@@ -391,7 +388,7 @@ public class SmoothNodes3DBg
 			LOGGER.finer("Point not moved, some triangles would become inverted");
 			return false;
 		}
-		n.moveTo(centroid3[0], centroid3[1], centroid3[2]);
+		n.moveTo(centroid3);
 
 		if (checkQuality)
 		{

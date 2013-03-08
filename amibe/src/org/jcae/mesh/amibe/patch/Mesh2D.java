@@ -436,8 +436,7 @@ public class Mesh2D extends Mesh
 				m2 = euclidian_metric2d;
 			else
 			{
-				double uv[] = pt.getUV();
-				surface.setParameter(uv[0], uv[1]);
+				surface.setParameter(pt.getX(), pt.getY());
 				MetricBuilder mb = new MetricBuilder(surface, meshParameters, temp);
 				m2 = mb.computeMetricOnSurface();
 			}
@@ -463,9 +462,8 @@ public class Mesh2D extends Mesh
 		double x = 0.0, y = 0.0;
 		for (Vertex v : t.vertex)
 		{
-			double [] p = v.getUV();
-			x += p[0];
-			y += p[1];
+			x += v.getX();
+			y += v.getY();
 		}
 		x /= t.vertex.length;
 		y /= t.vertex.length;
@@ -484,14 +482,12 @@ public class Mesh2D extends Mesh
 	public final double interpolatedDistance(Vertex2D start, Vertex2D end)
 	{
 		if (compGeomCurrent == 2)
-			return Math.sqrt(euclidian_metric2d.distance2(start.getUV(), end.getUV()));
+			return Math.sqrt(euclidian_metric2d.distance2(start, end));
 
 		Metric2D ms = getMetric(start);
 		Metric2D me = getMetric(end);
-		double [] ps = start.getUV();
-		double [] pe = end.getUV();
-		double l1 = Math.sqrt(ms.distance2(ps, pe));
-		double l2 = Math.sqrt(me.distance2(ps, pe));
+		double l1 = Math.sqrt(ms.distance2(start, end));
+		double l2 = Math.sqrt(me.distance2(start, end));
 		double lmax = Math.max(l1, l2);
 		if (!accurateDistance || Math.abs(l1 - l2) < delta_max * lmax)
 			return lmax;
@@ -514,10 +510,8 @@ public class Mesh2D extends Mesh
 			level = l.pop().intValue();
 			ms = getMetric(pt1);
 			me = getMetric(pt2);
-			ps = pt1.getUV();
-			pe = pt2.getUV();
-			l1 = Math.sqrt(ms.distance2(ps, pe));
-			l2 = Math.sqrt(me.distance2(ps, pe));
+			l1 = Math.sqrt(ms.distance2(pt1, pt2));
+			l2 = Math.sqrt(me.distance2(pt1, pt2));
 			lmax = Math.max(l1, l2);
 			if (Math.abs(l1 - l2) < delta_max * lmax || level == 0)
 				ret += lmax;

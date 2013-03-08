@@ -25,6 +25,7 @@ import java.util.NoSuchElementException;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.metrics.Location;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 
@@ -38,7 +39,7 @@ import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 //   to getClosestTriangle
 public class KdTreeLiaison extends MeshLiaison{
 	private final TriangleKdTree kdTree;
-	private transient double[] tmpCoords = new double[3];
+	private transient Location tmpCoords = new Location();
 	public KdTreeLiaison(Mesh backgroundMesh, MeshTraitsBuilder mtb) {
 		super(backgroundMesh, mtb);
 		kdTree = new TriangleKdTree(backgroundMesh);
@@ -51,16 +52,16 @@ public class KdTreeLiaison extends MeshLiaison{
 	public void backupRestore(Vertex v, boolean restore, int group) { }
 
 	@Override
-	protected boolean move(Vertex v, double[] target, boolean backup, int group,
+	protected boolean move(Vertex v, Location target, boolean backup, int group,
 		boolean doCheck) {
 		Triangle t = kdTree.getClosestTriangle(target, tmpCoords, group);
-		v.moveTo(tmpCoords[0], tmpCoords[1], tmpCoords[2]);
+		v.moveTo(tmpCoords);
 		return t != null;
 	}
 
 	@Override
 	public Triangle getBackgroundTriangle(Vertex v) {
-		Triangle toReturn = kdTree.getClosestTriangle(v.getUV(), null, -1);
+		Triangle toReturn = kdTree.getClosestTriangle(v, null, -1);
 		if(toReturn == null)
 			throw new NoSuchElementException(v.toString());
 		return toReturn;
@@ -70,8 +71,8 @@ public class KdTreeLiaison extends MeshLiaison{
 	public double[] getBackgroundNormal(Vertex v) {
 		double[] normal = new double[3];
 		Triangle t = getBackgroundTriangle(v);
-		Matrix3D.computeNormal3D(t.vertex[0].getUV(), t.vertex[1].getUV(),
-		t.vertex[2].getUV(), work1, work2, normal);
+		Matrix3D.computeNormal3D(t.vertex[0], t.vertex[1], t.vertex[2],
+			work1, work2, normal);
 		return normal;
 	}
 

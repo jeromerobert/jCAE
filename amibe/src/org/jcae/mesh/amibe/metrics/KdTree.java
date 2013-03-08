@@ -317,6 +317,13 @@ public class KdTree<T extends Location>
 			i[k] = (int) ((p[k] - x0[k]) * x0[dimension]);
 	}
 	
+	private void double2int(T p, int[] i)
+	{
+		i[0] = (int) ((p.getX() - x0[0]) * x0[dimension]);
+		i[1] = (int) ((p.getY() - x0[1]) * x0[dimension]);
+		i[2] = (int) ((p.getZ() - x0[2]) * x0[dimension]);
+	}
+
 	/**
 	 * Transform integer coordinates into double coordinates.
 	 * @param i  integer coordinates
@@ -392,7 +399,7 @@ public class KdTree<T extends Location>
 		int s = gridSize;
 		int [] ij = new int[dimension];
 		int [] oldij = new int[dimension];
-		double2int(v.getUV(), ij);
+		double2int(v, ij);
 		while (current.nItems < 0)
 		{
 			//  nItems is negative means that this cell only
@@ -421,7 +428,7 @@ public class KdTree<T extends Location>
 			for (int i = 0; i < BUCKETSIZE; i++)
 			{
 				T p = current.getVertex(i);
-				double2int(p.getUV(), oldij);
+				double2int(p, oldij);
 				int ind = indexSubCell(oldij, s);
 				Cell target = (Cell) newSubQuads[ind];
 				if (null == target)
@@ -468,7 +475,7 @@ public class KdTree<T extends Location>
 		int lastPos = 0;
 		int s = gridSize;
 		int [] ij = new int[dimension];
-		double2int(v.getUV(), ij);
+		double2int(v, ij);
 		while (current.nItems < 0)
 		{
 			//  nItems is negative
@@ -619,12 +626,9 @@ public class KdTree<T extends Location>
 	}
 
 	// Called in log messages
-	private String coordinatesToString(double[] uv)
+	private String coordinatesToString(T uv)
 	{
-		if (uv.length == 2)
-			return "("+uv[0]+", "+uv[1]+")";
-		else
-			return "("+uv[0]+", "+uv[1]+", "+uv[2]+")";
+		return "("+uv.getX()+", "+uv.getY()+", "+uv.getZ()+")";
 	}
 
 	/**
@@ -639,7 +643,7 @@ public class KdTree<T extends Location>
 	 * @param uv  coordinates.
 	 * @return a near vertex.
 	 */
-	public final T getNearVertex(Metric metric, double[] uv)
+	public final T getNearVertex(Metric metric, T uv)
 	{
 		if (root.nItems == 0)
 			return null;
@@ -664,11 +668,11 @@ public class KdTree<T extends Location>
 		
 		T vQ = current.getVertex(0);
 		T ret = vQ;
-		double retdist = metric.distance2(uv, vQ.getUV());
+		double retdist = metric.distance2(uv, vQ);
 		for (int i = 1; i < current.nItems; i++)
 		{
 			vQ = current.getVertex(i);
-			double d = metric.distance2(uv, vQ.getUV());
+			double d = metric.distance2(uv, vQ);
 			if (d < retdist)
 			{
 				retdist = d;
@@ -680,7 +684,7 @@ public class KdTree<T extends Location>
 		return ret;
 	}
 	
-	private T getNearVertexInSubCells(Cell current, Metric metric, double [] uv, int searchedCells)
+	private T getNearVertexInSubCells(Cell current, Metric metric, T uv, int searchedCells)
 	{
 		T ret = null;
 		int [] ijk = new int[dimension];
@@ -714,7 +718,7 @@ public class KdTree<T extends Location>
 				for (int i = 0; i < s.nItems; i++)
 				{
 					T vQ = s.getVertex(i);
-					double d = metric.distance2(uv, vQ.getUV());
+					double d = metric.distance2(uv, vQ);
 					if (d < dist || dist < 0.0)
 					{
 						dist = d;
@@ -747,20 +751,20 @@ public class KdTree<T extends Location>
 	private final class GetNearestVertexProcedure implements KdTreeProcedure
 	{
 		private final int [] ijk = new int[dimension];
-		private final double [] fromPosition;
+		private final T fromPosition;
 		private final Metric metric;
 		private T nearestVertex;
 		private final double [] i2d = new double[dimension];
 		private final int [] idist = new int[dimension];
 		private double dist;
 		private int searchedCells;
-		private GetNearestVertexProcedure(Metric m, double[] from, T v)
+		private GetNearestVertexProcedure(Metric m, T from, T v)
 		{
 			double2int(from, ijk);
 			nearestVertex = v;
 			fromPosition = from;
 			metric = m;
-			dist = metric.distance2(fromPosition, nearestVertex.getUV());
+			dist = metric.distance2(fromPosition, nearestVertex);
 			double [] r = metric.getUnitBallBBox();
 			for (int k = 0; k < dimension; k++)
 			{
@@ -783,7 +787,7 @@ public class KdTree<T extends Location>
 				for (int i = 0; i < self.nItems; i++)
 				{
 					T vtest = self.getVertex(i);
-					double retdist = metric.distance2(fromPosition, vtest.getUV());
+					double retdist = metric.distance2(fromPosition, vtest);
 					if (retdist < dist)
 					{
 						dist = retdist;
@@ -811,7 +815,7 @@ public class KdTree<T extends Location>
 	 * @param uv  coordinates.
 	 * @return the nearest vertex.
 	 */
-	public final T getNearestVertex(Metric metric, double[] uv)
+	public final T getNearestVertex(Metric metric, T uv)
 	{
 		if (root.nItems == 0)
 			return null;
@@ -834,17 +838,17 @@ public class KdTree<T extends Location>
 	{
 		private final int [] ij = new int[dimension];
 		private double dist;
-		private final double[] fromPosition;
+		private final T fromPosition;
 		private T nearestVertex;
 		private final Metric metric;
 		private int searchedCells;
-		private GetNearestVertexDebugProcedure(Metric m, double[] from, T v)
+		private GetNearestVertexDebugProcedure(Metric m, T from, T v)
 		{
 			double2int(from, ij);
 			nearestVertex = v;
 			fromPosition = from;
 			metric = m;
-			dist = metric.distance2(fromPosition, v.getUV());
+			dist = metric.distance2(fromPosition, v);
 		}
 		public int action(Object o, int s, final int [] i0)
 		{
@@ -855,7 +859,7 @@ public class KdTree<T extends Location>
 				for (int i = 0; i < self.nItems; i++)
 				{
 					T vtest = self.getVertex(i);
-					double retdist = metric.distance2(fromPosition, vtest.getUV());
+					double retdist = metric.distance2(fromPosition, vtest);
 					if (retdist < dist)
 					{
 						dist = retdist;
@@ -874,7 +878,7 @@ public class KdTree<T extends Location>
 	 * @param uv  coordinates.
 	 * @return the nearest vertex.
 	 */
-	public final T getNearestVertexDebug(Metric metric, double[] uv)
+	public final T getNearestVertexDebug(Metric metric, T uv)
 	{
 		if (root.nItems == 0)
 			return null;
@@ -936,35 +940,35 @@ public class KdTree<T extends Location>
 	}
 
 	// Methods only available in 2D
-	public interface K2DInterface
+	public interface K2DInterface<T>
 	{
-		public long onLeft(double[] p0, double[] p1, double[] p2);
-		public long distance2(double[] p0, double[] p1);
-		public long distance2cached(double[] p1);
+		public long onLeft(T p0, T p1, T p2);
+		public long distance2(T p0, T p1);
+		public long distance2cached(T p1);
 	}
-	private final class K2DInvalid implements K2DInterface
+	private final class K2DInvalid<T> implements K2DInterface<T>
 	{
-		public long onLeft(double[] p0, double[] p1, double[] p2) {
+		public long onLeft(T p0, T p1, T p2) {
 			throw new RuntimeException("Method onLeft only available in 2D");
 		}
 
-		public long distance2(double[] p0, double[] p1) {
+		public long distance2(T p0, T p1) {
 			throw new RuntimeException("Method distance2 only available in 2D");
 		}
 
-		public long distance2cached(double[] p1) {
+		public long distance2cached(T p1) {
 			throw new RuntimeException("Method distance2cached only available in 2D");
 		}
 
 	}
-	private final class K2D implements K2DInterface
+	private final class K2D implements K2DInterface<T>
 	{
 		// Temporary arrays
 		private final int[] i0 = new int[2];
 		private final int[] i1 = new int[2];
 		private final int[] i2 = new int[2];
 
-		public final long onLeft(double[] p0, double[] p1, double[] p2)
+		public final long onLeft(T p0, T p1, T p2)
 		{
 			double2int(p0, i0);
 			double2int(p1, i1);
@@ -976,7 +980,7 @@ public class KdTree<T extends Location>
 			return x01 * y02 - x02 * y01;
 		}
 
-		public final long distance2(double[] p0, double[] p1)
+		public final long distance2(T p0, T p1)
 		{
 			double2int(p0, i0);
 			double2int(p1, i1);
@@ -984,7 +988,7 @@ public class KdTree<T extends Location>
 			long dy = i1[1] - i0[1];
 			return dx * dx + dy * dy;
 		}
-		public final long distance2cached(double[] p1)
+		public final long distance2cached(T p1)
 		{
 			double2int(p1, i1);
 			long dx = i1[0] - i0[0];

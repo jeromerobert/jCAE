@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.metrics.Location;
 import org.jcae.mesh.amibe.projection.MapMeshLiaison;
 import org.jcae.mesh.xmldata.Amibe2VTK;
 
@@ -278,14 +279,12 @@ public class Remesh
 		bbox[3] = bbox[4] = bbox[5] = - (Double.MAX_VALUE / 2.0);
 		for (Vertex v : nodeset)
 		{
-			double[] xyz = v.getUV();
-			for (int k = 2; k >= 0; k--)
-			{
-				if (xyz[k] < bbox[k])
-					bbox[k] = xyz[k];
-				if (xyz[k] > bbox[3+k])
-					bbox[3+k] = xyz[k];
-			}
+			bbox[0] = Math.min(bbox[0], v.getX());
+			bbox[1] = Math.min(bbox[1], v.getY());
+			bbox[2] = Math.min(bbox[2], v.getZ());
+			bbox[3] = Math.max(bbox[3], v.getX());
+			bbox[4] = Math.max(bbox[4], v.getY());
+			bbox[5] = Math.max(bbox[5], v.getZ());
 		}
 		LOGGER.fine("Bounding box: lower("+bbox[0]+", "+bbox[1]+", "+bbox[2]+"), upper("+bbox[3]+", "+bbox[4]+", "+bbox[5]+")");
 		TIntObjectHashMap<KdTree<Vertex>> kdTrees = new TIntObjectHashMap<KdTree<Vertex>>();
@@ -394,12 +393,12 @@ public class Remesh
 	{
 	}
 
-	private static boolean isInside(double[] pos, Triangle t)
+	private static boolean isInside(Vertex pos, Triangle t)
 	{
 		double [][] temp = new double[4][3];
-		double[] p0 = t.vertex[0].getUV();
-		double[] p1 = t.vertex[1].getUV();
-		double[] p2 = t.vertex[2].getUV();
+		Vertex p0 = t.vertex[0];
+		Vertex p1 = t.vertex[1];
+		Vertex p2 = t.vertex[2];
 		Matrix3D.computeNormal3D(p0, p1, p2, temp[0], temp[1], temp[2]);
 		Matrix3D.computeNormal3D(p0, p1, pos, temp[0], temp[1], temp[3]);
 		if (Matrix3D.prodSca(temp[2], temp[3]) < 0.0)
@@ -709,9 +708,8 @@ public class Remesh
 					Vertex o = ot.origin();
 					Vertex d = ot.destination();
 					Vertex n = sym.apex();
-					double[] pos = v.getUV();
-					Matrix3D.computeNormal3D(o.getUV(), n.getUV(), pos, temp[0], temp[1], temp[2]);
-					Matrix3D.computeNormal3D(n.getUV(), d.getUV(), pos, temp[0], temp[1], temp[3]);
+					Matrix3D.computeNormal3D(o, n, v, temp[0], temp[1], temp[2]);
+					Matrix3D.computeNormal3D(n, d, v, temp[0], temp[1], temp[3]);
 					if (Matrix3D.prodSca(temp[2], temp[3]) <= 0.0)
 					{
 						// Vertex is not inserted
@@ -868,15 +866,11 @@ public class Remesh
 		EuclidianMetric3D mS = metrics.get(start);
 		EuclidianMetric3D mE = metrics.get(end);
 		//  Ensure that start point has the lowest edge size
-		double [] xs = start.getUV();
-		double [] xe = end.getUV();
-		if (reversed || mS.distance2(xs, xe) < mE.distance2(xs, xe))
+		if (reversed || mS.distance2(start, end) < mE.distance2(start, end))
 		{
 			Vertex tempV = start;
 			start = end;
 			end = tempV;
-			xs = xe;
-			xe = end.getUV();
 			EuclidianMetric3D tempM = mS;
 			mS = mE;
 			mE = tempM;
@@ -884,8 +878,8 @@ public class Remesh
 		double hS = mS.getUnitBallBBox()[0];
 		double hE = mE.getUnitBallBBox()[0];
 		double logRatio = Math.log(hE/hS);
-		double [] lower = new double[3];
-		double [] upper = new double[3];
+		Location lower = new Location();
+		Location upper = new Location();
 		boolean border = ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD | AbstractHalfEdge.SHARP);
 		int nr;
 		double maxError, target;
@@ -919,24 +913,21 @@ public class Remesh
 		Metric lastMetric = metrics.get(last);
 		while (r > 0)
 		{
-			System.arraycopy(last.getUV(), 0, lower, 0, 3);
-			System.arraycopy(end.getUV(), 0, upper, 0, 3);
+			lower.moveTo(last);
+			upper.moveTo(end);
 			// 1-d coordinate between lower and upper points
 			double alpha = 0.5;
 			double delta = 0.5;
-			Vertex np = mesh.createVertex(
-				0.5*(lower[0]+upper[0]),
-				0.5*(lower[1]+upper[1]),
-				0.5*(lower[2]+upper[2]));
+			Vertex np = mesh.createVertex(0, 0, 0);
+			np.middle(lower, upper);
 			int cnt = nrDichotomy;
 			while(cnt >= 0)
 			{
 				cnt--;
 				// Update vertex position if 'project' flag was set
-				double [] pos = np.getUV();
 				if (project && !ot.hasAttributes(AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 				{
-					liaison.project(np, pos, start);
+					liaison.project(np, np, start);
 				}
 				// Compute metrics at this position
 				EuclidianMetric3D m = metrics.get(np, ot.getTri());
@@ -966,7 +957,7 @@ public class Remesh
 						triNeighbor.add(start);
 					else if (start.getRef() != 0 && end.getRef() == 0)
 							triNeighbor.add(end);
-					else if (m.distance2(pos, start.getUV()) < m.distance2(pos, end.getUV()))
+					else if (m.distance2(np, start) < m.distance2(np, end))
 						triNeighbor.add(start);
 					else
 						triNeighbor.add(end);
@@ -979,21 +970,15 @@ public class Remesh
 				{
 					delta *= 0.5;
 					alpha -= delta;
-					System.arraycopy(pos, 0, upper, 0, 3);
-					np.moveTo(
-						0.5*(lower[0] + pos[0]),
-						0.5*(lower[1] + pos[1]),
-						0.5*(lower[2] + pos[2]));
+					upper.moveTo(np);
+					np.middle(lower, np);
 				}
 				else
 				{
 					delta *= 0.5;
 					alpha += delta;
-					System.arraycopy(pos, 0, lower, 0, 3);
-					np.moveTo(
-						0.5*(upper[0] + pos[0]),
-						0.5*(upper[1] + pos[1]),
-						0.5*(upper[2] + pos[2]));
+					lower.moveTo(np);
+					np.middle(upper, np);
 				}
 			}
 			if (cnt < 0)
@@ -1025,7 +1010,7 @@ public class Remesh
 			assert bgT.getGroupId() == group || group < 0:
 				mesh.getGroupName(group)+" "+mesh.getGroupName(bgT.getGroupId())+" "+v;
 			liaison.addVertex(v, bgT);
-			liaison.move(v, v.getUV(), group, false);
+			liaison.move(v, v, group, false);
 
 			boolean validCandidate = allowNearNodes;
 			if (!validCandidate)
@@ -1035,7 +1020,7 @@ public class Remesh
 			}
 			if (!validCandidate)
 			{
-				Vertex n = kdTreeGroup.getNearestVertex(metric, v.getUV());
+				Vertex n = kdTreeGroup.getNearestVertex(metric, v);
 				validCandidate = interpolatedDistance(v, metric, n, metrics.get(n)) > currentScale * minlen;
 			}
 			if (validCandidate)

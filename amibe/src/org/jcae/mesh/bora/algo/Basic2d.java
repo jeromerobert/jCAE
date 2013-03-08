@@ -192,10 +192,9 @@ public class Basic2d implements AlgoInterface
 					// 4.  Check whether deflection is valid.
 					if (canSkip && mp.hasDeflection())
 					{
-						double [] uv = lastPoint.getUV();
-						double [] start = m.getGeomSurface().value(uv[0], uv[1]);
-						uv = p2.getUV();
-						double [] end = m.getGeomSurface().value(uv[0], uv[1]);
+						double[] start = m.getGeomSurface().value(
+							lastPoint.getX(), lastPoint.getY());
+						double [] end = m.getGeomSurface().value(p2.getX(), p2.getY());
 						double dist = Math.sqrt(
 						  (start[0] - end[0]) * (start[0] - end[0]) +
 						  (start[1] - end[1]) * (start[1] - end[1]) +

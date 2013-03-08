@@ -408,7 +408,7 @@ public class Mesh implements Serializable
 	 * @param p  coordinates
 	 * @return a new {@link Vertex} instance with this location.
 	 */
-	public final Vertex createVertex(double [] p)
+	public final Vertex createVertex(Location p)
 	{
 		return factory.createVertex(p);
 	}
@@ -530,44 +530,6 @@ public class Mesh implements Serializable
 	public void setPersistentReferences(boolean persistentReferences)
 	{
 		this.persistentReferences = persistentReferences;
-	}
-
-	/**
-	 * Move a Vertex to a triangle centroid.
-	 *
-	 * @param t  triangle
-	 * @param c  if <code>null</code>, a new Vertex is created, otherwise this
-	 *    Vertex is moved to triangle centroid.
-	 * @return a {@link Vertex} instance which is located at the triangle centroid.
-	 */
-	public Vertex getTriangleCentroid(Triangle t, Vertex c)
-	{
-		int dim = t.vertex[0].getUV().length;
-		if (c == null)
-		{
-			if (dim > 2)
-				c = createVertex(0.0, 0.0, 0.0);
-			else
-				c = createVertex(0.0, 0.0);
-		}
-		double x = 0.0, y = 0.0, z = 0.0;
-		for (Vertex v : t.vertex)
-		{
-			double [] p = v.getUV();
-			x += p[0];
-			y += p[1];
-			if (dim > 2)
-				z += p[2];
-		}
-		x /= t.vertex.length;
-		y /= t.vertex.length;
-		z /= t.vertex.length;
-		if (dim > 2)
-			c.moveTo(x, y, z);
-		else
-			c.moveTo(x, y);
-
-		return c;
 	}
 
 	/**
@@ -979,10 +941,8 @@ public class Mesh implements Serializable
 				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD | AbstractHalfEdge.SHARP))
 					continue;
 				sym = ot.sym(sym);
-				double [] p0 = ot.origin().getUV();
-				double [] p1 = ot.destination().getUV();
-				Matrix3D.computeNormal3D(p0, p1, ot.apex().getUV(), temp[0], temp[1], temp[2]);
-				Matrix3D.computeNormal3D(p1, p0, sym.apex().getUV(), temp[0], temp[1], temp[3]);
+				Matrix3D.computeNormal3D(ot.origin(), ot.destination(), ot.apex(), temp[0], temp[1], temp[2]);
+				Matrix3D.computeNormal3D(ot.destination(), ot.origin(), sym.apex(), temp[0], temp[1], temp[3]);
 				if (Matrix3D.prodSca(temp[2], temp[3]) <= coplanarity)
 				{
 					ot.setAttributes(AbstractHalfEdge.SHARP);
@@ -1551,7 +1511,7 @@ public class Mesh implements Serializable
 	 * @param v   the destination vertex
 	 * @return <code>true</code> if origin of this edge can be moved, false otherwise.
 	 */
-	public final boolean canMoveOrigin(AbstractHalfEdge e, double[] pt)
+	public final boolean canMoveOrigin(AbstractHalfEdge e, Location pt)
 	{
 		return e.canMoveOrigin(this, pt);
 	}
@@ -1564,7 +1524,7 @@ public class Mesh implements Serializable
 	 * @return <code>true</code> if edge origin can be moved without producing
 	 *         inverted triangles, <code>false</code> otherwise.
 	 */
-	public final boolean checkNewRingNormals(AbstractHalfEdge e, double [] pt)
+	public final boolean checkNewRingNormals(AbstractHalfEdge e, Location pt)
 	{
 		return e.checkNewRingNormals(this, pt);
 	}
@@ -2005,8 +1965,8 @@ public class Mesh implements Serializable
 				Vertex d = ot.destination();
 				Vertex a = ot.apex();
 				Vertex n = sym.apex();
-				Matrix3D.computeNormal3D(o.getUV(), d.getUV(), a.getUV(), temp[0], temp[1], temp[2]);
-				Matrix3D.computeNormal3D(d.getUV(), o.getUV(), n.getUV(), temp[0], temp[1], temp[3]);
+				Matrix3D.computeNormal3D(o, d, a, temp[0], temp[1], temp[2]);
+				Matrix3D.computeNormal3D(d, o, n, temp[0], temp[1], temp[3]);
 				if (Matrix3D.prodSca(temp[2], temp[3]) < -0.6)
 				{
 					System.err.println("ERROR: dot product of normals of triangles below is: "+Matrix3D.prodSca(temp[2], temp[3]));
@@ -2025,15 +1985,15 @@ public class Mesh implements Serializable
 		{
 			if (t.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
-			double[] t0 = t.vertex[0].getUV();
-			double[] t1 = t.vertex[1].getUV();
-			double[] t2 = t.vertex[2].getUV();
+			Vertex t0 = t.vertex[0];
+			Vertex t1 = t.vertex[1];
+			Vertex t2 = t.vertex[2];
 			double a = t.vertex[0].sqrDistance3D(t.vertex[1]);
 			double c = t.vertex[0].sqrDistance3D(t.vertex[2]);
 			double b =
-				(t1[0] - t0[0]) * (t2[0] - t0[0]) +
-				(t1[1] - t0[1]) * (t2[1] - t0[1]) +
-				(t1[2] - t0[2]) * (t2[2] - t0[2]);
+				(t1.getX() - t0.getX()) * (t2.getX() - t0.getX()) +
+				(t1.getY() - t0.getY()) * (t2.getY() - t0.getY()) +
+				(t1.getZ() - t0.getZ()) * (t2.getZ() - t0.getZ());
 			if (a*c == b*b)
 			{
 				System.err.println("ERROR: degenerated triangle: "+t);

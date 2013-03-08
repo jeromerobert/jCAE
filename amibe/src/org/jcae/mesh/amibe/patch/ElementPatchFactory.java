@@ -24,6 +24,7 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.ElementFactoryInterface;
+import org.jcae.mesh.amibe.metrics.Location;
 import org.jcae.mesh.amibe.traits.VertexTraitsBuilder;
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
@@ -49,10 +50,9 @@ class ElementPatchFactory implements ElementFactoryInterface
 		throw new RuntimeException();
 	}
 
-	public Vertex2D createVertex(double [] x)
+	public Vertex2D createVertex(Location x)
 	{
-		assert x.length == 2;
-		return createVertex(x[0], x[1]);
+		return createVertex(x.getX(), x.getY());
 	}
 
 	private Triangle createTriangle()

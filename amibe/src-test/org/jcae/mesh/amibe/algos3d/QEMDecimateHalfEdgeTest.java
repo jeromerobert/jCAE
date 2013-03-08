@@ -89,6 +89,7 @@ public class QEMDecimateHalfEdgeTest
 	{
 		// Create new vertices and append them to current mesh
 		assert v.length == m*n;
+		double [] xyz = new double[3];
 		Vertex [] vy = new Vertex[v.length];
 		vertexLabel = v.length;
 		double ct = Math.cos(angle*Math.PI / 180.0);
@@ -99,7 +100,7 @@ public class QEMDecimateHalfEdgeTest
 				vy[i]   = v[i];
 			else
 			{
-				double [] xyz = v[i].getUV();
+				v[i].get(xyz);
 				vy[i]   = mesh.createVertex(ct*xyz[0]+st*xyz[2], xyz[1], -st*xyz[0]+ct*xyz[2]);
 				vy[i].setLabel(vertexLabel);
 				vertexLabel++;

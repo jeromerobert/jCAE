@@ -233,15 +233,8 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		{
 			if (!f.isWritable())
 				continue;
-			double [] p0 = f.vertex[0].getUV();
-			double [] p1 = f.vertex[1].getUV();
-			double [] p2 = f.vertex[2].getUV();
-			vect1[0] = p1[0] - p0[0];
-			vect1[1] = p1[1] - p0[1];
-			vect1[2] = p1[2] - p0[2];
-			vect2[0] = p2[0] - p0[0];
-			vect2[1] = p2[1] - p0[1];
-			vect2[2] = p2[2] - p0[2];
+			f.vertex[1].sub(f.vertex[0], vect1);
+			f.vertex[2].sub(f.vertex[0], vect2);
 			Matrix3D.prodVect3D(vect1, vect2, normal);
 			double norm = Matrix3D.norm(normal);
 			// This is in fact 2*area, but that does not matter
@@ -254,7 +247,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 				for (int k = 0; k < 3; k++)
 					normal[k] *=  norm;
 			}
-			double d = - Matrix3D.prodSca(normal, f.vertex[0].getUV());
+			double d = - Matrix3D.prodSca(normal, f.vertex[0]);
 			for (int i = 0; i < 3; i++)
 			{
 				final Quadric3DError q = quadricMap.get(f.vertex[i]);
@@ -275,11 +268,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 						//  add a weight proportional to squared edge
 						//  length.
 						//  Here norm(vect2) == norm(vect1)
-						p0 = b.origin().getUV();
-						p1 = b.destination().getUV();
-						vect1[0] = p1[0] - p0[0];
-						vect1[1] = p1[1] - p0[1];
-						vect1[2] = p1[2] - p0[2];
+						b.destination().sub(b.origin(), vect1);
 						Matrix3D.prodVect3D(vect1, normal, vect2);
 						norm = Matrix3D.norm(vect2);
 						if (norm > 1.e-20)
@@ -288,7 +277,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 							for (int k = 0; k < 3; k++)
 								vect2[k] *=  invNorm;
 						}
-						d = - Matrix3D.prodSca(vect2, b.origin().getUV());
+						d = - Matrix3D.prodSca(vect2, b.origin());
 						final Quadric3DError q1 = quadricMap.get(b.origin());
 						final Quadric3DError q2 = quadricMap.get(b.destination());
 						q1.addWeightedError(vect2, d, norm);
@@ -342,7 +331,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		assert q2 != null : d;
 		qCostOpt.computeQuadric3DError(q1, q2);
 		qCostOpt.optimalPlacement(o, d, q1, q2, placement, vCostOpt);
-		final double ret = q1.value(vCostOpt.getUV()) + q2.value(vCostOpt.getUV());
+		final double ret = q1.value(vCostOpt) + q2.value(vCostOpt);
 		// TODO: check why this assertion sometimes fail
 		// assert ret >= -1.e-2 : q1+"\n"+q2+"\n"+ret;
 		return ret;

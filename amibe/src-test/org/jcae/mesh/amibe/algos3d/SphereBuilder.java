@@ -226,15 +226,14 @@ public class SphereBuilder
 		{
 			if (v.getRef() > 0)
 				continue;
-			double [] coord = v.getUV();
-			double c = Math.cos(Math.PI * coord[2]);
-			if (coord[2] >= 0.0)
-				coord[2] = (1.0 - c*c*c*c*c) / 2.0;
+			double c = Math.cos(Math.PI * v.getZ());
+			if (v.getZ() >= 0.0)
+				v.moveTo(v.getX(), v.getY(), (1.0 - c*c*c*c*c) / 2.0);
 			else
-				coord[2] = - (1.0 - c*c*c*c*c) / 2.0;
+				v.moveTo(v.getX(), v.getY(), - (1.0 - c*c*c*c*c) / 2.0);
 
-			double r = Math.sqrt(coord[0]*coord[0] + coord[1]*coord[1] + coord[2]*coord[2]);
-			v.moveTo(coord[0]/r, coord[1]/r, coord[2]/r);
+			double r = Math.sqrt(v.getX()*v.getX() + v.getY()*v.getY() + v.getZ()*v.getZ());
+			v.scale(1/r);
 		}
 		return mesh;
 	}

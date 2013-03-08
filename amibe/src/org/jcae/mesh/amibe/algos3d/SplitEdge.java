@@ -65,7 +65,6 @@ import java.util.logging.Logger;
 public class SplitEdge extends AbstractAlgoHalfEdge
 {
 	private static final Logger LOGGER=Logger.getLogger(SplitEdge.class.getName());
-	private final double [] newXYZ = new double[3];
 	private Vertex insertedVertex = null;
 	
 	/**
@@ -138,14 +137,8 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		current = uniqueOrientation(current);
 		if (current.hasAttributes(AbstractHalfEdge.IMMUTABLE))
 			return false;
-		// New point
-		double [] p0 = current.origin().getUV();
-		double [] p1 = current.destination().getUV();
-		
-		for (int i = 0; i < 3; i++)
-			newXYZ[i] = 0.5*(p0[i]+p1[i]);
-		
-		insertedVertex = mesh.createVertex(newXYZ);
+		insertedVertex = mesh.createVertex(0, 0, 0);
+		insertedVertex.middle(current.origin(), current.destination());
 		return true;
 	}
 

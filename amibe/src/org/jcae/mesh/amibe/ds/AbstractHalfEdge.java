@@ -22,6 +22,7 @@ package org.jcae.mesh.amibe.ds;
 
 import org.jcae.mesh.amibe.traits.HalfEdgeTraitsBuilder;
 import java.util.Iterator;
+import org.jcae.mesh.amibe.metrics.Location;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 
 /**
@@ -362,10 +363,8 @@ public abstract class AbstractHalfEdge
 		{
 			if(!normalComputed)
 			{
-				area1 = Matrix3D.computeNormal3D(
-					o.getUV(), d.getUV(), apex.getUV(), temp1, temp2, normal1);
-				area2 = Matrix3D.computeNormal3D(
-					d.getUV(), o.getUV(), symApex.getUV(), temp1, temp2, normal2);
+				area1 = Matrix3D.computeNormal3D(o, d, apex, temp1, temp2, normal1);
+				area2 = Matrix3D.computeNormal3D(d, o, symApex, temp1, temp2, normal2);
 				normalComputed = true;
 			}
 		}
@@ -373,10 +372,8 @@ public abstract class AbstractHalfEdge
 		{
 			if(!swappedNormalComputed)
 			{
-				swappedArea1 = Matrix3D.computeNormal3D(
-					o.getUV(), symApex.getUV(), apex.getUV(), temp1, temp2, swappedNormal1);
-				swappedArea2 = Matrix3D.computeNormal3D(
-					d.getUV(), apex.getUV(), symApex.getUV(), temp1, temp2, swappedNormal2);
+				swappedArea1 = Matrix3D.computeNormal3D(o, symApex, apex, temp1, temp2, swappedNormal1);
+				swappedArea2 = Matrix3D.computeNormal3D(d, apex, symApex, temp1, temp2, swappedNormal2);
 				swappedNormalComputed = true;
 			}
 		}
@@ -663,8 +660,8 @@ public abstract class AbstractHalfEdge
 	 * @return <code>false</code> if the new position produces
 	 *    an inverted triangle, <code>true</code> otherwise.
 	 */
-	abstract boolean checkNewRingNormals(Mesh m, double [] newpt);
-	abstract boolean canMoveOrigin(Mesh m, double [] newpt);
+	abstract boolean checkNewRingNormals(Mesh m, Location newpt);
+	abstract boolean canMoveOrigin(Mesh m, Location newpt);
 
 	/**
 	 * Checks whether an edge can be contracted into a given vertex.

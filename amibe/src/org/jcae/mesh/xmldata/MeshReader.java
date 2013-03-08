@@ -135,7 +135,7 @@ public class MeshReader
 			for (int i=0; i < numberOfNodes; i++)
 			{
 				dfrN.get(coord);
-				nodelist[i] = (Vertex2D) mesh.createVertex(coord);
+				nodelist[i] = (Vertex2D) mesh.createVertex(coord[0], coord[1]);
 				if (i < numberOfNodes - numberOfReferences)
 					label = 0;
 				else
@@ -233,7 +233,7 @@ public class MeshReader
 			mesh.ensureCapacity(2 * numberOfNodes);
 			for (int i = 0; i < numberOfNodes; i++) {
 				dfrN.get(coord);
-				nodelist[i] = mesh.createVertex(coord);
+				nodelist[i] = mesh.createVertex(coord[0], coord[1], coord[2]);
 				if (i < numberOfNodes - numberOfReferences) {
 					label = 0;
 				} else {

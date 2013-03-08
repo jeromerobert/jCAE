@@ -106,11 +106,8 @@ public class RemeshSkeleton {
 	{
 		double[] diff = new double[3];
 		double[] seg = new double[3];
-		for(int i = 0; i < 3; i++)
-		{
-			diff[i] = v.getUV()[i] - edge.origin().getUV()[i];
-			seg[i] = edge.destination().getUV()[i] - edge.origin().getUV()[i];
-		}
+		v.sub(edge.origin(), diff);
+		edge.destination().sub(edge.origin(), seg);
 		return dot(seg, diff) / edge.origin().sqrDistance3D(edge.destination());
 	}
 
@@ -155,7 +152,7 @@ public class RemeshSkeleton {
 					liaison.addVertex(v, toSplit.getTri());
 					//TODO this will be slow as as toSplit.getTri() may be far
 					//from the wanted triangle so we will loop on all triangles
-					liaison.move(v, v.getUV(), true);
+					liaison.move(v, v, true);
 					AbstractHalfEdge e = getEdge(v, oldDestination);
 					edgeIndex.set(segId, e);
 				}

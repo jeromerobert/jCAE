@@ -82,27 +82,19 @@ public class EnforceAbsDeflection
 				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
 				mesh.moveVertexToCentroid(c, t);
-				double uv[] = c.getUV();
-				double [] xyz = mesh.getGeomSurface().value(uv[0], uv[1]);
+				double [] xyz = mesh.getGeomSurface().value(c.getX(), c.getY());
 				// mesh.createVertex() cannot be used because mesh is a
 				// Mesh2D instance and we want to create 3D instances.
 				p[3] = new Vertex(null, xyz[0], xyz[1], xyz[2]);
 				for (int i = 0; i < 3; i++)
 				{
-					uv = t.vertex[i].getUV();
-					xyz = mesh.getGeomSurface().value(uv[0], uv[1]);
+					Vertex v = t.vertex[i];
+					xyz = mesh.getGeomSurface().value(v.getX(), v.getY());
 					p[i] = new Vertex(null, xyz[0], xyz[1], xyz[2]);
 				}
-				double [] xyz0 = p[0].getUV();
-				double [] xyz1 = p[1].getUV();
-				double [] xyz2 = p[2].getUV();
-				double [] xyz3 = p[3].getUV();
-				for (int i = 0; i < 3; i++)
-				{
-					v1[i] = xyz1[i] - xyz0[i];
-					v2[i] = xyz2[i] - xyz0[i];
-					v3[i] = xyz3[i] - xyz0[i];
-				}
+				p[1].sub(p[0], v1);
+				p[2].sub(p[0], v2);
+				p[3].sub(p[0], v3);
 				Matrix3D.prodVect3D(v1, v2, v4);
 				double norm = Matrix3D.norm(v4);
 				if (norm > 0.0)
@@ -116,8 +108,7 @@ public class EnforceAbsDeflection
 				if (!mesh.getTriangles().contains(t) || t.hasAttributes(AbstractHalfEdge.BOUNDARY))
 					continue;
 				mesh.moveVertexToCentroid(c, t);
-				double uv[] = c.getUV();
-				Vertex2D v = (Vertex2D) mesh.createVertex(uv[0], uv[1]);
+				Vertex2D v = (Vertex2D) mesh.createVertex(c.getX(), c.getY());
 				VirtualHalfEdge2D vt = v.getSurroundingOTriangle(mesh);
 				if (vt.split3(mesh, v, null, false) != 0)
 					redo = true;

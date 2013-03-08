@@ -198,9 +198,8 @@ public class MetricSupport {
 		}
 		else
 		{
-			double[] uv = v.getUV();
 			toReturn = new EuclidianMetric3D(
-				metric.getTargetSize(uv[0], uv[1], uv[2], groupId));
+				metric.getTargetSize(v.getX(), v.getY(), v.getZ(), groupId));
 		}
 		return toReturn;
 	}
@@ -234,10 +233,8 @@ public class MetricSupport {
 	{
 		assert m1 != null : "Metric null at point "+pt1;
 		assert m2 != null : "Metric null at point "+pt2;
-		double[] p1 = pt1.getUV();
-		double[] p2 = pt2.getUV();
-		double a = Math.sqrt(m1.distance2(p1, p2));
-		double b = Math.sqrt(m2.distance2(p1, p2));
+		double a = Math.sqrt(m1.distance2(pt1, pt2));
+		double b = Math.sqrt(m2.distance2(pt1, pt2));
 		// Linear interpolation:
 		//double l = (2.0/3.0) * (a*a + a*b + b*b) / (a + b);
 		// Geometric interpolation

@@ -142,24 +142,23 @@ public class SmoothNodes3DTest
 	{
 		for (Vertex v : mesh.getNodes())
 		{
-			double [] coord = v.getUV();
 			// coord[0] = (radiusOut + radiusIn * cos(theta)) * cos(phi)
 			// coord[1] = (radiusOut + radiusIn * cos(theta)) * sin(phi)
 			// coord[2] = radiusIn * sin(theta)
-			double aux = Math.sqrt(coord[0]*coord[0] + coord[1]*coord[1]) - radiusOut;
-			if (Math.abs(aux*aux + coord[2]*coord[2] - radiusIn*radiusIn) > 0.01)
+			double aux = Math.sqrt(v.getX()*v.getX() + v.getY() * v.getY()) - radiusOut;
+			if (Math.abs(aux*aux + v.getZ()*v.getZ() - radiusIn*radiusIn) > 0.01)
 					throw new IllegalArgumentException("Wrong radii parameters");
 
-			double phi = Math.atan2(coord[1], coord[0]);
-			double theta = Math.atan2(coord[2], coord[0]*Math.cos(phi) + coord[1]*Math.sin(phi) - radiusOut);
+			double phi = Math.atan2(v.getY(), v.getX());
+			double theta = Math.atan2(v.getZ(), v.getX()*Math.cos(phi) + v.getY()*Math.sin(phi) - radiusOut);
 			// Modify theta
 			double relax = 1.;
 			double newTheta = Math.PI * Math.sin(relax*theta / 2.0) / Math.sin(relax*Math.PI / 2.0);
 			// Recompute (x,y,z)
-			coord[0] = (radiusOut + radiusIn * Math.cos(newTheta)) * Math.cos(phi);
-			coord[1] = (radiusOut + radiusIn * Math.cos(newTheta)) * Math.sin(phi);
-			coord[2] = radiusIn * Math.sin(newTheta);
-			v.moveTo(coord[0], coord[1], coord[2]);
+			v.moveTo(
+				(radiusOut + radiusIn * Math.cos(newTheta)) * Math.cos(phi),
+				(radiusOut + radiusIn * Math.cos(newTheta)) * Math.sin(phi),
+				radiusIn * Math.sin(newTheta));
 		}
 	}
  

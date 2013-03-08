@@ -24,6 +24,7 @@ package org.jcae.mesh.amibe.algos3d;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.ds.Vertex;
 import java.io.Serializable;
+import org.jcae.mesh.amibe.metrics.Location;
 
 /**
  * Garland's Quadric Error Metric.  See
@@ -113,14 +114,14 @@ public class Quadric3DError implements Serializable
 		cachedDet = false;
 	}
 
-	public final double value(double [] vect)
+	public final double value(Location vect)
 	{
 		double ret = c;
 		ret += 2.0 * Matrix3D.prodSca(b, vect);
 		ret +=
-			(A[0] * vect[0] + A[1] * vect[1] + A[2] * vect[2]) * vect[0] +
-			(A[1] * vect[0] + A[3] * vect[1] + A[4] * vect[2]) * vect[1] +
-			(A[2] * vect[0] + A[4] * vect[1] + A[5] * vect[2]) * vect[2];
+			(A[0] * vect.getX() + A[1] * vect.getY() + A[2] * vect.getZ()) * vect.getX() +
+			(A[1] * vect.getX() + A[3] * vect.getY() + A[4] * vect.getZ()) * vect.getY() +
+			(A[2] * vect.getX() + A[4] * vect.getY() + A[5] * vect.getZ()) * vect.getZ();
 		return ret;
 	}
 
@@ -170,30 +171,27 @@ public class Quadric3DError implements Serializable
 	private void moveAlongSegment(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2, Vertex ret)
 	{
 		int nrSegments = 6;
-		double [] p1 = v1.getUV();
-		double [] p2 = v2.getUV();
 		ret.copy(bestCandidateV1V2Ref(v1, v2, q1, q2));
-		double [] posMin = new double[] { p1[0], p1[1], p1[2] };
-		double [] pos = new double[3];
+		Location posMin = new Location(v1);
+		Location pos = new Location();
 		double qmin = q1.value(posMin) + q2.value(posMin);
-		double dx = (p2[0] - p1[0]) / (double) nrSegments;
-		double dy = (p2[1] - p1[1]) / (double) nrSegments;
-		double dz = (p2[2] - p1[2]) / (double) nrSegments;
+		double dx = (v2.getX() - v1.getX()) / (double) nrSegments;
+		double dy = (v2.getY() - v1.getY()) / (double) nrSegments;
+		double dz = (v2.getZ() - v1.getZ()) / (double) nrSegments;
 		for (int i = 0; i < nrSegments; i++)
 		{
-			pos[0] = p1[0] + dx * (i + 1.0);
-			pos[1] = p1[1] + dy * (i + 1.0);
-			pos[2] = p1[2] + dz * (i + 1.0);
+			pos.moveTo(
+				v1.getX() + dx * (i + 1.0),
+				v1.getY() + dy * (i + 1.0),
+				v1.getZ() + dz * (i + 1.0));
 			double q = q1.value(pos) + q2.value(pos);
 			if (q < qmin)
 			{
 				q = qmin;
-				posMin[0] = pos[0];
-				posMin[1] = pos[1];
-				posMin[2] = pos[2];
+				posMin.moveTo(pos);
 			}
 		}
-		ret.moveTo(posMin[0], posMin[1], posMin[2]);
+		ret.moveTo(posMin);
 	}
 
 	public final void optimalPlacement(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2, Placement p, Vertex ret)
@@ -210,10 +208,8 @@ public class Quadric3DError implements Serializable
 				if (!v1.isMutable() || !v2.isMutable())
 					return;
 				// Keep a reference if there is one
-				double [] p1 = v1.getUV();
-				double [] p2 = v2.getUV();
 				ret.copy(bestCandidateV1V2Ref(v1, v2, q1, q2));
-				ret.moveTo(0.5*(p1[0]+p2[0]), 0.5*(p1[1]+p2[1]), 0.5*(p1[2]+p2[2]));
+				ret.middle(v1, v2);
 			}
 			break;
 		case OPTIMAL:
@@ -253,16 +249,14 @@ public class Quadric3DError implements Serializable
 				// Find M = v1 + s(v2-v1) which minimizes
 				//   q(M) = s^2 (v2-v1)A(v2-v1) + s(v1A(v2-v1)+(v2-v1)Av1+2b(v2-v1))+cte
 				//   q'(M) = 2 s (v2-v1)A(v2-v1) + 2(v1A(v2-v1)+b(v2-v1))
-				double [] p1 = v1.getUV();
-				double [] p2 = v2.getUV();
-				double dx = p2[0] - p1[0];
-				double dy = p2[1] - p1[1];
-				double dz = p2[2] - p1[2];
+				double dx = v2.getX() - v1.getX();
+				double dy = v2.getY() - v1.getY();
+				double dz = v2.getZ() - v1.getZ();
 				double den = 0.0;
 
 				double num = b[0] * dx + b[1] * dy + b[2] * dz;
 				den += A[0] * dx * dx + 2.0 * A[1] * dx * dy + 2.0 * A[2] * dx * dz + A[3] * dy * dy + 2.0 * A[4] * dy * dz + A[5] * dz * dz;
-				num += A[0] * dx * p1[0] + A[1] * (dx * p1[1] + dy * p1[0]) + A[2] * (dx * p1[2] + dz * p1[0]) + A[3] * dy * p1[1] + A[4] * (dy * p1[2] + dz * p1[1]) + A[5] * dz * p1[2];
+				num += A[0] * dx * v1.getX() + A[1] * (dx * v1.getY() + dy * v1.getX()) + A[2] * (dx * v1.getZ() + dz * v1.getX()) + A[3] * dy * v1.getY() + A[4] * (dy * v1.getZ() + dz * v1.getY()) + A[5] * dz * v1.getZ();
 				if (den > 1.0e-4 * Math.abs(num))
 				{
 					double s = - num / den;
@@ -270,7 +264,8 @@ public class Quadric3DError implements Serializable
 						s = 0.0;
 					else if (s > 1.0 - 1.0e-4)
 						s = 1.0;
-					ret.moveTo(p1[0]+s*dx, p1[1]+s*dy, p1[2]+s*dz);
+					ret.moveTo(v1.getX() + s * dx, v1.getY() + s * dy,
+						v1.getZ() + s * dz);
 				}
 				else
 					moveAlongSegment(v1, v2, q1, q2, ret);
@@ -285,7 +280,7 @@ public class Quadric3DError implements Serializable
 
 	private static Vertex bestCandidateV1V2(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2)
 	{
-		if (q1.value(v1.getUV()) + q2.value(v1.getUV()) < q1.value(v2.getUV()) + q2.value(v2.getUV()))
+		if (q1.value(v1) + q2.value(v1) < q1.value(v2) + q2.value(v2))
 			return v1;
 		return v2;
 	}

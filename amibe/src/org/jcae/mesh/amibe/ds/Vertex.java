@@ -51,17 +51,13 @@ import java.util.TreeSet;
  * all incident triangles through their adjacency relations.
  * </p>
  */
-public class Vertex implements Location, Serializable
+public class Vertex extends Location implements Serializable
 {
 	private static final long serialVersionUID = 8049983674054731722L;
 	private static final Logger logger=Logger.getLogger(Vertex.class.getName());
 	
 	//  User-defined traits.  They are currently unused.
 	//protected final Traits traits;
-	/**
-	 * 2D or 3D coordinates.
-	 */
-	protected final double [] param;
 	//  ref1d > 0: link to the geometrical node
 	//  ref1d = 0: inner node
 	//  ref1d < 0: node on an inner boundary  (FIXME: unused for now)
@@ -86,11 +82,6 @@ public class Vertex implements Location, Serializable
 	 */
 	protected Vertex(VertexTraitsBuilder vtb)
 	{
-		/*if (vtb != null)
-			traits = vtb.createTraits();
-		else
-			traits = null;*/
-		param = new double[2];
 	}
 
 	/**
@@ -103,14 +94,7 @@ public class Vertex implements Location, Serializable
 	 */
 	public Vertex(VertexTraitsBuilder vtb, double x, double y, double z)
 	{
-		/*if (vtb != null)
-			traits = vtb.createTraits();
-		else
-			traits = null;*/
-		param = new double[3];
-		param[0] = x;
-		param[1] = y;
-		param[2] = z;
+		moveTo(x, y, z);
 	}
 	
 	/**
@@ -120,8 +104,7 @@ public class Vertex implements Location, Serializable
 	 */
 	public final void copy(Vertex that)
 	{
-		assert that.param.length == param.length;
-		System.arraycopy(that.param, 0, param, 0, param.length);
+		moveTo(that.getX(), that.getY(), that.getZ());
 		link  = that.link;
 		ref1d = that.ref1d;
 		label = that.label;
@@ -152,49 +135,6 @@ public class Vertex implements Location, Serializable
 	}
 	
 	/**
-	 * Gets coordinates of this vertex.
-	 *
-	 * @return coordinates of this vertex
-	 */
-	public final double [] getUV ()
-	{
-		return param;
-	}
-	
-	public void moveTo(double u, double v)
-	{
-		throw new RuntimeException();
-	}
-
-	/**
-	 * Sets 3D coordinates of this vertex.
-	 *
-	 * @param x  first coordinate of the new position
-	 * @param y  second coordinate of the new position
-	 * @param z  third coordinate of the new position
-	 */
-	public void moveTo(double x, double y, double z)
-	{
-		param[0] = x;
-		param[1] = y;
-		param[2] = z;
-	}
-
-	/**
-	 * Returns the squared distance in 3D space.
-	 *
-	 * @param end  the node to which distance is computed.
-	 * @return the squared distance to <code>end</code>.
-	 **/
-	public final double sqrDistance3D(Vertex end)
-	{
-		double x = param[0] - end.param[0];
-		double y = param[1] - end.param[1];
-		double z = param[2] - end.param[2];
-		return x*x+y*y+z*z;
-	}
-	
-	/**
 	 * Returns the distance in 3D space.
 	 *
 	 * @param end  the node to which distance is computed.
@@ -202,10 +142,7 @@ public class Vertex implements Location, Serializable
 	 **/
 	public final double distance3D(Vertex end)
 	{
-		double x = param[0] - end.param[0];
-		double y = param[1] - end.param[1];
-		double z = param[2] - end.param[2];
-		return Math.sqrt(x*x+y*y+z*z);
+		return Math.sqrt(sqrDistance3D(end));
 	}
 	
 	/**
@@ -253,11 +190,8 @@ public class Vertex implements Location, Serializable
 	 */
 	final void outer3D(Vertex n1, Vertex n2, double [] work1, double [] work2, double [] ret)
 	{
-		for (int i = 0; i < 3; i++)
-		{
-			work1[i] = n1.param[i] - param[i];
-			work2[i] = n2.param[i] - param[i];
-		}
+		n1.sub(this, work1);
+		n2.sub(this, work2);
 		Matrix3D.prodVect3D(work1, work2, ret);
 	}
 	
@@ -576,7 +510,6 @@ public class Vertex implements Location, Serializable
 		double [] vect1 = new double[3];
 		double [] vect2 = new double[3];
 		double [] vect3 = new double[3];
-		double [] p0 = param;
 		double mixed = 0.0;
 		double gauss = 0.0;
 		AbstractHalfEdge ot = getIncidentAbstractHalfEdge();
@@ -595,17 +528,9 @@ public class Vertex implements Location, Serializable
 					meanNormal[i] = 0.0;
 				return 0.0;
 			}
-			double [] p1 = ot.destination().getUV();
-			double [] p2 = ot.apex().getUV();
-			vect1[0] = p1[0] - p0[0];
-			vect1[1] = p1[1] - p0[1];
-			vect1[2] = p1[2] - p0[2];
-			vect2[0] = p2[0] - p1[0];
-			vect2[1] = p2[1] - p1[1];
-			vect2[2] = p2[2] - p1[2];
-			vect3[0] = p0[0] - p2[0];
-			vect3[1] = p0[1] - p2[1];
-			vect3[2] = p0[2] - p2[2];
+			ot.destination().sub(this, vect1);
+			ot.apex().sub(ot.destination(), vect2);
+			sub(ot.apex(), vect3);
 			double c12 = Matrix3D.prodSca(vect1, vect2);
 			double c23 = Matrix3D.prodSca(vect2, vect3);
 			double c31 = Matrix3D.prodSca(vect3, vect1);
@@ -742,14 +667,9 @@ public class Vertex implements Location, Serializable
 			ot = ot.nextOriginLoop();
 			if (ot.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
-			double [] p1 = ot.destination().getUV();
-			double [] p2 = ot.apex().getUV();
-			for (int i = 0; i < 3; i++)
-			{
-				vect1[i] = p1[i] - param[i];
-				vect2[i] = p2[i] - p1[i];
-				vect3[i] = param[i] - p2[i];
-			}
+			ot.destination().sub(this, vect1);
+			ot.apex().sub(ot.destination(), vect2);
+			sub(ot.apex(), vect3);
 			double c12 = Matrix3D.prodSca(vect1, vect2);
 			double c23 = Matrix3D.prodSca(vect2, vect3);
 			// Override vect2
@@ -823,7 +743,7 @@ public class Vertex implements Location, Serializable
 			ot = ot.nextOriginLoop();
 			if (ot.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
-			double area = Matrix3D.computeNormal3D(param, ot.destination().param, ot.apex().param, temp[0], temp[1], temp[2]);
+			double area = Matrix3D.computeNormal3D(this, ot.destination(), ot.apex(), temp[0], temp[1], temp[2]);
 			for (int i = 0; i < 3; i++)
 				normal[i] += area * temp[2][i];
 		}
@@ -840,8 +760,12 @@ public class Vertex implements Location, Serializable
 	public String toString ()
 	{
 		StringBuilder r = new StringBuilder("UV:");
-		for (int i = 0; i < param.length; i++)
-			r.append(" ").append(param[i]);
+		r.append(' ');
+		r.append(getX());
+		r.append(' ');
+		r.append(getY());
+		r.append(' ');
+		r.append(getZ());
 		if (ref1d != 0)
 			r.append(" ref1d: ").append(ref1d);
 		r.append(" hash: ").append(hashCode());

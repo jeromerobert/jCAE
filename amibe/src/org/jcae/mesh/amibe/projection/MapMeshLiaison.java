@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.metrics.Location;
 
 public class MapMeshLiaison extends MeshLiaison
 {
@@ -86,10 +87,10 @@ public class MapMeshLiaison extends MeshLiaison
 		location.isCached = false;
 	}
 
-	protected boolean move(Vertex v, double [] target, boolean backup,  int group, boolean doCheck)
+	protected boolean move(Vertex v, Location target, boolean backup,  int group, boolean doCheck)
 	{
 		if (LOGGER.isLoggable(Level.FINER))
-			LOGGER.log(Level.FINER, "Trying to move vertex "+v+" to ("+target[0]+", "+target[1]+", "+target[2]+") in group "+group);
+			LOGGER.log(Level.FINER, "Trying to move vertex "+v+" to ("+target+") in group "+group);
 		// Old projection
 		ProjectedLocation location = mapCurrentVertexProjection.get(group).get(v);
 		if (backup)
@@ -118,7 +119,7 @@ public class MapMeshLiaison extends MeshLiaison
 
 		if (LOGGER.isLoggable(Level.FINEST))
 			LOGGER.log(Level.FINEST, "New projection: "+location);
-		double [] newPosition = new double[3];
+		Location newPosition = new Location();
 		location.projectOnTriangle(target, newPosition);
 		// There are 2 distinct cases:
 		//   1. The projected vertex should be on the background mesh, and
@@ -150,7 +151,7 @@ public class MapMeshLiaison extends MeshLiaison
 			if (!location.computeBarycentricCoordinates(newPosition))
 			{
 				// FIXME: this should not happen. Try all triangles to find the best projection
-				LOGGER.log(Level.CONFIG, "Position found outside triangle: " + newPosition[0] + " " + newPosition[1] + " " + newPosition[2] + "; checking all triangles, this may be slow");
+				LOGGER.log(Level.CONFIG, "Position found outside triangle: " + newPosition + "; checking all triangles, this may be slow");
 				lf.walkDebug(backgroundMesh, group);
 				if(backup)
 				{
@@ -182,7 +183,7 @@ public class MapMeshLiaison extends MeshLiaison
 				return false;
 			}
 		}
-		v.moveTo(newPosition[0], newPosition[1], newPosition[2]);
+		v.moveTo(newPosition);
 		if (!backup)
 			currentMesh.getTrace().moveVertex(v);
 
@@ -213,9 +214,9 @@ public class MapMeshLiaison extends MeshLiaison
 	 */
 	public final void addVertex(Vertex v, Triangle bgT)
 	{
-		mapCurrentVertexProjection.get(-1).put(v, new ProjectedLocation(v.getUV(), bgT));
+		mapCurrentVertexProjection.get(-1).put(v, new ProjectedLocation(v, bgT));
 		if (bgT.getGroupId() != -1)
-			mapCurrentVertexProjection.get(bgT.getGroupId()).put(v, new ProjectedLocation(v.getUV(), bgT));
+			mapCurrentVertexProjection.get(bgT.getGroupId()).put(v, new ProjectedLocation(v, bgT));
 	}
 
 	/**
@@ -244,7 +245,7 @@ public class MapMeshLiaison extends MeshLiaison
 			if (it.key() != -1)
 			{
 				for (Vertex v : it.value().keySet())
-					move(v, v.getUV(), it.key(), false);
+					move(v, v, it.key(), false);
 			}
 		}
 		LOGGER.config("Finish updating projections");
@@ -272,7 +273,7 @@ public class MapMeshLiaison extends MeshLiaison
 		 * @param xyz coordinates
 		 * @param t triangle in background mesh
 		 */
-		public ProjectedLocation(double [] xyz, Triangle t)
+		public ProjectedLocation(Location xyz, Triangle t)
 		{
 			updateTriangle(t);
 			computeBarycentricCoordinates(xyz);
@@ -294,18 +295,17 @@ public class MapMeshLiaison extends MeshLiaison
 				return false;
 
 			t = newT;
-			invArea = 1.0 / Matrix3D.computeNormal3D(t.vertex[0].getUV(),
-				t.vertex[1].getUV(), t.vertex[2].getUV(),
-				work1, work2, normal);
+			invArea = 1.0 / Matrix3D.computeNormal3D(
+				t.vertex[0], t.vertex[1], t.vertex[2], work1, work2, normal);
 			return true;
 		}
 
-		private boolean updateVertexIndex(double [] xyz)
+		private boolean updateVertexIndex(Location xyz)
 		{
 			int oldIndex = vIndex;
-			double d0 = backgroundMesh.distance2(t.vertex[0].getUV(), xyz);
-			double d1 = backgroundMesh.distance2(t.vertex[1].getUV(), xyz);
-			double d2 = backgroundMesh.distance2(t.vertex[2].getUV(), xyz);
+			double d0 = t.vertex[0].sqrDistance3D(xyz);
+			double d1 = t.vertex[1].sqrDistance3D(xyz);
+			double d2 = t.vertex[2].sqrDistance3D(xyz);
 			if (d0 <= d1 && d0 <= d2)
 				vIndex = 0;
 			else if (d1 <= d0 && d1 <= d2)
@@ -316,32 +316,31 @@ public class MapMeshLiaison extends MeshLiaison
 			return vIndex != oldIndex;
 		}
 
-		private boolean computeBarycentricCoordinates(double [] coord)
+		private boolean computeBarycentricCoordinates(Location coord)
 		{
-			b[0] = Matrix3D.computeNormal3D(coord,
-				t.vertex[1].getUV(), t.vertex[2].getUV(),
+			b[0] = Matrix3D.computeNormal3D(coord, t.vertex[1], t.vertex[2],
 				work1, work2, work3) * invArea;
 			b[0] *= (work3[0]*normal[0] + work3[1]*normal[1] + work3[2]*normal[2]);
-			b[1] = Matrix3D.computeNormal3D(t.vertex[0].getUV(),
-				coord, t.vertex[2].getUV(),
+			b[1] = Matrix3D.computeNormal3D(t.vertex[0], coord, t.vertex[2],
 				work1, work2, work3) * invArea;
 			b[1] *= (work3[0]*normal[0] + work3[1]*normal[1] + work3[2]*normal[2]);
-			b[2] = Matrix3D.computeNormal3D(t.vertex[0].getUV(),
-				t.vertex[1].getUV(), coord,
+			b[2] = Matrix3D.computeNormal3D(t.vertex[0], t.vertex[1], coord,
 				work1, work2, work3) * invArea;
 			b[2] *= (work3[0]*normal[0] + work3[1]*normal[1] + work3[2]*normal[2]);
 			return b[0] >= 0.0 && b[1] >= 0.0 && b[2] >= 0.0;
 		}
 
-		private void projectOnTriangle(double [] xyz, double [] proj)
+		private void projectOnTriangle(Location xyz, Location proj)
 		{
-			double [] o = t.vertex[vIndex].getUV();
+			Vertex o = t.vertex[vIndex];
 			double dist =
-				(xyz[0] - o[0]) * normal[0] +
-				(xyz[1] - o[1]) * normal[1] +
-				(xyz[2] - o[2]) * normal[2];
-			for (int i = 0; i < 3; i++)
-				proj[i] = xyz[i] - dist * normal[i];
+				(xyz.getX() - o.getX()) * normal[0] +
+				(xyz.getY() - o.getY()) * normal[1] +
+				(xyz.getZ() - o.getZ()) * normal[2];
+			proj.moveTo(
+				xyz.getX() - dist * normal[0],
+				xyz.getY() - dist * normal[1],
+				xyz.getZ() - dist * normal[2]);
 		}
 
 		@Override

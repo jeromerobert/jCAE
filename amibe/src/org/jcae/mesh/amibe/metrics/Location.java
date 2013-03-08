@@ -19,23 +19,64 @@
 
 package org.jcae.mesh.amibe.metrics;
 
-public interface Location
+import org.jcae.mesh.amibe.ds.Vertex;
+
+public class Location
 {
+	private double x, y, z;
+	public Location()
+	{
+	}
+
+	public Location(Location l)
+	{
+		moveTo(l.getX(), l.getY(), l.getZ());
+	}
+
+	public Location(double x, double y, double z) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
+
 	/**
 	 * Gets coordinates of this vertex.  Array has length 2 in 2D and 3 in 3D.
 	 *
 	 * @return coordinates of this vertex
 	 */
-	double[] getUV();
+	public final double getX()
+	{
+		return x;
+	}
 
-	/**
-	 * Move vertex to this position, if in 2D.
-	 *
-	 * @param u first coordinate
-	 * @param v second coordinate
-	 */
-	void moveTo(double u, double v);
+	public final double getY()
+	{
+		return y;
+	}
 
+	public double getZ()
+	{
+		return z;
+	}
+
+	public final void get(double[] destination)
+	{
+		destination[0] = getX();
+		destination[1] = getY();
+		destination[2] = getZ();
+	}
+
+	public double get(int i)
+	{
+		switch(i)
+		{
+		case 0: return x;
+		case 1: return y;
+		case 2: return z;
+		default:
+			throw new ArrayIndexOutOfBoundsException();
+		}
+	}
 	/**
 	 * Move vertex to this position, if in 3D.
 	 *
@@ -43,5 +84,73 @@ public interface Location
 	 * @param y second coordinate
 	 * @param z third coordinate
 	 */
-	void moveTo(double x, double y, double z);
+	public final void moveTo(double x, double y, double z)
+	{
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
+
+	public final void moveTo(Location other)
+	{
+		this.x = other.getX();
+		this.y = other.getY();
+		this.z = other.getZ();
+	}
+
+	/** result = this - other */
+	public void sub(Location other, double[] result)
+	{
+		result[0] = getX() - other.getX();
+		result[1] = getY() - other.getY();
+		result[2] = getZ() - other.getZ();
+	}
+
+	/** Add other to this */
+	public void add(Location other)
+	{
+		x += other.getX();
+		y += other.getY();
+		z += other.getZ();
+	}
+
+	/** Set this location to the middle of l1 and l2 */
+	public void middle(Location l1, Location l2)
+	{
+		moveTo(
+			(l1.getX() + l2.getX()) / 2,
+			(l1.getY() + l2.getY()) / 2,
+			(l1.getZ() + l2.getZ()) / 2);
+	}
+
+	public void scale(double alpha)
+	{
+		this.x *= alpha;
+		this.y *= alpha;
+		this.z *= alpha;
+	}
+
+	public int dim()
+	{
+		return 3;
+	}
+
+	/**
+	 * Returns the squared distance in 3D space.
+	 *
+	 * @param end  the node to which distance is computed.
+	 * @return the squared distance to <code>end</code>.
+	 **/
+	public double sqrDistance3D(Location end)
+	{
+		double dx = getX() - end.getX();
+		double dy = getY() - end.getY();
+		double dz = getZ() - end.getZ();
+		return dx*dx+dy*dy+dz*dz;
+	}
+
+	@Override
+	public String toString() {
+		return "(" + x + ", " + y + ", " + z + ")";
+	}
 }

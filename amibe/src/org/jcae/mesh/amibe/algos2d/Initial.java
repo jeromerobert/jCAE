@@ -271,14 +271,14 @@ public class Initial
 		double [] bbmax = { Double.MIN_VALUE, Double.MIN_VALUE };
 		for (Vertex2D v: bNodes)
 		{
-			double [] uv = v.getUV();
-			for (int k = 0; k < 2; k++)
-			{
-				if (uv[k] > bbmax[k])
-					bbmax[k] = uv[k];
-				if (uv[k] < bbmin[k])
-					bbmin[k] = uv[k];
-			}
+			if (v.getX() > bbmax[0])
+				bbmax[0] = v.getX();
+			if (v.getX() < bbmin[0])
+				bbmin[0] = v.getX();
+			if (v.getY() > bbmax[1])
+				bbmax[1] = v.getY();
+			if (v.getY() < bbmin[1])
+				bbmin[1] = v.getY();
 		}
 		if (bbmax[0] <= bbmin[0] || bbmax[1] <= bbmin[1])
 			throw new InvalidFaceException();

@@ -20,11 +20,13 @@
 
 package org.jcae.mesh.amibe.ds;
 
+import org.jcae.mesh.amibe.metrics.Location;
+
 public interface ElementFactoryInterface
 {
 	public Vertex createVertex(double u, double v);
 	public Vertex createVertex(double x, double y, double z);
-	public Vertex createVertex(double [] x);
+	public Vertex createVertex(Location x);
 	public Triangle createTriangle(Vertex v0, Vertex v1, Vertex v2);
 	public Triangle createTriangle(Vertex [] v);
 	public Triangle createTriangle(Triangle that);

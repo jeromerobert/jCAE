@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.ds.Vertex;
 
 /**
  * Swap edges if the normals to its adjacent triangles are too different
@@ -128,15 +129,15 @@ public class ConstraintNormal3D
 					if (sa.onLeft(kdTree, (Vertex2D) ot.destination(), (Vertex2D) ot.apex()) <= 0L || oa.onLeft(kdTree, (Vertex2D) ot.origin(), (Vertex2D) sym.apex()) <= 0L)
 						continue;
 					// 3D coordinates of vertices
-					double p1[] = ot.origin().getUV();
-					double p2[] = ot.destination().getUV();
-					double apex1[] = ot.apex().getUV();
-					double apex2[] = sym.apex().getUV();
-					double [] xo = surface.value(p1[0], p1[1]);
-					double [] xd = surface.value(p2[0], p2[1]);
-					double [] xa = surface.value(apex1[0], apex1[1]);
-					double [] xn = surface.value(apex2[0], apex2[1]);
-					surface.setParameter(0.5*(p1[0]+p2[0]), 0.5*(p1[1]+p2[1]));
+					Vertex p1 = ot.origin();
+					Vertex p2 = ot.destination();
+					Vertex apex1 = ot.apex();
+					Vertex apex2 = sym.apex();
+					double [] xo = surface.value(p1.getX(), p1.getY());
+					double [] xd = surface.value(p2.getX(), p2.getY());
+					double [] xa = surface.value(apex1.getX(), apex1.getY());
+					double [] xn = surface.value(apex2.getX(), apex2.getY());
+					surface.setParameter(0.5*(p1.getX()+p2.getX()), 0.5*(p1.getY()+p2.getY()));
 					double [] normal = surface.normal();
 					for (int k = 0; k < 3; k++)
 					{

@@ -37,6 +37,7 @@ import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.metrics.Location;
 import org.jcae.mesh.xmldata.MeshReader;
 
 /**
@@ -258,7 +259,7 @@ public class TriangleKdTree {
 	 * look for all triangles.
 	 * @return
 	 */
-	public Triangle getClosestTriangle(double[] coords, double[] projection, int group)
+	public Triangle getClosestTriangle(Location coords, Location projection, int group)
 	{
 		Node n = getNode(coords, workBoundary1);
 		assert n != null;
@@ -332,7 +333,7 @@ public class TriangleKdTree {
 				return toReturn;
 			else
 			{
-				LOGGER.warning(Arrays.toString(coords)+" from group "+group+
+				LOGGER.warning(coords+" from group "+group+
 					" cannot be projected at "+aabbDistance+". Trying "+
 					(aabbDistance * 1.4)+".");
 				aabbDistance = aabbDistance * 1.4;
@@ -342,7 +343,7 @@ public class TriangleKdTree {
 		}
 	}
 
-	public Triangle getClosestTriangleDebug(double[] coords, double[] projection, int group)
+	public Triangle getClosestTriangleDebug(Location coords, Location projection, int group)
 	{
 		double minDist2 = Double.POSITIVE_INFINITY;
 		Triangle toReturn = null;
@@ -359,14 +360,14 @@ public class TriangleKdTree {
 				}
 			}
 		}
-		double[] otherProj = new double[3];
+		Location otherProj = new Location();
 		Triangle other = getClosestTriangle(coords, otherProj, group);
 		if(other != toReturn || other == null)
 		{
 			System.err.println("--- real solution ---");
 			System.err.println(toReturn);
 			System.err.println(Math.sqrt(minDist2));
-			System.err.println(Arrays.toString(projection));
+			System.err.println(projection);
 			System.err.println("--- kdtree solution ---");
 			System.err.println(other);
 			if(other != null)
@@ -374,11 +375,11 @@ public class TriangleKdTree {
 				int n = 0;
 				for(int i = 0; i < 3; i++)
 				{
-					double d = otherProj[i] - coords[i];
+					double d = otherProj.get(i) - coords.get(i);
 					n += d * d;
 				}
 				System.err.println(Math.sqrt(n));
-				System.err.println(Arrays.toString(otherProj));
+				System.err.println(otherProj);
 			}
 			throw new IllegalStateException();
 		}
@@ -440,7 +441,7 @@ public class TriangleKdTree {
 		List<Node> backup = new ArrayList<Node>(closeNodes);
 		closeNodes.clear();
 		BoundaryPool bp = new BoundaryPool();
-		getNodes(createCenteredAABB(new double[3], Double.POSITIVE_INFINITY), bp, false);
+		getNodes(createCenteredAABB(new Location(), Double.POSITIVE_INFINITY), bp, false);
 		for(int i = 0; i < closeNodes.size(); i++)
 			toReturn.put(closeNodes.get(i), bp.get(i));
 
@@ -534,28 +535,28 @@ public class TriangleKdTree {
 	}
 
 	/** Non zero Manhattan distance between a point and an AABB */
-	private double distanceAABB(double[] coord, double[] aabb)
+	private double distanceAABB(Location coord, double[] aabb)
 	{
 		double d = Double.NEGATIVE_INFINITY;
 		for(int i = 0; i < 3; i++)
 		{
-			double v = Math.abs(coord[i] - aabb[i]);
+			double v = Math.abs(coord.get(i) - aabb[i]);
 			if(v > 0)
 				d = Math.max(d, v);
-			v = Math.abs(aabb[i+3] - coord[i]);
+			v = Math.abs(aabb[i+3] - coord.get(i));
 			if(v > 0)
 				d = Math.max(d, v);
 		}
 		return d;
 	}
 
-	private double[] createCenteredAABB(double[] center, double size)
+	private double[] createCenteredAABB(Location center, double size)
 	{
 		double[] r = new double[6];
 		for(int i = 0; i < 3; i++)
 		{
-			r[i] = center[i] - size;
-			r[i+3] = center[i] + size;
+			r[i] = center.get(i) - size;
+			r[i+3] = center.get(i) + size;
 		}
 		return r;
 	}
@@ -570,10 +571,9 @@ public class TriangleKdTree {
 		}
 		for(Vertex vert: vertices)
 		{
-			double[] uv = vert.getUV();
 			for(int j = 0; j < 3; j++)
 			{
-				double v = uv[j];
+				double v = vert.get(j);
 				bounds[j] = Math.min(bounds[j], v);
 				bounds[j+3] = Math.max(bounds[j+3], v);
 			}
@@ -595,10 +595,10 @@ public class TriangleKdTree {
 				continue;
 			for(int i = 0; i < 3; i++)
 			{
-				double[] uv = t.vertex[i].getUV();
+				Vertex uv = t.vertex[i];
 				for(int j = 0; j < 3; j++)
 				{
-					double v = uv[j];
+					double v = uv.get(j);
 					bounds[j] = Math.min(bounds[j], v);
 					bounds[j+3] = Math.max(bounds[j+3], v);
 				}
@@ -724,7 +724,7 @@ public class TriangleKdTree {
 		aabb1[2] <= aabb2[5] && aabb1[5] >= aabb2[2];
 	}
 
-	private Node getNode(double[] coords, double[] tmpBounds)
+	private Node getNode(Location coords, double[] tmpBounds)
 	{
 		System.arraycopy(globalBounds, 0, tmpBounds, 0, tmpBounds.length);
 		Node current = root;
@@ -732,7 +732,7 @@ public class TriangleKdTree {
 		{
 			byte d = current.direction;
 			double cut = (tmpBounds[d] + tmpBounds[d+3]) / 2.0;
-			if(coords[d] < cut)
+			if(coords.get(d) < cut)
 			{
 				if(current.left == null)
 				{
@@ -778,10 +778,10 @@ public class TriangleKdTree {
 		}
 		for(int i = 0; i < 3; i++)
 		{
-			double[] uv = triangle.vertex[i].getUV();
+			Vertex uv = triangle.vertex[i];
 			for(int j = 0; j < 3; j++)
 			{
-				double v = uv[j];
+				double v = uv.get(j);
 				bounds[j] = Math.min(bounds[j], v);
 				bounds[j+3] = Math.max(bounds[j+3], v);
 			}
@@ -932,7 +932,7 @@ public class TriangleKdTree {
 			boolean inRight = false;
 			for(int i = 0; i < 3; i++)
 			{
-				if(t.vertex[i].getUV()[node.direction] < cut)
+				if(t.vertex[i].get(node.direction) < cut)
 				{
 					inLeft = true;
 					break;
@@ -941,7 +941,7 @@ public class TriangleKdTree {
 
 			for(int i = 0; i < 3; i++)
 			{
-				if(t.vertex[i].getUV()[node.direction] >= cut)
+				if(t.vertex[i].get(node.direction) >= cut)
 				{
 					inRight = true;
 					break;
@@ -1051,7 +1051,7 @@ public class TriangleKdTree {
 
 	public Object[] getPolyData()
 	{
-		getNodes(createCenteredAABB(new double[3], Double.POSITIVE_INFINITY), closeBoundaries, false);
+		getNodes(createCenteredAABB(new Location(), Double.POSITIVE_INFINITY), closeBoundaries, false);
 
 		int vertexCounter = 0;
 		ArrayList<int[]> quads = new ArrayList<int[]>();
@@ -1135,24 +1135,21 @@ public class TriangleKdTree {
 				long l1 = System.nanoTime();
 				TriangleKdTree t = new TriangleKdTree(mesh, bs, 4096);
 				long l2 = System.nanoTime();
-				double[] coords = new double[3];
+				Location coords = new Location();
 				loop: for(Triangle tria:mesh.getTriangles())
 				{
 					if(tria.hasAttributes(AbstractHalfEdge.OUTER))
 						continue;
-					for(int i = 0; i < 3; i++)
-					{
-						coords[i] = 0;
-						for(int j = 0; j < 3; j++)
-							coords[i] += tria.vertex[j].getUV()[i];
-						coords[i] /= 3;
-					}
+					coords.moveTo(0,0,0);
+					for(int j = 0; j < 3; j++)
+						coords.add(tria.vertex[j]);
+					coords.scale(1/3.0);
 					Triangle tp = t.getClosestTriangle(coords, null, -1);
 					if(tp != tria)
-						throw new IllegalStateException(tria.toString()+" "+Arrays.toString(
-							coords)+" "+tp);
+						throw new IllegalStateException(tria.toString()+" "+
+							coords+" "+tp);
 				}
-				System.out.println(t.getClosestTriangle(new double[]{400, -800, 0}, null, -1));
+				System.out.println(t.getClosestTriangle(new Location(400, -800, 0), null, -1));
 				long l3 = System.nanoTime();
 				System.out.println(t.stats());
 				long l4 = System.nanoTime();

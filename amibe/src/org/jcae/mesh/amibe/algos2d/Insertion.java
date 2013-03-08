@@ -36,6 +36,7 @@ import java.util.HashSet;
 import gnu.trove.PrimeFinder;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.metrics.Location;
 
 /**
  * Insert nodes to produce a unit mesh.  Process all edges; if an edge
@@ -218,9 +219,8 @@ public class Insertion
 					{
 						Vertex2D v = triNodes.get(index);
 						Metric metric = mesh.getMetric(v);
-						double[] uv = v.getUV();
-						Vertex2D n = (Vertex2D) kdTree.getNearestVertex(metric, uv);
-						assert checkNearestVertex(metric, uv, n);
+						Vertex2D n = (Vertex2D) kdTree.getNearestVertex(metric, v);
+						assert checkNearestVertex(metric, v, n);
 						if (mesh.interpolatedDistance(v, n) > curMinlen)
 						{
 							kdTree.add(v);
@@ -270,8 +270,8 @@ public class Insertion
 				// v.getSurroundingOTriangle() below.
 				c.setLink(t);
 				Metric metric = mesh.getMetric(c);
-				Vertex2D n = (Vertex2D) kdTree.getNearestVertex(metric, c.getUV());
-				assert checkNearestVertex(metric, c.getUV(), n);
+				Vertex2D n = (Vertex2D) kdTree.getNearestVertex(metric, c);
+				assert checkNearestVertex(metric, c, n);
 				if (mesh.interpolatedDistance(c, n) > curMinlen)
 				{
 					kdTree.add(c);
@@ -372,8 +372,8 @@ public class Insertion
 		int nrNodes = 0;
 		Vertex2D start = (Vertex2D) ot.origin();
 		Vertex2D end = (Vertex2D) ot.destination();
-		double [] lower = new double[2];
-		double [] upper = new double[2];
+		Location lower = new Location();
+		Location upper = new Location();
 		int nr;
 		double delta, target;
 		if (edgeLength < ONE_PLUS_SQRT2)
@@ -404,9 +404,10 @@ public class Insertion
 		Vertex2D last = start;
 		while (r > 0)
 		{
-			System.arraycopy(last.getUV(), 0, lower, 0, 2);
-			System.arraycopy(end.getUV(), 0, upper, 0, 2);
-			Vertex2D np = (Vertex2D) mesh.createVertex(0.5*(lower[0]+upper[0]), 0.5*(lower[1]+upper[1]));
+			lower.moveTo(last);
+			upper.moveTo(end);
+			Vertex2D np = (Vertex2D) mesh.createVertex(0, 0);
+			np.middle(lower, upper);
 			int cnt = nrDichotomy;
 			while(cnt >= 0)
 			{
@@ -419,7 +420,7 @@ public class Insertion
 					Metric metric = mesh.getMetric(last);
 					// Link to surrounding triangle to speed up
 					// kdTree.getNearestVertex()
-					if (!sym.hasAttributes(AbstractHalfEdge.OUTER) && metric.distance2(last.getUV(), sym.apex().getUV()) < metric.distance2(last.getUV(), ot.apex().getUV()))
+					if (!sym.hasAttributes(AbstractHalfEdge.OUTER) && metric.distance2(last, sym.apex()) < metric.distance2(last, ot.apex()))
 						last.setLink(sym.getTri());
 					else
 						last.setLink(ot.getTri());
@@ -430,15 +431,13 @@ public class Insertion
 				}
 				else if (l > target)
 				{
-					double [] current = np.getUV();
-					System.arraycopy(current, 0, upper, 0, 2);
-					np.moveTo(0.5*(lower[0] + current[0]), 0.5*(lower[1] + current[1]));
+					upper.moveTo(np);
+					np.middle(lower, np);
 				}
 				else
 				{
-					double [] current = np.getUV();
-					System.arraycopy(current, 0, lower, 0, 2);
-					np.moveTo(0.5*(upper[0] + current[0]), 0.5*(upper[1] + current[1]));
+					lower.moveTo(np);
+					np.middle(upper, np);
 				}
 			}
 			if (cnt < 0)
@@ -448,11 +447,11 @@ public class Insertion
 		return nrNodes;
 	}
 	
-	private boolean checkNearestVertex(Metric metric, double[] uv, Vertex n)
+	private boolean checkNearestVertex(Metric metric, Vertex uv, Vertex n)
 	{
-		double d1 = metric.distance2(uv, n.getUV());
+		double d1 = metric.distance2(uv, n);
 		Vertex debug = kdTree.getNearestVertexDebug(metric, uv);
-		double d2 = metric.distance2(uv, debug.getUV());
+		double d2 = metric.distance2(uv, debug);
 		assert d1 == d2 : ""+n+" is at a distance "+d1+" but nearest point is "+debug+" at distance "+d2;
 		return true;
 	}

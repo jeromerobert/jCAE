@@ -56,6 +56,7 @@ import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.oemm.OEMM.Node;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.metrics.Location;
 
 /**
  * This class converts between disk and memory formats.
@@ -282,7 +283,7 @@ public class Storage
 		TObjectIntHashMap<Vertex> ret = new TObjectIntHashMap<Vertex>(mesh.getNodes().size());
 		for(Vertex v: mesh.getNodes())
 		{
-			oemm.double2int(v.getUV(), positions);
+			oemm.double2int(v, positions);
 			Node n = null;
 			try {
 				n = oemm.search(positions);
@@ -348,7 +349,7 @@ public class Storage
 			}
 			try {
 				for (Vertex vertex: vertexList)
-					writeDoubleArray(fc, vertex.getUV());
+					writeDoubleArray(fc, vertex);
 			} catch (IOException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e);
@@ -774,7 +775,10 @@ public class Storage
 		int positions[] = new int[3];
 		for(Triangle tr: mesh.getTriangles())
 		{
-			boolean hasOuterEdge = tr.vertex[0].getUV().length == 2 || tr.vertex[1].getUV().length == 2 || tr.vertex[2].getUV().length == 2;
+			boolean hasOuterEdge =
+				mesh.outerVertex == tr.vertex[0] ||
+				mesh.outerVertex == tr.vertex[1] ||
+				mesh.outerVertex == tr.vertex[2];
 			assert hasOuterEdge == tr.hasAttributes(AbstractHalfEdge.OUTER);
 			if (tr.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
@@ -917,18 +921,12 @@ public class Storage
 		newLeaves[n.leafIndex] = n;
 		return n;
 	}
-	
-	private static int searchNode(OEMM oemm, Vertex vert, int[] positions)
-	{
-		if (vert instanceof FakeNonReadVertex) {
-			return ((FakeNonReadVertex) vert).getOEMMIndex();
-		}
-		double[] coords = vert.getUV();
-		return searchNode(oemm, coords, positions);
-	}
 
-	private static int searchNode(OEMM oemm, double[] coords, int[] positions)
+	private static int searchNode(OEMM oemm, Location coords, int[] positions)
 	{
+		if (coords instanceof FakeNonReadVertex) {
+			return ((FakeNonReadVertex) coords).getOEMMIndex();
+		}
 		oemm.double2int(coords, positions);
 		return oemm.search(positions).leafIndex;
 	}
@@ -945,10 +943,11 @@ public class Storage
 			fc.writeInt(val);
 	}
 	
-	private static void writeDoubleArray(DataOutputStream fc, double[] uv) throws IOException
+	private static void writeDoubleArray(DataOutputStream fc, Location uv) throws IOException
 	{
-		for (double val: uv)
-			fc.writeDouble(val);
+		fc.writeDouble(uv.getX());
+		fc.writeDouble(uv.getY());
+		fc.writeDouble(uv.getZ());
 	}
 	
 	/**

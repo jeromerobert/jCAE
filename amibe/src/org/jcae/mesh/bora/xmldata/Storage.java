@@ -458,19 +458,22 @@ public class Storage
 		DataOutputStream nodesout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile, true)));
 		DataOutputStream parasout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(parasFile, true)));
 		double [] xyz;
+		double[] tmpXYZ = new double[3];
 		for (Iterator<Vertex> itn = nodelist.iterator(); itn.hasNext(); )
 		{
 			Vertex n = itn.next();
 			if (n == outer)
 				continue;
 			if (surface == null)
-				xyz = n.getUV();
+			{
+				n.get(tmpXYZ);
+				xyz = tmpXYZ;
+			}
 			else
 			{
-				double [] p = n.getUV();
-				for (int d = 0; d < p.length; d++)
-					parasout.writeDouble(p[d]);
-				xyz = surface.value(p[0], p[1]);
+				for (int d = 0; d < n.dim(); d++)
+					parasout.writeDouble(n.get(d));
+				xyz = surface.value(n.getX(), n.getY());
 			}
 			for (int k = 0; k < 3; k++)
 				nodesout.writeDouble(xyz[k]);
@@ -567,7 +570,7 @@ public class Storage
 		for (int i = 0; i < numberOfNodes; i++)
 		{
 			dfrN.get(coord);
-			nodelist[i] = mesh.createVertex(coord);
+			nodelist[i] = mesh.createVertex(coord[0], coord[1], coord[2]);
 		}
 		if (mesh.hasNodes())
 		{

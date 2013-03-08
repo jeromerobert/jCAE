@@ -24,6 +24,7 @@ package org.jcae.mesh.amibe.patch;
 import org.jcae.mesh.amibe.metrics.Matrix2D;
 
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.metrics.Location;
 
 /**
  * 2D metrics.  This class provides metrics on the tangent plane.
@@ -232,10 +233,10 @@ public class MetricOnSurface implements Metric2D
 	 * @param p2  coordinates of the second node
 	 * @return square distance between two points with this metrics.
 	 */
-	public double distance2(double [] p1, double [] p2)
+	public double distance2(Location p1, Location p2)
 	{
-		double u = p2[0] - p1[0];
-		double v = p2[1] - p1[1];
+		double u = p2.getX() - p1.getX();
+		double v = p2.getY() - p1.getY();
 		double temp = E * u * u + 2.0 * F * u * v + G * v * v;
 		if (temp < 0.0)
 			temp = 0.0;

@@ -74,12 +74,12 @@ public class Fuse
 		}
 		for (Vertex n: mesh.getNodes())
 		{
-			double [] oldp = n.getUV();
-			for (int i = 0; i < 3; i++)
-			{
-				bmin[i] = Math.min(bmin[i], oldp[i]);
-				bmax[i] = Math.max(bmax[i], oldp[i]);
-			}
+			bmin[0] = Math.min(bmin[0], n.getX());
+			bmax[0] = Math.max(bmax[0], n.getX());
+			bmin[1] = Math.min(bmin[1], n.getY());
+			bmax[1] = Math.max(bmax[1], n.getY());
+			bmin[2] = Math.min(bmin[2], n.getZ());
+			bmax[2] = Math.max(bmax[2], n.getZ());
 		}
 		//  Enlarge the bounding box
 		for (int i = 0; i < 3; i++)
@@ -106,7 +106,7 @@ public class Fuse
 		{
 			if (n.getRef() <= 0)
 				continue;
-			Vertex p = octree.getNearestVertex(mesh.getMetric(n), n.getUV());
+			Vertex p = octree.getNearestVertex(mesh.getMetric(n), n);
 			if (p == null || p.getRef() <= 0 || n.sqrDistance3D(p) > tolerance)
 				octree.add(n);
 			else

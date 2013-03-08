@@ -26,6 +26,7 @@ import java.util.Map;
 import org.jcae.mesh.amibe.algos3d.Skeleton;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.Vertex;
 
 /**
  * Allow to set a given edge size at the frontier between 2 groups
@@ -57,9 +58,9 @@ public class GroupMetric extends DistanceMetric {
 		int[] ids = mesh.getGroupIDs(groupNames.toArray(new String[groupNames.size()]));
 		for(AbstractHalfEdge edge: skeleton.getByGroups(ids))
 		{
-			double[] o = edge.origin().getUV();
-			double[] d = edge.destination().getUV();
-			addLine(o[0], o[1], o[2], true, d[0], d[1], d[2], true, size0, d0, d1);
+			Vertex o = edge.origin();
+			Vertex d = edge.destination();
+			addLine(o.getX(), o.getY(), o.getZ(), true, d.getX(), d.getY(), d.getZ(), true, size0, d0, d1);
 		}
 	}
 

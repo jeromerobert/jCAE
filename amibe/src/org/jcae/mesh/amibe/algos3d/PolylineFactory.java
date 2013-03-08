@@ -82,8 +82,7 @@ public class PolylineFactory extends HashMap<Integer, Collection<List<Vertex>>>{
 		{
 			Vertex vv1 = get(i).getOther(this).vertex;
 			double[] r = new double[3];
-			for(int j = 0; j<3; j++)
-				r[j] = vv1.getUV()[j] - vertex.getUV()[j];
+			vv1.sub(vertex, r);
 			return r;
 		}
 		private boolean isSmooth(double dotProdLimit)

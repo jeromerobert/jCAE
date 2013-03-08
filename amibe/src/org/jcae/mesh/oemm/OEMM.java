@@ -25,6 +25,7 @@ import gnu.trove.TIntArrayList;
 import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.metrics.Location;
 
 /**
  * This class represents an empty OEMM.
@@ -438,7 +439,14 @@ public class OEMM implements Serializable
 		for (int i = 0; i < 3; i++)
 			ijk[i] = (int) ((p[i] - x0[i]) * x0[3]);
 	}
-	
+
+	public final void double2int(Location p, int [] ijk)
+	{
+		ijk[0] = (int) ((p.getX() - x0[0]) * x0[3]);
+		ijk[1] = (int) ((p.getY() - x0[1]) * x0[3]);
+		ijk[2] = (int) ((p.getZ() - x0[2]) * x0[3]);
+	}
+
 	/**
 	 * Converts from integer coordinates to double coordinates.
 	 * @param ijk  integer coordinates.

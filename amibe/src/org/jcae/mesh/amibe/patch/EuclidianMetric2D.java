@@ -19,6 +19,8 @@
 
 package org.jcae.mesh.amibe.patch;
 
+import org.jcae.mesh.amibe.metrics.Location;
+
 final class EuclidianMetric2D implements Metric2D
 {
 	private final double [] unit_bounds = new double[]{1.0, 1.0};
@@ -30,10 +32,10 @@ final class EuclidianMetric2D implements Metric2D
 	 * @param p2  coordinates of the second node
 	 * @return 2D Euclidian square distance between these two points.
 	 */
-	public final double distance2(double[] p1, double[] p2)
+	public final double distance2(Location p1, Location p2)
 	{
-		return (p1[0] - p2[0]) * (p1[0] - p2[0]) +
-		       (p1[1] - p2[1]) * (p1[1] - p2[1]);
+		return (p1.getX() - p2.getX()) * (p1.getX() - p2.getX()) +
+		       (p1.getY() - p2.getY()) * (p1.getY() - p2.getY());
 	}
 
 	/**

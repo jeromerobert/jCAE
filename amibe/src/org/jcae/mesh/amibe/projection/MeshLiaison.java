@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.metrics.Location;
 
 public abstract class MeshLiaison
 {
@@ -163,7 +164,7 @@ public abstract class MeshLiaison
 
 	private Vertex cloneVertex(Vertex v, Map<Vertex, Vertex> map, Map<Vertex, String> vGroups)
 	{
-			Vertex currentV = this.currentMesh.createVertex(v.getUV());
+			Vertex currentV = this.currentMesh.createVertex(v);
 			currentV.setRef(v.getRef());
 			currentV.setLabel(v.getLabel());
 			currentV.setMutable(v.isMutable());
@@ -203,7 +204,7 @@ public abstract class MeshLiaison
 	 * made if all triangles adjacent to the point are from the same group.
 	 * @return Whether or not the projection succeeded.
 	 */
-	public final boolean backupAndMove(Vertex v, double [] target, int group)
+	public final boolean backupAndMove(Vertex v, Location target, int group)
 	{
 		return move(v, target, true, group, true);
 	}
@@ -216,19 +217,19 @@ public abstract class MeshLiaison
 	 * @return <code>true</code> if a projection has been found, <code>false</code> otherwise.
 	 * In this case, vertex is not moved to the target position.
 	 */
-	public final boolean move(Vertex v, double [] target, boolean doCheck)
+	public final boolean move(Vertex v, Location target, boolean doCheck)
 	{
 		return move(v, target, false, -1, doCheck);
 	}
 
-	public final boolean move(Vertex v, double [] target, int group, boolean doCheck)
+	public final boolean move(Vertex v, Location target, int group, boolean doCheck)
 	{
 		return move(v, target, false, group, doCheck);
 	}
 
-	protected abstract boolean move(Vertex v, double [] target, boolean backup,  int group, boolean doCheck);
+	protected abstract boolean move(Vertex v, Location target, boolean backup,  int group, boolean doCheck);
 
-	public final boolean project(Vertex v, double[] target, Vertex start)
+	public final boolean project(Vertex v, Location target, Vertex start)
 	{
 		throw new RuntimeException("Not implemented yet");
 
@@ -277,7 +278,7 @@ public abstract class MeshLiaison
 	public static AbstractHalfEdge findSurroundingTriangleDebug(
 		Vertex v, Mesh mesh, int group)
 	{
-		LocationFinder lf = new LocationFinder(v.getUV(), group);
+		LocationFinder lf = new LocationFinder(v, group);
 		lf.walkDebug(mesh, group);
 		AbstractHalfEdge ret = lf.current.getAbstractHalfEdge();
 		if (ret.origin() == lf.current.vertex[lf.localEdgeIndex])
@@ -290,9 +291,8 @@ public abstract class MeshLiaison
 	/** Square of the distance between v and it's orthogonal projection on e */
 	public static double sqrOrthoDistance(Vertex v, AbstractHalfEdge e)
 	{
-		double[] o = e.origin().getUV();
-		double[] d = e.destination().getUV();
-		double[] vv = v.getUV();
+		Vertex o = e.origin();
+		Vertex d = e.destination();
 		double[] od = new double[3];
 		double[] ov = new double[3];
 		//norm of od
@@ -301,8 +301,8 @@ public abstract class MeshLiaison
 		double dot = 0;
 		for(int i = 0; i < 3; i++)
 		{
-			od[i] = d[i] - o[i];
-			ov[i] = vv[i] - o[i];
+			od[i] = d.get(i) - o.get(i);
+			ov[i] = v.get(i) - o.get(i);
 			n2 += od[i] * od[i];
 			dot += od[i] * ov[i];
 		}
@@ -416,11 +416,10 @@ public abstract class MeshLiaison
 
 	public static Triangle findSurroundingInAdjacentTriangles(Vertex v, Triangle start)
 	{
-		double[] pos = v.getUV();
 		AbstractHalfEdge ot = start.getAbstractHalfEdge();
 		AbstractHalfEdge sym = start.getAbstractHalfEdge();
 		int[] index = new int[2];
-		double dmin = sqrDistanceVertexTriangle(pos, start, index);
+		double dmin = sqrDistanceVertexTriangle(v, start, index);
 		Triangle ret = start;
 		for (int i = 0; i < 3; i++)
 		{
@@ -429,7 +428,7 @@ public abstract class MeshLiaison
 				continue;
 			sym = ot.sym(sym);
 			Triangle t = sym.getTri();
-			double dist = sqrDistanceVertexTriangle(pos, t, index);
+			double dist = sqrDistanceVertexTriangle(v, t, index);
 			if (dist < dmin)
 			{
 				dmin = dist;
@@ -447,9 +446,8 @@ public abstract class MeshLiaison
 	public static AbstractHalfEdge findSurroundingTriangle(Vertex v,
 		Triangle start, double maxError, int group)
 	{
-		double[] pos = v.getUV();
 		boolean redo = true;
-		LocationFinder lf = new LocationFinder(pos, group);
+		LocationFinder lf = new LocationFinder(v, group);
 
 		Triangle t = start;
 		AbstractHalfEdge ot = t.getAbstractHalfEdge();
@@ -478,7 +476,7 @@ public abstract class MeshLiaison
 			// Check a better start edge in neighborhood
 			if (LOGGER.isLoggable(Level.FINER))
 				LOGGER.log(Level.FINER, "Error too large: "+lf.dmin+" > "+maxError);
-			ot = findBetterTriangleInNeighborhood(pos, ot, maxError, group);
+			ot = findBetterTriangleInNeighborhood(v, ot, maxError, group);
 			if (ot == null)
 				return null;
 			redo = false;
@@ -492,7 +490,7 @@ public abstract class MeshLiaison
 		return null;
 	}
 
-	protected static AbstractHalfEdge findBetterTriangleInNeighborhood(double[] pos, AbstractHalfEdge ot, double maxError, int group)
+	protected static AbstractHalfEdge findBetterTriangleInNeighborhood(Location pos, AbstractHalfEdge ot, double maxError, int group)
 	{
 		int[] index = new int[2];
 		Triangle.List seen = new Triangle.List();
@@ -566,7 +564,7 @@ public abstract class MeshLiaison
 	 * @param index index[0] is the local id of the closest edge and index[1]
 	 * the region.
 	 */
-	public static double sqrDistanceVertexTriangle(double[] pos, Triangle tri, int[] index)
+	public static double sqrDistanceVertexTriangle(Location pos, Triangle tri, int[] index)
 	{
 		return TRIANGLE_DISTANCE.compute(pos, tri, index);
 	}
@@ -588,24 +586,22 @@ public abstract class MeshLiaison
 		private double[] edge0 = new double[3];
 		private double[] edge1 = new double[3];
 		private double[] diff = new double[3];
-		private double[] t0;
-		public void getProjection(double[] out)
+		private Location t0;
+		public void getProjection(Location out)
 		{
-			for(int i = 0; i < 3; i++)
-				out[i] = t0[i] + s*edge0[i] + t*edge1[i];
+			out.moveTo(
+				t0.getX() + s*edge0[0] + t*edge1[0],
+				t0.getY() + s*edge0[1] + t*edge1[1],
+				t0.getZ() + s*edge0[2] + t*edge1[2]
+				);
 		}
 
-		public double compute(double[] pos, Triangle tri, int[] index)
+		public double compute(Location pos, Triangle tri, int[] index)
 		{
-			t0 = tri.vertex[0].getUV();
-			double[] t1 = tri.vertex[1].getUV();
-			double[] t2 = tri.vertex[2].getUV();
-			for(int i = 0; i < 3; i++)
-			{
-				edge0[i] = t1[i] - t0[i];
-				edge1[i] = t2[i] - t0[i];
-				diff[i] = t0[i] - pos[i];
-			}
+			t0 = tri.vertex[0];
+			tri.vertex[1].sub(t0, edge0);
+			tri.vertex[2].sub(t0, edge1);
+			t0.sub(pos, diff);
 			double a = norm2(edge0);
 			double b = dot(edge0, edge1);
 			double c = norm2(edge1);
@@ -854,7 +850,7 @@ public abstract class MeshLiaison
 		Triangle t = mesh.createTriangle(v0, v1, v2);
 		int [] index = new int[2];
 		int nGrid = 128;
-		double[] pos = new double[3];
+		Location pos = new Location();
 		java.io.PrintStream outMesh = new java.io.PrintStream("test.mesh");
 		java.io.PrintStream outBB = new java.io.PrintStream("region.bb");
 		java.io.PrintStream distBB = new java.io.PrintStream("test.bb");
@@ -864,30 +860,28 @@ public abstract class MeshLiaison
 		distBB.println("3 1 "+(nGrid*nGrid+3)+" 2");
 		for (int j = 0; j < nGrid; j++)
 		{
-			pos[1] = 15.0 + (j * 16) / (double)nGrid;
-			pos[2] = 30.05;
+			double y = 15.0 + (j * 16) / (double)nGrid;
+			double z = 30.05;
 			for (int i = 0; i < nGrid; i++)
 			{
-				pos[0] =  5.0 + (i * 16) / (double)nGrid;
+				double x =  5.0 + (i * 16) / (double)nGrid;
+				pos.moveTo(x, y, z);
 				double d = sqrDistanceVertexTriangle(pos, t, index);
-				outMesh.println(pos[0]+" "+pos[1]+" "+pos[2]+" 0");
+				outMesh.println(x+" "+y+" "+z+" 0");
 				outBB.println((double)index[1]);
 				distBB.println(d);
 			}
 		}
 		index[1] = 0;
-		pos = v0.getUV();
-		outMesh.println(pos[0]+" "+pos[1]+" "+pos[2]+" "+index[1]);
+		outMesh.println(v0.getX()+" "+v0.getY()+" "+v0.getZ()+" "+index[1]);
 		outBB.println("0.0");
-		distBB.println(sqrDistanceVertexTriangle(pos, t, index));
-		pos = v1.getUV();
-		outMesh.println(pos[0]+" "+pos[1]+" "+pos[2]+" "+index[1]);
+		distBB.println(sqrDistanceVertexTriangle(v0, t, index));
+		outMesh.println(v1.getX()+" "+v1.getY()+" "+v1.getZ()+" "+index[1]);
 		outBB.println("0.0");
-		distBB.println(sqrDistanceVertexTriangle(pos, t, index));
-		pos = v2.getUV();
-		outMesh.println(pos[0]+" "+pos[1]+" "+pos[2]+" "+index[1]);
+		distBB.println(sqrDistanceVertexTriangle(v1, t, index));
+		outMesh.println(v2.getX()+" "+v2.getY()+" "+v2.getZ()+" "+index[1]);
 		outBB.println("0.0");
-		distBB.println(sqrDistanceVertexTriangle(pos, t, index));
+		distBB.println(sqrDistanceVertexTriangle(v2, t, index));
 
 		outMesh.println("\n\nQuadrilaterals\n"+((nGrid-1)*(nGrid-1)));
 		for (int j = 0; j < nGrid - 1; j++)
@@ -908,7 +902,7 @@ public abstract class MeshLiaison
 	protected static class LocationFinder
 	{
 		private final static Logger LOGGER2 = Logger.getLogger(LocationFinder.class.getName());
-		private double[] target = new double[3];
+		private Location target = new Location();
 		double dmin = Double.MAX_VALUE;
 		Triangle current;
 		int localEdgeIndex = -1;
@@ -916,9 +910,9 @@ public abstract class MeshLiaison
 		int[] index = new int[2];
 		private final int groupID;
 
-		LocationFinder(double[] pos, int groupID)
+		LocationFinder(Location pos, int groupID)
 		{
-			System.arraycopy(pos, 0, target, 0, 3);
+			target.moveTo(pos);
 			this.groupID = groupID;
 		}
 
@@ -1118,11 +1112,10 @@ public abstract class MeshLiaison
 			Collection<Line> borders = mapGroupBorder.get(groupId);
 			if (borders == null)
 				throw new IllegalArgumentException("group identifier not found");
-			double[] pos = v.getUV();
 			double dMin = Double.MAX_VALUE;
 			for (Line l : borders)
 			{
-				double d = l.sqrDistance(pos);
+				double d = l.sqrDistance(v);
 				if (d < dMin)
 					dMin = d;
 			}
@@ -1134,10 +1127,9 @@ public abstract class MeshLiaison
 			Collection<Line> borders = mapGroupBorder.get(groupId);
 			if (borders == null)
 				throw new IllegalArgumentException("group identifier "+groupId+" not found");
-			double[] pos = v.getUV();
 			for (Line l : borders)
 			{
-				if (l.sqrDistance(pos) <= distance2)
+				if (l.sqrDistance(v) <= distance2)
 				{
 					return true;
 				}
@@ -1147,34 +1139,31 @@ public abstract class MeshLiaison
 	
 		private static class Line
 		{
-			private final double[] origin = new double[3];
+			private final Location origin = new Location();
 			private final double[] direction = new double[3];
 			private final double sqrNormDirection;
 			Line(Vertex v1, Vertex v2)
 			{
-				System.arraycopy(v1.getUV(), 0, origin, 0, 3);
-				double[] end = v2.getUV();
-				direction[0] = end[0] - origin[0];
-				direction[1] = end[1] - origin[1];
-				direction[2] = end[2] - origin[2];
+				origin.moveTo(v1);
+				v2.sub(origin, direction);
 				sqrNormDirection = direction[0] * direction[0] + direction[1] * direction[1] + direction[2] * direction[2];
 			}
 	
-			double sqrDistance(double[] v)
+			double sqrDistance(Location v)
 			{
 				double t =
-					direction[0] * (v[0] - origin[0]) +
-					direction[1] * (v[1] - origin[1]) +
-					direction[2] * (v[2] - origin[2]);
+					direction[0] * (v.getX() - origin.getX()) +
+					direction[1] * (v.getY() - origin.getY()) +
+					direction[2] * (v.getZ() - origin.getZ());
 				if (t <= 0)
 					t = 0.0;
 				else if (t >= sqrNormDirection)
 					t = 1.0;
 				else
 					t /= sqrNormDirection;
-				double dx = v[0] - (origin[0] + t * direction[0]);
-				double dy = v[1] - (origin[1] + t * direction[1]);
-				double dz = v[2] - (origin[2] + t * direction[2]);
+				double dx = v.getX() - (origin.getX() + t * direction[0]);
+				double dy = v.getY() - (origin.getY() + t * direction[1]);
+				double dz = v.getZ() - (origin.getZ() + t * direction[2]);
 				return dx * dx + dy * dy + dz * dz;
 			}
 		}

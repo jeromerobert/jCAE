@@ -70,6 +70,7 @@ public class DistanceSurface extends QualityProcedure
 		Triangle f = (Triangle) o;
 		CADGeomSurface surface = surfaces[f.getGroupId()];
 		double dmax = 0.0;
+		double[] tmp = new double[3];
 		for (int i = 0; i < 3; i++)
 		{
 			Vertex n = f.vertex[i];
@@ -78,7 +79,8 @@ public class DistanceSurface extends QualityProcedure
 				d = distanceMap.get(n);
 			else
 			{
-				d = surface.lowerDistance(n.getUV());
+				n.get(tmp);
+				d = surface.lowerDistance(tmp);
 				distanceMap.put(n, d);
 			}
 			if (d > dmax)

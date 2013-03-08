@@ -22,6 +22,7 @@ package org.jcae.mesh.amibe.validation;
 
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 
@@ -80,10 +81,10 @@ public class DihedralAngle extends QualityProcedure
 			sym = ot.sym(sym);
 			if (t.getGroupId() != sym.getTri().getGroupId())
 				continue;
-			double [] p0 = ot.origin().getUV();
-			double [] p1 = ot.destination().getUV();
-			double [] p2 = ot.apex().getUV();
-			double [] p3 = sym.apex().getUV();
+			Vertex p0 = ot.origin();
+			Vertex p1 = ot.destination();
+			Vertex p2 = ot.apex();
+			Vertex p3 = sym.apex();
 
 			Matrix3D.computeNormal3D(p0, p1, p2, temp1, temp2, temp3);
 			Matrix3D.computeNormal3D(p1, p0, p3, temp1, temp2, temp4);

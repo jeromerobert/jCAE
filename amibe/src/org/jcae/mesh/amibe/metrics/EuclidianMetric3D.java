@@ -42,13 +42,13 @@ public final class EuclidianMetric3D implements Metric
 	 * @param p2  coordinates of the second node
 	 * @return 3D Euclidian square distance between these two points.
 	 */
-	public double distance2(double[] p1, double[] p2)
+	@Override
+	public double distance2(Location p1, Location p2)
 	{
-		return scale * (
-			   (p1[0] - p2[0]) * (p1[0] - p2[0]) +
-		       (p1[1] - p2[1]) * (p1[1] - p2[1]) +
-			   (p1[2] - p2[2]) * (p1[2] - p2[2])
-		);
+		double dx = p1.getX() - p2.getX();
+		double dy = p1.getY() - p2.getY();
+		double dz = p1.getZ() - p2.getZ();
+		return scale * (dx * dx + dy * dy + dz * dz);
 	}
 
 	/**

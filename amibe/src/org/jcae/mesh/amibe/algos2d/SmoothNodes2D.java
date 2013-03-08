@@ -277,15 +277,13 @@ public class SmoothNodes2D
 		else if (ot.apex() == n)
 			ot = ot.prev();
 		assert ot.origin() == n;
-		double [] oldp2 = n.getUV();
 		
 		//  Compute 2D coordinates centroid.
 		//  Metrics are not interpolated; these computations
 		//  are not accurate, but we check that quality is improved
 		//  before moving vertices, so we are safe.
 		int nn = 0;
-		double [] centroid2 = c.getUV();
-		centroid2[0] = centroid2[1] = 0.0;
+		c.moveTo(0, 0);
 		Vertex2D d = (Vertex2D) ot.destination();
 		Metric2D m0 = mesh.getMetric(n);
 		MetricOnSurface mInterpolate = null;
@@ -318,8 +316,7 @@ public class SmoothNodes2D
 			else
 				m1 = m2;
 			nn++;
-			double[] newp2 = v.getUV();
-			double l = m1.distance2(oldp2, newp2);
+			double l = m1.distance2(n, v);
 			if (modifiedLaplacian)
 			{
 				if (l > 1.0)
@@ -327,27 +324,22 @@ public class SmoothNodes2D
 					// Find the point on this edge which has the
 					// desired length
 					l = 1.0 / Math.sqrt(l);
-					for (int i = 0; i < 2; i++)
-						centroid2[i] += newp2[i] + l * (oldp2[i] - newp2[i]);
+					c.moveTo(
+						c.getX() + v.getX() + l * (n.getX() - v.getX()),
+						c.getY() + v.getY() + l * (n.getY() - v.getY()));
 				}
 				else
-				{
-					for (int i = 0; i < 2; i++)
-						centroid2[i] += oldp2[i];
-				}
+					c.moveTo(c.getX() + n.getX(), c.getY() + n.getY());
 			}
 			else
-			{
-				for (int i = 0; i < 2; i++)
-					centroid2[i] += newp2[i];
-			}
+				c.moveTo(c.getX() + v.getX(), c.getY() + v.getY());
 		}
 		while (ot.destination() != d);
 		assert (nn > 0);
-		for (int i = 0; i < 2; i++)
-			centroid2[i] /= nn;
-		for (int i = 0; i < 2; i++)
-			centroid2[i] = oldp2[i] + relaxation * (centroid2[i] - oldp2[i]);
+		c.scale(1.0/nn);
+		c.moveTo(
+			n.getX() + relaxation * (c.getX() - n.getX()),
+			n.getY() + relaxation * (c.getZ() - n.getY()));
 		KdTree kdTree = mesh.getKdTree();
 		do
 		{
@@ -357,9 +349,9 @@ public class SmoothNodes2D
 		}
 		while (ot.destination() != d);
 
-		double saveX = oldp2[0];
-		double saveY = oldp2[1];
-		mesh.moveVertex(n, centroid2[0], centroid2[1]);
+		double saveX = n.getX();
+		double saveY = n.getY();
+		mesh.moveVertex(n, c.getX(), c.getY());
 		// Check that quality has not been degraded
 		double newQuality = vertexQuality(ot);
 		if (newQuality < quality)
@@ -377,12 +369,9 @@ public class SmoothNodes2D
 		Vertex2D v0 = (Vertex2D) f.vertex[0];
 		Vertex2D v1 = (Vertex2D) f.vertex[1];
 		Vertex2D v2 = (Vertex2D) f.vertex[2];
-		double [] p0 = v0.getUV();
-		double [] p1 = v1.getUV();
-		double [] p2 = v2.getUV();
-		double l01 = mesh.getMetric(v0).distance2(p0, p1);
-		double l12 = mesh.getMetric(v1).distance2(p1, p2);
-		double l20 = mesh.getMetric(v2).distance2(p2, p0);
+		double l01 = mesh.getMetric(v0).distance2(v0, v1);
+		double l12 = mesh.getMetric(v1).distance2(v1, v2);
+		double l20 = mesh.getMetric(v2).distance2(v2, v0);
 
 		double lmin, lmax;
 		if (l01 > l12)

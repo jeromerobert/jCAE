@@ -267,11 +267,10 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 	@Override
 	public double getTargetSizeTopo(Mesh mesh, Vertex v)
 	{
-		double[] uv = v.getUV();
 		int groupId = -1;
 		if(v.isManifold())
 			groupId = ((Triangle)v.getLink()).getGroupId();
-		return getTargetSize(uv[0], uv[1], uv[2], groupId);
+		return getTargetSize(v.getX(), v.getY(), v.getZ(), groupId);
 	}
 
 	public void save(String fileName) throws IOException

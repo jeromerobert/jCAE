@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.metrics.Location;
 import org.jcae.mesh.amibe.metrics.MetricSupport.AnalyticMetricInterface;
 
 
@@ -233,8 +234,8 @@ public class RemeshPolyline
 
 		// The best candidate is found by dichotomy.
 		// Allocate lower and upper bounds.
-		double [] lower = new double[3];
-		double [] upper = new double[3];
+		Location lower = new Location();
+		Location upper = new Location();
 		double target = targetSize;
 		double accumulated = 0;
 		int nrDichotomy = - 2 * (int) (Math.log(maxError) / Math.log(2.0));
@@ -264,23 +265,19 @@ public class RemeshPolyline
 			if (LOGGER.isLoggable(Level.FINE))
 				LOGGER.log(Level.FINE, "Length segment={0} target={1} maxError={2}", new Object[]{edgeLength, target, maxError});
 
-			System.arraycopy(vS.getUV(), 0, lower, 0, 3);
-			System.arraycopy(vE.getUV(), 0, upper, 0, 3);
+			lower.moveTo(vS);
+			upper.moveTo(vE);
 			// 1-d coordinate between lower and upper points
 			double alpha = 0.5;
 			double delta = 0.5;
-			Vertex np = mesh.createVertex(
-				0.5*(lower[0]+upper[0]),
-				0.5*(lower[1]+upper[1]),
-				0.5*(lower[2]+upper[2]));
+			Vertex np = mesh.createVertex(0, 0, 0);
+			np.middle(lower, upper);
 			int cnt = nrDichotomy;
 			if (edgeLength > 1.0)
 				cnt *= (int) edgeLength;
 			while(cnt >= 0)
 			{
 				cnt--;
-				double [] pos = np.getUV();
-	
 				// Compute metrics at this position
 				EuclidianMetric3D m = new EuclidianMetric3D(hS*Math.exp(alpha*logRatio));
 				double l = interpolatedDistance(vS, mS, np, m);
@@ -303,11 +300,8 @@ public class RemeshPolyline
 					alpha -= delta;
 					if (LOGGER.isLoggable(Level.FINEST))
 						LOGGER.log(Level.FINEST, "{0} > {1} {2} {3} {4}", new Object[]{l, target, cnt, delta, alpha});
-					System.arraycopy(pos, 0, upper, 0, 3);
-					np.moveTo(
-						0.5*(lower[0] + pos[0]),
-						0.5*(lower[1] + pos[1]),
-						0.5*(lower[2] + pos[2]));
+					upper.moveTo(np);
+					np.middle(lower, np);
 				}
 				else
 				{
@@ -315,16 +309,13 @@ public class RemeshPolyline
 					alpha += delta;
 					if (LOGGER.isLoggable(Level.FINEST))
 						LOGGER.log(Level.FINEST, "{0} < {1} {2} {3} {4}", new Object[]{l, target, cnt, delta, alpha});
-					System.arraycopy(pos, 0, lower, 0, 3);
-					np.moveTo(
-						0.5*(upper[0] + pos[0]),
-						0.5*(upper[1] + pos[1]),
-						0.5*(upper[2] + pos[2]));
+					lower.moveTo(np);
+					np.middle(upper, np);
 				}
 			}
 			if (cnt < 0)
 			{
-				LOGGER.severe("Dichotomy failed");
+				LOGGER.severe("Dichotomy failed near "+vS+" "+vE);
 				return -1.0;
 			}
 		}
@@ -334,10 +325,8 @@ public class RemeshPolyline
 	{
 		assert m1 != null : "Metric null at point "+pt1;
 		assert m2 != null : "Metric null at point "+pt2;
-		double[] p1 = pt1.getUV();
-		double[] p2 = pt2.getUV();
-		double a = Math.sqrt(m1.distance2(p1, p2));
-		double b = Math.sqrt(m2.distance2(p1, p2));
+		double a = Math.sqrt(m1.distance2(pt1, pt2));
+		double b = Math.sqrt(m2.distance2(pt1, pt2));
 		// Linear interpolation:
 		//double l = (2.0/3.0) * (a*a + a*b + b*b) / (a + b);
 		// Geometric interpolation

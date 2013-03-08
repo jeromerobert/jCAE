@@ -164,8 +164,7 @@ public class TraceRecord implements TraceInterface
 	private void createAndAdd(Vertex v)
 	{
 		add(v);
-		double[] pos = v.getUV();
-		println("v = self.m.createVertex("+pos[0]+","+pos[1]+","+pos[2]+")");
+		println("v = self.m.createVertex("+v.getX()+","+v.getY()+","+v.getZ()+")");
 		println("self.m.getTrace().add(v, "+labelVertex+")");
 	}
 
@@ -403,10 +402,9 @@ public class TraceRecord implements TraceInterface
 	{
 		if (!disabled && mapVertexId.containsKey(v))
 		{
-			double[] pos = v.getUV();
 			println("# Vertex "+v);
 			println("v = self.m.getTrace().getVertex("+mapVertexId.get(v)+")");
-			println("v.moveTo("+pos[0]+", "+pos[1]+", "+pos[2]+")");
+			println("v.moveTo("+v.getX()+", "+v.getY()+", "+v.getZ()+")");
 		}
 		checkLines();
 	}

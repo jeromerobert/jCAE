@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.ds.Vertex;
 
 public class Clip
 {
@@ -89,12 +90,11 @@ public class Clip
 			boolean inside = true;
 			for (int i = 0; inside && i < 3; i++)
 			{
-				double[] pos = t.vertex[i].getUV();
-				for (int j = 0; inside && j < 3; j++)
-				{
-					if (pos[j] > upper[j] || pos[j] < lower[j])
-						inside = false;
-				}
+				Vertex v = t.vertex[i];
+				inside = !(
+					v.getX() > upper[0] || v.getX() < lower[0] ||
+					v.getY() > upper[1] || v.getY() < lower[1] ||
+					v.getZ() > upper[2] || v.getZ() < lower[2]);
 			}
 			if (inside)
 			{

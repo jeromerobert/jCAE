@@ -187,14 +187,18 @@ public class TriangleInterAABB {
 	private final double[] e1 = new double[3];
 	private final double[] e2 = new double[3];
 	private double min, max;
-	private double[][] triverts = new double[3][];
+	private double[][] triverts = new double[3][3];
 	private double[] boxcenter = new double[3];
 	private double[] boxhalfsize = new double[3];
 
 	public void setTriangle(Triangle triangle)
 	{
 		for(int i = 0; i < 3; i++)
-			triverts[i] = triangle.vertex[i].getUV();
+		{
+			triverts[i][0] = triangle.vertex[i].getX();
+			triverts[i][1] = triangle.vertex[i].getY();
+			triverts[i][2] = triangle.vertex[i].getZ();
+		}
 
 		/* compute triangle edges */
 		sub(e0, triverts[1], triverts[0]);      /* tri edge 0 */

@@ -86,7 +86,7 @@ public class JunctionConverter {
 			}
 		}
 		String group = groupName();
-		Vertex newV = mesh.createVertex(v.getUV());
+		Vertex newV = mesh.createVertex(v);
 		newV.setMutable(false);
 		mesh.add(newV);
 		mesh.setBeam(i, newV);
