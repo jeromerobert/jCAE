@@ -31,6 +31,7 @@ import gnu.trove.TIntObjectHashMap;
 import gnu.trove.TIntObjectIterator;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,6 +45,8 @@ public class MapMeshLiaison extends MeshLiaison
 	// Each group has its own map
 	private TIntObjectHashMap<Map<Vertex, ProjectedLocation>> mapCurrentVertexProjection;
 	private final ProjectedLocation savedProjectedLocation = new ProjectedLocation();
+	// Map to keep track of a near point in background mesh, used as a starting point of locators
+	private TIntObjectHashMap<Map<Vertex, Vertex>> neighborBgMap;
 
 	public MapMeshLiaison(Mesh backgroundMesh)
 	{
@@ -53,6 +56,64 @@ public class MapMeshLiaison extends MeshLiaison
 	public MapMeshLiaison(Mesh backgroundMesh, MeshTraitsBuilder mtb)
 	{
 		super(backgroundMesh, mtb);
+	}
+
+	public void initBgMap(TIntIntHashMap numberOfTriangles, Collection<Vertex> nodeset)
+	{
+		neighborBgMap = new TIntObjectHashMap<Map<Vertex, Vertex>>(numberOfTriangles.size());
+		neighborBgMap.put(-1, new HashMap<Vertex, Vertex>(nodeset.size()));
+		for (TIntIntIterator it = numberOfTriangles.iterator(); it.hasNext(); )
+		{
+			it.advance();
+			neighborBgMap.put(it.key(), new HashMap<Vertex, Vertex>(it.value() / 2));
+		}
+		for (Vertex v : nodeset)
+		{
+			if (null == v.getLink())
+				continue;
+			Triangle t = getBackgroundTriangle(v);
+			assert !t.hasAttributes(AbstractHalfEdge.OUTER);
+			addVertexInNeighborBgMap(v, t);
+		}
+	}
+
+	public void clearBgMap()
+	{
+		neighborBgMap = null;
+	}
+
+	public void addVertexInNeighborBgMap(Vertex v, Triangle bgT)
+	{
+		double d0 = v.sqrDistance3D(bgT.vertex[0]);
+		double d1 = v.sqrDistance3D(bgT.vertex[1]);
+		double d2 = v.sqrDistance3D(bgT.vertex[2]);
+		Vertex bgNearestVertex;
+		if (d0 <= d1 && d0 <= d2)
+		{
+			bgNearestVertex = bgT.vertex[0];
+		}
+		else if (d1 <= d0 && d1 <= d2)
+		{
+			bgNearestVertex = bgT.vertex[1];
+		}
+		else
+		{
+			bgNearestVertex = bgT.vertex[2];
+		}
+		neighborBgMap.get(-1).put(v, bgNearestVertex);
+		if (v.isManifold())
+		{
+			neighborBgMap.get(bgT.getGroupId()).put(v, bgNearestVertex);
+		}
+		else
+		{
+			for (Iterator<Triangle> itT = v.getNeighbourIteratorTriangle(); itT.hasNext(); )
+			{
+				int groupId = itT.next().getGroupId();
+				if (groupId >= 0)
+					neighborBgMap.get(groupId).put(v, bgNearestVertex);
+			}
+		}
 	}
 
 	protected void init(Collection<Vertex> backgroundNodeset)
@@ -205,7 +266,19 @@ public class MapMeshLiaison extends MeshLiaison
 		assert location != null : "Vertex "+v+" not found";
 		return location.normal;
 	}
+	@Override
+	public Triangle getBackgroundTriangle(Vertex v, double[] normal) {
+		System.arraycopy(getBackgroundNormal(v), 0, normal, 0, 3);
+		return getBackgroundTriangle(v);
+	}
 
+	@Override
+	public Triangle getBackgroundTriangle(Vertex v, Vertex start,
+		double maxError, int group) {
+		Map<Vertex, Vertex> mapBgGroupVertices = neighborBgMap.get(group);
+		Vertex bgNear = mapBgGroupVertices.get(start);
+		return findSurroundingTriangle(v, bgNear, maxError, true, group).getTri();
+	}
 	/**
 	 * Add a Vertex.
 	 *

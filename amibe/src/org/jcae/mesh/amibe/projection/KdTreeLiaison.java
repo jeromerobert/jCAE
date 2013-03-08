@@ -20,6 +20,7 @@
 
 package org.jcae.mesh.amibe.projection;
 
+import gnu.trove.TIntIntHashMap;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 import org.jcae.mesh.amibe.ds.Mesh;
@@ -39,7 +40,7 @@ import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 //   to getClosestTriangle
 public class KdTreeLiaison extends MeshLiaison{
 	private final TriangleKdTree kdTree;
-	private transient Location tmpCoords = new Location();
+	private final transient Location tmpCoords = new Location();
 	public KdTreeLiaison(Mesh backgroundMesh, MeshTraitsBuilder mtb) {
 		super(backgroundMesh, mtb);
 		kdTree = new TriangleKdTree(backgroundMesh);
@@ -77,6 +78,20 @@ public class KdTreeLiaison extends MeshLiaison{
 	}
 
 	@Override
+	public Triangle getBackgroundTriangle(Vertex v, double[] normal) {
+		Triangle t = getBackgroundTriangle(v);
+		Matrix3D.computeNormal3D(t.vertex[0], t.vertex[1], t.vertex[2],
+			work1, work2, normal);
+		return t;
+	}
+
+	@Override
+	public Triangle getBackgroundTriangle(Vertex v, Vertex start,
+		double maxError, int group) {
+		return kdTree.getClosestTriangle(v, null, group);
+	}
+
+	@Override
 	public void addVertex(Vertex v, Triangle bgT) {}
 
 	@Override
@@ -87,4 +102,14 @@ public class KdTreeLiaison extends MeshLiaison{
 	@Override
 	public void updateAll() { }
 
+	@Override
+	public void initBgMap(TIntIntHashMap numberOfTriangles,
+		Collection<Vertex> nodeset) {
+	}
+
+	@Override
+	public void clearBgMap() { }
+
+	@Override
+	public void addVertexInNeighborBgMap(Vertex v, Triangle bgT) { }
 }

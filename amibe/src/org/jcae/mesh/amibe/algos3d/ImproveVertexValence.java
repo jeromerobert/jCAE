@@ -58,6 +58,7 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 	private boolean checkNormals = true;
 	/** valences for alternate pattern  */
 	private int[] valences = new int[6];
+	private double[] tNormal = new double[3];
 	/** neighbourgs edges for alternate pattern */
 	private List<AbstractHalfEdge> aPEdges = new ArrayList<AbstractHalfEdge>(6);
 	private List<Vertex> aPVertices = new ArrayList<Vertex>(6);
@@ -459,11 +460,8 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 			Location newPt = new Location();
 			newPt.middle(ot.destination(), v);
 			Vertex newV = mesh.createVertex(newPt);
-			liaison.addVertex(newV, liaison.getBackgroundTriangle(v));
+			liaison.addVertex(newV, liaison.getBackgroundTriangle(v, tNormal));
 			liaison.move(newV, newV, false);
-			Vertex a = ot.apex();
-			Vertex n = ot.sym().apex();
-			double [] tNormal = liaison.getBackgroundNormal(v);
 			ot = mesh.vertexSplit(ot, newV);
 			// The valence of v has not been changed by
 			// inserting a Vertex, we now try to swap an edge.

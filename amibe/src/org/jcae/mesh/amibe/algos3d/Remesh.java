@@ -74,8 +74,6 @@ public class Remesh
 	private final MeshLiaison liaison;
 	// Octree to find nearest Vertex in current mesh
 	private TIntObjectHashMap<KdTree<Vertex>> kdTrees;
-	// Map to keep track of a near point in background mesh, used as a starting point of locators
-	private TIntObjectHashMap<Map<Vertex, Vertex>> neighborBgMap;
 	private final double minlen;
 	private final double maxlen;
 	private int nrFailedInterpolations;
@@ -231,22 +229,8 @@ public class Remesh
 		}
 
 		TIntIntHashMap numberOfTriangles = computeNumberOfTriangles(mesh.getTriangles());
-		neighborBgMap = new TIntObjectHashMap<Map<Vertex, Vertex>>(numberOfTriangles.size());
-		neighborBgMap.put(-1, new HashMap<Vertex, Vertex>(nodeset.size()));
-		for (TIntIntIterator it = numberOfTriangles.iterator(); it.hasNext(); )
-		{
-			it.advance();
-			neighborBgMap.put(it.key(), new HashMap<Vertex, Vertex>(it.value() / 2));
-		}
+		liaison.initBgMap(numberOfTriangles, nodeset);
 		kdTrees = createKdTree(nodeset, mesh.getTriangles(), numberOfTriangles);
-		for (Vertex v : nodeset)
-		{
-			if (null == v.getLink())
-				continue;
-			Triangle t = liaison.getBackgroundTriangle(v);
-			assert !t.hasAttributes(AbstractHalfEdge.OUTER);
-			addVertexInNeighborBgMap(v, t);
-		}
 	}
 
 	/** Return the number of triangles in each groups */
@@ -327,40 +311,6 @@ public class Remesh
 		}
 		seenByGroup.clear();
 		return kdTrees;
-	}
-
-	private void addVertexInNeighborBgMap(Vertex v, Triangle bgT)
-	{
-		double d0 = v.sqrDistance3D(bgT.vertex[0]);
-		double d1 = v.sqrDistance3D(bgT.vertex[1]);
-		double d2 = v.sqrDistance3D(bgT.vertex[2]);
-		Vertex bgNearestVertex;
-		if (d0 <= d1 && d0 <= d2)
-		{
-			bgNearestVertex = bgT.vertex[0];
-		}
-		else if (d1 <= d0 && d1 <= d2)
-		{
-			bgNearestVertex = bgT.vertex[1];
-		}
-		else
-		{
-			bgNearestVertex = bgT.vertex[2];
-		}
-		neighborBgMap.get(-1).put(v, bgNearestVertex);
-		if (v.isManifold())
-		{
-			neighborBgMap.get(bgT.getGroupId()).put(v, bgNearestVertex);
-		}
-		else
-		{
-			for (Iterator<Triangle> itT = v.getNeighbourIteratorTriangle(); itT.hasNext(); )
-			{
-				int groupId = itT.next().getGroupId();
-				if (groupId >= 0)
-					neighborBgMap.get(groupId).put(v, bgNearestVertex);
-			}
-		}
 	}
 
 	public void setAnalyticMetric(AnalyticMetricInterface m)
@@ -651,6 +601,7 @@ public class Remesh
 		LOGGER.config("Leave compute()");
 
 		mesh.getTrace().println("# End Remesh");
+		liaison.clearBgMap();
 		return this;
 	}
 
@@ -774,7 +725,7 @@ public class Remesh
 			}
 			while (!advance || edge.origin() != s);
 			afterSwapHook();
-			addVertexInNeighborBgMap(v, bgT);
+			liaison.addVertexInNeighborBgMap(v, bgT);
 			if (processed > 0 && (processed % progressBarStatus) == 0)
 				LOGGER.info("Vertices inserted: "+processed);
 
@@ -996,7 +947,6 @@ public class Remesh
 		int index = imax / 2;
 		Collection<Vertex> newVertices = new ArrayList<Vertex>();
 		int group = t.getGroupId();
-		Map<Vertex, Vertex> mapBgGroupVertices = neighborBgMap.get(group);
 		KdTree<Vertex> kdTreeGroup = kdTrees.get(group);
 		for (int i = 0; i < imax; i++)
 		{
@@ -1005,8 +955,7 @@ public class Remesh
 			assert metric != null;
 			double localSize = 0.5 * metric.getUnitBallBBox()[0];
 			double localSize2 = localSize * localSize;
-			Vertex bgNear = mapBgGroupVertices.get(triNeighbor.get(index));
-			Triangle bgT = liaison.findSurroundingTriangle(v, bgNear, localSize2, true, group).getTri();
+			Triangle bgT = liaison.getBackgroundTriangle(v, triNeighbor.get(index), localSize2, group);
 			assert bgT.getGroupId() == group || group < 0:
 				mesh.getGroupName(group)+" "+mesh.getGroupName(bgT.getGroupId())+" "+v;
 			liaison.addVertex(v, bgT);

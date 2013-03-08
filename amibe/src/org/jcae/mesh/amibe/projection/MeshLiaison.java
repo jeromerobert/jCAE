@@ -236,9 +236,27 @@ public abstract class MeshLiaison
 	}
 
 	public abstract Triangle getBackgroundTriangle(Vertex v);
-
 	public abstract double[] getBackgroundNormal(Vertex v);
-
+	/**
+	 * Return both the background triangle and it's normal
+	 * It avoid to lookup up two time for a background triangle when calling
+	 * both getBackgroundTriangle(Vertex) and getBackgroundNormal(Vertex)
+	 */
+	public abstract Triangle getBackgroundTriangle(Vertex v, double[] normal);
+	/**
+	 * Return the background triangle associated to v.
+	 * @param v
+	 * @param start if the Mesh liaison have a background map, start is a vertex
+	 * close from v which is alread in the background map. see initBgMap and
+	 * addVertexInNeighborBgMap
+	 * @param maxError the max error projection
+	 * @param group the group where to search the triangle
+	 * @return
+	 */
+	public abstract Triangle getBackgroundTriangle(Vertex v, Vertex start, double maxError, int group);
+	public abstract void initBgMap(TIntIntHashMap numberOfTriangles, Collection<Vertex> nodeset);
+	public abstract void clearBgMap();
+	public abstract void addVertexInNeighborBgMap(Vertex v, Triangle bgT);
 	/**
 	 * If all adjacent triangles of the vertex are in the same group, return
 	 * this group, else return null.
