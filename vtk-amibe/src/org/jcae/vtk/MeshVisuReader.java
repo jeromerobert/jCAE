@@ -329,11 +329,9 @@ public class MeshVisuReader extends MeshReader
 					if (vertex instanceof FakeNonReadVertex)
 					{
 						ID = offset;
-						double[] coords = vertex.getUV();
-						assert coords.length == 3;
-						nodes.add((float) coords[0]);
-						nodes.add((float) coords[1]);
-						nodes.add((float) coords[2]);
+						nodes.add((float) vertex.getX());
+						nodes.add((float) vertex.getY());
+						nodes.add((float) vertex.getZ());
 						++offset;
 					} else
 						ID = vertex.getLabel() - oemm.leaves[leave].minIndex;
