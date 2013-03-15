@@ -23,9 +23,9 @@ package org.jcae.mesh.amibe.algos3d;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
@@ -34,6 +34,7 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
+import org.jcae.mesh.amibe.util.HashFactory;
 import org.jcae.mesh.xmldata.Amibe2VTK;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
@@ -140,7 +141,7 @@ public class Skeleton {
 	 */
 	public Collection<List<Vertex>> getPolylinesVertices()
 	{
-		HashSet<VertexPolyline> hs = new HashSet<VertexPolyline>(polylines.size() * 4 / 3);
+		Set<VertexPolyline> hs = HashFactory.createHashSet(polylines.size());
 		for(List<AbstractHalfEdge> l:polylines)
 			hs.add(new VertexPolyline(l));
 		ArrayList<List<Vertex>> toReturn = new ArrayList<List<Vertex>>(hs.size());
@@ -160,7 +161,7 @@ public class Skeleton {
 
 	private Collection<AbstractHalfEdge> getNonManifoldHE(Mesh mesh)
 	{
-		HashSet<AbstractHalfEdge> toReturn = new HashSet<AbstractHalfEdge>();
+		Set<AbstractHalfEdge> toReturn = HashFactory.createHashSet();
 		for(Triangle t:mesh.getTriangles())
 		{
 			AbstractHalfEdge he = t.getAbstractHalfEdge();
@@ -225,8 +226,8 @@ public class Skeleton {
 			//next should have been an outer half edge so we ignore this case
 			//The vertex edge.destination() will be check using an other edge
 			return false;
-		HashSet<Integer> g1 = new HashSet<Integer>();
-		HashSet<Integer> g2 = new HashSet<Integer>();
+		Set<Integer> g1 = HashFactory.createHashSet();
+		Set<Integer> g2 = HashFactory.createHashSet();
 		getGroups(edge, g1);
 		getGroups(next, g2);
 		if(!g1.equals(g2))
@@ -265,8 +266,8 @@ public class Skeleton {
 		Collection<AbstractHalfEdge> input, double angle)
 	{
 		ArrayList<List<AbstractHalfEdge>> toReturn = new ArrayList<List<AbstractHalfEdge>>();
-		Collection<AbstractHalfEdge> beamSet = new HashSet<AbstractHalfEdge>(input);
-		HashSet<Vertex> polylineEnds = new HashSet<Vertex>();
+		Collection<AbstractHalfEdge> beamSet = HashFactory.createHashSet(input);
+		Set<Vertex> polylineEnds = HashFactory.createHashSet();
 		for(AbstractHalfEdge b:beamSet)
 		{
 			if(isPolylineEnd(b, angle))

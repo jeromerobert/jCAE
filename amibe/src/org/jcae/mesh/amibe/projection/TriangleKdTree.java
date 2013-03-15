@@ -20,7 +20,6 @@
 
 package org.jcae.mesh.amibe.projection;
 
-import gnu.trove.THashSet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +37,7 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.Location;
+import org.jcae.mesh.amibe.util.HashFactory;
 import org.jcae.mesh.xmldata.MeshReader;
 
 /**
@@ -165,7 +165,7 @@ public class TriangleKdTree {
 		return Arrays.toString(boxCenter)+" "+Arrays.toString(halfSize);
 	}
 
-	private final transient Set<Triangle> seen = new THashSet<Triangle>();
+	private final transient Set<Triangle> seen = HashFactory.createHashSet();
 	private final transient List<Node> closeNodes = new ArrayList<Node>();
 	private final transient BoundaryPool closeBoundaries = new BoundaryPool();
 	private final int[] closeIndex = new int[2];
