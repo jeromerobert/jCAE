@@ -211,7 +211,7 @@ class Adaptor3d_Curve
 	Adaptor3d_Curve()=0;
 	public:
 	%rename(value) Value;
-	const gp_Pnt & Value(const Standard_Real U) const;
+	const gp_Pnt Value(const Standard_Real U) const;
 };
 
 //extends the Adaptor3d_Curve class to reduce the JNI overhead when
@@ -388,7 +388,7 @@ class GeomAPI_ProjectPointOnSurf
 	void Init(const gp_Pnt& P,const Handle_Geom_Surface & surface);
 	Standard_Integer NbPoints() const;	
 	Quantity_Length LowerDistance() const;
-	const gp_Pnt & Point(const Standard_Integer Index) const;	
+	const gp_Pnt Point(const Standard_Integer Index) const;
 	void LowerDistanceParameters(Quantity_Parameter& U,Quantity_Parameter& V) const;
 	void Parameters(const Standard_Integer Index,Quantity_Parameter& U,Quantity_Parameter& V) const;
 	gp_Pnt NearestPoint() const;

@@ -66,7 +66,7 @@ class BRep_Tool
 	%rename(surface) Surface;
 	%rename(curveOnSurface) CurveOnSurface;
 	public:
-	static const gp_Pnt& Pnt(const TopoDS_Vertex& V) ;
+	static const gp_Pnt Pnt(const TopoDS_Vertex& V) ;
 	static gp_Pnt2d Parameters(const TopoDS_Vertex& V,const TopoDS_Face& F) ;
 	static Standard_Real Parameter(const TopoDS_Vertex& V,const TopoDS_Edge& E) ;
 	static Standard_Boolean Degenerated(const TopoDS_Edge& E) ;
