@@ -2161,6 +2161,92 @@ public class Mesh implements Serializable
 		}
 	}
 
+	/** Return the number of fan for each neighbour edges */
+	private List<Integer> getAdjacency(Vertex v)
+	{
+		Iterator<AbstractHalfEdge> it = v.getNeighbourIteratorAbstractHalfEdge();
+		ArrayList<Integer> l = new ArrayList<Integer>();
+		while(it.hasNext())
+		{
+			AbstractHalfEdge e = it.next();
+			if(!e.hasAttributes(AbstractHalfEdge.OUTER))
+			{
+				if(e.hasAttributes(AbstractHalfEdge.BOUNDARY))
+				{
+					l.add(1);
+				}
+				else if(e.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+				{
+					int n = 0;
+					Iterator<AbstractHalfEdge> it2 = e.fanIterator();
+					while(it2.hasNext())
+					{
+						it2.next();
+						n++;
+					}
+					l.add(n);
+				}
+				else
+				{
+					l.add(2);
+				}
+			}
+		}
+		Collections.sort(l);
+		return l;
+	}
+
+	/** Clear the adjacency, rebuild it and compare both version */
+	public boolean checkAdjacency()
+	{
+		Map<Vertex, List<Integer>> adjacency = HashFactory.createMap();
+		for(Triangle t:getTriangles())
+		{
+			for(Vertex v:t.vertex)
+			{
+				List<Integer> l = adjacency.get(v);
+				if(l == null)
+					adjacency.put(v, getAdjacency(v));
+			}
+		}
+		clearAdjacency();
+		buildAdjacency();
+		for(Triangle t:getTriangles())
+		{
+			for(Vertex v:t.vertex)
+			{
+				List<Integer> a1 = adjacency.get(v);
+				List<Integer> a2 = getAdjacency(v);
+				if(!a1.equals(a2))
+				{
+					new IllegalStateException(v + " " + a1 + " " + a2).printStackTrace();
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	public void clearAdjacency()
+	{
+		Iterator<Triangle> itt = getTriangles().iterator();
+		while(itt.hasNext())
+		{
+			Triangle t = itt.next();
+			if(t.hasAttributes(AbstractHalfEdge.OUTER))
+				itt.remove();
+			else
+			{
+				AbstractHalfEdge e = t.getAbstractHalfEdge();
+				for(int i = 0; i < 3; i++)
+				{
+					e.clearAttributes(0xFFFFFFFF);
+					e.glue(null);
+					e = e.next();
+				}
+			}
+		}
+	}
 	// Useful for debugging
 	/*  Following imports must be moved at top.
 import java.io.FileOutputStream;
