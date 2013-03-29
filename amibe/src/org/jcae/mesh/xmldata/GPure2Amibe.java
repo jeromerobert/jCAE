@@ -66,6 +66,8 @@ public class GPure2Amibe extends XMLReader {
 				partitionElements.add(e);
 			else if("Tesselation".equals(type))
 			{
+				if(getElement(e, "GPure:positions") == null)
+					continue;
 				if(getElement(e, "GPure:faces") == null)
 					edgeElements.add(e);
 				else
