@@ -128,13 +128,16 @@ public class TriangleKdTree {
 		this(mesh, 10, 4096.0);
 	}
 
-	public TriangleKdTree(Mesh mesh, int bucketSize, double minNodeRatio)
+	public TriangleKdTree(Iterable<Triangle> triangles)
+	{
+		this(triangles, 10, 4096.0);
+	}
+
+	private TriangleKdTree(Iterable<Triangle> triangles, int bucketSize,
+		double minNodeRatio, double[] bounds)
 	{
 		this.bucketSize = bucketSize;
-		if(mesh.hasNodes())
-			globalBounds = getBoundsFormVerts(mesh.getNodes());
-		else
-			globalBounds = getBoundsFromTria(mesh.getTriangles());
+		globalBounds = bounds;
 		for(int i = 0; i < 3; i++)
 		{
 			double offset = 0.01*(globalBounds[i+3]-globalBounds[i]);
@@ -145,11 +148,23 @@ public class TriangleKdTree {
 				globalRadius = globalSize[i];
 			minNodeSize[i] = globalSize[i] / minNodeRatio;
 		}
-		for(Triangle t:mesh.getTriangles())
+		for(Triangle t:triangles)
 			if(!t.hasAttributes(AbstractHalfEdge.OUTER))
 				addTriangle(t);
 		nodeStack = null;
 		boundaryPool = null;
+	}
+
+	public TriangleKdTree(Iterable<Triangle> triangles, int bucketSize, double minNodeRatio)
+	{
+		this(triangles, bucketSize, minNodeRatio, getBoundsFromTria(triangles));
+	}
+
+	public TriangleKdTree(Mesh mesh, int bucketSize, double minNodeRatio)
+	{
+		this(mesh.getTriangles(), bucketSize, minNodeRatio,
+			mesh.hasNodes() ? getBoundsFormVerts(mesh.getNodes()) :
+			getBoundsFromTria(mesh.getTriangles()));
 	}
 
 	private String bounds2String(double[] b)
@@ -561,7 +576,7 @@ public class TriangleKdTree {
 		return r;
 	}
 
-	private double[] getBoundsFormVerts(Iterable<Vertex> vertices)
+	private static double[] getBoundsFormVerts(Iterable<Vertex> vertices)
 	{
 		double[] bounds = new double[6];
 		for(int i = 0; i < 3; i++)
@@ -581,7 +596,7 @@ public class TriangleKdTree {
 		return bounds;
 	}
 
-	private double[] getBoundsFromTria(Iterable<Triangle> triangles)
+	private static double[] getBoundsFromTria(Iterable<Triangle> triangles)
 	{
 		double[] bounds = new double[6];
 		for(int i = 0; i < 3; i++)
