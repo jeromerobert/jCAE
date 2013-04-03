@@ -141,7 +141,7 @@ public class Skeleton {
 	 */
 	public Collection<List<Vertex>> getPolylinesVertices()
 	{
-		Set<VertexPolyline> hs = HashFactory.createHashSet(polylines.size());
+		Set<VertexPolyline> hs = HashFactory.createSet(polylines.size());
 		for(List<AbstractHalfEdge> l:polylines)
 			hs.add(new VertexPolyline(l));
 		ArrayList<List<Vertex>> toReturn = new ArrayList<List<Vertex>>(hs.size());
@@ -161,7 +161,7 @@ public class Skeleton {
 
 	private Collection<AbstractHalfEdge> getNonManifoldHE(Mesh mesh)
 	{
-		Set<AbstractHalfEdge> toReturn = HashFactory.createHashSet();
+		Set<AbstractHalfEdge> toReturn = HashFactory.createSet();
 		for(Triangle t:mesh.getTriangles())
 		{
 			AbstractHalfEdge he = t.getAbstractHalfEdge();
@@ -229,8 +229,8 @@ public class Skeleton {
 		if(edge.hasAttributes(AbstractHalfEdge.IMMUTABLE) != next.hasAttributes(
 			AbstractHalfEdge.IMMUTABLE))
 			return true;
-		Set<Integer> g1 = HashFactory.createHashSet();
-		Set<Integer> g2 = HashFactory.createHashSet();
+		Set<Integer> g1 = HashFactory.createSet();
+		Set<Integer> g2 = HashFactory.createSet();
 		getGroups(edge, g1);
 		getGroups(next, g2);
 		if(!g1.equals(g2))
@@ -271,8 +271,8 @@ public class Skeleton {
 		Collection<AbstractHalfEdge> input, double angle)
 	{
 		ArrayList<List<AbstractHalfEdge>> toReturn = new ArrayList<List<AbstractHalfEdge>>();
-		Collection<AbstractHalfEdge> beamSet = HashFactory.createHashSet(input);
-		Set<Vertex> polylineEnds = HashFactory.createHashSet();
+		Collection<AbstractHalfEdge> beamSet = HashFactory.createSet(input);
+		Set<Vertex> polylineEnds = HashFactory.createSet();
 		for(AbstractHalfEdge b:beamSet)
 		{
 			if(isPolylineEnd(b, angle))

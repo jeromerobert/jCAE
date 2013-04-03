@@ -37,9 +37,9 @@ import java.io.ObjectInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.LinkedHashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.util.HashFactory;
 
 public abstract class AbstractAlgoVertex
 {
@@ -102,7 +102,7 @@ public abstract class AbstractAlgoVertex
 			nodeset = mesh.getNodes();
 		if (nodeset == null)
 		{
-			nodeset = new LinkedHashSet<Vertex>(mesh.getTriangles().size() / 2);
+			nodeset = HashFactory.<Vertex>createSet(mesh.getTriangles().size() / 2);
 			for (Triangle f: mesh.getTriangles())
 			{
 				if (f.hasAttributes(AbstractHalfEdge.OUTER))

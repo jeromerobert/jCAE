@@ -49,6 +49,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.util.HashFactory;
 
 /**
  * Mesh data structure.
@@ -1134,7 +1135,7 @@ public class Mesh implements Serializable
 		{
 			// removeAll may be very slow on large lists
 			ArrayList<Triangle> savedList = new ArrayList<Triangle>(triangleList);
-			HashSet<Triangle> removedSet = new HashSet<Triangle>(removedTriangles);
+			Set<Triangle> removedSet = HashFactory.createSet(removedTriangles);
 			triangleList.clear();
 			for (Triangle t : savedList)
 			{

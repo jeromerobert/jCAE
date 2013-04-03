@@ -30,15 +30,15 @@ import org.jcae.mesh.amibe.metrics.Metric;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.mesh.amibe.metrics.Location;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
+import org.jcae.mesh.amibe.util.HashFactory;
 import org.jcae.mesh.amibe.util.QSortedTree.Node;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
@@ -50,7 +50,7 @@ import org.jcae.mesh.xmldata.MeshWriter;
 public class ImproveVertexValence extends AbstractAlgoVertex
 {
 	private static final Logger LOGGER=Logger.getLogger(ImproveVertexValence.class.getName());
-	private final LinkedHashSet<Vertex> immutableNodes = new LinkedHashSet<Vertex>();
+	private final Set<Vertex> immutableNodes = HashFactory.createSet();
 	private int valence3;
 	private int valence4;
 	private int inserted;
@@ -67,7 +67,7 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 	 * This is needed to update the tree. Level 1 is not enough because of
 	 * alternate and 55 patterns.
 	 */
-	private Collection<Vertex> level2Neighbours = new HashSet<Vertex>(18 * 4 / 3);
+	private Collection<Vertex> level2Neighbours = HashFactory.createSet(18);
 
 	/**
 	 * Creates a <code>ImproveConnectivity</code> instance.

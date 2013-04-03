@@ -21,7 +21,6 @@ package org.jcae.mesh.amibe.algos3d;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -33,6 +32,7 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.MetricSupport.AnalyticMetricInterface;
 import org.jcae.mesh.amibe.projection.MeshLiaison;
+import org.jcae.mesh.amibe.util.HashFactory;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 
@@ -121,7 +121,7 @@ public class RemeshSkeleton {
 			List<Vertex> toInsert = rp.compute();
 			List<Integer> bgLink = rp.getBackgroundLink();
 			int k = 0;
-			final HashSet<Vertex> toKeep = new HashSet<Vertex>(toInsert);
+			final Set<Vertex> toKeep = HashFactory.createSet(toInsert);
 			ArrayList<AbstractHalfEdge> edgeIndex = new ArrayList<AbstractHalfEdge>(polyline.size()-1);
 			for(int i = 0; i < polyline.size() - 1; i++)
 			{

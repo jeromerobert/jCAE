@@ -49,7 +49,6 @@ import java.util.LinkedHashSet;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -57,6 +56,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.mesh.amibe.metrics.Location;
 import org.jcae.mesh.amibe.projection.MapMeshLiaison;
+import org.jcae.mesh.amibe.util.HashFactory;
 import org.jcae.mesh.xmldata.Amibe2VTK;
 
 /**
@@ -79,9 +79,10 @@ public class Remesh
 	private int nrFailedInterpolations;
 
 	private final Map<Triangle, Collection<Vertex>> mapTriangleVertices =
-		new HashMap<Triangle, Collection<Vertex>>();
+		HashFactory.<Triangle, Collection<Vertex>>createMap();
 	// Keeps track of surrounding triangle
-	private final Map<Vertex, Triangle> surroundingTriangle = new HashMap<Vertex, Triangle>();
+	private final Map<Vertex, Triangle> surroundingTriangle = 
+		HashFactory.<Vertex, Triangle>createMap();
 
 	private final boolean project;
 	private final boolean hasRidges;
@@ -94,8 +95,8 @@ public class Remesh
 	private final List<Vertex> triNodes = new ArrayList<Vertex>();
 	private final List<EuclidianMetric3D> triMetrics = new ArrayList<EuclidianMetric3D>();
 	private final List<Vertex> triNeighbor = new ArrayList<Vertex>();
-	private Map <Triangle, Collection<Vertex>> verticesToDispatch =
-		new HashMap<Triangle, Collection<Vertex>>();
+	private final Map <Triangle, Collection<Vertex>> verticesToDispatch =
+		HashFactory.<Triangle, Collection<Vertex>>createMap();
 	//  Map to keep track of all groups near a vertex
 	private final Map<Vertex, int[]> groups = new HashMap<Vertex, int[]>();
 	private final Set<Vertex> boundaryNodes = new LinkedHashSet<Vertex>();
@@ -274,14 +275,14 @@ public class Remesh
 		TIntObjectHashMap<KdTree<Vertex>> kdTrees = new TIntObjectHashMap<KdTree<Vertex>>();
 		KdTree<Vertex> globalKdTree = new KdTree<Vertex>(bbox);
 		kdTrees.put(-1, globalKdTree);
-		TIntObjectHashMap<HashSet<Vertex>> seenByGroup = new TIntObjectHashMap<HashSet<Vertex>>(numberOfTriangles.size());
-		HashSet<Vertex> globalSeen = new HashSet(nodeset.size());
+		TIntObjectHashMap<Set<Vertex>> seenByGroup = new TIntObjectHashMap<Set<Vertex>>(numberOfTriangles.size());
+		Set<Vertex> globalSeen = HashFactory.createSet(nodeset.size());
 		seenByGroup.put(-1, globalSeen);
 		for (TIntIntIterator it = numberOfTriangles.iterator(); it.hasNext(); )
 		{
 			it.advance();
 			kdTrees.put(it.key(), new KdTree<Vertex>(bbox));
-			seenByGroup.put(it.key(), new HashSet(it.value() / 2));
+			seenByGroup.put(it.key(), HashFactory.<Vertex>createSet(it.value() / 2));
 		}
 		
 		for (Triangle f : triangles)
@@ -293,7 +294,7 @@ public class Remesh
 			for (int i = 0; i < 3; ++i)
 			{
 				Vertex v = f.vertex[i];
-				HashSet<Vertex> seen = seenByGroup.get(group);
+				Set<Vertex> seen = seenByGroup.get(group);
 				if (seen.contains(v))
 					continue;
 				seen.add(v);

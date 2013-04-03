@@ -40,6 +40,7 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.mesh.amibe.metrics.Location;
+import org.jcae.mesh.amibe.util.HashFactory;
 
 public abstract class MeshLiaison
 {
@@ -100,7 +101,7 @@ public abstract class MeshLiaison
 		Map<Vertex, String> vgGroups = createVGMap();
 
 		// Create vertices of currentMesh
-		Map<Vertex, Vertex> mapBgToCurrent = new HashMap<Vertex, Vertex>(backgroundNodeset.size()+1);
+		Map<Vertex, Vertex> mapBgToCurrent = HashFactory.createMap(backgroundNodeset.size());
 		for (Vertex v : backgroundNodeset)
 		{
 			Vertex currentV = cloneVertex(v, mapBgToCurrent, vgGroups);

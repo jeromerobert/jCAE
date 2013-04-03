@@ -180,7 +180,7 @@ public class TriangleKdTree {
 		return Arrays.toString(boxCenter)+" "+Arrays.toString(halfSize);
 	}
 
-	private final transient Set<Triangle> seen = HashFactory.createHashSet();
+	private final transient Set<Triangle> seen = HashFactory.createSet();
 	private final transient List<Node> closeNodes = new ArrayList<Node>();
 	private final transient BoundaryPool closeBoundaries = new BoundaryPool();
 	private final int[] closeIndex = new int[2];
@@ -452,7 +452,7 @@ public class TriangleKdTree {
 	/** Slow and memory consuming debug method that build node boundaries */
 	private Map<Node, double[]> getNodeBounds()
 	{
-		HashMap<Node, double[]> toReturn = new HashMap<Node, double[]>();
+		Map<Node, double[]> toReturn = HashFactory.createMap();
 		List<Node> backup = new ArrayList<Node>(closeNodes);
 		closeNodes.clear();
 		BoundaryPool bp = new BoundaryPool();

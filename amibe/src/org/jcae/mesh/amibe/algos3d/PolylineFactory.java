@@ -22,7 +22,6 @@ package org.jcae.mesh.amibe.algos3d;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -30,6 +29,7 @@ import java.util.Set;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
+import org.jcae.mesh.amibe.util.HashFactory;
 
 /**
  * Compute polylines from the beams of a mesh.
@@ -40,7 +40,7 @@ public class PolylineFactory extends HashMap<Integer, Collection<List<Vertex>>>{
 
 	/** Remove polylines ends which would lead to small polylines */
 	private static void filterSmall(Set<BeamVertex> polylineEnds, double small2) {
-		Set<BeamVertex> toRemove = new HashSet<BeamVertex>();
+		Set<BeamVertex> toRemove = HashFactory.createSet();
 		for(BeamVertex bv: polylineEnds)
 		{
 			for(Beam b:bv)
@@ -185,8 +185,8 @@ public class PolylineFactory extends HashMap<Integer, Collection<List<Vertex>>>{
 	{
 		List<Vertex> beams = mesh.getBeams();
 		int nbBeams = beams.size() / 2;
-		Map<Vertex, BeamVertex> verticeMap = new HashMap<Vertex, BeamVertex>();
-		Map<Integer, Collection<Beam>> beamMap = new HashMap<Integer, Collection<Beam>>();
+		Map<Vertex, BeamVertex> verticeMap = HashFactory.createMap();
+		Map<Integer, Collection<Beam>> beamMap = HashFactory.createMap();
 		for(int i = 0; i<nbBeams; i++)
 		{
 			BeamVertex v1 = createBeamVertex(beams.get(i*2), verticeMap);
@@ -198,7 +198,7 @@ public class PolylineFactory extends HashMap<Integer, Collection<List<Vertex>>>{
 			Collection<Beam> beamSet = beamMap.get(group);
 			if(beamSet == null)
 			{
-				beamSet = new HashSet<Beam>();
+				beamSet = HashFactory.createSet();
 				beamMap.put(group, beamSet);
 			}
 			beamSet.add(beam);
@@ -248,7 +248,7 @@ public class PolylineFactory extends HashMap<Integer, Collection<List<Vertex>>>{
 	public PolylineFactory(Mesh mesh, double angle, double smallBeams) {
 		angle = Math.cos(Math.toRadians(angle));
 		Map<Integer, Collection<Beam>> beamMap = indexify(mesh);
-		HashSet<BeamVertex> polylineEnds = new HashSet<BeamVertex>();
+		Set<BeamVertex> polylineEnds = HashFactory.createSet();
 		ArrayList<Beam> polylineB = new ArrayList<Beam>();
 		for(Entry<Integer, Collection<Beam>> e:beamMap.entrySet())
 		{

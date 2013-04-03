@@ -27,15 +27,16 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.xpath.XPathExpressionException;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.util.HashFactory;
 import org.jcae.mesh.xmldata.AmibeReader;
 import org.jcae.mesh.xmldata.JCAEXMLData;
 import org.jcae.mesh.xmldata.XMLReader;
@@ -72,7 +73,7 @@ public class RandomizeGroups {
 	public void compute(Mesh mesh) throws IOException, SAXException
 	{
 		Random random = new Random(0);
-		HashSet<Vertex> vertices = new HashSet<Vertex>();
+		Set<Vertex> vertices = HashFactory.createSet();
 		for(Collection<Vertex> l:mesh.getVertexGroup().values())
 			vertices.addAll(l);
 		vertices.addAll(mesh.getBeams());
