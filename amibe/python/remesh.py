@@ -218,9 +218,15 @@ def __remesh(options):
 
     if point_metric:
         point_metric.scaling = 1
+        if options.forced_bounds:
+            BeamInsertion(liaison.mesh, point_metric).insert(
+                options.forced_bounds[0], options.forced_bounds[1])
         RemeshSkeleton(liaison, 1.66, options.size / 100.0, point_metric).compute()
     else:
         RemeshSkeleton(liaison, 1.66, options.size / 100.0, options.size).compute()
+        if options.forced_bounds:
+            BeamInsertion(liaison.mesh, options.size).insert(
+                options.forced_bounds[0], options.forced_bounds[1])
 
     #2
     writeVTK(liaison)
