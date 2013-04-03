@@ -226,6 +226,9 @@ public class Skeleton {
 			//next should have been an outer half edge so we ignore this case
 			//The vertex edge.destination() will be check using an other edge
 			return false;
+		if(edge.hasAttributes(AbstractHalfEdge.IMMUTABLE) != next.hasAttributes(
+			AbstractHalfEdge.IMMUTABLE))
+			return true;
 		Set<Integer> g1 = HashFactory.createHashSet();
 		Set<Integer> g2 = HashFactory.createHashSet();
 		getGroups(edge, g1);
