@@ -59,11 +59,12 @@ public class PolylineFactory extends HashMap<Integer, Collection<List<Vertex>>>{
 		}
 		polylineEnds.removeAll(toRemove);
 	}
+	private final boolean ignoreGroups;
+	private static int beamCounter = 0;
 
-	private static class BeamVertex extends ArrayList<Beam>
+	private class BeamVertex extends ArrayList<Beam>
 		implements Comparable<BeamVertex>
 	{
-		private static int beamCounter = 0;
 		/** Replace hashCode to ensure the algorithm is reproducible */
 		private final int id = beamCounter ++;
 		public final Vertex vertex;
@@ -75,7 +76,7 @@ public class PolylineFactory extends HashMap<Integer, Collection<List<Vertex>>>{
 
 		private boolean isManifold()
 		{
-			return size() == 2 &&  get(0).group == get(1).group;
+			return size() == 2 && (ignoreGroups || get(0).group == get(1).group);
 		}
 
 		private double[] getVector(int i)
@@ -170,7 +171,7 @@ public class PolylineFactory extends HashMap<Integer, Collection<List<Vertex>>>{
 		}
 	}
 
-	private static BeamVertex createBeamVertex(Vertex v, Map<Vertex, BeamVertex> map)
+	private BeamVertex createBeamVertex(Vertex v, Map<Vertex, BeamVertex> map)
 	{
 		BeamVertex bv = map.get(v);
 		if(bv == null)
@@ -181,7 +182,7 @@ public class PolylineFactory extends HashMap<Integer, Collection<List<Vertex>>>{
 		return bv;
 	}
 
-	private static Map<Integer, Collection<Beam>> indexify(Mesh mesh)
+	private Map<Integer, Collection<Beam>> indexify(Mesh mesh)
 	{
 		List<Vertex> beams = mesh.getBeams();
 		int nbBeams = beams.size() / 2;
@@ -191,7 +192,7 @@ public class PolylineFactory extends HashMap<Integer, Collection<List<Vertex>>>{
 		{
 			BeamVertex v1 = createBeamVertex(beams.get(i*2), verticeMap);
 			BeamVertex v2 = createBeamVertex(beams.get(i*2+1), verticeMap);
-			int group = mesh.getBeamGroup(i);
+			int group = ignoreGroups ? -1 : mesh.getBeamGroup(i);
 			Beam beam = new Beam(v1, v2, group);
 			v1.add(beam);
 			v2.add(beam);
@@ -238,6 +239,9 @@ public class PolylineFactory extends HashMap<Integer, Collection<List<Vertex>>>{
 		this(mesh, -1.0, 0);
 	}
 
+	public PolylineFactory(Mesh mesh, double angle, double smallBeams) {
+		this(mesh, angle, smallBeams, false);
+	}
 	/**
 	 * @param mesh
 	 * @param angle Ridge limit angle in degrees. Polylines won't contains angle
@@ -245,7 +249,8 @@ public class PolylineFactory extends HashMap<Integer, Collection<List<Vertex>>>{
 	 * @param smallBeams beams smaller than this value will be ignore when
 	 *   calculating the smooth criteria
 	 */
-	public PolylineFactory(Mesh mesh, double angle, double smallBeams) {
+	public PolylineFactory(Mesh mesh, double angle, double smallBeams, boolean ignoreGroups) {
+		this.ignoreGroups = ignoreGroups;
 		angle = Math.cos(Math.toRadians(angle));
 		Map<Integer, Collection<Beam>> beamMap = indexify(mesh);
 		Set<BeamVertex> polylineEnds = HashFactory.createSet();

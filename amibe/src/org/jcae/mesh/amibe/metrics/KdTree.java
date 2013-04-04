@@ -321,7 +321,8 @@ public class KdTree<T extends Location>
 	{
 		i[0] = (int) ((p.getX() - x0[0]) * x0[dimension]);
 		i[1] = (int) ((p.getY() - x0[1]) * x0[dimension]);
-		i[2] = (int) ((p.getZ() - x0[2]) * x0[dimension]);
+		if(i.length > 2)
+			i[2] = (int) ((p.getZ() - x0[2]) * x0[dimension]);
 	}
 
 	/**

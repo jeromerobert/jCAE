@@ -454,7 +454,7 @@ public class Initial
 		}
 
 		LOGGER.fine(" Select 3D smaller diagonals");
-		mesh.pushCompGeom(3);
+		mesh.pushCompGeom(mesh.getGeomSurface() == null ? 2 : 3);
 		boolean redo = true;
 		//  With Riemannian metrics, there may be infinite loops,
 		//  make sure to exit this loop.
@@ -475,7 +475,7 @@ public class Initial
 					redo = true;
  			}
  		}
-		mesh.popCompGeom(3);
+		mesh.pushCompGeom(mesh.getGeomSurface() == null ? 2 : 3);
 		
 		assert (mesh.isValid());
 	}
