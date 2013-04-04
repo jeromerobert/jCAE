@@ -2119,6 +2119,48 @@ public class Mesh implements Serializable
 			}
 		}
 	}
+
+	/**
+	 * 
+	 * @param bounds {xmin, ymin, zmin, xmax, ymax, zmax}
+	 */
+	public void getBoundingBox(double[] bounds)
+	{
+		bounds[0] = Double.POSITIVE_INFINITY;
+		bounds[1] = Double.POSITIVE_INFINITY;
+		bounds[2] = Double.POSITIVE_INFINITY;
+		bounds[3] = Double.NEGATIVE_INFINITY;
+		bounds[4] = Double.NEGATIVE_INFINITY;
+		bounds[5] = Double.NEGATIVE_INFINITY;
+		if(hasNodes())
+		{
+			for(Vertex v:getNodes())
+			{
+				bounds[0] = Math.min(bounds[0], v.getX());
+				bounds[1] = Math.min(bounds[1], v.getY());
+				bounds[2] = Math.min(bounds[2], v.getZ());
+				bounds[3] = Math.max(bounds[3], v.getX());
+				bounds[4] = Math.max(bounds[4], v.getY());
+				bounds[5] = Math.max(bounds[5], v.getZ());
+			}
+		}
+		else
+		{
+			for(Triangle t:getTriangles())
+			{
+				for(Vertex v: t.vertex)
+				{
+					bounds[0] = Math.min(bounds[0], v.getX());
+					bounds[1] = Math.min(bounds[1], v.getY());
+					bounds[2] = Math.min(bounds[2], v.getZ());
+					bounds[3] = Math.max(bounds[3], v.getX());
+					bounds[4] = Math.max(bounds[4], v.getY());
+					bounds[5] = Math.max(bounds[5], v.getZ());
+				}
+			}
+		}
+	}
+
 	// Useful for debugging
 	/*  Following imports must be moved at top.
 import java.io.FileOutputStream;
