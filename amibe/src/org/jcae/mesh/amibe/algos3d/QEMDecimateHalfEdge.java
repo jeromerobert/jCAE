@@ -175,6 +175,17 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 				freeEdgesOnly = Boolean.parseBoolean(val);
 				LOGGER.info("freeEdgesOnly: "+freeEdgesOnly);
 			}
+			// This is a workaround for a bug which currently cannot be found.
+			// When the metric is small close to a non-manifold or boundary
+			// edge, adjacent triangles may be collapsed. So it break the border.
+			else if("freezeNonManifold".equals(key))
+			{
+				for(Vertex v:mesh.getNodes())
+				{
+					if(v.getRef() != 0)
+						v.setMutable(false);
+				}
+			}
 			else if(!metrics.isKnownOption(key))
 				throw new RuntimeException("Unknown option: "+key);
 		}
