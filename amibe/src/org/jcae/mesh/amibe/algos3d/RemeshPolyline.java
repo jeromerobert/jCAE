@@ -50,7 +50,7 @@ public class RemeshPolyline
 	private final List<Vertex> bgWire = new ArrayList<Vertex>();
 	// Map containing the metrics at each input point
 	private final Map<Vertex, EuclidianMetric3D> metricsMap = new LinkedHashMap<Vertex, EuclidianMetric3D>();
-
+	private AnalyticMetricInterface analyticMetric;
 	private boolean buildBackgroundLink;
 	/** Keep track of on which background segment each point were inserted */
 	private List<Integer> backgroundLink;
@@ -111,6 +111,7 @@ public class RemeshPolyline
 				abscissa += v.distance3D(last);
 			last = v;
 		}
+		analyticMetric = analytic;
 		LOGGER.log(Level.FINE, "Polyline approximate length: {0}", abscissa);
 	}
 
@@ -279,7 +280,12 @@ public class RemeshPolyline
 			{
 				cnt--;
 				// Compute metrics at this position
-				EuclidianMetric3D m = new EuclidianMetric3D(hS*Math.exp(alpha*logRatio));
+				EuclidianMetric3D m;
+				if(analyticMetric == null)
+					m = new EuclidianMetric3D(hS*Math.exp(alpha*logRatio));
+				else
+					m = new EuclidianMetric3D(analyticMetric.getTargetSize(
+						np.getX(), np.getY(), np.getZ(), -1));
 				double l = interpolatedDistance(vS, mS, np, m);
 				if (Math.abs(l - target) < maxError)
 				{
