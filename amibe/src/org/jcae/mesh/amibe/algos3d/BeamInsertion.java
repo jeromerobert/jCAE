@@ -31,7 +31,6 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
-import org.jcae.mesh.amibe.ds.EdgeAttrSetter;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
@@ -276,7 +275,7 @@ public class BeamInsertion {
 			rs.compute();
 			MeshWriter.writeObject3D(liaison.getMesh(), "/tmp/AMIBE/c2.amibe", null);
 		} catch (IOException ex) {
-			Logger.getLogger(EdgeAttrSetter.class.getName()).log(Level.SEVERE,
+			Logger.getLogger(BeamInsertion.class.getName()).log(Level.SEVERE,
 				null, ex);
 		}
 	}
