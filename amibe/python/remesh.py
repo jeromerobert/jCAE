@@ -44,7 +44,8 @@ def read_mesh(path):
     MeshReader.readObject3D(mesh, path)
     return mesh
 
-def afront_debug(afront_path, tmp_dir, mesh, size, point_metric, immutable_groups):
+def afront_debug(afront_path, tmp_dir, mesh, size, point_metric, immutable_groups,
+		afront_stderr = None):
     from org.jcae.mesh.xmldata import Amibe2OFF, AFront2Amibe, AmibeReader, MultiDoubleFileReader
     """ Same as afront but with temporary files to help debugging """
     mesh_dir = os.path.join(tmp_dir, "mesh.amibe")
