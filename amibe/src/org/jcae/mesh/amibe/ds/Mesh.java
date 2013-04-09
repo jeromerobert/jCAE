@@ -557,7 +557,7 @@ public class Mesh implements Serializable
 		ArrayList<Triangle> newTri = new ArrayList<Triangle>();
 		//  For each vertex, build the list of triangles
 		//  connected to this vertex.
-		Map<Vertex, ArrayList<Triangle>> tVertList = getMapVertexLinks();
+		Map<Vertex, Collection<Triangle>> tVertList = getMapVertexLinks();
 		//  Connect all edges together
 		glueSymmetricHalfEdges(tVertList, newTri);
 
@@ -628,7 +628,7 @@ public class Mesh implements Serializable
 		if (maxLabel != currentMaxLabel)
 			logger.fine("Created "+(maxLabel - currentMaxLabel)+" more references");
 		//  Remove all references to help the garbage collector.
-		for (ArrayList<Triangle> list : tVertList.values())
+		for (Collection<Triangle> list : tVertList.values())
 			list.clear();
 		// Add outer triangles
 		triangleList.addAll(newTri);
@@ -640,7 +640,7 @@ public class Mesh implements Serializable
 		}
 	}
 
-	private Map<Vertex, ArrayList<Triangle>> getMapVertexLinks()
+	private Map<Vertex, Collection<Triangle>> getMapVertexLinks()
 	{
 		Collection<Vertex> vertices;
 		if (nodeList == null)
@@ -658,7 +658,7 @@ public class Mesh implements Serializable
 		{
 			vertices = nodeList;
 		}
-		Map<Vertex, ArrayList<Triangle>> tVertList = new LinkedHashMap<Vertex, ArrayList<Triangle>>(vertices.size());
+		Map<Vertex, Collection<Triangle>> tVertList = new LinkedHashMap<Vertex, Collection<Triangle>>(vertices.size());
 		for (Vertex v: vertices)
 			tVertList.put(v, new ArrayList<Triangle>(10));
 		for (Triangle t: triangleList)
@@ -669,7 +669,7 @@ public class Mesh implements Serializable
 			{
 				if (v.isReadable())
 				{
-					ArrayList<Triangle> list = tVertList.get(v);
+					Collection<Triangle> list = tVertList.get(v);
 					list.add(t);
 				}
 				v.setLink(t);
@@ -683,16 +683,17 @@ public class Mesh implements Serializable
 		rebuildVertexLinks(getMapVertexLinks());
 	}
 
-	private void rebuildVertexLinks(Map<Vertex, ArrayList<Triangle>> tVertList)
+	public static void rebuildVertexLinks(Map<Vertex, Collection<Triangle>> tVertList)
 	{
-		for (Map.Entry<Vertex, ArrayList<Triangle>> entry : tVertList.entrySet())
+		for (Map.Entry<Vertex, Collection<Triangle>> entry : tVertList.entrySet())
 		{
 			Vertex v = entry.getKey();
-			ArrayList<Triangle> list = entry.getValue();
+			Collection<Triangle> list = entry.getValue();
 			int cnt = 0;
 			AbstractHalfEdge ot = null;
 			if (null == v.getLink())
 				continue;
+			assert v.getLink() instanceof Triangle: v;
 			ot = v.getIncidentAbstractHalfEdge((Triangle) v.getLink(), ot);
 			Vertex d = ot.destination();
 			do
@@ -769,17 +770,18 @@ public class Mesh implements Serializable
 		}
 	}
 
-	private void glueSymmetricHalfEdges(Map<Vertex, ArrayList<Triangle>> tVertList, ArrayList<Triangle> newTri)
+	public void glueSymmetricHalfEdges(Map<Vertex,
+		Collection<Triangle>> tVertList, Collection<Triangle> newTri)
 	{
 		Triangle.List markedTri = new Triangle.List();
 		AbstractHalfEdge ot = null;
 		AbstractHalfEdge ot2 = null;
 		AbstractHalfEdge [] work = new AbstractHalfEdge[3];
-		for (Map.Entry<Vertex, ArrayList<Triangle>> e: tVertList.entrySet())
+		for (Map.Entry<Vertex, Collection<Triangle>> e: tVertList.entrySet())
 		{
 			//  Mark all triangles having v as vertex
 			Vertex v = e.getKey();
-			ArrayList<Triangle> neighTriList = e.getValue();
+			Collection<Triangle> neighTriList = e.getValue();
 			if (neighTriList == null)
 				continue;
 			for (Triangle t: neighTriList)
@@ -792,7 +794,7 @@ public class Mesh implements Serializable
 				if (ot.hasSymmetricEdge())
 					continue;
 				Vertex v2 = ot.destination();
-				ArrayList<Triangle> neighTriList2 = tVertList.get(v2);
+				Collection<Triangle> neighTriList2 = tVertList.get(v2);
 				if (neighTriList2 == null)
 					continue;
 				// Edge (v,v2) has not yet been processed.
@@ -838,7 +840,8 @@ public class Mesh implements Serializable
 		}
 	}
 
-	private void glueNonManifoldHalfEdges(Vertex v, Vertex v2, AbstractHalfEdge ot, AbstractHalfEdge ot2, AbstractHalfEdge [] work, ArrayList<Triangle> newTri)
+	public void glueNonManifoldHalfEdges(Vertex v, Vertex v2, AbstractHalfEdge ot,
+		AbstractHalfEdge ot2, AbstractHalfEdge [] work, Collection<Triangle> newTri)
 	{
 		assert v == ot.origin() && v2 == ot.destination();
 		assert (v == ot2.origin() && v2 == ot2.destination()) || (v2 == ot2.origin() && v == ot2.destination());
@@ -864,7 +867,7 @@ public class Mesh implements Serializable
 			bindSymEdgesToVirtualTriangles(ot, work[0], work[1], work[2], newTri);
 		}
 
-		assert !ot2.hasSymmetricEdge();
+		assert !ot2.hasSymmetricEdge(): ot2+"\n"+ot2.sym();
 		// Link ot2 to a virtual triangle
 		work[0] = bindToVirtualTriangle(ot2, work[0]);
 		newTri.add(work[0].getTri());
@@ -893,7 +896,7 @@ public class Mesh implements Serializable
 	}
 
 	private void bindSymEdgesToVirtualTriangles(AbstractHalfEdge ot, AbstractHalfEdge sym,
-		AbstractHalfEdge temp0, AbstractHalfEdge temp1, ArrayList<Triangle> newTriangles)
+		AbstractHalfEdge temp0, AbstractHalfEdge temp1, Collection<Triangle> newTriangles)
 	{
 		// Link ot to a virtual triangle
 		temp0 = bindToVirtualTriangle(ot, temp0);
