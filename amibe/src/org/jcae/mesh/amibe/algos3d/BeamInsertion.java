@@ -121,6 +121,7 @@ public class BeamInsertion {
 		ByteBuffer bb = ByteBuffer.allocate((int)vertexChannel.size());
 		bb.order(ByteOrder.nativeOrder());
 		vertexChannel.read(bb);
+		bb.rewind();
 		DoubleBuffer vertexBuffer = bb.asDoubleBuffer();
 
 		FileChannel beamChannel = new FileInputStream(beamFile).getChannel();
