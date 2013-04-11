@@ -449,7 +449,9 @@ public class Vertex extends Location implements Serializable
 	/**
 	 * Return an iterator over incident half-edges.
 	 * Note: this method works also with non-manifold meshes.
-	 *
+	 * When this iterator start from a non-manifold edge and is expected to
+	 * finish on another non-manifold edge with same destination, this iterator
+	 * will not return all outer edges.
 	 * @return an iterator over incident half-edges.
 	 */
 	public Iterator<AbstractHalfEdge> getNeighbourIteratorAbstractHalfEdge()
