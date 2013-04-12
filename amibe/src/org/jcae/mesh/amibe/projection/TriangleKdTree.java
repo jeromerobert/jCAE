@@ -264,6 +264,25 @@ public class TriangleKdTree {
 		closeBoundaries.clear();
 		closeNodes.clear();
 	}
+
+	public void getNearTriangles(double[] aabb, Collection<Triangle> result, int group)
+	{
+		getNodes(aabb, null, false);
+		for(Node nn: closeNodes)
+		{
+			if(nn.triangles != null)
+			{
+				for(Triangle t:nn.triangles)
+				{
+					if(group >= 0 && t.getGroupId() != group)
+						continue;
+					result.add(t);
+				}
+			}
+		}
+		closeNodes.clear();
+	}
+
 	/**
 	 * Get the closest triangle for coords
 	 * @param coords
@@ -428,6 +447,7 @@ public class TriangleKdTree {
 					System.err.println(ti.triBoxOverlap(nb.get(n), true));
 					System.err.println(intersect(triangleBounds, nb.get(n)));
 					System.err.println("n :"+Arrays.toString(nb.get(n)));
+					System.err.println("n :"+bounds2String(nb.get(n)));
 				}
 				throw new IllegalStateException();
 			}
