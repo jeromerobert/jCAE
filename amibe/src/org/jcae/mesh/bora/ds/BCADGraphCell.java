@@ -21,6 +21,7 @@
 
 package org.jcae.mesh.bora.ds;
 
+import gnu.trove.set.hash.TCustomHashSet;
 import org.jcae.mesh.cad.CADShape;
 import org.jcae.mesh.cad.CADShapeFactory;
 import org.jcae.mesh.cad.CADShapeEnum;
@@ -31,7 +32,7 @@ import java.util.Collection;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Iterator;
-import gnu.trove.THashSet;
+import gnu.trove.set.hash.THashSet;
 import java.util.Collections;
 
 /**
@@ -182,7 +183,8 @@ public class BCADGraphCell
 	 */
 	public final Iterator<BCADGraphCell> shapesExplorer(CADShapeEnum cse)
 	{
-		return shapesExplorer(cse, new THashSet<CADShape>(KeepOrientationHashingStrategy.getInstance()));
+		return shapesExplorer(cse, new TCustomHashSet<CADShape>(
+			KeepOrientationHashingStrategy.getInstance()));
 	}
 
 	/**
@@ -258,7 +260,8 @@ public class BCADGraphCell
 	 */
 	public final Iterator<BCADGraphCell> shapesIterator()
 	{
-		return shapesIterator(new THashSet<CADShape>(KeepOrientationHashingStrategy.getInstance()));
+		return shapesIterator(new TCustomHashSet<CADShape>(
+			KeepOrientationHashingStrategy.getInstance()));
 	}
 
 	/**

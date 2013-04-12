@@ -1,8 +1,8 @@
 package org.jcae.viewer3d.fe.unv;
 
-import gnu.trove.TFloatArrayList;
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntIntHashMap;
+import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TIntIntHashMap;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.StringTokenizer;

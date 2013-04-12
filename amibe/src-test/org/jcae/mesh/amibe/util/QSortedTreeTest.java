@@ -20,6 +20,7 @@
 
 package org.jcae.mesh.amibe.util;
 
+import gnu.trove.impl.PrimeFinder;
 import java.util.Iterator;
 
 import static org.junit.Assert.*;
@@ -105,7 +106,7 @@ public class QSortedTreeTest
 	
 	final void unitTest5(int n, int s)
 	{
-		int prime = gnu.trove.PrimeFinder.nextPrime(n);
+		int prime = PrimeFinder.nextPrime(n);
 		Integer [] iii = unitTestInit(prime);
 		int index = 1;
 		for (int i = 0; i < prime; i++)
@@ -120,7 +121,7 @@ public class QSortedTreeTest
 	
 	final void unitTest6(int n, int s)
 	{
-		int prime = gnu.trove.PrimeFinder.nextPrime(n);
+		int prime = PrimeFinder.nextPrime(n);
 		Integer [] iii = new Integer[prime];
 		for (int i = 0; i < iii.length; i++)
 			iii[i] = Integer.valueOf(i);

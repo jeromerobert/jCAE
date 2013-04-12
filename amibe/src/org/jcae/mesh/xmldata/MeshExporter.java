@@ -20,9 +20,9 @@
 
 package org.jcae.mesh.xmldata;
 
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntIntHashMap;
+import gnu.trove.set.hash.TIntHashSet;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TIntIntHashMap;
 import java.io.IOException;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -254,7 +254,7 @@ abstract public class MeshExporter
 		TIntHashSet nodeset = new TIntHashSet(nodeIDs);
 		TIntArrayList nodelist = new TIntArrayList(nodeset.toArray());
 		nodelist.sort();
-		writeNodes(out, nodelist.toNativeArray(), amibeNodeToUNVNode);
+		writeNodes(out, nodelist.toArray(), amibeNodeToUNVNode);
 		TIntIntHashMap amibeTriaToUNVTria=new TIntIntHashMap();
 		writeTriangles(out, nodeIDs, amibeNodeToUNVNode, amibeTriaToUNVTria);
 		try

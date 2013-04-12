@@ -25,8 +25,8 @@ import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntIterator;
+import gnu.trove.set.hash.TIntHashSet;
+import gnu.trove.iterator.TIntIterator;
 
 import javax.media.j3d.BoundingSphere;
 import javax.media.j3d.BranchGroup;

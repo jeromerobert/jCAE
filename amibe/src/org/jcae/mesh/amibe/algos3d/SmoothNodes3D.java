@@ -37,7 +37,7 @@ import java.util.LinkedHashSet;
 import java.util.Collection;
 import java.util.Iterator;
 import java.io.IOException;
-import gnu.trove.TObjectDoubleHashMap;
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

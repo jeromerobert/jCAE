@@ -21,7 +21,7 @@
 package org.jcae.mesh.amibe.ds;
 
 
-import gnu.trove.TObjectIntHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 
 /**
  * 1D edge.

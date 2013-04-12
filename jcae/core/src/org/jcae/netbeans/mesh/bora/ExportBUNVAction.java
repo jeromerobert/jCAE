@@ -1,6 +1,6 @@
 package org.jcae.netbeans.mesh.bora;
 
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -55,7 +55,7 @@ public final class ExportBUNVAction extends CookieAction
 
 
 				BoraToUnvConvert conv = new BoraToUnvConvert(unvFile, subMesh);
-				conv.collectBoundaryNodes(listOfShapes.toNativeArray());
+				conv.collectBoundaryNodes(listOfShapes.toArray());
 				conv.beforeProcessingAllShapes(false);
 
 				//specifying the groups

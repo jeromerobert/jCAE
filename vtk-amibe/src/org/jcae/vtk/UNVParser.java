@@ -1,8 +1,8 @@
 package org.jcae.vtk;
 
-import gnu.trove.TFloatArrayList;
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntIntHashMap;
+import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TIntIntHashMap;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
@@ -198,7 +198,7 @@ public class UNVParser
 			surfaceGroupNames.add("");
 			int[] group=new int[surfaceIndices.size()];
 			int i = 0;
-			for(int val : elementSurfaceIndicesMap.getValues())
+			for(int val : elementSurfaceIndicesMap.values())
 			{
 				group[i]=val;
 				i++;
@@ -319,7 +319,7 @@ public class UNVParser
 					break;
 				}
 			}
-			surfaceGroups.add(facelist.toNativeArray());			
+			surfaceGroups.add(facelist.toArray());
 		}
 	}
 	
@@ -446,13 +446,13 @@ public class UNVParser
 		if(!groupTetra4.isEmpty())
 		{
 			surfaceGroupNames.add(name);
-			surfaceGroups.add(groupTetra4.toNativeArray());
+			surfaceGroups.add(groupTetra4.toArray());
 		}
 
 		if(!groupHexa8.isEmpty())
 		{
 			surfaceGroupNames.add(name);
-			surfaceGroups.add(groupHexa8.toNativeArray());
+			surfaceGroups.add(groupHexa8.toArray());
 		}
 		
 		return;
@@ -493,7 +493,7 @@ public class UNVParser
 			coords.add(z);
 		}
 		this.nodesIndicesMap=indices;
-		this.nodesCoordinates=coords.toNativeArray();
+		this.nodesCoordinates=coords.toArray();
 	}
 
 	private double readUnit(BufferedReader rd)

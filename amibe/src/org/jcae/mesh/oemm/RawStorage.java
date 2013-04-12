@@ -39,10 +39,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.lang.ref.SoftReference;
-import gnu.trove.TIntIterator;
-import gnu.trove.TIntIntHashMap;
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntHashSet;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.hash.TIntHashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

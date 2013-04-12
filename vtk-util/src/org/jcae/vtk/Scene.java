@@ -20,8 +20,8 @@
 package org.jcae.vtk;
 
 
-import gnu.trove.TLongObjectHashMap;
-import gnu.trove.TLongObjectIterator;
+import gnu.trove.map.hash.TLongObjectHashMap;
+import gnu.trove.iterator.TLongObjectIterator;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -307,7 +307,7 @@ public class Scene implements AbstractNode.ActorListener
 	public void setClippingPlanes(vtkPlaneCollection planes)
 	{
 		AbstractNode[] nodes = new AbstractNode[idActorToNode.size()];
-		idActorToNode.getValues(nodes);
+		idActorToNode.values(nodes);
 		for (AbstractNode node : nodes)
 			node.getActor().GetMapper().SetClippingPlanes(planes);
 	}

@@ -20,9 +20,9 @@
 
 package org.jcae.mesh.amibe.ds;
 
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntIntHashMap;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.hash.TIntHashSet;
+import gnu.trove.map.hash.TIntIntHashMap;
 import org.jcae.mesh.amibe.traits.Traits;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
@@ -2257,7 +2257,7 @@ import java.io.PrintWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
-import gnu.trove.TObjectIntHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 
 	public void printMesh()
 	{

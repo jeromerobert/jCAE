@@ -19,8 +19,8 @@
 
 package org.jcae.mesh.amibe.ds;
 
-import gnu.trove.TIntObjectHashMap;
-import gnu.trove.TObjectIntHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 
 import java.util.logging.Logger;
 

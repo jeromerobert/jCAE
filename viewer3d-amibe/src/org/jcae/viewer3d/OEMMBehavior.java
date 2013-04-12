@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Iterator;
 import java.lang.ref.SoftReference;
-import gnu.trove.TIntHashSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 
 import javax.media.j3d.*;

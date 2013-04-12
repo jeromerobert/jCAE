@@ -21,7 +21,7 @@
 package org.jcae.mesh.oemm;
 
 import java.util.ArrayList;
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -249,7 +249,7 @@ public class OEMM implements Serializable
 		        throws java.io.IOException
 		{
 			s.defaultWriteObject();
-			s.writeObject(adjLeaves.toNativeArray());
+			s.writeObject(adjLeaves.toArray());
 		}
 
 		public final void setPathComponents(ArrayList<String> dir, int octant)

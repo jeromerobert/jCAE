@@ -33,7 +33,7 @@ import org.jcae.mesh.amibe.metrics.Metric;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.HashSet;
-import gnu.trove.PrimeFinder;
+import gnu.trove.impl.PrimeFinder;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.mesh.amibe.metrics.Location;

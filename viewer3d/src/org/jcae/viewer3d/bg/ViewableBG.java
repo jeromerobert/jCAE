@@ -31,8 +31,8 @@ import org.jcae.viewer3d.PickViewable;
 import org.jcae.viewer3d.SelectionListener;
 import org.jcae.viewer3d.ViewableAdaptor;
 import com.sun.j3d.utils.picking.PickIntersection;
-import gnu.trove.TIntObjectHashMap;
-import gnu.trove.TIntHashSet;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * @author Jerome Robert

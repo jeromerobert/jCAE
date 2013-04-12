@@ -20,8 +20,8 @@
 
 package org.jcae.mesh.xmldata;
 
-import gnu.trove.TObjectIntHashMap;
-import gnu.trove.TObjectIntIterator;
+import gnu.trove.map.hash.TObjectIntHashMap;
+import gnu.trove.iterator.TObjectIntIterator;
 import java.io.*;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;

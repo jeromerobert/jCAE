@@ -19,7 +19,7 @@
  */
 package org.jcae.vtk.test;
 
-import gnu.trove.TFloatArrayList;
+import gnu.trove.list.array.TFloatArrayList;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -131,7 +131,7 @@ public class MergeVTPAnd3D
 			vtkFloatArray scalar = new vtkFloatArray();
 			scalar.SetName(labels[i]);
 			scalar.SetNumberOfComponents(1);
-			scalar.SetJavaArray(scalars.get(i).toNativeArray());
+			scalar.SetJavaArray(scalars.get(i).toArray());
 			
 			pointData.AddArray(scalar);
 		}		

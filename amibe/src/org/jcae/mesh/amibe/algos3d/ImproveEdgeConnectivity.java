@@ -32,7 +32,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
-import gnu.trove.TObjectIntHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

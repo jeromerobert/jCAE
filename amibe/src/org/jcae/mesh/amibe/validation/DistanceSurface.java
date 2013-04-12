@@ -29,7 +29,7 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.xmldata.MeshReader;
-import gnu.trove.TObjectDoubleHashMap;
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import java.io.IOException;
 
 public class DistanceSurface extends QualityProcedure

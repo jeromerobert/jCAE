@@ -20,7 +20,7 @@
 
 package org.jcae.mesh.xmldata;
 
-import gnu.trove.TIntIntHashMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;

@@ -40,9 +40,9 @@ import org.jcae.mesh.cad.CADShape;
 import org.jcae.mesh.cad.CADFace;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import gnu.trove.TIntIntHashMap;
-import gnu.trove.TIntObjectHashMap;
-import gnu.trove.TIntArrayList;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.list.array.TIntArrayList;
 import java.util.logging.Logger;
 
 
@@ -100,7 +100,7 @@ public class MeshToSoupConvert implements FilterInterface, JCAEXMLData
 				continue;
 			listOfFaces.add(iFace);
 		}
-		m2dTo3D.collectBoundaryNodes(listOfFaces.toNativeArray());
+		m2dTo3D.collectBoundaryNodes(listOfFaces.toArray());
 		m2dTo3D.beforeProcessingAllShapes(false);
 		iFace = 0;
 		for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())

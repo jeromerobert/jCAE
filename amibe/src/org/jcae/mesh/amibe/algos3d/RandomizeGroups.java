@@ -20,7 +20,7 @@
 
 package org.jcae.mesh.amibe.algos3d;
 
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

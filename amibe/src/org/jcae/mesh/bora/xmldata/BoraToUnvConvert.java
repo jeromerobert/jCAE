@@ -29,9 +29,9 @@ import org.jcae.mesh.xmldata.FilterInterface;
 import org.jcae.mesh.xmldata.UNVGenericWriter;
 import org.jcae.mesh.cad.CADShapeEnum;
 
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntIntHashMap;
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.IOException;
 import java.util.logging.Logger;
 import org.xml.sax.SAXException;
@@ -197,7 +197,7 @@ public class BoraToUnvConvert implements FilterInterface
 				group.add(indexElements);
 			}
 		}
-		unvWriter.writeGroup(groupId, groupName, group.toNativeArray());
+		unvWriter.writeGroup(groupId, groupName, group.toArray());
 	}
 
 	public static void main(String[] args)
@@ -222,10 +222,10 @@ public class BoraToUnvConvert implements FilterInterface
 					listOfFaces.add(d.getId());
 				}
 			}
-			conv.collectBoundaryNodes(listOfFaces.toNativeArray());
+			conv.collectBoundaryNodes(listOfFaces.toArray());
 			conv.beforeProcessingAllShapes(false);
 			int groupId = 0;
-			for (int iFace : listOfFaces.toNativeArray()) {
+			for (int iFace : listOfFaces.toArray()) {
 				groupId++;
 				conv.processOneShape(groupId, "test" + groupId, iFace);
 			}

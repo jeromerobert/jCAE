@@ -9,6 +9,11 @@
             <public-packages>
                 <package>gnu.trove</package>
                 <package>gnu.trove.decorator</package>
+                <package>gnu.trove.impl</package>
+                <package>gnu.trove.iterator</package>
+                <package>gnu.trove.list.array</package>
+                <package>gnu.trove.map.hash</package>
+                <package>gnu.trove.procedure</package>
             </public-packages>
             <class-path-extension>
                 <runtime-relative-path>ext/trove.jar</runtime-relative-path>

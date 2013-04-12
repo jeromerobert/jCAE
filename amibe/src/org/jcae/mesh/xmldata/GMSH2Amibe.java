@@ -20,7 +20,7 @@
 
 package org.jcae.mesh.xmldata;
 
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -106,12 +106,12 @@ public class GMSH2Amibe {
 			out.nextGroup(groupNames[i]);
 			if(triaGroups[i] != null)
 			{
-				for(int e:triaGroups[i].toNativeArray())
+				for(int e:triaGroups[i].toArray())
 					out.addTriaToGroup(e);
 			}
 			if(beamGroups[i] != null)
 			{
-				for(int e:beamGroups[i].toNativeArray())
+				for(int e:beamGroups[i].toArray())
 					out.addBeamToGroup(e);
 			}
 		}

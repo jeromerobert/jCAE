@@ -20,8 +20,8 @@
  */
 
 package org.jcae.viewer3d.fe.unv;
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntIntHashMap;
+import gnu.trove.set.hash.TIntHashSet;
+import gnu.trove.map.hash.TIntIntHashMap;
 import java.awt.Color;
 import org.jcae.viewer3d.fe.FEDomainAdaptor;
 

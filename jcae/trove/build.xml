@@ -7,6 +7,6 @@
     <import file="nbproject/build-impl.xml"/>
 		<!-- from http://wiki.netbeans.org/DevFaqWrapperModules -->
 	<target name="release">
-		<copy verbose="true" file="${libs.trove.classpath}" todir="${cluster}/modules/ext"/>
+		<copy verbose="true" file="${libs.trove.classpath}" tofile="${cluster}/modules/ext/trove.jar"/>
 	</target>
 </project>

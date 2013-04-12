@@ -30,10 +30,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import gnu.trove.TIntObjectHashMap;
-import gnu.trove.TIntObjectIterator;
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntHashSet;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.iterator.TIntObjectIterator;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.hash.TIntHashSet;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Vertex;

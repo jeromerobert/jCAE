@@ -45,8 +45,8 @@ import org.jcae.mesh.xmldata.*;
 import org.jcae.mesh.cad.*;
 import java.util.logging.Logger;
 
-import gnu.trove.TIntArrayList;
-import gnu.trove.THashSet;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.hash.THashSet;
 
 /**
  * Main class to mesh a surface.
@@ -351,7 +351,7 @@ public class Mesher
 				continue;
 			listOfFaces.add(iFace);
 		}
-		m2dTo3D.collectBoundaryNodes(listOfFaces.toNativeArray());
+		m2dTo3D.collectBoundaryNodes(listOfFaces.toArray());
 		m2dTo3D.beforeProcessingAllShapes(writeNormals);
 		iFace = 0;
 		for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())

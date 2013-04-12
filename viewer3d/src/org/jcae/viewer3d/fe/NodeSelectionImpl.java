@@ -1,6 +1,6 @@
 package org.jcae.viewer3d.fe;
 
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.array.TIntArrayList;
 
 public class NodeSelectionImpl implements NodeSelection
 {

@@ -37,11 +37,11 @@ import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 
-import gnu.trove.PrimeFinder;
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntIntHashMap;
-import gnu.trove.TIntIntIterator;
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.impl.PrimeFinder;
+import gnu.trove.set.hash.TIntHashSet;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.iterator.TIntIntIterator;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.IOException;
 import java.util.Map;
 import java.util.HashMap;

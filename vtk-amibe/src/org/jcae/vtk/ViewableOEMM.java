@@ -20,10 +20,10 @@
 package org.jcae.vtk;
 
 
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntObjectHashMap;
-import gnu.trove.TObjectIntHashMap;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.hash.TIntHashSet;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
@@ -269,7 +269,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 
 				LeafNode.DataProvider dataEdge = new LeafNode.DataProvider();
 				dataEdge.setNodes(meshNodes);
-				dataEdge.setLines(allEdges[0].toNativeArray());
+				dataEdge.setLines(allEdges[0].toArray());
 				LeafNode edgeNode = new LeafNode(edgesNode, dataEdge, Color.WHITE);
 				edgeNode.setManager(true);
 				IDToEdgeNode.put(leaves[i], edgeNode);
@@ -279,7 +279,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 
 				LeafNode.DataProvider dataFreeEdge = new LeafNode.DataProvider();
 				dataFreeEdge.setNodes(meshNodes);
-				dataFreeEdge.setLines(allEdges[1].toNativeArray());
+				dataFreeEdge.setLines(allEdges[1].toArray());
 				LeafNode freeEdgeNode = new LeafNode(freeEdgesNode, dataFreeEdge, Color.RED);
 				freeEdgeNode.setManager(true);
 				IDToFreeEdgeNode.put(leaves[i], freeEdgeNode);

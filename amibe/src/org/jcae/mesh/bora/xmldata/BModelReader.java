@@ -36,7 +36,7 @@ import java.util.Iterator;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.logging.Level;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

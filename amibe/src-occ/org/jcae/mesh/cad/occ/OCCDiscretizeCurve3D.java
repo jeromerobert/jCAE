@@ -22,7 +22,7 @@ package org.jcae.mesh.cad.occ;
 
 import org.jcae.opencascade.jni.Adaptor3d_Curve;
 import java.util.logging.Logger;
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.array.TIntArrayList;
 
 public class OCCDiscretizeCurve3D
 {

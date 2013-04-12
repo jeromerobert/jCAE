@@ -28,7 +28,7 @@ import java.text.FieldPosition;
 import java.text.ParsePosition;
 import java.text.NumberFormat;
 import java.util.Arrays;
-import gnu.trove.TIntHashSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.util.logging.Logger;
 
 

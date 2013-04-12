@@ -20,7 +20,7 @@
 
 package org.jcae.mesh.amibe.validation;
 
-import gnu.trove.TFloatArrayList;
+import gnu.trove.list.array.TFloatArrayList;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.FileOutputStream;

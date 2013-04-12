@@ -40,14 +40,14 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Comparator;
 import java.util.List;
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntIterator;
-import gnu.trove.TIntObjectHashMap;
-import gnu.trove.TIntObjectIterator;
-import gnu.trove.TObjectIntHashMap;
-import gnu.trove.TIntIntHashMap;
-import gnu.trove.TIntByteHashMap;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.hash.TIntHashSet;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.iterator.TIntObjectIterator;
+import gnu.trove.map.hash.TObjectIntHashMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntByteHashMap;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
@@ -219,9 +219,8 @@ public class Storage
 		TIntObjectHashMap<Vertex> referencedVertices = getMapLabelToVertex(mesh);
 		
 		TIntHashSet processedVertIndex = new TIntHashSet(referencedVertices.size());
-		for (Object o: referencedVertices.getValues()) 
+		for (Vertex v: referencedVertices.valueCollection()) 
 		{
-			Vertex v = (Vertex) o;
 			mesh.add(v);
 			processedVertIndex.add(v.getLabel());
 		}
@@ -544,9 +543,9 @@ public class Storage
 	 */
 	private static void removeLoadedAdjacentNodes(Node node, TIntHashSet storedLeaves)
 	{
-		TIntArrayList list = new TIntArrayList(node.adjLeaves.toNativeArray());
+		TIntArrayList list = new TIntArrayList(node.adjLeaves);
 		node.adjLeaves.clear();
-		for (int nodeValue: list.toNativeArray()) {
+		for (int nodeValue: list.toArray()) {
 			if (!storedLeaves.contains(nodeValue)) {
 				node.adjLeaves.add(nodeValue);
 			}

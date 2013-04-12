@@ -49,7 +49,7 @@ import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Collection;
 import java.util.Iterator;
-import gnu.trove.TObjectDoubleHashMap;
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

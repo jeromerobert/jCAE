@@ -20,7 +20,7 @@
 package org.jcae.mesh.amibe.validation;
 
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
-import gnu.trove.TFloatArrayList;
+import gnu.trove.list.array.TFloatArrayList;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 

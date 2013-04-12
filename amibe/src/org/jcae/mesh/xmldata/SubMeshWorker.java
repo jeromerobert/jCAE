@@ -20,8 +20,8 @@
 
 package org.jcae.mesh.xmldata;
 
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.set.hash.TIntHashSet;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.logging.Level;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;

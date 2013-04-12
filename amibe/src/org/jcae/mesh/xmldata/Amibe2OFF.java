@@ -20,8 +20,8 @@
 
 package org.jcae.mesh.xmldata;
 
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntIntHashMap;
+import gnu.trove.set.hash.TIntHashSet;
+import gnu.trove.map.hash.TIntIntHashMap;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;

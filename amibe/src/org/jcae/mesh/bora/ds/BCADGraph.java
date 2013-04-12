@@ -21,6 +21,7 @@
 
 package org.jcae.mesh.bora.ds;
 
+import gnu.trove.map.hash.TCustomHashMap;
 import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADExplorer;
 import org.jcae.mesh.cad.CADFace;
@@ -33,8 +34,9 @@ import org.jcae.mesh.cad.CADVertex;
 import java.util.LinkedHashSet;
 import java.util.Collection;
 import java.util.Iterator;
-import gnu.trove.THashMap;
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.hash.THashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import java.util.Map;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -50,8 +52,8 @@ public class BCADGraph
 	// Cell root
 	private final BCADGraphCell root;
 	// Map between topological elements and graph cells
-	private final THashMap<CADShape, BCADGraphCell> cadShapeToGraphCell =
-			new THashMap<CADShape, BCADGraphCell>(KeepOrientationHashingStrategy.getInstance());
+	private final Map<CADShape, BCADGraphCell> cadShapeToGraphCell =
+			new TCustomHashMap<CADShape, BCADGraphCell>(KeepOrientationHashingStrategy.getInstance());
 	// Map between indices and graph cells or user-defined groups
 	private final TIntObjectHashMap<BCADGraphCell> indexToCell = new TIntObjectHashMap<BCADGraphCell>();
 	// First free index
@@ -83,7 +85,7 @@ public class BCADGraph
 			for (exp.init(shape, cse); exp.more(); exp.next())
 			{
 				CADShape sub = exp.current();
-				if (cadShapeToGraphCell.contains(sub))
+				if (cadShapeToGraphCell.containsKey(sub))
 					continue;
 				BCADGraphCell cell = new BCADGraphCell(this, sub, cse);
 				cadShapeToGraphCell.put(sub, cell);

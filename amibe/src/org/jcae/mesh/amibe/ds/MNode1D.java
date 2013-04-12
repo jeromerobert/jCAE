@@ -24,7 +24,7 @@ import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
-import gnu.trove.TObjectIntHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 
 /**
  * 1D node.

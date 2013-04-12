@@ -19,11 +19,11 @@
  */
 package org.jcae.vtk;
 
-import gnu.trove.TFloatArrayList;
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntObjectHashMap;
-import gnu.trove.TIntObjectIterator;
+import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.hash.TIntHashSet;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.iterator.TIntObjectIterator;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -94,10 +94,7 @@ public class MeshVisuReader extends MeshReader
 
 	MeshVisu[] getMeshes()
 	{
-		MeshVisu[] values = new MeshVisu[mapLeafToMeshVisu.size()];
-		mapLeafToMeshVisu.getValues(values);
-
-		return values;
+		return mapLeafToMeshVisu.values();
 	}
 
 	public void buildMeshVisu(int[] leaves)
@@ -340,9 +337,9 @@ public class MeshVisuReader extends MeshReader
 			}
 		}
 
-		toReturn.edges = edges.toNativeArray();
-		toReturn.freeEdges = freeEdges.toNativeArray();
-		toReturn.nodes = nodes.toNativeArray();
+		toReturn.edges = edges.toArray();
+		toReturn.freeEdges = freeEdges.toArray();
+		toReturn.nodes = nodes.toArray();
 
 		return toReturn;
 	}

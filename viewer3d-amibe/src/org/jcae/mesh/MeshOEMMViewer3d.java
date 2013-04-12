@@ -36,7 +36,7 @@ import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.HashMap;
-import gnu.trove.TIntHashSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

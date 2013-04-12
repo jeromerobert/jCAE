@@ -19,14 +19,14 @@
 
 package org.jcae.mesh.amibe.projection;
 
-import gnu.trove.TIntIntHashMap;
-import gnu.trove.TIntIntIterator;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.iterator.TIntIntIterator;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.FileNotFoundException;
 import java.util.Collection;
 import java.util.HashMap;

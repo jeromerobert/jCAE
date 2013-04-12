@@ -21,8 +21,8 @@
 
 package org.jcae.mesh.amibe.util;
 
-import gnu.trove.THashMap;
-import gnu.trove.THashSet;
+import gnu.trove.map.hash.THashMap;
+import gnu.trove.set.hash.THashSet;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;

@@ -18,7 +18,7 @@
 
 package org.jcae.vtk;
 
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import java.io.IOException;
 import org.jcae.mesh.xmldata.AmibeWriter;
 import vtk.vtkDataArray;
@@ -129,7 +129,7 @@ public class AmibePolyDataWriter
 				if(!eGroups[i].isEmpty())
 				{
 					out.nextGroup(lGrpNames[i]);
-					for(int j:eGroups[i].toNativeArray())
+					for(int j:eGroups[i].toArray())
 					{
 						if(j < nbBeams)
 							out.addBeamToGroup(j);
@@ -155,7 +155,7 @@ public class AmibePolyDataWriter
 				if(!eGroups[i].isEmpty())
 				{
 					out.nextNodeGroup(lGrpNames[i]);
-					for(int j:eGroups[i].toNativeArray())
+					for(int j:eGroups[i].toArray())
 						out.addNodeToGroup(j);
 				}
 			}

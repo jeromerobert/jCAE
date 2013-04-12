@@ -20,7 +20,7 @@
 
 package org.jcae.mesh.amibe.util;
 
-import gnu.trove.THashMap;
+import gnu.trove.map.hash.THashMap;
 import java.util.Map;
 import java.util.Iterator;
 import java.util.NoSuchElementException;

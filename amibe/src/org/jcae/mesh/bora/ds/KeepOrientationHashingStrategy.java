@@ -19,14 +19,14 @@
 
 package org.jcae.mesh.bora.ds;
 
-import gnu.trove.TObjectHashingStrategy;
+import gnu.trove.strategy.HashingStrategy;
 import org.jcae.mesh.cad.CADShape;
 
 // In OccJava, two CADShape instances can be equal with different orientations.
 // We sometimes need to keep track of shape orientation in our graph, hash
 // sets and maps can then use an KeepOrientationHashingStrategy INSTANCE as hashing
 // strategy.
-class KeepOrientationHashingStrategy implements TObjectHashingStrategy<CADShape>
+class KeepOrientationHashingStrategy implements HashingStrategy<CADShape>
 {
 	private static final long serialVersionUID = -8044550982617929038L;
 

@@ -20,7 +20,7 @@
 
 package org.jcae.mesh.amibe.metrics;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;

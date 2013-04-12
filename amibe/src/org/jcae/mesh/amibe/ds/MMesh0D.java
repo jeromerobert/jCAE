@@ -27,7 +27,7 @@ import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import gnu.trove.TObjectIntHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 
 /**
  * List of vertices of the whole shape.

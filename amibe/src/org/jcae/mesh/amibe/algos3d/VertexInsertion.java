@@ -20,7 +20,7 @@
 
 package org.jcae.mesh.amibe.algos3d;
 
-import gnu.trove.PrimeFinder;
+import gnu.trove.impl.PrimeFinder;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;

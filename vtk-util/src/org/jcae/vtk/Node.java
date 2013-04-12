@@ -20,7 +20,7 @@
 package org.jcae.vtk;
 
 
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -570,7 +570,7 @@ public class Node extends AbstractNode
 		if(selectionMapper == null)
 			selectionMapper = new vtkPainterPolyDataMapper();
 		selectionMapper.ScalarVisibilityOff();
-		vtkPolyData d = selectInto(data, selection.toNativeArray());
+		vtkPolyData d = selectInto(data, selection.toArray());
 		selectionMapper.SetInput(d);
 		selectionActor.SetMapper(selectionMapper);
 		getSelectionMapperCustomiser().customiseMapper(selectionMapper);
@@ -668,7 +668,7 @@ public class Node extends AbstractNode
 		for (int i = 0; i < leaves.size(); ++i)
 		{
 			if (!selectionChildren[i].isEmpty())
-				leaves.get(i).setCellSelection(pickContext, selectionChildren[i].toNativeArray());
+				leaves.get(i).setCellSelection(pickContext, selectionChildren[i].toArray());
 		}
 		
 		timeStampSelected();

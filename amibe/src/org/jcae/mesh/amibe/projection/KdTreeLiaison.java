@@ -20,7 +20,7 @@
 
 package org.jcae.mesh.amibe.projection;
 
-import gnu.trove.TIntIntHashMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 import org.jcae.mesh.amibe.ds.Mesh;

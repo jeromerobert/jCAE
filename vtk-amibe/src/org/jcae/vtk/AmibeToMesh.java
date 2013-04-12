@@ -20,9 +20,9 @@
 
 package org.jcae.vtk;
 
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntIntHashMap;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.hash.TIntHashSet;
+import gnu.trove.map.hash.TIntIntHashMap;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -76,7 +76,7 @@ public class AmibeToMesh
 		TIntArrayList list = new TIntArrayList(set.size());
 		list.add(set.toArray());
 		list.sort();
-		return list.toNativeArray();
+		return list.toArray();
 	}
 
 	private static  void renumberArray(int[] newIndices, int[] ... arraysToRenumber)
