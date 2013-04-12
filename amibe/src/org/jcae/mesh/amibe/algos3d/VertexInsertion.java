@@ -60,10 +60,8 @@ public class VertexInsertion {
 	/** triangles added when inserting a point in the middle of a triangle */
 	private final Collection<Triangle> tmp = new ArrayList<Triangle>(3);
 	private Collection<Vertex> notMutableInserted, mutableInserted;
-	private Vertex projectedMiddle, middle;
 	private final AnalyticMetricInterface metric;
-	private final Quality quality = new Quality();
-
+	private final VertexSwapper swapper;
 	public VertexInsertion(MeshLiaison liaison, final double size) {
 		this(liaison, new AnalyticMetricInterface() {
 
@@ -83,9 +81,9 @@ public class VertexInsertion {
 		LOGGER.info("Start creating kd-tree");
 		kdTree = new TriangleKdTree(liaison.getMesh());
 		LOGGER.info(kdTree.stats());
-		projectedMiddle = liaison.getMesh().createVertex(0, 0, 0);
-		middle = liaison.getMesh().createVertex(0, 0, 0);
 		this.metric = metric;
+		swapper = new VertexSwapper(liaison);
+		swapper.setKdTree(kdTree);
 	}
 
 	public void insertNodes(String fileName, int group) throws IOException
@@ -143,6 +141,7 @@ public class VertexInsertion {
 		int step = PrimeFinder.nextPrime(n+1);
 		int k = 0;
 		int nbInserted = 0;
+		swapper.setGroup(group);
 		main: for(int i = 0; i < n; i++)
 		{
 			k = (k + step) % n;
@@ -172,7 +171,8 @@ public class VertexInsertion {
 			kdTree.replace(t, tmp);
 			tmp.clear();
 			mutableInserted.add(v);
-			swap(v, localMetric2 / 2, group);
+			swapper.setSqrDeflection(localMetric2 / 2);
+			swapper.swap(v);
 			nbInserted ++;
 		}
 		LOGGER.info(nbInserted+" / "+vertices.size()+" inserted nodes on group "+group);
@@ -186,53 +186,6 @@ public class VertexInsertion {
 		return mutableInserted;
 	}
 
-	private void swap(Vertex v, double sqrDeflection, int group)
-	{
-		Mesh mesh = liaison.getMesh();
-		HalfEdge current = (HalfEdge) v.getIncidentAbstractHalfEdge((Triangle)v.getLink(), null);
-		current = current.next();
-		Vertex o = current.origin();
-		assert current.apex() == v;
-		boolean redo = true;
-		while(redo)
-		{
-			redo = false;
-			while(true)
-			{
-				boolean isSwapped = false;
-				if (!current.hasAttributes(AbstractHalfEdge.NONMANIFOLD |
-					AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.OUTER)
-					&& current.canSwapTopology())
-				{
-					quality.setEdge(current);
-					if(quality.getSwappedAngle() > 0 &&
-						quality.getSwappedQuality() > quality.getQuality())
-					{
-						middle.middle(current.apex(), current.sym().apex());
-						liaison.move(projectedMiddle, middle, group, true);
-						if(projectedMiddle.sqrDistance3D(middle) < sqrDeflection)
-						{
-							kdTree.remove(current.getTri());
-							kdTree.remove(current.sym().getTri());
-							current = (HalfEdge) mesh.edgeSwap(current);
-							HalfEdge swapped = current.next();
-							kdTree.addTriangle(swapped.getTri());
-							kdTree.addTriangle(swapped.sym().getTri());
-							redo = true;
-							isSwapped = true;
-						}
-					}
-				}
-
-				if(!isSwapped)
-				{
-					current = current.nextApexLoop();
-					if (current.origin() == o)
-						break;
-				}
-			}
-		}
-	}
 	/**
 	 * Try to insert a vertex into an edge of the given triangle
 	 * @param t

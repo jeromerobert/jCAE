@@ -87,6 +87,7 @@ public class BeamInsertion {
 	private final Mesh mesh;
 	private final TriangleKdTree kdTree;
 	private final double[] vector1 = new double[3], vector2 = new double[3];
+	private final VertexSwapper swapper;
 	//only for tolerance
 	private final MetricSupport.AnalyticMetricInterface metric;
 	public BeamInsertion(final Mesh mesh, final double edgeSize)
@@ -112,6 +113,8 @@ public class BeamInsertion {
 			}
 		});
 		this.metric = metric;
+		swapper = new VertexSwapper(mesh);
+		swapper.setKdTree(kdTree);
 	}
 
 	/** Insert a set of beams from binary files */
@@ -197,6 +200,8 @@ public class BeamInsertion {
 			mesh.edgeCollapse(toCollapse, target);
 			toCollapse = nextEdge(v1, vector1, v1);
 		}
+		swapper.swap(v1);
+		swapper.swap(v2);
 		return toCollapse;
 	}
 
