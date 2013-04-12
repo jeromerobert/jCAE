@@ -197,6 +197,14 @@ def __remesh(options):
         point_metric = None
     safe_coplanarity = str(max(options.coplanarity, 0.8))
 
+    if options.forced_points:
+        if point_metric:
+            vi = VertexInsertion(liaison, point_metric)
+        else:
+            vi = VertexInsertion(liaison, options.size)
+        vi.insertNodes(options.forced_points, -1)
+        Vertex.setMutable(vi.mutableInserted, False)
+
     #0
     writeVTK(liaison)
 

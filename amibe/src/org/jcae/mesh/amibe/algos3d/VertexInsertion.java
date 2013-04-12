@@ -21,7 +21,12 @@
 package org.jcae.mesh.amibe.algos3d;
 
 import gnu.trove.PrimeFinder;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
+import java.nio.channels.FileChannel;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -81,6 +86,16 @@ public class VertexInsertion {
 		projectedMiddle = liaison.getMesh().createVertex(0, 0, 0);
 		middle = liaison.getMesh().createVertex(0, 0, 0);
 		this.metric = metric;
+	}
+
+	public void insertNodes(String fileName, int group) throws IOException
+	{
+		FileChannel vertexChannel = new FileInputStream(fileName).getChannel();
+		ByteBuffer bb = ByteBuffer.allocate((int)vertexChannel.size());
+		bb.order(ByteOrder.nativeOrder());
+		vertexChannel.read(bb);
+		bb.rewind();
+		insertNodes(bb.asDoubleBuffer(), group);
 	}
 
 	public void insertNodes(final DoubleBuffer vertices, int group)
