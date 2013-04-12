@@ -125,7 +125,7 @@ public class BeamInsertion {
 		DoubleBuffer vertexBuffer = bb.asDoubleBuffer();
 
 		FileChannel beamChannel = new FileInputStream(beamFile).getChannel();
-		bb = ByteBuffer.allocate((int)vertexChannel.size());
+		bb = ByteBuffer.allocate((int)beamChannel.size());
 		bb.order(ByteOrder.nativeOrder());
 		beamChannel.read(bb);
 		bb.rewind();
@@ -133,8 +133,11 @@ public class BeamInsertion {
 		int nbBeams = beamBuffer.capacity() / 2;
 		for(int i = 0; i < nbBeams; i++)
 		{
-			Vertex v1 = createVertex(beamBuffer.get(), vertexBuffer);
-			Vertex v2 = createVertex(beamBuffer.get(), vertexBuffer);
+			int i1 = beamBuffer.get();
+			int i2 = beamBuffer.get();
+			assert i1 != i2: "Beam number "+i+" on "+nbBeams+" is degenerated: "+i1+"-"+i2;
+			Vertex v1 = createVertex(i1, vertexBuffer);
+			Vertex v2 = createVertex(i2, vertexBuffer);
 			setImmutable(insert(v1, v2));
 		}
 	}
@@ -171,6 +174,7 @@ public class BeamInsertion {
 	{
 		v1 = insert(v1);
 		v2 = insert(v2);
+		assert v1 != v2;
 		v2.sub(v1, vector1);
 		AbstractHalfEdge toCollapse = nextEdge(v1, vector1, v1);
 		while(toCollapse.destination() != v2)
@@ -179,8 +183,18 @@ public class BeamInsertion {
 				toCollapse = toCollapse.sym();
 			assert !toCollapse.hasAttributes(AbstractHalfEdge.OUTER): toCollapse;
 			assert !toCollapse.hasAttributes(AbstractHalfEdge.IMMUTABLE): toCollapse;
-			assert mesh.canCollapseEdge(toCollapse, v1): "Cannot collapse "+toCollapse;
-			mesh.edgeCollapse(toCollapse, v1);
+			Vertex target = v1;
+			if(!mesh.canCollapseEdge(toCollapse, v1))
+			{
+				toCollapse = nextEdge(toCollapse.origin(), vector1, toCollapse.origin());
+				target = toCollapse.destination();
+				if(toCollapse.hasAttributes(AbstractHalfEdge.OUTER))
+					toCollapse = toCollapse.sym();
+				assert mesh.canCollapseEdge(toCollapse, target):
+					"Cannot collapse "+toCollapse+" to "+target;
+			}
+			removeFromKdTree(toCollapse);
+			mesh.edgeCollapse(toCollapse, target);
 			toCollapse = nextEdge(v1, vector1, v1);
 		}
 		return toCollapse;
@@ -215,6 +229,27 @@ public class BeamInsertion {
 			kdTree.addTriangle(edge.getTri());
 	}
 
+	private void removeFromKdTree(AbstractHalfEdge edge)
+	{
+		if(edge.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+		{
+			Iterator<AbstractHalfEdge> it = edge.fanIterator();
+			while(it.hasNext())
+			{
+				AbstractHalfEdge e = it.next();
+				if(!e.hasAttributes(AbstractHalfEdge.OUTER))
+					kdTree.remove(e.getTri());
+			}
+		}
+		else
+		{
+			if(!edge.hasAttributes(AbstractHalfEdge.OUTER))
+				kdTree.remove(edge.getTri());
+			if(!edge.sym().hasAttributes(AbstractHalfEdge.OUTER))
+			kdTree.remove(edge.sym().getTri());
+		}
+	}
+
 	private Vertex insert(Vertex v)
 	{
 		Triangle t = kdTree.getClosestTriangle(v, null, -1);
@@ -228,15 +263,7 @@ public class BeamInsertion {
 
 		if(v.sqrDistance3D(e.destination()) < tol2)
 			return e.destination();
-
-		if(e.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
-		{
-			Iterator<AbstractHalfEdge> it = e.fanIterator();
-			while(it.hasNext())
-				addTriangleToKdTree(it.next());
-		}
-		else
-			kdTree.remove(t);
+		removeFromKdTree(e);
 		mesh.vertexSplit(e, v);
 		AbstractHalfEdge newEdge = e.next().sym().next();
 		if(e.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
