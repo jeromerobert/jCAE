@@ -67,6 +67,26 @@ public class Skeleton {
 		return a;
 	}
 
+	public Collection<AbstractHalfEdge> getByGroups(int groupIds)
+	{
+		ArrayList<AbstractHalfEdge> a = new ArrayList<AbstractHalfEdge>();
+		for(List<AbstractHalfEdge> l:getPolylines(groupIds))
+			a.addAll(l);
+		return a;
+	}
+
+	public Collection<List<AbstractHalfEdge>> getPolylines(int groupIds)
+	{
+		ArrayList<List<AbstractHalfEdge>> toReturn = new ArrayList<List<AbstractHalfEdge>>();
+		main: for(List<AbstractHalfEdge> l: polylines)
+		{
+			AbstractHalfEdge e = l.get(0);
+			if(e.getTri().getGroupId() == groupIds)
+				toReturn.add(l);
+		}
+		return toReturn;
+	}
+
 	/**
 	 * Return polylines which are border of the given groups
 	 * @param groupIds
