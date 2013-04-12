@@ -128,9 +128,9 @@ public class BeamInsertion {
 		bb = ByteBuffer.allocate((int)vertexChannel.size());
 		bb.order(ByteOrder.nativeOrder());
 		beamChannel.read(bb);
+		bb.rewind();
 		IntBuffer beamBuffer = bb.asIntBuffer();
 		int nbBeams = beamBuffer.capacity() / 2;
-		beamBuffer.rewind();
 		for(int i = 0; i < nbBeams; i++)
 		{
 			Vertex v1 = createVertex(beamBuffer.get(), vertexBuffer);
