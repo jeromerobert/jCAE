@@ -74,6 +74,8 @@ public class VertexSwapper {
 
 	public void swap(Vertex v)
 	{
+		if(!v.isManifold())
+			return;
 		HalfEdge current = (HalfEdge) v.getIncidentAbstractHalfEdge((Triangle)v.getLink(), null);
 		current = current.next();
 		Vertex o = current.origin();
