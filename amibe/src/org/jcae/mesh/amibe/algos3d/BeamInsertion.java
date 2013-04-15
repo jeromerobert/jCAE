@@ -217,7 +217,10 @@ public class BeamInsertion {
 				AbstractHalfEdge.BOUNDARY)) && notDirection != e.destination())
 			{
 				e.destination().sub(e.origin(), vector2);
-				double dot = Matrix3D.prodSca(vector1, vector2);
+				double norm = Matrix3D.norm(vector2);
+				for(int i = 0; i < 3; i++)
+					vector2[i] /= norm;
+				double dot = Matrix3D.prodSca(direction, vector2);
 				if(dot > bestDot)
 				{
 					bestDot = dot;
