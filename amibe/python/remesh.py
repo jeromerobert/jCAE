@@ -13,9 +13,6 @@ from java.util import HashMap
 from java.util import ArrayList
 from java.util import LinkedHashMap
 
-# GNU trove
-from gnu.trove import TIntArrayList
-
 # Python
 import sys
 from math import sqrt

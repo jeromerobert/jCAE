@@ -3,7 +3,7 @@
 from org.jcae.mesh.amibe.ds import Mesh, AbstractHalfEdge
 from org.jcae.mesh.amibe.validation import *
 from org.jcae.mesh.xmldata import MeshReader, MeshExporter
-from gnu.trove import TIntHashSet
+from gnu.trove.set.hash import TIntHashSet
 
 # Java
 from java.lang import Class

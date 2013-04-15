@@ -15,7 +15,7 @@ from java.util import LinkedHashMap
 from java.lang import String, Math
 
 # GNU trove
-from gnu.trove import TIntArrayList
+from gnu.trove.list.array import TIntArrayList
 
 # Python
 import sys

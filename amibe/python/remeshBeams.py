@@ -6,8 +6,6 @@ from org.jcae.mesh.amibe.metrics import EuclidianMetric3D
 from org.jcae.mesh.amibe.algos3d import PolylineFactory, RemeshPolyline
 from org.jcae.mesh.xmldata import MeshReader, MeshWriter
 
-from gnu.trove import TIntArrayList
-
 # Java
 from java.util import ArrayList
 from java.util import LinkedHashMap
