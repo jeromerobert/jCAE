@@ -38,7 +38,7 @@ public class GroupMetric extends DistanceMetric {
 	private final Map<Integer, Double> groupsMetric = new HashMap<Integer, Double>();
 	public GroupMetric(Mesh mesh, double sizeInf) {
 		super(sizeInf);
-		skeleton = new Skeleton(mesh, sizeInf);
+		skeleton = new Skeleton(mesh, Math.PI * 2);
 		this.mesh = mesh;
 	}
 
@@ -48,6 +48,9 @@ public class GroupMetric extends DistanceMetric {
 	}
 
 	/**
+	 * Add the frontier between n groups.
+	 * If n is 1 only free edges will be added. if it's 2 only manifold edges
+	 * will be added. If it's more than 2 only non-manifold edges will be added.
 	 * @param groupNames
 	 * @param size0 size of edges when distance is between zero and d0
 	 * @param d0
@@ -56,12 +59,24 @@ public class GroupMetric extends DistanceMetric {
 	public void addFrontier(List<String> groupNames, double size0, double d0, double d1)
 	{
 		int[] ids = mesh.getGroupIDs(groupNames.toArray(new String[groupNames.size()]));
-		for(AbstractHalfEdge edge: skeleton.getByGroups(ids))
+		addFrontier(skeleton.getByGroups(ids), size0, d0, d1);
+	}
+
+	private void addFrontier(Iterable<AbstractHalfEdge> edges, double size0, double d0, double d1)
+	{
+		for(AbstractHalfEdge edge: edges)
 		{
 			Vertex o = edge.origin();
 			Vertex d = edge.destination();
 			addLine(o.getX(), o.getY(), o.getZ(), true, d.getX(), d.getY(), d.getZ(), true, size0, d0, d1);
 		}
+	}
+
+	/** Add the boundaries of a group, including free and non-manifold edges */
+	public void addBoundary(String groupName, double size0, double d0, double d1)
+	{
+		addFrontier(skeleton.getByGroups(mesh.getGroupIDs(groupName)[0]),
+			size0, d0, d1);
 	}
 
 	@Override

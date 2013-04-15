@@ -32,7 +32,6 @@ import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.util.HashFactory;
 import org.jcae.mesh.xmldata.Amibe2VTK;
@@ -110,11 +109,16 @@ public class Skeleton {
 						if(k >= groupIds.length || ne.getTri().getGroupId() != groupIds[k++])
 							continue main;
 					}
+					toReturn.add(l);
 				}
-				else if(groupIds.length != 2 || e.sym().getTri().getGroupId() != groupIds[1])
-					continue main;
-
-				toReturn.add(l);
+				else if(e.hasAttributes(AbstractHalfEdge.BOUNDARY) && groupIds.length == 1)
+				{
+					toReturn.add(l);
+				}
+				else if(groupIds.length == 2 && e.sym().getTri().getGroupId() == groupIds[1])
+				{
+					toReturn.add(l);
+				}
 			}
 		}
 		return toReturn;
