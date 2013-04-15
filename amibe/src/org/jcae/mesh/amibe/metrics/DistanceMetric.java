@@ -20,12 +20,14 @@
 package org.jcae.mesh.amibe.metrics;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.List;
@@ -224,6 +226,8 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 	{
 		LineSource ps = new LineSource(x0, y0, z0, closed0, x1, y1, z1, closed1);
 		ps.size0 = size0;
+		if(d0 >= d1)
+			throw new IllegalArgumentException(d0+" >= "+d1);
 		ps.sqrD0 = d0 * d0;
 		ps.sqrD1 = d1 * d1;
 		sources.add(ps);
@@ -280,6 +284,10 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 		fc.close();
 	}
 
+	/**
+	 * Save the metric to a binary file.
+	 * Do not use this for long term storage, the format may change.
+	 */
 	public void save(WritableByteChannel out) throws IOException
 	{
 		ArrayList<PointSource> ps = new ArrayList<PointSource>();
@@ -319,6 +327,54 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 		}
 		bb.rewind();
 		out.write(bb);
+	}
+	public void load(String fileName) throws IOException
+	{
+		FileChannel channel = new FileInputStream(fileName).getChannel();
+		load(channel);
+		channel.close();
+	}
+	/** Read a metric in binary format */
+	public void load(ReadableByteChannel in) throws IOException
+	{
+		ByteBuffer size = ByteBuffer.allocate(4);
+		in.read(size);
+		int nbPoints = size.getInt(0);
+		ByteBuffer bb = ByteBuffer.allocate(nbPoints * 6 * 8);
+		bb.order(ByteOrder.nativeOrder());
+		in.read(bb);
+		bb.rewind();
+		for(int i = 0; i < nbPoints; i++)
+		{
+			double size0 = bb.getDouble();
+			double sqrD0 = bb.getDouble();
+			double sqrD1 = bb.getDouble();
+			double x = bb.getDouble();
+			double y = bb.getDouble();
+			double z = bb.getDouble();
+			addPoint(x, y, z, size0, Math.sqrt(sqrD0), Math.sqrt(sqrD1));
+		}
+		size.rewind();
+		in.read(size);
+		int nbLines = size.get(0);
+		bb = ByteBuffer.allocate(nbLines * 9 * 8);
+		bb.order(ByteOrder.nativeOrder());
+		in.read(bb);
+		bb.rewind();
+		for(int i = 0; i < nbLines; i++)
+		{
+			double size0 = bb.getDouble();
+			double sqrD0 = bb.getDouble();
+			double sqrD1 = bb.getDouble();
+			double x0 = bb.getDouble();
+			double y0 = bb.getDouble();
+			double z0 = bb.getDouble();
+			double x1 = bb.getDouble();
+			double y1 = bb.getDouble();
+			double z1 = bb.getDouble();
+			addLine(x0, y0, z0, true, x1, y1, z1, true, size0,
+				Math.sqrt(sqrD0), Math.sqrt(sqrD1));
+		}
 	}
 
 	public double getSize(int group)
