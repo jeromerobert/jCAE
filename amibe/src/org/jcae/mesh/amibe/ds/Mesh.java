@@ -20,9 +20,12 @@
 
 package org.jcae.mesh.amibe.ds;
 
+import gnu.trove.list.TDoubleList;
+import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.hash.TIntHashSet;
 import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import org.jcae.mesh.amibe.traits.Traits;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
@@ -233,7 +236,82 @@ public class Mesh implements Serializable
 	{
 		triangleList.add(t);
 	}
-	
+
+	private int getFreeGroupID()
+	{
+		int i = 1;
+		while(groupNames.get(i) != null)
+			i++;
+		return i;
+	}
+
+	public int pushTriangles(double[] coordinates, int[] indices)
+	{
+		Vertex[] vertices = new Vertex[coordinates.length / 3];
+		int k = 0;
+		for(int i = 0; i < coordinates.length / 3; i++)
+		{
+			vertices[i] = createVertex(
+				coordinates[k], coordinates[k+1], coordinates[k+2]);
+			k += 3;
+		}
+
+		if(hasNodes())
+		{
+			for(Vertex v:vertices)
+				add(v);
+		}
+		k = 0;
+		int groupId = getFreeGroupID();
+		for(int i = 0; i < indices.length / 3; i++)
+		{
+			Triangle t = createTriangle(vertices[indices[k]],
+				vertices[indices[k + 1]], vertices[indices[k + 2]]);
+			add(t);
+			t.setGroupId(groupId);
+			k += 3;
+		}
+		// TODO try to do it in the triangle loop to avoid a full adjacency
+		// build
+		clearAdjacency();
+		buildAdjacency();
+		return groupId;
+	}
+
+	public void popTriangles(TDoubleList coordinates, TIntList indices, int group)
+	{
+		TObjectIntHashMap<Vertex> map = new TObjectIntHashMap<Vertex>(
+			100, 0.5f, Integer.MIN_VALUE);
+		int nextVertexId = 0;
+		Iterator<Triangle> it = getTriangles().iterator();
+		while(it.hasNext())
+		{
+			Triangle t = it.next();
+			if(t.getGroupId() == group)
+			{
+				for(Vertex v:t.vertex)
+				{
+					int vid = map.putIfAbsent(v, nextVertexId);
+					if(vid == map.getNoEntryValue())
+					{
+						vid = nextVertexId;
+						nextVertexId++;
+						coordinates.add(v.getX());
+						coordinates.add(v.getY());
+						coordinates.add(v.getZ());
+					}
+					indices.add(vid);
+				}
+			}
+			it.remove();
+		}
+		map = null;
+		// TODO try to do it in the triangle loop to avoid a full adjacency
+		// build
+		clearAdjacency();
+		buildAdjacency();
+	}
+
 	/**
 	 * Removes a triangle from triangle list.
 	 *
