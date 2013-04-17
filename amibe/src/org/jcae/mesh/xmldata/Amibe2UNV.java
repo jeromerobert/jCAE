@@ -74,7 +74,17 @@ public class Amibe2UNV
 	private final String directory;
 	private final MeshExporter.UNV unvWriter;
 	private double scale = 1.0;
-	
+	private int elementary = 1;
+
+	/**
+	 * This is the number written just after the type of elements.
+	 * The default is 1. gmsh use this number to set the id of the create GFace
+	 * when using the Merge command.
+	 */
+	public void setElementary(int elementary) {
+		this.elementary = elementary;
+	}
+
 	/**
 	 * @param directory The directory which contain 3d files
 	 */
@@ -237,7 +247,7 @@ public class Amibe2UNV
 		f.close();
 		logger.info("Total number of nodes: "+count);
 	}
-	
+
 	/**
 	 * @param out
 	 * @throws IOException 
@@ -256,7 +266,7 @@ public class Amibe2UNV
 				int n3 = trias.get();
 				if(n1 >= 0)
 					MeshExporter.UNV.writeSingleTriangle(out, count,
-						n1+1, n2+1, n3+1);
+						n1+1, n2+1, n3+1, elementary);
 				count ++;
 			}
 		}

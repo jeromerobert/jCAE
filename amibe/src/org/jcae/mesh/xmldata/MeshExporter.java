@@ -407,7 +407,13 @@ abstract public class MeshExporter
 
 		public static void writeSingleTriangle(PrintStream out, int count, int n0, int n1, int n2)
 		{
-			out.println(FORMAT_I10.format(count)+"        91         1         1         1         3");
+			writeSingleTriangle(out, count, n0, n1, n2, 1);
+		}
+
+		public static void writeSingleTriangle(PrintStream out, int count, int n0, int n1, int n2, int elementary)
+		{
+			out.println(FORMAT_I10.format(count) + "        91" +
+				FORMAT_I10.format(elementary) + "         1         1         3");
 			out.println(FORMAT_I10.format(n0)+FORMAT_I10.format(n1)+FORMAT_I10.format(n2));
 		}
 
