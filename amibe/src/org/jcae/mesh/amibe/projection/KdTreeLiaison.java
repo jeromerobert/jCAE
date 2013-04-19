@@ -95,8 +95,11 @@ public class KdTreeLiaison extends MeshLiaison{
 	public void addVertex(Vertex v, Triangle bgT) {}
 
 	@Override
-	public Triangle removeVertex(Vertex v) {
-		return getBackgroundTriangle(v);
+	public void removeVertex(Vertex v) {
+	}
+
+	@Override
+	public void replaceVertex(Vertex oldV, Vertex newV) {
 	}
 
 	@Override

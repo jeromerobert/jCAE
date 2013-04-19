@@ -290,7 +290,10 @@ public abstract class MeshLiaison
 	 * @param v vertex in current mesh
 	 * @return  triangle in the background mesh
 	 */
-	public abstract Triangle removeVertex(Vertex v);
+	public abstract void removeVertex(Vertex v);
+
+	/** Replace a vertex by another one on the same background triangle */
+	public abstract void replaceVertex(Vertex oldV, Vertex newV);
 
 	public abstract void updateAll();
 

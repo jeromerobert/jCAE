@@ -292,13 +292,23 @@ public class MapMeshLiaison extends MeshLiaison
 			mapCurrentVertexProjection.get(bgT.getGroupId()).put(v, new ProjectedLocation(v, bgT));
 	}
 
+	@Override
+	public void replaceVertex(Vertex oldV, Vertex newV) {
+		addVertex(newV, popVertex(oldV));
+	}
+
+	@Override
+	public void removeVertex(Vertex v) {
+		popVertex(v);
+	}
+
 	/**
 	 * Remove a Vertex.
 	 *
 	 * @param v vertex in current mesh
 	 * @return  triangle in the background mesh
 	 */
-	public final Triangle removeVertex(Vertex v)
+	public final Triangle popVertex(Vertex v)
 	{
 		for (TIntObjectIterator<Map<Vertex, ProjectedLocation>> it = mapCurrentVertexProjection.iterator(); it.hasNext(); )
 		{

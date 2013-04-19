@@ -316,9 +316,8 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 		// Now current == (v3*a)
 		if (liaison != null)
 		{
-			Triangle bgT = liaison.removeVertex(v1);
 			liaison.removeVertex(v2);
-			liaison.addVertex(v3, bgT);
+			liaison.replaceVertex(v1, v3);
 		}
 		metrics.put(v3);
 		// Update edge costs

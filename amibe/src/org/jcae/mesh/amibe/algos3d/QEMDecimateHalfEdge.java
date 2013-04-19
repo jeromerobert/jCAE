@@ -489,12 +489,16 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		current = (HalfEdge) mesh.edgeCollapse(current, v3);
 		if (liaison != null)
 		{
-			Triangle bg1T = liaison.removeVertex(v1);
-			Triangle bg2T = liaison.removeVertex(v2);
 			if (v3.sqrDistance3D(v1) < v3.sqrDistance3D(v2))
-				liaison.addVertex(v3, bg1T);
+			{
+				liaison.replaceVertex(v1, v3);
+				liaison.removeVertex(v2);
+			}
 			else
-				liaison.addVertex(v3, bg2T);
+			{
+				liaison.replaceVertex(v2, v3);
+				liaison.removeVertex(v1);
+			}
 		}
 		// Now current == (v3*a)
 		// Update edge costs
