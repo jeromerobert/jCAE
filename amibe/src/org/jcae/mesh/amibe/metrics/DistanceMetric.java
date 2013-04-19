@@ -24,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
@@ -69,7 +70,7 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 
 	private class PointSource extends DistanceMetricInterface
 	{
-		private final double sx,sy,sz;
+		public final double sx,sy,sz;
 
 		public PointSource(final double sx, final double sy, final double sz)
 		{
@@ -374,6 +375,38 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 			double z1 = bb.getDouble();
 			addLine(x0, y0, z0, true, x1, y1, z1, true, size0,
 				Math.sqrt(sqrD0), Math.sqrt(sqrD1));
+		}
+	}
+
+	public void saveTxt(String fileName) throws IOException
+	{
+		PrintWriter out = new PrintWriter(fileName);
+		saveTxt(out);
+		out.close();
+	}
+
+	public void saveTxt(PrintWriter out) throws IOException
+	{
+		for(DistanceMetricInterface source:sources)
+		{
+			if(source instanceof PointSource)
+			{
+				PointSource s = (PointSource)source;
+				out.printf("1 %g %g %g %g %g %g\n", s.sx, s.sy, s.sz,
+					s.size0, Math.sqrt(s.sqrD0), Math.sqrt(s.sqrD1));
+			}
+			else if(source instanceof LineSource)
+			{
+				LineSource s = (LineSource)source;
+				out.printf("2 %g %g %g %d %g %g %g %d %g %g %g\n",
+					s.sx0, s.sy0, s.sz0, s.closed0 ? 1 : 0,
+					s.sx1, s.sy1, s.sz1, s.closed1 ? 1 : 0,
+					s.size0, Math.sqrt(s.sqrD0), Math.sqrt(s.sqrD1));
+			}
+			else
+			{
+				LOGGER.warning("Unknown source type "+source.getClass());
+			}
 		}
 	}
 
