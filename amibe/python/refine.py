@@ -6,7 +6,7 @@ from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.projection import MeshLiaison
 from org.jcae.mesh.amibe.metrics import EuclidianMetric3D, DistanceMetric
 from org.jcae.mesh.xmldata import MeshReader, MeshWriter
-from org.jcae.mesh.amibe.metrics.MetricSupport import AnalyticMetricInterface
+from org.jcae.mesh.amibe.metrics.MetricSupport import AnalyticMetric
 
 # Java
 from java.util import HashMap
@@ -138,12 +138,12 @@ if options.decimateSize or options.decimateTarget:
 	SwapEdge(liaison, swapOptions).compute()
 
 algo = Remesh(liaison, opts)
-class RemeshMetric(AnalyticMetricInterface):
-	def getTargetSize(self, x, y, z):
+class RemeshMetric(AnalyticMetric):
+	def getTargetSize(self, x, y, z, groupId):
 		return min(200.0, (x - 9000.0)*(x - 9000.0) / 2250.0)
 
 if options.point_metric_file:
-    algo.setAnalyticMetric(DistanceMetric(options.size, options.point_metric_file))
+	algo.setAnalyticMetric(DistanceMetric(options.size, options.point_metric_file))
 elif setAnalytic:
 	algo.setAnalyticMetric(RemeshMetric());
 
