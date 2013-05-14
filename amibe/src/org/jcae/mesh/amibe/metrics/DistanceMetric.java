@@ -48,7 +48,7 @@ import org.jcae.mesh.amibe.ds.Vertex;
  * won't.
  * @author Jerome Robert
  */
-public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
+public class DistanceMetric extends MetricSupport.AnalyticMetric {
 
 	private static final Logger LOGGER=Logger.getLogger(DistanceMetric.class.getName());
 
@@ -267,15 +267,6 @@ public class DistanceMetric implements MetricSupport.AnalyticMetricInterface {
 			minValue = Math.min(v, minValue);
 		}
 		return minValue * scaling;
-	}
-
-	@Override
-	public double getTargetSizeTopo(Mesh mesh, Vertex v)
-	{
-		int groupId = -1;
-		if(v.isManifold())
-			groupId = ((Triangle)v.getLink()).getGroupId();
-		return getTargetSize(v.getX(), v.getY(), v.getZ(), groupId);
 	}
 
 	public void save(String fileName) throws IOException

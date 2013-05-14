@@ -64,6 +64,29 @@ public class MetricSupport {
 		double getTargetSizeTopo(Mesh mesh, Vertex v);
 	}
 
+	public static abstract class AnalyticMetric implements AnalyticMetricInterface
+	{
+		/**
+		 * Return the target size when topology information are available.
+		 * This is used for exemple before inserting a point into the mesh.
+		 */
+		public abstract double getTargetSize(double x, double y, double z, int groupId);
+
+		/**
+		 * Return the target size when topology information are available.
+		 * This is only used at the initialization of algorithms
+		 */
+		@Override
+		public double getTargetSizeTopo(Mesh mesh, Vertex v)
+		{
+			int groupId = -1;
+			if(v.isManifold())
+				groupId = ((Triangle)v.getLink()).getGroupId();
+			return getTargetSize(v.getX(), v.getY(), v.getZ(), groupId);
+		}
+
+	}
+
 	public MetricSupport(Mesh mesh, Map<String, String> options) {
 		this(mesh, options, "size");
 	}
