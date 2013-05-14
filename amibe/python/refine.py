@@ -47,10 +47,11 @@ parser.add_option("-m", "--metricsFile", metavar="STRING",
 parser.add_option("-P", "--point-metric", metavar="STRING",
                   action="store", type="string", dest="point_metric_file",
                   help="""A CSV file containing points which to refine around. Each line must contains 6 values:
-                  - 1
-                  - x, y, z
-                  - the distance of the source where the target size is defined
-                  - the target size at the given distance""")
+                   1, x, y, z, s0 (target size at distance d0), d0, d1(distance from which point has no influence)
+                  Target size at distance d of this point is computed like this:
+                    a) if d <= d0, s0.
+                    b) if d >= d1, global mesh size sInf.
+                    c) if d0 < d < d1, s0 + (sInf - s0) * (d^2 - d0^2)/(d1^2 - d0^2).""")
 parser.add_option("-p", "--project",
                   action="store_true", dest="project",
                   help="project vertices onto local surface")
