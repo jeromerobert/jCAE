@@ -94,7 +94,9 @@ public class MeshVisuReader extends MeshReader
 
 	MeshVisu[] getMeshes()
 	{
-		return mapLeafToMeshVisu.values();
+		MeshVisu[] toReturn = new MeshVisu[mapLeafToMeshVisu.size()];
+		mapLeafToMeshVisu.values(toReturn);
+		return toReturn;
 	}
 
 	public void buildMeshVisu(int[] leaves)
