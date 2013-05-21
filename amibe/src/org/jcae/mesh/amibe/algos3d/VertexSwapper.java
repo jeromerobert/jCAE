@@ -40,7 +40,7 @@ public class VertexSwapper {
 	private TriangleKdTree kdTree;
 	private final Vertex projectedMiddle, middle;
 	private double sqrDeflection;
-	private int group;
+	private int group = -1;
 	public VertexSwapper(MeshLiaison liaison) {
 		this(liaison, null);
 	}
@@ -74,9 +74,20 @@ public class VertexSwapper {
 
 	public void swap(Vertex v)
 	{
-		if(!v.isManifold())
-			return;
-		HalfEdge current = (HalfEdge) v.getIncidentAbstractHalfEdge((Triangle)v.getLink(), null);
+		if(v.isManifold())
+		{
+			swapManifold(v, (Triangle)v.getLink());
+		}
+		else
+		{
+			for(Triangle t:(Triangle[])v.getLink())
+				swapManifold(v, t);
+		}
+	}
+
+	private void swapManifold(Vertex v, Triangle triangle)
+	{
+		HalfEdge current = (HalfEdge) v.getIncidentAbstractHalfEdge(triangle, null);
 		current = current.next();
 		Vertex o = current.origin();
 		assert current.apex() == v;
