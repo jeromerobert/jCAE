@@ -272,12 +272,12 @@ public class RemeshPolyline
 			double alpha = 0.5;
 			double delta = 0.5;
 			Vertex np = mesh.createVertex(0, 0, 0);
-			np.middle(lower, upper);
 			int cnt = nrDichotomy;
 			if (edgeLength > 1.0)
 				cnt *= (int) edgeLength;
 			while(cnt >= 0)
 			{
+				np.middle(lower, upper);
 				cnt--;
 				// Compute metrics at this position
 				EuclidianMetric3D m;
@@ -307,7 +307,6 @@ public class RemeshPolyline
 					if (LOGGER.isLoggable(Level.FINEST))
 						LOGGER.log(Level.FINEST, "{0} > {1} {2} {3} {4}", new Object[]{l, target, cnt, delta, alpha});
 					upper.moveTo(np);
-					np.middle(lower, np);
 				}
 				else
 				{
@@ -316,7 +315,6 @@ public class RemeshPolyline
 					if (LOGGER.isLoggable(Level.FINEST))
 						LOGGER.log(Level.FINEST, "{0} < {1} {2} {3} {4}", new Object[]{l, target, cnt, delta, alpha});
 					lower.moveTo(np);
-					np.middle(upper, np);
 				}
 			}
 			if (cnt < 0)
