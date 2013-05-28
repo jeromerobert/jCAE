@@ -53,7 +53,7 @@ public class RemeshPolyline
 	private AnalyticMetricInterface analyticMetric;
 	private boolean buildBackgroundLink;
 	/** Keep track of on which background segment each point were inserted */
-	private List<Integer> backgroundLink;
+	private List<Integer> backgroundLink, saveBackgroundLink;
 	public RemeshPolyline(Mesh m, List<Vertex> vertices, double size)
 	{
 		this(m, vertices,
@@ -124,7 +124,10 @@ public class RemeshPolyline
 	public List<Vertex> compute()
 	{
 		if(buildBackgroundLink)
+		{
 			backgroundLink = new ArrayList<Integer>();
+			saveBackgroundLink = new ArrayList<Integer>();
+		}
 		List<Vertex> newWire = new ArrayList<Vertex>();
 		Vertex last = bgWire.get(bgWire.size() -1);
 		newWire.add(bgWire.get(0));
@@ -138,6 +141,11 @@ public class RemeshPolyline
 		while(true)
 		{
 			List<Vertex> saveList = new ArrayList<Vertex>(newWire);
+			if(buildBackgroundLink)
+			{
+				saveBackgroundLink.clear();
+				saveBackgroundLink.addAll(backgroundLink);
+			}
 			// lastLength is the distance between the last inserted
 			// point and the last point of the polyline.
 			double lastLength = compute(newWire, target, maxError);
@@ -166,7 +174,10 @@ public class RemeshPolyline
 				// Avoid infinite loops
 				if (lastLength > curError)
 				{
-					LOGGER.warning("Beam discretization may be of poor quality");
+					LOGGER.warning("Beam discretization may be of poor quality between "+
+						new Location(bgWire.get(0)) + " and " +
+						new Location(bgWire.get(bgWire.size() - 1)));
+					backgroundLink = saveBackgroundLink;
 					return saveList;
 				}
 				curError = lastLength;
@@ -183,7 +194,9 @@ public class RemeshPolyline
 				// Avoid infinite loops
 				if (target - lastLength > curError)
 				{
-					LOGGER.warning("Beam discretization may be of poor quality");
+					LOGGER.warning("Beam discretization may be of poor quality between "+
+						new Location(bgWire.get(0)) + " and " +
+						new Location(bgWire.get(bgWire.size() - 1)));
 					break;
 				}
 				curError = target - lastLength;
