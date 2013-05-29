@@ -209,6 +209,22 @@ def __remesh(options):
 
     #1
     writeVTK(liaison)
+    if options.boundary_angle == None:
+        options.boundary_angle = 1.66
+    if point_metric:
+        point_metric.scaling = 1
+        if options.forced_bounds:
+            BeamInsertion(liaison.mesh, point_metric).insert(
+                options.forced_bounds[0], options.forced_bounds[1])
+        RemeshSkeleton(liaison, options.boundary_angle, options.size / 100.0, point_metric).compute()
+    else:
+        RemeshSkeleton(liaison, options.boundary_angle, options.size / 100.0, options.size).compute()
+        if options.forced_bounds:
+            BeamInsertion(liaison.mesh, options.size).insert(
+                options.forced_bounds[0], options.forced_bounds[1])
+
+    #2
+    writeVTK(liaison)
 
     if options.recordFile:
         cmds = [ String("assert self.m.checkNoDegeneratedTriangles()"), String("assert self.m.checkNoInvertedTriangles()"), String("assert self.m.checkVertexLinks()"), String("assert self.m.isValid()") ]
@@ -223,22 +239,6 @@ def __remesh(options):
         point_metric.scaling = sqrt(2)
         algo.analyticMetric = point_metric
     algo.compute()
-
-    #2
-    writeVTK(liaison)
-    if options.boundary_angle == None:
-        options.boundary_angle = 1.66
-    if point_metric:
-        point_metric.scaling = 1
-        if options.forced_bounds:
-            BeamInsertion(liaison.mesh, point_metric).insert(
-                options.forced_bounds[0], options.forced_bounds[1])
-        RemeshSkeleton(liaison, options.boundary_angle, options.size / 100.0, point_metric).compute()
-    else:
-        RemeshSkeleton(liaison, options.boundary_angle, options.size / 100.0, options.size).compute()
-        if options.forced_bounds:
-            BeamInsertion(liaison.mesh, options.size).insert(
-                options.forced_bounds[0], options.forced_bounds[1])
 
     #3
     writeVTK(liaison)
