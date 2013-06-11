@@ -173,6 +173,9 @@ public class Delaunay2D {
 			Triangle t3d = mesh.createTriangle(tmp);
 			t3d.setGroupId(group);
 			mesh.add(t3d);
+			if(mesh.hasNodes())
+				for(Vertex v:tmp)
+					mesh.add(v);
 		}
 	}
 }
