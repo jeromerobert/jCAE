@@ -168,10 +168,12 @@ def create_mesh(**kwargs):
 def __remesh(options):
     afront_stderr = getattr(options, 'afront_stderr', None)
     mesh = getattr(options, 'mesh', None)
-    if not mesh:
-        mesh = create_mesh(**options)
+    liaison = getattr(options, 'liaison', None)
+    if not liaison:
+        if not mesh:
+            mesh = create_mesh(**options)
+        liaison = MeshLiaison.create(mesh)
 
-    liaison = MeshLiaison.create(mesh)
     if options.recordFile:
         liaison.getMesh().getTrace().setDisabled(False)
         liaison.getMesh().getTrace().setLogFile(options.recordFile)
