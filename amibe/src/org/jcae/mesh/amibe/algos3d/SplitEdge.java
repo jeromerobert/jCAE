@@ -193,7 +193,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		assert mesh.isValid();
 		if (liaison != null)
 		{
-			liaison.addVertex(insertedVertex, liaison.getBackgroundTriangle(current.origin()));
+			liaison.addVertex(insertedVertex, current.origin());
 		}
 
 		HalfEdge ret = current.prev();

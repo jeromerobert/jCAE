@@ -460,9 +460,8 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 			Location newPt = new Location();
 			newPt.middle(ot.destination(), v);
 			Vertex newV = mesh.createVertex(newPt);
-			liaison.addVertex(newV, liaison.getBackgroundTriangle(v, tNormal));
-			liaison.move(newV, newV, false);
 			ot = mesh.vertexSplit(ot, newV);
+			liaison.addVertex(newV, v, tNormal);
 			// The valence of v has not been changed by
 			// inserting a Vertex, we now try to swap an edge.
 			// If we can't, revert this split.

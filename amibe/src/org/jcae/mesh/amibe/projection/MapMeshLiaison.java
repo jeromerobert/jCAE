@@ -253,7 +253,7 @@ public class MapMeshLiaison extends MeshLiaison
 		return true;
 	}
 
-	public final Triangle getBackgroundTriangle(Vertex v)
+	private Triangle getBackgroundTriangle(Vertex v)
 	{
 		ProjectedLocation location = mapCurrentVertexProjection.get(-1).get(v);
 		assert location != null : "Vertex "+v+" not found";
@@ -266,18 +266,22 @@ public class MapMeshLiaison extends MeshLiaison
 		assert location != null : "Vertex "+v+" not found";
 		return location.normal;
 	}
-	@Override
-	public Triangle getBackgroundTriangle(Vertex v, double[] normal) {
+
+	private Triangle getBackgroundTriangle(Vertex v, double[] normal) {
 		System.arraycopy(getBackgroundNormal(v), 0, normal, 0, 3);
 		return getBackgroundTriangle(v);
 	}
 
 	@Override
-	public Triangle getBackgroundTriangle(Vertex v, Vertex start,
-		double maxError, int group) {
+	public Triangle addVertex(Vertex v, Vertex start, double maxError, int group) {
 		Map<Vertex, Vertex> mapBgGroupVertices = neighborBgMap.get(group);
 		Vertex bgNear = mapBgGroupVertices.get(start);
-		return findSurroundingTriangle(v, bgNear, maxError, true, group).getTri();
+		Triangle bgT = findSurroundingTriangle(v, bgNear, maxError, true, group).getTri();
+		assert bgT.getGroupId() == group || group < 0:
+			getMesh().getGroupName(group)+" "+getMesh().getGroupName(bgT.getGroupId())+" "+v;
+		addVertex(v, bgT);
+		move(v, v, group, false);
+		return bgT;
 	}
 	/**
 	 * Add a Vertex.
@@ -290,6 +294,17 @@ public class MapMeshLiaison extends MeshLiaison
 		mapCurrentVertexProjection.get(-1).put(v, new ProjectedLocation(v, bgT));
 		if (bgT.getGroupId() != -1)
 			mapCurrentVertexProjection.get(bgT.getGroupId()).put(v, new ProjectedLocation(v, bgT));
+	}
+
+	@Override
+	public void addVertex(Vertex newV, Vertex existingVertex) {
+		addVertex(newV, getBackgroundTriangle(existingVertex));
+	}
+
+	@Override
+	public void addVertex(Vertex v, Vertex existingVertex, double[] normal) {
+		addVertex(v, getBackgroundTriangle(existingVertex, normal));
+		move(v, v, false);
 	}
 
 	@Override

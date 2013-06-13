@@ -60,8 +60,7 @@ public class KdTreeLiaison extends MeshLiaison{
 		return t != null;
 	}
 
-	@Override
-	public Triangle getBackgroundTriangle(Vertex v) {
+	private Triangle getBackgroundTriangle(Vertex v) {
 		Triangle toReturn = kdTree.getClosestTriangle(v, null, -1);
 		if(toReturn == null)
 			throw new NoSuchElementException(v.toString());
@@ -78,21 +77,25 @@ public class KdTreeLiaison extends MeshLiaison{
 	}
 
 	@Override
-	public Triangle getBackgroundTriangle(Vertex v, double[] normal) {
-		Triangle t = getBackgroundTriangle(v);
-		Matrix3D.computeNormal3D(t.vertex[0], t.vertex[1], t.vertex[2],
-			work1, work2, normal);
-		return t;
-	}
-
-	@Override
-	public Triangle getBackgroundTriangle(Vertex v, Vertex start,
-		double maxError, int group) {
-		return kdTree.getClosestTriangle(v, null, group);
+	public Triangle addVertex(Vertex v, Vertex start, double maxError, int group)
+	{
+		move(v, v, false, -1, false);
+		return null;
 	}
 
 	@Override
 	public void addVertex(Vertex v, Triangle bgT) {}
+
+	@Override
+	public void addVertex(Vertex newV, Vertex existingVertex) { }
+
+	@Override
+	public void addVertex(Vertex v, Vertex existingVertex, double[] normal) {
+		Triangle t = kdTree.getClosestTriangle(v, tmpCoords, -1);
+		v.moveTo(tmpCoords);
+		Matrix3D.computeNormal3D(t.vertex[0], t.vertex[1], t.vertex[2],
+			work1, work2, normal);
+	}
 
 	@Override
 	public void removeVertex(Vertex v) {

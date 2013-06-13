@@ -956,12 +956,7 @@ public class Remesh
 			assert metric != null;
 			double localSize = 0.5 * metric.getUnitBallBBox()[0];
 			double localSize2 = localSize * localSize;
-			Triangle bgT = liaison.getBackgroundTriangle(v, triNeighbor.get(index), localSize2, group);
-			assert bgT.getGroupId() == group || group < 0:
-				mesh.getGroupName(group)+" "+mesh.getGroupName(bgT.getGroupId())+" "+v;
-			liaison.addVertex(v, bgT);
-			liaison.move(v, v, group, false);
-
+			Triangle bgT = liaison.addVertex(v, triNeighbor.get(index), localSize2, group);
 			boolean validCandidate = allowNearNodes;
 			if (!validCandidate)
 			{
