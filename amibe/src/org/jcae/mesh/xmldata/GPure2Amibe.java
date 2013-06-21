@@ -55,6 +55,7 @@ public class GPure2Amibe extends XMLReader {
 		XPathExpressionException,
 		IOException {
 		out = new AmibeWriter.Dim3(outputDir);
+		out.setFixNoGroup(true);
 		Element triaElement = null;
 		ArrayList<Element> edgeElements = new ArrayList<Element>();
 		ArrayList<Element> partitionElements = new ArrayList<Element>();

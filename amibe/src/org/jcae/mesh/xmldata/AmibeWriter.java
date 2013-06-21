@@ -538,7 +538,15 @@ public abstract class AmibeWriter {
 	 */
 	private void checkNoGroup() throws IOException
 	{
-		if(groups.isEmpty())
+		int trianglesInGroup = 0;
+		int edgesInGroup = 0;
+		for(Group g: groups)
+		{
+			trianglesInGroup += g.nbElement;
+			edgesInGroup += g.bNbElement;
+		}
+
+		if(trianglesInGroup == 0 && numberOfTriangles > 0)
 		{
 			Group g=new Group();
 			g.name="C_EXT";
@@ -547,8 +555,11 @@ public abstract class AmibeWriter {
 			groups.add(g);
 			for(int i=0; i<numberOfTriangles; i++)
 				groupChan.writeInt(i);
+		}
 
-			g=new Group();
+		if(edgesInGroup == 0 && numberOfBeams > 0)
+		{
+			Group g=new Group();
 			g.name="CF_EXT";
 			g.bNbElement=numberOfBeams;
 			g.bOffset=0;
