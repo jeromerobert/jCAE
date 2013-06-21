@@ -31,6 +31,9 @@ import java.util.logging.Logger;
 import javax.swing.*;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
+import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.xmldata.AmibeReader.SubMesh;
 import org.xml.sax.SAXException;
 
@@ -439,5 +442,25 @@ public class Groups
 			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 		}
 		return groupList;
+	}
+
+	/**
+	 * Remove a set of group from a mesh
+	 */
+	public static void remove(String amibePath, String ... names) throws IOException
+	{
+		MeshTraitsBuilder traits = new MeshTraitsBuilder();
+		traits.addTriangleSet();
+		Mesh m = new org.jcae.mesh.amibe.ds.Mesh(traits);
+		MeshReader.readObject3D(m, amibePath);
+		int[] ids = m.getGroupIDs(names);
+		Iterator<Triangle> it = m.getTriangles().iterator();
+		while(it.hasNext())
+		{
+			Triangle t = it.next();
+			if(t.getGroupId() == ids[0])
+				it.remove();
+		}
+		MeshWriter.writeObject3D(m, amibePath, null);
 	}
 }
