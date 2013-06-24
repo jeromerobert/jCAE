@@ -135,17 +135,6 @@ public class Vertex extends Location implements Serializable
 	}
 	
 	/**
-	 * Returns the distance in 3D space.
-	 *
-	 * @param end  the node to which distance is computed.
-	 * @return the distance to <code>end</code>.
-	 **/
-	public final double distance3D(Vertex end)
-	{
-		return Math.sqrt(sqrDistance3D(end));
-	}
-	
-	/**
 	 * Returns the angle at which a segment is seen.
 	 *
 	 * @param n1  first node

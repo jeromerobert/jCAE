@@ -149,6 +149,17 @@ public class Location
 		return dx*dx+dy*dy+dz*dz;
 	}
 
+	/**
+	 * Returns the distance in 3D space.
+	 *
+	 * @param end  the node to which distance is computed.
+	 * @return the distance to <code>end</code>.
+	 **/
+	public double distance3D(Location end)
+	{
+		return Math.sqrt(sqrDistance3D(end));
+	}
+
 	@Override
 	public String toString() {
 		return "(" + x + ", " + y + ", " + z + ")";
