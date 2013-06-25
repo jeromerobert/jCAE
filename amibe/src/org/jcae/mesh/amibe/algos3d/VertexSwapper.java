@@ -40,6 +40,7 @@ public class VertexSwapper {
 	private TriangleKdTree kdTree;
 	private final Vertex projectedMiddle, middle;
 	private double sqrDeflection;
+	private double minNormalAngle = Double.POSITIVE_INFINITY;
 	private int group = -1;
 	public VertexSwapper(MeshLiaison liaison) {
 		this(liaison, null);
@@ -64,6 +65,15 @@ public class VertexSwapper {
 		this.kdTree = kdTree;
 	}
 
+	/**
+	 * if the cosinus of the angle between the normals of the edge to be swapped
+	 * is smaller than this value, the edge is not swapped.
+	 */
+	public void setMinNormalAngle(double minNormalAngle) {
+		this.minNormalAngle = minNormalAngle;
+	}
+
+	/** Set the acceptable distance from the underlying liaison */
 	public void setSqrDeflection(double sqrDeflection) {
 		this.sqrDeflection = sqrDeflection;
 	}
@@ -85,6 +95,14 @@ public class VertexSwapper {
 		}
 	}
 
+	/** Return true if the edge should be swapped */
+	protected boolean isQualityImproved(Quality quality)
+	{
+		return quality.getSwappedAngle() > 0 &&
+			quality.getAngle() > minNormalAngle &&
+			quality.getSwappedQuality() > quality.getQuality();
+	}
+
 	private void swapManifold(Vertex v, Triangle triangle)
 	{
 		HalfEdge current = (HalfEdge) v.getIncidentAbstractHalfEdge(triangle, null);
@@ -103,8 +121,7 @@ public class VertexSwapper {
 					&& current.canSwapTopology())
 				{
 					quality.setEdge(current);
-					if(quality.getSwappedAngle() > 0 &&
-						quality.getSwappedQuality() > quality.getQuality())
+					if(isQualityImproved(quality))
 					{
 						if(liaison != null)
 						{
