@@ -386,6 +386,9 @@ public abstract class AbstractHalfEdge
 			return  Math.min(area1/p1/p1, area2/p2/p2);
 		}
 
+		/**
+		 * cosinus of the angle between the 2 normals of the adjacent triangle
+		 */
 		public double getAngle()
 		{
 			computeNormal();
@@ -400,6 +403,10 @@ public abstract class AbstractHalfEdge
 			return Math.min(swappedArea1/p3/p3, swappedArea2/p4/p4);
 		}
 
+		/**
+		 * cosinus of the angle between the 2 normals of the adjacent triangle
+		 * of the edge if it is swapped
+		 */
 		public double getSwappedAngle()
 		{
 			computeSwappedNormal();
