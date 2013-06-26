@@ -263,6 +263,7 @@ public class Mesh implements Serializable
 		}
 		k = 0;
 		int groupId = getFreeGroupID();
+		setGroupName(groupId, Integer.toString(groupId));
 		for(int i = 0; i < indices.length / 3; i++)
 		{
 			Triangle t = createTriangle(vertices[indices[k]],
@@ -271,10 +272,6 @@ public class Mesh implements Serializable
 			t.setGroupId(groupId);
 			k += 3;
 		}
-		// TODO try to do it in the triangle loop to avoid a full adjacency
-		// build
-		clearAdjacency();
-		buildAdjacency();
 		return groupId;
 	}
 
@@ -302,8 +299,8 @@ public class Mesh implements Serializable
 					}
 					indices.add(vid);
 				}
+				it.remove();
 			}
-			it.remove();
 		}
 		map = null;
 		// TODO try to do it in the triangle loop to avoid a full adjacency
