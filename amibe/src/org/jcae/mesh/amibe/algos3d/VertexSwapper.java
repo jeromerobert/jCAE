@@ -40,7 +40,7 @@ public class VertexSwapper {
 	private TriangleKdTree kdTree;
 	private final Vertex projectedMiddle, middle;
 	private double sqrDeflection;
-	private double minNormalAngle = Double.POSITIVE_INFINITY;
+	private double minNormalAngle = -2;
 	private int group = -1;
 	public VertexSwapper(MeshLiaison liaison) {
 		this(liaison, null);
