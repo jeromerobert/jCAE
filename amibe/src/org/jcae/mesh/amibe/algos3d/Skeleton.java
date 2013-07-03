@@ -44,6 +44,8 @@ import org.jcae.mesh.xmldata.MeshWriter;
  */
 public class Skeleton {
 	private final Collection<List<AbstractHalfEdge>> polylines;
+	private final Set<Integer> groups1 = HashFactory.createSet();
+	private final Set<Integer> groups2 = HashFactory.createSet();
 	/**
 	 * @param mesh
 	 * @param angle min polyline angle
@@ -231,19 +233,41 @@ public class Skeleton {
 	private boolean isPolylineEnd(AbstractHalfEdge edge, double angle)
 	{
 		AbstractHalfEdge next = null;
-		Iterator<AbstractHalfEdge> it = edge.destination().getNeighbourIteratorAbstractHalfEdge();
-		while(it.hasNext())
+		if(edge.destination().isManifold())
 		{
-			AbstractHalfEdge e = it.next();
-			assert e != edge;
-			assert e.origin() == edge.destination();
-			if((next == null || e.destination() != next.destination()) &&
-				e.destination() != edge.origin() && isNonManifold(e))
+			Triangle triangle = (Triangle) edge.destination().getLink();
+			AbstractHalfEdge ot = edge.destination().getIncidentAbstractHalfEdge(triangle, null);
+			assert ot.origin() == edge.destination();
+			Vertex d = ot.destination();
+			do
 			{
-				if(next == null)
-					next = e;
-				else
-					return true;
+				if(ot.destination() != edge.origin() && isNonManifold(ot))
+				{
+					if(next == null)
+						next = ot;
+					else
+						assert false;
+				}
+				ot = ot.nextOriginLoop();
+			}
+			while (ot.destination() != d);
+		}
+		else
+		{
+			Iterator<AbstractHalfEdge> it = edge.destination().getNeighbourIteratorAbstractHalfEdge();
+			while(it.hasNext())
+			{
+				AbstractHalfEdge e = it.next();
+				assert e != edge;
+				assert e.origin() == edge.destination();
+				if((next == null || e.destination() != next.destination()) &&
+					e.destination() != edge.origin() && isNonManifold(e))
+				{
+					if(next == null)
+						next = e;
+					else
+						return true;
+				}
 			}
 		}
 		if(next == null)
@@ -253,11 +277,23 @@ public class Skeleton {
 		if(edge.hasAttributes(AbstractHalfEdge.IMMUTABLE) != next.hasAttributes(
 			AbstractHalfEdge.IMMUTABLE))
 			return true;
-		Set<Integer> g1 = HashFactory.createSet();
-		Set<Integer> g2 = HashFactory.createSet();
-		getGroups(edge, g1);
-		getGroups(next, g2);
-		if(!g1.equals(g2))
+
+		if(edge.hasAttributes(AbstractHalfEdge.BOUNDARY) &&
+			next.hasAttributes(AbstractHalfEdge.BOUNDARY))
+		{
+			if(edge.getTri() != next.getTri())
+			return true;
+		}
+		else
+		{
+			groups1.clear();
+			groups2.clear();
+			getGroups(edge, groups1);
+			getGroups(next, groups2);
+			if(!groups1.equals(groups2))
+				return true;
+		}
+		if(angle > 2*Math.PI)
 			return true;
 		return edge.destination().angle3D(edge.origin(), next.destination()) < angle;
 	}
