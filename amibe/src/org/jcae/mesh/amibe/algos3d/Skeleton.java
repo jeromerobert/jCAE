@@ -202,7 +202,11 @@ public class Skeleton {
 		return toReturn;
 	}
 
-	private boolean isNonManifold(AbstractHalfEdge he)
+	/**
+	 * Method use to filter hald edges which will be included in the skeleton
+	 * @return true if the half edge must be included
+	 */
+	protected boolean isNonManifold(AbstractHalfEdge he)
 	{
 		if(he.hasAttributes(AbstractHalfEdge.OUTER))
 			return false;
