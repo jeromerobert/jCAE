@@ -275,9 +275,10 @@ public class Skeleton {
 			}
 		}
 		if(next == null)
-			//next should have been an outer half edge so we ignore this case
-			//The vertex edge.destination() will be check using an other edge
-			return false;
+			// Cannot find the next segment so this is a end.
+			// this happen when the next whould a have been of type which is
+			// filtered by the isNonManifold method
+			return true;
 		if(edge.hasAttributes(AbstractHalfEdge.IMMUTABLE) != next.hasAttributes(
 			AbstractHalfEdge.IMMUTABLE))
 			return true;
@@ -312,6 +313,7 @@ public class Skeleton {
 		while(cv != startEdge.origin() && !possibleEnds.contains(cv))
 		{
 			Iterator<AbstractHalfEdge> it = cv.getNeighbourIteratorAbstractHalfEdge();
+			AbstractHalfEdge next = null;
 			while(it.hasNext())
 			{
 				AbstractHalfEdge e = it.next();
@@ -319,12 +321,18 @@ public class Skeleton {
 					e.getTri().getGroupId() == startEdge.getTri().getGroupId() &&
 					isNonManifold(e))
 				{
-					cb = e;
+					next = e;
 					break;
 				}
 			}
 			assert !beams.contains(cb): "Cannot find the edge next to "+cv+
 				" in group "+startEdge.getTri().getGroupId();
+			cb = next;
+			if(cb == null)
+			{
+				throw new NullPointerException("Cannot find the edge next to "
+					+ cv + " in group " + startEdge.getTri().getGroupId());
+			}
 			beams.add(cb);
 			cv = cb.destination();
 		}
