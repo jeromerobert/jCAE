@@ -167,6 +167,12 @@ public class TriangleKdTree {
 			getBoundsFromTria(mesh.getTriangles()));
 	}
 
+	/** Return the bounds of the whole tree */
+	public double[] getBounds()
+	{
+		return Arrays.copyOf(globalBounds, 6);
+	}
+
 	private String bounds2String(double[] b)
 	{
 		double[] boxCenter = new double[3];
