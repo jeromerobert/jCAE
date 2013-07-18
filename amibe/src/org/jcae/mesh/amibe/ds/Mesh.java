@@ -557,7 +557,10 @@ public class Mesh implements Serializable
 
 	public void setGroupName(int id, String name)
 	{
-		groupNames.put(id, name);
+		if(name == null)
+			groupNames.remove(id);
+		else
+			groupNames.put(id, name);
 	}
 
 	public String getGroupName(int id)
