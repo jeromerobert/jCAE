@@ -265,7 +265,7 @@ public class Triangle implements Serializable
 			assert listTail != null;
 			assert listTail.listNext == listSentinel : listTail;
 			if (o.listNext != null)
-				throw new ConcurrentModificationException();
+				throw new ConcurrentModificationException(o.toString());
 			listTail.listNext = o;
 			listTail = o;
 			o.listNext = listSentinel;
