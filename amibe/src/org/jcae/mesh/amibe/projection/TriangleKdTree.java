@@ -1057,6 +1057,8 @@ public class TriangleKdTree {
 			}
 			maxDepth = Math.max(nodes.size(), maxDepth);
 		}
+		if(maxNode == null)
+			return "Empty kdtree";
 		if(maxNode.triangles.length != new HashSet<Triangle>(Arrays.asList(
 			maxNode.triangles)).size())
 			throw new IllegalArgumentException(Arrays.toString(maxNode.triangles));
