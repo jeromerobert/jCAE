@@ -227,8 +227,6 @@ public class DistanceMetric extends MetricSupport.AnalyticMetric {
 	{
 		LineSource ps = new LineSource(x0, y0, z0, closed0, x1, y1, z1, closed1);
 		ps.size0 = size0;
-		if(d0 >= d1)
-			throw new IllegalArgumentException(d0+" >= "+d1);
 		ps.sqrD0 = d0 * d0;
 		ps.sqrD1 = d1 * d1;
 		sources.add(ps);
