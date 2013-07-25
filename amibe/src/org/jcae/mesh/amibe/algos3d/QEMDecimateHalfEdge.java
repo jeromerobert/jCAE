@@ -505,9 +505,9 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		// Now current == (v3*a)
 		// Update edge costs
 		quadricMap.put(v3, q3);
+		assert current != null : v3+" not connected to "+apex;
 		if(!metrics.isEmpty())
 			metrics.put(v3, metrics.get(v3, current.getTri()));
-		assert current != null : v3+" not connected to "+apex;
 		assert current.origin() == v3 : ""+current+"\n"+v3+"\n"+apex;
 		assert current.apex() == apex : ""+current+"\n"+v3+"\n"+apex;
 		v3 = vFree;
