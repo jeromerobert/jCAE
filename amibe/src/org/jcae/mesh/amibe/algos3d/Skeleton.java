@@ -286,7 +286,7 @@ public class Skeleton {
 		if(edge.hasAttributes(AbstractHalfEdge.BOUNDARY) &&
 			next.hasAttributes(AbstractHalfEdge.BOUNDARY))
 		{
-			if(edge.getTri() != next.getTri())
+			if(edge.getTri().getGroupId() != next.getTri().getGroupId())
 			return true;
 		}
 		else
