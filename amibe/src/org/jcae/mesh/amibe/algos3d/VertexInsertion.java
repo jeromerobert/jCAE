@@ -152,6 +152,8 @@ public class VertexInsertion {
 			double tol2 = localMetric2 / (40 * 40);
 			TriangleHE t = (TriangleHE) kdTree.getClosestTriangle(
 				v, projection, group);
+			if(t == null)
+				throw new NullPointerException("Cannot find projection for "+v);
 			liaison.move(v, projection, group, true);
 			for(Vertex tv:t.vertex)
 			{
