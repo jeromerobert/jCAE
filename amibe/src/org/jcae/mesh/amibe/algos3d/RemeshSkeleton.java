@@ -137,12 +137,14 @@ public class RemeshSkeleton {
 			{
 				int segId = bgLink.get(k++);
 				AbstractHalfEdge toSplit = edgeIndex.get(segId);
-				if(v.sqrDistance3D(toSplit.origin()) <= tolerance)
+				double od = v.sqrDistance3D(toSplit.origin());
+				double dd = v.sqrDistance3D(toSplit.destination());
+				if(od <= dd && od <= tolerance)
 				{
 					toKeep.remove(v);
 					toKeep.add(toSplit.origin());
 				}
-				else if(v.sqrDistance3D(toSplit.destination()) <= tolerance)
+				else if(dd <= tolerance)
 				{
 					toKeep.remove(v);
 					toKeep.add(toSplit.destination());
