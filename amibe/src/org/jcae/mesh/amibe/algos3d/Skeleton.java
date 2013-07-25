@@ -325,8 +325,6 @@ public class Skeleton {
 					break;
 				}
 			}
-			assert !beams.contains(cb): "Cannot find the edge next to "+cv+
-				" in group "+startEdge.getTri().getGroupId();
 			cb = next;
 			if(cb == null)
 			{
