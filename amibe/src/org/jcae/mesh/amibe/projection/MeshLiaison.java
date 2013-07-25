@@ -592,7 +592,7 @@ public abstract class MeshLiaison
 		return TRIANGLE_DISTANCE.compute(pos, tri, index);
 	}
 
-	public final static TriangleDistance TRIANGLE_DISTANCE = new TriangleDistance();
+	private final static TriangleDistance TRIANGLE_DISTANCE = new TriangleDistance();
 	private static double norm2(double[] v)
 	{
 		return v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
@@ -617,6 +617,11 @@ public abstract class MeshLiaison
 				t0.getY() + s*edge0[1] + t*edge1[1],
 				t0.getZ() + s*edge0[2] + t*edge1[2]
 				);
+		}
+
+		protected double handleDegenerated(double det, Triangle tri)
+		{
+			throw new RuntimeException("Illegal arguments: s="+s+" t="+t+" "+det+"\n"+tri);
 		}
 
 		public double compute(Location pos, Triangle tri, int[] index)
@@ -735,7 +740,7 @@ public abstract class MeshLiaison
 					else if (s >= 1.0 - s - t && t >= 1.0 - s -t)
 						index[1] = 1;
 					else
-						throw new RuntimeException("Illegal arguments: s="+s+" t="+t+" "+det+"\n"+tri);
+						return handleDegenerated(det, tri);
 					index[0] = index[1] / 2;
 				}
 			}

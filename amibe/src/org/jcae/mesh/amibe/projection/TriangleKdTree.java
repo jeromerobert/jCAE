@@ -37,6 +37,7 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.Location;
+import org.jcae.mesh.amibe.projection.MeshLiaison.TriangleDistance;
 import org.jcae.mesh.amibe.util.HashFactory;
 import org.jcae.mesh.xmldata.MeshReader;
 
@@ -122,7 +123,13 @@ public class TriangleKdTree {
 	private transient List<Node> nodeStack;
 	private transient BoundaryPool boundaryPool;
 	private final transient double[] workBoundary1 = new double[6];
-
+	private final static TriangleDistance TRIANGLE_DISTANCE = new TriangleDistance(){
+		@Override
+		protected double handleDegenerated(double det, Triangle tri) {
+			LOGGER.info(tri+" is degenerated");
+			return Double.POSITIVE_INFINITY;
+		}
+	};
 	public TriangleKdTree(Mesh mesh)
 	{
 		this(mesh, 10, 4096.0);
@@ -318,13 +325,13 @@ public class TriangleKdTree {
 			{
 				if(group >= 0 && t.getGroupId() != group)
 					continue;
-				double d = MeshLiaison.TRIANGLE_DISTANCE.compute(coords, t, closeIndex);
+				double d = TRIANGLE_DISTANCE.compute(coords, t, closeIndex);
 				if(d < aabbDistance)
 				{
 					aabbDistance = d;
 					toReturn = t;
 					if(projection != null)
-						MeshLiaison.TRIANGLE_DISTANCE.getProjection(projection);
+						TRIANGLE_DISTANCE.getProjection(projection);
 				}
 				seen.add(t);
 				//It seems to happen often so let's optimize
@@ -356,13 +363,13 @@ public class TriangleKdTree {
 							continue;
 						if(!seen.contains(t))
 						{
-							double d = MeshLiaison.TRIANGLE_DISTANCE.compute(coords, t, closeIndex);
+							double d = TRIANGLE_DISTANCE.compute(coords, t, closeIndex);
 							if(d < triangleDistance)
 							{
 								triangleDistance = d;
 								toReturn = t;
 								if(projection != null)
-									MeshLiaison.TRIANGLE_DISTANCE.getProjection(projection);
+									TRIANGLE_DISTANCE.getProjection(projection);
 							}
 						}
 					}
@@ -391,12 +398,12 @@ public class TriangleKdTree {
 		{
 			if(t.getGroupId() == group || group < 0)
 			{
-				double d = MeshLiaison.TRIANGLE_DISTANCE.compute(coords, t, closeIndex);
+				double d = TRIANGLE_DISTANCE.compute(coords, t, closeIndex);
 				if(d < minDist2)
 				{
 					minDist2 = d;
 					toReturn = t;
-					MeshLiaison.TRIANGLE_DISTANCE.getProjection(projection);
+					TRIANGLE_DISTANCE.getProjection(projection);
 				}
 			}
 		}
