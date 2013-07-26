@@ -412,6 +412,27 @@ public abstract class AbstractHalfEdge
 			computeSwappedNormal();
 			return Matrix3D.prodSca(swappedNormal1, swappedNormal2);
 		}
+
+		public double swappedVolume()
+		{
+			return tetraVolume(o, d, apex, symApex);
+		}
+
+		public static double tetraVolume(Location o, Location d, Location apex, Location symApex)
+		{
+			double p1x = d.getX() - o.getX();
+			double p1y = d.getY() - o.getY();
+			double p1z = d.getZ() - o.getZ();
+			double p2x = apex.getX() - o.getX();
+			double p2y = apex.getY() - o.getY();
+			double p2z = apex.getZ() - o.getZ();
+			double p3x = symApex.getX() - o.getX();
+			double p3y = symApex.getY() - o.getY();
+			double p3z = symApex.getZ() - o.getZ();
+			double det = (p1x * p2y * p3z + p1y * p2z * p3x + p2x * p3y * p1z)-
+				(p1z * p2y * p3x + p1y * p2x * p3z + p1x * p2z * p3y);
+			return det / 6.0;
+		}
 	}
 	/**
 	 * User-defined traits.  There are currently no traits for half-edges.
