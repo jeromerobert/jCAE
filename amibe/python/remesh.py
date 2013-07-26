@@ -34,7 +34,7 @@ def writeVTK(liaison):
     global debug_write_counter
     if debug_write_counter:
         MeshWriter.writeObject3D(liaison.mesh, "/tmp/tmp.amibe", "")
-        Amibe2VTK("/tmp/tmp.amibe").write("/tmp/m%i.vtp" % debug_write_counter);
+        Amibe2VTK("/tmp/tmp.amibe").write("/tmp/m%i.vtp" % (debug_write_counter-1));
         debug_write_counter=debug_write_counter+1
 
 def read_mesh(path):
