@@ -415,7 +415,7 @@ public abstract class AbstractHalfEdge
 
 		public double swappedVolume()
 		{
-			return tetraVolume(o, d, apex, symApex);
+			return Math.abs(tetraVolume(o, d, apex, symApex));
 		}
 
 		public static double tetraVolume(Location o, Location d, Location apex, Location symApex)
