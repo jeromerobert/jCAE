@@ -32,6 +32,8 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge.Quality;
+import org.jcae.mesh.amibe.ds.Vertex;
 
 /**
  * Laplacian smoothing.
@@ -45,6 +47,9 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 	private double minQualityFactor;
 	private double minCosAfterSwap = -2;
 	private boolean expectInsert = true;
+	private double sqrDeflection = Double.POSITIVE_INFINITY;
+	private Quality quality = new Quality();
+
 	/**
 	 * Creates a <code>SwapEdge</code> instance.
 	 *
@@ -93,12 +98,17 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 			mesh.buildRidges(minCos);
 		counter = m.getTriangles().size() * 3;
 		setNoSwapAfterProcessing(true);
+		quality.setLiaison(liaison);
 	}
 
 	@Override
 	public Logger thisLogger()
 	{
 		return LOGGER;
+	}
+
+	public void setDeflection(double deflection) {
+		this.sqrDeflection = deflection * deflection;
 	}
 
 	@Override
@@ -118,8 +128,13 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 			// Triangle normals have been checked, let checkSwap3D
 			// only check triangle quality
 			coplanarity = -2.0;
+			if(!Double.isInfinite(sqrDeflection))
+			{
+				quality.setEdge(e);
+				if(quality.sqrSwappedDeflection(-1) > sqrDeflection)
+					return Double.MAX_VALUE;
+			}
 		}
-
 		return - e.checkSwap3D(mesh, coplanarity, 0, minQualityFactor,
 			expectInsert, minCosAfterSwap, -2.0);
 	}

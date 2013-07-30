@@ -231,7 +231,9 @@ def __remesh(options):
     opts.put("coplanarity", safe_coplanarity)
     # Swapping here will help QEMDecimateHalfEdge to decimate more and will
     # reduce the risk to have edge not processed by LengthDecimateHalfEdge
-    SwapEdge(liaison, opts).compute()
+    algo = SwapEdge(liaison, opts)
+    algo.deflection = options.size
+    algo.compute()
 
     #3
     writeVTK(liaison)
