@@ -209,7 +209,7 @@ def __remesh(options):
         vi.insertNodes(options.forced_points, -1)
         Vertex.setMutable(vi.mutableInserted, False)
 
-    #1
+    #0
     writeVTK(liaison)
     if options.boundary_angle == None:
         options.boundary_angle = 1.66
@@ -225,7 +225,7 @@ def __remesh(options):
             BeamInsertion(liaison.mesh, options.size).insert(
                 options.forced_bounds[0], options.forced_bounds[1])
 
-    #2
+    #1
     writeVTK(liaison)
     opts = HashMap()
     opts.put("coplanarity", safe_coplanarity)
@@ -235,7 +235,7 @@ def __remesh(options):
     algo.maxSwapVolume = (options.size / 4.0)**3
     algo.compute()
 
-    #3
+    #2
     writeVTK(liaison)
 
     if options.recordFile:
@@ -252,7 +252,7 @@ def __remesh(options):
         algo.analyticMetric = point_metric
     algo.compute()
 
-    #4
+    #3
     writeVTK(liaison)
     opts.clear()
     opts.put("size", str(options.size))
@@ -263,7 +263,7 @@ def __remesh(options):
         algo.analyticMetric = point_metric
     algo.compute()
 
-    #5
+    #4
     # afront call
     writeVTK(liaison)
     afront_nodes_reader = None
@@ -275,14 +275,14 @@ def __remesh(options):
         afront_frozen = afront_insert(liaison, afront_nodes_reader, options.size, point_metric)
         Vertex.setMutable(afront_frozen, False)
 
-    #6
+    #5
     writeVTK(liaison)
     if options.afront_path:
         opts.clear()
         opts.put("coplanarity", safe_coplanarity)
         SwapEdge(liaison, opts).compute()
 
-    #7
+    #6
     writeVTK(liaison)
     opts.clear()
     opts.put("size", str(options.size))
@@ -295,14 +295,14 @@ def __remesh(options):
         algo.analyticMetric = point_metric
     algo.compute()
 
-    #8
+    #7
     writeVTK(liaison)
 
     opts.clear()
     opts.put("coplanarity", safe_coplanarity)
     SwapEdge(liaison, opts).compute()
 
-    #9
+    #8
     writeVTK(liaison)
 
     opts.clear()
@@ -312,7 +312,7 @@ def __remesh(options):
     algo = SmoothNodes3DBg(liaison, opts)
     algo.compute()
 
-    #10
+    #9
     writeVTK(liaison)
 
     opts.clear()
@@ -320,7 +320,7 @@ def __remesh(options):
     opts.put("minCosAfterSwap", "0.3")
     SwapEdge(liaison, opts).compute()
 
-    #11
+    #10
     writeVTK(liaison)
     if not options.afront_path:
         opts.clear()
@@ -329,7 +329,7 @@ def __remesh(options):
         algo.analyticMetric = point_metric
         algo.compute()
 
-    #12
+    #11
     writeVTK(liaison)
 
     opts.clear()
@@ -344,7 +344,7 @@ def __remesh(options):
         algo.analyticMetric = point_metric
     algo.compute()
 
-    #13
+    #12
     writeVTK(liaison)
 
     opts.clear()
@@ -352,7 +352,7 @@ def __remesh(options):
     opts.put("minCosAfterSwap", "0.3")
     SwapEdge(liaison, opts).compute()
 
-    #14
+    #13
     writeVTK(liaison)
 
     if afront_frozen:
@@ -362,7 +362,7 @@ def __remesh(options):
     opts.put("checkNormals", "false")
     ImproveVertexValence(liaison, opts).compute()
 
-    #15
+    #14
     writeVTK(liaison)
 
     opts.clear()
@@ -371,7 +371,7 @@ def __remesh(options):
     algo = SmoothNodes3DBg(liaison, opts)
     algo.compute()
 
-    #16
+    #15
     writeVTK(liaison)
 
     #MeshWriter.writeObject3D(liaison.mesh, outDir, ""
