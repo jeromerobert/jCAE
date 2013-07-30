@@ -35,10 +35,8 @@ import org.jcae.mesh.amibe.projection.TriangleKdTree;
  */
 public class VertexSwapper {
 	private final Mesh mesh;
-	private final MeshLiaison liaison;
 	private final Quality quality = new Quality();
 	private TriangleKdTree kdTree;
-	private final Vertex projectedMiddle, middle;
 	private double sqrDeflection;
 	private double minNormalAngle = -2;
 	private int group = -1;
@@ -51,14 +49,12 @@ public class VertexSwapper {
 	}
 
 	private VertexSwapper(MeshLiaison liaison, Mesh mesh) {
-		this.liaison = liaison;
+		quality.setLiaison(liaison);
 		if(liaison == null)
 			this.mesh = mesh;
 		else
 			this.mesh = liaison.getMesh();
 		assert this.mesh != null;
-		projectedMiddle = this.mesh.createVertex(0, 0, 0);
-		middle = this.mesh.createVertex(0, 0, 0);
 	}
 
 	public void setKdTree(TriangleKdTree kdTree) {
@@ -121,30 +117,23 @@ public class VertexSwapper {
 					&& current.canSwapTopology())
 				{
 					quality.setEdge(current);
-					if(isQualityImproved(quality))
+					if(isQualityImproved(quality) &&
+						quality.sqrSwappedDeflection(group) < sqrDeflection)
 					{
-						if(liaison != null)
+						if(kdTree != null)
 						{
-							middle.middle(current.apex(), current.sym().apex());
-							liaison.move(projectedMiddle, middle, group, true);
+							kdTree.remove(current.getTri());
+							kdTree.remove(current.sym().getTri());
 						}
-						if(liaison == null || projectedMiddle.sqrDistance3D(middle) < sqrDeflection)
+						current = (HalfEdge) mesh.edgeSwap(current);
+						HalfEdge swapped = current.next();
+						if(kdTree != null)
 						{
-							if(kdTree != null)
-							{
-								kdTree.remove(current.getTri());
-								kdTree.remove(current.sym().getTri());
-							}
-							current = (HalfEdge) mesh.edgeSwap(current);
-							HalfEdge swapped = current.next();
-							if(kdTree != null)
-							{
-								kdTree.addTriangle(swapped.getTri());
-								kdTree.addTriangle(swapped.sym().getTri());
-							}
-							redo = true;
-							isSwapped = true;
+							kdTree.addTriangle(swapped.getTri());
+							kdTree.addTriangle(swapped.sym().getTri());
 						}
+						redo = true;
+						isSwapped = true;
 					}
 				}
 

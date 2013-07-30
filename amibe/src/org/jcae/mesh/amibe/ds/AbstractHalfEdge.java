@@ -24,6 +24,7 @@ import org.jcae.mesh.amibe.traits.HalfEdgeTraitsBuilder;
 import java.util.Iterator;
 import org.jcae.mesh.amibe.metrics.Location;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
+import org.jcae.mesh.amibe.projection.MeshLiaison;
 
 /**
  * Abstract class to define common methods on edges.
@@ -348,7 +349,9 @@ public abstract class AbstractHalfEdge
 		private double[] temp2 = new double[3];
 		private double area1, area2, swappedArea1, swappedArea2;
 		private Vertex o, d, apex, symApex;
+		private Vertex middle, projectedMiddle;
 		private boolean normalComputed, swappedNormalComputed;
+		private MeshLiaison liaison;
 		public void setEdge(AbstractHalfEdge edge)
 		{
 			o = edge.origin();
@@ -418,6 +421,7 @@ public abstract class AbstractHalfEdge
 			return Math.abs(tetraVolume(o, d, apex, symApex));
 		}
 
+		/** Signed tetrahedron volume */
 		public static double tetraVolume(Location o, Location d, Location apex, Location symApex)
 		{
 			double p1x = d.getX() - o.getX();
@@ -433,7 +437,33 @@ public abstract class AbstractHalfEdge
 				(p1z * p2y * p3x + p1y * p2x * p3z + p1x * p2z * p3y);
 			return det / 6.0;
 		}
+
+		/** Set the liaison ton compute the swapped deflection */
+		public void setLiaison(MeshLiaison liaison)
+		{
+			this.liaison = liaison;
+			if(liaison != null)
+			{
+				middle = liaison.getMesh().createVertex(0,0,0);
+				projectedMiddle = liaison.getMesh().createVertex(0,0,0);
+			}
+		}
+
+		/**
+		 * distance between the middle of the swapped edge and the background mesh
+		 * @param group the group of the background triangle if you knows it, -1 else
+		 * @return the square of the deflection or 0 if the liaison was not set
+		 */
+		public double sqrSwappedDeflection(int group)
+		{
+			if(liaison == null)
+				return 0;
+			middle.middle(apex, symApex);
+			liaison.move(projectedMiddle, middle, group, true);
+			return projectedMiddle.sqrDistance3D(middle);
+		}
 	}
+
 	/**
 	 * User-defined traits.  There are currently no traits for half-edges.
 	 */
