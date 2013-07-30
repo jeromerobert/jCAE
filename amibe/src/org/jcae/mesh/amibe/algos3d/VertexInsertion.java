@@ -37,7 +37,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge.Quality;
-import org.jcae.mesh.amibe.ds.HalfEdge;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.TriangleHE;
@@ -62,6 +61,8 @@ public class VertexInsertion {
 	private Collection<Vertex> notMutableInserted, mutableInserted;
 	private final AnalyticMetricInterface metric;
 	private final VertexSwapper swapper;
+	private int swapperGroup;
+	private double swapperDeflection;
 	public VertexInsertion(MeshLiaison liaison, final double size) {
 		this(liaison, new AnalyticMetricInterface() {
 
@@ -82,7 +83,14 @@ public class VertexInsertion {
 		kdTree = new TriangleKdTree(liaison.getMesh());
 		LOGGER.info(kdTree.stats());
 		this.metric = metric;
-		swapper = new VertexSwapper(liaison);
+		swapper = new VertexSwapper(liaison)
+		{
+			@Override
+			protected boolean isQualityImproved(Quality quality) {
+				return super.isQualityImproved(quality) &&
+					quality.sqrSwappedDeflection(swapperGroup) < swapperDeflection;
+			}
+		};
 		swapper.setKdTree(kdTree);
 	}
 
@@ -173,7 +181,8 @@ public class VertexInsertion {
 			kdTree.replace(t, tmp);
 			tmp.clear();
 			mutableInserted.add(v);
-			swapper.setSqrDeflection(localMetric2 / 2);
+			swapperGroup = group;
+			swapperDeflection = localMetric2 / 2;
 			swapper.swap(v);
 			nbInserted ++;
 		}
