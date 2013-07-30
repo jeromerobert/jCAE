@@ -232,7 +232,7 @@ def __remesh(options):
     # Swapping here will help QEMDecimateHalfEdge to decimate more and will
     # reduce the risk to have edge not processed by LengthDecimateHalfEdge
     algo = SwapEdge(liaison, opts)
-    algo.deflection = options.size
+    algo.maxSwapVolume = (options.size / 4.0)**3
     algo.compute()
 
     #3

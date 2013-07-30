@@ -48,7 +48,8 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 	private double minCosAfterSwap = -2;
 	private boolean expectInsert = true;
 	private double sqrDeflection = Double.POSITIVE_INFINITY;
-	private Quality quality = new Quality();
+	private double swapVolume = Double.POSITIVE_INFINITY;
+	private final Quality quality = new Quality();
 
 	/**
 	 * Creates a <code>SwapEdge</code> instance.
@@ -111,6 +112,10 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 		this.sqrDeflection = deflection * deflection;
 	}
 
+	public void setMaxSwapVolume(double volume) {
+		this.swapVolume = volume;
+	}
+
 	@Override
 	public void preProcessAllHalfEdges()
 	{
@@ -134,6 +139,12 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 				if(quality.sqrSwappedDeflection(-1) > sqrDeflection)
 					return Double.MAX_VALUE;
 			}
+		}
+		if(!Double.isInfinite(swapVolume))
+		{
+			quality.setEdge(e);
+			if(quality.swappedVolume() > swapVolume)
+				return Double.MAX_VALUE;
 		}
 		return - e.checkSwap3D(mesh, coplanarity, 0, minQualityFactor,
 			expectInsert, minCosAfterSwap, -2.0);
