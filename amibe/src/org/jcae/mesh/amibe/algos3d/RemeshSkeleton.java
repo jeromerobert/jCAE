@@ -48,6 +48,8 @@ public class RemeshSkeleton {
 	private final AnalyticMetricInterface metric;
 	private final MeshLiaison liaison;
 	private final VertexSwapper vertexSwapper;
+	private double swapVolume;
+
 	public RemeshSkeleton(MeshLiaison liaison, double angle, double tolerance,
 		final double size) {
 		this(liaison, angle, tolerance, new AnalyticMetricInterface() {
@@ -69,7 +71,13 @@ public class RemeshSkeleton {
 		this.angle = angle;
 		this.tolerance = tolerance * tolerance;
 		this.metric = metric;
-		vertexSwapper = new VertexSwapper(liaison);
+		vertexSwapper = new VertexSwapper(liaison)
+		{
+			@Override
+			protected boolean isQualityImproved(AbstractHalfEdge.Quality quality) {
+				return super.isQualityImproved(quality) && quality.swappedVolume() < swapVolume;
+			}
+		};
 	}
 
 	private AbstractHalfEdge getEdge(List<Vertex> polyline, int segId)
@@ -160,8 +168,7 @@ public class RemeshSkeleton {
 					AbstractHalfEdge e = getEdge(v, oldDestination);
 					edgeIndex.set(segId, e);
 					double m2 = metric.getTargetSizeTopo(mesh, v);
-					m2 *= m2;
-					vertexSwapper.setSqrDeflection(m2 / 4.0);
+					swapVolume = m2 * m2 * m2 / 64;
 					vertexSwapper.swap(v);
 				}
 			}
