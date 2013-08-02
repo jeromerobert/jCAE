@@ -121,6 +121,7 @@ class EdgeProjector {
 	private Vertex lastMergeTarget;
 	private AbstractHalfEdge lastSplitted1;
 	private AbstractHalfEdge lastSplitted2;
+	private AbstractHalfEdge edgeToCollapse;
 	double weight;
 	private final TriangleSplitter triangleSplitter = new TriangleSplitter(triangleHelper);
 	private final VertexMerger vertexMerger = new VertexMerger();
@@ -187,23 +188,25 @@ class EdgeProjector {
 	private boolean canMerge(Vertex source, Location target) {
 		assert source != null;
 		assert target != null;
-		if(!checkMerge)
-			return true;
-		Location realPosition = new Location(weight * source.getX() + (1 - weight) * target.getX(),
-			weight * source.getY() + (1 - weight) * target.getY(),
-			weight * source.getZ() + (1 - weight) * target.getZ());
+		Location realPosition = null;
+		if(checkMerge)
+			realPosition = new Location(weight * source.getX() + (1 - weight) * target.getX(),
+				weight * source.getY() + (1 - weight) * target.getY(),
+				weight * source.getZ() + (1 - weight) * target.getZ());
 		Iterator<AbstractHalfEdge> it = source.getNeighbourIteratorAbstractHalfEdge();
+		edgeToCollapse = null;
 		while (it.hasNext()) {
 			AbstractHalfEdge e = it.next();
 			assert e.origin() == source;
 			assert e.origin().isMutable(): e;
 			assert e.origin().isManifold(): e;
-			if(e.destination() == target)
-				return false;
-			if (!mesh.canMoveOrigin(e, realPosition)) {
+			if (checkMerge && !mesh.canMoveOrigin(e, realPosition)) {
 				LOGGER.info("Cannot move " + source + " to " + realPosition +
 					". distance=" + source.distance3D(realPosition));
+				return false;
 			}
+			if(e.destination() == target)
+				edgeToCollapse = e;
 		}
 		return true;
 	}
@@ -219,7 +222,19 @@ class EdgeProjector {
 		target.moveTo(weight * source.getX() + (1 - weight) * target.getX(),
 			weight * source.getY() + (1 - weight) * target.getY(),
 			weight * source.getZ() + (1 - weight) * target.getZ());
-		vertexMerger.merge(mesh, target, source, target);
+		if(edgeToCollapse == null)
+			vertexMerger.merge(mesh, target, source, target);
+		else
+		{
+			assert edgeToCollapse.origin() == source;
+			assert edgeToCollapse.destination() == target;
+			if(edgeToCollapse.hasAttributes(AbstractHalfEdge.OUTER))
+				edgeToCollapse = edgeToCollapse.sym();
+			Triangle t = edgeToCollapse.getTri();
+			mesh.edgeCollapse(edgeToCollapse, target);
+			kdTree.remove(t);
+			edgeToCollapse = null;
+		}
 		if(target.isManifold())
 			target.setLink(new Triangle[]{(Triangle)target.getLink()});
 		saveAsVTK(mesh);
