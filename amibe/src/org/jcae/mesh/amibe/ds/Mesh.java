@@ -928,7 +928,7 @@ public class Mesh implements Serializable
 			// ot has no symmetric edge yet; this happens only if this edge has
 			// not been processed yet and ot and ot2 have incompatible orientations,
 			// i.e. ot2 = (v, v2)
-			assert v == ot2.origin() && v2 == ot2.destination();
+			assert v == ot2.origin() && v2 == ot2.destination(): "Wrong configuration around "+v+" and "+v2;
 			// Link ot to a virtual triangle.
 			work[0] = bindToVirtualTriangle(ot, work[0]);
 			newTri.add(work[0].getTri());
