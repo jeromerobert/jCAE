@@ -43,6 +43,7 @@
                 <package>org.jcae.mesh.bora.xmldata</package>
                 <package>org.jcae.mesh.cad</package>
                 <package>org.jcae.mesh.oemm</package>
+                <package>org.jcae.mesh.stitch</package>
                 <package>org.jcae.mesh.xmldata</package>
                 <package>org.jcae.vtk</package>
             </public-packages>
