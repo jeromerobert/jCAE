@@ -206,7 +206,15 @@ class EdgeProjector {
 				return false;
 			}
 			if(e.destination() == target)
-				edgeToCollapse = e;
+			{
+				if(mesh.canCollapseEdge(e, target))
+					// target has alread been projected to the target mesh so we
+					// collapse the edge of the source mesh instead of merging vertices.
+					// Merging vertices would create degenerated triangle.
+					edgeToCollapse = e;
+				else
+					return false;
+			}
 		}
 		return true;
 	}
