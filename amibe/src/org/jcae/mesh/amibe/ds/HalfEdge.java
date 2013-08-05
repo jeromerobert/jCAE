@@ -673,7 +673,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @see Mesh#canCollapseEdge
 	 */
 	@Override
-	final boolean canCollapse(Mesh mesh, Vertex v)
+	final boolean canCollapse(Mesh mesh, Location v)
 	{
 		// Be consistent with collapse()
 		if (hasAttributes(IMMUTABLE | OUTER))

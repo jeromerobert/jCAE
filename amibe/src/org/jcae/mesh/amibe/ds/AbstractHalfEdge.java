@@ -728,7 +728,7 @@ public abstract class AbstractHalfEdge
 	 * @return <code>true</code> if this edge can be contracted into the single vertex n, <code>false</code> otherwise
 	 * @see Mesh#canCollapseEdge
 	 */
-	abstract boolean canCollapse(Mesh m, Vertex v);
+	abstract boolean canCollapse(Mesh m, Location v);
 
 	/**
 	 * Contracts an edge.

@@ -832,7 +832,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * Warning: this method uses m.tempVH[0], m.tempVH[1] and m.tempVH[2] temporary arrays.
 	 */
 	@Override
-	final boolean canCollapse(Mesh m, Vertex n)
+	final boolean canCollapse(Mesh m, Location n)
 	{
 		// Be consistent with collapse()
 		if (hasAttributes(OUTER))

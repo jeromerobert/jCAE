@@ -1534,7 +1534,7 @@ public class Mesh implements Serializable
 	 * @param v   the resulting vertex
 	 * @return <code>true</code> if this edge can be contracted into the single vertex n, <code>false</code> otherwise.
 	 */
-	public final boolean canCollapseEdge(AbstractHalfEdge e, Vertex v)
+	public final boolean canCollapseEdge(AbstractHalfEdge e, Location v)
 	{
 		return e.canCollapse(this, v);
 	}
