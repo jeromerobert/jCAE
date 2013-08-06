@@ -569,7 +569,6 @@ class EdgeProjector {
 		//if neither origin nor destination both extremities of the edge
 		//are already projected but the full edge may not be fully projected
 		//so we will try only the out/out case.
-		assert mesh.getTriangles().contains(edge.getTri());
 		triangles.clear();
 		boolean notProjected = !origin && !destination &&
 			edge.hasAttributes(AbstractHalfEdge.BOUNDARY);
@@ -635,7 +634,6 @@ class EdgeProjector {
 				triangleProjector2.project(edge.destination(), triangleHelper);
 				handleOutOutCase(edge);
 				if (mergeAndFinish()) {
-					saveAsVTK(mesh);
 					return;
 				}
 			}

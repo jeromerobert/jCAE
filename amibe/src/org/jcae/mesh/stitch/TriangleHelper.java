@@ -174,7 +174,7 @@ class TriangleHelper {
 				d.getY() + alpha * (c.getY() - d.getY()),
 				d.getZ() + alpha * (c.getZ() - d.getZ()));
 		}
-		assert isOnEdge(f, d, c, tol): Math.abs(denum);
+		assert isOnEdge(f, d, c, 2*tol): Math.abs(denum);
 		return f.sqrDistance3D(e);
 	}
 

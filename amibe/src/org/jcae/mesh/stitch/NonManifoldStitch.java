@@ -171,8 +171,8 @@ public class NonManifoldStitch {
 		List<Vertex> beams2 = new ArrayList<Vertex>(beams.size());
 		for(Vertex b: beams)
 			beams2.add(b);
-		stitchBeams(beams, group1, 0.5, Double.MAX_VALUE, tolerance);
-		stitchBeams(beams2, group2, 0.5, Double.MAX_VALUE, tolerance);
+		stitchBeams(beams, group1, 0, Double.MAX_VALUE, tolerance);
+		stitchBeams(beams2, group2, 0, Double.MAX_VALUE, tolerance);
 	}
 
 	/** Actually fissure the surface and convert the working group to beams */
