@@ -138,15 +138,27 @@ public class NonManifoldStitch {
 		nbInsertedBeams += nbBeams;
 	}
 
-	public void stitch(int group1, int group2, double weight, boolean boundaryOnly) {
-		Skeleton s = new Skeleton(mesh, Double.POSITIVE_INFINITY)
+	private Collection<AbstractHalfEdge> getBorder(int group)
+	{
+		ArrayList<AbstractHalfEdge> toReturn = new ArrayList<AbstractHalfEdge>();
+		for(Triangle t:mesh.getTriangles())
 		{
-			@Override
-			protected boolean isNonManifold(AbstractHalfEdge he) {
-				return he.hasAttributes(AbstractHalfEdge.BOUNDARY);
+			if(t.getGroupId() == group)
+			{
+				AbstractHalfEdge e = t.getAbstractHalfEdge();
+				for(int i = 0; i < 3; i++)
+				{
+					if(e.hasAttributes(AbstractHalfEdge.BOUNDARY))
+						toReturn.add(e);
+					e = e.next();
+				}
 			}
-		};
-		Collection<AbstractHalfEdge> set1 = s.getByGroups(group1);
+		}
+		return toReturn;
+	}
+
+	public void stitch(int group1, int group2, double weight, boolean boundaryOnly) {
+		Collection<AbstractHalfEdge> set1 = getBorder(group1);
 		EdgeProjector edgeProjector = new EdgeProjector(mesh, kdTree, set1,
 			group2, maxDistance, tolerance);
 		edgeProjector.weight = weight;
