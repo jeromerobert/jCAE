@@ -239,6 +239,13 @@ class EdgeProjector {
 			if(edgeToCollapse.hasAttributes(AbstractHalfEdge.OUTER))
 				edgeToCollapse = edgeToCollapse.sym();
 			Triangle t = edgeToCollapse.getTri();
+			if(lastSplitted1.getTri() == t)
+				lastSplitted1 = null;
+			if(lastSplitted2 .getTri() == t)
+				lastSplitted2 = null;
+			toProject.remove(edgeToCollapse);
+			toProject.remove(edgeToCollapse.next());
+			toProject.remove(edgeToCollapse.prev());
 			mesh.edgeCollapse(edgeToCollapse, target);
 			kdTree.remove(t);
 			edgeToCollapse = null;
