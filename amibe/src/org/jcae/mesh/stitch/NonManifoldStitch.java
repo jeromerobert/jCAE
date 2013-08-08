@@ -21,7 +21,9 @@ package org.jcae.mesh.stitch;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.mesh.amibe.algos3d.Skeleton;
@@ -59,6 +61,8 @@ public class NonManifoldStitch {
 
 	private void checkNonManifold()
 	{
+		Map<Integer, Collection<AbstractHalfEdge>> edges =
+			new HashMap<Integer, Collection<AbstractHalfEdge>>();
 		for(Triangle t:mesh.getTriangles())
 		{
 			AbstractHalfEdge e = t.getAbstractHalfEdge();
@@ -66,23 +70,36 @@ public class NonManifoldStitch {
 			{
 				if(e.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 				{
-					LOGGER.warning("Non manifold edge detected: "+e.origin()+" "+e.destination());
-					final AbstractHalfEdge ee = e;
-					throw new IllegalArgumentException()
+					int gid = e.getTri().getGroupId();
+					Collection<AbstractHalfEdge> l = edges.get(gid);
+					if(l == null)
 					{
-						// localized message so netbeans plaform open a popup
-						@Override
-						public String getLocalizedMessage() {
-							return "Cannot stitch non-manifold surfaces. "+
-								"Clean your tesselation first. The problem is around "+
-								new Location(ee.origin())+" and "+
-								new Location(ee.destination())+" on group "+
-								mesh.getGroupName(ee.getTri().getGroupId());
-						}
-					};
+						l = new ArrayList<AbstractHalfEdge>();
+						edges.put(gid, l);
+					}
+					l.add(e);
 				}
 				e = e.next();
 			}
+		}
+		if(!edges.isEmpty())
+		{
+			final StringBuilder sb = new StringBuilder(
+				"Cannot stitch non-manifold or badly oriented surfaces.");
+			for(Map.Entry<Integer, Collection<AbstractHalfEdge>> e: edges.entrySet())
+			{
+				sb.append("\ngroup: "+mesh.getGroupName(e.getKey())+" / "+e.getKey());
+				for(AbstractHalfEdge ee: e.getValue())
+					sb.append("\n\t"+new Location(ee.origin())+"-"+new Location(ee.destination()));
+			}
+			throw new IllegalArgumentException()
+			{
+				// localized message so netbeans plaform open a popup
+				@Override
+				public String getLocalizedMessage() {
+					return sb.toString();
+				}
+			};
 		}
 	}
 
