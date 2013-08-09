@@ -188,6 +188,8 @@ class EdgeProjector {
 	private boolean canMerge(Vertex source, Location target) {
 		assert source != null;
 		assert target != null;
+		if(source == target)
+			return false;
 		Location realPosition = null;
 		if(checkMerge)
 			realPosition = new Location(weight * source.getX() + (1 - weight) * target.getX(),
@@ -205,7 +207,7 @@ class EdgeProjector {
 					". distance=" + source.distance3D(realPosition));
 				return false;
 			}
-			if(e.destination() == target)
+			if(e.destination() == target && e.hasAttributes(AbstractHalfEdge.BOUNDARY))
 			{
 				if(mesh.canCollapseEdge(e, target))
 					// target has alread been projected to the target mesh so we
