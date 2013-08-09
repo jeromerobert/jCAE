@@ -174,6 +174,16 @@ public class NonManifoldStitch {
 		return toReturn;
 	}
 
+	public void stitch(int group1, double weight, boolean boundaryOnly) {
+		Collection<AbstractHalfEdge> set1 = getBorder(group1);
+		EdgeProjector edgeProjector = new EdgeProjector(mesh, kdTree, set1,
+			group1, maxDistance, tolerance);
+		edgeProjector.setIgnoreGroup(true);
+		edgeProjector.weight = weight;
+		edgeProjector.setBoundaryOnly(boundaryOnly);
+		edgeProjector.project();
+	}
+
 	public void stitch(int group1, int group2, double weight, boolean boundaryOnly) {
 		Collection<AbstractHalfEdge> set1 = getBorder(group1);
 		EdgeProjector edgeProjector = new EdgeProjector(mesh, kdTree, set1,

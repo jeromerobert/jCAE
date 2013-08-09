@@ -131,6 +131,7 @@ class EdgeProjector {
 	private final Pool<AbstractHalfEdge> toProject = createPool();
 	private final Pool<AbstractHalfEdge> halfInserted = createPool();
 	private final int group;
+	private boolean ignoreGroup;
 	private final Collection<Triangle> splittedTriangle = new ArrayList<Triangle>(3);
 	private final List<TriangleHelper> triangleHelpers = new ArrayList<TriangleHelper>();
 	private Vertex lastMergeSource;
@@ -164,6 +165,15 @@ class EdgeProjector {
 		this.group = group;
 		maxSqrDist = maxDist * maxDist;
 		sqrTol = tol * tol;
+	}
+
+	/**
+	 * When true project on all groups but the specified one, instead of
+	 * projecting to the specified group
+	 */
+	public void setIgnoreGroup(boolean ignore)
+	{
+		ignoreGroup = ignore;
 	}
 
 	public void setBoundaryOnly(boolean b)
@@ -596,13 +606,16 @@ class EdgeProjector {
 			edge.hasAttributes(AbstractHalfEdge.BOUNDARY);
 		if ((origin && destination) || notProjected) {
 			compteEdgeAABB(edge, aabb);
-			kdTree.getNearTriangles(aabb, triangles, group);
+			kdTree.getNearTriangles(aabb, triangles, group, ignoreGroup);
 		} else {
 			Vertex vv = origin ? edge.destination() : edge.origin();
 			Iterator<Triangle> it = vv.getNeighbourIteratorTriangle();
 			while (it.hasNext()) {
 				Triangle t = it.next();
-				if (t.getGroupId() == group) {
+				if (!t.hasAttributes(AbstractHalfEdge.OUTER) &&
+					((!ignoreGroup && group >= 0 && t.getGroupId() == group) ||
+					(ignoreGroup && group >= 0 && t.getGroupId() != group)))
+				{
 					triangles.add(t);
 				}
 			}

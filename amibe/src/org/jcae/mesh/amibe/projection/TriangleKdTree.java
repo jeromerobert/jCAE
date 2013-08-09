@@ -277,8 +277,11 @@ public class TriangleKdTree {
 		closeBoundaries.clear();
 		closeNodes.clear();
 	}
-
 	public void getNearTriangles(double[] aabb, Collection<Triangle> result, int group)
+	{
+		getNearTriangles(aabb, result, group, false);
+	}
+	public void getNearTriangles(double[] aabb, Collection<Triangle> result, int group, boolean notInGroup)
 	{
 		getNodes(aabb, null, false);
 		for(Node nn: closeNodes)
@@ -287,7 +290,8 @@ public class TriangleKdTree {
 			{
 				for(Triangle t:nn.triangles)
 				{
-					if(group >= 0 && t.getGroupId() != group)
+					if(group >= 0 && ((t.getGroupId() != group && !notInGroup) ||
+						(notInGroup && t.getGroupId() == group)))
 						continue;
 					result.add(t);
 				}
