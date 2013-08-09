@@ -242,6 +242,7 @@ class TriangleProjector {
 	public void reset()
 	{
 		type = ProjectionType.FAR;
+		sqrDistance = Double.POSITIVE_INFINITY;
 	}
 
 	public static void test()

@@ -31,12 +31,12 @@ import static org.jcae.mesh.stitch.TriangleHelper.isOnEdge;
  * @author Jerome Robert
  */
 class TriangleSplitter {
-	private final TriangleHelper triangleHelper;
+	private TriangleHelper triangleHelper;
 	private final Location splitPoint = new Location();
 	private AbstractHalfEdge toSplit;
 	private Vertex vertex;
 
-	public TriangleSplitter(TriangleHelper th)
+	public void setTriangle(TriangleHelper th)
 	{
 		this.triangleHelper = th;
 	}

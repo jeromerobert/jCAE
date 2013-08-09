@@ -253,7 +253,8 @@ class TriangleHelper {
 		Vertex v2 = mesh.createVertex(0, 1, 0);
 		Triangle triangle = mesh.createTriangle(v0, v1, v2);
 		TriangleHelper th = new TriangleHelper(triangle);
-		TriangleSplitter ts = new TriangleSplitter(th);
+		TriangleSplitter ts = new TriangleSplitter();
+		ts.setTriangle(th);
 		ts.split(new Location(-0.5, 0.5, 0), new Location(2, 0.5, 0), 1);
 		assert ts.getSplitPoint().sqrDistance3D(new Location(0,0.5,0)) < 1E-6;
 

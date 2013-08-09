@@ -21,9 +21,12 @@ package org.jcae.mesh.stitch;
 
 import gnu.trove.set.hash.THashSet;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -107,8 +110,21 @@ class EdgeProjector {
 	}
 	private final static Logger LOGGER = Logger.getLogger(EdgeProjector.class.getName());
 	private final Pool<Triangle> triangles = createPool();
-	private final TriangleProjector triangleProjector1 = new TriangleProjector();
-	private final TriangleProjector triangleProjector2 = new TriangleProjector();
+	//projectors for origin vertices
+	private final List<TriangleProjector> triangleProjectors1 = new ArrayList<TriangleProjector>();
+	//the current projector for origin vertices
+	private TriangleProjector triangleProjector1;
+	private boolean projector1Valid;
+
+	//projectors for origin vertices
+	private final List<TriangleProjector> triangleProjectors2 = new ArrayList<TriangleProjector>();
+	//the current projector for origin vertices
+	private TriangleProjector triangleProjector2;
+	private boolean projector2Valid;
+
+	private Integer[] triangleProjectorOrder;
+	/** A projector which will alway be too far to be concidered */
+	private TriangleProjector farProjector = new TriangleProjector();
 	private final double[] aabb = new double[6];
 	private final Mesh mesh;
 	private final TriangleKdTree kdTree;
@@ -116,18 +132,18 @@ class EdgeProjector {
 	private final Pool<AbstractHalfEdge> halfInserted = createPool();
 	private final int group;
 	private final Collection<Triangle> splittedTriangle = new ArrayList<Triangle>(3);
-	private final TriangleHelper triangleHelper = new TriangleHelper();
+	private final List<TriangleHelper> triangleHelpers = new ArrayList<TriangleHelper>();
 	private Vertex lastMergeSource;
 	private Vertex lastMergeTarget;
 	private AbstractHalfEdge lastSplitted1;
 	private AbstractHalfEdge lastSplitted2;
 	private AbstractHalfEdge edgeToCollapse;
 	double weight;
-	private final TriangleSplitter triangleSplitter = new TriangleSplitter(triangleHelper);
+	private final TriangleSplitter triangleSplitter = new TriangleSplitter();
 	private final VertexMerger vertexMerger = new VertexMerger();
 	private final VertexSwapper vertexSwapper;
-	public boolean checkMerge = true;
-
+	public boolean checkMerge = true, boundaryOnly;
+	private final double maxSqrDist, sqrTol;
 	public EdgeProjector(Mesh mesh, TriangleKdTree kdTree,
 		Collection<AbstractHalfEdge> edges, int group, double maxDist,
 		double tol) {
@@ -146,16 +162,13 @@ class EdgeProjector {
 		this.toProject.addAll(edges);
 		vertexSwapper.setKdTree(kdTree);
 		this.group = group;
-		triangleProjector1.sqrMaxDistance = maxDist * maxDist;
-		triangleProjector2.sqrMaxDistance = maxDist * maxDist;
-		triangleProjector1.sqrTolerance = tol * tol;
-		triangleProjector2.sqrTolerance = tol * tol;
+		maxSqrDist = maxDist * maxDist;
+		sqrTol = tol * tol;
 	}
 
 	public void setBoundaryOnly(boolean b)
 	{
-		triangleProjector1.boundaryOnly = b;
-		triangleProjector2.boundaryOnly = b;
+		boundaryOnly = b;
 	}
 
 	public void project() {
@@ -474,7 +487,7 @@ class EdgeProjector {
 					triangleSplitter.getSplittedEdge());
 				lastSplitted2 = getNextBorderEdge(edge);
 				assert TriangleHelper.isOnEdge(lastMergeSource, edge.origin(),
-					edge.destination(), triangleProjector1.sqrTolerance);
+					edge.destination(), triangleProjector2.sqrTolerance);
 			} else {
 				lastMergeTarget = null;
 			}
@@ -491,7 +504,7 @@ class EdgeProjector {
 			lastSplitted1 = edge;
 			lastSplitted2 = getNextBorderEdge(edge);
 			assert TriangleHelper.isOnEdge(lastMergeSource, edge.origin(),
-				edge.destination(), triangleProjector1.sqrTolerance);
+				edge.destination(), triangleProjector2.sqrTolerance);
 		} else if (origin && triangleProjector1.getType() == ProjectionType.FACE) {
 			lastMergeSource = edge.origin();
 			if (canMerge(lastMergeSource, triangleProjector1.getProjection())) {
@@ -508,7 +521,7 @@ class EdgeProjector {
 				lastSplitted1 = edge;
 				lastSplitted2 = getNextBorderEdge(edge);
 				assert TriangleHelper.isOnEdge(lastMergeSource, edge.origin(),
-					edge.destination(), triangleProjector1.sqrTolerance);
+					edge.destination(), triangleProjector2.sqrTolerance);
 			}
 		} else if (origin && triangleProjector1.getType() == ProjectionType.EDGE) {
 			lastMergeSource = edge.origin();
@@ -526,7 +539,7 @@ class EdgeProjector {
 				lastSplitted1 = edge;
 				lastSplitted2 = getNextBorderEdge(edge);
 				assert TriangleHelper.isOnEdge(lastMergeSource, edge.origin(),
-					edge.destination(), triangleProjector1.sqrTolerance);
+					edge.destination(), triangleProjector2.sqrTolerance);
 			}
 		}
 		if (lastMergeSource != null && lastMergeTarget != null && !canMerge(lastMergeSource,
@@ -597,6 +610,90 @@ class EdgeProjector {
 	}
 
 	/**
+	 * Fill triangleProjectors1 and triangleProjectors2, then order them in the
+	 * triangleProjectorOrder array.
+	 * triangleProjectorOrder can be used to iterator over triangleProjectors
+	 * starting with the closest triangle.
+	 * Projecting to the closest triangle instead of a random close triangle is
+	 * more robust.
+	 */
+	private void projectToClosest(AbstractHalfEdge edge)
+	{
+		boolean origin = edge.origin().isManifold();
+		boolean destination = edge.destination().isManifold();
+		findCandidateTriangles(edge);
+		while(triangleHelpers.size() < triangles.size())
+			triangleHelpers.add(new TriangleHelper());
+		int k = 0;
+		for(Triangle t: triangles)
+		{
+			assert mesh.getTriangles().contains(t);
+			triangleHelpers.get(k++).setTriangle(t);
+		}
+		projector1Valid = origin || (!origin && !destination);
+		projector2Valid = destination || (!origin && !destination);
+		if (projector1Valid)
+			projectToClosest(edge.origin(), triangleProjectors1);
+		if (projector2Valid)
+			projectToClosest(edge.destination(), triangleProjectors2);
+		if(triangleProjectorOrder == null || triangleProjectorOrder.length < triangles.size())
+			triangleProjectorOrder = new Integer[triangles.size()];
+		for(int i = 0; i < triangleProjectorOrder.length; i++)
+			triangleProjectorOrder[i] = i;
+		Arrays.sort(triangleProjectorOrder, 0, triangles.size(), projectorComparator);
+	}
+
+	private final Comparator<Integer> projectorComparator
+		= new Comparator<Integer>(){
+
+		public int compare(Integer o1, Integer o2) {
+			double v1, v2;
+			if(projector1Valid && projector2Valid)
+			{
+				v1 = Math.min(triangleProjectors1.get(o1).getSqrDistance(),
+					triangleProjectors2.get(o1).getSqrDistance());
+				v2 = Math.min(triangleProjectors1.get(o2).getSqrDistance(),
+					triangleProjectors2.get(o2).getSqrDistance());
+			}
+			else if(projector1Valid)
+			{
+				v1 = triangleProjectors1.get(o1).getSqrDistance();
+				v2 = triangleProjectors1.get(o2).getSqrDistance();
+			}
+			else //if(projector2Valid)
+			{
+				assert projector2Valid;
+				v1 = triangleProjectors2.get(o1).getSqrDistance();
+				v2 = triangleProjectors2.get(o2).getSqrDistance();
+			}
+			return Double.compare(v1, v2);
+		}
+	};
+
+	/**
+	 * Project location to the closest triangle available in the triangleHelpers list.
+	 * triangleHelpers must contains TriangleHelper initialised with the triangle
+	 * of the triangles list.
+	 */
+	private void projectToClosest(Location location, List<TriangleProjector> projectors)
+	{
+		while(projectors.size() < triangles.size())
+		{
+			TriangleProjector tp = new TriangleProjector();
+			tp.sqrMaxDistance = maxSqrDist;
+			tp.sqrTolerance = sqrTol;
+			tp.boundaryOnly = boundaryOnly;
+			projectors.add(tp);
+		}
+		int n = triangles.size();
+		for(int k = 0; k < n; k++)
+		{
+			TriangleProjector tp = projectors.get(k);
+			tp.reset();
+			tp.project(location, triangleHelpers.get(k));
+		}
+	}
+	/**
 	 * Project the edge on the given group of the mesh
 	 * @param edge the edge to project
 	 * @param halfProjected filled with the list of half projected edges. A
@@ -604,26 +701,25 @@ class EdgeProjector {
 	 * both vertex a projected but on different triangles.
 	 */
 	private void projectEdge(AbstractHalfEdge edge) {
-		triangleProjector1.reset();
-		triangleProjector2.reset();
 		boolean origin = edge.origin().isManifold();
 		boolean destination = edge.destination().isManifold();
+		projectToClosest(edge);
 		//if neither origin nor destination both extremities of the edge
 		//are already projected but the full edge may not be fully projected
 		//so we will try only the out/out case.
-		findCandidateTriangles(edge);
-		triangle_loop:
-		for (Triangle t : triangles) {
-			assert mesh.getTriangles().contains(t);
-			triangleHelper.setTriangle(t);
-			if (origin || (!origin && !destination)) {
-				triangleProjector1.project(edge.origin(), triangleHelper);
-			}
-			if (destination || (!origin && !destination)) {
-				triangleProjector2.project(edge.destination(), triangleHelper);
-			}
+		int n = triangles.size();
+		for (int i = 0; i < n; i++) {
+			int index = triangleProjectorOrder[i];
+			triangleProjector1 = farProjector;
+			triangleProjector2 = farProjector;
+			if(projector1Valid)
+				triangleProjector1 = triangleProjectors1.get(index);
+			if(projector2Valid)
+				triangleProjector2 = triangleProjectors2.get(index);
+			TriangleHelper th = triangleHelpers.get(index);
+			triangleSplitter.setTriangle(th);
 			check(mesh);
-			dispatchCases(origin, destination, edge, t);
+			dispatchCases(origin, destination, edge, th.getTriangle());
 			check(mesh);
 			if (lastMergeTarget != null) {
 				assert TriangleHelper.isOnEdge(lastMergeSource, edge.origin(),
@@ -636,11 +732,11 @@ class EdgeProjector {
 		// OUT/OUT case have a lower priority over other cases so we process
 		// it in a separate loop after others.
 		if (origin && destination) {
-			triangle_loop:
-			for (Triangle t : triangles) {
-				triangleHelper.setTriangle(t);
-				triangleProjector1.project(edge.origin(), triangleHelper);
-				triangleProjector2.project(edge.destination(), triangleHelper);
+			for (int i = 0; i < n; i++) {
+				int index = triangleProjectorOrder[i];
+				triangleProjector1 = triangleProjectors1.get(index);
+				triangleProjector2 = triangleProjectors2.get(index);
+				triangleSplitter.setTriangle(triangleHelpers.get(index));
 				handleOutOutCase(edge);
 				if (mergeAndFinish()) {
 					return;
