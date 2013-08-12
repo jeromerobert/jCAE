@@ -312,6 +312,7 @@ class VertexMerger {
 			{
 				for(int j = 0; j < 3; j++)
 				{
+					assert t.vertex[j] != targetV: "Cannot merge "+vertices[i]+" to "+targetV;
 					if(t.vertex[j] == vertices[i])
 						t.vertex[j] = targetV;
 				}

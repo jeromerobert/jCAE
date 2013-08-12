@@ -230,15 +230,25 @@ class EdgeProjector {
 					". distance=" + source.distance3D(realPosition));
 				return false;
 			}
-			if(e.destination() == target && e.hasAttributes(AbstractHalfEdge.BOUNDARY))
+			if(e.destination() == target)
 			{
-				if(mesh.canCollapseEdge(e, target))
+				if(e.hasAttributes(AbstractHalfEdge.OUTER))
+					e = e.sym();
+				if(e.hasAttributes(AbstractHalfEdge.BOUNDARY) && mesh.canCollapseEdge(e, target))
+				{
 					// target has alread been projected to the target mesh so we
 					// collapse the edge of the source mesh instead of merging vertices.
 					// Merging vertices would create degenerated triangle.
 					edgeToCollapse = e;
+				}
 				else
+				{
+					LOGGER.info(
+						"Cannot collapse " + source + " to " + target +
+						". boundary=" + e.hasAttributes(AbstractHalfEdge.BOUNDARY) +
+						" canCollapse=" + mesh.canCollapseEdge(e, target));
 					return false;
+				}
 			}
 		}
 		return true;
@@ -259,10 +269,8 @@ class EdgeProjector {
 			vertexMerger.merge(mesh, target, source, target);
 		else
 		{
-			assert edgeToCollapse.origin() == source;
-			assert edgeToCollapse.destination() == target;
-			if(edgeToCollapse.hasAttributes(AbstractHalfEdge.OUTER))
-				edgeToCollapse = edgeToCollapse.sym();
+			assert (edgeToCollapse.origin() == source && edgeToCollapse.destination() == target) ||
+				(edgeToCollapse.origin() == target && edgeToCollapse.destination() == source);
 			Triangle t = edgeToCollapse.getTri();
 			if(lastSplitted1.getTri() == t)
 				lastSplitted1 = null;
