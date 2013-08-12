@@ -382,23 +382,28 @@ class EdgeProjector {
 	private AbstractHalfEdge getNextBorderEdge(AbstractHalfEdge edge) {
 		assert edge.hasAttributes(AbstractHalfEdge.BOUNDARY): "boundary edge expected: "+edge;
 		AbstractHalfEdge toReturn = edge.next();
-		while (!toReturn.hasAttributes(AbstractHalfEdge.BOUNDARY)) {
+		int gid = edge.getTri().getGroupId();
+		while (toReturn.destination() != mesh.outerVertex &&
+			!(toReturn.hasAttributes(AbstractHalfEdge.BOUNDARY) &&
+			toReturn.getTri().getGroupId() == gid)) {
 			toReturn = toReturn.sym().next();
 		}
 		assert toReturn.origin() == edge.destination();
-		assert toReturn.hasAttributes(AbstractHalfEdge.BOUNDARY);
-		return toReturn;
+		return toReturn.destination() == mesh.outerVertex ? null : toReturn;
 	}
 
 	private AbstractHalfEdge getPreviousBorderEdge(AbstractHalfEdge edge) {
 		assert edge.hasAttributes(AbstractHalfEdge.BOUNDARY): "boundary edge expected: "+edge;
 		AbstractHalfEdge toReturn = edge.next().next();
-		while (!toReturn.hasAttributes(AbstractHalfEdge.BOUNDARY)) {
+		int gid = edge.getTri().getGroupId();
+		while (toReturn.origin() != mesh.outerVertex &&
+			!(toReturn.hasAttributes(AbstractHalfEdge.BOUNDARY) &&
+			toReturn.getTri().getGroupId() == gid)) {
 			toReturn = toReturn.sym().next().next();
 		}
+
 		assert toReturn.destination() == edge.origin();
-		assert toReturn.hasAttributes(AbstractHalfEdge.BOUNDARY);
-		return toReturn;
+		return toReturn.origin() == mesh.outerVertex ? null : toReturn;
 	}
 
 	private void handleOutOutCase(AbstractHalfEdge edge) {
