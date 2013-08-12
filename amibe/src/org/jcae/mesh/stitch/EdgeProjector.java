@@ -230,11 +230,28 @@ class EdgeProjector {
 					". distance=" + source.distance3D(realPosition));
 				return false;
 			}
+			boolean boundary = e.hasAttributes(AbstractHalfEdge.BOUNDARY) ||
+				(e.sym() != null && e.sym().hasAttributes(AbstractHalfEdge.BOUNDARY));
+			if(boundaryOnly)
+			{
+				// check that we do not create non-manifold edges in boundary
+				// only mode (manifold stitch).
+				Iterator<AbstractHalfEdge> itt = e.destination().getNeighbourIteratorAbstractHalfEdge();
+				while(itt.hasNext())
+				{
+					AbstractHalfEdge ee = itt.next();
+					if(ee.destination() == target &&
+						(!ee.hasAttributes(AbstractHalfEdge.BOUNDARY) &&
+						!ee.sym().hasAttributes(AbstractHalfEdge.BOUNDARY) || !boundary))
+						return false;
+				}
+			}
+
 			if(e.destination() == target)
 			{
 				if(e.hasAttributes(AbstractHalfEdge.OUTER))
 					e = e.sym();
-				if(e.hasAttributes(AbstractHalfEdge.BOUNDARY) && mesh.canCollapseEdge(e, target))
+				if(boundary && mesh.canCollapseEdge(e, target))
 				{
 					// target has alread been projected to the target mesh so we
 					// collapse the edge of the source mesh instead of merging vertices.
