@@ -283,8 +283,7 @@ class EdgeProjector {
 			kdTree.remove(t);
 			edgeToCollapse = null;
 		}
-		if(target.isManifold())
-			target.setLink(new Triangle[]{(Triangle)target.getLink()});
+		target.setMutable(false);
 		saveAsVTK(mesh);
 	}
 
@@ -604,8 +603,8 @@ class EdgeProjector {
 	 * projected
 	 */
 	private void findCandidateTriangles(AbstractHalfEdge edge) {
-		boolean origin = edge.origin().isManifold();
-		boolean destination = edge.destination().isManifold();
+		boolean origin = edge.origin().isMutable();
+		boolean destination = edge.destination().isMutable();
 		//if neither origin nor destination both extremities of the edge
 		//are already projected but the full edge may not be fully projected
 		//so we will try only the out/out case.
@@ -640,8 +639,8 @@ class EdgeProjector {
 	 */
 	private void projectToClosest(AbstractHalfEdge edge)
 	{
-		boolean origin = edge.origin().isManifold();
-		boolean destination = edge.destination().isManifold();
+		boolean origin = edge.origin().isMutable();
+		boolean destination = edge.destination().isMutable();
 		findCandidateTriangles(edge);
 		while(triangleHelpers.size() < triangles.size())
 			triangleHelpers.add(new TriangleHelper());
@@ -722,8 +721,8 @@ class EdgeProjector {
 	 * both vertex a projected but on different triangles.
 	 */
 	private void projectEdge(AbstractHalfEdge edge) {
-		boolean origin = edge.origin().isManifold();
-		boolean destination = edge.destination().isManifold();
+		boolean origin = edge.origin().isMutable();
+		boolean destination = edge.destination().isMutable();
 		projectToClosest(edge);
 		//if neither origin nor destination both extremities of the edge
 		//are already projected but the full edge may not be fully projected
