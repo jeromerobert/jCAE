@@ -302,11 +302,6 @@ public class Mesh implements Serializable
 				it.remove();
 			}
 		}
-		map = null;
-		// TODO try to do it in the triangle loop to avoid a full adjacency
-		// build
-		clearAdjacency();
-		buildAdjacency();
 	}
 
 	/**
