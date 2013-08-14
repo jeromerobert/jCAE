@@ -59,7 +59,7 @@ public class DistanceMetric extends MetricSupport.AnalyticMetric {
 		public double size0;
 		/**
 		 * if the distance^2 is greater than this value this source is not
-		 * concidered
+		 * considered
 		 */
 		public double sqrD1;
 		/** cache for sqrD0 - sqrD1 */
@@ -148,6 +148,13 @@ public class DistanceMetric extends MetricSupport.AnalyticMetric {
 
 	protected final List<DistanceMetricInterface> sources = new ArrayList<DistanceMetricInterface>();
 	protected double sizeInf;
+	/**
+	 * maximum length ratio between two adjacent edges; this parameter is
+	 * used in the numeric (and mixed) metric
+	 */
+	protected double rho = 0.0;
+	/** choose analytic metric with numerical criterion if true */
+	protected boolean mixed = false;
 	protected double scaling = 1.0;
 	public DistanceMetric(double sizeInf) {
 		this.sizeInf = sizeInf;
@@ -194,6 +201,22 @@ public class DistanceMetric extends MetricSupport.AnalyticMetric {
 				throw new IllegalArgumentException("Invalid line found in file "+fileName+": "+line);
 		}
 		br.close();
+	}
+
+	public DistanceMetric(double sizeInf, String fileName, double rho) throws
+		IOException
+	{
+		this(sizeInf, fileName);
+		if(rho <= 1.0)
+			throw new IllegalArgumentException(rho+" <= 1.0");
+		this.rho = rho;
+	}
+
+	public DistanceMetric(double sizeInf, String fileName, double rho, boolean mixed) throws
+		IOException
+	{
+		this(sizeInf, fileName, rho);
+		this.mixed = mixed;
 	}
 
 	/**
@@ -247,8 +270,42 @@ public class DistanceMetric extends MetricSupport.AnalyticMetric {
 		ps.ratio = ps.sqrD0 / ps.delta;
 	}
 
+	/**
+	 * Compute the value of the isotropic metric at a node
+	 * @param x x-coordinate of the node
+	 * @param y y-coordinate of the node
+	 * @param z z-coordinate of the node
+	 * @param groupId ID of the element group
+	 */
 	@Override
-	public double getTargetSize(double x, double y, double z, int groupId) {
+	public double getTargetSize(double x, double y, double z, int groupId)
+	{
+		if(rho > 1.0)
+			if(mixed)
+				return getTargetSizeMixed(x, y, z, groupId);
+			else
+				return getTargetSizeNumeric(x, y, z, groupId);
+		else
+			return getTargetSizeAnalytic(x, y, z, groupId);
+	}
+
+	/**
+	 * Compute the mixed (analytic-numeric) isotropic metric at a node
+	 */
+	public double getTargetSizeMixed(double x, double y, double z,
+		int groupId)
+	{
+		double ha = getTargetSizeAnalytic(x, y, z, groupId);
+		double hn = getTargetSizeNumeric(x, y, z, groupId);
+		return Math.min(ha, hn);
+	}
+
+	/**
+	 * Compute the analytic isotropic metric at a node
+	 */
+	public double getTargetSizeAnalytic(double x, double y, double z,
+		int groupId)
+	{
 		double minValue = getSize(groupId);
 		for (DistanceMetricInterface s : sources) {
 			double d2 = s.getSqrDistance(x, y, z);
@@ -261,6 +318,38 @@ public class DistanceMetric extends MetricSupport.AnalyticMetric {
 			{
 				double deltaS = sizeInf - s.size0;
 				v = deltaS * d2 / s.delta + (s.size0 - s.ratio * deltaS);
+			}
+			minValue = Math.min(v, minValue);
+		}
+		return minValue * scaling;
+	}
+
+	/**
+	 * Compute the numeric isotropic metric at a node
+	 */
+	public double getTargetSizeNumeric(double x, double y, double z,
+		int groupId)
+	{
+		double minValue = getSize(groupId);
+		for (DistanceMetricInterface s : sources) {
+			double d2 = s.getSqrDistance(x, y, z);
+			double v;
+			if(d2 < s.size0 * s.size0)
+				v = s.size0;
+			else
+			{
+				double hk = s.size0;
+				double hkp1 = rho * hk;
+				double dk = s.size0;
+				double dkp1 = dk + hkp1;
+				while(d2 > dk*dk && hkp1 < sizeInf)
+				{
+					hk = hkp1;
+					hkp1 = hk * rho;
+					dk = dkp1;
+					dkp1 = dk + hkp1;
+				}
+				v = hk + (hkp1 - hk) * (Math.sqrt(d2) - dk) / (dkp1 - dk);
 			}
 			minValue = Math.min(v, minValue);
 		}

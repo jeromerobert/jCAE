@@ -61,6 +61,13 @@ parser.add_option("-n", "--allowNearNodes",
 parser.add_option("-t", "--size", metavar="FLOAT", default=0.0,
                   action="store", type="float", dest="size",
                   help="target size")
+parser.add_option("-r", "--rho", metavar="FLOAT", default=0.0,
+                  action="store", type="float", dest="rho",
+                  help="numerical metric ratio (required: rho > 1)")
+parser.add_option("--mixed", metavar="BOOLEAN", default=False,
+                  action="store_true", dest="mixed",
+                  help="""set mixed analytic-numeric metric.
+                  rho must be set with a valid value (>1.0) using -r option, otherwise ignored.""")
 parser.add_option("-T", "--nearLengthRatio", metavar="FLOAT", default=1.0 / Math.sqrt(2.0),
                   action="store", type="float", dest="nearLengthRatio",
 		  help="ratio to size target to determine if a vertex is near an existing point (default: 1/sqrt(2)")
@@ -143,7 +150,10 @@ class RemeshMetric(AnalyticMetric):
 		return min(200.0, (x - 9000.0)*(x - 9000.0) / 2250.0)
 
 if options.point_metric_file:
-	algo.setAnalyticMetric(DistanceMetric(options.size, options.point_metric_file))
+	if options.rho > 1.0:
+		algo.setAnalyticMetric(DistanceMetric(options.size, options.point_metric_file, options.rho, options.mixed))
+	else:
+		algo.setAnalyticMetric(DistanceMetric(options.size, options.point_metric_file))
 elif setAnalytic:
 	algo.setAnalyticMetric(RemeshMetric());
 
