@@ -161,6 +161,11 @@ class EdgeProjector {
 			}
 		};
 		this.toProject.addAll(edges);
+		for(AbstractHalfEdge e: toProject)
+		{
+			e.origin().setMutable(true);
+			e.destination().setMutable(true);
+		}
 		vertexSwapper.setKdTree(kdTree);
 		this.group = group;
 		maxSqrDist = maxDist * maxDist;
@@ -257,6 +262,7 @@ class EdgeProjector {
 					// collapse the edge of the source mesh instead of merging vertices.
 					// Merging vertices would create degenerated triangle.
 					edgeToCollapse = e;
+					return true;
 				}
 				else
 				{
@@ -289,9 +295,9 @@ class EdgeProjector {
 			assert (edgeToCollapse.origin() == source && edgeToCollapse.destination() == target) ||
 				(edgeToCollapse.origin() == target && edgeToCollapse.destination() == source);
 			Triangle t = edgeToCollapse.getTri();
-			if(lastSplitted1.getTri() == t)
+			if(lastSplitted1 != null && lastSplitted1.getTri() == t)
 				lastSplitted1 = null;
-			if(lastSplitted2 .getTri() == t)
+			if(lastSplitted2 != null && lastSplitted2 .getTri() == t)
 				lastSplitted2 = null;
 			toProject.remove(edgeToCollapse);
 			toProject.remove(edgeToCollapse.next());
@@ -530,14 +536,18 @@ class EdgeProjector {
 			} else {
 				lastMergeTarget = null;
 			}
-		} else if (origin && triangleProjector1.getType() == ProjectionType.VERTEX) {
+		} else if (origin && triangleProjector1.getType() == ProjectionType.VERTEX &&
+			edge.origin() != triangleProjector1.getVertex())
+		{
 			lastMergeSource = edge.origin();
 			lastMergeTarget = triangleProjector1.getVertex();
 			lastSplitted1 = edge;
 			lastSplitted2 = getPreviousBorderEdge(edge);
 			assert TriangleHelper.isOnEdge(lastMergeSource, edge.origin(),
 				edge.destination(), triangleProjector1.sqrTolerance);
-		} else if (destination && triangleProjector2.getType() == ProjectionType.VERTEX) {
+		} else if (destination && triangleProjector2.getType() == ProjectionType.VERTEX &&
+			edge.destination() != triangleProjector2.getVertex())
+		{
 			lastMergeSource = edge.destination();
 			lastMergeTarget = triangleProjector2.getVertex();
 			lastSplitted1 = edge;
