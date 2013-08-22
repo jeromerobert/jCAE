@@ -228,9 +228,9 @@ public class AmibeNode extends DataNode
 				List<File> x = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
 				if(x != null && !x.isEmpty() && !x.get(0).getPath().isEmpty())
 				{
-					final String path = FileUtil.getRelativePath(
-						getDataObject().getPrimaryFile().getParent(),
-						FileUtil.toFileObject(x.get(0)));
+					FileObject fo = FileUtil.toFileObject(x.get(0));
+					final String path = fo == null ? null : FileUtil.getRelativePath(
+						getDataObject().getPrimaryFile().getParent(), fo);
 					if(path != null)
 					{
 						ls.add(new PasteType() {
