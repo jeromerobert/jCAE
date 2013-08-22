@@ -92,6 +92,7 @@ class TriangleProjector {
 		type = ProjectionType.FAR;
 
 		for (int i = 0; i < 3; i++) {
+			assert currentEdge != null: t;
 			if(currentEdge.hasAttributes(AbstractHalfEdge.BOUNDARY))
 			{
 				//use vectToVertices to store temporary vectors

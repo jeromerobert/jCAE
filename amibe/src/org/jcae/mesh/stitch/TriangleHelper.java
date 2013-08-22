@@ -62,7 +62,7 @@ class TriangleHelper {
 		//TODO lazy initialisation ?
 		Matrix3D.prodVect3D(edges[0], edges[1], normal);
 		normAN2 = Matrix3D.prodSca(normal, normal);
-		assert normAN2 > 0;
+		assert normAN2 > 0: triangle;
 		//TODO lazy initialisation ?
 		for (int i = 0; i < 3; i++) {
 			edgesNorm[i] = Matrix3D.prodSca(edges[i], edges[i]);

@@ -229,8 +229,7 @@ class EdgeProjector {
 			AbstractHalfEdge e = it.next();
 			assert e.origin() == source;
 			assert e.origin().isMutable(): e;
-			assert e.origin().isManifold(): e;
-			if (checkMerge && !mesh.canMoveOrigin(e, realPosition)) {
+			if (checkMerge && (!e.origin().isManifold() || !mesh.canMoveOrigin(e, realPosition))) {
 				LOGGER.info("Cannot move " + source + " to " + realPosition +
 					". distance=" + source.distance3D(realPosition));
 				return false;
@@ -679,7 +678,8 @@ class EdgeProjector {
 		int k = 0;
 		for(Triangle t: triangles)
 		{
-			assert mesh.getTriangles().contains(t);
+			assert t.getAbstractHalfEdge() != null: t;
+			assert mesh.getTriangles().contains(t): t;
 			triangleHelpers.get(k++).setTriangle(t);
 		}
 		projector1Valid = origin || (!origin && !destination);
