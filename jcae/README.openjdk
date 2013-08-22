@@ -28,7 +28,47 @@ Here are instruction to build OpenJDK 7 for glibc 2.3. Note that this configurat
    cd build/linux-amd64/classes/
    cp -a ../corba/classes/* .
 
-* Delete all *.debuginfo from the j2re-image directory to make it lighter to deploy
+* Delete all *.debuginfo and *.diz files from the j2re-image directory to make it lighter to deploy
 
 * cp /lib/libbz2.so.1.0 to jdk7u/build/linux-amd64/j2re-image/lib/amd64 as the target OS may not have it
+
+* To build hotspot in optimized mode use the following patch. Building in optimized mode instead of product mode
+(the default) allow to get access to more (1222 vs 689) command line options, including the
+-XX:+PrintFlagsWithComments which list all options.
+
+--- a/make/hotspot-rules.gmk	Wed Jul 31 21:26:52 2013 -0700
++++ b/make/hotspot-rules.gmk	Thu Aug 22 11:50:23 2013 +0200
+@@ -64,7 +64,7 @@
+ # Basic hotspot build and export of it's files
+ #
+
+-HOTSPOT_TARGET = all_product
++HOTSPOT_TARGET = all_optimized
+ ifeq ($(DEBUG_NAME), debug)
+   HOTSPOT_TARGET = all_debug
+ endif
+
+
+* jdk7u40-b37 fail to build in optimized mode. Here is the pach:
+--- a/src/share/vm/gc_implementation/g1/g1GCPhaseTimes.cpp	Wed Jul 31 21:27:03 2013 -0700
++++ b/src/share/vm/gc_implementation/g1/g1GCPhaseTimes.cpp	Thu Aug 22 11:48:33 2013 +0200
+@@ -151,6 +151,9 @@
+   }
+ }
+
++#elif !defined(PRODUCT)
++template <class T> void WorkerDataArray<T>::reset() { }
++template <class T> void WorkerDataArray<T>::verify() { }
+ #endif
+
+* Here is an example build script:
+export MILESTONE=jcae
+export BUILD_NUMBER=b20130822
+export ALT_FREETYPE_HEADERS_PATH=/usr/local/include/freetype2
+export ALT_FREETYPE_LIB_PATH=/usr/local/lib/
+export ALT_BOOTDIR=/home/robert/jdk1.6.0_31/
+export HOTSPOT_BUILD_JOBS=8
+export PARALLEL_COMPILE_JOBS=8
+make sanity
+make
 
