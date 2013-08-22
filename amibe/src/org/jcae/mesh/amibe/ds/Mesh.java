@@ -286,8 +286,9 @@ public class Mesh implements Serializable
 			Triangle t = it.next();
 			if(t.getGroupId() == group)
 			{
-				for(Vertex v:t.vertex)
+				for(int i = 0; i < 3; i++)
 				{
+					Vertex v = t.getV(i);
 					int vid = map.putIfAbsent(v, nextVertexId);
 					if(vid == map.getNoEntryValue())
 					{
@@ -434,7 +435,7 @@ public class Mesh implements Serializable
 	public final Triangle createTriangle(Vertex [] v)
 	{
 		assert v.length == 3;
-		return factory.createTriangle(v);
+		return factory.createTriangle(v[0], v[1], v[2]);
 	}
 
 	/**
@@ -446,7 +447,7 @@ public class Mesh implements Serializable
 	public final Triangle createTetrahedron(Vertex [] v)
 	{
 		assert v.length == 4;
-		return factory.createTriangle(v);
+		return new Tetrahedron(v);
 	}
 
 	/**
@@ -723,8 +724,7 @@ public class Mesh implements Serializable
 			{
 				if (!t.isWritable())
 					continue;
-				for (Vertex v: t.vertex)
-					vertices.add(v);
+				t.addVertexTo(vertices);
 			}
 		}
 		else
@@ -738,8 +738,9 @@ public class Mesh implements Serializable
 		{
 			if (t.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
-			for (Vertex v: t.vertex)
+			for (int i = 0; i < 3; i++)
 			{
+				Vertex v = t.getV(i);
 				if (v.isReadable())
 				{
 					Collection<Triangle> list = tVertList.get(v);
@@ -1629,12 +1630,12 @@ public class Mesh implements Serializable
 	{
 		for (Triangle t: triangleList)
 		{
-			if (t.vertex[0] == t.vertex[1] || t.vertex[1] == t.vertex[2] || t.vertex[2] == t.vertex[0])
+			if (t.getV0() == t.getV1() || t.getV1() == t.getV2() || t.getV2() == t.getV0())
 			{
 				logger.severe("Duplicate vertices: "+t);
 				return false;
 			}
-			if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
+			if (t.getV0() == outerVertex || t.getV1() == outerVertex || t.getV2() == outerVertex)
 			{
 				if (constrained && factory.hasAdjacency())
 				{
@@ -1647,13 +1648,13 @@ public class Mesh implements Serializable
 			}
 			for (int i = 0; i < 3; i++)
 			{
-				Vertex v = t.vertex[i];
+				Vertex v = t.getV(i);
 				if (v.getLink() == null)
 					continue;
 				if (v.isManifold())
 				{
 					Triangle t2 = (Triangle) v.getLink();
-					if (t2.vertex[0] != v && t2.vertex[1] != v && t2.vertex[2] != v)
+					if (t2.getV0() != v && t2.getV1() != v && t2.getV2() != v)
 					{
 						logger.severe("Vertex "+v+" linked to "+t2);
 						return false;
@@ -2062,11 +2063,11 @@ public class Mesh implements Serializable
 		{
 			if (t.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
-			Vertex t0 = t.vertex[0];
-			Vertex t1 = t.vertex[1];
-			Vertex t2 = t.vertex[2];
-			double a = t.vertex[0].sqrDistance3D(t.vertex[1]);
-			double c = t.vertex[0].sqrDistance3D(t.vertex[2]);
+			Vertex t0 = t.getV0();
+			Vertex t1 = t.getV1();
+			Vertex t2 = t.getV2();
+			double a = t.getV0().sqrDistance3D(t.getV1());
+			double c = t.getV0().sqrDistance3D(t.getV2());
 			double b =
 				(t1.getX() - t0.getX()) * (t2.getX() - t0.getX()) +
 				(t1.getY() - t0.getY()) * (t2.getY() - t0.getY()) +
@@ -2177,8 +2178,9 @@ public class Mesh implements Serializable
 	{
 		for(Triangle t:getTriangles())
 		{
-			for(Vertex v:t.vertex)
+			for(int i = 0; i < 3; i++)
 			{
+				Vertex v = t.getV(i);
 				Iterator<AbstractHalfEdge> it = v.getNeighbourIteratorAbstractHalfEdge();
 				boolean nonManifold = false;
 				while(it.hasNext())
@@ -2224,8 +2226,9 @@ public class Mesh implements Serializable
 		{
 			for(Triangle t:getTriangles())
 			{
-				for(Vertex v: t.vertex)
+				for(int i = 0; i < 3; i++)
 				{
+					Vertex v = t.getV(i);
 					bounds[0] = Math.min(bounds[0], v.getX());
 					bounds[1] = Math.min(bounds[1], v.getY());
 					bounds[2] = Math.min(bounds[2], v.getZ());
@@ -2278,8 +2281,9 @@ public class Mesh implements Serializable
 		Map<Vertex, List<Integer>> adjacency = HashFactory.createMap();
 		for(Triangle t:getTriangles())
 		{
-			for(Vertex v:t.vertex)
+			for(int i = 0; i < 3; i++)
 			{
+				Vertex v = t.getV(i);
 				List<Integer> l = adjacency.get(v);
 				if(l == null)
 					adjacency.put(v, getAdjacency(v));
@@ -2289,8 +2293,9 @@ public class Mesh implements Serializable
 		buildAdjacency();
 		for(Triangle t:getTriangles())
 		{
-			for(Vertex v:t.vertex)
+			for(int i = 0; i < 3; i++)
 			{
+				Vertex v = t.getV(i);
 				List<Integer> a1 = adjacency.get(v);
 				List<Integer> a2 = getAdjacency(v);
 				if(!a1.equals(a2))
@@ -2354,11 +2359,11 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 			{
 				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
-				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
+				if (t.getV0() == outerVertex || t.getV1() == outerVertex || t.getV2() == outerVertex)
 					continue;
-				nodeset.add(t.vertex[0]);
-				nodeset.add(t.vertex[1]);
-				nodeset.add(t.vertex[2]);
+				nodeset.add(t.getV0());
+				nodeset.add(t.getV1());
+				nodeset.add(t.getV2());
 			}
 			int count = 0;
 			TObjectIntHashMap<Vertex> labels = new TObjectIntHashMap<Vertex>(nodeset.size());
@@ -2380,13 +2385,13 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 			{
 				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
-				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
+				if (t.getV0() == outerVertex || t.getV1() == outerVertex || t.getV2() == outerVertex)
 					continue;
 				count++;
 				out.println(""+count+"        91         1         1         1         3");
 				for(int i = 0; i < 3; i++)
 				{
-					int nodelabel = labels.get(t.vertex[i]);
+					int nodelabel = labels.get(t.getV(i));
 					out.print(" "+nodelabel);
 				}
 				out.println("");
@@ -2418,11 +2423,11 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 			{
 				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
-				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
+				if (t.getV0() == outerVertex || t.getV1() == outerVertex || t.getV2() == outerVertex)
 					continue;
-				nodeset.add(t.vertex[0]);
-				nodeset.add(t.vertex[1]);
-				nodeset.add(t.vertex[2]);
+				nodeset.add(t.getV0());
+				nodeset.add(t.getV1());
+				nodeset.add(t.getV2());
 			}
 			int count = 0;
 			TObjectIntHashMap<Vertex> labels = new TObjectIntHashMap<Vertex>(nodeset.size());
@@ -2442,7 +2447,7 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 			{
 				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
-				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
+				if (t.getV0() == outerVertex || t.getV1() == outerVertex || t.getV2() == outerVertex)
 					continue;
 				count++;
 			}
@@ -2452,12 +2457,12 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 			{
 				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
-				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
+				if (t.getV0() == outerVertex || t.getV1() == outerVertex || t.getV2() == outerVertex)
 					continue;
 				count++;
 				for(int i = 0; i < 3; i++)
 				{
-					int nodelabel = labels.get(t.vertex[i]);
+					int nodelabel = labels.get(t.getV(i));
 					out.print(nodelabel+" ");
 				}
 				out.println("1");

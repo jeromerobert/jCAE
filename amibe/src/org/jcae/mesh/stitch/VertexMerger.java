@@ -60,8 +60,9 @@ class VertexMerger {
 			assert !edge.hasAttributes(AbstractHalfEdge.OUTER): edge+"\n"+edge.sym();
 			edgeToClear.add(edge);
 			Triangle t = edge.getTri();
-			for(Vertex v: t.vertex)
+			for(int i = 0; i < 3; i++)
 			{
+				Vertex v = t.getV(i);
 				Collection<Triangle> l = map.get(v);
 				if(l == null)
 				{
@@ -79,8 +80,9 @@ class VertexMerger {
 	{
 		for(Triangle t:triangles)
 		{
-			for(Vertex v: t.vertex)
+			for(int i = 0; i < 3; i++)
 			{
+				Vertex v = t.getV(i);
 				Collection<Triangle> l = map.get(v);
 				if(l == null)
 				{
@@ -158,7 +160,7 @@ class VertexMerger {
 			for(Triangle t:e.getValue())
 			{
 				assert !t.hasAttributes(AbstractHalfEdge.OUTER);
-				assert Arrays.asList(t.vertex).contains(e.getKey());
+				assert t.getV0() == e.getKey() || t.getV1() == e.getKey() || t.getV2() == e.getKey();
 			}
 			assert e.getKey().isManifold(): e.getKey();
 		}
@@ -257,7 +259,9 @@ class VertexMerger {
 			{
 				if(!current.hasAttributes(AbstractHalfEdge.OUTER))
 				{
-					assert Arrays.asList(current.getTri().vertex).contains(v);
+					assert current.getTri().getV0() == v ||
+						current.getTri().getV1() == v ||
+						current.getTri().getV2() == v;
 					fan.add(current.getTri());
 				}
 				assert current.getTri() != null;
@@ -277,11 +281,11 @@ class VertexMerger {
 			first = false;
 			for(Triangle t:fan)
 			{
-				assert Arrays.asList(t.vertex).contains(v);
+				assert t.getV0() == v || t.getV1() == v || t.getV2() == v;
 				for(int i = 0; i < 3; i++)
 				{
-					if(t.vertex[i] == v)
-						t.vertex[i] = newV;
+					if(t.getV(i) == v)
+						t.setV(i, newV);
 				}
 				newV.setLink(t);
 			}
@@ -312,9 +316,9 @@ class VertexMerger {
 			{
 				for(int j = 0; j < 3; j++)
 				{
-					assert t.vertex[j] != targetV: "Cannot merge "+vertices[i]+" to "+targetV;
-					if(t.vertex[j] == vertices[i])
-						t.vertex[j] = targetV;
+					assert t.getV(j) != targetV: "Cannot merge "+vertices[i]+" to "+targetV;
+					if(t.getV(j) == vertices[i])
+						t.setV(j, targetV);
 				}
 			}
 			map.remove(vertices[i]);

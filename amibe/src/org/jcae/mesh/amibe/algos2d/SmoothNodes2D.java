@@ -175,8 +175,7 @@ public class SmoothNodes2D
 				{
 					if (f.hasAttributes(AbstractHalfEdge.OUTER))
 						continue;
-					for (Vertex v: f.vertex)
-						nodeset.add(v);
+					f.addVertexTo(nodeset);
 				}
 			}
 			for (int i = 0; i < nloop; i++)
@@ -365,10 +364,10 @@ public class SmoothNodes2D
 	private double triangleQuality(AbstractHalfEdge edge)
 	{
 		Triangle f = edge.getTri();
-		assert f.vertex[0] != mesh.outerVertex && f.vertex[1] != mesh.outerVertex && f.vertex[2] != mesh.outerVertex : f;
-		Vertex2D v0 = (Vertex2D) f.vertex[0];
-		Vertex2D v1 = (Vertex2D) f.vertex[1];
-		Vertex2D v2 = (Vertex2D) f.vertex[2];
+		assert f.getV0() != mesh.outerVertex && f.getV1() != mesh.outerVertex && f.getV2() != mesh.outerVertex : f;
+		Vertex2D v0 = (Vertex2D) f.getV0();
+		Vertex2D v1 = (Vertex2D) f.getV1();
+		Vertex2D v2 = (Vertex2D) f.getV2();
 		double l01 = mesh.getMetric(v0).distance2(v0, v1);
 		double l12 = mesh.getMetric(v1).distance2(v1, v2);
 		double l20 = mesh.getMetric(v2).distance2(v2, v0);

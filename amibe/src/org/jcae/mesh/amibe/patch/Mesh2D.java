@@ -460,13 +460,14 @@ public class Mesh2D extends Mesh
 	public final void moveVertexToCentroid(Vertex2D vertex, Triangle t)
 	{
 		double x = 0.0, y = 0.0;
-		for (Vertex v : t.vertex)
-		{
-			x += v.getX();
-			y += v.getY();
-		}
-		x /= t.vertex.length;
-		y /= t.vertex.length;
+		x += t.getV0().getX();
+		x += t.getV1().getX();
+		x += t.getV2().getX();
+		y += t.getV0().getY();
+		y += t.getV1().getY();
+		y += t.getV2().getY();
+		x /= 3;
+		y /= 3;
 		moveVertex(vertex, x, y);
 	}
 
@@ -541,11 +542,11 @@ public class Mesh2D extends Mesh
 		{
 			// We can not rely on t.hasAttributes(AbstractHalfEdge.OUTER) here,
 			// attributes may not have been set yet.
-			if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
+			if (t.getV0() == outerVertex || t.getV1() == outerVertex || t.getV2() == outerVertex)
 					continue;
-			Vertex2D tv0 = (Vertex2D) t.vertex[0];
-			Vertex2D tv1 = (Vertex2D) t.vertex[1];
-			Vertex2D tv2 = (Vertex2D) t.vertex[2];
+			Vertex2D tv0 = (Vertex2D) t.getV0();
+			Vertex2D tv1 = (Vertex2D) t.getV1();
+			Vertex2D tv2 = (Vertex2D) t.getV2();
 			double l = tv0.onLeft(quadtree, tv1, tv2);
 			if (l <= 0L)
 			{

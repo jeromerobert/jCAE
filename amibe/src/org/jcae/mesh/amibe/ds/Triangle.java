@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 import java.io.Serializable;
+import java.util.Collection;
 
 /**
  * A triangle containing adjacency relations.
@@ -38,7 +39,7 @@ public class Triangle implements Serializable
 	/**
 	 * Three vertices.
 	 */
-	public Vertex [] vertex;
+	protected Vertex v0, v1, v2;
 	
 	// Group id
 	private int groupId = -1;
@@ -52,18 +53,18 @@ public class Triangle implements Serializable
 	// Reference to the next element in the singly linked list.
 	private Triangle listNext;
 	
-	public Triangle(TriangleTraitsBuilder builder)
+	public Triangle(Vertex v0, Vertex v1, Vertex v2)
 	{
-		/*if (builder != null)
-			traits = builder.createTraits();
-		else
-			traits = null;*/
-		vertex = new Vertex[3];
+		this.v0 = v0;
+		this.v1 = v1;
+		this.v2 = v2;
 	}
 
 	public void copy(Triangle src)
 	{
-		System.arraycopy(src.vertex, 0, vertex, 0, 3);
+		v0 = src.v0;
+		v1 = src.v1;
+		v2 = src.v2;
 		readable = src.readable;
 		writable = src.writable;
 		groupId = src.groupId;
@@ -169,8 +170,9 @@ public class Triangle implements Serializable
 		if (groupId >= 0)
 			r.append("\nGroup: ").append(groupId);
 		r.append("\nVertices:");
-		for (int i = 0; i < 3; i++)
-			r.append("\n  ").append(vertex[i]);
+		r.append("\n  ").append(v0);
+		r.append("\n  ").append(v1);
+		r.append("\n  ").append(v2);
 		if (listNext != null)
 			r.append("\nLink next: ").append(listNext.hashCode());
 		return r.toString();
@@ -220,9 +222,9 @@ public class Triangle implements Serializable
 	public static class List
 	{
 		//   Head of the list.  Triangles are linked from this instance.
-		private final Triangle listHead = new Triangle(null);
+		private final Triangle listHead = new Triangle(null, null, null);
 		//   Sentinel.  This triangle is always the last triangle of the list.
-		private final Triangle listSentinel = new Triangle(null);
+		private final Triangle listSentinel = new Triangle(null, null, null);
 		//   Reference to the last collected triangle.
 		private Triangle listTail = listHead;
 		//   Number of collected items (for debugging purpose, can be removed).
@@ -349,4 +351,54 @@ public class Triangle implements Serializable
 		}
 	}
 	
+	public Vertex getV0()
+	{
+		return v0;
+	}
+
+	public Vertex getV1()
+	{
+		return v1;
+	}
+
+	public Vertex getV2()
+	{
+		return v2;
+	}
+
+	public Vertex getV(int i)
+	{
+		switch(i)
+		{
+		case 0: return v0;
+		case 1: return v1;
+		case 2: return v2;
+		default:
+			throw new IllegalArgumentException();
+		}
+	}
+
+	public int vertexNumber()
+	{
+		return 3;
+	}
+
+	public void addVertexTo(Collection<Vertex> vertex)
+	{
+		vertex.add(v0);
+		vertex.add(v1);
+		vertex.add(v2);
+	}
+
+	public void setV(int i, Vertex v)
+	{
+		switch(i)
+		{
+		case 0: v0 = v; break;
+		case 1: v1 = v; break;
+		case 2: v2 = v; break;
+		default:
+			throw new IllegalArgumentException();
+		}
+	}
 }

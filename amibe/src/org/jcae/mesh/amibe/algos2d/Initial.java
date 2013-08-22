@@ -433,11 +433,12 @@ public class Initial
 			t = it.next();
 			if (t.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
-			for (Vertex v: t.vertex)
-			{
-				if (v.isManifold())
-					v.setLink(t);
-			}
+			if (t.getV0().isManifold())
+				t.getV0().setLink(t);
+			if (t.getV1().isManifold())
+				t.getV1().setLink(t);
+			if (t.getV2().isManifold())
+				t.getV2().setLink(t);
 		}
 		
 		if (innerNodes != null && !innerNodes.isEmpty())

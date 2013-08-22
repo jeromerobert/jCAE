@@ -122,11 +122,11 @@ public class Fuse
 		{
 			for (int j = 0; j < 3; j++)
 			{
-				Vertex n = t.vertex[j];
+				Vertex n = t.getV(j);
 				Vertex p = map.get(n);
 				if (p != null)
 				{
-					t.vertex[j] = p;
+					t.setV(j, p);
 					mesh.remove(n);
 				}
 			}

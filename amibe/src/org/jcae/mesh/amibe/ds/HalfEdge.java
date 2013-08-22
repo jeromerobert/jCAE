@@ -248,7 +248,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 */
 	final void setOrigin(Vertex v)
 	{
-		tri.vertex[next3[localNumber]] = v;
+		tri.setV(next3[localNumber], v);
 	}
 	
 	/**
@@ -258,7 +258,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 */
 	final void setDestination(Vertex v)
 	{
-		tri.vertex[prev3[localNumber]] = v;
+		tri.setV(prev3[localNumber], v);
 	}
 	
 	/**
@@ -268,7 +268,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 */
 	final void setApex(Vertex v)
 	{
-		tri.vertex[localNumber] = v;
+		tri.setV(localNumber, v);
 	}
 	
 	/**
@@ -322,7 +322,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	@Override
 	public final Vertex origin()
 	{
-		return tri.vertex[next3[localNumber]];
+		return tri.getV(next3[localNumber]);
 	}
 	
 	/**
@@ -333,7 +333,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	@Override
 	public final Vertex destination()
 	{
-		return tri.vertex[prev3[localNumber]];
+		return tri.getV(prev3[localNumber]);
 	}
 	
 	/**
@@ -344,7 +344,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	@Override
 	public final Vertex apex()
 	{
-		return tri.vertex[localNumber];
+		return tri.getV(localNumber);
 	}
 	
 	/**

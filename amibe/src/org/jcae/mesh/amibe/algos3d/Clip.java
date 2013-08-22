@@ -90,7 +90,7 @@ public class Clip
 			boolean inside = true;
 			for (int i = 0; inside && i < 3; i++)
 			{
-				Vertex v = t.vertex[i];
+				Vertex v = t.getV(i);
 				inside = !(
 					v.getX() > upper[0] || v.getX() < lower[0] ||
 					v.getY() > upper[1] || v.getY() < lower[1] ||

@@ -47,9 +47,9 @@ public class MinAngleFace extends QualityProcedure
 	
 	private float quality(Triangle f)
 	{
-		Vertex n1 = f.vertex[0];
-		Vertex n2 = f.vertex[1];
-		Vertex n3 = f.vertex[2];
+		Vertex n1 = f.getV0();
+		Vertex n2 = f.getV1();
+		Vertex n3 = f.getV2();
 		double a1 = Math.abs(n1.angle3D(n2, n3));
 		double a2 = Math.abs(n2.angle3D(n3, n1));
 		double a3 = Math.abs(n3.angle3D(n1, n2));

@@ -141,7 +141,7 @@ public class MeshLiaisonTest
 		assertTrue("findSurroundingTriangle failed", ot != null);
 		assertTrue("findSurroundingTriangle failed", ref == ot);
 		Triangle tRes = ot.getTri();
-		assertTrue("North Pole not found", tRes.vertex[0] == northPole || tRes.vertex[1] == northPole || tRes.vertex[2] == northPole);
+		assertTrue("North Pole not found", tRes.getV0() == northPole || tRes.getV1() == northPole || tRes.getV2() == northPole);
 	}
 	
 }

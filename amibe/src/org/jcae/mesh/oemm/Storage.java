@@ -250,7 +250,7 @@ public class Storage
 		{
 			for (int i = 0; i < 3; i++)
 			{
-				Vertex vertex = tr.vertex[i];
+				Vertex vertex = tr.getV(i);
 				if (!vertex.isReadable() || vertex instanceof FakeNonReadVertex) {
 					continue;
 				}
@@ -735,7 +735,7 @@ public class Storage
 				{
 					for (int i = 0; i < 3; i++)
 					{
-						Vertex v = triangle.vertex[i];
+						Vertex v = triangle.getV(i);
 						Node foundNode = oemm.leaves[searchNode(oemm, v, positions)];
 						leaf[i] = foundNode.leafIndex;
 						assert leaf[i] < oemm.leaves.length; 
@@ -775,17 +775,18 @@ public class Storage
 		for(Triangle tr: mesh.getTriangles())
 		{
 			boolean hasOuterEdge =
-				mesh.outerVertex == tr.vertex[0] ||
-				mesh.outerVertex == tr.vertex[1] ||
-				mesh.outerVertex == tr.vertex[2];
+				mesh.outerVertex == tr.getV0() ||
+				mesh.outerVertex == tr.getV1() ||
+				mesh.outerVertex == tr.getV2();
 			assert hasOuterEdge == tr.hasAttributes(AbstractHalfEdge.OUTER);
 			if (tr.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			// By convention, if T=(V1,V2,V3) and each Vi is contained in node Ni,
 			// then T belongs to min(Ni)
 			int nodeNumber = Integer.MAX_VALUE;
-			for(Vertex v: tr.vertex)
+			for(int i = 0; i < tr.vertexNumber(); i++)
 			{
+				Vertex v = tr.getV(i);
 				int n;
 				if (mapVertexToLeafindex.containsKey(v))
 					n = mapVertexToLeafindex.get(v);

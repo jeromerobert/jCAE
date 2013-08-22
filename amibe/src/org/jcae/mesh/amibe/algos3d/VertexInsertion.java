@@ -163,8 +163,9 @@ public class VertexInsertion {
 			if(t == null)
 				throw new NullPointerException("Cannot find projection for "+v);
 			liaison.move(v, projection, group, true);
-			for(Vertex tv:t.vertex)
+			for(int iv = 0; iv < 3; iv++)
 			{
+				Vertex tv = t.getV(iv);
 				if(tv.sqrDistance3D(v) < tol2)
 				{
 					if(tv.isMutable())

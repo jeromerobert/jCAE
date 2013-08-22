@@ -647,7 +647,7 @@ public class TriangleKdTree {
 				continue;
 			for(int i = 0; i < 3; i++)
 			{
-				Vertex uv = t.vertex[i];
+				Vertex uv = t.getV(i);
 				for(int j = 0; j < 3; j++)
 				{
 					double v = uv.get(j);
@@ -830,7 +830,7 @@ public class TriangleKdTree {
 		}
 		for(int i = 0; i < 3; i++)
 		{
-			Vertex uv = triangle.vertex[i];
+			Vertex uv = triangle.getV(i);
 			for(int j = 0; j < 3; j++)
 			{
 				double v = uv.get(j);
@@ -984,7 +984,7 @@ public class TriangleKdTree {
 			boolean inRight = false;
 			for(int i = 0; i < 3; i++)
 			{
-				if(t.vertex[i].get(node.direction) < cut)
+				if(t.getV(i).get(node.direction) < cut)
 				{
 					inLeft = true;
 					break;
@@ -993,7 +993,7 @@ public class TriangleKdTree {
 
 			for(int i = 0; i < 3; i++)
 			{
-				if(t.vertex[i].get(node.direction) >= cut)
+				if(t.getV(i).get(node.direction) >= cut)
 				{
 					inRight = true;
 					break;
@@ -1076,7 +1076,7 @@ public class TriangleKdTree {
 
 		return "number of leaves: " + nbLeaf + " max depth: " + maxDepth +
 			" largest node: " + maxTriangles + " near " +
-			Arrays.toString(nearMaxTriangle.vertex);
+			nearMaxTriangle.getV0()+", "+nearMaxTriangle.getV1()+", "+nearMaxTriangle.getV2();
 	}
 
 	/** The 8 vertices of a voxel */
@@ -1196,7 +1196,7 @@ public class TriangleKdTree {
 						continue;
 					coords.moveTo(0,0,0);
 					for(int j = 0; j < 3; j++)
-						coords.add(tria.vertex[j]);
+						coords.add(tria.getV(j));
 					coords.scale(1/3.0);
 					Triangle tp = t.getClosestTriangle(coords, null, -1);
 					if(tp != tria)

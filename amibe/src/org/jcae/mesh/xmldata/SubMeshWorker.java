@@ -105,7 +105,7 @@ public class SubMeshWorker
 		for (Triangle t : meshInt.getTriangles())
 		{
 			for (int i = 0; i < 3; i++)
-				maxRef = Math.max(maxRef, Math.abs(t.vertex[i].getRef()));
+				maxRef = Math.max(maxRef, Math.abs(t.getV(i).getRef()));
 
 			if (!groups.contains(t.getGroupId()))
 				continue;
@@ -113,10 +113,10 @@ public class SubMeshWorker
 			removedTriangles.add(t);
 			for (int i = 0; i < 3; i++)
 			{
-				Vertex vn = mapVertexIntToExt.get(t.vertex[i]);
+				Vertex vn = mapVertexIntToExt.get(t.getV(i));
 				if (null == vn)
 				{
-					Vertex v = t.vertex[i];
+					Vertex v = t.getV(i);
 					vn = meshExt.createVertex(v);
 					vn.copy(v);
 					mapVertexIntToExt.put(v, vn);
@@ -180,11 +180,11 @@ public class SubMeshWorker
 		{
 			for (int i = 0; i < 3; i++)
 			{
-				int ref1d = t.vertex[i].getRef();
+				int ref1d = t.getV(i).getRef();
 				if (0 == ref1d)
 				{
 					// Inner vertex
-					vInt[i] = t.vertex[i];
+					vInt[i] = t.getV(i);
 				}
 				else if (ref2Vertex.contains(ref1d))
 				{
@@ -194,8 +194,8 @@ public class SubMeshWorker
 				else
 				{
 					// New boundary point
-					vInt[i] = meshInt.createVertex(t.vertex[i]);
-					vInt[i].copy(t.vertex[i]);
+					vInt[i] = meshInt.createVertex(t.getV(i));
+					vInt[i].copy(t.getV(i));
 					ref2Vertex.put(ref1d, vInt[i]);
 				}
 				meshInt.add(vInt[i]);

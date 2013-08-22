@@ -168,9 +168,10 @@ public class Delaunay2D {
 			k = 0;
 			if(t.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
-			for(Vertex vertex:t.vertex)
-				tmp[k++] = v2dTov3d.get(vertex);
-			Triangle t3d = mesh.createTriangle(tmp);
+			tmp[k++] = v2dTov3d.get(t.getV0());
+			tmp[k++] = v2dTov3d.get(t.getV1());
+			tmp[k++] = v2dTov3d.get(t.getV2());
+			Triangle t3d = mesh.createTriangle(tmp[0], tmp[1], tmp[2]);
 			t3d.setGroupId(group);
 			mesh.add(t3d);
 			if(mesh.hasNodes())

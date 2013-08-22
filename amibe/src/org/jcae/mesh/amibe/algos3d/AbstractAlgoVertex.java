@@ -107,8 +107,7 @@ public abstract class AbstractAlgoVertex
 			{
 				if (f.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
-				for (Vertex v: f.vertex)
-					nodeset.add(v);
+				f.addVertexTo(nodeset);
 			}
 		}
 		//  Compute vertex cost

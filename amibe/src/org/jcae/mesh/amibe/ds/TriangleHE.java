@@ -21,8 +21,6 @@
 package org.jcae.mesh.amibe.ds;
 
 import java.util.Collection;
-import org.jcae.mesh.amibe.metrics.Location;
-import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 
 public class TriangleHE extends Triangle
 {
@@ -34,11 +32,9 @@ public class TriangleHE extends Triangle
 	/**
 	 * Constructor.
 	 */
-	TriangleHE(TriangleTraitsBuilder ttb)
+	TriangleHE(Vertex v0, Vertex v1, Vertex v2)
 	{
-		super(ttb);
-		// This constructor is called by ElementFactory.createTriangle,
-		// and it also creates an HalfEdge instance and set e0.
+		super(v0, v1, v2);
 	}
 
 	@Override
@@ -153,8 +149,9 @@ public class TriangleHE extends Triangle
 	public void split(Mesh mesh)
 	{
 		Vertex uv = mesh.createVertex(0,0,0);
-		for(int j = 0; j < 3; j++)
-			uv.add(vertex[j]);
+		uv.add(v0);
+		uv.add(v1);
+		uv.add(v2);
 		uv.scale(1/3.0);
 		split(mesh, uv, null);
 	}
@@ -169,14 +166,14 @@ public class TriangleHE extends Triangle
 	{
 		assert v != null;
 		//TODO reuse the current instance and create only 2 new triangles
-		Triangle t1 = mesh.createTriangle(v, vertex[0], vertex[1]);
-		replaceTriangle(vertex[0], t1);
+		Triangle t1 = mesh.createTriangle(v, v0, v1);
+		replaceTriangle(v0, t1);
 		t1.setGroupId(getGroupId());
-		Triangle t2 = mesh.createTriangle(v, vertex[1], vertex[2]);
-		replaceTriangle(vertex[1], t2);
+		Triangle t2 = mesh.createTriangle(v, v1, v2);
+		replaceTriangle(v1, t2);
 		t2.setGroupId(getGroupId());
-		Triangle t3 = mesh.createTriangle(v, vertex[2], vertex[0]);
-		replaceTriangle(vertex[2], t3);
+		Triangle t3 = mesh.createTriangle(v, v2, v0);
+		replaceTriangle(v2, t3);
 		t3.setGroupId(getGroupId());
 		v.setLink(t1);
 		AbstractHalfEdge t1he = t1.getAbstractHalfEdge().next();

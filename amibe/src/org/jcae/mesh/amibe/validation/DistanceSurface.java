@@ -73,7 +73,7 @@ public class DistanceSurface extends QualityProcedure
 		double[] tmp = new double[3];
 		for (int i = 0; i < 3; i++)
 		{
-			Vertex n = f.vertex[i];
+			Vertex n = f.getV(i);
 			double d;
 			if (distanceMap.contains(n))
 				d = distanceMap.get(n);

@@ -113,9 +113,9 @@ public class SplitEdgeTest
 	{
 		for (Triangle t: tArray)
 		{
-			Vertex temp = t.vertex[1];
-			t.vertex[1] = t.vertex[2];
-			t.vertex[2] = temp;
+			Vertex temp = t.getV1();
+			t.setV(1, t.getV2());
+			t.setV(2, temp);
 		}
 	}
 
@@ -126,8 +126,9 @@ public class SplitEdgeTest
 		{
 			if (t.hasAttributes(AbstractHalfEdge.OUTER))
 			{
-				for (Vertex vv: t.vertex)
+				for (int i = 0; i < 3; i++)
 				{
+					Vertex vv = t.getV(i);
 					if (0 == vv.getRef())
 					{
 						ref++;

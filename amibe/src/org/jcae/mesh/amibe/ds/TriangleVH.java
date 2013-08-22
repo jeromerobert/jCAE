@@ -20,8 +20,6 @@
 
 package org.jcae.mesh.amibe.ds;
 
-import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
-
 /**
  * A triangular element of the mesh.  Instances of this class carry up
  * all topological information required for adjacency relations.  Their
@@ -93,9 +91,9 @@ public class TriangleVH extends Triangle
 	/**
 	 * Constructor.
 	 */
-	public TriangleVH(TriangleTraitsBuilder ttb)
+	public TriangleVH(Vertex v0, Vertex v1, Vertex v2)
 	{
-		super(ttb);
+		super(v0, v1, v2);
 	}
 
 	@Override

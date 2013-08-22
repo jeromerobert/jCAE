@@ -90,8 +90,7 @@ public abstract class MeshLiaison
 			{
 				if (f.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
-				for (Vertex v: f.vertex)
-					backgroundNodeset.add(v);
+				f.addVertexTo(backgroundNodeset);
 			}
 		}
 		
@@ -117,9 +116,9 @@ public abstract class MeshLiaison
 			if (t.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			Triangle newT = this.currentMesh.createTriangle(
-				mapBgToCurrent.get(t.vertex[0]),
-				mapBgToCurrent.get(t.vertex[1]),
-				mapBgToCurrent.get(t.vertex[2]));
+				mapBgToCurrent.get(t.getV0()),
+				mapBgToCurrent.get(t.getV1()),
+				mapBgToCurrent.get(t.getV2()));
 			newT.setGroupId(t.getGroupId());
 			this.currentMesh.add(newT);
 		}
@@ -304,9 +303,9 @@ public abstract class MeshLiaison
 		LocationFinder lf = new LocationFinder(v, group);
 		lf.walkDebug(mesh, group);
 		AbstractHalfEdge ret = lf.current.getAbstractHalfEdge();
-		if (ret.origin() == lf.current.vertex[lf.localEdgeIndex])
+		if (ret.origin() == lf.current.getV(lf.localEdgeIndex))
 			ret = ret.next();
-		else if (ret.destination() == lf.current.vertex[lf.localEdgeIndex])
+		else if (ret.destination() == lf.current.getV(lf.localEdgeIndex))
 			ret = ret.prev();
 		return ret;
 	}
@@ -486,9 +485,9 @@ public abstract class MeshLiaison
 			if((group >= 0 && lf.current.getGroupId() == group) || group < 0)
 			{
 				ot = lf.current.getAbstractHalfEdge(ot);
-				if (ot.origin() == lf.current.vertex[lf.localEdgeIndex])
+				if (ot.origin() == lf.current.getV(lf.localEdgeIndex))
 					ot = ot.next();
-				else if (ot.destination() == lf.current.vertex[lf.localEdgeIndex])
+				else if (ot.destination() == lf.current.getV(lf.localEdgeIndex))
 					ot = ot.prev();
 				if (lf.dmin < maxError)
 					return ot;
@@ -504,9 +503,9 @@ public abstract class MeshLiaison
 				return null;
 			redo = false;
 			t = ot.getTri();
-			if (ot.origin() == t.vertex[0])
+			if (ot.origin() == t.getV0())
 				ot = ot.next();
-			else if (ot.destination() == t.vertex[0])
+			else if (ot.destination() == t.getV0())
 				ot = ot.prev();
 		}
 
@@ -532,9 +531,9 @@ public abstract class MeshLiaison
 				seen.clear();
 				int i = index[0];
 				ot = t.getAbstractHalfEdge(ot);
-				if (ot.origin() == t.vertex[i])
+				if (ot.origin() == t.getV(i))
 					ot = ot.next();
-				else if (ot.destination() == t.vertex[i])
+				else if (ot.destination() == t.getV(i))
 					ot = ot.prev();
 				if (LOGGER.isLoggable(Level.FINER))
 					LOGGER.log(Level.FINER, "Found better edge: error="+dist+" "+ot);
@@ -557,8 +556,9 @@ public abstract class MeshLiaison
 					queue.add(ot.sym().getTri());
 			}
 			// Add links to non-manifold vertices
-			for (Vertex n : t.vertex)
+			for (int i = 0; i < 3; i++)
 			{
+				Vertex n = t.getV(i);
 				if (!n.isManifold())
 				{
 					Triangle[] links = (Triangle[]) n.getLink();
@@ -626,9 +626,9 @@ public abstract class MeshLiaison
 
 		public double compute(Location pos, Triangle tri, int[] index)
 		{
-			t0 = tri.vertex[0];
-			tri.vertex[1].sub(t0, edge0);
-			tri.vertex[2].sub(t0, edge1);
+			t0 = tri.getV0();
+			tri.getV1().sub(t0, edge0);
+			tri.getV2().sub(t0, edge1);
 			t0.sub(pos, diff);
 			double a = norm2(edge0);
 			double b = dot(edge0, edge1);
@@ -995,9 +995,9 @@ public abstract class MeshLiaison
 			walkAroundOrigin(initEdge);
 
 			AbstractHalfEdge ot = current.getAbstractHalfEdge();
-			if (ot.origin() == current.vertex[localEdgeIndex])
+			if (ot.origin() == current.getV(localEdgeIndex))
 				ot = ot.next();
-			else if (ot.destination() == current.vertex[localEdgeIndex])
+			else if (ot.destination() == current.getV(localEdgeIndex))
 				ot = ot.prev();
 
 			boolean modified = false;
@@ -1009,9 +1009,9 @@ public abstract class MeshLiaison
 					modified = true;
 					countdown = 2;
 					ot = current.getAbstractHalfEdge(ot);
-					if (ot.origin() == current.vertex[localEdgeIndex])
+					if (ot.origin() == current.getV(localEdgeIndex))
 						ot = ot.next();
-					else if (ot.destination() == current.vertex[localEdgeIndex])
+					else if (ot.destination() == current.getV(localEdgeIndex))
 						ot = ot.prev();
 				}
 				ot = ot.sym();
@@ -1026,9 +1026,9 @@ public abstract class MeshLiaison
 		boolean walkByAdjacency()
 		{
 			AbstractHalfEdge ot = current.getAbstractHalfEdge();
-			if (ot.origin() == current.vertex[localEdgeIndex])
+			if (ot.origin() == current.getV(localEdgeIndex))
 				ot = ot.next();
-			else if (ot.destination() == current.vertex[localEdgeIndex])
+			else if (ot.destination() == current.getV(localEdgeIndex))
 				ot = ot.prev();
 			boolean modified = false;
 			do
@@ -1048,17 +1048,17 @@ public abstract class MeshLiaison
 				if (index[1] % 2 == 0)
 				{
 					int i = ((index[1] / 2) + 1) % 3;
-					if (ot.apex() == current.vertex[i])
+					if (ot.apex() == current.getV(i))
 						ot = ot.prev();
-					else if (ot.destination() == current.vertex[i])
+					else if (ot.destination() == current.getV(i))
 						ot = ot.next();
 					walkAroundOrigin(ot);
 				}
 				else
 				{
-					if (ot.origin() == current.vertex[localEdgeIndex])
+					if (ot.origin() == current.getV(localEdgeIndex))
 						ot = ot.next();
-					else if (ot.destination() == current.vertex[localEdgeIndex])
+					else if (ot.destination() == current.getV(localEdgeIndex))
 						ot = ot.prev();
 				}
 			} while (true);

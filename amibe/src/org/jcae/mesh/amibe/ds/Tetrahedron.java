@@ -18,41 +18,35 @@
  * (C) Copyright 2013, by EADS France
  */
 
-package org.jcae.mesh.stitch;
-
-import java.util.Set;
-import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.amibe.ds.Triangle;
-import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.util.HashFactory;
+package org.jcae.mesh.amibe.ds;
 
 /**
- *
+ * Hack to add a Tetrahedron in a mesh.
+ * See usage in Netgen and Tetgen classes.
  * @author Jerome Robert
  */
-public class NonManifoldSplitter {
-	private final Mesh mesh;
-	public NonManifoldSplitter(Mesh mesh)
-	{
-		this.mesh = mesh;
+public class Tetrahedron extends Triangle {
+
+	private Vertex v3;
+	public Tetrahedron(Vertex[] vs) {
+		super(vs[0], vs[1], vs[2]);
 	}
 
-	public void compute()
-	{
-		Set<Vertex> nonManifold = HashFactory.createSet();
-		for(Triangle t:mesh.getTriangles())
+	@Override
+	public Vertex getV(int i) {
+		switch(i)
 		{
-			if(!t.getV0().isManifold())
-				nonManifold.add(t.getV0());
-			if(!t.getV1().isManifold())
-				nonManifold.add(t.getV1());
-			if(!t.getV2().isManifold())
-				nonManifold.add(t.getV2());
+		case 0: return v0;
+		case 1: return v1;
+		case 2: return v2;
+		case 3: return v3;
+		default:
+			throw new IllegalArgumentException();
 		}
-		nonManifold.remove(mesh.outerVertex);
-		VertexMerger merger = new VertexMerger();
-		for(Vertex v: nonManifold)
-			merger.unmerge(mesh, v);
-		assert mesh.isValid();
+	}
+
+	@Override
+	public int vertexNumber() {
+		return 4;
 	}
 }

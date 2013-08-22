@@ -88,7 +88,7 @@ public class EnforceAbsDeflection
 				p[3] = new Vertex(null, xyz[0], xyz[1], xyz[2]);
 				for (int i = 0; i < 3; i++)
 				{
-					Vertex v = t.vertex[i];
+					Vertex v = t.getV(i);
 					xyz = mesh.getGeomSurface().value(v.getX(), v.getY());
 					p[i] = new Vertex(null, xyz[0], xyz[1], xyz[2]);
 				}

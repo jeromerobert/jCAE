@@ -84,21 +84,21 @@ public class MapMeshLiaison extends MeshLiaison
 
 	public void addVertexInNeighborBgMap(Vertex v, Triangle bgT)
 	{
-		double d0 = v.sqrDistance3D(bgT.vertex[0]);
-		double d1 = v.sqrDistance3D(bgT.vertex[1]);
-		double d2 = v.sqrDistance3D(bgT.vertex[2]);
+		double d0 = v.sqrDistance3D(bgT.getV0());
+		double d1 = v.sqrDistance3D(bgT.getV1());
+		double d2 = v.sqrDistance3D(bgT.getV2());
 		Vertex bgNearestVertex;
 		if (d0 <= d1 && d0 <= d2)
 		{
-			bgNearestVertex = bgT.vertex[0];
+			bgNearestVertex = bgT.getV0();
 		}
 		else if (d1 <= d0 && d1 <= d2)
 		{
-			bgNearestVertex = bgT.vertex[1];
+			bgNearestVertex = bgT.getV1();
 		}
 		else
 		{
-			bgNearestVertex = bgT.vertex[2];
+			bgNearestVertex = bgT.getV2();
 		}
 		neighborBgMap.get(-1).put(v, bgNearestVertex);
 		if (v.isManifold())
@@ -165,9 +165,9 @@ public class MapMeshLiaison extends MeshLiaison
 			LOGGER.log(Level.FINEST, "Old projection: "+location);
 		LocationFinder lf = new LocationFinder(target, group);
 		AbstractHalfEdge ot = location.t.getAbstractHalfEdge();
-		if (ot.apex() == location.t.vertex[location.vIndex])
+		if (ot.apex() == location.t.getV(location.vIndex))
 			ot = ot.prev();
-		else if (ot.destination() == location.t.vertex[location.vIndex])
+		else if (ot.destination() == location.t.getV(location.vIndex))
 			ot = ot.next();
 		lf.walkAroundOrigin(ot);
 		if (null == lf.current)
@@ -223,9 +223,9 @@ public class MapMeshLiaison extends MeshLiaison
 			if (!location.computeBarycentricCoordinates(newPosition))
 			{
 /* FIXME: this should not happen. For now, do not move in such a case
-				double [] p0 = location.t.vertex[0].getUV();
-				double [] p1 = location.t.vertex[1].getUV();
-				double [] p2 = location.t.vertex[2].getUV();
+				double [] p0 = location.t.getV0().getUV();
+				double [] p1 = location.t.getV1().getUV();
+				double [] p2 = location.t.getV2().getUV();
 				for (int i = 0; i < 3; i++)
 				{
 					if (location.b[i] < 0.0)
@@ -394,16 +394,16 @@ public class MapMeshLiaison extends MeshLiaison
 
 			t = newT;
 			invArea = 1.0 / Matrix3D.computeNormal3D(
-				t.vertex[0], t.vertex[1], t.vertex[2], work1, work2, normal);
+				t.getV0(), t.getV1(), t.getV2(), work1, work2, normal);
 			return true;
 		}
 
 		private boolean updateVertexIndex(Location xyz)
 		{
 			int oldIndex = vIndex;
-			double d0 = t.vertex[0].sqrDistance3D(xyz);
-			double d1 = t.vertex[1].sqrDistance3D(xyz);
-			double d2 = t.vertex[2].sqrDistance3D(xyz);
+			double d0 = t.getV0().sqrDistance3D(xyz);
+			double d1 = t.getV1().sqrDistance3D(xyz);
+			double d2 = t.getV2().sqrDistance3D(xyz);
 			if (d0 <= d1 && d0 <= d2)
 				vIndex = 0;
 			else if (d1 <= d0 && d1 <= d2)
@@ -416,13 +416,13 @@ public class MapMeshLiaison extends MeshLiaison
 
 		private boolean computeBarycentricCoordinates(Location coord)
 		{
-			b[0] = Matrix3D.computeNormal3D(coord, t.vertex[1], t.vertex[2],
+			b[0] = Matrix3D.computeNormal3D(coord, t.getV1(), t.getV2(),
 				work1, work2, work3) * invArea;
 			b[0] *= (work3[0]*normal[0] + work3[1]*normal[1] + work3[2]*normal[2]);
-			b[1] = Matrix3D.computeNormal3D(t.vertex[0], coord, t.vertex[2],
+			b[1] = Matrix3D.computeNormal3D(t.getV0(), coord, t.getV2(),
 				work1, work2, work3) * invArea;
 			b[1] *= (work3[0]*normal[0] + work3[1]*normal[1] + work3[2]*normal[2]);
-			b[2] = Matrix3D.computeNormal3D(t.vertex[0], t.vertex[1], coord,
+			b[2] = Matrix3D.computeNormal3D(t.getV0(), t.getV1(), coord,
 				work1, work2, work3) * invArea;
 			b[2] *= (work3[0]*normal[0] + work3[1]*normal[1] + work3[2]*normal[2]);
 			return b[0] >= 0.0 && b[1] >= 0.0 && b[2] >= 0.0;
@@ -430,7 +430,7 @@ public class MapMeshLiaison extends MeshLiaison
 
 		private void projectOnTriangle(Location xyz, Location proj)
 		{
-			Vertex o = t.vertex[vIndex];
+			Vertex o = t.getV(vIndex);
 			double dist =
 				(xyz.getX() - o.getX()) * normal[0] +
 				(xyz.getY() - o.getY()) * normal[1] +

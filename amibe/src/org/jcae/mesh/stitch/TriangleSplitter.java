@@ -88,7 +88,7 @@ class TriangleSplitter {
 		triangleHelper.getBarycentricCoords(p, uv);
 		double u = 0;
 		double v = 0;
-		if (apex == triangle.vertex[2]) {
+		if (apex == triangle.getV2()) {
 			if(uv[0] > 1)
 			{
 				toSplit = null;
@@ -104,13 +104,13 @@ class TriangleSplitter {
 			}
 			else
 			{
-				assert toSplit == null ||  toSplit.origin() == triangle.vertex[0] :
+				assert toSplit == null ||  toSplit.origin() == triangle.getV0() :
 					toSplit.origin() + "\n" + triangle;
-				assert toSplit == null ||  toSplit.destination() == triangle.vertex[1];
+				assert toSplit == null ||  toSplit.destination() == triangle.getV1();
 				assert vertex != null || isOnEdge(splitPoint, apex, p, sqrTol): u+" "+v+" "+Arrays.toString(uv);
 				assert vertex == null || isOnEdge(vertex, apex, p, sqrTol): u+" "+v+" "+Arrays.toString(uv);
 			}
-		} else if (apex == triangle.vertex[1]) {
+		} else if (apex == triangle.getV1()) {
 			if(uv[1] > 1)
 			{
 				toSplit = null;
@@ -126,11 +126,11 @@ class TriangleSplitter {
 			}
 			else
 			{
-				assert toSplit == null ||  toSplit.origin() == triangle.vertex[2];
-				assert toSplit == null ||  toSplit.destination() == triangle.vertex[0];
+				assert toSplit == null ||  toSplit.origin() == triangle.getV2();
+				assert toSplit == null ||  toSplit.destination() == triangle.getV0();
 				assert isOnEdge(splitPoint, apex, p, sqrTol): u+" "+v+" "+Arrays.toString(uv);
 			}
-		} else if(apex == triangle.vertex[0])
+		} else if(apex == triangle.getV0())
 		{
 			if(uv[0] + uv[1] < 0)
 			{
@@ -149,8 +149,8 @@ class TriangleSplitter {
 			}
 			else
 			{
-				assert toSplit == null ||  toSplit.origin() == triangle.vertex[1];
-				assert toSplit == null ||  toSplit.destination() == triangle.vertex[2];
+				assert toSplit == null ||  toSplit.origin() == triangle.getV1();
+				assert toSplit == null ||  toSplit.destination() == triangle.getV2();
 				assert isOnEdge(splitPoint, apex, p, sqrTol): u+" "+v+" "+Arrays.toString(uv);
 			}
 		}

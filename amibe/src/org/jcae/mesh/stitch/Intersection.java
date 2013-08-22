@@ -61,8 +61,9 @@ public class Intersection {
 			aabb[i] = Double.POSITIVE_INFINITY;
 		for(int i = 0; i < 3; i++)
 			aabb[i+3] = Double.NEGATIVE_INFINITY;
-		for(Vertex v:t.vertex)
+		for(int i = 0; i < 3; i++)
 		{
+			Vertex v = t.getV(i);
 			aabb[0] = Math.min(v.getX(), aabb[0]);
 			aabb[1] = Math.min(v.getY(), aabb[1]);
 			aabb[2] = Math.min(v.getZ(), aabb[2]);
@@ -148,15 +149,15 @@ public class Intersection {
 
 	private boolean intersect(Triangle pts1, Triangle pts2, Vertex v1, Vertex v2) {
 		// Compute supporting plane normals.
-		Matrix3D.computeNormal3D(pts1.vertex[0], pts1.vertex[1], pts1.vertex[2], temp1, temp2, n1);
-		Matrix3D.computeNormal3D(pts2.vertex[0], pts2.vertex[1], pts2.vertex[2], temp1, temp2, n2);
-		double s1 = -Matrix3D.prodSca(n1, pts1.vertex[0]);
-		double s2 = -Matrix3D.prodSca(n2, pts2.vertex[0]);
+		Matrix3D.computeNormal3D(pts1.getV0(), pts1.getV1(), pts1.getV2(), temp1, temp2, n1);
+		Matrix3D.computeNormal3D(pts2.getV0(), pts2.getV1(), pts2.getV2(), temp1, temp2, n2);
+		double s1 = -Matrix3D.prodSca(n1, pts1.getV0());
+		double s2 = -Matrix3D.prodSca(n2, pts2.getV0());
 
 		// Compute signed distances of points p1, q1, r1 from supporting
 		// plane of second triangle.
 		for(int i = 0; i < 3; i++)
-			dist1[i] = Matrix3D.prodSca(n2, pts1.vertex[i]) + s2;
+			dist1[i] = Matrix3D.prodSca(n2, pts1.getV(i)) + s2;
 
 		// If signs of all points are the same, all the points lie on the
 		// same side of the supporting plane, and we can exit early.
@@ -167,7 +168,7 @@ public class Intersection {
 		// Do the same for p2, q2, r2 and supporting plane of first
 		// triangle.
 		for (int i = 0; i < 3; i++) {
-			dist2[i] = Matrix3D.prodSca(n1, pts2.vertex[i]) + s1;
+			dist2[i] = Matrix3D.prodSca(n1, pts2.getV(i)) + s1;
 		}
 
 		// If signs of all points are the same, all the points lie on the
@@ -206,16 +207,16 @@ public class Intersection {
 			int id1 = i, id2 = (i + 1) % 3;
 
 			// Find t coordinate on line of intersection between two planes.
-			if (intersectWithLine(pts1.vertex[id1], pts1.vertex[id2], n2,
-				pts2.vertex[0], x)) {
+			if (intersectWithLine(pts1.getV(id1), pts1.getV(id2), n2,
+				pts2.getV0(), x)) {
 				if(index1 >= 2)
 					//something strange append so we don't intersect
 					return false;
 				t1[index1++] = Matrix3D.prodSca(x, v) - Matrix3D.prodSca(p, v);
 			}
 
-			if (intersectWithLine(pts2.vertex[id1], pts2.vertex[id2], n1,
-				pts1.vertex[0], x)) {
+			if (intersectWithLine(pts2.getV(id1), pts2.getV(id2), n1,
+				pts1.getV0(), x)) {
 				if(index2 >= 2)
 					//something strange append so we don't intersect
 					return false;

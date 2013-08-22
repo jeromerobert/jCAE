@@ -60,7 +60,7 @@ public class AbsoluteDeflection2D extends QualityProcedure
 		p[3] = mesh.createVertex(xyz[0], xyz[1], xyz[3]);
 		for (int i = 0; i < 3; i++)
 		{
-			xyz = mesh.getGeomSurface().value(t.vertex[i].getX(), t.vertex[i].getY());
+			xyz = mesh.getGeomSurface().value(t.getV(i).getX(), t.getV(i).getY());
 			p[i] = mesh.createVertex(xyz[0], xyz[1], xyz[3]);
 		}
 		p[1].sub(p[0], v1);

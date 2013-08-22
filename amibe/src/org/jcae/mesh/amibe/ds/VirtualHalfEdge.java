@@ -441,7 +441,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	@Override
 	public final Vertex origin()
 	{
-		return tri.vertex[next3[localNumber]];
+		return tri.getV(next3[localNumber]);
 	}
 	
 	/**
@@ -452,7 +452,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	@Override
 	public final Vertex destination()
 	{
-		return tri.vertex[prev3[localNumber]];
+		return tri.getV(prev3[localNumber]);
 	}
 	
 	/**
@@ -463,7 +463,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	@Override
 	public final Vertex apex()
 	{
-		return tri.vertex[localNumber];
+		return tri.getV(localNumber);
 	}
 	
 	//  The following 3 methods change the underlying triangle.
@@ -475,7 +475,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 */
 	final void setOrigin(Vertex v)
 	{
-		tri.vertex[next3[localNumber]] = v;
+		tri.setV(next3[localNumber], v);
 	}
 	
 	/**
@@ -485,7 +485,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 */
 	public final void setDestination(Vertex v)
 	{
-		tri.vertex[prev3[localNumber]] = v;
+		tri.setV(prev3[localNumber], v);
 	}
 	
 	/**
@@ -495,7 +495,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 */
 	protected final void setApex(Vertex v)
 	{
-		tri.vertex[localNumber] = v;
+		tri.setV(localNumber, v);
 	}
 	
 	// Section: adjacency

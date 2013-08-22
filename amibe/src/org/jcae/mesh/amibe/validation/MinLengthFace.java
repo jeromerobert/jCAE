@@ -45,9 +45,9 @@ public class MinLengthFace extends QualityProcedure
 			throw new IllegalArgumentException();
 		double l1, l2, l3;
 		Triangle f = (Triangle) o;
-		Vertex n1 = f.vertex[0];
-		Vertex n2 = f.vertex[1];
-		Vertex n3 = f.vertex[2];
+		Vertex n1 = f.getV0();
+		Vertex n2 = f.getV1();
+		Vertex n3 = f.getV2();
 		l1 = n1.distance3D(n2);
 		l2 = n2.distance3D(n3);
 		l3 = n3.distance3D(n1);

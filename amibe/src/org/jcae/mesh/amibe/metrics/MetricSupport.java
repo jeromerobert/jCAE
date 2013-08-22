@@ -173,8 +173,9 @@ public class MetricSupport {
 				AnalyticMetricInterface metric = getAnalyticMetric(t.getGroupId());
 				if (metric == null)
 					throw new NullPointerException("Cannot determine metrics, either set 'size' or 'metricsMap' arguments, or call Remesh.setAnalyticMetric()");
-				for (Vertex v : t.vertex)
+				for (int i = 0; i < 3; i++)
 				{
+					Vertex v = t.getV(i);
 					EuclidianMetric3D curMetric = metrics.get(v);
 					EuclidianMetric3D newMetric = new EuclidianMetric3D(
 						metric.getTargetSizeTopo(mesh, v));

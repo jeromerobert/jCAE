@@ -201,9 +201,9 @@ public class TraceRecord implements TraceInterface
 	private void createAndAdd(Triangle t)
 	{
 		add(t);
-		println("vTemp0 = self.m.getTrace().getVertex("+mapVertexId.get(t.vertex[0])+")");
-		println("vTemp1 = self.m.getTrace().getVertex("+mapVertexId.get(t.vertex[1])+")");
-		println("vTemp2 = self.m.getTrace().getVertex("+mapVertexId.get(t.vertex[2])+")");
+		println("vTemp0 = self.m.getTrace().getVertex("+mapVertexId.get(t.getV0())+")");
+		println("vTemp1 = self.m.getTrace().getVertex("+mapVertexId.get(t.getV1())+")");
+		println("vTemp2 = self.m.getTrace().getVertex("+mapVertexId.get(t.getV2())+")");
 		println("t = self.m.createTriangle(vTemp0, vTemp1, vTemp2)");
 		println("t.setGroupId("+t.getGroupId()+")");
 		if (!t.isReadable())

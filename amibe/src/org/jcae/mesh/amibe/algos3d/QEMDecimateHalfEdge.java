@@ -231,7 +231,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 				continue;
 			for (int i = 0; i < 3; i++)
 			{
-				final Vertex n = af.vertex[i];
+				final Vertex n = af.getV(i);
 				if (!quadricMap.containsKey(n))
 					quadricMap.put(n, new Quadric3DError());
 			}
@@ -244,8 +244,8 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		{
 			if (!f.isWritable())
 				continue;
-			f.vertex[1].sub(f.vertex[0], vect1);
-			f.vertex[2].sub(f.vertex[0], vect2);
+			f.getV1().sub(f.getV0(), vect1);
+			f.getV2().sub(f.getV0(), vect2);
 			Matrix3D.prodVect3D(vect1, vect2, normal);
 			double norm = Matrix3D.norm(normal);
 			// This is in fact 2*area, but that does not matter
@@ -258,10 +258,10 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 				for (int k = 0; k < 3; k++)
 					normal[k] *=  norm;
 			}
-			double d = - Matrix3D.prodSca(normal, f.vertex[0]);
+			double d = - Matrix3D.prodSca(normal, f.getV0());
 			for (int i = 0; i < 3; i++)
 			{
-				final Quadric3DError q = quadricMap.get(f.vertex[i]);
+				final Quadric3DError q = quadricMap.get(f.getV(i));
 				q.addError(normal, d, area);
 			}
 			// Penalty for boundary triangles

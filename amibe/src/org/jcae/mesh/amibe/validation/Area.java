@@ -47,8 +47,8 @@ public class Area extends QualityProcedure
 		if (!(o instanceof Triangle))
 			throw new IllegalArgumentException();
 		Triangle f = (Triangle) o;
-		f.vertex[1].sub(f.vertex[0], v1);
-		f.vertex[2].sub(f.vertex[0], v2);
+		f.getV1().sub(f.getV0(), v1);
+		f.getV2().sub(f.getV0(), v2);
 		Matrix3D.prodVect3D(v1, v2, v3);
 		return (float) (0.5 * Matrix3D.norm(v3));
 	}

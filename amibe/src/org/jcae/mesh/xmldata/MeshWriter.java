@@ -122,9 +122,9 @@ public class MeshWriter
 			if (!f.isWritable())
 				continue;
 			aw.addTriangle(
-				nodeIndex.get(f.vertex[0]),
-				nodeIndex.get(f.vertex[1]),
-				nodeIndex.get(f.vertex[2]));
+				nodeIndex.get(f.getV0()),
+				nodeIndex.get(f.getV1()),
+				nodeIndex.get(f.getV2()));
 			nrTriangles++;
 		}
 		if(writeOuter)
@@ -135,9 +135,9 @@ public class MeshWriter
 				if (f.isWritable())
 					continue;
 				aw.addTriangle(
-					-nodeIndex.get(f.vertex[0]),
-					-nodeIndex.get(f.vertex[1]),
-					-nodeIndex.get(f.vertex[2]));
+					-nodeIndex.get(f.getV0()),
+					-nodeIndex.get(f.getV1()),
+					-nodeIndex.get(f.getV2()));
 				nrTriangles++;
 			}
 		}
@@ -221,8 +221,9 @@ public class MeshWriter
 					continue;
 				for (int j = 0; j < 3; j++)
 				{
-					if (!nodelist.contains(t.vertex[j]))
-						nodelist.add(t.vertex[j]);
+					Vertex v = t.getV(j);
+					if (!nodelist.contains(v))
+						nodelist.add(v);
 				}
 			}
 		}
@@ -256,8 +257,9 @@ public class MeshWriter
 					continue;
 				for (int j = 0; j < 3; j++)
 				{
-					if (!nodelist.contains(t.vertex[j]))
-						nodelist.add(t.vertex[j]);
+					Vertex v = t.getV(j);
+					if (!nodelist.contains(v))
+						nodelist.add(v);
 				}
 			}
 			nodelist.addAll(submesh.getBeams());

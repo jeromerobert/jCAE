@@ -71,7 +71,7 @@ public class KdTreeLiaison extends MeshLiaison{
 	public double[] getBackgroundNormal(Vertex v) {
 		double[] normal = new double[3];
 		Triangle t = getBackgroundTriangle(v);
-		Matrix3D.computeNormal3D(t.vertex[0], t.vertex[1], t.vertex[2],
+		Matrix3D.computeNormal3D(t.getV0(), t.getV1(), t.getV2(),
 			work1, work2, normal);
 		return normal;
 	}
@@ -93,7 +93,7 @@ public class KdTreeLiaison extends MeshLiaison{
 	public void addVertex(Vertex v, Vertex existingVertex, double[] normal) {
 		Triangle t = kdTree.getClosestTriangle(v, tmpCoords, -1);
 		v.moveTo(tmpCoords);
-		Matrix3D.computeNormal3D(t.vertex[0], t.vertex[1], t.vertex[2],
+		Matrix3D.computeNormal3D(t.getV0(), t.getV1(), t.getV2(),
 			work1, work2, normal);
 	}
 

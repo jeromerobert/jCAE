@@ -59,11 +59,11 @@ class ElementFactory implements ElementFactoryInterface
 		return new HalfEdge(halfedgeTraitsBuilder, t, orientation, attributes);
 	}
 
-	private Triangle createTriangle()
+	public Triangle createTriangle(Vertex v0, Vertex v1, Vertex v2)
 	{
 		if (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.HALFEDGE))
 		{
-			TriangleHE ret = new TriangleHE(triangleTraitsBuilder);
+			TriangleHE ret = new TriangleHE(v0, v1, v2);
 			HalfEdge e0 = (HalfEdge) createHalfEdge(ret, (byte) 0, (byte) 0);
 			HalfEdge e1 = (HalfEdge) createHalfEdge(ret, (byte) 1, (byte) 0);
 			HalfEdge e2 = (HalfEdge) createHalfEdge(ret, (byte) 2, (byte) 0);
@@ -74,26 +74,9 @@ class ElementFactory implements ElementFactoryInterface
 			return ret;
 		}
 		else if (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.VIRTUALHALFEDGE))
-			return new TriangleVH(triangleTraitsBuilder);
+			return new TriangleVH(v0, v1, v2);
 		else
-			return new Triangle(triangleTraitsBuilder);
-	}
-
-	public Triangle createTriangle(Vertex v0, Vertex v1, Vertex v2)
-	{
-		Triangle ret = createTriangle();
-		ret.vertex[0] = v0;
-		ret.vertex[1] = v1;
-		ret.vertex[2] = v2;
-		return ret;
-	}
-
-	public Triangle createTriangle(Vertex [] v)
-	{
-		Triangle ret = createTriangle();
-		ret.vertex = new Vertex[v.length];
-		System.arraycopy(v, 0, ret.vertex, 0, v.length);
-		return ret;
+			return new Triangle(v0, v1, v2);
 	}
 
 	/**
@@ -101,7 +84,7 @@ class ElementFactory implements ElementFactoryInterface
 	 */
 	public Triangle createTriangle(Triangle that)
 	{
-		Triangle ret = createTriangle();
+		Triangle ret = createTriangle(null, null, null);
 		ret.copy(that);
 		return ret;
 	}

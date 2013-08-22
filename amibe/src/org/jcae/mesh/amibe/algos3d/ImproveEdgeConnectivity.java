@@ -101,8 +101,9 @@ public class ImproveEdgeConnectivity extends AbstractAlgoHalfEdge
 		{
 			if (t.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
-			for (Vertex v: t.vertex)
-				map.put(v, map.get(v) + 1);
+			map.put(t.getV0(), map.get(t.getV0()) + 1);
+			map.put(t.getV1(), map.get(t.getV1()) + 1);
+			map.put(t.getV2(), map.get(t.getV2()) + 1);
 			HalfEdge e = (HalfEdge) t.getAbstractHalfEdge();
 			for (int i = 0; i < 3; i++)
 			{

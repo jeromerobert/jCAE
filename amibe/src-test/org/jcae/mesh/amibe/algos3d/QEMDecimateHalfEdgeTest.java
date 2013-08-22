@@ -308,12 +308,12 @@ public class QEMDecimateHalfEdgeTest
 		{
 			for (int i = 0; i < m-1; i++)
 			{
-				Vertex temp = T[2*(m-1)*j+2*i].vertex[1];
-				T[2*(m-1)*j+2*i].vertex[1] = T[2*(m-1)*j+2*i].vertex[2];
-				T[2*(m-1)*j+2*i].vertex[2] = temp;
-				temp = T[2*(m-1)*j+2*i+1].vertex[1];
-				T[2*(m-1)*j+2*i+1].vertex[1] = T[2*(m-1)*j+2*i+1].vertex[2];
-				T[2*(m-1)*j+2*i+1].vertex[2] = temp;
+				Vertex temp = T[2*(m-1)*j+2*i].getV1();
+				T[2*(m-1)*j+2*i].setV(1, T[2*(m-1)*j+2*i].getV2());
+				T[2*(m-1)*j+2*i].setV(2, temp);
+				temp = T[2*(m-1)*j+2*i+1].getV1();
+				T[2*(m-1)*j+2*i+1].setV(1, T[2*(m-1)*j+2*i+1].getV2());
+				T[2*(m-1)*j+2*i+1].setV(2, temp);
 			}
 		}
 		mesh.buildAdjacency();
@@ -394,8 +394,9 @@ public class QEMDecimateHalfEdgeTest
 		{
 			if (t.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
-			for(Vertex vertex : t.vertex)
+			for(int i = 0; i < 3; i++)
 			{
+				Vertex vertex = t.getV(i);
 				if(vertex.getRef() == 0)
 				{
 					vertex.setMutable(false);
@@ -418,9 +419,9 @@ public class QEMDecimateHalfEdgeTest
 		options.put("maxtriangles", "1");
 		mesh = new Mesh();
 		createMxNShell(5, 5);
-		Vertex v0 = T[0].vertex[0];
-		T[0].vertex[0] = T[0].vertex[1];
-		T[0].vertex[1] = v0;
+		Vertex v0 = T[0].getV0();
+		T[0].setV(0, T[0].getV1());
+		T[0].setV(1, v0);
 		mesh.buildAdjacency();
 		assertTrue("Mesh is not valid", mesh.isValid());
 

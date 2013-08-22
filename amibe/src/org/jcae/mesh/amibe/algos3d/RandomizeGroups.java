@@ -85,7 +85,7 @@ public class RandomizeGroups {
 			if(groupName != null && canRandomize(groupName))
 			{
 				for(int i = 0; i < 3; i++)
-					if(!t.vertex[i].isManifold() || vertices.contains(t.vertex[i]))
+					if(!t.getV(i).isManifold() || vertices.contains(t.getV(i)))
 						continue triangles;
 				if(random.nextDouble() < ratio)
 					t.setGroupId(newGroupId);

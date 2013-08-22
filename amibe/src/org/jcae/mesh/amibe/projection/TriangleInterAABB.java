@@ -195,9 +195,9 @@ public class TriangleInterAABB {
 	{
 		for(int i = 0; i < 3; i++)
 		{
-			triverts[i][0] = triangle.vertex[i].getX();
-			triverts[i][1] = triangle.vertex[i].getY();
-			triverts[i][2] = triangle.vertex[i].getZ();
+			triverts[i][0] = triangle.getV(i).getX();
+			triverts[i][1] = triangle.getV(i).getY();
+			triverts[i][2] = triangle.getV(i).getZ();
 		}
 
 		/* compute triangle edges */

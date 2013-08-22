@@ -167,8 +167,7 @@ public class SmoothNodes3D
 				{
 					if (f.hasAttributes(AbstractHalfEdge.OUTER))
 						continue;
-					for (Vertex v: f.vertex)
-						nodeset.add(v);
+					f.addVertexTo(nodeset);
 				}
 			}
 			for (Vertex v: nodeset)
@@ -360,8 +359,8 @@ public class SmoothNodes3D
 	private double triangleQuality(AbstractHalfEdge edge)
 	{
 		Triangle f = edge.getTri();
-		assert f.vertex[0] != mesh.outerVertex && f.vertex[1] != mesh.outerVertex && f.vertex[2] != mesh.outerVertex : f;
-		double p = f.vertex[0].distance3D(f.vertex[1]) + f.vertex[1].distance3D(f.vertex[2]) + f.vertex[2].distance3D(f.vertex[0]);
+		assert f.getV0() != mesh.outerVertex && f.getV1() != mesh.outerVertex && f.getV2() != mesh.outerVertex : f;
+		double p = f.getV0().distance3D(f.getV1()) + f.getV1().distance3D(f.getV2()) + f.getV2().distance3D(f.getV0());
 		double area = edge.area(mesh);
 		double ret = scaleFactor * area / p / p;
 		assert ret >= 0.0 && ret <= 1.01;

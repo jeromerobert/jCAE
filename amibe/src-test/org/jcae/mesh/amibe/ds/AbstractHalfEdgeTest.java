@@ -198,9 +198,9 @@ public class AbstractHalfEdgeTest
 	{
 		for (Triangle t: tArray)
 		{
-			Vertex temp = t.vertex[1];
-			t.vertex[1] = t.vertex[2];
-			t.vertex[2] = temp;
+			Vertex temp = t.getV1();
+			t.setV(1, t.getV2());
+			t.setV(2, temp);
 		}
 	}
 
@@ -310,9 +310,9 @@ public class AbstractHalfEdgeTest
 	final void buildMesh3NM()
 	{
 		createMxNShell(3, 2);
-		Vertex vTemp = T[0].vertex[0];
-		T[0].vertex[0] = T[0].vertex[1];
-		T[0].vertex[1] = vTemp;
+		Vertex vTemp = T[0].getV0();
+		T[0].setV(0, T[0].getV1());
+		T[0].setV(1, vTemp);
 		mesh.buildAdjacency();
 		assertTrue("Mesh is not valid", mesh.isValid());
 	}

@@ -55,10 +55,10 @@ class TriangleHelper {
 
 	public final void setTriangle(Triangle triangle) {
 		this.triangle = triangle;
-		triangle.vertex[1].sub(triangle.vertex[0], edges[0]);
-		triangle.vertex[2].sub(triangle.vertex[1], edges[1]);
+		triangle.getV1().sub(triangle.getV0(), edges[0]);
+		triangle.getV2().sub(triangle.getV1(), edges[1]);
 		//TODO lazy initialisation ?
-		triangle.vertex[0].sub(triangle.vertex[2], edges[2]);
+		triangle.getV0().sub(triangle.getV2(), edges[2]);
 		//TODO lazy initialisation ?
 		Matrix3D.prodVect3D(edges[0], edges[1], normal);
 		normAN2 = Matrix3D.prodSca(normal, normal);
@@ -78,7 +78,7 @@ class TriangleHelper {
 		// Compute vectors
 		double[] v0 = edges[2]; // - (C-A)
 		double[] v1 = edges[0]; // B-A
-		p.sub(triangle.vertex[0], tmp); // P - A
+		p.sub(triangle.getV0(), tmp); // P - A
 		// Compute dot products
 		double dot00 = edgesNorm[2];
 		double dot01 = -Matrix3D.prodSca(v0, v1); //TODO precompute
@@ -97,7 +97,7 @@ class TriangleHelper {
 	 * U vector is v0v2 and V is v0v1
 	 */
 	public Location getLocation(double u, double v) {
-		Vertex v0 = triangle.vertex[0];
+		Vertex v0 = triangle.getV0();
 		location.moveTo(v0.getX() - u * edges[2][0] + v * edges[0][0],
 			v0.getY() - u * edges[2][1] + v * edges[0][1],
 			v0.getZ() - u * edges[2][2] + v * edges[0][2]);

@@ -225,7 +225,7 @@ public class Remesh
 			{
 				if (f.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
-				nodeset.addAll(Arrays.asList(f.vertex));
+				f.addVertexTo(nodeset);
 			}
 		}
 
@@ -293,7 +293,7 @@ public class Remesh
 			KdTree<Vertex> kdTree = kdTrees.get(group);
 			for (int i = 0; i < 3; ++i)
 			{
-				Vertex v = f.vertex[i];
+				Vertex v = f.getV(i);
 				Set<Vertex> seen = seenByGroup.get(group);
 				if (seen.contains(v))
 					continue;
@@ -347,9 +347,9 @@ public class Remesh
 	private static boolean isInside(Vertex pos, Triangle t)
 	{
 		double [][] temp = new double[4][3];
-		Vertex p0 = t.vertex[0];
-		Vertex p1 = t.vertex[1];
-		Vertex p2 = t.vertex[2];
+		Vertex p0 = t.getV0();
+		Vertex p1 = t.getV1();
+		Vertex p2 = t.getV2();
 		Matrix3D.computeNormal3D(p0, p1, p2, temp[0], temp[1], temp[2]);
 		Matrix3D.computeNormal3D(p0, p1, pos, temp[0], temp[1], temp[3]);
 		if (Matrix3D.prodSca(temp[2], temp[3]) < 0.0)

@@ -55,38 +55,23 @@ class ElementPatchFactory implements ElementFactoryInterface
 		return createVertex(x.getX(), x.getY());
 	}
 
-	private Triangle createTriangle()
+	private Triangle createTriangleImpl(Vertex v0, Vertex v1, Vertex v2)
 	{
 		if (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.VIRTUALHALFEDGE))
-			return new TriangleVH(triangleTraitsBuilder);
-		return new Triangle(triangleTraitsBuilder);
-	}
-	
-	public Triangle createTriangle(Vertex v0, Vertex v1, Vertex v2)
-	{
-		Triangle ret = createTriangle();
-		Vertex2D [] vArray = new Vertex2D[3];
-		vArray[0] = (Vertex2D) v0;
-		vArray[1] = (Vertex2D) v1;
-		vArray[2] = (Vertex2D) v2;
-		for (int i = 0; i < 3; i++)
-			if (vArray[i].getLink() == null)
-				vArray[i].setLink(ret);
-		ret.vertex = vArray;
-		return ret;
+			return new TriangleVH(v0, v1, v2);
+		return new Triangle(v0, v1, v2);
 	}
 
-	public Triangle createTriangle(Vertex [] v)
+	@Override
+	public Triangle createTriangle(Vertex v0, Vertex v1, Vertex v2)
 	{
-		Triangle ret = createTriangle();
-		Vertex2D [] vArray = new Vertex2D[3];
-		for (int i = 0; i < v.length; i++)
-		{
-			vArray[i] = (Vertex2D) v[i];
-			if (vArray[i].getLink() == null)
-				vArray[i].setLink(ret);
-		}
-		ret.vertex = vArray;
+		Triangle ret = createTriangleImpl(v0, v1, v2);
+		if (v0.getLink() == null)
+			v0.setLink(ret);
+		if (v1.getLink() == null)
+			v1.setLink(ret);
+		if (v2.getLink() == null)
+			v2.setLink(ret);
 		return ret;
 	}
 
@@ -95,8 +80,7 @@ class ElementPatchFactory implements ElementFactoryInterface
 	 */
 	public Triangle createTriangle(Triangle that)
 	{
-		Triangle ret = createTriangle();
-		ret.vertex = new Vertex2D[3];
+		Triangle ret = createTriangleImpl(null, null, null);
 		ret.copy(that);
 		return ret;
 	}

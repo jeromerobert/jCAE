@@ -141,7 +141,7 @@ class TriangleProjector {
 			return;
 		}
 		// use vectToVertices[0] as a temporary vector
-		point.sub(th.getTriangle().vertex[0], vectToVertices[0]);
+		point.sub(th.getTriangle().getV0(), vectToVertices[0]);
 		double amDotAN = Matrix3D.prodSca(th.normal, vectToVertices[0]);
 		double alpha = amDotAN / th.normAN2;
 		sqrDistance = amDotAN * alpha;
@@ -150,13 +150,13 @@ class TriangleProjector {
 			point.getZ() - alpha * th.normal[2]);
 
 		for (int i = 0; i < 3; i++) {
-			projection.sub(th.getTriangle().vertex[i], vectToVertices[i]);
+			projection.sub(th.getTriangle().getV(i), vectToVertices[i]);
 			dist2ToVertices[i] = Matrix3D.prodSca(vectToVertices[i],
 				vectToVertices[i]);
 			if (dist2ToVertices[i] < sqrTolerance) {
 				if(sqrDistance < sqrMaxDistance)
 				{
-					vertexProject = th.getTriangle().vertex[i];
+					vertexProject = th.getTriangle().getV(i);
 					type = ProjectionType.VERTEX;
 				}
 				else
@@ -166,7 +166,7 @@ class TriangleProjector {
 		}
 		edgeProject = th.getTriangle().getAbstractHalfEdge().prev();
 		for (int i = 0; i < 3; i++) {
-			assert th.getTriangle().vertex[i] == edgeProject.origin();			
+			assert th.getTriangle().getV(i) == edgeProject.origin();			
 			Matrix3D.prodVect3D(th.edges[i], vectToVertices[i], crossProducts[i]);
 			double edgeNorm = th.getEdgeNorm(i);
 			double normMP2 = Matrix3D.prodSca(crossProducts[i], crossProducts[i]) / edgeNorm;
@@ -185,9 +185,9 @@ class TriangleProjector {
 				}
 				type = ProjectionType.EDGE;
 				if (dot > 0 && dot < 1) {
-					projection.moveTo(th.getTriangle().vertex[i].getX() + dot * th.edges[i][0],
-						th.getTriangle().vertex[i].getY() + dot * th.edges[i][1],
-						th.getTriangle().vertex[i].getZ() + dot * th.edges[i][2]);
+					projection.moveTo(th.getTriangle().getV(i).getX() + dot * th.edges[i][0],
+						th.getTriangle().getV(i).getY() + dot * th.edges[i][1],
+						th.getTriangle().getV(i).getZ() + dot * th.edges[i][2]);
 					return;
 				}
 			}

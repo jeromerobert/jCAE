@@ -518,8 +518,8 @@ public class Storage
 		{
 			if (f.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
-			for (int j = 0, n = f.vertex.length; j < n; j++)
-				facesout.writeInt(localIdx.get(f.vertex[j]));
+			for (int j = 0, n = f.vertexNumber(); j < n; j++)
+				facesout.writeInt(localIdx.get(f.getV(j)));
 		}
 		facesout.close();
 	}
