@@ -51,7 +51,7 @@ public class JCAEFormatter extends Formatter
 			.append("] ")
 			.append(loggerName)
 			.append("- ")
-			.append(record.getMessage())
+			.append(formatMessage(record))
 			.append(lineSep);
 		return output.toString();
 	}
