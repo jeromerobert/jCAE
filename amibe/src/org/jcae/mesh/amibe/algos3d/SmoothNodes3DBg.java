@@ -180,6 +180,7 @@ public class SmoothNodes3DBg
 
 	public final SmoothNodes3DBg compute()
 	{
+		long startTime = System.nanoTime();
 		LOGGER.info("Run "+getClass().getName());
 		if (nloop > 0)
 		{
@@ -232,6 +233,9 @@ public class SmoothNodes3DBg
 		LOGGER.info("Total number of points not moved during processing: "+notProcessed);
 		assert mesh.checkNoDegeneratedTriangles();
 		assert mesh.checkNoInvertedTriangles();
+		long endTime = System.nanoTime();
+		LOGGER.log(Level.INFO, "Computation time: {0}ms",
+			Double.toString((endTime - startTime)/1E6));
 		return this;
 	}
 	

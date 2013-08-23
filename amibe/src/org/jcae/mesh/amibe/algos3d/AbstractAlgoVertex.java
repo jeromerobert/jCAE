@@ -74,6 +74,7 @@ public abstract class AbstractAlgoVertex
 	}
 	public final void compute()
 	{
+		long startTime = System.nanoTime();
 		thisLogger().info("Run "+getClass().getName());
 		mesh.getTrace().println("# Begin "+getClass().getName());
 		processed = 0;
@@ -89,6 +90,9 @@ public abstract class AbstractAlgoVertex
 		mesh.getTrace().println("# End "+getClass().getName());
 		assert mesh.checkNoDegeneratedTriangles();
 		assert mesh.checkNoInvertedTriangles();
+		long endTime = System.nanoTime();
+		thisLogger().log(Level.INFO, "Computation time: {0}ms",
+			Double.toString((endTime - startTime)/1E6));
 	}
 
 	public void setProgressBarStatus(int n)

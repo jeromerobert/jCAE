@@ -431,6 +431,7 @@ public class Remesh
 
 	public final Remesh compute()
 	{
+		long startTime = System.nanoTime();
 		LOGGER.info("Run "+getClass().getName());
 		mesh.getTrace().println("# Begin Remesh");
 		metrics.compute();
@@ -603,6 +604,9 @@ public class Remesh
 
 		mesh.getTrace().println("# End Remesh");
 		liaison.clearBgMap();
+		long endTime = System.nanoTime();
+		LOGGER.log(Level.INFO, "Computation time: {0}ms",
+			Double.toString((endTime - startTime)/1E6));
 		return this;
 	}
 

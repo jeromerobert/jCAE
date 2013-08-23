@@ -90,6 +90,7 @@ public abstract class AbstractAlgoHalfEdge
 
 	public final void compute()
 	{
+		long startTime = System.nanoTime();
 		preCheck();
 		thisLogger().info("Run "+getClass().getName());
 		mesh.getTrace().println("# Begin "+getClass().getName());
@@ -102,6 +103,9 @@ public abstract class AbstractAlgoHalfEdge
 		thisLogger().info("Final number of triangles: "+countInnerTriangles(mesh));
 		mesh.getTrace().println("# End "+getClass().getName());
 		postCheck();
+		long endTime = System.nanoTime();
+		thisLogger().log(Level.INFO, "Computation time: {0}ms",
+			Double.toString((endTime - startTime)/1E6));
 	}
 
 	public void setProgressBarStatus(int n)
