@@ -51,15 +51,19 @@ public abstract class AbstractAlgoHalfEdge
 	int processed = 0;
 	int swapped = 0;
 	int notProcessed = 0;
-	int notInTree = 0;
+	private int notInTree = 0;
 	private int progressBarStatus = 10000;
 	private boolean noSwapAfterProcessing = false;
 	double minCos = 0.95;
 	boolean moreTriangles = false;
-	QSortedTree<HalfEdge> tree = new PAVLSortedTree<HalfEdge>();
+	private QSortedTree<HalfEdge> tree = new PAVLSortedTree<HalfEdge>();
 	
 	protected abstract void preProcessAllHalfEdges();
-	protected abstract void postProcessAllHalfEdges();
+	protected void postProcessAllHalfEdges()
+	{
+		//LOGGER.info("Number of edges which were not in the binary tree before being removed: "+notInTree);
+		thisLogger().info("Number of edges still present in the binary tree: "+tree.size());
+	}
 	protected abstract boolean canProcessEdge(HalfEdge e);
 	protected abstract HalfEdge processEdge(HalfEdge e, double cost);
 	protected abstract double cost(HalfEdge e);
@@ -176,6 +180,23 @@ public abstract class AbstractAlgoHalfEdge
 	// This routine is needed by DecimateHalfedge.
 	void preProcessEdge()
 	{
+	}
+
+	protected void addToTreeIfNot(HalfEdge current)
+	{
+		HalfEdge h = uniqueOrientation(current.next());
+		if (!h.hasAttributes(
+			AbstractHalfEdge.IMMUTABLE | AbstractHalfEdge.OUTER |
+			AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY |
+			AbstractHalfEdge.NONMANIFOLD) && !tree.contains(h))
+		{
+			double val = cost(h);
+			if (val <= tolerance)
+			{
+				tree.insert(h, val);
+				h.setAttributes(AbstractHalfEdge.MARKED);
+			}
+		}
 	}
 
 	final void addToTree(final HalfEdge e)
@@ -407,4 +428,29 @@ public abstract class AbstractAlgoHalfEdge
 	{
 	}
 
+	protected void updateCost(HalfEdge f)
+	{
+		updateCost(f, cost(f));
+	}
+
+	protected void updateCost(HalfEdge f, double newCost)
+	{
+		HalfEdge h = uniqueOrientation(f);
+		if (tree.contains(h))
+			tree.update(h, newCost);
+		else
+		{
+			tree.insert(h, newCost);
+			h.setAttributes(AbstractHalfEdge.MARKED);
+		}
+	}
+
+	protected HalfEdge removeOneFromTree(HalfEdge e)
+	{
+		HalfEdge h = uniqueOrientation(e);
+		if (!tree.remove(h))
+			notInTree++;
+		assert !tree.contains(h);
+		return h;
+	}
 }

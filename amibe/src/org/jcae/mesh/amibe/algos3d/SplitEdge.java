@@ -149,14 +149,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		double newCost = cost(current);
 		if (nrFinal == 0 && newCost > tolerance)
 			return;
-		HalfEdge h = uniqueOrientation(current);
-		if (tree.contains(h))
-			tree.update(h, newCost);
-		else
-		{
-			tree.insert(h, newCost);
-			h.setAttributes(AbstractHalfEdge.MARKED);
-		}
+		updateCost(current, newCost);
 	}
 
 	@Override
@@ -176,17 +169,11 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		if (current.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 		{
 			for (Iterator<AbstractHalfEdge> it = current.fanIterator(); it.hasNext(); )
-			{
-				HalfEdge f = (HalfEdge) it.next();
-				if (!tree.remove(uniqueOrientation(f)))
-					notInTree++;
-			}
+				removeOneFromTree((HalfEdge) it.next());
 		}
 		else
-			if (!tree.remove(current))
-				notInTree++;
+			removeOneFromTree(current);
 		current.clearAttributes(AbstractHalfEdge.MARKED);
-		assert !tree.contains(current);
 		mesh.vertexSplit(current, insertedVertex);
 		nrTriangles += 2;
 		assert current.destination() == insertedVertex : insertedVertex+" "+current;
@@ -233,8 +220,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		LOGGER.info("Number of splitted edges: "+processed);
 		LOGGER.info("Total number of edges not splitted during processing: "+notProcessed);
 		LOGGER.info("Total number of edges swapped to increase quality: "+swapped);
-		//LOGGER.info("Number of edges which were not in the binary tree before being removed: "+notInTree);
-		LOGGER.info("Number of edges still present in the binary tree: "+tree.size());
+		super.postProcessAllHalfEdges();
 	}
 
 	private final static String usageString = "<xmlDir> <-t maxLength | -n nrTriangles> <brepFile> <outputDir>";

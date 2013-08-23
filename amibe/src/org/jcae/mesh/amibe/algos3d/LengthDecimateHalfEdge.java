@@ -279,10 +279,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 		for (Iterator<AbstractHalfEdge> it = current.fanIterator(); it.hasNext(); )
 		{
 			HalfEdge f = (HalfEdge) it.next();
-			HalfEdge h = uniqueOrientation(f);
-			if (!tree.remove(h))
-				notInTree++;
-			assert !tree.contains(h);
+			HalfEdge h = removeOneFromTree(f);
 			h.clearAttributes(AbstractHalfEdge.MARKED);
 			if (f.getTri().isWritable())
 			{
@@ -331,17 +328,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 				current = current.nextOriginLoop();
 				assert !current.hasAttributes(AbstractHalfEdge.NONMANIFOLD);
 				if (current.destination().isReadable() && current.origin().isReadable())
-				{
-					double newCost = cost(current);
-					HalfEdge h = uniqueOrientation(current);
-					if (tree.contains(h))
-						tree.update(h, newCost);
-					else
-					{
-						tree.insert(h, newCost);
-						h.setAttributes(AbstractHalfEdge.MARKED);
-					}
-				}
+					updateCost(current);
 			}
 			while (current.apex() != apex);
 			return current.next();
@@ -361,17 +348,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 			{
 				f = f.nextOriginLoop();
 				if (f.destination().isReadable() && f.origin().isReadable())
-				{
-					double newCost = cost(f);
-					HalfEdge h = uniqueOrientation(f);
-					if (tree.contains(h))
-						tree.update(h, newCost);
-					else
-					{
-						tree.insert(h, newCost);
-						h.setAttributes(AbstractHalfEdge.MARKED);
-					}
-				}
+					updateCost(f);
 			}
 			while (f.destination() != d);
 			current = f;
@@ -385,8 +362,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 		LOGGER.info("Number of contracted edges: "+processed);
 		LOGGER.info("Total number of edges not contracted during processing: "+notProcessed);
 		LOGGER.info("Total number of edges swapped to increase quality: "+swapped);
-		//LOGGER.info("Number of edges which were not in the binary tree before being removed: "+notInTree);
-		LOGGER.info("Number of edges still present in the binary tree: "+tree.size());
+		super.postProcessAllHalfEdges();
 	}
 
 	private final static String usageString = "<xmlDir> <-t tolerance | -n nrTriangles> <brepFile> <outputDir>";

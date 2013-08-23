@@ -167,21 +167,14 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 		counter --;
 		for (int i = 0; i < 3; i++)
 		{
-			HalfEdge h = uniqueOrientation(current);
-			if (!tree.remove(h))
-				notInTree++;
-			assert !tree.contains(h);
-			h.clearAttributes(AbstractHalfEdge.MARKED);
+			removeOneFromTree(current).clearAttributes(AbstractHalfEdge.MARKED);
 			current = current.next();
 		}
 		HalfEdge sym = current.sym();
 		for (int i = 0; i < 2; i++)
 		{
 			sym = sym.next();
-			HalfEdge h = uniqueOrientation(sym);
-			if (!tree.remove(h))
-				notInTree++;
-			h.clearAttributes(AbstractHalfEdge.MARKED);
+			removeOneFromTree(sym).clearAttributes(AbstractHalfEdge.MARKED);
 		}
 		current = (HalfEdge) mesh.edgeSwap(current);
 		// Update edge costs
@@ -203,8 +196,7 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 	public void postProcessAllHalfEdges()
 	{
 		LOGGER.info("Number of swapped edges: "+processed);
-		//LOGGER.info("Number of edges which were not in the binary tree before being removed: "+notInTree);
-		LOGGER.info("Number of edges still present in the binary tree: "+tree.size());
+		super.postProcessAllHalfEdges();
 	}
 
 	private final static String usageString = "<xmlDir> <coplanarity> <outputDir>";

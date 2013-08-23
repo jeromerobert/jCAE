@@ -232,14 +232,8 @@ public class ImproveEdgeConnectivity extends AbstractAlgoHalfEdge
 		}
 		while (true)
 		{
-			HalfEdge h = uniqueOrientation(current);
-			if (!tree.remove(h))
-				notInTree++;
-			assert !tree.contains(h);
-			h = uniqueOrientation(current.next());
-			if (!tree.remove(h))
-				notInTree++;
-			assert !tree.contains(h);
+			removeOneFromTree(current);
+			removeOneFromTree(current.next());
 			if (isManifold)
 			{
 				current = current.nextOriginLoop();
@@ -279,26 +273,8 @@ public class ImproveEdgeConnectivity extends AbstractAlgoHalfEdge
 		}
 		while (true)
 		{
-			HalfEdge h = uniqueOrientation(current);
-			if (!h.hasAttributes(AbstractHalfEdge.IMMUTABLE | AbstractHalfEdge.OUTER | AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD) && !tree.contains(h))
-			{
-				double val = cost(h);
-				if (val <= tolerance)
-				{
-					tree.insert(h, val);
-					h.setAttributes(AbstractHalfEdge.MARKED);
-				}
-			}
-			h = uniqueOrientation(current.next());
-			if (!h.hasAttributes(AbstractHalfEdge.IMMUTABLE | AbstractHalfEdge.OUTER | AbstractHalfEdge.SHARP | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD) && !tree.contains(h))
-			{
-				double val = cost(h);
-				if (val <= tolerance)
-				{
-					tree.insert(h, val);
-					h.setAttributes(AbstractHalfEdge.MARKED);
-				}
-			}
+			addToTreeIfNot(current);
+			addToTreeIfNot(current.next());
 			if (isManifold)
 			{
 				current = current.nextOriginLoop();
@@ -318,8 +294,7 @@ public class ImproveEdgeConnectivity extends AbstractAlgoHalfEdge
 	public void postProcessAllHalfEdges()
 	{
 		LOGGER.info("Number of swapped edges: "+processed);
-		//LOGGER.info("Number of edges which were not in the binary tree before being removed: "+notInTree);
-		LOGGER.info("Number of edges still present in the binary tree: "+tree.size());
+		super.postProcessAllHalfEdges();
 	}
 
 	private static void usage(int rc)
