@@ -373,9 +373,6 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		assert q2 != null : v2;
 		q3.computeQuadric3DError(q1, q2);
 		q3.optimalPlacement(v1, v2, q1, q2, placement, v3);
-		v3.setLink(null);
-		if(liaison != null)
-			liaison.move(v3, v3, false);
 		if (!mesh.canCollapseEdge(current, v3))
 			return false;
 		if (!metrics.isEmpty())
@@ -499,6 +496,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 				liaison.replaceVertex(v2, v3);
 				liaison.removeVertex(v1);
 			}
+			liaison.move(v3, v3, false);
 		}
 		// Now current == (v3*a)
 		// Update edge costs
