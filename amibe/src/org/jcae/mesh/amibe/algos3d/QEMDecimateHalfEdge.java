@@ -334,8 +334,23 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 	{
 		final Vertex o = e.origin();
 		final Vertex d = e.destination();
-		if (!o.isMutable() && !d.isMutable())
+
+		HalfEdge current = uniqueOrientation(e);
+		if (current.hasAttributes(AbstractHalfEdge.IMMUTABLE))
 			return Double.MAX_VALUE;
+		if (freeEdgesOnly && !current.hasAttributes(AbstractHalfEdge.BOUNDARY))
+			return Double.MAX_VALUE;
+		final Vertex v1 = current.origin();
+		final Vertex v2 = current.destination();
+		assert v1 != v2 : current;
+		// If an endpoint is not writable, its neighborhood is
+		// not fully determined and contraction must not be
+		// performed.
+		if (!v1.isWritable() || !v2.isWritable())
+			return Double.MAX_VALUE;
+		if (!v1.isMutable() && !v2.isMutable())
+			return Double.MAX_VALUE;
+
 		final Quadric3DError q1 = quadricMap.get(o);
 		assert q1 != null : o;
 		final Quadric3DError q2 = quadricMap.get(d);
@@ -352,21 +367,9 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 	public boolean canProcessEdge(HalfEdge current)
 	{
 		current = uniqueOrientation(current);
-		if (current.hasAttributes(AbstractHalfEdge.IMMUTABLE))
-			return false;
-		if (freeEdgesOnly && !current.hasAttributes(AbstractHalfEdge.BOUNDARY))
-			return false;
 		final Vertex v1 = current.origin();
 		final Vertex v2 = current.destination();
 		assert v1 != v2 : current;
-		// If an endpoint is not writable, its neighborhood is
-		// not fully determined and contraction must not be
-		// performed.
-		if (!v1.isWritable() || !v2.isWritable())
-			return false;
-		if (!v1.isMutable() && !v2.isMutable())
-			return false;
-		/* FIXME: add an option so that boundary nodes may be frozen. */
 		final Quadric3DError q1 = quadricMap.get(v1);
 		final Quadric3DError q2 = quadricMap.get(v2);
 		assert q1 != null : v1;
