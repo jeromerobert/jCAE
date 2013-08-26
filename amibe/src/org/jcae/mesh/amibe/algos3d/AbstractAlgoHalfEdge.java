@@ -30,7 +30,6 @@ import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.projection.MeshLiaison;
 import org.jcae.mesh.amibe.util.QSortedTree;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
-import java.util.Stack;
 import java.util.Iterator;
 import java.io.ObjectOutputStream;
 import java.io.FileOutputStream;
@@ -38,8 +37,10 @@ import java.io.ObjectInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.util.HashFactory;
 
 public abstract class AbstractAlgoHalfEdge
 {
@@ -58,6 +59,7 @@ public abstract class AbstractAlgoHalfEdge
 	boolean moreTriangles = false;
 	private QSortedTree<HalfEdge> tree = new PAVLSortedTree<HalfEdge>();
 	
+	private final Collection<HalfEdge> notProcessedObjects = HashFactory.createSet();
 	protected abstract void preProcessAllHalfEdges();
 	protected void postProcessAllHalfEdges()
 	{
@@ -193,6 +195,10 @@ public abstract class AbstractAlgoHalfEdge
 			double val = cost(h);
 			if (val <= tolerance)
 			{
+				// the edge has changed so we want canProcessEdge to be
+				// re-evaluated, so we remove the edge from the
+				// notProcessObjects set
+				notProcessedObjects.remove(h);
 				tree.insert(h, val);
 				h.setAttributes(AbstractHalfEdge.MARKED);
 			}
@@ -213,6 +219,10 @@ public abstract class AbstractAlgoHalfEdge
 		// not be very useful.
 		if (nrFinal != 0 || val <= tolerance)
 		{
+			// the edge has changed so we want canProcessEdge to be
+			// re-evaluated, so we remove the edge from the notProcessObjects
+			// set
+			notProcessedObjects.remove(e);
 			tree.insert(e, val);
 			e.setAttributes(AbstractHalfEdge.MARKED);
 		}
@@ -224,6 +234,8 @@ public abstract class AbstractAlgoHalfEdge
 		{
 			HalfEdge f = (HalfEdge) it.next();
 			HalfEdge h = uniqueOrientation(f);
+			if(notProcessedObjects.remove(h))
+				assert !tree.contains(h);
 			if (!tree.remove(h))
 				notInTree++;
 			h.clearAttributes(AbstractHalfEdge.MARKED);
@@ -233,8 +245,6 @@ public abstract class AbstractAlgoHalfEdge
 
 	private boolean processAllHalfEdges()
 	{
-		Stack<HalfEdge> stackNotProcessedObject = new Stack<HalfEdge>();
-		Stack<Double> stackNotProcessedValue = new Stack<Double>();
 		double cost = -1.0;
 		while (!tree.isEmpty() && (nrFinal == 0 || (moreTriangles && nrTriangles < nrFinal) || (!moreTriangles && nrTriangles > nrFinal)))
 		{
@@ -247,6 +257,7 @@ public abstract class AbstractAlgoHalfEdge
 			{
 				QSortedTree.Node<HalfEdge> q = itt.next();
 				current = q.getData();
+				assert current == uniqueOrientation(current);
 				cost = q.getValue();
 				if (nrFinal == 0 && cost > tolerance)
 					break;
@@ -255,37 +266,18 @@ public abstract class AbstractAlgoHalfEdge
 				if (thisLogger().isLoggable(Level.FINE))
 					thisLogger().fine("Edge not processed: "+current);
 				notProcessed++;
-				// Add a penalty to edges which could not have been
-				// processed.  This has to be done outside this loop,
-				// because PAVLSortedTree instances must not be modified
-				// when walked through.
-				if (nrFinal == 0)
-				{
-					stackNotProcessedObject.push(current);
-					if (tolerance != 0.0)
-						stackNotProcessedValue.push(Double.valueOf(cost+0.7*(tolerance - cost)));
-					else
-						// tolerance = cost = 0
-						stackNotProcessedValue.push(Double.valueOf(1.0));
-				}
-				else
-				{
-					stackNotProcessedObject.push(current);
-					double penalty = tree.getRootValue()*0.7;
-					if (penalty == 0.0)
-						penalty = 1.0;
-					stackNotProcessedValue.push(Double.valueOf(cost+penalty));
-				}
-				current = null;
+				tree.remove(current);
+				notProcessedObjects.add(current);
 			}
 			if ((nrFinal == 0 && cost > tolerance) || current == null)
 				break;
-			// Update costs for edges which were not contracted
-			while (stackNotProcessedObject.size() > 0)
+			// Update costs for edges which were not contracted because
+			// canProcessEdge returned false
+			if(tree.isEmpty())
 			{
-				double newCost = stackNotProcessedValue.pop().doubleValue();
-				HalfEdge f = stackNotProcessedObject.pop();
-				tree.update(f, newCost);
+				for(HalfEdge e: notProcessedObjects)
+					tree.insert(e, cost(e));
+				notProcessedObjects.clear();
 			}
 			current = processEdge(current, cost);
 			afterProcessHook();
@@ -436,6 +428,9 @@ public abstract class AbstractAlgoHalfEdge
 	protected void updateCost(HalfEdge f, double newCost)
 	{
 		HalfEdge h = uniqueOrientation(f);
+		// the edge has changed so we want canProcessEdge to be re-evaluated, so
+		// we remove the edge from the notProcessObjects set
+		notProcessedObjects.remove(h);
 		if (tree.contains(h))
 			tree.update(h, newCost);
 		else
@@ -448,6 +443,13 @@ public abstract class AbstractAlgoHalfEdge
 	protected HalfEdge removeOneFromTree(HalfEdge e)
 	{
 		HalfEdge h = uniqueOrientation(e);
+		if(notProcessedObjects.remove(h))
+		{
+			// and edge cannot be in tree and in notProcessedObjects at the same
+			// time
+			assert !tree.contains(h);
+			return h;
+		}
 		if (!tree.remove(h))
 			notInTree++;
 		assert !tree.contains(h);
