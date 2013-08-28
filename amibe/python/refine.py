@@ -46,7 +46,7 @@ parser.add_option("-m", "--metricsFile", metavar="STRING",
                   help="name of a file containing metrics map")
 parser.add_option("-P", "--point-metric", metavar="STRING",
                   action="store", type="string", dest="point_metric_file",
-                  help="""A CSV file containing points which to refine around. Each line must contains 6 values:
+                  help="""A CSV file containing points which to refine around. Each line must contains 7 values:
                    1, x, y, z, s0 (target size at distance d0), d0, d1(distance from which point has no influence)
                   Target size at distance d of this point is computed like this:
                     a) if d <= d0, s0.
