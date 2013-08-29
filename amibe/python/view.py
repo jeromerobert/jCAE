@@ -4,10 +4,11 @@ from org.jcae.mesh.oemm import OEMM, Storage
 from org.jcae.vtk import AmibeToMesh, Canvas, Palette, UNVToMesh, View, Viewable, ViewableCAD, ViewableMesh, ViewableOEMM, Utils
 
 # Swing
-from java.awt import BorderLayout
+from java.awt import BorderLayout, EventQueue
 from java.awt.event import KeyEvent, KeyListener
 from javax.swing import JFrame
 from java.util import Collections
+from java.lang import Thread
 
 # VTK
 from vtk import vtkRenderer, vtkInteractorStyleTrackballCamera
@@ -81,8 +82,17 @@ style = vtkInteractorStyleTrackballCamera()
 style.AutoAdjustCameraClippingRangeOn()
 canvas.getIren().SetInteractorStyle(style)
 
-frame.setVisible(True)
-canvas.cameraManager.fitAll()
+#  Run these commands in the Event Dispatch Thread, otherwise an
+#  IllegalMonitorStateException may be raised.
+class RunInEventDispatchThread(Thread):
+    def __init__(self, frame, canvas):
+        self.frame = frame
+        self.canvas = canvas
+    def run(self):
+        self.frame.setVisible(True)
+        self.canvas.cameraManager.fitAll()
+
+EventQueue.invokeLater(RunInEventDispatchThread(frame, canvas))
 
 if options.batch:
 	Utils.takeScreenshot(canvas, options.batch)
