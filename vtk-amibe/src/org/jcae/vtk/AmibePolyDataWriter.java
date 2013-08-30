@@ -26,6 +26,7 @@ import vtk.vtkIdTypeArray;
 import vtk.vtkIntArray;
 import vtk.vtkNativeLibrary;
 import vtk.vtkPolyData;
+import vtk.vtkXMLPolyDataReader;
 
 
 /**
@@ -161,4 +162,13 @@ public class AmibePolyDataWriter
 			}
 		}
     }
+
+	/** Shortcut to convert a VTP file to an Amibe directory */
+	public static void vtpToAmibe(String inputFile, String outputDir) throws IOException
+	{
+		vtkXMLPolyDataReader reader = new vtkXMLPolyDataReader();
+		reader.SetFileName(inputFile);
+		reader.Update();
+		new AmibePolyDataWriter(reader.GetOutput(), null).write(outputDir);
+	}
 }
