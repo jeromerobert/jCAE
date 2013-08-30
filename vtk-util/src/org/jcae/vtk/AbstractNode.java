@@ -131,6 +131,21 @@ public abstract class AbstractNode
 	protected boolean visible = true;
 	protected boolean selected;
 	protected boolean pickable;
+	public final static double SHADING_ANGLE;
+
+	// default value from VTK sources (vtkPolyDataNormals.cxx)
+	public final static double DEFAULT_SHADING_ANGLE = 30;
+
+	static
+	{
+		String shadingAngleStr = System.getProperty(
+			"org.jcae.vtk.shading.angle", null);
+		if(shadingAngleStr == null)
+			SHADING_ANGLE = DEFAULT_SHADING_ANGLE;
+		else
+			SHADING_ANGLE = Double.parseDouble(shadingAngleStr);
+	}
+
 	
 	public static interface ActorListener
 	{
@@ -437,6 +452,7 @@ public abstract class AbstractNode
 		algoNormals.FlipNormalsOff();
 		algoNormals.AutoOrientNormalsOff();
 		algoNormals.ComputePointNormalsOn();
+		algoNormals.SetFeatureAngle(getShadingAngle());
 		algoNormals.Update();
 
 		data = algoNormals.GetOutput();
@@ -580,6 +596,15 @@ public abstract class AbstractNode
 				sb.append(" pickable");
 		}
 		return sb.toString();
+	}
+
+	/**
+	 * To be overriden by subclasse to change the shading angle.
+	 * This implementation return the SHADING_ANGLE constant.
+	 */
+	protected double getShadingAngle()
+	{
+		return SHADING_ANGLE;
 	}
 
 	public void setEdgeVisible(boolean b)
