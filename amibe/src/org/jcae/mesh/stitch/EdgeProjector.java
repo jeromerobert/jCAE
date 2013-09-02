@@ -488,6 +488,8 @@ class EdgeProjector {
 			if (lastMergeTarget == null && triangleSplitter.getSplittedEdge() != null) {
 				lastMergeTarget = mesh.createVertex(triangleSplitter.getSplitPoint());
 			}
+			if(lastMergeTarget != null && !lastMergeTarget.isMutable())
+				lastMergeTarget = null;
 			if (lastMergeTarget != null) {
 				lastMergeSource = mesh.createVertex(0, 0, 0);
 				double l = TriangleHelper.reverseProject(triangleProjector1.getProjection(),
@@ -516,6 +518,8 @@ class EdgeProjector {
 			if (lastMergeTarget == null && triangleSplitter.getSplittedEdge() != null) {
 				lastMergeTarget = mesh.createVertex(triangleSplitter.getSplitPoint());
 			}
+			if(lastMergeTarget != null && !lastMergeTarget.isMutable())
+				lastMergeTarget = null;
 			if (lastMergeTarget != null) {
 				lastMergeSource = mesh.createVertex(0, 0, 0);
 				double l = TriangleHelper.reverseProject(triangleProjector2.getProjection(),
