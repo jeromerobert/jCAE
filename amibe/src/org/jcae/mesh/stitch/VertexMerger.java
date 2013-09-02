@@ -47,19 +47,15 @@ class VertexMerger {
 	private final Collection<Collection<Triangle>> trianglesByFan = new ArrayList<Collection<Triangle>>();
 	private final Set<Triangle> triToRemove = HashFactory.createSet();
 	/** add neigbour triangle of the vertex to the map */
-	private void indexify(Mesh mesh, Vertex vertex)
+	private void indexify(Vertex vertex)
 	{
-		Iterator<AbstractHalfEdge> it = vertex.getNeighbourIteratorAbstractHalfEdge();
+		Iterator<Triangle> it = vertex.getNeighbourIteratorTriangle();
 		while(it.hasNext())
 		{
-			AbstractHalfEdge edge = it.next();
-			if(edge.destination() == mesh.outerVertex)
+			Triangle t = it.next();
+			if(t.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
-			if(edge.hasAttributes(AbstractHalfEdge.OUTER))
-				edge = edge.sym();
-			assert !edge.hasAttributes(AbstractHalfEdge.OUTER): edge+"\n"+edge.sym();
-			edgeToClear.add(edge);
-			Triangle t = edge.getTri();
+			AbstractHalfEdge e = t.getAbstractHalfEdge();
 			for(int i = 0; i < 3; i++)
 			{
 				Vertex v = t.getV(i);
@@ -69,9 +65,11 @@ class VertexMerger {
 					l = new ArrayList<Triangle>(10);
 					map.put(v, l);
 				}
-				assert !t.hasAttributes(AbstractHalfEdge.OUTER);
 				if(!l.contains(t))
 					l.add(t);
+				if(e.origin() == vertex || e.destination() == vertex)
+					edgeToClear.add(e);
+				e = e.next();
 			}
 		}
 	}
@@ -305,7 +303,7 @@ class VertexMerger {
 		addedTriangles.clear();
 		edgeToClear.clear();
 		for(Vertex v:vertices)
-			indexify(mesh, v);
+			indexify(v);
 		clearAdjacency(mesh);
 		Vertex targetV = vertices[vertices.length - 1];
 		Collection<Triangle> targetL = map.get(targetV);
