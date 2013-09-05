@@ -268,6 +268,7 @@ public abstract class AbstractAlgoHalfEdge
 				notProcessed++;
 				tree.remove(current);
 				notProcessedObjects.add(current);
+				current = null;
 			}
 			if ((nrFinal == 0 && cost > tolerance) || current == null)
 				break;
