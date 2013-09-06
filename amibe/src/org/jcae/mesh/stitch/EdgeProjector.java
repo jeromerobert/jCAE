@@ -282,7 +282,7 @@ class EdgeProjector {
 		assert source != target;
 		assert !Double.isNaN(source.getX());
 		assert !Double.isNaN(target.getX());
-		assert !(source.getLink() instanceof Triangle[]);
+		assert !(source.getLink() instanceof Triangle[]): source;
 		assert canMerge(source, target);
 		target.moveTo(weight * source.getX() + (1 - weight) * target.getX(),
 			weight * source.getY() + (1 - weight) * target.getY(),
@@ -310,6 +310,8 @@ class EdgeProjector {
 	}
 
 	private void splitEdge(AbstractHalfEdge toSplit, Vertex v) {
+		assert v.sqrDistance3D(toSplit.origin()) > 1E-24: toSplit+" "+v;
+		assert v.sqrDistance3D(toSplit.destination()) > 1E-24: toSplit+" "+v;
 		if (toSplit.hasAttributes(AbstractHalfEdge.BOUNDARY))
 		{
 			Triangle t = toSplit.getTri();
@@ -598,6 +600,7 @@ class EdgeProjector {
 			lastMergeTarget)) {
 			lastMergeTarget = null;
 		}
+
 	}
 
 	private boolean mergeAndFinish() {

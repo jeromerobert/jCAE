@@ -84,6 +84,9 @@ class TriangleSplitter {
 	 */
 	public void splitApex(Vertex apex, Location p, double sqrTol) {
 		Triangle triangle = triangleHelper.getTriangle();
+		assert triangle.getV0().sqrDistance3D(p) > 1E-24;
+		assert triangle.getV1().sqrDistance3D(p) > 1E-24;
+		assert triangle.getV2().sqrDistance3D(p) > 1E-24;
 		double[] uv = new double[2];
 		triangleHelper.getBarycentricCoords(p, uv);
 		double u = 0;

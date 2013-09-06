@@ -123,6 +123,7 @@ class TriangleHelper {
 		Location d, Location e, Location f, double tol)
 	{
 		assert f != null;
+		assert e.sqrDistance3D(b) > 1E-24: e +" "+b;
 		double dei, dej;
 		//i = x, j = y
 		double cbi = b.getX() - c.getX();
