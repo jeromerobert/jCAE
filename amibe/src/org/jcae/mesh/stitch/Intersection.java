@@ -322,6 +322,6 @@ public class Intersection {
 		x[1] = p1.getY() + t * p21[1];
 		x[2] = p1.getZ() + t * p21[2];
 
-		return t >= 0.0 && t <= 1.0;
+		return t >= 0.0 && t < 1.0;
 	}
 }
