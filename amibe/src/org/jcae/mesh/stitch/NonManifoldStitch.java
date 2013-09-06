@@ -34,6 +34,7 @@ import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.Location;
 import org.jcae.mesh.amibe.projection.TriangleKdTree;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
+import org.jcae.mesh.amibe.util.HashFactory;
 import org.jcae.mesh.xmldata.MeshReader;
 
 /**
@@ -208,8 +209,17 @@ public class NonManifoldStitch {
 		List<Vertex> beams = inter.intersect(group1, group2, tolerance);
 		//copy the beam to insert because stitchBeams will move them.
 		List<Vertex> beams2 = new ArrayList<Vertex>(beams.size());
+		Map<Vertex, Vertex> copyMap = HashFactory.createMap(beams.size() / 2 + 5);
 		for(Vertex b: beams)
-			beams2.add(b);
+		{
+			Vertex copy = copyMap.get(b);
+			if(copy == null)
+			{
+				copy = mesh.createVertex(b);
+				copyMap.put(b, copy);
+			}
+			beams2.add(copy);
+		}
 		stitchBeams(beams, group1, 0, Double.MAX_VALUE, tolerance);
 		stitchBeams(beams2, group2, 0, Double.MAX_VALUE, tolerance);
 	}
