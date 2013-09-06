@@ -19,6 +19,9 @@
  */
 package org.jcae.mesh.stitch;
 
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TIntArrayList;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -262,6 +265,32 @@ public class NonManifoldStitch {
 		System.err.println("projection: "+(t3-t2)/1E9);
 	}
 
+	/** Intersection of 4 groups with adjacent triangles */
+	private static void test8(String data) throws IOException
+	{
+		Mesh mesh = new Mesh(MeshTraitsBuilder.getDefault3D());
+		MeshReader.readObject3D(mesh, data+"case8.amibe");
+		EdgeProjector.saveAsVTK(mesh);
+		NonManifoldStitch nms = new NonManifoldStitch(mesh);
+		nms.setTolerance(0.01);
+		for(int i = 1; i <= mesh.getNumberOfGroups(); i++)
+			System.err.println(i+" => "+mesh.getGroupName(i));
+		for(int i = 1; i <= mesh.getNumberOfGroups()-1; i++)
+		for(int j = i+1; j <= mesh.getNumberOfGroups(); j++)
+		{
+			System.err.println("intersecting "+i+" "+j);
+			EdgeProjector.saveVTK = true;
+			EdgeProjector.saveAsVTK(mesh);
+			EdgeProjector.saveVTK = false;
+			nms.intersect(i, j);
+		}
+		new NonManifoldSplitter(mesh).compute();
+		mesh.popTriangles(new TDoubleArrayList(), new TIntArrayList(), nms.workingGroup);
+		EdgeProjector.saveVTK = true;
+		EdgeProjector.saveAsVTK(mesh);
+		EdgeProjector.saveVTK = false;
+	}
+
 	public static void main(final String[] args) {
 		try {
 			String data = args[0];
@@ -290,6 +319,7 @@ public class NonManifoldStitch {
 			test6(mesh);
 			EdgeProjector.saveVTK = true;
 			EdgeProjector.saveAsVTK(mesh);
+			test8(data);
 
 			mesh = new Mesh(MeshTraitsBuilder.getDefault3D());
 			MeshReader.readObject3D(mesh, data+"case7.amibe");
