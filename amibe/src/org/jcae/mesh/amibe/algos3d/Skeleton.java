@@ -234,6 +234,7 @@ public class Skeleton {
 		}
 	}
 
+	/** Return true if edge.destination() is a polyline end */
 	private boolean isPolylineEnd(AbstractHalfEdge edge, double angle)
 	{
 		AbstractHalfEdge next = null;
@@ -250,7 +251,7 @@ public class Skeleton {
 					if(next == null)
 						next = ot;
 					else
-						assert false;
+						return true;
 				}
 				ot = ot.nextOriginLoop();
 			}
