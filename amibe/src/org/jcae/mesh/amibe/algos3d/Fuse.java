@@ -21,47 +21,43 @@
 
 package org.jcae.mesh.amibe.algos3d;
 
+import java.io.IOException;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.KdTree;
-import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
+import org.jcae.mesh.amibe.util.HashFactory;
+import org.jcae.mesh.xmldata.MeshReader;
+import org.jcae.mesh.xmldata.MeshWriter;
 
 /**
- * (Obsolete) Fuse near nodes in a <code>MMesh3D</code> instance.
+ * Fuse near nodes in a Mesh instance.
  */
 public class Fuse
 {
 	private static final Logger LOGGER=Logger.getLogger(Fuse.class.getName());
 	private final Mesh mesh;
-	private final double tolerance;
-	
-	/**
-	 * Creates a <code>Fuse</code> instance.
-	 *
-	 * @param m  the <code>MMesh3D</code> instance to fuse.
-	 */
-	public Fuse(Mesh m)
-	{
-		this(m, 0.0);
-	}
-	
+	private final double[] tolerances;
+
 	/**
 	 * Creates a <code>Fuse</code> instance.
 	 *
 	 * @param m  the <code>MMesh3D</code> instance to refine.
 	 * @param eps  tolerance.
 	 */
-	public Fuse(Mesh m, double eps)
+	public Fuse(Mesh m, double ... eps)
 	{
 		mesh = m;
-		tolerance = eps*eps;
+		int k = 0;
+		tolerances = new double[eps.length];
+		for(double e: eps)
+			tolerances[k++] = e * e;
 	}
-	
-	/**
-	 * Fuse boundary nodes which are closer than a given bound.
-	 */
+
 	public void compute()
 	{
 		LOGGER.fine("Running Fuse");
@@ -99,35 +95,37 @@ public class Fuse
 			bbox[i] = bmin[i];
 			bbox[i+3] = bmax[i];
 		}
-		KdTree<Vertex> octree = new KdTree<Vertex>(bbox);
-		HashMap<Vertex, Vertex> map = new HashMap<Vertex, Vertex>();
-		int nSubst = 0;
-		for (Vertex n: mesh.getNodes())
+		Map<Vertex, Vertex> map = HashFactory.createMap();
+		for(double tolerance: tolerances)
 		{
-			if (n.getRef() <= 0)
-				continue;
-			Vertex p = octree.getNearestVertex(mesh.getMetric(n), n);
-			if (p == null || p.getRef() <= 0 || n.sqrDistance3D(p) > tolerance)
-				octree.add(n);
-			else
+			KdTree<Vertex> octree = new KdTree<Vertex>(bbox);
+			map.clear();
+			for (Vertex n: mesh.getNodes())
 			{
-				LOGGER.fine("Node "+n+" is removed, it is too close from "+p);
-				nSubst++;
-				map.put(n, p);
-				n.setRef(0);
-			}
-		}
-		LOGGER.fine(""+nSubst+" node(s) are removed");
-		for (Triangle t: mesh.getTriangles())
-		{
-			for (int j = 0; j < 3; j++)
-			{
-				Vertex n = t.getV(j);
-				Vertex p = map.get(n);
-				if (p != null)
+				Vertex p = octree.getNearestVertex(mesh.getMetric(n), n);
+				if (p == null || n.sqrDistance3D(p) > tolerance)
+					octree.add(n);
+				else
 				{
-					t.setV(j, p);
-					mesh.remove(n);
+					LOGGER.log(Level.FINE,
+						"Node {0} is removed, it is too close from {1}",
+						new Object[]{n, p});
+					map.put(n, p);
+					n.setRef(0);
+				}
+			}
+			LOGGER.log(Level.INFO, "{0} node(s) are removed", map.size());
+			for (Triangle t: mesh.getTriangles())
+			{
+				for (int j = 0; j < 3; j++)
+				{
+					Vertex n = t.getV(j);
+					Vertex p = map.get(n);
+					if (p != null)
+					{
+						t.setV(j, p);
+						mesh.remove(n);
+					}
 				}
 			}
 		}
