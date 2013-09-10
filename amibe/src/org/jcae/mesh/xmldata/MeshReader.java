@@ -200,13 +200,19 @@ public class MeshReader
 		logger.fine("end reading "+JCAEXMLData.xml2dFilename+iFace);
 	}
 
+	public static void readObject3D(Mesh mesh, String xmlDir) throws IOException
+	{
+		readObject3D(mesh, xmlDir, true);
+	}
+
 	/**
 	 * Loads an Amibe 3D XML file into an existing Mesh instance.
 	 *
 	 * @param mesh     data structure updated when reading files
 	 * @param xmlDir   directory containing XML files
+	 * @param buildAdjacency  true to build adjacency after reading the mesh
 	 */
-	public static void readObject3D(Mesh mesh, String xmlDir)
+	public static void readObject3D(Mesh mesh, String xmlDir, boolean buildAdjacency)
 		throws IOException
 	{
 		try {
@@ -311,7 +317,7 @@ public class MeshReader
 					mesh.setVertexGroup(nodelist[j], g.getName());
 			}
 			//  Build adjacency relations
-			if (mesh.hasAdjacency()) {
+			if (mesh.hasAdjacency() && buildAdjacency) {
 				logger.fine("Build mesh adjacency");
 				mesh.buildAdjacency();
 			}
