@@ -22,6 +22,7 @@
 package org.jcae.mesh.amibe.algos3d;
 
 import java.io.IOException;
+import java.util.Iterator;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
@@ -115,8 +116,10 @@ public class Fuse
 				}
 			}
 			LOGGER.log(Level.INFO, "{0} node(s) are removed", map.size());
-			for (Triangle t: mesh.getTriangles())
+			Iterator<Triangle> itt = mesh.getTriangles().iterator();
+			while(itt.hasNext())
 			{
+				Triangle t = itt.next();
 				for (int j = 0; j < 3; j++)
 				{
 					Vertex n = t.getV(j);
@@ -127,6 +130,8 @@ public class Fuse
 						mesh.remove(n);
 					}
 				}
+				if(t.getV0() == t.getV1() || t.getV0() == t.getV2() || t.getV1() == t.getV2())
+					itt.remove();
 			}
 		}
 	}
