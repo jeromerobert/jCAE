@@ -456,19 +456,22 @@ public abstract class AbstractNode
 		algoNormals.Update();
 
 		data = algoNormals.GetOutput();
-		vtkPointData pointData = data.GetPointData();
-		vtkFloatArray computedNormals = (vtkFloatArray) pointData.GetNormals();		
-		float[] javaComputedNormals = computedNormals.GetJavaArray();
 		float[] javaNormals = dataProvider.getNormals();
-		
-		// If the normals are not computed change them by the normals computed by the meshes
-		for(int i = 0 ; i < javaComputedNormals.length ; i+= 3)
+		vtkPointData pointData = data.GetPointData();
+		vtkFloatArray computedNormals = (vtkFloatArray) pointData.GetNormals();
+		if(computedNormals != null)
 		{
-			if(javaNormals[i] == 0. && javaNormals[i + 1] == 0. && javaNormals[i + 2] == 0.)
+			float[] javaComputedNormals = computedNormals.GetJavaArray();
+
+			// If the normals are not computed change them by the normals computed by the meshes
+			for(int i = 0 ; i < javaComputedNormals.length ; i+= 3)
 			{
-				javaNormals[i] = javaComputedNormals[i];
-				javaNormals[i + 1] = javaComputedNormals[i  + 1];
-				javaNormals[i + 2] = javaComputedNormals[i + 2];
+				if(javaNormals[i] == 0. && javaNormals[i + 1] == 0. && javaNormals[i + 2] == 0.)
+				{
+					javaNormals[i] = javaComputedNormals[i];
+					javaNormals[i + 1] = javaComputedNormals[i  + 1];
+					javaNormals[i + 2] = javaComputedNormals[i + 2];
+				}
 			}
 		}
 		
