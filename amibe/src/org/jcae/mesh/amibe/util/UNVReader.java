@@ -80,7 +80,7 @@ public class UNVReader
 						// read unit
 						unit = readUnit(rd);
 					}
-					else if ( (line.equals("2430")) || (line.equals("2435")) | (line.equals("2477")) )
+					else if ( (line.equals("2430")) || (line.equals("2435")) || (line.equals("2477")) || (line.equals("2467")) )
 					{
 						// read groups
 						int nrGroups = readGroup(rd, line, facesmap, beamPlaceHolder);
@@ -339,7 +339,7 @@ public class UNVReader
 								logger.severe("In group "+groupIdx+", element number "+ind+" does not exist");
 						}
 						nbelem--;
-						if (type.equals("2435") || type.equals("2477"))
+						if (type.equals("2430") || type.equals("2435") || type.equals("2477") || type.equals("2467"))
 						{
 							st.nextToken();
 							st.nextToken();
