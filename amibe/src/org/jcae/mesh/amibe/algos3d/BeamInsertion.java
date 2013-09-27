@@ -34,7 +34,6 @@ import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.metrics.MetricSupport;
 import org.jcae.mesh.amibe.projection.MeshLiaison;
 import org.jcae.mesh.amibe.projection.TriangleKdTree;
@@ -86,10 +85,10 @@ public class BeamInsertion {
 
 	private final Mesh mesh;
 	private final TriangleKdTree kdTree;
-	private final double[] vector1 = new double[3], vector2 = new double[3];
 	private final VertexSwapper swapper;
 	//only for tolerance
 	private final MetricSupport.AnalyticMetricInterface metric;
+	private EdgesCollapser edgesCollapser;
 	public BeamInsertion(final Mesh mesh, final double edgeSize)
 	{
 		this(mesh, new MetricSupport.AnalyticMetricInterface() {
@@ -115,6 +114,7 @@ public class BeamInsertion {
 		this.metric = metric;
 		swapper = new VertexSwapper(mesh);
 		swapper.setKdTree(kdTree);
+		edgesCollapser = new EdgesCollapser(mesh);
 	}
 
 	/** Insert a set of beams from binary files */
@@ -177,58 +177,12 @@ public class BeamInsertion {
 	{
 		v1 = insert(v1);
 		v2 = insert(v2);
-		assert v1 != v2;
-		v2.sub(v1, vector1);
-		AbstractHalfEdge toCollapse = nextEdge(v1, vector1, v1);
-		while(toCollapse.destination() != v2)
-		{
-			if(toCollapse.hasAttributes(AbstractHalfEdge.OUTER))
-				toCollapse = toCollapse.sym();
-			assert !toCollapse.hasAttributes(AbstractHalfEdge.OUTER): toCollapse;
-			assert !toCollapse.hasAttributes(AbstractHalfEdge.IMMUTABLE): toCollapse;
-			Vertex target = v1;
-			if(!mesh.canCollapseEdge(toCollapse, v1))
-			{
-				toCollapse = nextEdge(toCollapse.origin(), vector1, toCollapse.origin());
-				target = toCollapse.destination();
-				if(toCollapse.hasAttributes(AbstractHalfEdge.OUTER))
-					toCollapse = toCollapse.sym();
-				assert mesh.canCollapseEdge(toCollapse, target):
-					"Cannot collapse "+toCollapse+" to "+target;
-			}
-			removeFromKdTree(toCollapse);
-			mesh.edgeCollapse(toCollapse, target);
-			toCollapse = nextEdge(v1, vector1, v1);
-		}
+		AbstractHalfEdge toCollapse = edgesCollapser.collapse(v1, v2);
+		for(AbstractHalfEdge e: edgesCollapser.getCollapsed())
+			removeFromKdTree(e);
 		swapper.swap(v1);
 		swapper.swap(v2);
 		return toCollapse;
-	}
-
-	private AbstractHalfEdge nextEdge(Vertex v, double[] direction, Vertex notDirection)
-	{
-		Iterator<AbstractHalfEdge> it = v.getNeighbourIteratorAbstractHalfEdge();
-		double bestDot = Double.NEGATIVE_INFINITY;
-		AbstractHalfEdge bestEdge = null;
-		while(it.hasNext())
-		{
-			AbstractHalfEdge e = it.next();
-			if((e.hasAttributes(AbstractHalfEdge.NONMANIFOLD) || e.hasAttributes(
-				AbstractHalfEdge.BOUNDARY)) && notDirection != e.destination())
-			{
-				e.destination().sub(e.origin(), vector2);
-				double norm = Matrix3D.norm(vector2);
-				for(int i = 0; i < 3; i++)
-					vector2[i] /= norm;
-				double dot = Matrix3D.prodSca(direction, vector2);
-				if(dot > bestDot)
-				{
-					bestDot = dot;
-					bestEdge = e;
-				}
-			}
-		}
-		return bestEdge;
 	}
 
 	private void addTriangleToKdTree(AbstractHalfEdge edge)
