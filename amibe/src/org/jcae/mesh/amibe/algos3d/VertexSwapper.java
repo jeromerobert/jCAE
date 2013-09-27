@@ -97,7 +97,7 @@ public class VertexSwapper {
 			{
 				boolean isSwapped = false;
 				if (!current.hasAttributes(AbstractHalfEdge.NONMANIFOLD |
-					AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.OUTER)
+					AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.OUTER | AbstractHalfEdge.IMMUTABLE)
 					&& current.canSwapTopology())
 				{
 					quality.setEdge(current);
