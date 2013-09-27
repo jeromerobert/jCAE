@@ -589,7 +589,7 @@ public class Mesh implements Serializable
 
 	public Map<String, Collection<Vertex>> getVertexGroup()
 	{
-		return Collections.unmodifiableMap(vertexGroups);
+		return vertexGroups;
 	}
 
 	public int getNumberOfGroups()
