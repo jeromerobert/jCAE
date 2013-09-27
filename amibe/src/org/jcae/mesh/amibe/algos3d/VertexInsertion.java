@@ -54,6 +54,7 @@ import org.jcae.mesh.xmldata.MultiDoubleFileReader;
  */
 public class VertexInsertion {
 	private final MeshLiaison liaison;
+	private final Mesh mesh;
 	private final static Logger LOGGER = Logger.getLogger(VertexInsertion.class.getName());
 	private final TriangleKdTree kdTree;
 	/** triangles added when inserting a point in the middle of a triangle */
@@ -62,9 +63,17 @@ public class VertexInsertion {
 	private final AnalyticMetricInterface metric;
 	private final VertexSwapper swapper;
 	private int swapperGroup;
-	private double swapperDeflection;
+	private double swapperDeflection, swapperVolume;
 	public VertexInsertion(MeshLiaison liaison, final double size) {
-		this(liaison, new AnalyticMetricInterface() {
+		this(liaison.getMesh(), liaison, size);
+	}
+
+	public VertexInsertion(Mesh mesh, final double size) {
+		this(mesh, null, size);
+	}
+
+	private VertexInsertion(Mesh mesh, MeshLiaison liaison, final double size) {
+		this(mesh, liaison, new AnalyticMetricInterface() {
 
 			public double getTargetSize(double x, double y, double z,
 				int groupId) {
@@ -78,19 +87,34 @@ public class VertexInsertion {
 	}
 
 	public VertexInsertion(MeshLiaison liaison, AnalyticMetricInterface metric) {
+		this(liaison.getMesh(), liaison, metric);
+	}
+
+	private VertexInsertion(Mesh mesh, MeshLiaison liaison, AnalyticMetricInterface metric) {
 		this.liaison = liaison;
+		this.mesh = mesh;
 		LOGGER.info("Start creating kd-tree");
-		kdTree = new TriangleKdTree(liaison.getMesh());
+		kdTree = new TriangleKdTree(mesh);
 		LOGGER.info(kdTree.stats());
 		this.metric = metric;
-		swapper = new VertexSwapper(liaison)
-		{
-			@Override
-			protected boolean isQualityImproved(Quality quality) {
-				return super.isQualityImproved(quality) &&
-					quality.sqrSwappedDeflection(swapperGroup) < swapperDeflection;
-			}
-		};
+		if(liaison == null)
+			swapper = new VertexSwapper(mesh)
+			{
+				@Override
+				protected boolean isQualityImproved(Quality quality) {
+					return super.isQualityImproved(quality) &&
+						quality.swappedVolume() < swapperVolume;
+				}
+			};
+		else
+			swapper = new VertexSwapper(liaison)
+			{
+				@Override
+				protected boolean isQualityImproved(Quality quality) {
+					return super.isQualityImproved(quality) &&
+						quality.sqrSwappedDeflection(swapperGroup) < swapperDeflection;
+				}
+			};
 		swapper.setKdTree(kdTree);
 	}
 
@@ -162,7 +186,8 @@ public class VertexInsertion {
 				v, projection, group);
 			if(t == null)
 				throw new NullPointerException("Cannot find projection for "+v);
-			liaison.move(v, projection, group, true);
+			if(liaison != null)
+				liaison.move(v, projection, group, true);
 			for(int iv = 0; iv < 3; iv++)
 			{
 				Vertex tv = t.getV(iv);
@@ -178,12 +203,13 @@ public class VertexInsertion {
 
 			// We could check that we are close from an edge but we don't
 			// because swaping will properly handle this case
-			t.split(liaison.getMesh(), v, tmp);
+			t.split(mesh, v, tmp);
 			kdTree.replace(t, tmp);
 			tmp.clear();
 			mutableInserted.add(v);
 			swapperGroup = group;
 			swapperDeflection = localMetric2 / 2;
+			swapperVolume = localMetric2 * localMetric;
 			swapper.swap(v);
 			nbInserted ++;
 		}
@@ -223,7 +249,7 @@ public class VertexInsertion {
 					kdTree.remove(t);
 					kdTree.remove(e.sym().getTri());
 				}
-				liaison.getMesh().vertexSplit(e, v);
+				mesh.vertexSplit(e, v);
 				Iterator<Triangle> it = v.getNeighbourIteratorTriangle();
 				while(it.hasNext())
 					kdTree.addTriangle(it.next());
