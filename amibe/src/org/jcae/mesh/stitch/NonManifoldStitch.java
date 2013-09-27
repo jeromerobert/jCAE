@@ -146,7 +146,7 @@ public class NonManifoldStitch {
 		mesh.buildAdjacency();
 
 		EdgeProjector edgeProjector = new EdgeProjector(mesh, kdTree,
-			edgesToProject, triaGroup, maxDistance, tolerance)
+			edgesToProject, triaGroup, maxDistance, tolerance, weight)
 		{
 			@Override
 			protected boolean isToProject(AbstractHalfEdge edge) {
@@ -154,7 +154,6 @@ public class NonManifoldStitch {
 			}
 		};
 		edgeProjector.checkMerge = false;
-		edgeProjector.weight = weight;
 		edgeProjector.project();
 		nbInsertedBeams += nbBeams;
 	}
@@ -181,9 +180,8 @@ public class NonManifoldStitch {
 	public void stitch(int group1, double weight, boolean boundaryOnly) {
 		Collection<AbstractHalfEdge> set1 = getBorder(group1);
 		EdgeProjector edgeProjector = new EdgeProjector(mesh, kdTree, set1,
-			group1, maxDistance, tolerance);
+			group1, maxDistance, tolerance, weight);
 		edgeProjector.setIgnoreGroup(true);
-		edgeProjector.weight = weight;
 		edgeProjector.setBoundaryOnly(boundaryOnly);
 		edgeProjector.project();
 	}
@@ -191,8 +189,7 @@ public class NonManifoldStitch {
 	public void stitch(int group1, int group2, double weight, boolean boundaryOnly) {
 		Collection<AbstractHalfEdge> set1 = getBorder(group1);
 		EdgeProjector edgeProjector = new EdgeProjector(mesh, kdTree, set1,
-			group2, maxDistance, tolerance);
-		edgeProjector.weight = weight;
+			group2, maxDistance, tolerance, weight);
 		edgeProjector.setBoundaryOnly(boundaryOnly);
 		edgeProjector.project();
 	}

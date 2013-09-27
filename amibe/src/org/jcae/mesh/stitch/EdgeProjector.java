@@ -46,7 +46,7 @@ import org.jcae.mesh.xmldata.MeshWriter;
  *
  * @author Jerome Robert
  */
-class EdgeProjector {
+public class EdgeProjector {
 	private interface Pool<E> extends Collection<E>
 	{
 		E get();
@@ -139,7 +139,7 @@ class EdgeProjector {
 	private AbstractHalfEdge lastSplitted1;
 	private AbstractHalfEdge lastSplitted2;
 	private AbstractHalfEdge edgeToCollapse;
-	double weight;
+	private double weight;
 	private final TriangleSplitter triangleSplitter = new TriangleSplitter();
 	private final VertexMerger vertexMerger = new VertexMerger();
 	private final VertexSwapper vertexSwapper;
@@ -147,7 +147,7 @@ class EdgeProjector {
 	private final double maxSqrDist, sqrTol;
 	public EdgeProjector(Mesh mesh, TriangleKdTree kdTree,
 		Collection<AbstractHalfEdge> edges, int group, double maxDist,
-		double tol) {
+		double tol, double weight) {
 		this.mesh = mesh;
 		this.kdTree = kdTree;
 		final double tol3 = tol * tol * tol;
@@ -170,6 +170,7 @@ class EdgeProjector {
 		this.group = group;
 		maxSqrDist = maxDist * maxDist;
 		sqrTol = tol * tol;
+		this.weight = weight;
 	}
 
 	/**
@@ -612,7 +613,9 @@ class EdgeProjector {
 			}
 			assert lastMergeSource.sqrDistance3D(lastMergeTarget) < triangleProjector1.sqrMaxDistance * 2 : lastMergeSource.sqrDistance3D(lastMergeTarget);
 			check(mesh);
+			mergingVertices(lastMergeSource, lastMergeTarget);
 			mergeVertices(lastMergeSource, lastMergeTarget);
+			verticesMerged(lastMergeTarget);
 			check(mesh);
 			if (lastSplitted1 != null &&
 				lastSplitted1.hasAttributes(AbstractHalfEdge.BOUNDARY) &&
@@ -632,6 +635,18 @@ class EdgeProjector {
 		return false;
 	}
 
+	/**
+	 * Callback called when a vertex is inserted on an existing vertex.
+	 * By default it does nothing
+	 */
+	protected void mergingVertices(Vertex source, Vertex target)
+	{
+	}
+
+	protected void verticesMerged(Vertex target)
+	{
+	}
+
 	protected boolean isToProject(AbstractHalfEdge edge)
 	{
 		return true;
@@ -649,6 +664,13 @@ class EdgeProjector {
 		triangles.clear();
 		boolean notProjected = !origin && !destination &&
 			edge.hasAttributes(AbstractHalfEdge.BOUNDARY);
+		int group = this.group;
+		boolean ignoreGroup = this.ignoreGroup;
+		if(group == -1)
+		{
+			ignoreGroup = true;
+			group = edge.getTri().getGroupId();
+		}
 		if ((origin && destination) || notProjected) {
 			compteEdgeAABB(edge, aabb);
 			kdTree.getNearTriangles(aabb, triangles, group, ignoreGroup);
