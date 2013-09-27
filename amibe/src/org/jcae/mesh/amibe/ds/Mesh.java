@@ -2328,6 +2328,35 @@ public class Mesh implements Serializable
 			}
 		}
 	}
+
+	/**
+	 * Merge an other mesh to this mesh.
+	 * This method assuming that there are no group name conflict that is group
+	 * names from the other mesh do not exists in this mesh
+	 */
+	public void merge(Mesh toMerge)
+	{
+		if(hasNodes())
+			//I don't need it yet
+			throw new UnsupportedOperationException();
+
+		int groupOffset = getNumberOfGroups();
+		for(Triangle t: toMerge.getTriangles())
+		{
+			add(t);
+			t.setGroupId(t.getGroupId() + groupOffset);
+		}
+		int nbBeams = toMerge.getBeams().size() / 2;
+		List<Vertex> otherBeams = toMerge.getBeams();
+		for(int i = 0; i < nbBeams; i++)
+		{
+			addBeam(otherBeams.get(i * 2), otherBeams.get(i * 2 + 1),
+				toMerge.getBeamGroup(i) + groupOffset);
+		}
+		for(Entry<Integer, String> e: toMerge.groupNames.entrySet())
+			setGroupName(e.getKey()+groupOffset, e.getValue());
+		vertexGroups.putAll(toMerge.getVertexGroup());
+	}
 	// Useful for debugging
 	/*  Following imports must be moved at top.
 import java.io.FileOutputStream;
