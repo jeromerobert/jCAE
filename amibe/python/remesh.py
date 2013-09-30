@@ -279,6 +279,7 @@ def __remesh(options):
     writeVTK(liaison)
     if options.afront_path:
         opts.clear()
+        opts.put("expectInsert", "false")
         opts.put("coplanarity", safe_coplanarity)
         SwapEdge(liaison, opts).compute()
 
