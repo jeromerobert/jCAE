@@ -339,18 +339,13 @@ public class DistanceMetric extends MetricSupport.AnalyticMetric {
 				v = s.size0;
 			else
 			{
-				double hk = s.size0;
-				double hkp1 = rho * hk;
-				double dk = s.size0;
-				double dkp1 = dk + hkp1;
-				while(d2 > dk*dk && hkp1 < sizeInf)
-				{
-					hk = hkp1;
-					hkp1 = hk * rho;
-					dk = dkp1;
-					dkp1 = dk + hkp1;
-				}
-				v = hk + (hkp1 - hk) * (Math.sqrt(d2) - dk) / (dkp1 - dk);
+				double deltaS = sizeInf - s.size0;
+				double arho = (rho - 1.0) / rho;
+				double drho = s.size0 + deltaS / arho;
+				if (d2 > drho * drho)
+					v = sizeInf;
+				else
+					v = s.size0 + arho * (Math.sqrt(d2) - s.size0);
 			}
 			minValue = Math.min(v, minValue);
 		}
