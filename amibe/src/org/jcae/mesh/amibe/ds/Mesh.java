@@ -2049,7 +2049,9 @@ public class Mesh implements Serializable
 				{
 					System.err.println("ERROR: dot product of normals of triangles below is: "+Matrix3D.prodSca(temp[2], temp[3]));
 					System.err.println("T1: "+t);
+					System.err.println("group name: "+getGroupName(t.getGroupId()));
 					System.err.println("T2: "+sym.getTri());
+					System.err.println("group name: "+getGroupName(sym.getTri().getGroupId()));
 					return false;
 				}
 			}
@@ -2075,6 +2077,7 @@ public class Mesh implements Serializable
 			if (a*c == b*b)
 			{
 				System.err.println("ERROR: degenerated triangle: "+t);
+				System.err.println("group name: "+getGroupName(t.getGroupId()));
 				return false;
 			}
 		}

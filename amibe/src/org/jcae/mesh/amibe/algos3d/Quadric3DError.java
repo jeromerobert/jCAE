@@ -287,7 +287,7 @@ public class Quadric3DError implements Serializable
 
 	private static Vertex bestCandidateV1V2Ref(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2)
 	{
-		assert v1.isMutable() || v2.isMutable();
+		assert v1.isMutable() || v2.isMutable(): v1+" "+v2;
 		if(!v1.isMutable())
 			return v1;
 		else if(!v2.isMutable())

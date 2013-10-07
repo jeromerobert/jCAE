@@ -104,7 +104,7 @@ public class RemeshSkeleton {
 			if(e.destination() == v1 && !e.sym().hasAttributes(AbstractHalfEdge.OUTER))
 				return e.sym();
 		}
-		throw new NoSuchElementException(v1+" "+v2);
+		throw new NoSuchElementException(v1+" "+v2+" "+v1.getLink()+" "+v2.getLink());
 	}
 
 	private static double dot(double[] v1, double[] v2)
