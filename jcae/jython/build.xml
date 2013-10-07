@@ -7,34 +7,8 @@
     <import file="nbproject/build-impl.xml"/>
 	<property file="../nbproject/private/private.properties"/>
 	<property file="../nbproject/project.properties"/>
-
-	<target name="-release.files.linux" if="arch.linux">
-	    <property name="jython.path" value="${path.jython.linux}"/>
-		<property name="script.ext" value=""/>
-	</target>
-
-	<target name="-release.files.win32" if="arch.win32">
-	    <property name="jython.path" value="${path.jython.win32}"/>
-		<property name="script.ext" value=".bat"/>
-	</target>
-
-	<!--
-	depends on up-to-date target because jython includes more than 1000 files
-	and the copy task takes times even to check that there is nothing to copy
-	-->
-	<target name="release" depends="-release.files.linux,-release.files.win32,up-to-date"
-		unless="is.jar.uptodate">
-		<copy verbose="true" todir="${cluster}/modules/jython">
-			<fileset dir="${jython.path}">
-				<exclude name="tests/**"/>
-				<exclude name="Lib/test/**"/>
-				<exclude name="Lib/**/*.class"/>
-				<exclude name="Lib/email/test/**"/>
-                <exclude name="**/cachedir/**"/>
-			</fileset>
-		</copy>
-		<chmod file="${cluster}/modules/jython/bin/jython${script.ext}" perm="755"/>
-		<chmod file="${cluster}/modules/jython/jython${script.ext}" perm="755"/>
+	<target name="release" unless="is.jar.uptodate">
+		<copy verbose="true" file="${libs.jython.classpath}" tofile="${cluster}/modules/ext/jython.jar"/>
 	</target>
 
 	<target name="compile" depends="release,projectized-common.compile"/>

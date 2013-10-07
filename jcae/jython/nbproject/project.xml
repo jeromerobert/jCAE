@@ -28,8 +28,8 @@
                 <package>org.python.util</package>
             </public-packages>
             <class-path-extension>
-                <runtime-relative-path>jython/jython.jar</runtime-relative-path>
-                <binary-origin>../build/cluster/modules/jython/jython.jar</binary-origin>
+                <runtime-relative-path>ext/jython.jar</runtime-relative-path>
+                <binary-origin>../build/cluster/modules/ext/jython.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>

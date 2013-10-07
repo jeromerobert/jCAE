@@ -1,0 +1,66 @@
+jCAE need a "standalone" bundle of jython. It can be downloaded from the
+jython website or build using the ant jar-standalone command.
+
+The patch bellow allow to build such jar file
+with .py files replaced by $py.class files so the bootstrap is much faster.
+
+diff --git a/build.xml b/build.xml
+index b99cd92..49ae2a0 100644
+--- a/build.xml
++++ b/build.xml
+@@ -614,10 +614,12 @@ The readme text for the next release will be like:
+     </target>
+ 
+ <target name="jar-standalone" depends="jar-complete, copy-lib">
++        <java jar="${dist.dir}/${jython.deploy.jar}" fork="true" dir="${dist.dir}">
++            <arg line="-m compileall Lib"/>
++        </java>
+         <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="extlibs/jarjar-0.7.jar"/>
+         <jarjar destfile="${dist.dir}/${jython.standalone.jar}">
+             <zipfileset src="${dist.dir}/${jython.deploy.jar}"/>
+-            <fileset dir="${dist.dir}" includes="Lib/**" excludes="Lib/test/**,Lib/email/test/**"/>
+ 
+             <manifest>
+                 <attribute name="Main-Class" value="org.python.util.jython" />
+@@ -634,6 +636,9 @@ The readme text for the next release will be like:
+                 </section>
+             </manifest>
+         </jarjar>
++        <jar destfile="${dist.dir}/${jython.standalone.jar}" update="true">
++            <fileset dir="${dist.dir}" includes="Lib/**.class" excludes="Lib/test/**,Lib/email/test/**"/>
++        </jar>
+     </target>
+ 
+     <target name="jar" depends="compile,expose">
+diff --git a/src/org/python/core/PySystemState.java b/src/org/python/core/PySystemState.java
+index dddcab6..a356d60 100644
+--- a/src/org/python/core/PySystemState.java
++++ b/src/org/python/core/PySystemState.java
+@@ -1070,15 +1070,13 @@ public class PySystemState extends PyObject implements ClassDictInit {
+     private static PyList initPath(Properties props, boolean standalone, String jarFileName) {
+         PyList path = new PyList();
+         addPaths(path, props.getProperty("python.path", ""));
+-        if (prefix != null) {
+-            String libpath = new File(prefix.toString(), "Lib").toString();
+-            path.append(new PyString(libpath));
+-        }
+         if (standalone) {
+             // standalone jython: add the /Lib directory inside JYTHON_JAR to the path
+             addPaths(path, jarFileName + "/Lib");
++        } else if (prefix != null) {
++            String libpath = new File(prefix.toString(), "Lib").toString();
++            path.append(new PyString(libpath));
+         }
+-
+         return path;
+     }
+ 
+@@ -1095,7 +1093,7 @@ public class PySystemState extends PyObject implements ClassDictInit {
+             JarFile jarFile = null;
+             try {
+                 jarFile = new JarFile(jarFileName);
+-                JarEntry jarEntry = jarFile.getJarEntry("Lib/os.py");
++                JarEntry jarEntry = jarFile.getJarEntry("Lib/os$py.class");
+                 standalone = jarEntry != null;
+             } catch (IOException ioe) {
+             } finally {

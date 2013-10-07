@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.TreeSet;
@@ -36,7 +35,6 @@ import java.util.logging.LogRecord;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import org.jcae.mesh.JCAEFormatter;
-import org.jcae.mesh.xmldata.Group;
 import org.jcae.netbeans.options.OptionNode;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
@@ -46,7 +44,6 @@ import org.openide.nodes.Node;
 import org.openide.util.Cancellable;
 import org.openide.util.Exceptions;
 import org.openide.util.HelpCtx;
-import org.openide.util.Utilities;
 import org.openide.util.actions.CookieAction;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
@@ -281,31 +278,35 @@ public abstract class AlgoAction extends CookieAction {
 
 	protected String getClassPath()
 	{
-		return InstalledFileLocator.getDefault().locate(
-			"modules/ext/amibe.jar", "org.jcae.netbeans", false).getPath();
+		File amibe = InstalledFileLocator.getDefault().locate(
+			"modules/ext/amibe.jar", "org.jcae.netbeans", false);
+		File trove = InstalledFileLocator.getDefault().locate(
+			"modules/ext/trove.jar", "org.jcae.netbeans", false);
+		return amibe.getPath()+File.pathSeparatorChar+trove.getPath();
 	}
-	
+
+	private String getJythonJar()
+	{
+		return InstalledFileLocator.getDefault().locate(
+			"modules/ext/jython.jar", "org.jcae.jython", false).getPath();
+	}
+
 	private void runInOtherVM(Node node, List<String> args, File pyFile, InputOutput io)
 		throws IOException
 	{
 		ProcessBuilder pb = new ProcessBuilder();
-		String ext = Utilities.isWindows() ? ".bat" : "";
-		File f = InstalledFileLocator.getDefault().locate(
-				"modules/jython/bin/jython" + ext, "org.jcae.netbeans.mesh", false);
-		pb.command().add(f.getPath());
-		for (String s:OptionNode.getJVMOptions()) {
-			if (s.startsWith("-") && !s.startsWith("-D")) {
-				s = "-J" + s;
-			}
+		pb.command().add(System.getProperty("java.home") + File.separatorChar +
+			"bin" + File.separatorChar + "java");
+		for (String s:OptionNode.getJVMOptions())
 			pb.command().add(s);
-		}
 		String home = System.getProperty("netbeans.user");
 		File dir = new File(new File(new File(new File(home), "var"), "cache"), "jython");
 		pb.command().add("-Dpython.cachedir="+dir.getPath());
-		pb.environment().put("CLASSPATH", getClassPath());
+		pb.environment().put("JYTHONPATH", getClassPath());
+		pb.command().add("-jar");
+		pb.command().add(getJythonJar());
 		pb.command().add(pyFile.getPath());
 		pb.command().addAll(args);
-		pb.environment().put("JAVA_HOME", System.getProperty("java.home"));
 		customizeProcessBuilder(node, pb);
 		runProcess(pb, io);
 	}
