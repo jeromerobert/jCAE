@@ -233,15 +233,10 @@ public class CameraManager
 	
 	public void zoomTo(float x, float y, float z, float r) 
 	{
-		double[] pos = new double[]{x,y,z};
+		double rr = r / Math.sqrt(3);
 		canvas.lock();
-		canvas.GetRenderer().GetActiveCamera().SetFocalPoint(pos);
-		double[] n=canvas.GetRenderer().GetActiveCamera().GetDirectionOfProjection();
-		pos[0]-=r*n[0];
-		pos[1]-=r*n[1];
-		pos[2]-=r*n[2];
-		canvas.GetRenderer().GetActiveCamera().SetPosition(pos);
-		canvas.RenderSecured();
+		canvas.GetRenderer().ResetCamera(x-rr, x+rr, y-rr, y+rr, z-rr, z+rr);
+		canvas.Render();
 		canvas.unlock();
 	}
 	
