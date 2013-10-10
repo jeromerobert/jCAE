@@ -282,13 +282,10 @@ public abstract class AlgoAction extends CookieAction {
 			"modules/ext/amibe.jar", "org.jcae.netbeans", false);
 		File trove = InstalledFileLocator.getDefault().locate(
 			"modules/ext/trove.jar", "org.jcae.netbeans", false);
-		return amibe.getPath()+File.pathSeparatorChar+trove.getPath();
-	}
-
-	private String getJythonJar()
-	{
-		return InstalledFileLocator.getDefault().locate(
-			"modules/ext/jython.jar", "org.jcae.jython", false).getPath();
+		File jython = InstalledFileLocator.getDefault().locate(
+			"modules/ext/jython.jar", "org.jcae.netbeans", false);
+		return amibe.getPath() + File.pathSeparatorChar + trove.getPath() +
+			File.pathSeparatorChar + jython.getPath();
 	}
 
 	private void runInOtherVM(Node node, List<String> args, File pyFile, InputOutput io)
@@ -302,9 +299,9 @@ public abstract class AlgoAction extends CookieAction {
 		String home = System.getProperty("netbeans.user");
 		File dir = new File(new File(new File(new File(home), "var"), "cache"), "jython");
 		pb.command().add("-Dpython.cachedir="+dir.getPath());
-		pb.environment().put("JYTHONPATH", getClassPath());
-		pb.command().add("-jar");
-		pb.command().add(getJythonJar());
+		pb.command().add("-cp");
+		pb.command().add(getClassPath());
+		pb.command().add("org.python.util.jython");
 		pb.command().add(pyFile.getPath());
 		pb.command().addAll(args);
 		customizeProcessBuilder(node, pb);

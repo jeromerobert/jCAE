@@ -1,7 +1,7 @@
 
 # jCAE
 from org.jcae.mesh.amibe.ds import Mesh, AbstractHalfEdge, Vertex
-from org.jcae.mesh.amibe.algos3d import Remesh, SwapEdge, QEMDecimateHalfEdge
+from org.jcae.mesh.amibe.algos3d import Remesh, SwapEdge, QEMDecimateHalfEdge, ImproveVertexValence
 from org.jcae.mesh.amibe.algos3d import LengthDecimateHalfEdge, VertexInsertion, PolylineFactory
 from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.projection import MeshLiaison
