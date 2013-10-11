@@ -23,6 +23,10 @@ import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import gnu.trove.list.array.TFloatArrayList;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import org.jcae.mesh.amibe.ds.Triangle;
 
 /**
  * Abstract class to compute quality criteria.
@@ -149,5 +153,41 @@ public abstract class QualityProcedure
 	{
 		data = d;
 	}
-	
+
+	/**
+	 * Return the highest or lowest quality triangles in the list
+	 * @param qualityProcedure The quality procedure to use
+	 * @param input The list of Triangle to test
+	 * @param nb The number of triangles to return. If the number is positive
+	 * the lowest quality triangles are return else the highest quality triangles
+	 * are return
+	 * @return The triangles with the lowest or highest quality
+	 */
+	public static List<Triangle> worstTriangles(QualityProcedure qualityProcedure,
+		final List<Triangle> input, final int nb)
+	{
+		Integer[] indices = new Integer[input.size()];
+		for (int i = 0; i < indices.length; i++) {
+			indices[i] = i;
+		}
+		final float[] qualities = new float[indices.length];
+		int k = 0;
+		for (Triangle t : input) {
+			qualities[k++] = qualityProcedure.quality(t);
+		}
+		Arrays.sort(indices, new Comparator<Integer>() {
+			public int compare(Integer o1, Integer o2) {
+				return Float.compare(qualities[o1], qualities[o2]);
+			}
+		});
+		Triangle[] toReturn = new Triangle[nb];
+		if (nb > 0) {
+			for (int i = 0; i < nb; i++)
+				toReturn[i] = input.get(indices[i]);
+		} else {
+			for (int i = 0; i < -nb; i++)
+				toReturn[i] = input.get(indices[indices.length - i - 1]);
+		}
+		return Arrays.asList(toReturn);
+	}
 }
