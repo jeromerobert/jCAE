@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.TreeSet;
@@ -32,10 +31,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import org.jcae.mesh.JCAEFormatter;
 import org.jcae.netbeans.options.OptionNode;
+import org.jcae.netbeans.viewer3d.ViewManager;
+import org.jcae.vtk.CameraManager;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.filesystems.FileUtil;
@@ -47,6 +50,9 @@ import org.openide.util.HelpCtx;
 import org.openide.util.actions.CookieAction;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
+import org.openide.windows.OutputEvent;
+import org.openide.windows.OutputListener;
+import org.openide.windows.OutputWriter;
 import org.python.util.PythonInterpreter;
 
 /**
@@ -54,15 +60,22 @@ import org.python.util.PythonInterpreter;
  * @author Jerome Robert
  */
 public abstract class AlgoAction extends CookieAction {
-
 	protected static class Redirector extends Thread {
-
+		private static final Pattern PATTERN;
+		static
+		{
+			String floatRegex = "([-+]?\\d*\\.?\\d+(?:[eE][-+]?\\d+)?)";
+			String separator = "[\\s,]+";
+			PATTERN = Pattern.compile(floatRegex + separator + floatRegex + separator + floatRegex);
+		}
 		private final BufferedReader in;
-		private final PrintWriter out;
+		private final OutputWriter out;
+		private final CameraManager cameraManager;
 
-		public Redirector(InputStream in, PrintWriter out) {
+		public Redirector(InputStream in, OutputWriter out) {
 			this.in = new BufferedReader(new InputStreamReader(in));
 			this.out = out;
+			this.cameraManager = ViewManager.getDefault().getCurrentView().getCameraManager();
 		}
 
 		@Override
@@ -70,7 +83,22 @@ public abstract class AlgoAction extends CookieAction {
 			try {
 				String line = in.readLine();
 				while (line != null) {
-					out.println(line);
+					Matcher m = PATTERN.matcher(line);
+					if(m.find())
+					{
+						final float x = Float.parseFloat(m.group(1));
+						final float y = Float.parseFloat(m.group(2));
+						final float z = Float.parseFloat(m.group(3));
+						out.println(line, new OutputListener() {
+							public void outputLineSelected(OutputEvent ev) {}
+							public void outputLineCleared(OutputEvent ev) {}
+							public void outputLineAction(OutputEvent ev) {
+								cameraManager.zoomTo(x, y, z, 20);
+							}
+						});
+					}
+					else
+						out.println(line);
 					line = in.readLine();
 				}
 			} catch (IOException ex) {
