@@ -299,6 +299,8 @@ public abstract class AlgoAction extends CookieAction {
 		String home = System.getProperty("netbeans.user");
 		File dir = new File(new File(new File(new File(home), "var"), "cache"), "jython");
 		pb.command().add("-Dpython.cachedir="+dir.getPath());
+		//Required to get wildcard import
+		pb.command().add("-Dpython.cachedir.skip=false");
 		pb.command().add("-cp");
 		pb.command().add(getClassPath());
 		pb.command().add("org.python.util.jython");
