@@ -180,11 +180,13 @@ public abstract class QualityProcedure
 				return Float.compare(qualities[o1], qualities[o2]);
 			}
 		});
-		Triangle[] toReturn = new Triangle[nb];
+		Triangle[] toReturn;
 		if (nb > 0) {
+			toReturn = new Triangle[nb];
 			for (int i = 0; i < nb; i++)
 				toReturn[i] = input.get(indices[i]);
 		} else {
+			toReturn = new Triangle[-nb];
 			for (int i = 0; i < -nb; i++)
 				toReturn[i] = input.get(indices[indices.length - i - 1]);
 		}

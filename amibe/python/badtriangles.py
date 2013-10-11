@@ -3,6 +3,7 @@ from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.validation import *
 from org.jcae.mesh.xmldata import MeshReader
 from optparse import OptionParser
+from math import *
 import sys
 
 cmd=("report  ", "<dir>", "Print bad triangles in a mesh, sorted by quality.")
@@ -26,6 +27,8 @@ mesh = Mesh(MeshTraitsBuilder())
 xmlDir = args[0]
 MeshReader.readObject3D(mesh, xmlDir)
 qproc = globals()[options.crit]()
-print type(mesh.triangles)
 for t in QualityProcedure.worstTriangles(qproc, mesh.triangles, options.number):
-    print t
+    if "Angle" in options.crit:
+        print degrees(qproc.quality(t)), t
+    else:
+        print degrees(quality(t)), t
