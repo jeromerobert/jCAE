@@ -99,7 +99,7 @@ public class Triangle implements Serializable
 	 */
 	public boolean hasAttributes(int attr)
 	{
-		throw new RuntimeException();
+		return false;
 	}
 	
 	/**
