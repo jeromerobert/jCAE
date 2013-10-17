@@ -43,7 +43,7 @@ public class EdgesCollapser {
 		this.mesh = mesh;
 	}
 
-	public AbstractHalfEdge collapse(Vertex v1, Vertex v2)
+	private AbstractHalfEdge collapseImpl(Vertex v1, Vertex v2)
 	{
 		v2.sub(v1, vector1);
 		AbstractHalfEdge toCollapse = nextEdge(v1, vector1, v1);
@@ -55,19 +55,32 @@ public class EdgesCollapser {
 			assert !toCollapse.hasAttributes(AbstractHalfEdge.IMMUTABLE): toCollapse;
 			Vertex target = v1;
 			if(!mesh.canCollapseEdge(toCollapse, v1))
-			{
-				toCollapse = nextEdge(toCollapse.origin(), vector1, toCollapse.origin());
-				target = toCollapse.destination();
-				if(toCollapse.hasAttributes(AbstractHalfEdge.OUTER))
-					toCollapse = toCollapse.sym();
-				assert mesh.canCollapseEdge(toCollapse, target):
-					"Cannot collapse "+toCollapse+" to "+target;
-			}
+				return null;
 			collapsingEdge(toCollapse);
 			mesh.edgeCollapse(toCollapse, target);
 			toCollapse = nextEdge(v1, vector1, v1);
 		}
 		return toCollapse;
+	}
+
+	public AbstractHalfEdge collapse(Vertex v1, Vertex v2)
+	{
+		AbstractHalfEdge r = collapseImpl(v1, v2);
+		if(r == null)
+		{
+			// we failed to collapse from v2 to v1, let's try in the other side
+			r = collapseImpl(v2, v1);
+			if(r == null)
+				// we are still failing but the configuration may have change
+				// so let's try forward again.
+				r = collapseImpl(v1, v2);
+			else
+				r = r.sym();
+		}
+
+		if(r == null)
+			throw new IllegalArgumentException("Cannot collapse "+v1+" to "+v2);
+		return r;
 	}
 
 	/**
