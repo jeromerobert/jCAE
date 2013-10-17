@@ -441,17 +441,11 @@ public class EdgeProjector {
 			Location p2 = triangleProjector2.getProjection();
 			Location p1 = triangleProjector1.getProjection();
 			triangleSplitter.split(p1, p2, triangleProjector1.sqrTolerance);
-			lastMergeTarget = triangleSplitter.getSplitVertex();
-			if (triangleSplitter.getSplittedEdge() != null && lastMergeTarget == null) {
-				lastMergeTarget = mesh.createVertex(triangleSplitter.getSplitPoint());
-				assert TriangleHelper.isOnEdge(lastMergeTarget, p1, p2,
-					triangleProjector1.sqrTolerance);
-			}
+			lastMergeTarget = triangleSplitter.getSplitVertex(mesh);
 			if (lastMergeTarget != null) {
 				lastMergeSource = mesh.createVertex(0, 0, 0);
-				double l = TriangleHelper.reverseProject(p2, edge.destination(),
-					edge.origin(), lastMergeTarget, lastMergeSource,
-					triangleProjector1.sqrTolerance);
+				double l = triangleSplitter.getReverseSplitPoint(p2,
+					edge.destination(), edge.origin(), lastMergeSource);
 				if (l > triangleProjector1.sqrMaxDistance) {
 					lastMergeTarget = null;
 				}
@@ -487,17 +481,14 @@ public class EdgeProjector {
 			triangleSplitter.splitApex(edge.destination(),
 				triangleProjector1.getProjection(),
 				triangleProjector1.sqrTolerance);
-			lastMergeTarget = triangleSplitter.getSplitVertex();
-			if (lastMergeTarget == null && triangleSplitter.getSplittedEdge() != null) {
-				lastMergeTarget = mesh.createVertex(triangleSplitter.getSplitPoint());
-			}
+			lastMergeTarget = triangleSplitter.getSplitVertex(mesh);
 			if(lastMergeTarget != null && !lastMergeTarget.isMutable())
 				lastMergeTarget = null;
 			if (lastMergeTarget != null) {
 				lastMergeSource = mesh.createVertex(0, 0, 0);
-				double l = TriangleHelper.reverseProject(triangleProjector1.getProjection(),
-					edge.origin(), edge.destination(), lastMergeTarget,
-					lastMergeSource, triangleProjector1.sqrTolerance);
+				double l = triangleSplitter.getReverseSplitPoint(
+					triangleProjector1.getProjection(), edge.origin(),
+					edge.destination(), lastMergeSource);
 				if (l > triangleProjector1.sqrMaxDistance) {
 					lastMergeTarget = null;
 				}
@@ -517,17 +508,14 @@ public class EdgeProjector {
 			triangleSplitter.splitApex(edge.origin(),
 				triangleProjector2.getProjection(),
 				triangleProjector2.sqrTolerance);
-			lastMergeTarget = triangleSplitter.getSplitVertex();
-			if (lastMergeTarget == null && triangleSplitter.getSplittedEdge() != null) {
-				lastMergeTarget = mesh.createVertex(triangleSplitter.getSplitPoint());
-			}
+			lastMergeTarget = triangleSplitter.getSplitVertex(mesh);
 			if(lastMergeTarget != null && !lastMergeTarget.isMutable())
 				lastMergeTarget = null;
 			if (lastMergeTarget != null) {
 				lastMergeSource = mesh.createVertex(0, 0, 0);
-				double l = TriangleHelper.reverseProject(triangleProjector2.getProjection(),
-					edge.destination(), edge.origin(), lastMergeTarget,
-					lastMergeSource, triangleProjector2.sqrTolerance);
+				double l = triangleSplitter.getReverseSplitPoint(
+					triangleProjector2.getProjection(), edge.destination(),
+					edge.origin(), lastMergeSource);
 				if (l > triangleProjector2.sqrMaxDistance) {
 					lastMergeTarget = null;
 				}
@@ -611,7 +599,10 @@ public class EdgeProjector {
 				LOGGER.info("Something strange append around "+lastMergeSource);
 				return false;
 			}
-			assert lastMergeSource.sqrDistance3D(lastMergeTarget) < triangleProjector1.sqrMaxDistance * 2 : lastMergeSource.sqrDistance3D(lastMergeTarget);
+			assert lastMergeSource.sqrDistance3D(lastMergeTarget) < triangleProjector1.sqrMaxDistance * 2 :
+				"Vertex is too far: "+
+				Math.sqrt(lastMergeSource.sqrDistance3D(lastMergeTarget))+
+				" > "+Math.sqrt(triangleProjector1.sqrMaxDistance);
 			check(mesh);
 			mergingVertices(lastMergeSource, lastMergeTarget);
 			mergeVertices(lastMergeSource, lastMergeTarget);

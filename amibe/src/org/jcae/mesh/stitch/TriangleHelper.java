@@ -105,81 +105,6 @@ class TriangleHelper {
 	}
 
 	/**
-	 * Given the 2 quads bellow with A E and B orthogonal, compute the
-	 * coordinates of F from other points.
-	 * <pre>
-	 *          _____C
-	 *     _ _F/     |
-	 *   D/   |      |
-	 *   |    |      |
-	 *   |    |      |
-	 *   A____E______B
-	 * </pre>
-	 * @param tol tolerance for determinant check. This is homogenous to a
-	 * squared length
-	 * @return the square of the distance between E and F
-	 */
-	public static double reverseProject(Location b, Location c,
-		Location d, Location e, Location f, double tol)
-	{
-		assert f != null;
-		assert e.sqrDistance3D(b) > 1E-24: e +" "+b;
-		double dei, dej;
-		//i = x, j = y
-		double cbi = b.getX() - c.getX();
-		double cbj = b.getY() - c.getY();
-		double dci = c.getX() - d.getX();
-		double dcj = c.getY() - d.getY();
-		double denum = cbj*dci - cbi * dcj;
-		if(Math.abs(denum) < tol)
-		{
-			//i = x, j = z
-			cbi = b.getX() - c.getX();
-			cbj = b.getZ() - c.getZ();
-			dci = c.getX() - d.getX();
-			dcj = c.getZ() - d.getZ();
-			denum = cbj*dci - cbi * dcj;
-			if(Math.abs(denum) < tol)
-			{
-				//i = y, j = z
-				cbi = b.getY() - c.getY();
-				cbj = b.getZ() - c.getZ();
-				dei = e.getY() - d.getY();
-				dej = e.getZ() - d.getZ();
-				dci = c.getY() - d.getY();
-				dcj = c.getZ() - d.getZ();
-				denum = cbj*dci - cbi * dcj;
-			}
-			else
-			{
-				dei = e.getX() - d.getX();
-				dej = e.getZ() - d.getZ();
-			}
-		}
-		else
-		{
-			dei = e.getX() - d.getX();
-			dej = e.getY() - d.getY();
-		}
-		if(Math.abs(denum) < tol)
-		{
-			f.moveTo(e);
-		}
-		else
-		{
-			/*assert Math.abs(denum) > tol : denum + " > " + tol + "\nb=" + b +
-				"\nc=" + c + "\nd=" + d + "\ne=" + e + "\ntol=" + tol;*/
-			double alpha = (cbj * dei - cbi * dej) / denum;
-			f.moveTo(
-				d.getX() + alpha * (c.getX() - d.getX()),
-				d.getY() + alpha * (c.getY() - d.getY()),
-				d.getZ() + alpha * (c.getZ() - d.getZ()));
-		}
-		assert isOnEdge(f, d, c, 2*tol): Math.abs(denum);
-		return f.sqrDistance3D(e);
-	}
-
-	/**
 	 * Given 2 triangles A, B, C and A, D, E with D on AB and unknown and on E
 	 * on AC, use the Thales theorem to compute the DE distance, then if DE is
 	 * smaller than sqrMaxDist, set location of E.
@@ -256,8 +181,9 @@ class TriangleHelper {
 		TriangleHelper th = new TriangleHelper(triangle);
 		TriangleSplitter ts = new TriangleSplitter();
 		ts.setTriangle(th);
-		ts.split(new Location(-0.5, 0.5, 0), new Location(2, 0.5, 0), 1);
-		assert ts.getSplitPoint().sqrDistance3D(new Location(0,0.5,0)) < 1E-6;
+		ts.split(new Location(-0.5, 0.5, 0), new Location(2, 0.5, 0), .1);
+		assert ts.getSplitVertex(mesh).sqrDistance3D(new Location(0,0.5,0)) < 1E-6: ts.getSplitVertex(
+			mesh)+" "+ts.getSplittedEdge();
 
 		v2.moveTo(0.5, 0.1, 0.1);
 		assert TriangleHelper.sqrDistance(v0, v1, v2) - 0.02 < 1E-8;
@@ -269,7 +195,7 @@ class TriangleHelper {
 		Location p1 = new Location(-1.8504563775477978, 1000.2540420059955, -19.002491845838513);
 		Location p2 = new Location(195.4932520809972, 980.6765334491752, -19.151315547512326);
 		ts.split(p1, p2, 0.010000000000000002);
-		assert ts.getSplitVertex() == null && ts.getSplittedEdge() == null;
+		assert ts.getSplitVertex(mesh) == null;
 
 		v0.moveTo(4000.0, -2250.0, -1000.0);
 		v1.moveTo(-2000.0, 3000.0, -1000.0);
@@ -286,12 +212,6 @@ class TriangleHelper {
 		p1 = new Location(555.5819503922005, 831.444099215599, 0.0);
 		p2 = new Location(707.106, 707.108, 0.0);
 		ts.split(p1, p2, 0.010000000000000002);
-		assert ts.getSplitVertex() == null && ts.getSplittedEdge() == null;
-
-		Location b=new Location(555.569, 831.47, 0.0);
-		Location c = new Location(555.569, 831.47, 0.0);
-		Location d= new Location(382.682, 923.88, 0.0);
-		Location e= new Location(544.4204001835601, 837.4290490264581, 0.0);
-		TriangleHelper.reverseProject(b, c, d, e, new Location(), 1.0);
+		assert ts.getSplitVertex(mesh) == null;
 	}
 }

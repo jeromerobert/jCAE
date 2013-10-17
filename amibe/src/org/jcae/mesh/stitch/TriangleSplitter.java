@@ -21,6 +21,7 @@ package org.jcae.mesh.stitch;
 
 import java.util.Arrays;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
+import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.Location;
@@ -41,20 +42,42 @@ class TriangleSplitter {
 		this.triangleHelper = th;
 	}
 
-	public Location getSplitPoint()
+	public Vertex getSplitVertex(Mesh mesh)
 	{
-		return splitPoint;
-	}
-
-	public Vertex getSplitVertex()
-	{
-		return vertex;
+		if(vertex == null)
+		{
+			if(toSplit == null)
+				return null;
+			else
+				return mesh.createVertex(splitPoint);
+		}
+		else
+			return vertex;
 	}
 
 	public AbstractHalfEdge getSplittedEdge()
 	{
 		return toSplit;
 	}
+
+	/**
+	 * Return a point of the projected segment which is close to the split point
+	 * @param b the projection of c on the triangle
+	 * @param c a point of the projected segment
+	 * @param d a point of the projected segment
+	 * @return
+	 */
+	public double getReverseSplitPoint(Location b, Location c, Location d, Location result)
+	{
+		Location e = vertex;
+		if( e == null )
+			if(toSplit == null)
+				return Double.POSITIVE_INFINITY;
+			else
+				e = splitPoint;
+		return lineToLineDistance(b, c, d, e, result);
+	}
+
 	private boolean isVertex(double u, double v, double sqrTol)
 	{
 		splitPoint.moveTo(triangleHelper.getLocation(u, v));
@@ -163,6 +186,70 @@ class TriangleSplitter {
 			toSplit = null;
 			vertex = null;
 		}
+	}
+	/**
+	 * Given a line L1: D+t*DC and L2 E+t*BC find the point of L1 which is the
+	 * closest of L2 and return the distance
+	 * @param b A point of the direction of L2
+	 * @param c A point of L1 and of the direction of L2
+	 * @param d A point of L1
+	 * @param e A point of L2
+	 * @param f set to the point of L1 which is the closest of L2
+	 * @return the square of the distance between L1 and L2
+	 */
+	private static double lineToLineDistance(Location b, Location c,
+		Location d, Location e, Location f)
+	{
+		double a01 = 0;
+		double b0 = 0;
+		double cc = 0;
+		double b1 = 0;
+		double normd1 = 0;
+		double normd2 = 0;
+		//use e as temporary storage for the direction of L1
+		f.moveTo(c.getX() - d.getX(),
+			c.getY() - d.getY(),
+			c.getZ() - d.getZ());
+
+		for(int i = 0; i < 3; i++)
+		{
+			double diff = d.get(i) - e.get(i);
+			double d1 = f.get(i);
+			double d2 = c.get(i) - b.get(i);
+			normd1 += d1 * d1;
+			normd2 += d2 * d2;
+			a01 -= d1 * d2;
+			b0 += diff * d1;
+			cc += diff * diff;
+			b1 -= diff * d2;
+		}
+		double s0;
+		if(normd2 < 1E-10)
+		{
+			//L2 is degenerated so just project e to L1
+			s0 = - b0 / Math.sqrt(cc);
+		}
+		else
+		{
+			normd1 = Math.sqrt(normd1);
+			normd2 = Math.sqrt(normd2);
+			b0 /= normd1;
+			b1 /= normd2;
+			a01 /= normd1 * normd2;
+			s0 = (a01 * b1 - b0) / Math.abs(1 - a01 * a01);
+		}
+
+		s0 /= normd1;
+		f.moveTo(
+			d.getX() + s0 * f.getX(),
+			d.getY() + s0 * f.getY(),
+			d.getZ() + s0 * f.getZ());
+
+		double sqrDist = f.sqrDistance3D(e);
+		assert s0 > 0 && s0 < 1 : "\ns0 :" + s0 + "\nb: " + b + "\nc: " + c +
+			"\nd: " + d + "\ne: " + e + "\ndist: " + Math.sqrt(sqrDist) +
+			"\n" + "normd1: " + normd1 + "\nnormd2: " + normd2 + "\n";
+		return sqrDist;
 	}
 
 	/**
