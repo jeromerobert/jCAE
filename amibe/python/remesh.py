@@ -78,9 +78,10 @@ def afront_debug(afront_path, tmp_dir, mesh, size, point_metric, immutable_group
         else:
             cmd.extend(['-target_size', str(size)])
         cmd.append('-tri_mesh')
-        sys.stderr.write("meshing %s\n" % g.name)
-        sys.stderr.write(" ".join(cmd)+"\n")
-        return_code = subprocess.call(cmd, cwd = tmp_dir)
+        logstd = sys.stdout if afront_stderr is subprocess.STDOUT else sys.stderr
+        logstd.write("meshing %s\n" % g.name)
+        logstd.write(" ".join(cmd)+"\n")
+        return_code = subprocess.call(cmd, cwd = tmp_dir, stderr = afront_stderr)
         if return_code != 0:
             print "Exit code: "+str(return_code)
     return MultiDoubleFileReader(nodes_file)
@@ -116,8 +117,9 @@ def afront(afront_path, tmp_dir, mesh, size, point_metric, immutable_groups,
         else:
             cmd.extend(['-target_size', str(size)])
         cmd.append('-tri_mesh')
-        sys.stderr.write("meshing %s\n" % g.name)
-        sys.stderr.write(" ".join(cmd)+"\n")
+        logstd = sys.stdout if afront_stderr is subprocess.STDOUT else sys.stderr
+        logstd.write("meshing %s\n" % g.name)
+        logstd.write(" ".join(cmd)+"\n")
         p = subprocess.Popen(cmd, stdin = subprocess.PIPE, cwd = tmp_dir,
              stderr = afront_stderr)
         sm.readGroup(g, p.stdin.fileno().channel)
