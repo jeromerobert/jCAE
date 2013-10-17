@@ -242,7 +242,7 @@ public class Vertex extends Location implements Serializable
 			ot = ot.next();
 		else if (ot.apex() == this)
 			ot = ot.prev();
-		assert ot.origin() == this;
+		assert ot.origin() == this: "Fatal error around "+ot.origin();
 		return ot;
 	}
 
