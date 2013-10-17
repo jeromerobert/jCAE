@@ -88,7 +88,7 @@ public class BeamInsertion {
 	private final VertexSwapper swapper;
 	//only for tolerance
 	private final MetricSupport.AnalyticMetricInterface metric;
-	private EdgesCollapser edgesCollapser;
+	private final EdgesCollapser edgesCollapser;
 	public BeamInsertion(final Mesh mesh, final double edgeSize)
 	{
 		this(mesh, new MetricSupport.AnalyticMetricInterface() {
@@ -114,7 +114,13 @@ public class BeamInsertion {
 		this.metric = metric;
 		swapper = new VertexSwapper(mesh);
 		swapper.setKdTree(kdTree);
-		edgesCollapser = new EdgesCollapser(mesh);
+		edgesCollapser = new EdgesCollapser(mesh)
+		{
+			@Override
+			protected void collapsingEdge(AbstractHalfEdge edge) {
+				removeFromKdTree(edge);
+			}
+		};
 	}
 
 	/** Insert a set of beams from binary files */
@@ -178,8 +184,6 @@ public class BeamInsertion {
 		v1 = insert(v1);
 		v2 = insert(v2);
 		AbstractHalfEdge toCollapse = edgesCollapser.collapse(v1, v2);
-		for(AbstractHalfEdge e: edgesCollapser.getCollapsed())
-			removeFromKdTree(e);
 		swapper.swap(v1);
 		swapper.swap(v2);
 		return toCollapse;

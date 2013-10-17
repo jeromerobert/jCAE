@@ -38,22 +38,13 @@ import org.jcae.mesh.amibe.metrics.Matrix3D;
 public class EdgesCollapser {
 	private final double[] vector1 = new double[3], vector2 = new double[3];
 	private final Mesh mesh;
-	private final Collection<AbstractHalfEdge> collapsedEdges = new ArrayList<AbstractHalfEdge>();
-
 	public EdgesCollapser(Mesh mesh)
 	{
 		this.mesh = mesh;
 	}
 
-	/** return the list of collapsed edges during the last collapse call */
-	public Collection<AbstractHalfEdge> getCollapsed()
-	{
-		return collapsedEdges;
-	}
-
 	public AbstractHalfEdge collapse(Vertex v1, Vertex v2)
 	{
-		collapsedEdges.clear();
 		v2.sub(v1, vector1);
 		AbstractHalfEdge toCollapse = nextEdge(v1, vector1, v1);
 		while(toCollapse.destination() != v2)
@@ -72,11 +63,19 @@ public class EdgesCollapser {
 				assert mesh.canCollapseEdge(toCollapse, target):
 					"Cannot collapse "+toCollapse+" to "+target;
 			}
-			collapsedEdges.add(toCollapse);
+			collapsingEdge(toCollapse);
 			mesh.edgeCollapse(toCollapse, target);
 			toCollapse = nextEdge(v1, vector1, v1);
 		}
 		return toCollapse;
+	}
+
+	/**
+	 * Called before collapsing an edged.
+	 * To be overriden by subclassers.
+	 */
+	protected void collapsingEdge(AbstractHalfEdge edge)
+	{
 	}
 
 	private AbstractHalfEdge nextEdge(Vertex v, double[] direction, Vertex notDirection)
