@@ -32,6 +32,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Logger;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
@@ -470,13 +471,13 @@ public class DistanceMetric extends MetricSupport.AnalyticMetric {
 			if(source instanceof PointSource)
 			{
 				PointSource s = (PointSource)source;
-				out.printf("1 %g %g %g %g %g %g\n", s.sx, s.sy, s.sz,
+				out.printf(Locale.ROOT, "1 %g %g %g %g %g %g\n", s.sx, s.sy, s.sz,
 					s.size0, Math.sqrt(s.sqrD0), Math.sqrt(s.sqrD1));
 			}
 			else if(source instanceof LineSource)
 			{
 				LineSource s = (LineSource)source;
-				out.printf("2 %g %g %g %d %g %g %g %d %g %g %g\n",
+				out.printf(Locale.ROOT, "2 %g %g %g %d %g %g %g %d %g %g %g\n",
 					s.sx0, s.sy0, s.sz0, s.closed0 ? 1 : 0,
 					s.sx1, s.sy1, s.sz1, s.closed1 ? 1 : 0,
 					s.size0, Math.sqrt(s.sqrD0), Math.sqrt(s.sqrD1));
