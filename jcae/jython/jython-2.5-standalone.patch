@@ -27,7 +27,7 @@ index b99cd92..49ae2a0 100644
              </manifest>
          </jarjar>
 +        <jar destfile="${dist.dir}/${jython.standalone.jar}" update="true">
-+            <fileset dir="${dist.dir}" includes="Lib/**.class" excludes="Lib/test/**,Lib/email/test/**"/>
++            <fileset dir="${dist.dir}" includes="Lib/**/*.class" excludes="Lib/test/**,Lib/email/test/**"/>
 +        </jar>
      </target>
  
