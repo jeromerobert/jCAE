@@ -168,6 +168,8 @@ public class BeamInsertion {
 			edge.setAttributes(AbstractHalfEdge.IMMUTABLE);
 			edge.sym().setAttributes(AbstractHalfEdge.IMMUTABLE);
 		}
+		edge.origin().setMutable(false);
+		edge.destination().setMutable(false);
 	}
 	private Vertex createVertex(int i, DoubleBuffer vertices)
 	{
