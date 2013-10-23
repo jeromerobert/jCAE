@@ -693,7 +693,7 @@ public class Mesh implements Serializable
 		freeVertices.removeAll(beams);
 		if (nrJunctionPoints > 0)
 			logger.info("Found "+nrJunctionPoints+" junction points");
-		if (!freeVertices.isEmpty())
+		if (!freeVertices.isEmpty() && hasNodes())
 		{
 			logger.log(Level.INFO, "Removed "+freeVertices.size()+" free points");
 			nodeList.removeAll(freeVertices);
