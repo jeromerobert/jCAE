@@ -766,7 +766,6 @@ public class TriangleKdTree {
 				}
 			}
 		}
-		assert !closeNodes.isEmpty(): bounds2String(aabb);
 	}
 
 	private boolean intersect(double[] aabb1, double[] aabb2)
