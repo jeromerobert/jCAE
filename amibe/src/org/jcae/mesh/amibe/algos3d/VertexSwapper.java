@@ -83,6 +83,15 @@ public class VertexSwapper {
 			quality.getSwappedQuality() > quality.getQuality();
 	}
 
+	/**
+	 * Allow subclasser to customize when an half edge can be swapped.
+	 * By default this call HalfEdge.canSwapTopology
+	 */
+	protected boolean canSwap(HalfEdge e)
+	{
+		return e.canSwapTopology();
+	}
+
 	private void swapManifold(Vertex v, Triangle triangle)
 	{
 		HalfEdge current = (HalfEdge) v.getIncidentAbstractHalfEdge(triangle, null);
@@ -98,7 +107,7 @@ public class VertexSwapper {
 				boolean isSwapped = false;
 				if (!current.hasAttributes(AbstractHalfEdge.NONMANIFOLD |
 					AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.OUTER | AbstractHalfEdge.IMMUTABLE)
-					&& current.canSwapTopology())
+					&& canSwap(current))
 				{
 					quality.setEdge(current);
 					if(isQualityImproved(quality))
