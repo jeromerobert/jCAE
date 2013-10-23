@@ -87,4 +87,10 @@ public class HashFactory {
 		else
 			return new THashMap<K, V>(capacity);
 	}	
+
+	public static <K, V> void ensureCapacity(Map<K, V> map, int capacity)
+	{
+		if(map instanceof THashMap)
+			((THashMap)map).ensureCapacity(capacity);
+	}
 }
