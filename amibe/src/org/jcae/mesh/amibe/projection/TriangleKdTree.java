@@ -198,9 +198,9 @@ public class TriangleKdTree {
 	private final transient BoundaryPool closeBoundaries = new BoundaryPool();
 	private final int[] closeIndex = new int[2];
 
-	public void remove(Triangle triangle)
+	public boolean remove(Triangle triangle)
 	{
-		replace(triangle, Collections.<Triangle>emptyList());
+		return replace(triangle, Collections.<Triangle>emptyList());
 	}
 	/**
 	 * Replace a triangle by a set of triangles which are located in the same
@@ -209,9 +209,11 @@ public class TriangleKdTree {
 	 * triangle.
 	 * @param toReplace
 	 * @param newTriangles
+	 * @return true if toReplace was actually found during the replacing process
 	 */
-	public void replace(Triangle toReplace, Collection<Triangle> newTriangles)
+	public boolean replace(Triangle toReplace, Collection<Triangle> newTriangles)
 	{
+		boolean found = false;
 		bounds(toReplace, triangleBounds);
 		getNodes(triangleBounds, closeBoundaries, false);
 		//TODO remove the array allocation (make it a class field)
@@ -230,6 +232,7 @@ public class TriangleKdTree {
 					// than checking the node/triangles intersection.
 					if(n.triangles[j] == toReplace)
 					{
+						found = true;
 						for(Triangle newT:newTriangles)
 						{
 							bounds(newT, triangleBounds);
@@ -276,6 +279,7 @@ public class TriangleKdTree {
 		}
 		closeBoundaries.clear();
 		closeNodes.clear();
+		return found;
 	}
 	public void getNearTriangles(double[] aabb, Collection<Triangle> result, int group)
 	{
