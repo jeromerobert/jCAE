@@ -200,7 +200,8 @@ public class UNV2Amibe
 	private String unitBlock;	
 	private String stripedUnvFile;
 	private IDMapping idMapping;
-	
+	private double scale = 1.0;
+
 	/** a list of 2412 elements which won't be store in the amibe file */
 	private final ArrayList<Element> elements=new ArrayList<Element>();
 	
@@ -239,7 +240,7 @@ public class UNV2Amibe
 				if (line.equals("2411") || line.equals("781"))
 				{
 					// read nodes
-					convertNodes(in, unit, out);
+					convertNodes(in, unit * scale, out);
 				}
 				else if (line.equals("2412"))
 				{
@@ -326,6 +327,10 @@ public class UNV2Amibe
 		stripedUnv.close();
 	}
 
+	protected boolean skipGroup(String name)
+	{
+		return false;
+	}
 	/**
 	 * 
 	 * @param in
@@ -350,6 +355,7 @@ public class UNV2Amibe
 			int nbelem = Integer.valueOf(snb).intValue();
 			// Read group name
 			String groupName = in.readLine().trim();
+			boolean skipGroup = skipGroup(groupName);
 			boolean groupCreated = false;
 			line = in.readLine().trim();
 			while (line.charAt(0) == '8' || line.charAt(0) == '7')
@@ -360,7 +366,7 @@ public class UNV2Amibe
 				{
 					st.nextToken();
 					int ind = Integer.parseInt(st.nextToken());
-					if (ind != 0)
+					if (ind != 0 && !skipGroup)
 					{
 						ind --;
 						if(line.charAt(0) == '8')
@@ -531,7 +537,11 @@ public class UNV2Amibe
 	{
 		stripedUnvFile=file;
 	}
-	
+
+	public void setScale(double scale) {
+		this.scale = scale;
+	}
+
 	public static void main(String[] args)
 	{
 		try
