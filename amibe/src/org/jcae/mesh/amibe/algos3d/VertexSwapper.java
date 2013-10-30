@@ -20,6 +20,7 @@
 
 package org.jcae.mesh.amibe.algos3d;
 
+import java.util.Iterator;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge.Quality;
 import org.jcae.mesh.amibe.ds.HalfEdge;
@@ -63,6 +64,26 @@ public class VertexSwapper {
 		this.group = group;
 	}
 
+	/**
+	 * Swap the edges whose v is the origin
+	 * This method is much slower than swap and should be avoided when possible
+	 */
+	public void swapOrigin(Vertex v)
+	{
+		loop: while(true)
+		{
+			Iterator<AbstractHalfEdge> it = v.getNeighbourIteratorAbstractHalfEdge();
+			while(it.hasNext())
+			{
+				HalfEdge he = (HalfEdge) it.next();
+				if(swapImpl(he) != he)
+					continue loop;
+			}
+			break loop;
+		}
+	}
+
+	/** Swap the edges whose v is the apex */
 	public void swap(Vertex v)
 	{
 		if(v.isManifold())
@@ -104,32 +125,12 @@ public class VertexSwapper {
 			redo = false;
 			while(true)
 			{
-				boolean isSwapped = false;
-				if (!current.hasAttributes(AbstractHalfEdge.NONMANIFOLD |
-					AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.OUTER | AbstractHalfEdge.IMMUTABLE)
-					&& canSwap(current))
-				{
-					quality.setEdge(current);
-					if(isQualityImproved(quality))
-					{
-						if(kdTree != null)
-						{
-							kdTree.remove(current.getTri());
-							kdTree.remove(current.sym().getTri());
-						}
-						current = (HalfEdge) mesh.edgeSwap(current);
-						HalfEdge swapped = current.next();
-						if(kdTree != null)
-						{
-							kdTree.addTriangle(swapped.getTri());
-							kdTree.addTriangle(swapped.sym().getTri());
-						}
-						redo = true;
-						isSwapped = true;
-					}
-				}
-
-				if(!isSwapped)
+				HalfEdge next = swapImpl(current);
+				boolean swapped = next != current;
+				current = next;
+				if(swapped)
+					redo = true;
+				else
 				{
 					current = current.nextApexLoop();
 					if (current.origin() == o)
@@ -137,5 +138,31 @@ public class VertexSwapper {
 				}
 			}
 		}
+	}
+
+	private HalfEdge swapImpl(HalfEdge current)
+	{
+		if (!current.hasAttributes(AbstractHalfEdge.NONMANIFOLD |
+			AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.OUTER | AbstractHalfEdge.IMMUTABLE)
+			&& canSwap(current))
+		{
+			quality.setEdge(current);
+			if(isQualityImproved(quality))
+			{
+				if(kdTree != null)
+				{
+					kdTree.remove(current.getTri());
+					kdTree.remove(current.sym().getTri());
+				}
+				current = (HalfEdge) mesh.edgeSwap(current);
+				HalfEdge swapped = current.next();
+				if(kdTree != null)
+				{
+					kdTree.addTriangle(swapped.getTri());
+					kdTree.addTriangle(swapped.sym().getTri());
+				}
+			}
+		}
+		return current;
 	}
 }
