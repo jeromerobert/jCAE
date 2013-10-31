@@ -288,12 +288,13 @@ public class NonManifoldStitch {
 		EdgeProjector.saveVTK = false;
 	}
 
+	/**
+	 * Functional tests
+	 * @param args
+	 */
 	public static void main(final String[] args) {
 		try {
 			String data = args[0];
-			TriangleProjector.test();
-			TriangleHelper.test();
-			VertexMerger.test();
 			Mesh mesh = new Mesh(MeshTraitsBuilder.getDefault3D());
 			MeshReader.readObject3D(mesh, data+"case1.amibe");
 			NonManifoldStitch nms = new NonManifoldStitch(mesh);

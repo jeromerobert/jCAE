@@ -170,48 +170,4 @@ class TriangleHelper {
 	public Triangle getTriangle() {
 		return triangle;
 	}
-
-	public static void test()
-	{
-		Mesh mesh = new Mesh(MeshTraitsBuilder.getDefault3D());
-		Vertex v0 = mesh.createVertex(0, 0, 0);
-		Vertex v1 = mesh.createVertex(1, 0, 0);
-		Vertex v2 = mesh.createVertex(0, 1, 0);
-		Triangle triangle = mesh.createTriangle(v0, v1, v2);
-		TriangleHelper th = new TriangleHelper(triangle);
-		TriangleSplitter ts = new TriangleSplitter();
-		ts.setTriangle(th);
-		ts.split(new Location(-0.5, 0.5, 0), new Location(2, 0.5, 0), .1);
-		assert ts.getSplitVertex(mesh).sqrDistance3D(new Location(0,0.5,0)) < 1E-6: ts.getSplitVertex(
-			mesh)+" "+ts.getSplittedEdge();
-
-		v2.moveTo(0.5, 0.1, 0.1);
-		assert TriangleHelper.sqrDistance(v0, v1, v2) - 0.02 < 1E-8;
-
-		v0.moveTo(5500.0, 3500.0, 0.0);
-		v1.moveTo(-500.0, 3500.0, 0.0);
-		v2.moveTo(295.4250418574649, 928.3645397543528, -19.548979250276396);
-		th.setTriangle(th.getTriangle());
-		Location p1 = new Location(-1.8504563775477978, 1000.2540420059955, -19.002491845838513);
-		Location p2 = new Location(195.4932520809972, 980.6765334491752, -19.151315547512326);
-		ts.split(p1, p2, 0.010000000000000002);
-		assert ts.getSplitVertex(mesh) == null;
-
-		v0.moveTo(4000.0, -2250.0, -1000.0);
-		v1.moveTo(-2000.0, 3000.0, -1000.0);
-		v2.moveTo(1000.0, 750.0, -1000.0);
-		th.setTriangle(th.getTriangle());
-		ts.split(new Location(1000.0, -334.87, -1000.0),
-			new Location(1000.0, 0, -1000.0), 1);
-		assert ts.getSplittedEdge() == null;
-
-		v0.moveTo(5500.0, 3500.0, 0.0);
-		v1.moveTo(-500.0, 3500.0, 0.0);
-		v2.moveTo(-500.0, 500.0, 0.0);
-		th.setTriangle(th.getTriangle());
-		p1 = new Location(555.5819503922005, 831.444099215599, 0.0);
-		p2 = new Location(707.106, 707.108, 0.0);
-		ts.split(p1, p2, 0.010000000000000002);
-		assert ts.getSplitVertex(mesh) == null;
-	}
 }
