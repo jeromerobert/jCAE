@@ -235,6 +235,7 @@ public class Vertex extends Location implements Serializable
 		return getIncidentAbstractHalfEdge((Triangle) link, null);
 	}
 
+	/** Return the edge whose this vertex is origin */
 	public final AbstractHalfEdge getIncidentAbstractHalfEdge(Triangle t, AbstractHalfEdge ot)
 	{
 		ot = t.getAbstractHalfEdge(ot);
@@ -242,7 +243,8 @@ public class Vertex extends Location implements Serializable
 			ot = ot.next();
 		else if (ot.apex() == this)
 			ot = ot.prev();
-		assert ot.origin() == this: "Fatal error around "+ot.origin();
+		assert ot.origin() == this : "Cannot find the half edge of\n" + t +
+			"\nstarting from\n" + this;
 		return ot;
 	}
 
@@ -431,7 +433,10 @@ public class Vertex extends Location implements Serializable
 		Triangle [] t = (Triangle []) link;
 		Iterator<Triangle> [] iterators = new NeighbourIteratorTriangle[t.length];
 		for (int i = 0; i < t.length; i++)
+		{
+			assert t[i].getV0() == this || t[i].getV1() == this || t[i].getV2() == this;
 			iterators[i] = new NeighbourIteratorTriangle(t[i]);
+		}
 		return new ChainIterator<Triangle>(iterators);
 	}
 	
