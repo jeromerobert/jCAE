@@ -245,7 +245,7 @@ public class Mesh implements Serializable
 		return i;
 	}
 
-	public int pushTriangles(double[] coordinates, int[] indices)
+	public int pushGroup(double[] coordinates, int[] triangles, int[] beams)
 	{
 		Vertex[] vertices = new Vertex[coordinates.length / 3];
 		int k = 0;
@@ -264,44 +264,94 @@ public class Mesh implements Serializable
 		k = 0;
 		int groupId = getFreeGroupID();
 		setGroupName(groupId, Integer.toString(groupId));
-		for(int i = 0; i < indices.length / 3; i++)
+		if(triangles != null)
 		{
-			Triangle t = createTriangle(vertices[indices[k]],
-				vertices[indices[k + 1]], vertices[indices[k + 2]]);
-			add(t);
-			t.setGroupId(groupId);
-			k += 3;
+			for(int i = 0; i < triangles.length / 3; i++)
+			{
+				Triangle t = createTriangle(vertices[triangles[k]],
+					vertices[triangles[k + 1]], vertices[triangles[k + 2]]);
+				add(t);
+				t.setGroupId(groupId);
+				k += 3;
+			}
+		}
+		k = 0;
+		if(beams != null)
+		{
+			for(int i = 0; i < beams.length / 2; i++)
+			{
+				addBeam(vertices[beams[k]], vertices[beams[k+1]], groupId);
+				k += 2;
+			}
 		}
 		return groupId;
 	}
 
-	public void popTriangles(TDoubleList coordinates, TIntList indices, int group)
+	public void popGroup(TDoubleList coordinates, TIntList triangles, TIntList beams, int group)
 	{
 		TObjectIntHashMap<Vertex> map = new TObjectIntHashMap<Vertex>(
 			100, 0.5f, Integer.MIN_VALUE);
 		int nextVertexId = 0;
-		Iterator<Triangle> it = getTriangles().iterator();
-		while(it.hasNext())
+		if(triangles != null)
 		{
-			Triangle t = it.next();
-			if(t.getGroupId() == group)
+			Iterator<Triangle> it = getTriangles().iterator();
+			while(it.hasNext())
 			{
-				for(int i = 0; i < 3; i++)
+				Triangle t = it.next();
+				if(t.getGroupId() == group)
 				{
-					Vertex v = t.getV(i);
-					int vid = map.putIfAbsent(v, nextVertexId);
-					if(vid == map.getNoEntryValue())
+					for(int i = 0; i < 3; i++)
 					{
-						vid = nextVertexId;
-						nextVertexId++;
-						coordinates.add(v.getX());
-						coordinates.add(v.getY());
-						coordinates.add(v.getZ());
+						Vertex v = t.getV(i);
+						int vid = map.putIfAbsent(v, nextVertexId);
+						if(vid == map.getNoEntryValue())
+						{
+							vid = nextVertexId;
+							nextVertexId++;
+							coordinates.add(v.getX());
+							coordinates.add(v.getY());
+							coordinates.add(v.getZ());
+						}
+						triangles.add(vid);
 					}
-					indices.add(vid);
+					it.remove();
 				}
-				it.remove();
 			}
+		}
+		int nb = getBeams().size() / 2;
+		if(nb > 0 && beams != null)
+		{
+			ArrayList<Vertex> newBeams = new ArrayList<Vertex>(this.beams.size());
+			TIntArrayList newBeamGroups = new TIntArrayList(beamGroups);
+			for(int k = 0; k < nb; k++)
+			{
+				int g = getBeamGroup(k);
+				if(g == group)
+				{
+					for(int i = 0; i < 2; i++)
+					{
+						Vertex v = this.beams.get(2 * k + i);
+						int vid = map.putIfAbsent(v, nextVertexId);
+						if(vid == map.getNoEntryValue())
+						{
+							vid = nextVertexId;
+							nextVertexId++;
+							coordinates.add(v.getX());
+							coordinates.add(v.getY());
+							coordinates.add(v.getZ());
+						}
+						beams.add(vid);
+					}
+				}
+				else
+				{
+					newBeamGroups.add(g);
+					newBeams.add(this.beams.get(2 * k));
+					newBeams.add(this.beams.get(2 * k + 1));
+				}
+			}
+			this.beamGroups = newBeamGroups;
+			this.beams = newBeams;
 		}
 	}
 

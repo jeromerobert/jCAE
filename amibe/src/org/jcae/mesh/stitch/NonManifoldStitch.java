@@ -282,7 +282,7 @@ public class NonManifoldStitch {
 			nms.intersect(i, j);
 		}
 		new NonManifoldSplitter(mesh).compute();
-		mesh.popTriangles(new TDoubleArrayList(), new TIntArrayList(), nms.workingGroup);
+		mesh.popGroup(null, null, null, nms.workingGroup);
 		EdgeProjector.saveVTK = true;
 		EdgeProjector.saveAsVTK(mesh);
 		EdgeProjector.saveVTK = false;
