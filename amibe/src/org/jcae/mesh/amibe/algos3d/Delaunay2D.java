@@ -96,16 +96,21 @@ public class Delaunay2D {
 	}
 
 	/** Add a new vertex to the current polyline */
-	public void addVertex(double x, double y)
+	public Vertex addVertex(double x, double y)
 	{
 		if(orderedVertices == null)
 			orderedVertices = new ArrayList<Vertex>(1000);
+		Vertex r;
 		switch(direction)
 		{
-		case X: orderedVertices.add(mesh.createVertex(0, x, y)); break;
-		case Y: orderedVertices.add(mesh.createVertex(y, 0, x)); break;
-		case Z: orderedVertices.add(mesh.createVertex(x, y, 0)); break;
+		case X: r = mesh.createVertex(0, x, y); break;
+		case Y: r = mesh.createVertex(y, 0, x); break;
+		case Z: r = mesh.createVertex(x, y, 0); break;
+		default:
+			throw new IllegalStateException();
 		}
+		orderedVertices.add(r);
+		return r;
 	}
 
 	/** Close the current polyline */
