@@ -238,7 +238,11 @@ public class Skeleton {
 	private boolean isPolylineEnd(AbstractHalfEdge edge, double angle)
 	{
 		AbstractHalfEdge next = null;
-		if(edge.destination().isManifold())
+		if(!edge.destination().isMutable())
+		{
+			return true;
+		}
+		else if(edge.destination().isManifold())
 		{
 			Triangle triangle = (Triangle) edge.destination().getLink();
 			AbstractHalfEdge ot = edge.destination().getIncidentAbstractHalfEdge(triangle, null);
