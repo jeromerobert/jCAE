@@ -203,8 +203,10 @@ public class VertexInsertion {
 
 			// We could check that we are close from an edge but we don't
 			// because swaping will properly handle this case
+			kdTree.remove(t);
 			t.split(mesh, v, tmp);
-			kdTree.replace(t, tmp);
+			for(Triangle tt: tmp)
+				kdTree.addTriangle(tt);
 			tmp.clear();
 			mutableInserted.add(v);
 			swapperGroup = group;

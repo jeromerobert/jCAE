@@ -207,8 +207,10 @@ public class EdgeProjector {
 
 	private Vertex splitTriangle(Triangle t, TriangleProjector tp) {
 		Vertex toInsert = mesh.createVertex(tp.getProjection());
+		kdTree.remove(t);
 		((TriangleHE) t).split(mesh, toInsert, splittedTriangle);
-		kdTree.replace(t, splittedTriangle);
+		for(Triangle tt: splittedTriangle)
+			kdTree.addTriangle(tt);
 		splittedTriangle.clear();
 		vertexSwapper.swap(toInsert);
 		return toInsert;

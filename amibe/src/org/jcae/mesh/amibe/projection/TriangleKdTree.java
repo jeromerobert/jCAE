@@ -198,27 +198,11 @@ public class TriangleKdTree {
 	private final transient BoundaryPool closeBoundaries = new BoundaryPool();
 	private final int[] closeIndex = new int[2];
 
-	public boolean remove(Triangle triangle)
-	{
-		return replace(triangle, Collections.<Triangle>emptyList());
-	}
-	/**
-	 * Replace a triangle by a set of triangles which are located in the same
-	 * place as the original triangle.
-	 * This is expected to be used to update the kdtree after splitting a
-	 * triangle.
-	 * @param toReplace
-	 * @param newTriangles
-	 * @return true if toReplace was actually found during the replacing process
-	 */
-	public boolean replace(Triangle toReplace, Collection<Triangle> newTriangles)
+	public boolean remove(Triangle toReplace)
 	{
 		boolean found = false;
 		bounds(toReplace, triangleBounds);
 		getNodes(triangleBounds, closeBoundaries, false);
-		//TODO remove the array allocation (make it a class field)
-		Triangle[] toAdd = new Triangle[newTriangles.size()];
-		int toAddIndex = 0;
 		for(int i = 0; i < closeNodes.size(); i++)
 		{
 			double[] b = closeBoundaries.get(i);
@@ -233,38 +217,15 @@ public class TriangleKdTree {
 					if(n.triangles[j] == toReplace)
 					{
 						found = true;
-						for(Triangle newT:newTriangles)
+						if(oldSize > 1)
 						{
-							bounds(newT, triangleBounds);
-							if(intersect(triangleBounds, b))
-							{
-								triangleInterAABB1.setTriangle(newT);
-								if(triangleInterAABB1.triBoxOverlap(b, true))
-									toAdd[toAddIndex++] = newT;
-							}
+							Triangle[] newA = new Triangle[oldSize - 1];
+							System.arraycopy(n.triangles, 0, newA, 0, j);
+							System.arraycopy(n.triangles, j+1, newA, j, oldSize - j - 1);
+							n.triangles = newA;
 						}
-						switch(toAddIndex)
-						{
-							case 0:
-								if(oldSize > 1)
-								{
-									Triangle[] newA = new Triangle[oldSize - 1];
-									System.arraycopy(n.triangles, 0, newA, 0, j);
-									System.arraycopy(n.triangles, j+1, newA, j, oldSize - j - 1);
-									n.triangles = newA;
-								}
-								else
-									n.triangles = null;
-								break;
-							case 1: n.triangles[j] = toAdd[0];
-								break;
-							default:
-								n.triangles = Arrays.copyOf(n.triangles, oldSize + toAddIndex - 1);
-								n.triangles[j] = toAdd[0];
-								System.arraycopy(toAdd, 1, n.triangles, oldSize, toAddIndex - 1);
-								break;
-						}
-						toAddIndex = 0;
+						else
+							n.triangles = null;
 						break;
 					}
 				}
@@ -1214,7 +1175,7 @@ public class TriangleKdTree {
 				{
 					if(tria.hasAttributes(AbstractHalfEdge.OUTER))
 						continue;
-					t.replace(tria, Collections.<Triangle>emptyList());
+					t.remove(tria);
 				}
 				long l5 = System.nanoTime();
 				Set<Triangle> tmp2 = t.getTriangles();
