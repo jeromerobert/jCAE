@@ -2385,6 +2385,11 @@ public class Mesh implements Serializable
 				}
 			}
 		}
+		if(hasNodes())
+		{
+			for(Vertex v:getNodes())
+				v.setLink(null);
+		}
 	}
 
 	/**
