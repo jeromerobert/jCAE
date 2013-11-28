@@ -247,6 +247,13 @@ public class Mesh implements Serializable
 
 	public int pushGroup(double[] coordinates, int[] triangles, int[] beams)
 	{
+		int groupId = getFreeGroupID();
+		setGroupName(groupId, Integer.toString(groupId));
+		return pushGroup(coordinates, triangles, beams, groupId);
+	}
+
+	public int pushGroup(double[] coordinates, int[] triangles, int[] beams, int groupId)
+	{
 		Vertex[] vertices = new Vertex[coordinates.length / 3];
 		int k = 0;
 		for(int i = 0; i < coordinates.length / 3; i++)
@@ -262,8 +269,6 @@ public class Mesh implements Serializable
 				add(v);
 		}
 		k = 0;
-		int groupId = getFreeGroupID();
-		setGroupName(groupId, Integer.toString(groupId));
 		if(triangles != null)
 		{
 			for(int i = 0; i < triangles.length / 3; i++)

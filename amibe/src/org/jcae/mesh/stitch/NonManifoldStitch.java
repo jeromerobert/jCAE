@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.algos3d.Fuse;
 import org.jcae.mesh.amibe.algos3d.Skeleton;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Mesh;
@@ -186,7 +187,53 @@ public class NonManifoldStitch {
 		edgeProjector.project();
 	}
 
-	public void stitch(int group1, int group2, double weight, boolean boundaryOnly) {
+	/**
+	 * Stitch all borders of groups in the given mesh.
+	 * This implementation is very slow because it recreate a new KdTree for
+	 * each pair of groups. A faster implementation would require that
+	 * EdgeProjector support non-manifold edges which is not yet available.
+	 */
+	public static void stitch(Mesh mesh, double maxDist, double cleanTol)
+	{
+		int nbGroup = mesh.getNumberOfGroups();
+		TDoubleArrayList tmpCoords = new TDoubleArrayList();
+		TIntArrayList tmpTria = new TIntArrayList();
+		for(int gid1 = 1; gid1 < nbGroup; gid1++)
+		{
+			Mesh workingMesh = new Mesh(MeshTraitsBuilder.getDefault3D());
+			tmpTria.clear();
+			tmpCoords.clear();
+			mesh.popGroup(tmpCoords, tmpTria, null, gid1);
+			workingMesh.pushGroup(tmpCoords.toArray(), tmpTria.toArray(), null, gid1);
+			for(int gid2 = gid1+1; gid2 <= nbGroup; gid2++)
+			{
+				tmpTria.clear();
+				tmpCoords.clear();
+				mesh.popGroup(tmpCoords, tmpTria, null, gid2);
+				workingMesh.pushGroup(tmpCoords.toArray(), tmpTria.toArray(), null, gid2);
+
+				workingMesh.clearAdjacency();
+				workingMesh.buildAdjacency();
+				NonManifoldStitch nms = new NonManifoldStitch(workingMesh);
+				nms.setMaxDistance(maxDist);
+				nms.setTolerance(cleanTol);
+				EdgeProjector.saveAsVTK(workingMesh);
+				nms.stitchBoth(gid1, gid2, 0);
+
+				tmpTria.clear();
+				tmpCoords.clear();
+				workingMesh.popGroup(tmpCoords, tmpTria, null, gid2);
+				mesh.pushGroup(tmpCoords.toArray(), tmpTria.toArray(), null, gid2);
+			}
+			tmpTria.clear();
+			tmpCoords.clear();
+			workingMesh.popGroup(tmpCoords, tmpTria, null, gid1);
+			mesh.pushGroup(tmpCoords.toArray(), tmpTria.toArray(), null, gid1);
+		}
+		new Fuse(mesh, cleanTol).compute();
+	}
+
+	public void stitch(int group1, final int group2, double weight, boolean boundaryOnly) {
 		Collection<AbstractHalfEdge> set1 = getBorder(group1);
 		EdgeProjector edgeProjector = new EdgeProjector(mesh, kdTree, set1,
 			group2, maxDistance, tolerance, weight);
