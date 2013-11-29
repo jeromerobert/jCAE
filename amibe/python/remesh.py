@@ -247,6 +247,8 @@ def __remesh(options):
     opts.put("coplanarity", str(options.coplanarity))
     opts.put("size", str(options.size*0.3))
     opts.put("maxlength", str(options.size*sqrt(2)))
+    #workaround for a QEMDecimateHalfEdge bug
+    opts.put("freezeNonManifold", "true")
     algo = QEMDecimateHalfEdge(liaison, opts)
     if point_metric:
         point_metric.scaling = sqrt(2)
