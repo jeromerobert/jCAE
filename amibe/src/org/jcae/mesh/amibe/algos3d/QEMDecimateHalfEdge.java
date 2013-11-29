@@ -34,6 +34,8 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
 import java.io.IOException;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -121,6 +123,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 	private final Quadric3DError qCostOpt = new Quadric3DError();
 	private static final boolean testDump = false;
 	private final MetricSupport metrics;
+	private final Collection<Vertex> frozenVertices = new ArrayList<Vertex>();
 	/**
 	 * Creates a <code>QEMDecimateHalfEdge</code> instance.
 	 *
@@ -182,8 +185,11 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 			{
 				for(Vertex v:mesh.getNodes())
 				{
-					if(v.getRef() != 0)
+					if(v.getRef() != 0 && v.isMutable())
+					{
 						v.setMutable(false);
+						frozenVertices.add(v);
+					}
 				}
 			}
 			else if(!metrics.isKnownOption(key))
@@ -629,6 +635,8 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		LOGGER.info("Total number of edges not contracted during processing: "+notProcessed);
 		LOGGER.info("Total number of edges swapped to increase quality: "+swapped);
 		super.postProcessAllHalfEdges();
+		for(Vertex v: frozenVertices)
+			v.setMutable(true);
 	}
 
 	private final static String usageString = "<xmlDir> <-t tolerance | -n nrTriangles> <brepFile> <outputDir>";
