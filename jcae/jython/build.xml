@@ -7,9 +7,10 @@
     <import file="nbproject/build-impl.xml"/>
 	<property file="../nbproject/private/private.properties"/>
 	<property file="../nbproject/project.properties"/>
-	<target name="release" unless="is.jar.uptodate">
+
+	<target name="-copy-jar">
 		<copy verbose="true" file="${libs.jython.classpath}" tofile="${cluster}/modules/ext/jython.jar"/>
 	</target>
 
-	<target name="compile" depends="release,projectized-common.compile"/>
+	<target name="compile" depends="-copy-jar,projectized-common.compile"/>
 </project>

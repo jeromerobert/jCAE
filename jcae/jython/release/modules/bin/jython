@@ -1,0 +1,13 @@
+#! /bin/sh
+
+# Get the absolute root directory
+cwd=$PWD
+cd $(dirname $0)/..
+modules_dir=$PWD
+cd ../..
+root_dir=$PWD
+cd $cwd
+export CLASSPATH="$modules_dir/ext/jython.jar:$CLASSPATH"
+
+"$root_dir/jre/bin/java" -Dpython.cachedir.skip=false org.python.util.jython "$@"
+
