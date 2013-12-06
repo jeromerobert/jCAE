@@ -1,0 +1,58 @@
+<project name="jcae-nb-init" default="init" basedir="..">
+  <!-- input properties are
+    jcae.nbinit.nbver=release74_fcs
+    jcae.nbinit.cache=/path/to/cache
+  -->
+  <target name="-init-proxy" if="http.proxyHost">
+    <setproxy proxyhost="${http.proxyHost}" proxyport="${http.proxyPort}"/>
+  </target>
+
+  <target name="download" description="Download schema" depends="-init-proxy">
+    <fail unless="jcae.nbinit.nbver" message="Please set jcae.nbinit.nbver to a netbeans tag. See http://hg.netbeans.org/releases/tags"/>
+    <property name="jcae.nbinit.cache" location="${user.home}/.jcae/nbinitcache"/>
+    <property name="cache" location="${jcae.nbinit.cache}/${jcae.nbinit.nbver}"/>
+    <mkdir dir="${cache}"/>
+    <get src="http://hg.netbeans.org/releases/raw-file/${jcae.nbinit.nbver}/java.j2seproject/src/org/netbeans/modules/java/j2seproject/resources/build-impl.xsl"
+      dest="${cache}/project-build-impl.xsl" skipexisting="true"/>
+    <get src="http://hg.netbeans.org/releases/raw-file/${jcae.nbinit.nbver}/apisupport.ant/src/org/netbeans/modules/apisupport/project/suite/resources/build-impl.xsl"
+      dest="${cache}/suite-build-impl.xsl" skipexisting="true"/>
+    <get src="http://hg.netbeans.org/releases/raw-file/${jcae.nbinit.nbver}/apisupport.ant/src/org/netbeans/modules/apisupport/project/suite/resources/platform.xsl"
+      dest="${cache}/platform.xsl" skipexisting="true"/>
+    <get src="http://hg.netbeans.org/releases/raw-file/${jcae.nbinit.nbver}/apisupport.ant/src/org/netbeans/modules/apisupport/project/resources/build-impl.xsl"
+      dest="${cache}/module-build-impl.xsl" skipexisting="true"/>
+  </target>
+  <macrodef name="module">
+    <attribute name="name"/>
+    <sequential>
+      <xslt style="${cache}/module-build-impl.xsl" in="jcae/@{name}/nbproject/project.xml" out="jcae/@{name}/nbproject/build-impl.xml"/>
+    </sequential>
+  </macrodef>
+
+  <macrodef name="project">
+    <attribute name="name"/>
+    <sequential>
+      <xslt style="${cache}/project-build-impl.xsl" in="@{name}/nbproject/project.xml" out="@{name}/nbproject/build-impl.xml"/>
+    </sequential>
+  </macrodef>
+
+  <target name="init" depends="download">
+    <xslt style="${cache}/suite-build-impl.xsl" in="jcae/nbproject/project.xml" out="jcae/nbproject/build-impl.xml"/>
+    <xslt style="${cache}/platform.xsl" in="jcae/nbproject/project.xml" out="jcae/nbproject/platform.xml"/>
+    <module name="amibe"/>
+    <module name="amibe-occ"/>
+    <module name="core"/>
+    <module name="jython"/>
+    <module name="mesh-algos"/>
+    <module name="occjava-nb"/>
+    <module name="trove"/>
+    <module name="vtk-util"/>
+    <module name="tweakui"/>
+    <module name="vecmath"/>
+    <module name="vtk"/>
+    <project name="jcae/occjava"/>
+    <project name="jcae/vtk-amibe"/>
+    <project name="amibe"/>
+    <project name="vtk-util"/>
+    <project name="vtk-amibe-occ"/>
+  </target>
+</project>
