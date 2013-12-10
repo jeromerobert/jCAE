@@ -1,7 +1,9 @@
 
 # jCAE
 from org.jcae.mesh.amibe.ds import Mesh, AbstractHalfEdge
-from org.jcae.mesh.amibe.algos3d import Remesh, QEMDecimateHalfEdge, SwapEdge, RemeshPolyline, ImproveVertexValence, SmoothNodes3DBg
+from org.jcae.mesh.amibe.algos3d import Remesh, QEMDecimateHalfEdge
+from org.jcae.mesh.amibe.algos3d import SwapEdge, ImproveVertexValence, SmoothNodes3DBg
+from org.jcae.mesh.amibe.algos3d import PolylineFactory, RemeshPolyline
 from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.projection import MeshLiaison
 from org.jcae.mesh.amibe.metrics import EuclidianMetric3D, DistanceMetric
@@ -87,9 +89,16 @@ parser.add_option("-T", "--nearLengthRatio", metavar="FLOAT",
                   dest="nearLengthRatio",
                   help="ratio to size target to determine if a vertex is near "
                   "an existing point (default: 1/sqrt(2))")
+parser.add_option("-w", "--wire", metavar="FLOAT", default=-1.0,
+                  action="store", type="float", dest="wire",
+                  help="remesh beams (default: -1.0: do not remesh)")
 parser.add_option("-I", "--immutable-border",
                   action="store_true", dest="immutable_border",
                   help="Tag free edges as immutable")
+parser.add_option("-M", "--immutable-groups", metavar="STRING",
+                  action="store", type="string", dest="immutable_groups_file",
+                  help="A text file containing the list of groups which whose "
+                  "elements and nodes must not be modified by this algorithm.")
 parser.add_option("--record", metavar="PREFIX",
                   action="store", type="string", dest="recordFile",
                   help="record mesh operations in a Python file to replay this "
@@ -132,6 +141,13 @@ if options.immutable_border:
 liaison.getMesh().buildRidges(coplanarity)
 if options.preserveGroups:
 	liaison.getMesh().buildGroupBoundaries()
+
+immutable_groups = []
+if options.immutable_groups_file:
+	f = open(options.immutable_groups_file)
+	immutable_groups = f.read().split()
+	f.close()
+	liaison.mesh.tagGroups(immutable_groups, AbstractHalfEdge.IMMUTABLE)
 
 if options.recordFile:
 	cmds = [ String("assert self.m.checkNoDegeneratedTriangles()"),
@@ -197,53 +213,24 @@ if (coplanarity >= 0.0):
 smoothAlgo = SmoothNodes3DBg(liaison, smoothOptions)
 smoothAlgo.compute()
 
-## Now compute beams
-bgroupMap = LinkedHashMap()
-newMesh = smoothAlgo.getOutputMesh()
-for i in xrange(newMesh.getBeams().size() / 2):
-	bId = newMesh.getBeamGroup(i)
-	listBeamId = bgroupMap.get(bId)
-	if listBeamId is None:
-		listBeamId = TIntArrayList(100)
-		bgroupMap.put(bId, listBeamId)
-	listBeamId.add(i)
-
-vertices = ArrayList(newMesh.getBeams())
-newMesh.resetBeams()
-mapGroupToListOfPolylines = LinkedHashMap()
-for bId in bgroupMap.keySet():
-	listBeamId = bgroupMap.get(bId)
-	listOfPolylines = ArrayList()
-	polyline = ArrayList()
-	lastVertex = None
-	for i in xrange(listBeamId.size()):
-		b = listBeamId.get(i) 
-		if lastVertex != vertices.get(2*b):
-			# New polyline
-			polyline = ArrayList()
-			listOfPolylines.add(polyline)
-			polyline.add(vertices.get(2*b))
-		lastVertex = vertices.get(2*b+1)
-		polyline.add(lastVertex)
-	mapGroupToListOfPolylines.put(bId, listOfPolylines)
-
-for bId in bgroupMap.keySet():
-	listBeamId = bgroupMap.get(bId)
-	listOfPolylines = mapGroupToListOfPolylines.get(bId)
-	nrPoly = listOfPolylines.size()
-	for numPoly in xrange(nrPoly):
-		polyline = listOfPolylines.get(numPoly)
-		if options.point_metric_file:
-			met = DistanceMetric(options.size, options.point_metric_file)
-		else:
-			met = ArrayList()
+## Remesh beams
+if options.wire > 0.0:
+	polylines = PolylineFactory(liaison.mesh, 135.0, options.wire*0.2)
+	liaison.mesh.resetBeams()
+	for entry in polylines.entrySet():
+		groupId = entry.key
+		for polyline in entry.value:
+			listM = ArrayList()
 			for v in polyline:
-				met.add(EuclidianMetric3D(options.size))
-		result = RemeshPolyline(newMesh, polyline, met).compute()
-		for i in xrange(result.size() - 1):
-			newMesh.addBeam(result.get(i), result.get(i+1), bId)
+				listM.add(EuclidianMetric3D(options.wire))
+			if liaison.mesh.getGroupName(groupId) in immutable_groups:
+				result = polyline
+			else:
+				result = RemeshPolyline(liaison.mesh, polyline, listM).compute()
+			for i in xrange(result.size() - 1):
+				liaison.mesh.addBeam(result.get(i), result.get(i+1), groupId)
 
 ## Output
-MeshWriter.writeObject3D(newMesh, outDir, "")
+MeshWriter.writeObject3D(liaison.getMesh(), outDir, "")
 if options.recordFile:
 	liaison.getMesh().getTrace().finish()
