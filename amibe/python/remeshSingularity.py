@@ -185,7 +185,7 @@ ImproveVertexValence(liaison, valenceOptions).compute()
 
 ## Smooth
 smoothOptions = HashMap()
-smoothOptions.put("iterations", str(3))
+smoothOptions.put("iterations", str(8))
 smoothOptions.put("boundaries", "false")
 smoothOptions.put("check", "true")
 smoothOptions.put("size", str(-1.0))
