@@ -807,6 +807,16 @@ public class TriangleKdTree {
 	private final double[] triangleBounds = new double[6];
 	public void addTriangle(Triangle triangle)
 	{
+		addTriangle(triangle, false);
+	}
+
+	/**
+	 * @param testExist if the triangle is already in the kdTree do not add it
+	 * again. This is a bit time consuming so set it to false if you are sur a
+	 * triangle is not in the kd-tree
+	 */
+	public void addTriangle(Triangle triangle, boolean testExist)
+	{
 		bounds(triangle, triangleBounds);
 		getNodes(triangleBounds, closeBoundaries, true);
 		triangleInterAABB1.setTriangle(triangle);
@@ -815,13 +825,13 @@ public class TriangleKdTree {
 			double[] b = closeBoundaries.get(i);
 
 			if(triangleInterAABB1.triBoxOverlap(b, true))
-				addTriange(triangle, closeNodes.get(i), b);
+				addTriange(triangle, closeNodes.get(i), b, testExist);
 		}
 		closeNodes.clear();
 		closeBoundaries.clear();
 	}
 
-	private void addTriange(Triangle triangle, Node node, double[] bounds)
+	private void addTriange(Triangle triangle, Node node, double[] bounds, boolean testExist)
 	{
 		if(node.triangles == null)
 		{
@@ -829,6 +839,12 @@ public class TriangleKdTree {
 		}
 		else
 		{
+			if(testExist)
+			{
+				for(Triangle t: node.triangles)
+					if(t == triangle)
+						return;
+			}
 			int n = node.triangles.length;
 			node.triangles = Arrays.copyOf(node.triangles, n + 1);
 			node.triangles[n] = triangle;

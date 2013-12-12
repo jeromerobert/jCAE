@@ -38,6 +38,7 @@ import org.jcae.mesh.amibe.metrics.MetricSupport;
 import org.jcae.mesh.amibe.projection.MeshLiaison;
 import org.jcae.mesh.amibe.projection.TriangleKdTree;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
+import org.jcae.mesh.xmldata.Amibe2VTK;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 
@@ -118,9 +119,45 @@ public class BeamInsertion {
 		{
 			@Override
 			protected void collapsingEdge(AbstractHalfEdge edge) {
-				removeFromKdTree(edge);
+				Iterator<Triangle> it = edge.origin().getNeighbourIteratorTriangle();
+				while(it.hasNext())
+				{
+					Triangle e = it.next();
+					if(e.hasAttributes(AbstractHalfEdge.BOUNDARY) &&
+						!e.hasAttributes(AbstractHalfEdge.OUTER))
+						kdTree.remove(e);
+				}
+				it = edge.destination().getNeighbourIteratorTriangle();
+				while(it.hasNext())
+				{
+					Triangle e = it.next();
+					if(e.hasAttributes(AbstractHalfEdge.BOUNDARY) &&
+						!e.hasAttributes(AbstractHalfEdge.OUTER))
+						kdTree.remove(e);
+				}
 			}
 		};
+	}
+
+	/** Debug method */
+	private void saveBeamAsVTP(DoubleBuffer vertices, IntBuffer beams)
+	{
+		try {
+			Mesh m = new Mesh();
+			double[] va = new double[vertices.capacity()];
+			vertices.get(va);
+			vertices.rewind();
+			int[] ia = new int[beams.capacity()];
+			beams.get(ia);
+			beams.rewind();
+			m.pushGroup(va, null, ia);
+			String p = "/tmp/amibe-beaminsertiondbg.amibe";
+			MeshWriter.writeObject3D(m, p, null);
+			new Amibe2VTK(p).write("/tmp/amibe-beaminsertiondbg.vtp");
+		} catch (Exception ex) {
+			Logger.getLogger(BeamInsertion.class.getName()).log(Level.SEVERE,
+				null, ex);
+		}
 	}
 
 	/** Insert a set of beams from binary files */
@@ -186,6 +223,22 @@ public class BeamInsertion {
 		v1 = insert(v1);
 		v2 = insert(v2);
 		AbstractHalfEdge toCollapse = edgesCollapser.collapse(v1, v2);
+		Iterator<Triangle> it = toCollapse.origin().getNeighbourIteratorTriangle();
+		while(it.hasNext())
+		{
+			Triangle e = it.next();
+			if(e.hasAttributes(AbstractHalfEdge.BOUNDARY) &&
+				!e.hasAttributes(AbstractHalfEdge.OUTER))
+				kdTree.addTriangle(e, true);
+		}
+		it = toCollapse.destination().getNeighbourIteratorTriangle();
+		while(it.hasNext())
+		{
+			Triangle e = it.next();
+			if(e.hasAttributes(AbstractHalfEdge.BOUNDARY) &&
+				!e.hasAttributes(AbstractHalfEdge.OUTER))
+				kdTree.addTriangle(e, true);
+		}
 		swapper.swap(v1);
 		swapper.swap(v2);
 		return toCollapse;
