@@ -1,43 +1,51 @@
 <project name="jcae-nb-init" default="init" basedir="..">
-  <!-- input properties are
-    jcae.nbinit.nbver=release74_fcs
-    jcae.nbinit.cache=/path/to/cache
-  -->
-  <target name="-init-proxy" if="http.proxyHost">
-    <setproxy proxyhost="${http.proxyHost}" proxyport="${http.proxyPort}"/>
+  <description>
+Create the build-impl.xml in all nbproject directories.
+It require that the user.properties.file is set to a property file containing
+the nbplatform.default.netbeans.dest.dir variable.
+Example: ant -Duser.properties.file=/home/robert/.netbeans/7.4/build.properties -f nbinit.xml
+  </description>
+  <property file="${user.properties.file}"/>
+  <macrodef name="nbunjar">
+    <attribute name="src"/>
+    <attribute name="file"/>
+    <attribute name="name"/>
+    <sequential>
+      <unjar src="${nbplatform.default.netbeans.dest.dir}/@{src}" dest="${tmp.dir}">
+        <patternset>
+          <include name="@{file}"/>
+        </patternset>
+      </unjar>
+      <property name="@{name}.xsl" location="${tmp.dir}/@{file}"/>
+    </sequential>
+  </macrodef>
+
+  <target name="-unjar">
+    <tempfile property="tmp.dir"/>
+    <mkdir dir="${tmp.dir}"/>
+    <nbunjar src="java/modules/org-netbeans-modules-java-j2seproject.jar" file="org/netbeans/modules/java/j2seproject/resources/build-impl.xsl" name="project"/>
+    <nbunjar src="apisupport/modules/org-netbeans-modules-apisupport-ant.jar" file="org/netbeans/modules/apisupport/project/suite/resources/build-impl.xsl" name="suite"/>
+    <nbunjar src="apisupport/modules/org-netbeans-modules-apisupport-ant.jar" file="org/netbeans/modules/apisupport/project/suite/resources/platform.xsl" name="platform"/>
+    <nbunjar src="apisupport/modules/org-netbeans-modules-apisupport-ant.jar" file="org/netbeans/modules/apisupport/project/resources/build-impl.xsl" name="module"/>
   </target>
 
-  <target name="download" description="Download schema" depends="-init-proxy">
-    <fail unless="jcae.nbinit.nbver" message="Please set jcae.nbinit.nbver to a netbeans tag. See http://hg.netbeans.org/releases/tags"/>
-    <property name="jcae.nbinit.cache" location="${user.home}/.jcae/nbinitcache"/>
-    <property name="cache" location="${jcae.nbinit.cache}/${jcae.nbinit.nbver}"/>
-    <mkdir dir="${cache}"/>
-    <get src="http://hg.netbeans.org/releases/raw-file/${jcae.nbinit.nbver}/java.j2seproject/src/org/netbeans/modules/java/j2seproject/resources/build-impl.xsl"
-      dest="${cache}/project-build-impl.xsl" skipexisting="true"/>
-    <get src="http://hg.netbeans.org/releases/raw-file/${jcae.nbinit.nbver}/apisupport.ant/src/org/netbeans/modules/apisupport/project/suite/resources/build-impl.xsl"
-      dest="${cache}/suite-build-impl.xsl" skipexisting="true"/>
-    <get src="http://hg.netbeans.org/releases/raw-file/${jcae.nbinit.nbver}/apisupport.ant/src/org/netbeans/modules/apisupport/project/suite/resources/platform.xsl"
-      dest="${cache}/platform.xsl" skipexisting="true"/>
-    <get src="http://hg.netbeans.org/releases/raw-file/${jcae.nbinit.nbver}/apisupport.ant/src/org/netbeans/modules/apisupport/project/resources/build-impl.xsl"
-      dest="${cache}/module-build-impl.xsl" skipexisting="true"/>
-  </target>
   <macrodef name="module">
     <attribute name="name"/>
     <sequential>
-      <xslt style="${cache}/module-build-impl.xsl" in="jcae/@{name}/nbproject/project.xml" out="jcae/@{name}/nbproject/build-impl.xml"/>
+      <xslt style="${module.xsl}" in="jcae/@{name}/nbproject/project.xml" out="jcae/@{name}/nbproject/build-impl.xml"/>
     </sequential>
   </macrodef>
 
   <macrodef name="project">
     <attribute name="name"/>
     <sequential>
-      <xslt style="${cache}/project-build-impl.xsl" in="@{name}/nbproject/project.xml" out="@{name}/nbproject/build-impl.xml"/>
+      <xslt style="${project.xsl}" in="@{name}/nbproject/project.xml" out="@{name}/nbproject/build-impl.xml"/>
     </sequential>
   </macrodef>
 
-  <target name="init" depends="download">
-    <xslt style="${cache}/suite-build-impl.xsl" in="jcae/nbproject/project.xml" out="jcae/nbproject/build-impl.xml"/>
-    <xslt style="${cache}/platform.xsl" in="jcae/nbproject/project.xml" out="jcae/nbproject/platform.xml"/>
+  <target name="init" depends="-unjar">
+    <xslt style="${suite.xsl}" in="jcae/nbproject/project.xml" out="jcae/nbproject/build-impl.xml"/>
+    <xslt style="${platform.xsl}" in="jcae/nbproject/project.xml" out="jcae/nbproject/platform.xml"/>
     <module name="amibe"/>
     <module name="amibe-occ"/>
     <module name="core"/>
@@ -54,5 +62,6 @@
     <project name="amibe"/>
     <project name="vtk-util"/>
     <project name="vtk-amibe-occ"/>
+    <delete dir="${tmp.dir}"/>
   </target>
 </project>
