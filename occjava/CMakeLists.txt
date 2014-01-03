@@ -47,16 +47,20 @@ endif(OCE_FOUND)
 set_source_files_properties(src/OccJava.i PROPERTIES CPLUSPLUS ON)
 include_directories(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2} ${OCE_INCLUDE_DIR} src)
 set(CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_SOURCE_DIR}/src-java/org/jcae/opencascade/jni)
+set(CMAKE_SWIG_FLAGS -package org.jcae.opencascade.jni)
+
+SWIG_ADD_MODULE(OccJava java src/OccJava.i src/jnistream.cxx)
+SWIG_LINK_LIBRARIES(OccJava ${OCE_TOOLKITS})
+
 if(WIN32)
   add_definitions(-DWNT)
   if(MINGW)
       set(CMAKE_MODULE_LINKER_FLAGS "-Wl,--add-stdcall-alias ${CMAKE_MODULE_LINKER_FLAGS}")
+      #We want OccJava.dll, not libOccJava.dll
+      set_target_properties(${SWIG_MODULE_OccJava_REAL_NAME} PROPERTIES PREFIX "")
   endif(MINGW)
 endif(WIN32)
-set(CMAKE_SWIG_FLAGS -package org.jcae.opencascade.jni)
 #CMake won't create this directory it self. A bug ?
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/src)
 
-SWIG_ADD_MODULE(OccJava java src/OccJava.i src/jnistream.cxx)
-SWIG_LINK_LIBRARIES(OccJava ${OCE_TOOLKITS})
 
