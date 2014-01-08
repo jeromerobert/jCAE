@@ -44,7 +44,7 @@
 	</target>
 
 	<target name="release" depends="-release.files.linux,-release.files.win32">
-		<copy file="${libs.VTK.classpath}" todir="${cluster}/modules/ext" />
+		<copy file="${libs.VTK.classpath}" tofile="${cluster}/modules/ext/vtk.jar" />
 	</target>
 
 	<target name="clean" depends="projectized-common.clean">
