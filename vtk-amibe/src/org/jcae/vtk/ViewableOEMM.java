@@ -104,7 +104,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 		data.SetPoints(points);
 		data.SetLines(Utils.createCells(quadsFilled.length / 3, quadsFilled));
 		vtkPolyDataMapper mapper = new vtkPolyDataMapper();
-		mapper.SetInput(data);
+		mapper.SetInputData(data);
 		octree.SetMapper(mapper);
 		octree.GetProperty().SetColor(0., 0., 1.);
 		octree.PickableOff();
@@ -335,7 +335,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 		vtkExtractSelectedFrustum selector = new vtkExtractSelectedFrustum();
 
 		vtkDataSet dataSet = octreePickingActor.GetMapper().GetInputAsDataSet();
-		selector.SetInput(dataSet);
+		selector.SetInputData(dataSet);
 		selector.CreateFrustum(Utils.computeVerticesFrustum(
 			pressPosition[0], pressPosition[1],
 			releasePosition[0], releasePosition[1],

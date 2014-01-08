@@ -111,7 +111,7 @@ public class Netgen2VTK {
 	{
 		vtkXMLUnstructuredGridWriter w = new vtkXMLUnstructuredGridWriter();
 		w.SetDataModeToAscii();
-		w.SetInput(convert(in));
+		w.SetInputData(convert(in));
 		w.SetFileName(out);
 		w.Write();
 		EventQueue.invokeLater(new Runnable(){

@@ -45,7 +45,7 @@ public class BillBoard extends vtkTexturedActor2D
 		reader.Update();
 		vtkImageData image = reader.GetOutput();
 		vtkTexture texture = new vtkTexture();
-		texture.SetInput(image);
+		texture.SetInputData(image);
 		int[] dimensions = image.GetDimensions();
 
 		this.SetTexture(texture);
@@ -103,7 +103,7 @@ public class BillBoard extends vtkTexturedActor2D
 		coordView.SetCoordinateSystemToViewport();
 
 		vtkPolyDataMapper2D mapper = new vtkPolyDataMapper2D();
-		mapper.SetInput(data);
+		mapper.SetInputData(data);
 		mapper.SetTransformCoordinate(coordView);
 
 

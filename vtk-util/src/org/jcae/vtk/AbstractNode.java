@@ -447,7 +447,7 @@ public abstract class AbstractNode
 		
 		// Compute normals that are not given
 		vtkPolyDataNormals algoNormals = new vtkPolyDataNormals();
-		algoNormals.SetInput(data);
+		algoNormals.SetInputDataObject(data);
 		algoNormals.SplittingOff();
 		algoNormals.FlipNormalsOff();
 		algoNormals.AutoOrientNormalsOff();

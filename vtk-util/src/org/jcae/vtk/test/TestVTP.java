@@ -65,7 +65,7 @@ public static void main(String[] args) {
 		
 		vtkXMLPolyDataWriter writer = new vtkXMLPolyDataWriter();
 		writer.SetDataModeToAscii();
-		writer.SetInput(data);
+		writer.SetInputDataObject(data);
 		writer.SetFileName("data.vtp");
 		writer.Write();
 		

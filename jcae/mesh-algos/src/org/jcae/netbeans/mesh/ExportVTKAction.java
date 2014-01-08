@@ -60,7 +60,7 @@ public final class ExportVTKAction extends CookieAction
 			try {
 				AmibePolyDataReader reader = new AmibePolyDataReader(meshDir.getPath());
 				vtkXMLPolyDataWriter writer = new vtkXMLPolyDataWriter();
-				writer.SetInput(reader.getPolyData());
+				writer.SetInputData(reader.getPolyData());
 				writer.SetFileName(vtpFile);
 				writer.Write();
 			} catch (IOException ex) {

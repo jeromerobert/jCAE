@@ -187,10 +187,7 @@ public class Utils
 	
 	public static void loadVTKLibraries()
 	{
-		vtkNativeLibrary.LoadNativeLibraries(vtkNativeLibrary.COMMON,
-			vtkNativeLibrary.FILTERING, vtkNativeLibrary.IO,
-			vtkNativeLibrary.IMAGING, vtkNativeLibrary.GRAPHICS,
-			vtkNativeLibrary.RENDERING);
+		vtkNativeLibrary.LoadNativeLibraries();
 	}
 
 	public static void main(final String[] args)

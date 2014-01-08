@@ -319,7 +319,7 @@ public class LeafNode extends AbstractNode
 		if(mapper == null)
 			mapper = new vtkPainterPolyDataMapper();
 		getMapperCustomiser().customiseMapper(mapper);
-		mapper.SetInput(data);
+		mapper.SetInputDataObject(data);
 		mapper.Update();
 	}
 
@@ -414,8 +414,8 @@ public class LeafNode extends AbstractNode
 		
 		vtkExtractSelectedPolyDataIds selFilter = new vtkExtractSelectedPolyDataIds();
 		selFilter.ReleaseDataFlagOn();
-		selFilter.SetInput(1, sel);
-		selFilter.SetInput(0, data);
+		selFilter.SetInputData(1, sel);
+		selFilter.SetInputData(0, data);
 		selectionMapper.SetInputConnection(selFilter.GetOutputPort());
 	}
 

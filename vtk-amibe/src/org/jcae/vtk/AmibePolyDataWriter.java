@@ -38,8 +38,7 @@ public class AmibePolyDataWriter
 {
     static
     {
-		vtkNativeLibrary.LoadNativeLibraries(vtkNativeLibrary.IO,
-			vtkNativeLibrary.FILTERING, vtkNativeLibrary.COMMON);
+		vtkNativeLibrary.LoadNativeLibraries(vtkNativeLibrary.VTKCOMMONDATAMODEL);
     }
 
 	private final vtkPolyData polyData;

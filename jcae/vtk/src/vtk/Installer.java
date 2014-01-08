@@ -27,7 +27,7 @@ public class Installer extends ModuleInstall {
 
 	@Override
 	public void restored() {
-		vtkNativeLibrary.LoadNativeLibraries(vtkNativeLibrary.COMMON);
+		vtkNativeLibrary.LoadNativeLibraries(vtkNativeLibrary.VTKCOMMONCORE);
 		Logger.getLogger(Installer.class.getName()).info(
 			new vtkVersion().GetVTKSourceVersion());
 	}

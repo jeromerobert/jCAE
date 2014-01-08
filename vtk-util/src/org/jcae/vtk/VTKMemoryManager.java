@@ -63,7 +63,7 @@ final class VTKMemoryManager {
 				lObjectMap = (ConcurrentHashMap)
 					javaHash.getDeclaredField("PointerToReference").get(null);
 			} catch (ClassNotFoundException ex) {
-				Field f = vtkObject.class.getDeclaredField("JAVA_OBJECT_MANAGER");
+				Field f = vtkObjectBase.class.getDeclaredField("JAVA_OBJECT_MANAGER");
 				lObjectManager = f.get(null);
 				Method m = lObjectManager.getClass().getDeclaredMethod("getAutoGarbageCollector");
 				lGC = (vtkJavaGarbageCollector) m.invoke(lObjectManager);

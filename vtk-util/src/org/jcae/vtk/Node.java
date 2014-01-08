@@ -425,7 +425,7 @@ public class Node extends AbstractNode
 			System.out.println(vdp.GetDisplayListPainter().GetInformation());*/
 		}
 		getMapperCustomiser().customiseMapper(mapper);
-		mapper.SetInput(data);
+		mapper.SetInputData(data);
 		mapper.Update();		
 	}
 
@@ -634,8 +634,8 @@ public class Node extends AbstractNode
 		selection.AddNode(selectionNode);
 		vtkExtractSelectedPolyDataIds selFilter = new vtkExtractSelectedPolyDataIds();
 		selFilter.ReleaseDataFlagOn();
-		selFilter.SetInput(1, selection);
-		selFilter.SetInput(0, input);
+		selFilter.SetInputData(1, selection);
+		selFilter.SetInputData(0, input);
 		return selFilter.GetOutputPort();
 	}
 

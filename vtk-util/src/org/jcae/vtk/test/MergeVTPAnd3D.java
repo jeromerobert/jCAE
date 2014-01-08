@@ -140,7 +140,7 @@ public class MergeVTPAnd3D
 		vtkXMLPolyDataWriter writer = new vtkXMLPolyDataWriter();
 		writer.SetFileName(path);
 		writer.SetDataModeToAscii();
-		writer.SetInput(data);
+		writer.SetInputData(data);
 		writer.Write();
 	}
 	

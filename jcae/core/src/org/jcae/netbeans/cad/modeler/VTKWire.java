@@ -87,7 +87,7 @@ public class VTKWire {
 				actor = new vtkActor();
 				actor.SetMapper(vdm);
 				vpd = new vtkPolyData();
-				vdm.SetInput(vpd);
+				vdm.SetInputData(vpd);
 				panel.GetRenderer().AddActor(actor);
 			} else
 				vpd = ((vtkPolyDataMapper)actor.GetMapper()).GetInput();
