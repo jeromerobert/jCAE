@@ -42,10 +42,10 @@ public class BillBoard extends vtkTexturedActor2D
 	{
 		vtkPNGReader reader = new vtkPNGReader();
 		reader.SetFileName(texturePath);
+		reader.Update();
 		vtkImageData image = reader.GetOutput();
 		vtkTexture texture = new vtkTexture();
 		texture.SetInput(image);
-		image.Update();
 		int[] dimensions = image.GetDimensions();
 
 		this.SetTexture(texture);

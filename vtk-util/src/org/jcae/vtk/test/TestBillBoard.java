@@ -47,8 +47,8 @@ public class TestBillBoard
 		reader.SetFileName(args[0]);
 		vtkImageData image = reader.GetOutput();
 		vtkTexture texture = new vtkTexture();
-		texture.SetInput(image);
-		image.Update();
+		texture.SetInputConnection(reader.GetOutputPort());
+		texture.Update();
 		int[] dimensions = image.GetDimensions();
 		
 		

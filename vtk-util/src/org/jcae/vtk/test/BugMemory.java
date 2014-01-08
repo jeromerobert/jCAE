@@ -51,7 +51,7 @@ public class BugMemory
 	{
 		// map to graphics objects
 			map = new vtkPolyDataMapper();
-			map.SetInput(cone.GetOutput());
+			map.SetInputConnection(cone.GetOutputPort());
 
 			map.Update();
 	}

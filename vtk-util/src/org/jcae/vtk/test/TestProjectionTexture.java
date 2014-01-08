@@ -77,20 +77,19 @@ public class TestProjectionTexture {
 		projection.SetPoint2(-1,-1 + 2,0);
 		
 		// Apply the projection to the sphere
-		projection.SetInput(sphere.GetOutput());
-		projection.Update();
+		projection.SetInputConnection(sphere.GetOutputPort());
 		
 		// map to graphics objects
 		vtkPolyDataMapper map = new vtkPolyDataMapper();
 		// Take the result of the projection texturing
-		map.SetInput((vtkPolyData)projection.GetOutput());
+		map.SetInputConnection(projection.GetOutputPort());
 
 		vtkActor aSphere = new vtkActor();
 		aSphere.SetMapper(map);
 		// Create the texture
 		vtkTexture texture = new vtkTexture();
 		// Take the image for the texture input
-		texture.SetInput(reader.GetOutput());
+		texture.SetInputConnection(reader.GetOutputPort());
 		// Apply to the actor
 		aSphere.GetProperty().SetTexture("pwet", texture);
 		

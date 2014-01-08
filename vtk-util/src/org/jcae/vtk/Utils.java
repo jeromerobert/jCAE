@@ -673,7 +673,7 @@ public class Utils
 
 		// map to graphics objects
 		vtkPolyDataMapper map = new vtkPolyDataMapper();
-		map.SetInput(cone.GetOutput());
+		map.SetInputConnection(cone.GetOutputPort());
 
 		// actor coordinates geometry, properties, transformation
 		vtkActor aSphere = new vtkActor();
@@ -713,9 +713,9 @@ public class Utils
 				vtkTransform transform = new vtkTransform();
 				transform.Translate(4 * (i + 1), 4 * (j + 1), 0);
 				filter.SetTransform(transform);
-				filter.SetInput(cone.GetOutput());
+				filter.SetInputConnection(cone.GetOutputPort());
 				vtkPolyDataMapper map = new vtkPolyDataMapper();
-				map.SetInput((vtkPolyData) filter.GetOutput());
+				map.SetInputConnection(filter.GetOutputPort());
 				vtkActor actor = new vtkActor();
 				actor.SetMapper(map);
 

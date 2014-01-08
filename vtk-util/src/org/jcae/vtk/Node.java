@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import vtk.vtkActor;
+import vtk.vtkAlgorithmOutput;
 import vtk.vtkCellData;
 import vtk.vtkExtractSelectedPolyDataIds;
 import vtk.vtkIdTypeArray;
@@ -570,8 +571,7 @@ public class Node extends AbstractNode
 		if(selectionMapper == null)
 			selectionMapper = new vtkPainterPolyDataMapper();
 		selectionMapper.ScalarVisibilityOff();
-		vtkPolyData d = selectInto(data, selection.toArray());
-		selectionMapper.SetInput(d);
+		selectionMapper.SetInputConnection(selectInto(data, selection.toArray()));
 		selectionActor.SetMapper(selectionMapper);
 		getSelectionMapperCustomiser().customiseMapper(selectionMapper);
 		
@@ -617,7 +617,7 @@ public class Node extends AbstractNode
 		throw new IllegalArgumentException("Wrong index: "+index);
 	}
 
-	private vtkPolyData selectInto(vtkPolyData input, int[] cellID)
+	private vtkAlgorithmOutput selectInto(vtkPolyData input, int[] cellID)
 	{
 		vtkSelection selection = new vtkSelection();
 		vtkSelectionNode selectionNode = new vtkSelectionNode();
@@ -636,10 +636,7 @@ public class Node extends AbstractNode
 		selFilter.ReleaseDataFlagOn();
 		selFilter.SetInput(1, selection);
 		selFilter.SetInput(0, input);
-
-		vtkPolyData dataFiltered = selFilter.GetOutput();
-		selFilter.Update();
-		return dataFiltered;
+		return selFilter.GetOutputPort();
 	}
 
 	@Override

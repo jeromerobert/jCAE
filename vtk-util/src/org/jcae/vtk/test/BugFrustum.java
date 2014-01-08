@@ -48,7 +48,7 @@ public class BugFrustum {
 		cone.SetResolution(10);
 		// map to graphics objects
 		vtkPolyDataMapper map = new vtkPolyDataMapper();
-		map.SetInput(cone.GetOutput());
+		map.SetInputConnection(cone.GetOutputPort());
 
 		// actor coordinates geometry, properties, transformation
 		vtkActor aSphere = new vtkActor();
@@ -92,7 +92,7 @@ public class BugFrustum {
 		System.out.println("EVALUATION : " +planes.FunctionValue(1001,11,11));
 		System.out.println("planes." + planes.GetPlane(0).FunctionValue(-11,0,0));
 		
-		selector.SetInput(cone.GetOutput());
+		selector.SetInputConnection(cone.GetOutputPort());
 		//UNCOMMENT TO CHECK THE BOUNDARIES
 		//selector.ShowBoundsOn(); 
 		// UNCOMMENT TO SEE THAT THE frustum extractor doesn't work inside and outside the boundaries

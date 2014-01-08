@@ -416,10 +416,7 @@ public class LeafNode extends AbstractNode
 		selFilter.ReleaseDataFlagOn();
 		selFilter.SetInput(1, sel);
 		selFilter.SetInput(0, data);
-
-		vtkPolyData dataFiltered = selFilter.GetOutput();
-		selFilter.Update();		
-		selectionMapper.SetInput(dataFiltered);
+		selectionMapper.SetInputConnection(selFilter.GetOutputPort());
 	}
 
 	@Override

@@ -38,7 +38,7 @@ public class BenchMark
 		source.SetThetaResolution(precision);
 		
 		vtkPolyDataMapper mapper = new vtkPolyDataMapper();
-		mapper.SetInput(source.GetOutput());
+		mapper.SetInputConnection(source.GetOutputPort());
 		mapper.Update();
 		
 		for (int i = 0; i < width; i++)

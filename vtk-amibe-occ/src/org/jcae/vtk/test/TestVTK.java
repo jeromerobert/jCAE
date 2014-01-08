@@ -76,7 +76,7 @@ public class TestVTK
 
 		// map to graphics objects
 		vtkPolyDataMapper map = new vtkPolyDataMapper();
-		map.SetInput(cone.GetOutput());
+		map.SetInputConnection(cone.GetOutputPort());
 
 		// actor coordinates geometry, properties, transformation
 		vtkActor aSphere = new vtkActor();
