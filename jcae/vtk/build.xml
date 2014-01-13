@@ -17,13 +17,11 @@
 	</patternset>
 
 	<patternset id="vtk.windows.files">
+	    <!-- mingw build without hack to remove lib prefix -->
+		<include name="libvtk*.dll"/>
+		<!-- mingw build with hack to remove lib prefix -->
 		<include name="vtk*.dll"/>
 		<include name="LSDyna.dll"/>
-		<include name="msvcr*.dll"/>
-		<include name="Microsoft.VC*.CRT/*"/>
-		<include name="mingwm10.dll"/>
-		<include name="libgcc_s_sjlj-1.dll"/>
-		<include name="libstdc++-6.dll"/>
 	</patternset>
 
 	<target name="-release.files.linux" if="arch.linux">
@@ -32,7 +30,12 @@
 				<patternset refid="vtk.unix.files"/>
 			</fileset>
 		</copy>
-		<copy verbose="true" file="${path.libstdc++}" todir="${cluster}/modules/lib"/>
+		<!-- not path.libstdc++.linux for backward compatiblity -->
+		<copy verbose="true" todir="${cluster}/modules/lib" flatten="true">
+			<!-- use filelist instead of fileset or files to raise an error
+			on missing files -->
+			<filelist files="${path.libstdc++}"/>
+		</copy>
 	</target>
 
 	<target name="-release.files.win32" if="arch.win32">
@@ -40,6 +43,11 @@
 			<fileset dir="${vtk.dir.win32}">
 				<patternset refid="vtk.windows.files"/>
 			</fileset>
+		</copy>
+		<copy verbose="true" todir="${cluster}/modules/lib" flatten="true">
+			<!-- use filelist instead of fileset or files to raise an error
+			on missing files -->
+			<filelist files="${path.libstdc++.win32}"/>
 		</copy>
 	</target>
 

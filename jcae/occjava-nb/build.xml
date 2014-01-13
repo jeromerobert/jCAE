@@ -20,9 +20,10 @@
 	</patternset>
 
 	<patternset id="occ.windows.files">
+	    <!-- mingw build without hack to remove lib prefix -->
+		<include name="libTK*.dll"/>
+		<!-- mingw build with hack to remove lib prefix -->
 		<include name="TK*.dll"/>
-		<include name="libgcc_s_sjlj-1.dll"/>
-		<include name="libstdc++-6.dll"/>
 	</patternset>
 
 	<target name="-release.files.linux" if="arch.linux">
@@ -31,7 +32,10 @@
 				<patternset refid="occ.unix.files"/>
 			</fileset>
 		</copy>
-		<copy file="${path.occjava.linux}" todir="${cluster}/modules/lib"/>
+		<copy verbose="true" todir="${cluster}/modules/lib" flatten="true">
+			<filelist files="${path.occjava.linux}"/>
+			<filelist files="${path.libstdc++}"/>
+		</copy>
 	</target>
 
 	<target name="-release.files.win32" if="arch.win32">
@@ -40,7 +44,10 @@
 				<patternset refid="occ.windows.files"/>
 			</fileset>
 		</copy>
-		<copy file="${path.occjava.win32}" todir="${cluster}/modules/lib"/>
+		<copy verbose="true" todir="${cluster}/modules/lib" flatten="true">
+			<filelist files="${path.occjava.win32}"/>
+			<filelist files="${path.libstdc++.win32}"/>
+		</copy>
 	</target>
 
 	<target name="release" depends="-release.files.linux,-release.files.win32">
