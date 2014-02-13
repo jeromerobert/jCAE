@@ -192,6 +192,8 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 		}
 		do
 		{
+			if(!edge.destination().isManifold())
+				return -1;
 			if(withNeighbours)
 			{
 				aPEdges.add(edge);
