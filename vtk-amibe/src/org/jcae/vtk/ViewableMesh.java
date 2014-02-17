@@ -152,6 +152,11 @@ public class ViewableMesh extends Viewable
 		return Collections.unmodifiableCollection(groupToTrias.keySet());
 	}
 
+	public Collection<LeafNode> getTriaNodes()
+	{
+		return Collections.unmodifiableCollection(groupToTrias.values());
+	}
+
 	public Collection<String> getBeamGroups()
 	{
 		return Collections.unmodifiableCollection(groupToBeams.keySet());

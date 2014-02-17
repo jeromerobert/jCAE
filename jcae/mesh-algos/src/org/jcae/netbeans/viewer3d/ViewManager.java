@@ -20,17 +20,19 @@
 package org.jcae.netbeans.viewer3d;
 
 import java.awt.BorderLayout;
+import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
 import org.jcae.netbeans.viewer3d.actions.SelectViewable;
+import org.jcae.vtk.LeafNode;
+import org.jcae.vtk.RepresentationManager;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
+import org.jcae.vtk.ViewableMesh;
 import org.openide.ErrorManager;
 import org.openide.util.Lookup;
 import org.openide.util.actions.SystemAction;
@@ -38,6 +40,7 @@ import org.openide.util.lookup.ServiceProvider;
 import org.openide.windows.Mode;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
+import vtk.vtkPanel;
 
 /**
  * Patterns : Singleton, Factory
@@ -145,20 +148,35 @@ public class ViewManager
 
 	public ViewManager()
 	{
-		try
-		{
-			//Starting with Java 7, jawt is not automatically loaded and it's
-			//required by VTK.
-			System.loadLibrary("jawt");
-		}
-		catch(UnsatisfiedLinkError e)
-		{
-			if(e.getMessage() == null ||
-				!e.getMessage().contains("already loaded in another classloader"))
-				Logger.getLogger(ViewManager.class.getName()).log(Level.SEVERE, null, e);
-		}
+		//Load jawt and mawt
+		Toolkit.getDefaultToolkit();
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
+		RepresentationManager.getInstance().addProvider(
+			new RepresentationManager.AbstractProvider()
+		{
+			public boolean isEdgeVisibility() {
+				return false;
+			}
+
+			@Override
+			protected vtkPanel getPanel() {
+				return getCurrentView();
+			}
+
+			@Override
+			protected void addActors() {
+				for(Viewable v:getCurrentView().getViewables())
+				{
+					if(v instanceof ViewableMesh)
+					{
+						ViewableMesh vm = (ViewableMesh) v;
+						for(LeafNode n:vm.getTriaNodes())
+							actors.add(n.getActor());
+					}
+				}
+			}
+		});
 	}
 
 	public View[] getAllView()

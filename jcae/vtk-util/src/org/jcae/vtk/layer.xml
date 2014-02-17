@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN" "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
+<filesystem>
+    <folder name="Actions">
+        <folder name="JCAE3DViewer">
+		  <file name="org-jcae-vtk-EdgeVisibilityAction.instance">
+			<attr name="preferencesNode"  stringvalue="org/jcae/vtk"/>
+			<attr name="preferencesKey" stringvalue="viewer.edges.visible"/>
+			<attr name="instanceCreate" methodvalue="org.openide.awt.Actions.checkbox"/>
+			<attr name="displayName" stringvalue="Show triangle edges"/>
+			<attr name="iconBase" stringvalue="org/jcae/vtk/edgeVisibility.png"/>
+		  </file>
+		  <file name="org-jcae-vtk-BackFaceVisibilityAction.instance">
+			<attr name="preferencesNode"  stringvalue="org/jcae/vtk"/>
+			<attr name="preferencesKey" stringvalue="viewer.backface.visible"/>
+			<attr name="instanceCreate" methodvalue="org.openide.awt.Actions.checkbox"/>
+			<attr name="displayName" stringvalue="Show back faces"/>
+			<attr name="iconBase" stringvalue="org/jcae/vtk/backVisibility.png"/>
+		  </file>
+        </folder>
+    </folder>
+</filesystem>

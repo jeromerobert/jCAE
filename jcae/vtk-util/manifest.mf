@@ -1,5 +1,6 @@
 Manifest-Version: 1.0
 OpenIDE-Module: org.jcae.vtk
+OpenIDE-Module-Layer: org/jcae/vtk/layer.xml
 OpenIDE-Module-Localizing-Bundle: org/jcae/vtk/Bundle.properties
 OpenIDE-Module-Specification-Version: 1.0
 
