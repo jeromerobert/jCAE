@@ -21,6 +21,7 @@
 package org.jcae.vtk.test;
 
 import java.awt.Color;
+import java.awt.Toolkit;
 import org.jcae.vtk.Utils;
 import vtk.*;
 
@@ -99,9 +100,12 @@ public class BugManyActor
 
 	public static void main(String[] args) throws Exception
 	{
-		System.loadLibrary("vtkRenderingJava");
+		Toolkit.getDefaultToolkit();
+		vtkNativeLibrary.LoadNativeLibraries(
+			vtkNativeLibrary.VTKRENDERINGOPENGL,
+			vtkNativeLibrary.VTKINTERACTIONSTYLE);
 
-		vtkRenderer ren1 = new vtkRenderer();
+		vtkRenderer ren1 = new vtkOpenGLRenderer();
 		addDummyCones(10, 10, ren1);
 
 		vtkRenderWindow renWin = new vtkRenderWindow();
