@@ -48,7 +48,8 @@ import org.jcae.mesh.xmldata.MeshWriter;
  * @author Jerome Robert
  */
 public class BeamInsertion {
-	private static class BorderTriangleIterator implements Iterator<Triangle>
+	private final static Logger LOGGER = Logger.getLogger(BeamInsertion.class.getName());
+	private class BorderTriangleIterator implements Iterator<Triangle>
 	{
 		private final Iterator<Triangle> delegate;
 		private Triangle current;
@@ -60,9 +61,8 @@ public class BeamInsertion {
 		{
 			if(current == null)
 			{
-				while((current == null ||
-					!(current.hasAttributes(AbstractHalfEdge.BOUNDARY) ||
-					current.hasAttributes(AbstractHalfEdge.NONMANIFOLD))) &&
+				while((current == null || !isTargetTriangle(current))
+					 &&
 					delegate.hasNext())
 					current = delegate.next();
 			}
@@ -123,20 +123,32 @@ public class BeamInsertion {
 				while(it.hasNext())
 				{
 					Triangle e = it.next();
-					if(e.hasAttributes(AbstractHalfEdge.BOUNDARY) &&
-						!e.hasAttributes(AbstractHalfEdge.OUTER))
+					if(isTargetTriangle(e))
 						kdTree.remove(e);
 				}
 				it = edge.destination().getNeighbourIteratorTriangle();
 				while(it.hasNext())
 				{
 					Triangle e = it.next();
-					if(e.hasAttributes(AbstractHalfEdge.BOUNDARY) &&
-						!e.hasAttributes(AbstractHalfEdge.OUTER))
+					if(isTargetTriangle(e))
 						kdTree.remove(e);
 				}
 			}
 		};
+	}
+
+	protected boolean isTargetEdge(AbstractHalfEdge edge)
+	{
+		return !edge.hasAttributes(AbstractHalfEdge.OUTER) &&
+		(edge.hasAttributes(AbstractHalfEdge.BOUNDARY) ||
+		edge.hasAttributes(AbstractHalfEdge.NONMANIFOLD));
+	}
+
+	protected boolean isTargetTriangle(Triangle t)
+	{
+		return !t.hasAttributes(AbstractHalfEdge.OUTER) &&
+		(t.hasAttributes(AbstractHalfEdge.BOUNDARY) ||
+		t.hasAttributes(AbstractHalfEdge.NONMANIFOLD));
 	}
 
 	/** Debug method */
@@ -227,16 +239,14 @@ public class BeamInsertion {
 		while(it.hasNext())
 		{
 			Triangle e = it.next();
-			if(e.hasAttributes(AbstractHalfEdge.BOUNDARY) &&
-				!e.hasAttributes(AbstractHalfEdge.OUTER))
+			if(isTargetTriangle(e))
 				kdTree.addTriangle(e, true);
 		}
 		it = toCollapse.destination().getNeighbourIteratorTriangle();
 		while(it.hasNext())
 		{
 			Triangle e = it.next();
-			if(e.hasAttributes(AbstractHalfEdge.BOUNDARY) &&
-				!e.hasAttributes(AbstractHalfEdge.OUTER))
+			if(isTargetTriangle(e))
 				kdTree.addTriangle(e, true);
 		}
 		swapper.swap(v1);
@@ -284,6 +294,11 @@ public class BeamInsertion {
 
 		if(v.sqrDistance3D(e.destination()) < tol2)
 			return e.destination();
+		if(!isTargetEdge(e))
+		{
+			throw new IllegalStateException("Cannot project "+v+
+				" to any boundary or non manifold edges of triangle\n"+t);
+		}
 		removeFromKdTree(e);
 		mesh.vertexSplit(e, v);
 		AbstractHalfEdge newEdge = e.next().sym().next();
