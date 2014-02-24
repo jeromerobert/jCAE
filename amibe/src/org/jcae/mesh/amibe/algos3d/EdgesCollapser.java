@@ -38,9 +38,12 @@ import org.jcae.mesh.amibe.metrics.Matrix3D;
 public class EdgesCollapser {
 	private final double[] vector1 = new double[3], vector2 = new double[3];
 	private final Mesh mesh;
+	private final VertexSwapper vertexSwapper;
+
 	public EdgesCollapser(Mesh mesh)
 	{
 		this.mesh = mesh;
+		this.vertexSwapper = new VertexSwapper(mesh);
 	}
 
 	private AbstractHalfEdge collapseImpl(Vertex v1, Vertex v2)
@@ -54,6 +57,11 @@ public class EdgesCollapser {
 			assert !toCollapse.hasAttributes(AbstractHalfEdge.OUTER): toCollapse;
 			assert !toCollapse.hasAttributes(AbstractHalfEdge.IMMUTABLE): toCollapse;
 			Vertex target = v1;
+			if(!mesh.canCollapseEdge(toCollapse, v1))
+			{
+				vertexSwapper.swapOrigin(toCollapse.destination() == v1 ?
+					toCollapse.origin() : toCollapse.destination());
+			}
 			if(!mesh.canCollapseEdge(toCollapse, v1))
 				return null;
 			collapsingEdge(toCollapse);
