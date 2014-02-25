@@ -657,8 +657,18 @@ public class Node extends AbstractNode
 		// Compute the selections		
 		for (int cellID : cellSelection)
 		{
-			int nodeID = ids[cellID];
-			selectionChildren[nodeID].add(nodeIndexToLeafIndex(nodeID, cellID));
+			if(cellID >= ids.length)
+			{
+				LOGGER.log(Level.SEVERE,
+					"cellID {0} out of bounds {1}.\ncellSelection={2}\nids={3}",
+					new Object[]{cellID, ids.length,
+					Arrays.toString(cellSelection), Arrays.toString(ids)});
+			}
+			else
+			{
+				int nodeID = ids[cellID];
+				selectionChildren[nodeID].add(nodeIndexToLeafIndex(nodeID, cellID));
+			}
 		}
 
 		// Send the selections to the children
