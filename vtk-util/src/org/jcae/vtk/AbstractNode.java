@@ -492,6 +492,7 @@ public abstract class AbstractNode
 		if(actor != null)
 		{
 			fireActorDeleted(actor);
+			Utils.delete(actor);
 			actor = null;
 		}
 		if(mapper != null)
