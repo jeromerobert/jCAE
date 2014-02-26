@@ -51,6 +51,9 @@ public class Canvas extends vtkCanvas
 	private vtkUnsignedCharArray buffer = new vtkUnsignedCharArray();
 	private int bufferWidth, bufferHeight = 0;
 	private final static boolean OPT_2D=Boolean.getBoolean("org.jcae.vtk.2dopt");
+	private final static boolean NO_REMOVE_NOTIFY =
+		System.getProperty("os.name").contains("Windows") &&
+		!Boolean.getBoolean("org.jcae.vtk.removenotify");
 	public Canvas()
 	{
 		addMouseWheelListener(new MouseWheelListener() {
@@ -177,8 +180,7 @@ public class Canvas extends vtkCanvas
 	@Override
 	public void removeNotify()
 	{
-		String osName = System.getProperty("os.name");
-		if (!osName.contains("Windows"))
+		if (!NO_REMOVE_NOTIFY)
 			super.removeNotify();
 	}
 
