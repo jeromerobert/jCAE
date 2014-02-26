@@ -451,6 +451,7 @@ public abstract class AbstractNode
 		algoNormals.SplittingOff();
 		algoNormals.FlipNormalsOff();
 		algoNormals.AutoOrientNormalsOff();
+		algoNormals.ConsistencyOff();
 		algoNormals.ComputePointNormalsOn();
 		algoNormals.SetFeatureAngle(getShadingAngle());
 		algoNormals.Update();
