@@ -118,7 +118,7 @@ public class RepresentationManager {
 	public void update()
 	{
 		Preferences pref = NbPreferences.forModule(getClass());
-		int edgeVisible = pref.getBoolean(PREF_EDGE_VISIBILITY, false) ? 1 : 0;
+		boolean edgeVisible = pref.getBoolean(PREF_EDGE_VISIBILITY, false);
 		boolean backFaceVisible = pref.getBoolean(PREF_BACKFACE_VISIBILITY, false);
 		for(Provider ap: actorProviders)
 		{
@@ -128,13 +128,12 @@ public class RepresentationManager {
 					continue;
 				vtkProperty aprop = a.GetProperty();
 				if(ap.isEdgeVisibility())
-					aprop.SetEdgeVisibility(edgeVisible);
+					aprop.SetEdgeVisibility(edgeVisible ? 1 : 0);
 				if(ap.isBackFaceVisibility())
 				{
 					vtkProperty bfp;
 					if(backFaceVisible)
 					{
-						aprop.LightingOn();
 						bfp = a.MakeProperty();
 						bfp.SetAmbient(1.0);
 						bfp.SetAmbientColor(1,1,1);
@@ -142,10 +141,10 @@ public class RepresentationManager {
 					else
 					{
 						bfp = null;
-						aprop.LightingOff();
 					}
 					a.SetBackfaceProperty(bfp);
 				}
+				aprop.SetLighting(!edgeVisible || backFaceVisible);
 			}
 		}
 	}
