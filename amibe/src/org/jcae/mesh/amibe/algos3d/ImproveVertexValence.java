@@ -273,11 +273,13 @@ public class ImproveVertexValence extends AbstractAlgoVertex
 
 	private AbstractHalfEdge get55Pattern(Vertex v)
 	{
+		if(!v.isManifold())
+			return null;
 		AbstractHalfEdge start = v.getIncidentAbstractHalfEdge((Triangle)v.getLink(), null);
 		AbstractHalfEdge edge = start;
 		for(int i = 0; i < 5; i++)
 		{
-			if(getValence(edge.destination()) == 5)
+			if(edge.destination().isManifold() && getValence(edge.destination()) == 5)
 			{
 				int v1 = getValence(edge.apex());
 				int v2 = getValence(edge.sym().apex());
