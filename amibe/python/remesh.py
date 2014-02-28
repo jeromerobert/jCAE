@@ -293,6 +293,7 @@ def __remesh(options):
 
     opts.clear()
     opts.put("coplanarity", safe_coplanarity)
+    opts.put("expectInsert", "false" if options.afront_path else "true")
     SwapEdge(liaison, opts).compute()
 
     #7
@@ -310,6 +311,7 @@ def __remesh(options):
 
     opts.clear()
     opts.put("coplanarity", str(options.coplanarity))
+    opts.put("expectInsert", "false" if options.afront_path else "true")
     opts.put("minCosAfterSwap", "0.3")
     SwapEdge(liaison, opts).compute()
 
@@ -342,6 +344,7 @@ def __remesh(options):
 
     opts.clear()
     opts.put("coplanarity", str(options.coplanarity))
+    opts.put("expectInsert", "false" if options.afront_path else "true")
     opts.put("minCosAfterSwap", "0.3")
     SwapEdge(liaison, opts).compute()
 
