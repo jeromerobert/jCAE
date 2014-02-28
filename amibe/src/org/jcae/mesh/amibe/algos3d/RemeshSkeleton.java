@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
@@ -32,7 +31,6 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.MetricSupport.AnalyticMetricInterface;
 import org.jcae.mesh.amibe.projection.MeshLiaison;
-import org.jcae.mesh.amibe.util.HashFactory;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 
@@ -107,31 +105,17 @@ public class RemeshSkeleton {
 		throw new NoSuchElementException(v1+" "+v2+" "+v1.getLink()+" "+v2.getLink());
 	}
 
-	private static double dot(double[] v1, double[] v2)
-	{
-		return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
-	}
-
-	private static double getAbscissa(Vertex v, AbstractHalfEdge edge)
-	{
-		double[] diff = new double[3];
-		double[] seg = new double[3];
-		v.sub(edge.origin(), diff);
-		edge.destination().sub(edge.origin(), seg);
-		return dot(seg, diff) / edge.origin().sqrDistance3D(edge.destination());
-	}
-
 	public void compute()
 	{
 		Skeleton skeleton = new Skeleton(mesh, angle);
+		EdgesCollapser edgeCollapser = new EdgesCollapser(mesh);
 		main: for(List<Vertex> polyline: skeleton.getPolylinesVertices())
 		{
 			RemeshPolyline rp = new RemeshPolyline(mesh, polyline, metric);
 			rp.setBuildBackgroundLink(true);
 			List<Vertex> toInsert = rp.compute();
 			List<Integer> bgLink = rp.getBackgroundLink();
-			int k = 0;
-			final Set<Vertex> toKeep = HashFactory.createSet(toInsert);
+
 			ArrayList<AbstractHalfEdge> edgeIndex = new ArrayList<AbstractHalfEdge>(polyline.size()-1);
 			for(int i = 0; i < polyline.size() - 1; i++)
 			{
@@ -141,21 +125,20 @@ public class RemeshSkeleton {
 				edgeIndex.add(e);
 			}
 
-			for(Vertex v:toInsert)
+			for(int k = 0; k < toInsert.size(); k++)
 			{
-				int segId = bgLink.get(k++);
+				Vertex v = toInsert.get(k);
+				int segId = bgLink.get(k);
 				AbstractHalfEdge toSplit = edgeIndex.get(segId);
 				double od = v.sqrDistance3D(toSplit.origin());
 				double dd = v.sqrDistance3D(toSplit.destination());
 				if(od <= dd && od <= tolerance)
 				{
-					toKeep.remove(v);
-					toKeep.add(toSplit.origin());
+					toInsert.set(k, toSplit.origin());
 				}
 				else if(dd <= tolerance)
 				{
-					toKeep.remove(v);
-					toKeep.add(toSplit.destination());
+					toInsert.set(k, toSplit.destination());
 				}
 				else
 				{
@@ -172,7 +155,10 @@ public class RemeshSkeleton {
 					vertexSwapper.swap(v);
 				}
 			}
-			for(Vertex v:toKeep)
+			for(int k = 0; k < toInsert.size() - 1; k++)
+				edgeCollapser.collapse(toInsert.get(k), toInsert.get(k+1));
+
+			for(Vertex v:toInsert)
 				v.setMutable(false);
 			/*HashSet<Vertex> toCollapse = new HashSet<Vertex>(polyline);
 			toCollapse.removeAll(toKeep);
@@ -180,36 +166,6 @@ public class RemeshSkeleton {
 			if(nbNotCollapsed > 0)
 				System.err.println(nbNotCollapsed+" were not "+nbNotCollapsed);*/
 		}
-	}
-
-	private int collapse(final Set<Vertex> toKeep, Set<Vertex> toCollapse)
-	{
-		boolean changed = true;
-		while(changed)
-		{
-			//check(toCollapse);
-			changed = false;
-			Iterator<Vertex> itToCollapse = toCollapse.iterator();
-			while(itToCollapse.hasNext())
-			{
-				Vertex v = itToCollapse.next();
-				Iterator<AbstractHalfEdge> it = v.getNeighbourIteratorAbstractHalfEdge();
-				while(it.hasNext())
-				{
-					AbstractHalfEdge edge = it.next();
-					Vertex dest = edge.destination();
-					if(toKeep.contains(dest) && mesh.canCollapseEdge(edge, dest))
-					{
-						mesh.edgeCollapse(edge, dest);
-						liaison.removeVertex(v);
-						changed = true;
-						itToCollapse.remove();
-						break;
-					}
-				}
-			}
-		}
-		return toCollapse.size();
 	}
 
 	public static void main(final String[] args) {
