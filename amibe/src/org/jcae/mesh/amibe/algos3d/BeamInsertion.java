@@ -235,6 +235,8 @@ public class BeamInsertion {
 		v1 = insert(v1);
 		v2 = insert(v2);
 		AbstractHalfEdge toCollapse = edgesCollapser.collapse(v1, v2);
+		if(toCollapse == null)
+			throw new IllegalStateException("Cannot insert the beam "+v1+" - "+v2);
 		Iterator<Triangle> it = toCollapse.origin().getNeighbourIteratorTriangle();
 		while(it.hasNext())
 		{

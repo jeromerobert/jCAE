@@ -39,14 +39,14 @@ public class EdgesCollapser {
 	private final double[] vector1 = new double[3], vector2 = new double[3];
 	private final Mesh mesh;
 	private final VertexSwapper vertexSwapper;
-
+	private transient boolean someCollapseDone;
 	public EdgesCollapser(Mesh mesh)
 	{
 		this.mesh = mesh;
 		this.vertexSwapper = new VertexSwapper(mesh);
 	}
 
-	private AbstractHalfEdge collapseImpl(Vertex v1, Vertex v2)
+	private AbstractHalfEdge collapseImpl(Vertex v1, Vertex v2, boolean swap)
 	{
 		v2.sub(v1, vector1);
 		AbstractHalfEdge toCollapse = nextEdge(v1, vector1, v1);
@@ -57,7 +57,7 @@ public class EdgesCollapser {
 			assert !toCollapse.hasAttributes(AbstractHalfEdge.OUTER): toCollapse;
 			assert !toCollapse.hasAttributes(AbstractHalfEdge.IMMUTABLE): toCollapse;
 			Vertex target = v1;
-			if(!mesh.canCollapseEdge(toCollapse, v1))
+			if(swap && !mesh.canCollapseEdge(toCollapse, v1))
 			{
 				vertexSwapper.swapOrigin(toCollapse.destination() == v1 ?
 					toCollapse.origin() : toCollapse.destination());
@@ -65,29 +65,44 @@ public class EdgesCollapser {
 			if(!mesh.canCollapseEdge(toCollapse, v1))
 				return null;
 			collapsingEdge(toCollapse);
+			someCollapseDone = true;
 			mesh.edgeCollapse(toCollapse, target);
 			toCollapse = nextEdge(v1, vector1, v1);
 		}
 		return toCollapse;
 	}
 
-	public AbstractHalfEdge collapse(Vertex v1, Vertex v2)
+	private AbstractHalfEdge collapseImpl(Vertex v1, Vertex v2)
 	{
-		AbstractHalfEdge r = collapseImpl(v1, v2);
+		someCollapseDone = false;
+		AbstractHalfEdge r = collapseImpl(v1, v2, false);
 		if(r == null)
 		{
 			// we failed to collapse from v2 to v1, let's try in the other side
-			r = collapseImpl(v2, v1);
+			r = collapseImpl(v2, v1, false);
 			if(r == null)
+			{
 				// we are still failing but the configuration may have change
-				// so let's try forward again.
-				r = collapseImpl(v1, v2);
+				// so let's try forward again but with swap.
+				r = collapseImpl(v1, v2, true);
+				if(r == null)
+				{
+					r = collapseImpl(v2, v1, true);
+					if(r != null)
+						r = r.sym();
+				}
+			}
 			else
 				r = r.sym();
 		}
+		return r;
+	}
 
-		if(r == null)
-			throw new IllegalArgumentException("Cannot collapse "+v1+" to "+v2);
+	public AbstractHalfEdge collapse(Vertex v1, Vertex v2)
+	{
+		AbstractHalfEdge r = collapseImpl(v1, v2);
+		while(r == null && someCollapseDone)
+			r = collapseImpl(v1, v2);
 		return r;
 	}
 
