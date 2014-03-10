@@ -6,9 +6,8 @@ from org.jcae.mesh.amibe.algos3d import SwapEdge, ImproveVertexValence, SmoothNo
 from org.jcae.mesh.amibe.algos3d import PolylineFactory, RemeshPolyline
 from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.projection import MeshLiaison
-from org.jcae.mesh.amibe.metrics import EuclidianMetric3D, DistanceMetric
+from org.jcae.mesh.amibe.metrics import EuclidianMetric3D, SingularMetric
 from org.jcae.mesh.xmldata import MeshReader, MeshWriter
-from org.jcae.mesh.amibe.metrics.MetricSupport import AnalyticMetric
 
 # Java
 from java.util import HashMap
@@ -44,12 +43,12 @@ cmd=("remeshSingularity  ", "<inputDir> <outputDir> <pointMetric> <sizeInf>",
 
    pointMetric
         A CSV file containing points which to refine around. Each line must
-        contains 7 values: 1, x, y, z, s0 (target size at distance d0), d0, d1
-        (distance from which point has no influence).
+        contains 8 values: 1, x, y, z, s0 (target size at distance d0), d0, d1
+        (distance from which point has no influence), alpha (singularity order).
         Target size at distance d of this point is computed like this:
             a) if d <= d0, s0
             b) if d >= d1, global mesh size sInf
-            c) if d0 < d < d1, s0 + (sInf - s0) * (d^2 - d0^2)/(d1^2 - d0^2)
+            c) if d0 < d < d1, s0 + (sInf - s0) * ((d - d0)/(d1 - d0))^(alpha + 1)
 
         In addition, the numerical criterion makes sure that the target sizes hi
         and hj of nodes i and j of each edge e_ij are such that hi < rho * hj
@@ -181,10 +180,10 @@ refineAlgo = Remesh(liaison, refineOptions)
 
 if options.rho > 1.0:
 	## mixed metric
-	refineAlgo.setAnalyticMetric(DistanceMetric(sizeinf, point_metric_file, options.rho, True))
+	refineAlgo.setAnalyticMetric(SingularMetric(sizeinf, point_metric_file, options.rho, True))
 else:
 	## analytic metric
-	refineAlgo.setAnalyticMetric(DistanceMetric(sizeinf, point_metric_file))
+	refineAlgo.setAnalyticMetric(SingularMetric(sizeinf, point_metric_file))
 refineAlgo.compute();
 
 ## Swap
