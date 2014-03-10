@@ -53,6 +53,8 @@ public abstract class AbstractDistanceMetric extends MetricSupport.AnalyticMetri
 		public double delta;
 		/** cache for sqrD0 / delta */
 		public double ratio;
+		/** singularity order */
+		public double alpha;
 	}
 
 	protected class PointSource extends DistanceMetricInterface
