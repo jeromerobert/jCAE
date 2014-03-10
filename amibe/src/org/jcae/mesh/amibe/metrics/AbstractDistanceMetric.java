@@ -233,19 +233,27 @@ public abstract class AbstractDistanceMetric extends MetricSupport.AnalyticMetri
 	{
 		double minValue = getSize(groupId);
 		for (DistanceMetricInterface s : sources) {
-			double d2 = s.getSqrDistance(x, y, z);
+			double d = Math.sqrt(s.getSqrDistance(x, y, z));
 			double v;
-			if(d2 < s.size0 * s.size0)
+			/** constant metric [0 s.size0] */
+			if(d < s.size0)
 				v = s.size0;
+			/** geometric interpolation on first interval */
+			else if(d < s.size0 * (1. + rho))
+			{
+				double t = (d - s.size0) / (rho * s.size0);
+				v = s.size0 * Math.pow(rho, t);
+			}
+			/** linear interpolation otherwise */
 			else
 			{
 				double deltaS = sizeInf - s.size0;
 				double arho = (rho - 1.0) / rho;
 				double drho = s.size0 + deltaS / arho;
-				if (d2 > drho * drho)
+				if (d > drho)
 					v = sizeInf;
 				else
-					v = s.size0 + arho * (Math.sqrt(d2) - s.size0);
+					v = s.size0 + arho * (d - s.size0);
 			}
 			minValue = Math.min(v, minValue);
 		}
