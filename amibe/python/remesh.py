@@ -279,6 +279,17 @@ def __remesh(options):
     writeVTK(liaison)
     opts.clear()
     opts.put("size", str(options.size))
+    opts.put("freeEdgesOnly", "true")
+    opts.put("coplanarity", "-2")
+    algo = LengthDecimateHalfEdge(liaison, opts)
+    if point_metric:
+        algo.analyticMetric = point_metric
+    algo.compute()
+
+    #6
+    writeVTK(liaison)
+    opts.clear()
+    opts.put("size", str(options.size))
     opts.put("coplanarity", str(options.coplanarity))
     opts.put("minCosAfterSwap", "0.3")
     opts.put("nearLengthRatio", "0.6")
@@ -288,7 +299,7 @@ def __remesh(options):
         algo.analyticMetric = point_metric
     algo.compute()
 
-    #6
+    #7
     writeVTK(liaison)
 
     opts.clear()
@@ -296,7 +307,7 @@ def __remesh(options):
     opts.put("expectInsert", "false" if options.afront_path else "true")
     SwapEdge(liaison, opts).compute()
 
-    #7
+    #8
     writeVTK(liaison)
 
     opts.clear()
@@ -306,7 +317,7 @@ def __remesh(options):
     algo = SmoothNodes3DBg(liaison, opts)
     algo.compute()
 
-    #8
+    #9
     writeVTK(liaison)
 
     opts.clear()
@@ -315,7 +326,7 @@ def __remesh(options):
     opts.put("minCosAfterSwap", "0.3")
     SwapEdge(liaison, opts).compute()
 
-    #9
+    #10
     writeVTK(liaison)
     if not options.afront_path:
         opts.clear()
@@ -324,7 +335,7 @@ def __remesh(options):
         algo.analyticMetric = point_metric
         algo.compute()
 
-    #10
+    #11
     writeVTK(liaison)
 
     opts.clear()
@@ -339,7 +350,7 @@ def __remesh(options):
         algo.analyticMetric = point_metric
     algo.compute()
 
-    #11
+    #12
     writeVTK(liaison)
 
     opts.clear()
@@ -348,7 +359,7 @@ def __remesh(options):
     opts.put("minCosAfterSwap", "0.3")
     SwapEdge(liaison, opts).compute()
 
-    #12
+    #13
     writeVTK(liaison)
 
     if afront_frozen:
@@ -358,7 +369,7 @@ def __remesh(options):
     opts.put("checkNormals", "false")
     ImproveVertexValence(liaison, opts).compute()
 
-    #13
+    #14
     writeVTK(liaison)
 
     opts.clear()
@@ -367,7 +378,7 @@ def __remesh(options):
     algo = SmoothNodes3DBg(liaison, opts)
     algo.compute()
 
-    #14
+    #15
     writeVTK(liaison)
 
     #MeshWriter.writeObject3D(liaison.mesh, outDir, ""
