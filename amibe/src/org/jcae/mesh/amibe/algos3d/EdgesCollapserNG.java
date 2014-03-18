@@ -41,6 +41,7 @@ import org.jcae.mesh.amibe.util.AStar;
  */
 public class EdgesCollapserNG {
 	private final Mesh mesh;
+	private final TriMultPoly triMultPoly = new TriMultPoly();
 	private final AStar<Vertex> astar = new AStar<Vertex>()
 	{
 		private final Collection<Vertex> neightbors = new ArrayList<Vertex>();
@@ -195,6 +196,18 @@ public class EdgesCollapserNG {
 		if(path.size() == 2)
 			return getEdge(v1, v2);
 		else
-			return null;
+		{
+			if(triMultPoly.isAvailable())
+			{
+				runTriMultPoly(path);
+				return getEdge(v1, v2);
+			}
+			else
+				return null;
+		}
+	}
+
+	private void runTriMultPoly(List<Vertex> path) {
+
 	}
 }
