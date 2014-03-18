@@ -108,7 +108,7 @@ public class RemeshSkeleton {
 	public void compute()
 	{
 		Skeleton skeleton = new Skeleton(mesh, angle);
-		EdgesCollapser edgeCollapser = new EdgesCollapser(mesh);
+		EdgesCollapserNG edgeCollapser = new EdgesCollapserNG(mesh);
 		main: for(List<Vertex> polyline: skeleton.getPolylinesVertices())
 		{
 			RemeshPolyline rp = new RemeshPolyline(mesh, polyline, metric);
