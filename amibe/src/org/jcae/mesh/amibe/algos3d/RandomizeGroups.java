@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.xpath.XPathExpressionException;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
@@ -72,6 +73,16 @@ public class RandomizeGroups {
 	 */
 	public void compute(Mesh mesh) throws IOException, SAXException
 	{
+		compute(mesh, false);
+	}
+
+	private boolean canRandomize(Vertex v, Collection<Vertex> forbidden)
+	{
+		return v.isManifold() && !forbidden.contains(v);
+	}
+
+	public void compute(Mesh mesh, boolean neighbors) throws IOException, SAXException
+	{
 		Random random = new Random(0);
 		Set<Vertex> vertices = HashFactory.createSet();
 		for(Collection<Vertex> l:mesh.getVertexGroup().values())
@@ -84,11 +95,28 @@ public class RandomizeGroups {
 			String groupName = mesh.getGroupName(t.getGroupId());
 			if(groupName != null && canRandomize(groupName))
 			{
-				for(int i = 0; i < 3; i++)
-					if(!t.getV(i).isManifold() || vertices.contains(t.getV(i)))
-						continue triangles;
+				if(!canRandomize(t.getV0(), vertices) ||
+					!canRandomize(t.getV1(), vertices) ||
+					!canRandomize(t.getV2(), vertices))
+					continue;
+				AbstractHalfEdge e = t.getAbstractHalfEdge();
+				if(neighbors)
+				{
+					if(!canRandomize(e.sym().apex(), vertices) ||
+						!canRandomize(e.next().sym().apex(), vertices) ||
+						!canRandomize(e.prev().sym().apex(), vertices))
+						continue;
+				}
 				if(random.nextDouble() < ratio)
+				{
 					t.setGroupId(newGroupId);
+					if(neighbors)
+					{
+						e.sym().getTri().setGroupId(newGroupId);
+						e.next().sym().getTri().setGroupId(newGroupId);
+						e.prev().sym().getTri().setGroupId(newGroupId);
+					}
+				}
 			}
 		}
 	}
