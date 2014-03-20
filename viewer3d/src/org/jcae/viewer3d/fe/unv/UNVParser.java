@@ -102,7 +102,7 @@ public class UNVParser
 	public int[] getBeam2FromGroup(int groupId)
 	{
 		if (groupId == UNVProvider.OTHERS_GROUP)
-			return beamIndices.toNativeArray();
+			return beamIndices.toArray();
 		return new int[0];
 	}
 
@@ -186,12 +186,7 @@ public class UNVParser
 		{
 			surfaceGroupNames.add("");
 			int[] group=new int[surfaceIndices.size()];
-			int i = 0;
-			for(int val: elementSurfaceIndicesMap.getValues())
-			{
-				group[i]=val;
-				i++;
-			}
+			elementSurfaceIndicesMap.values(group);
 			surfaceGroups.add(group);
 		}
 		
@@ -310,7 +305,7 @@ public class UNVParser
 					break;
 				}
 			}
-			surfaceGroups.add(facelist.toNativeArray());			
+			surfaceGroups.add(facelist.toArray());
 		}
 	}
 	
@@ -437,13 +432,13 @@ public class UNVParser
 		if(!groupTetra4.isEmpty())
 		{
 			surfaceGroupNames.add(name);
-			surfaceGroups.add(groupTetra4.toNativeArray());
+			surfaceGroups.add(groupTetra4.toArray());
 		}
 
 		if(!groupHexa8.isEmpty())
 		{
 			surfaceGroupNames.add(name);
-			surfaceGroups.add(groupHexa8.toNativeArray());
+			surfaceGroups.add(groupHexa8.toArray());
 		}
 		
 		return;
@@ -484,7 +479,7 @@ public class UNVParser
 			coords.add(z);
 		}
 		this.nodesIndicesMap=indices;
-		this.nodesCoordinates=coords.toNativeArray();
+		this.nodesCoordinates=coords.toArray();
 	}
 
 	private double readUnit(BufferedReader rd) {
