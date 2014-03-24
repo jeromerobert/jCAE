@@ -317,25 +317,9 @@ public class Skeleton {
 		beams.add(startEdge);
 		while(cv != startEdge.origin() && !possibleEnds.contains(cv))
 		{
-			Iterator<AbstractHalfEdge> it = cv.getNeighbourIteratorAbstractHalfEdge();
-			AbstractHalfEdge next = null;
-			while(it.hasNext())
-			{
-				AbstractHalfEdge e = it.next();
-				if(e.destination() != cb.origin() &&
-					e.getTri().getGroupId() == startEdge.getTri().getGroupId() &&
-					isNonManifold(e))
-				{
-					next = e;
-					break;
-				}
-			}
-			cb = next;
-			if(cb == null)
-			{
-				throw new NullPointerException("Cannot find the edge next to "
-					+ cv + " in group " + startEdge.getTri().getGroupId());
-			}
+			cb = cb.next();
+			while(!isNonManifold(cb))
+				cb = cb.sym().next();
 			beams.add(cb);
 			cv = cb.destination();
 		}
