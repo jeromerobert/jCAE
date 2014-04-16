@@ -22,6 +22,8 @@
 package org.jcae.mesh.amibe.algos3d;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
@@ -59,6 +61,24 @@ public class Fuse
 			tolerances[k++] = e * e;
 	}
 
+	private Collection<Vertex> getNodes()
+	{
+		if(mesh.hasNodes())
+			return mesh.getNodes();
+		else
+		{
+			Collection<Triangle> triangles = mesh.getTriangles();
+			HashSet<Vertex> toReturn = new HashSet<Vertex>(triangles.size() / 2 * 4 / 3);
+			for(Triangle t: triangles)
+			{
+				toReturn.add(t.getV0());
+				toReturn.add(t.getV1());
+				toReturn.add(t.getV2());
+			}
+			return toReturn;
+		}
+	}
+
 	public void compute()
 	{
 		LOGGER.fine("Running Fuse");
@@ -69,7 +89,8 @@ public class Fuse
 			bmin[i] = Double.MAX_VALUE;
 			bmax[i] = Double.MIN_VALUE;
 		}
-		for (Vertex n: mesh.getNodes())
+		Collection<Vertex> nodes = getNodes();
+		for (Vertex n: nodes)
 		{
 			bmin[0] = Math.min(bmin[0], n.getX());
 			bmax[0] = Math.max(bmax[0], n.getX());
@@ -101,7 +122,7 @@ public class Fuse
 		{
 			KdTree<Vertex> octree = new KdTree<Vertex>(bbox);
 			map.clear();
-			for (Vertex n: mesh.getNodes())
+			for (Vertex n: nodes)
 			{
 				Vertex p = octree.getNearestVertex(mesh.getMetric(n), n);
 				if (p == null || n.sqrDistance3D(p) > tolerance)
@@ -127,7 +148,7 @@ public class Fuse
 					if (p != null)
 					{
 						t.setV(j, p);
-						mesh.remove(n);
+						nodes.remove(n);
 					}
 				}
 				if(t.getV0() == t.getV1() || t.getV0() == t.getV2() || t.getV1() == t.getV2())
