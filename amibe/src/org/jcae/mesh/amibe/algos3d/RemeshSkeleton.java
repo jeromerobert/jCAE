@@ -111,6 +111,8 @@ public class RemeshSkeleton {
 		EdgesCollapserNG edgeCollapser = new EdgesCollapserNG(mesh);
 		main: for(List<Vertex> polyline: skeleton.getPolylinesVertices())
 		{
+			if(polyline.size() == 2)
+				continue;
 			RemeshPolyline rp = new RemeshPolyline(mesh, polyline, metric);
 			rp.setBuildBackgroundLink(true);
 			List<Vertex> toInsert = rp.compute();
@@ -155,16 +157,19 @@ public class RemeshSkeleton {
 					vertexSwapper.swap(v);
 				}
 			}
-			for(int k = 0; k < toInsert.size() - 1; k++)
-				edgeCollapser.collapse(toInsert.get(k), toInsert.get(k+1));
+			if(toInsert.size() == 2)
+			{
+				int n = Math.max(1, polyline.size() / 2);
+				edgeCollapser.collapse(toInsert.get(0), toInsert.get(1), polyline.get(n));
+			}
+			else
+			{
+				for(int k = 0; k < toInsert.size() - 1; k++)
+					edgeCollapser.collapse(toInsert.get(k), toInsert.get(k+1), null);
+			}
 
 			for(Vertex v:toInsert)
 				v.setMutable(false);
-			/*HashSet<Vertex> toCollapse = new HashSet<Vertex>(polyline);
-			toCollapse.removeAll(toKeep);
-			int nbNotCollapsed = collapse(toKeep, toCollapse);
-			if(nbNotCollapsed > 0)
-				System.err.println(nbNotCollapsed+" were not "+nbNotCollapsed);*/
 		}
 	}
 

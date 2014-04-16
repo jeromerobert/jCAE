@@ -139,9 +139,31 @@ public class EdgesCollapserNG {
 	{
 	}
 
-	public AbstractHalfEdge collapse(Vertex v1, Vertex v2)
+	/**
+	 * Try to create the edge v1 v2, by collapsing all edges between v1 and v2
+	 * @param v1
+	 * @param v2
+	 * @param intermediate a vertex between v1 and v2. This vertex help to find
+	 * the path between v1 and v2. It may be null.
+	 * @return
+	 */
+	public AbstractHalfEdge collapse(Vertex v1, Vertex v2, Vertex intermediate)
 	{
-		List<Vertex> path = astar.find(v1, v2);
+		assert v1 != intermediate;
+		assert v2 != intermediate;
+		assert v1 != v2;
+		List<Vertex> path;
+		if(intermediate == null)
+			path = astar.find(v1, v2);
+		else
+		{
+			path = astar.find(v1, intermediate);
+			List<Vertex> path2 = astar.find(intermediate, v2);
+			assert !path2.contains(v1): v1+"\n"+intermediate+"\n"+v2;
+			for(int i = 1; i < path2.size(); i++)
+				path.add(path2.get(i));
+		}
+
 		boolean oneCollapseDone = true;
 		main: while(path.size() > 2 && oneCollapseDone)
 		{
