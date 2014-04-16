@@ -134,7 +134,8 @@ class TriangleSplitter {
 					toSplit.origin() + "\n" + triangle;
 				assert toSplit == null ||  toSplit.destination() == triangle.getV1();
 				assert vertex != null || isOnEdge(splitPoint, apex, p, sqrTol): u+" "+v+" "+Arrays.toString(uv);
-				assert vertex == null || isOnEdge(vertex, apex, p, sqrTol): u+" "+v+" "+Arrays.toString(uv);
+				assert vertex == null || isOnEdge(vertex, apex, p, sqrTol):
+					u + " " + v + " " + Arrays.toString(uv) + "\n" + vertex + "\n" + apex + "\n" + p;
 			}
 		} else if (apex == triangle.getV1()) {
 			if(uv[1] > 1)
