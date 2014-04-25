@@ -565,14 +565,18 @@ public class Mesh implements Serializable
 		return factory.createVertex(x, y, z);
 	}
 
-
 	public void addBeam(Vertex v1, Vertex v2, int group)
+	{
+		addBeam(v1, v2, group, true);
+	}
+
+	public void addBeam(Vertex v1, Vertex v2, int group, boolean addVertices)
 	{
 		beams.add(v1);
 		beams.add(v2);
 		v1.setMutable(false);
 		v2.setMutable(false);
-		if (hasNodes())
+		if (addVertices && hasNodes())
 		{
 			nodeList.add(v1);
 			nodeList.add(v2);

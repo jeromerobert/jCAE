@@ -293,7 +293,7 @@ public class MeshReader
 			{
 				IntFileReader ifrB = subMesh.getBeams();
 				for (int i = 0; i < numberOfBeams; i++)
-					mesh.addBeam(nodelist[ifrB.get()], nodelist[ifrB.get()], 0);
+					mesh.addBeam(nodelist[ifrB.get()], nodelist[ifrB.get()], 0, false);
 				ifrB.close();
 			}
 
