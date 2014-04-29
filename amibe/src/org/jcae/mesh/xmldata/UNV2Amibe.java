@@ -240,7 +240,7 @@ public class UNV2Amibe
 				if (line.equals("2411") || line.equals("781"))
 				{
 					// read nodes
-					convertNodes(in, unit * scale, out);
+					convertNodes(in, unit / scale, out);
 				}
 				else if (line.equals("2412"))
 				{
