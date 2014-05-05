@@ -850,7 +850,11 @@ public class View extends Canvas3D implements PositionListener
 		BoundingSphere bs;
 		if(!bounds.isEmpty())
 		{
-			bs=(BoundingSphere) bounds.get(0);
+			Bounds bbs= bounds.get(0);
+			if(bbs instanceof BoundingSphere)
+				bs=(BoundingSphere) bbs;
+			else
+				bs = new BoundingSphere(bbs);
 			bs.combine(bounds.toArray(new Bounds[bounds.size()]));
 		}
 		else
