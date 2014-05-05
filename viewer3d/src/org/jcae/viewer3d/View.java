@@ -60,6 +60,17 @@ public class View extends Canvas3D implements PositionListener
 	private static final float zFactorAbs=Float.parseFloat(System.getProperty("javax.media.j3d.zFactorAbs", "1.0f"));
 	private static final float zFactorRel=Float.parseFloat(System.getProperty("javax.media.j3d.zFactorRel", "1.0f"));
 	
+	//  when using high scaling value it would be better to set
+	// -Dj3d.useBoxForGroupBounds=true
+	private static final double X_SCALE = Double.parseDouble(
+		System.getProperty("org.jcae.viewer3d.scale.x", "1.0"));
+	private static final double Y_SCALE = Double.parseDouble(
+		System.getProperty("org.jcae.viewer3d.scale.y", "1.0"));
+	private static final double Z_SCALE = Double.parseDouble(
+		System.getProperty("org.jcae.viewer3d.scale.z", "1.0"));
+	private static final boolean DO_SCALE = X_SCALE != 1.0 ||
+		Y_SCALE != 1.0 || Z_SCALE != 1.0;
+
 	/** Cheat codes to change polygon offset on CAD */
 	private class PAKeyListener extends KeyAdapter
 	{
@@ -490,6 +501,15 @@ public class View extends Canvas3D implements PositionListener
 		if(vsg==null)
 		{
 			Node node=viewable.getJ3DNode();
+			if(DO_SCALE)
+			{
+				final Node fNode = node;
+				final Transform3D t3d = new Transform3D();
+				t3d.setScale(new Vector3d(X_SCALE, Y_SCALE, Z_SCALE));
+				TransformGroup tg = new TransformGroup(t3d);
+				tg.addChild(node);
+				node = tg;
+			}
 			BranchGroup parent=new BranchGroup();
 			parent.setCapability(Group.ALLOW_CHILDREN_EXTEND);
 			parent.setCapability(BranchGroup.ALLOW_DETACH);
