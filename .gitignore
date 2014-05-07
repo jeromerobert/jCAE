@@ -162,3 +162,8 @@ vtk-amibe-occ/nbproject/build-impl.xml
 vtk-amibe-occ/nbproject/genfiles.properties
 vtk-amibe-occ/nbproject/private/
 htdocs/build/
+viewer3d/nbproject/private/
+viewer3d/build/
+viewer3d/dist/
+viewer3d/nbproject/build-impl.xml
+viewer3d/nbproject/genfiles.properties
