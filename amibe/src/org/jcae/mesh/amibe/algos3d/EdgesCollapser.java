@@ -21,6 +21,7 @@
 package org.jcae.mesh.amibe.algos3d;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
@@ -50,6 +51,7 @@ public class EdgesCollapser {
 	{
 		v2.sub(v1, vector1);
 		AbstractHalfEdge toCollapse = nextEdge(v1, vector1, v1);
+		assert toCollapse != null : v1+"\n"+v2+"\n"+Arrays.toString(vector1);
 		while(toCollapse.destination() != v2)
 		{
 			if(toCollapse.hasAttributes(AbstractHalfEdge.OUTER))

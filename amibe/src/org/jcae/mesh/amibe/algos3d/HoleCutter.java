@@ -88,11 +88,10 @@ public class HoleCutter {
 			if(bestEdge != null)
 			{
 				loop.add(bestEdge);
-				assert bestEdge.apex().getX() < -2600: bestEdge;
-				assert bestEdge.apex().getX() > -2800: bestEdge;
 			}
 		}
-		cutHole(toReturn, loop);
+		if(!loop.isEmpty())
+			cutHole(toReturn, loop);
 		return toReturn;
 	}
 
@@ -132,14 +131,21 @@ public class HoleCutter {
 		while(!front.isEmpty())
 		{
 			AbstractHalfEdge e = front.get(front.size() - 1).sym();
+			assert e != null: front.get(front.size() - 1);
 			front.remove(front.size() - 1);
 			Triangle t = e.getTri();
 			if(triangle.add(t))
 			{
 				if(!loop.contains(e.next()))
+				{
+					assert !e.next().hasAttributes(AbstractHalfEdge.OUTER): e+"\n"+e.next();
 					front.add(e.next());
+				}
 				if(!loop.contains(e.prev()))
+				{
+					assert !e.prev().hasAttributes(AbstractHalfEdge.OUTER): e+"\n"+e.next();
 					front.add(e.prev());
+				}
 			}
 		}
 	}
