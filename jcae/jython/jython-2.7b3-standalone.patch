@@ -1,0 +1,86 @@
+jCAE need a "standalone" bundle of jython. It can be downloaded from the
+jython website or build using the ant jar-standalone command.
+
+The patch bellow allow to build such jar file
+with .py files replaced by $py.class files so the bootstrap is much faster.
+
+It also change the default value of cachedir and cachedir.skip so java -jar jython.jar
+does what you expect.
+
+diff --git a/build.xml b/build.xml
+index 7953339..2d7b802 100644
+--- a/build.xml
++++ b/build.xml
+@@ -643,10 +643,12 @@ The readme text for the next release will be like:
+     </target>
+ 
+ <target name="jar-standalone" depends="jar-complete, copy-lib">
++        <java jar="${dist.dir}/${jython.deploy.jar}" fork="true" dir="${dist.dir}">
++            <arg line="-m compileall Lib"/>
++        </java>
+         <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="extlibs/jarjar-1.4.jar"/>
+         <jarjar destfile="${dist.dir}/${jython.standalone.jar}">
+             <zipfileset src="${dist.dir}/${jython.deploy.jar}"/>
+-            <fileset dir="${dist.dir}" includes="Lib/**" excludes="Lib/test/**,Lib/email/test/**"/>
+ 
+             <manifest>
+                 <attribute name="Main-Class" value="org.python.util.jython" />
+@@ -663,6 +665,9 @@ The readme text for the next release will be like:
+                 </section>
+             </manifest>
+         </jarjar>
++        <jar destfile="${dist.dir}/${jython.standalone.jar}" update="true">
++            <fileset dir="${dist.dir}" includes="Lib/**/*.class" excludes="Lib/test/**,Lib/email/test/**"/>
++        </jar>
+     </target>
+ 
+     <target name="jar" depends="compile,expose">
+diff --git a/src/org/python/core/PySystemState.java b/src/org/python/core/PySystemState.java
+index 82fae97..ea56983 100644
+--- a/src/org/python/core/PySystemState.java
++++ b/src/org/python/core/PySystemState.java
+@@ -55,7 +55,8 @@ public class PySystemState extends PyObject implements ClassDictInit {
+     public static final String PYTHON_CONSOLE_ENCODING = "python.console.encoding";
+     public static final String PYTHON_IO_ENCODING = "python.io.encoding";
+     public static final String PYTHON_IO_ERRORS = "python.io.errors";
+-    protected static final String CACHEDIR_DEFAULT_NAME = "cachedir";
++    protected static final String CACHEDIR_DEFAULT_NAME = System.getProperty("user.home") +
++        File.separator + ".cache" + File.separator + "jython";
+ 
+     public static final String JYTHON_JAR = "jython.jar";
+     public static final String JYTHON_DEV_JAR = "jython-dev.jar";
+@@ -821,7 +822,7 @@ public class PySystemState extends PyObject implements ClassDictInit {
+ 
+         // Now the post properties (possibly set by custom JythonInitializer).
+         registry.putAll(postProperties);
+-        if (standalone) {
++        if (standalone && false) {
+             // set default standalone property (if not yet set)
+             if (!registry.containsKey(PYTHON_CACHEDIR_SKIP)) {
+                 registry.put(PYTHON_CACHEDIR_SKIP, "true");
+@@ -1341,13 +1342,12 @@ public class PySystemState extends PyObject implements ClassDictInit {
+     private static PyList initPath(Properties props, boolean standalone, String jarFileName) {
+         PyList path = new PyList();
+         addPaths(path, props.getProperty("python.path", ""));
+-        if (prefix != null) {
+-            String libpath = new File(prefix.toString(), "Lib").toString();
+-            path.append(new PyString(libpath));
+-        }
+         if (standalone) {
+             // standalone jython: add the /Lib directory inside JYTHON_JAR to the path
+             addPaths(path, jarFileName + "/Lib");
++        } else if (prefix != null) {
++            String libpath = new File(prefix.toString(), "Lib").toString();
++            path.append(new PyString(libpath));
+         }
+ 
+         return path;
+@@ -1366,7 +1366,7 @@ public class PySystemState extends PyObject implements ClassDictInit {
+             JarFile jarFile = null;
+             try {
+                 jarFile = new JarFile(jarFileName);
+-                JarEntry jarEntry = jarFile.getJarEntry("Lib/os.py");
++                JarEntry jarEntry = jarFile.getJarEntry("Lib/os$py.class");
+                 standalone = jarEntry != null;
+             } catch (IOException ioe) {
+                 // Continue
