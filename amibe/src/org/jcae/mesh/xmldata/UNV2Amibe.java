@@ -154,6 +154,7 @@ public class UNV2Amibe
 		 * in groups.
 		 */
 		public static int TRIAS = 0, BEAMS = 1;
+		private int shift;
 		private FileChannel channel;
 		private File file;
 		private ByteBuffer buffer = ByteBuffer.allocate(8);
@@ -162,6 +163,7 @@ public class UNV2Amibe
 			file = File.createTempFile("amibe", ".bin");
 			file.deleteOnExit();
 			channel = new RandomAccessFile(file, "rw").getChannel();
+			shift = 0;
 		}
 
 		public void close() throws IOException
@@ -170,8 +172,13 @@ public class UNV2Amibe
 			file.delete();
 		}
 
-		public void add(int amibeID, int type) throws IOException
+		public void add(int amibeID, int unvID, int type) throws IOException
 		{
+			if (amibeID != unvID - 1 - shift) {
+				ByteBuffer padBuffer = ByteBuffer.allocate(8 * (unvID - 1 - amibeID - shift));
+				channel.write(padBuffer);
+				shift = unvID - 1 - amibeID;
+			}
 			buffer.rewind();
 			buffer.putInt(amibeID);
 			buffer.putInt(type);
@@ -476,7 +483,7 @@ public class UNV2Amibe
 		{
 			// first line: type of object
 			StringTokenizer st = new StringTokenizer(line);
-			st.nextToken(); // face index
+			int index = Integer.parseInt(st.nextToken()); // face index
 			int type=Integer.parseInt(st.nextToken());
 			switch(type)
 			{
@@ -493,7 +500,7 @@ public class UNV2Amibe
 					p2 = Integer.parseInt(st.nextToken());
 					p3 = Integer.parseInt(st.nextToken());
 					out.addTriangle(p1-1, p2-1, p3-1);
-					idMapping.add(nbTrias, IDMapping.TRIAS);
+					idMapping.add(nbTrias, index, IDMapping.TRIAS);
 					nbTrias ++;
 					break;
 				case 94:
@@ -502,21 +509,21 @@ public class UNV2Amibe
 				case 21: //linear beam
 					Element21 beam = new Element21(line, rd);
 					out.addBeam(beam.getNode(0)-1, beam.getNode(1)-1);
-					idMapping.add(nbBeams, IDMapping.BEAMS);
+					idMapping.add(nbBeams, index, IDMapping.BEAMS);
 					nbBeams ++;
 					break;
 				case 22:
 				case 24:  // parabolic beam
 					Element24 b = new Element24(line, rd);
 					out.addBeam(b.getNode(0) - 1, b.getNode(2) - 1);
-					idMapping.add(nbBeams, IDMapping.BEAMS);
+					idMapping.add(nbBeams, index, IDMapping.BEAMS);
 					nbBeams++;
 					break;
 				case 42:
 				case 92: //parabolic triangles
 					Element92 e=new Element92(line, rd);
 					out.addTriangle(e.getNode(0)-1, e.getNode(2)-1, e.getNode(4)-1);
-					idMapping.add(nbTrias, IDMapping.TRIAS);
+					idMapping.add(nbTrias, index, IDMapping.TRIAS);
 					nbTrias ++;
 					break;
 				case 118: //tetra
