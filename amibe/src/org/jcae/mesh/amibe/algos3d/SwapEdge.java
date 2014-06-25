@@ -47,6 +47,11 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 	private double minQualityFactor;
 	private double minCosAfterSwap = -2;
 	private boolean expectInsert = true;
+	/**
+	 * if -(swapedAngle-angle)/(swapedQuality-quality) is higher than this value
+	 * the edge is not swapped.
+	 */
+	private double angleQualityRatio = Double.POSITIVE_INFINITY;
 	private double sqrDeflection = Double.POSITIVE_INFINITY;
 	private double swapVolume = Double.POSITIVE_INFINITY;
 	private final Quality quality = new Quality();
@@ -108,6 +113,19 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 		return LOGGER;
 	}
 
+	/**
+	 * if -(swapedAngle-angle)/(swapedQuality-quality) is higher than this value
+	 * the edge is not swapped.
+	 * Then angle si between -1 and 1 and the quality between 0 and 1/(12*sqrt(3)).
+	 * A good value is 100. The default value is infinity which disable this
+	 * feature.
+	 * Hopefully this parameter will give better results than minQualityFactor
+	 * and minCosAfterSwap.
+	 */
+	public void setAngleQualityRatio(double angleQualityRatio) {
+		this.angleQualityRatio = angleQualityRatio;
+	}
+
 	public void setDeflection(double deflection) {
 		this.sqrDeflection = deflection * deflection;
 	}
@@ -146,8 +164,17 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 			if(quality.swappedVolume() > swapVolume)
 				return Double.MAX_VALUE;
 		}
-		return - e.checkSwap3D(mesh, coplanarity, 0, minQualityFactor,
+		double toReturn = - e.checkSwap3D(mesh, coplanarity, 0, minQualityFactor,
 			expectInsert, minCosAfterSwap, -2.0);
+		if(!Double.isInfinite(angleQualityRatio) && toReturn < tolerance)
+		{
+			quality.setEdge(e);
+			double dq = quality.getSwappedQuality() - quality.getQuality();
+			double da = quality.getSwappedAngle() - quality.getAngle();
+			if(-da / dq > angleQualityRatio)
+				return Double.POSITIVE_INFINITY;
+		}
+		return toReturn;
 	}
 	
 	@Override

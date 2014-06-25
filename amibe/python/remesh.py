@@ -324,7 +324,9 @@ def __remesh(options):
     opts.put("coplanarity", str(options.coplanarity))
     opts.put("expectInsert", "false" if options.afront_path else "true")
     opts.put("minCosAfterSwap", "0.3")
-    SwapEdge(liaison, opts).compute()
+    algo = SwapEdge(liaison, opts)
+    algo.angleQualityRatio = 150
+    algo.compute()
 
     #10
     writeVTK(liaison)
@@ -357,7 +359,9 @@ def __remesh(options):
     opts.put("coplanarity", str(options.coplanarity))
     opts.put("expectInsert", "false" if options.afront_path else "true")
     opts.put("minCosAfterSwap", "0.3")
-    SwapEdge(liaison, opts).compute()
+    algo = SwapEdge(liaison, opts)
+    algo.angleQualityRatio = 150
+    algo.compute()
 
     #13
     writeVTK(liaison)
