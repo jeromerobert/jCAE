@@ -24,9 +24,11 @@ package org.jcae.mesh.amibe.algos3d;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.util.HashFactory;
 
@@ -37,12 +39,40 @@ import org.jcae.mesh.amibe.util.HashFactory;
  * @author Jerome Robert
  */
 public class HoleCutter {
+	private boolean isClosedLoop(Set<AbstractHalfEdge> edges)
+	{
+		Map<Vertex, Vertex> map = HashFactory.createMap(edges.size());
+		Vertex start = null;
+		for(AbstractHalfEdge e: edges)
+		{
+			map.put(e.origin(), e.destination());
+			start = e.destination();
+		}
+		int nbEdges = 0;
+		Vertex current = start;
+		while(true)
+		{
+			current = map.get(current);
+			nbEdges ++;
+			if(current == null)
+				return false;
+
+			if(current == start)
+				return nbEdges == edges.size();
+
+			if(nbEdges > edges.size())
+				//we are in a sub loop
+				return false;
+		}
+	}
 	/**
 	 * return the list of triangles in the hole
 	 */
 	public Collection<Triangle> cut(Set<AbstractHalfEdge> edges)
 	{
 		Set<Triangle> toReturn = HashFactory.createSet();
+		if(!isClosedLoop(edges))
+			return toReturn;
 		Set<AbstractHalfEdge> loop = HashFactory.createSet(edges.size());
 		double[] tmp1 = new double[3];
 		double[] tmp2 = new double[3];
@@ -120,6 +150,11 @@ public class HoleCutter {
 		return true;
 	}
 
+	/**
+	 * tag the triangle which are inside the hole
+	 * @param triangle the list of tagged triangles
+	 * @param loop the border of the hole
+	 */
 	private static void cutHole(Collection<Triangle> triangle, Set<AbstractHalfEdge> loop) {
 		AbstractHalfEdge start = loop.iterator().next();
 		ArrayList<AbstractHalfEdge> front = new ArrayList<AbstractHalfEdge>();
