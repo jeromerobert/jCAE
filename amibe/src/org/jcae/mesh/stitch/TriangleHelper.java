@@ -87,7 +87,7 @@ class TriangleHelper {
 		double dot12 = Matrix3D.prodSca(v1, tmp);
 		// Compute barycentric coordinates
 		double invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
-		assert Double.isNaN(invDenom): triangle;
+		assert !Double.isNaN(invDenom): triangle;
 		uv[0] = (dot11 * dot02 - dot01 * dot12) * invDenom;
 		uv[1] = (dot00 * dot12 - dot01 * dot02) * invDenom;
 	}
