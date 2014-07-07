@@ -64,6 +64,7 @@ public class VertexInsertion {
 	private final VertexSwapper swapper;
 	private int swapperGroup;
 	private double swapperDeflection, swapperVolume;
+	private boolean alwaysInsert;
 	public VertexInsertion(MeshLiaison liaison, final double size) {
 		this(liaison.getMesh(), liaison, size);
 	}
@@ -188,16 +189,19 @@ public class VertexInsertion {
 				throw new NullPointerException("Cannot find projection for "+v);
 			if(liaison != null)
 				liaison.move(v, projection, group, true);
-			for(int iv = 0; iv < 3; iv++)
+			if(!alwaysInsert)
 			{
-				Vertex tv = t.getV(iv);
-				if(tv.sqrDistance3D(v) < tol2)
+				for(int iv = 0; iv < 3; iv++)
 				{
-					if(tv.isMutable())
-						mutableInserted.add(tv);
-					else
-						notMutableInserted.add(tv);
-					continue main;
+					Vertex tv = t.getV(iv);
+					if(tv.sqrDistance3D(v) < tol2)
+					{
+						if(tv.isMutable())
+							mutableInserted.add(tv);
+						else
+							notMutableInserted.add(tv);
+						continue main;
+					}
 				}
 			}
 
@@ -261,6 +265,14 @@ public class VertexInsertion {
 			assert e != null;
 		}
 		return false;
+	}
+
+	/**
+	 * Always insert the point even if we are close from an existing vertex.
+	 * If true the tolerance is only used to swap.
+	 */
+	public void setAlwaysInsert(boolean alwaysInsert) {
+		this.alwaysInsert = alwaysInsert;
 	}
 
 	public static void main(final String[] args) {
