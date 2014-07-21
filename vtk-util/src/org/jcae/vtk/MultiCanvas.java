@@ -148,14 +148,15 @@ public abstract class MultiCanvas implements Node.ActorListener, Node.ChildCreat
 		}
 
 		listCanvas.remove(canvas);
-		
-		// Dot not lock the canvas when doing this because the 3d context can be already removed
+
 		vtkRenderer renderer = canvas.GetRenderer();
+		canvas.lock();
 		for(vtkProp actor : props)
 		{
 			renderer.RemoveViewProp(actor);
 		}
 		canvas.RenderSecured();
+		canvas.unlock();
 	}
 		
 	public void lockCanvas()
