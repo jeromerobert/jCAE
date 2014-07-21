@@ -63,7 +63,6 @@ public class HideGroupAction extends AbstractGroupAction {
 				interactor.addTriangles(toRemove);
 				interactor.addBeams(toRemove);
 			}
-			view.Render();
 		}
 	}
 
