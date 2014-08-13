@@ -20,15 +20,16 @@
 
 package org.jcae.mesh.amibe.algos3d;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.ProcessBuilder.Redirect;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -37,6 +38,7 @@ import java.util.logging.Logger;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.projection.AbstractLocaleRemesher;
 import org.jcae.mesh.xmldata.MeshWriter;
 
 /**
@@ -50,7 +52,7 @@ import org.jcae.mesh.xmldata.MeshWriter;
  * to enable this algorithm.
  * @author Jerome Robert
  */
-public class TriMultPoly {
+public class TriMultPoly extends AbstractLocaleRemesher {
 	private final static Logger LOGGER = Logger.getLogger(TriMultPoly.class.getName());
 	public final static String EXE_PATH = "org.jcae.amibe.trimultpoly.path";
 	private final String executable;
@@ -62,6 +64,7 @@ public class TriMultPoly {
 	private ReadableByteChannel stderr;
 	private WritableByteChannel stdin;
 	private final ByteBuffer buffer = ByteBuffer.allocate(3 + 4 * 8 + 4 + 4);
+
 	public TriMultPoly()
 	{
 		this(System.getProperty(EXE_PATH));
@@ -112,6 +115,7 @@ public class TriMultPoly {
 			return;
 		ProcessBuilder pb = new ProcessBuilder(executable, "-d");
 		try {
+			pb.redirectOutput(Redirect.INHERIT);
 			process = pb.start();
 			stdin = Channels.newChannel(process.getOutputStream());
 			stderr = Channels.newChannel(process.getErrorStream());
@@ -121,7 +125,7 @@ public class TriMultPoly {
 	}
 
 	/** Save in the native TriMultPoly file format for debugging */
-	private void saveCurve(Collection<List<Vertex>> vertices, String fileName) throws IOException
+	private static void saveCurve(Collection<List<Vertex>> vertices, String fileName) throws IOException
 	{
 		PrintWriter pw = new PrintWriter(fileName);
 		int nbVert = 0;
@@ -178,35 +182,22 @@ public class TriMultPoly {
 		return nbVert;
 	}
 
-	public Collection<Triangle> triangulate(Mesh mesh, Collection<List<Vertex>> vertices) throws IOException
+	protected void triangulate(Mesh mesh, Collection<List<Vertex>> vertices) throws IOException
 	{
-		int nbVert = sendVertices(vertices);
 		buffer.limit(4);
 		stderr.read(buffer);
 		int nbTria = buffer.getInt(0);
-		ArrayList<Triangle> toReturn = new ArrayList<Triangle>(nbTria);
-		List<Vertex> vertIndex;
-		if(vertices.size() > 1)
-		{
-			vertIndex = new ArrayList<Vertex>(nbVert);
-			for(List<Vertex> vs: vertices)
-				vertIndex.addAll(vs);
-		}
-		else
-			vertIndex = vertices.iterator().next();
+		if(nbTria == 0)
+			throw new RuntimeException("trimulpoly was not able to create a triangulation");
 		buffer.limit(12);
 		buffer.rewind();
 		for(int i = 0; i < nbTria; i++)
 		{
 			stderr.read(buffer);
-			Vertex v1 = vertIndex.get(buffer.getInt(0));
-			Vertex v2 = vertIndex.get(buffer.getInt(4));
-			Vertex v3 = vertIndex.get(buffer.getInt(8));
-			toReturn.add(mesh.createTriangle(v1, v2, v3));
+			addTriangle(mesh, buffer.getInt(0), buffer.getInt(4), buffer.getInt(8));
 			buffer.rewind();
 		}
-
-		return toReturn;
+		buffer.clear();
 	}
 
 	public void close()
@@ -217,6 +208,15 @@ public class TriMultPoly {
 	@Override
 	protected void finalize() throws Throwable {
 		close();
+	}
+
+	public static List<Vertex> createVertices(Mesh mesh, double[] array)
+	{
+		List<Vertex> r = new ArrayList<Vertex>();
+		for(int i = 0; i < array.length / 3; i++)
+			r.add(mesh.createVertex(
+				array[3 * i], array[3 * i + 1], array[3 * i + 2]));
+		return r;
 	}
 
 	public static void main(final String[] args) {
@@ -256,15 +256,37 @@ public class TriMultPoly {
 			2.502539, -1.103106, -1.451018,
 			4.502539, -1.103106, -1.4510180};
 		Mesh mesh = new Mesh();
-		List<Vertex> vertices = new ArrayList<Vertex>();
-		for(int i = 0; i < points.length / 3; i++)
-			vertices.add(mesh.createVertex(
-				points[3 * i], points[3 * i + 1], points[3 * i + 2]));
+		List<Vertex> vertices = createVertices(mesh, points);
 		try {
-			Collection<Triangle> triangles = tmp.triangulate(mesh, Collections.singleton(vertices));
-			for(Triangle t: triangles)
+			tmp.triangulate(mesh, Collections.singleton(vertices));
+			for(Triangle t: tmp.getNewTriangles())
 				mesh.add(t);
 			MeshWriter.writeObject3D(mesh, "/tmp/pbl/bug.zebra/trimultpoly.amibe", null);
+		} catch (IOException ex) {
+			LOGGER.log(Level.SEVERE, null, ex);
+		}
+
+		mesh = new Mesh();
+		List<Vertex> vertices1 = createVertices(mesh, new double[]{
+			0,0,0,
+			1,0,0,
+			1,1,0,
+			0,1,0
+		});
+		List<Vertex> vertices2 = createVertices(mesh, new double[]{
+			0.3, 0.2, 0,
+			0.8, 0.9, 0,
+			(0.3+0.8) / 2, (0.2+0.9) / 2, 0
+		});
+		tmp = new TriMultPoly("/home/robert/tetramesh/TriMultPoly_src_v1.1.0/TriMultPoly");
+		//tmp.setDelauneyTetra(false);
+		try {
+			List<List<Vertex>> input = Arrays.asList(vertices1, vertices2);
+			saveCurve(input, "/tmp/trimultpoly.txt");
+			tmp.triangulate(mesh, input);
+			for(Triangle t: tmp.getNewTriangles())
+				mesh.add(t);
+			MeshWriter.writeObject3D(mesh, "/tmp/pbl/bug.zebra/trimultpoly2.amibe", null);
 		} catch (IOException ex) {
 			LOGGER.log(Level.SEVERE, null, ex);
 		}
