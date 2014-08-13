@@ -21,6 +21,7 @@
 package org.jcae.mesh.amibe.projection;
 
 import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.Vertex;
 
 /**
  * Check if a triangle intersect an ABB.
@@ -199,12 +200,33 @@ public class TriangleInterAABB {
 			triverts[i][1] = triangle.getV(i).getY();
 			triverts[i][2] = triangle.getV(i).getZ();
 		}
+		computeTriangleEdge();
+	}
 
-		/* compute triangle edges */
+	/**
+	 * @param triangle
+	 * @param m a 3x4 matrix, useful to check OBB intersection instead of AABB
+	 */
+	public void setTriangle(Triangle triangle, double[] m)
+	{
+		for(int i = 0; i < 3; i++)
+		{
+			Vertex v = triangle.getV(i);
+			double x = v.getX();
+			double y = v.getY();
+			double z = v.getZ();
+			triverts[i][0] = m[0] * x + m[1] * y + m[2] * z + m[3];
+			triverts[i][1] = m[4] * x + m[5] * y + m[6] * z + m[7];
+			triverts[i][2] = m[8] * x + m[9] * y + m[10] * z + m[11];
+		}
+		computeTriangleEdge();
+	}
+
+	private void computeTriangleEdge()
+	{
 		sub(e0, triverts[1], triverts[0]);      /* tri edge 0 */
 		sub(e1, triverts[2], triverts[1]);      /* tri edge 1 */
 		sub(e2, triverts[0], triverts[2]);      /* tri edge 2 */
-
 		cross(normal, e0, e1);
 	}
 
