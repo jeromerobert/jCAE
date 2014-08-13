@@ -778,4 +778,20 @@ public abstract class AbstractHalfEdge
 	 */
 	public abstract Iterator<AbstractHalfEdge> fanIterator();
 
+	public Triangle createBoundaryTriangle(Mesh mesh)
+	{
+		if (!hasSymmetricEdge() && !hasAttributes(AbstractHalfEdge.OUTER))
+		{
+			setAttributes(AbstractHalfEdge.BOUNDARY);
+			Triangle adj = mesh.createTriangle(mesh.outerVertex, destination(), origin());
+			adj.setAttributes(AbstractHalfEdge.OUTER);
+			adj.setReadable(false);
+			adj.setWritable(false);
+			AbstractHalfEdge sym = adj.getAbstractHalfEdge();
+			sym.setAttributes(AbstractHalfEdge.BOUNDARY);
+			glue(sym);
+			return adj;
+		}
+		return null;
+	}
 }

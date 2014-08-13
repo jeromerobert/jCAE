@@ -176,20 +176,7 @@ class VertexMerger {
 		Iterable<AbstractHalfEdge> edges, Collection<Triangle> newOuterTriangles)
 	{
 		for(AbstractHalfEdge ot: edges)
-		{
-			if (!ot.hasSymmetricEdge() && !ot.hasAttributes(AbstractHalfEdge.OUTER))
-			{
-				ot.setAttributes(AbstractHalfEdge.BOUNDARY);
-				Triangle adj = mesh.createTriangle(mesh.outerVertex, ot.destination(), ot.origin());
-				newOuterTriangles.add(adj);
-				adj.setAttributes(AbstractHalfEdge.OUTER);
-				adj.setReadable(false);
-				adj.setWritable(false);
-				AbstractHalfEdge sym = adj.getAbstractHalfEdge();
-				sym.setAttributes(AbstractHalfEdge.BOUNDARY);
-				ot.glue(sym);
-			}
-		}
+			newOuterTriangles.add(ot.createBoundaryTriangle(mesh));
 	}
 
 	/**
