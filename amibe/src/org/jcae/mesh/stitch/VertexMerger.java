@@ -176,7 +176,11 @@ class VertexMerger {
 		Iterable<AbstractHalfEdge> edges, Collection<Triangle> newOuterTriangles)
 	{
 		for(AbstractHalfEdge ot: edges)
-			newOuterTriangles.add(ot.createBoundaryTriangle(mesh));
+		{
+			Triangle t = ot.createBoundaryTriangle(mesh);
+			if(t != null)
+				newOuterTriangles.add(t);
+		}
 	}
 
 	/**
