@@ -195,13 +195,19 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 		return true;
 	}
 
-	private Collection<Integer> getGroups(Vertex v)
+	/**
+	 * Return true if the vertex is on a boundary edge
+	 */
+	private boolean isBoundary(Vertex v)
 	{
-		Iterator<Triangle> it = v.getNeighbourIteratorTriangle();
-		TreeSet<Integer> r = new TreeSet<Integer>();
+		Iterator<AbstractHalfEdge> it = v.getNeighbourIteratorAbstractHalfEdge();
 		while(it.hasNext())
-			r.add(it.next().getGroupId());
-		return r;
+		{
+			AbstractHalfEdge e = it.next();
+			if(e.hasAttributes(AbstractHalfEdge.BOUNDARY))
+				return true;
+		}
+		return false;
 	}
 
 	/**
@@ -211,11 +217,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	private Vertex optimalPlacementGroups(Vertex v1, Vertex v2)
 	{
 		Vertex toReturn;
-		if(v1.isMutable() && !v2.isMutable())
-			toReturn = v2;
-		else if(v2.isMutable() && !v1.isMutable())
-			toReturn = v1;
-		else if(!v1.isMutable() && !v2.isMutable())
+		if(!v1.isMutable() && !v2.isMutable())
 			toReturn = null;
 		else if(v1.isManifold() && v2.isManifold())
 			toReturn = optimalPlacement(v1, v2);
@@ -223,8 +225,6 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 		{
 			TreeSet<Integer> grps1 = new TreeSet<Integer>();
 			TreeSet<Integer> grps2 = new TreeSet<Integer>();
-			grps1.clear();
-			grps2.clear();
 			v1.getGroups(grps1);
 			v2.getGroups(grps2);
 			if(grps1.containsAll(grps2))
@@ -244,6 +244,12 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 				//group set are disjoin so collapse is forbidden
 				toReturn = null;
 		}
+
+		// Do not break polyline ends
+		if(toReturn == v1 && (!v2.isMutable() || !v2.isManifold() && isBoundary(v2)))
+			toReturn = null;
+		else if(toReturn == v2 && (!v1.isMutable() || !v1.isManifold() && isBoundary(v1)))
+			toReturn = null;
 		return toReturn;
 	}
 
