@@ -149,9 +149,9 @@ public class EdgesCollapserNG {
 	 */
 	public AbstractHalfEdge collapse(Vertex v1, Vertex v2, Vertex intermediate)
 	{
-		assert v1 != intermediate;
-		assert v2 != intermediate;
-		assert v1 != v2;
+		assert v1 != intermediate: v1;
+		assert v2 != intermediate: v2;
+		assert v1 != v2: v1;
 		List<Vertex> path;
 		if(intermediate == null)
 			path = astar.find(v1, v2);

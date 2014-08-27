@@ -234,6 +234,7 @@ public class Mesh implements Serializable
 	 */
 	public final void add(Triangle t)
 	{
+		assert t!= null;
 		triangleList.add(t);
 	}
 
