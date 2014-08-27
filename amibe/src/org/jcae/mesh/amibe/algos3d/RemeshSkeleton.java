@@ -160,7 +160,8 @@ public class RemeshSkeleton {
 			if(toInsert.size() == 2)
 			{
 				int n = Math.max(1, polyline.size() / 2);
-				edgeCollapser.collapse(toInsert.get(0), toInsert.get(1), polyline.get(n));
+				if(toInsert.get(0) != toInsert.get(1))
+					edgeCollapser.collapse(toInsert.get(0), toInsert.get(1), polyline.get(n));
 			}
 			else
 			{
