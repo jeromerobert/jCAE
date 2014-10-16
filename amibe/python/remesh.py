@@ -20,6 +20,7 @@ from optparse import OptionParser
 import tempfile
 import subprocess
 import os
+import shutil
 
 def read_groups(file_name):
     f=open(file_name)
@@ -266,6 +267,7 @@ def __remesh(options):
             options.size, point_metric, immutable_groups, afront_stderr = afront_stderr)
         afront_frozen = afront_insert(liaison, afront_nodes_reader, options.size, point_metric)
         Vertex.setMutable(afront_frozen, False)
+        shutil.rmtree(tmp_dir, ignore_errors=True)
 
     #4
     writeVTK(liaison)
