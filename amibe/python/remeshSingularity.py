@@ -1,8 +1,9 @@
 
 # jCAE
 from org.jcae.mesh.amibe.ds import Mesh, AbstractHalfEdge
-from org.jcae.mesh.amibe.algos3d import Remesh, QEMDecimateHalfEdge
+from org.jcae.mesh.amibe.algos3d import RemeshSkeleton, Remesh, QEMDecimateHalfEdge
 from org.jcae.mesh.amibe.algos3d import SwapEdge, ImproveVertexValence, SmoothNodes3DBg
+from org.jcae.mesh.amibe.algos3d import RemoveDegeneratedTriangles
 from org.jcae.mesh.amibe.algos3d import PolylineFactory, RemeshPolyline
 from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.projection import MeshLiaison
@@ -12,11 +13,7 @@ from org.jcae.mesh.xmldata import MeshReader, MeshWriter
 # Java
 from java.util import HashMap
 from java.util import ArrayList
-from java.util import LinkedHashMap
 from java.lang import String, Math
-
-# GNU trove
-from gnu.trove.list.array import TIntArrayList
 
 # Python
 import sys
@@ -27,7 +24,7 @@ from optparse import OptionParser
 Remesh an existing mesh around singularities
 """
 
-cmd=("remeshSingularity  ", "<inputDir> <outputDir> <pointMetric> <sizeInf>",
+cmd=("remeshSingularity", "<inputDir> <outputDir> <pointMetric> <sizeInf>",
 """Remesh an existing mesh around singularities:
     1) Decimate (optional)
     2) Refine according to pointMetric and sizeInf
@@ -77,6 +74,9 @@ parser.add_option("--no-preserveGroups", default=True, action="store_false",
                   help="do not preserve groups: edges adjacent to two "
                   "different groups are handled like normal edges (default: "
                   "preserve groups)")
+parser.add_option("-k", "--skeleton",
+                  default=False, action="store_true", dest="skeleton",
+                  help="remesh skeleton beforehand")
 parser.add_option("-n", "--allowNearNodes",
                   action="store_true", dest="allowNearNodes",
                   help="insert vertices even if this creates a small edge")
@@ -91,12 +91,16 @@ parser.add_option("-T", "--nearLengthRatio", metavar="FLOAT",
 parser.add_option("-w", "--wire", metavar="FLOAT", default=-1.0,
                   action="store", type="float", dest="wire",
                   help="remesh beams (default: -1.0: do not remesh)")
+parser.add_option("-e", "--eratio", metavar="FLOAT", default=10.0,
+                  action="store", type="float", dest="eratio",
+                  help="remove triangles whose edge ratio is greater than "
+                  "tolerance (default: 10.0)")
 parser.add_option("-I", "--immutable-border",
                   action="store_true", dest="immutable_border",
                   help="Tag free edges as immutable")
 parser.add_option("-M", "--immutable-groups", metavar="STRING",
                   action="store", type="string", dest="immutable_groups_file",
-                  help="A text file containing the list of groups which whose "
+                  help="A text file containing the list of groups whose "
                   "elements and nodes must not be modified by this algorithm.")
 parser.add_option("--record", metavar="PREFIX",
                   action="store", type="string", dest="recordFile",
@@ -106,8 +110,8 @@ parser.add_option("--record", metavar="PREFIX",
 (options, args) = parser.parse_args(args=sys.argv[1:])
 
 if len(args) != 4:
-	parser.print_usage()
-	sys.exit(1)
+    parser.print_usage()
+    sys.exit(1)
 
 ## Arguments
 xmlDir = args[0]
@@ -118,55 +122,67 @@ sizeinf = float(args[3])
 ## Process coplanarity option
 coplanarity = cos(options.coplanarityAngle * pi / 180.)
 if options.coplanarity:
-	coplanarity = options.coplanarity
+    coplanarity = options.coplanarity
 
 ## Build background mesh
 mtb = MeshTraitsBuilder.getDefault3D()
 if options.recordFile:
-	mtb.addTraceRecord()
+    mtb.addTraceRecord()
 mtb.addNodeSet()
 mesh = Mesh(mtb)
 if options.recordFile:
-	mesh.getTrace().setDisabled(True)
+    mesh.getTrace().setDisabled(True)
 MeshReader.readObject3D(mesh, xmlDir)
 liaison = MeshLiaison.create(mesh, mtb)
 
 if options.recordFile:
-	liaison.getMesh().getTrace().setDisabled(False)
-	liaison.getMesh().getTrace().setLogFile(options.recordFile)
-	liaison.getMesh().getTrace().createMesh("mesh", liaison.getMesh())
+    liaison.getMesh().getTrace().setDisabled(False)
+    liaison.getMesh().getTrace().setLogFile(options.recordFile)
+    liaison.getMesh().getTrace().createMesh("mesh", liaison.getMesh())
 if options.immutable_border:
-	liaison.mesh.tagFreeEdges(AbstractHalfEdge.IMMUTABLE)
+    liaison.mesh.tagFreeEdges(AbstractHalfEdge.IMMUTABLE)
 liaison.getMesh().buildRidges(coplanarity)
 if options.preserveGroups:
-	liaison.getMesh().buildGroupBoundaries()
+    liaison.getMesh().buildGroupBoundaries()
 
 immutable_groups = []
 if options.immutable_groups_file:
-	f = open(options.immutable_groups_file)
-	immutable_groups = f.read().split()
-	f.close()
-	liaison.mesh.tagGroups(immutable_groups, AbstractHalfEdge.IMMUTABLE)
+    f = open(options.immutable_groups_file)
+    immutable_groups = f.read().split()
+    f.close()
+    liaison.mesh.tagGroups(immutable_groups, AbstractHalfEdge.IMMUTABLE)
 
 if options.recordFile:
-	cmds = [ String("assert self.m.checkNoDegeneratedTriangles()"),
-			 String("assert self.m.checkNoInvertedTriangles()"),
-			 String("assert self.m.checkVertexLinks()"),
-			 String("assert self.m.isValid()") ]
-	liaison.getMesh().getTrace().setHooks(cmds)
+    cmds = [ String("assert self.m.checkNoDegeneratedTriangles()"),
+             String("assert self.m.checkNoInvertedTriangles()"),
+             String("assert self.m.checkVertexLinks()"),
+             String("assert self.m.isValid()") ]
+    liaison.getMesh().getTrace().setHooks(cmds)
 
 ## Decimate
 if options.decimateSize or options.decimateTarget:
-	decimateOptions = HashMap()
-	if options.decimateSize:
-		decimateOptions.put("size", str(options.decimateSize))
-	elif options.decimateTarget:
-		decimateOptions.put("maxtriangles", str(options.decimateTarget))
-	decimateOptions.put("coplanarity", str(coplanarity))
-	QEMDecimateHalfEdge(liaison, decimateOptions).compute()
-	swapOptions = HashMap()
-	swapOptions.put("coplanarity", str(coplanarity))
-	SwapEdge(liaison, swapOptions).compute()
+    decimateOptions = HashMap()
+    if options.decimateSize:
+        decimateOptions.put("size", str(options.decimateSize))
+    elif options.decimateTarget:
+        decimateOptions.put("maxtriangles", str(options.decimateTarget))
+    decimateOptions.put("coplanarity", str(coplanarity))
+    QEMDecimateHalfEdge(liaison, decimateOptions).compute()
+    swapOptions = HashMap()
+    swapOptions.put("coplanarity", str(coplanarity))
+    SwapEdge(liaison, swapOptions).compute()
+
+## Metric
+if options.rho > 1.0:
+    ## mixed metric
+    metric = SingularMetric(sizeinf, point_metric_file, options.rho, True)
+else:
+    ## analytic metric
+    metric = SingularMetric(sizeinf, point_metric_file)
+
+## Remesh Skeleton
+if options.skeleton:
+    RemeshSkeleton(liaison, 1.66, sizeinf/100.0, metric).compute()
 
 ## Remesh
 refineOptions = HashMap()
@@ -175,15 +191,9 @@ refineOptions.put("coplanarity", str(coplanarity))
 refineOptions.put("nearLengthRatio", str(options.nearLengthRatio))
 refineOptions.put("project", "false")
 if options.allowNearNodes:
-	refineOptions.put("allowNearNodes", "true")
+    refineOptions.put("allowNearNodes", "true")
 refineAlgo = Remesh(liaison, refineOptions)
-
-if options.rho > 1.0:
-	## mixed metric
-	refineAlgo.setAnalyticMetric(SingularMetric(sizeinf, point_metric_file, options.rho, True))
-else:
-	## analytic metric
-	refineAlgo.setAnalyticMetric(SingularMetric(sizeinf, point_metric_file))
+refineAlgo.setAnalyticMetric(metric)
 refineAlgo.compute();
 
 ## Swap
@@ -208,28 +218,32 @@ smoothOptions.put("tolerance", str(2.0))
 smoothOptions.put("relaxation", str(0.6))
 smoothOptions.put("refresh", "false")
 if (coplanarity >= 0.0):
-	smoothOptions.put("coplanarity", str(coplanarity))
-smoothAlgo = SmoothNodes3DBg(liaison, smoothOptions)
-smoothAlgo.compute()
+    smoothOptions.put("coplanarity", str(coplanarity))
+SmoothNodes3DBg(liaison, smoothOptions).compute()
+
+## Remove Degenerated
+rdOptions = HashMap()
+rdOptions.put("rho", str(options.eratio))
+RemoveDegeneratedTriangles(liaison, rdOptions).compute()
 
 ## Remesh beams
 if options.wire > 0.0:
-	polylines = PolylineFactory(liaison.mesh, 135.0, options.wire*0.2)
-	liaison.mesh.resetBeams()
-	for entry in polylines.entrySet():
-		groupId = entry.key
-		for polyline in entry.value:
-			listM = ArrayList()
-			for v in polyline:
-				listM.add(EuclidianMetric3D(options.wire))
-			if liaison.mesh.getGroupName(groupId) in immutable_groups:
-				result = polyline
-			else:
-				result = RemeshPolyline(liaison.mesh, polyline, listM).compute()
-			for i in xrange(result.size() - 1):
-				liaison.mesh.addBeam(result.get(i), result.get(i+1), groupId)
+    polylines = PolylineFactory(liaison.mesh, 135.0, options.wire*0.2)
+    liaison.mesh.resetBeams()
+    for entry in polylines.entrySet():
+        groupId = entry.key
+        for polyline in entry.value:
+            listM = ArrayList()
+            for v in polyline:
+                listM.add(EuclidianMetric3D(options.wire))
+            if liaison.mesh.getGroupName(groupId) in immutable_groups:
+                result = polyline
+            else:
+                result = RemeshPolyline(liaison.mesh, polyline, listM).compute()
+            for i in xrange(result.size() - 1):
+                liaison.mesh.addBeam(result.get(i), result.get(i+1), groupId)
 
 ## Output
 MeshWriter.writeObject3D(liaison.getMesh(), outDir, "")
 if options.recordFile:
-	liaison.getMesh().getTrace().finish()
+    liaison.getMesh().getTrace().finish()
