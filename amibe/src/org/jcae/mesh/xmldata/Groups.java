@@ -324,7 +324,8 @@ public class Groups
 		}
 		finally
 		{
-			ifr.close();
+			if(ifr != null)
+				ifr.close();
 		}
 		return trianglesGroup;
 	}
