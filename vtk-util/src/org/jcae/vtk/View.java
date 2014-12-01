@@ -51,7 +51,8 @@ public class View extends Canvas {
 	private Point releasePosition;
 	private boolean interactive = true;
 	private boolean appendSelection;
-
+	private boolean SELECT_ONLY_VISIBLE = Boolean.parseBoolean(
+		System.getProperty("org.jcae.vtk.selectOnlyVisible", "true"));
 	static
 	{
 		Utils.setVTKLogFile(new File(System.getProperty("user.home"),
@@ -147,7 +148,7 @@ public class View extends Canvas {
 				if(currentViewable != null)
 				{
 					PickContext context = new FrustumPicker(this,
-						true, pressPosition, releasePosition);
+						SELECT_ONLY_VISIBLE, pressPosition, releasePosition);
 					currentViewable.performSelection(context);
 				}
 				setMouseMode(MouseMode.POINT_SELECTION);
