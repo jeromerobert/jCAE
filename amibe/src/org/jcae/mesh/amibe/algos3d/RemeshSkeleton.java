@@ -111,11 +111,11 @@ public class RemeshSkeleton {
 		EdgesCollapserNG edgeCollapser = new EdgesCollapserNG(mesh);
 		main: for(List<Vertex> polyline: skeleton.getPolylinesVertices())
 		{
-			if(polyline.size() == 2)
-				continue;
 			RemeshPolyline rp = new RemeshPolyline(mesh, polyline, metric);
 			rp.setBuildBackgroundLink(true);
 			List<Vertex> toInsert = rp.compute();
+			if(polyline.size() == 2 && toInsert.size() == 2)
+				continue;
 			List<Integer> bgLink = rp.getBackgroundLink();
 
 			ArrayList<AbstractHalfEdge> edgeIndex = new ArrayList<AbstractHalfEdge>(polyline.size()-1);
