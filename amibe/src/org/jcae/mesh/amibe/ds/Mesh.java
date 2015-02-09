@@ -2504,6 +2504,20 @@ public class Mesh implements Serializable
 			add(nt);
 		}
 	}
+
+	public void reverse(int group)
+	{
+		for(Triangle t: getTriangles())
+		{
+			if(t.getGroupId() == group || group == -1)
+			{
+				Vertex v0 = t.getV0();
+				Vertex v1 = t.getV1();
+				t.setV(0, v1);
+				t.setV(1, v0);
+			}
+		}
+	}
 	// Useful for debugging
 	/*  Following imports must be moved at top.
 import java.io.FileOutputStream;
