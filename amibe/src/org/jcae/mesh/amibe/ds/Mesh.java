@@ -2425,6 +2425,85 @@ public class Mesh implements Serializable
 			setGroupName(e.getKey()+groupOffset, e.getValue());
 		vertexGroups.putAll(toMerge.getVertexGroup());
 	}
+
+	/**
+	 * Return nodes even if hasNodes is false
+	 * @triangles if not null, receive the triangle in the group
+	 */
+	public Collection<Vertex> getOrComputeNodes(int group, Collection<Triangle> triangles)
+	{
+		if(hasNodes() && group == -1)
+			return getNodes();
+		else
+		{
+			Set<Vertex> toReturn;
+			if(group == -1)
+				toReturn = HashFactory.createSet(triangleList.size() / 2 * 4 / 3);
+			else
+				toReturn = HashFactory.createSet();
+
+			for(Triangle t: triangleList)
+			{
+				if(group == -1 || t.getGroupId() == group)
+				{
+					toReturn.add(t.getV0());
+					toReturn.add(t.getV1());
+					toReturn.add(t.getV2());
+					if(triangles != null)
+						triangles.add(t);
+				}
+			}
+			return toReturn;
+		}
+	}
+
+	/**
+	 * Apply a geometrical transformation to all vertices of the triangles of
+	 * a given group
+	 */
+	public void transform(int group, Matrix3D rotation, double[] translation)
+	{
+		double[] tmp1 = new double[3];
+		double[] tmp2 = new double[3];
+		for(Vertex v: getOrComputeNodes(group, null))
+		{
+			if(rotation != null)
+			{
+				v.get(tmp1);
+				rotation.apply(tmp1, tmp2);
+			}
+			else
+				v.get(tmp2);
+			if(translation != null)
+			{
+				for(int i = 0; i < 3; i++)
+					tmp2[i] += translation[i];
+			}
+			v.moveTo(tmp2[0], tmp2[1], tmp2[2]);
+		}
+	}
+
+	/**
+	 * Duplicate the vertices and triangles of a given group
+	 */
+	public void copy(int group, int toGroup)
+	{
+		ArrayList<Triangle> triangles = new ArrayList<Triangle>();
+		Collection<Vertex> vertices = getOrComputeNodes(group, triangles);
+		Map<Vertex, Vertex> map = HashFactory.createMap(vertices.size());
+		for(Vertex v:vertices)
+		{
+			map.put(v, createVertex(v));
+		}
+		if(hasNodes())
+			getNodes().addAll(map.values());
+		for(Triangle t: triangles)
+		{
+			Triangle nt = createTriangle(map.get(t.v0), map.get(t.v1), map.get(t.v2));
+			nt.setGroupId(toGroup);
+			add(nt);
+		}
+	}
 	// Useful for debugging
 	/*  Following imports must be moved at top.
 import java.io.FileOutputStream;

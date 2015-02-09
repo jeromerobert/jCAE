@@ -61,24 +61,6 @@ public class Fuse
 			tolerances[k++] = e * e;
 	}
 
-	private Collection<Vertex> getNodes()
-	{
-		if(mesh.hasNodes())
-			return mesh.getNodes();
-		else
-		{
-			Collection<Triangle> triangles = mesh.getTriangles();
-			HashSet<Vertex> toReturn = new HashSet<Vertex>(triangles.size() / 2 * 4 / 3);
-			for(Triangle t: triangles)
-			{
-				toReturn.add(t.getV0());
-				toReturn.add(t.getV1());
-				toReturn.add(t.getV2());
-			}
-			return toReturn;
-		}
-	}
-
 	public void compute()
 	{
 		LOGGER.fine("Running Fuse");
@@ -89,7 +71,7 @@ public class Fuse
 			bmin[i] = Double.MAX_VALUE;
 			bmax[i] = Double.MIN_VALUE;
 		}
-		Collection<Vertex> nodes = getNodes();
+		Collection<Vertex> nodes = mesh.getOrComputeNodes(-1, null);
 		for (Vertex n: nodes)
 		{
 			bmin[0] = Math.min(bmin[0], n.getX());
