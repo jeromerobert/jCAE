@@ -410,7 +410,8 @@ def __remesh(options):
 
     if options.post_script:
         execfile(options.post_script)
-    MeshWriter.writeObject3D(liaison.mesh, options.out_dir, "")
+    if options.out_dir:
+        MeshWriter.writeObject3D(liaison.mesh, options.out_dir, "")
 
 if __name__ == "__main__":
     """
