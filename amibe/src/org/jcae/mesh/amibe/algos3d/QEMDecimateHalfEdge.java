@@ -183,7 +183,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 			// edge, adjacent triangles may be collapsed. So it break the border.
 			else if("freezeNonManifold".equals(key))
 			{
-				for(Vertex v:mesh.getNodes())
+				for(Vertex v:mesh.getOrComputeNodes(-1, null))
 				{
 					if(v.getRef() != 0 && v.isMutable())
 					{
