@@ -399,6 +399,8 @@ def __remesh(options):
             #print "Remesh polyline of group "+str(groupId)+"/"+str(polylines.size())+" "+str(polyline.size())+" vertices"
             if liaison.mesh.getGroupName(groupId) in immutable_groups:
                 result = polyline
+            elif point_metric:
+                result = RemeshPolyline(liaison.mesh, polyline, point_metric).compute()
             else:
                 result = RemeshPolyline(liaison.mesh, polyline, listM).compute()
             for i in xrange(result.size() - 1):
