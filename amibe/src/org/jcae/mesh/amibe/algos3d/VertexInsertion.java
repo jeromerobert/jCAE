@@ -20,7 +20,6 @@
 
 package org.jcae.mesh.amibe.algos3d;
 
-import gnu.trove.impl.PrimeFinder;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -33,6 +32,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
@@ -171,14 +171,12 @@ public class VertexInsertion {
 		mutableInserted = new ArrayList<Vertex>(vertices.size());
 		notMutableInserted = new ArrayList<Vertex>();
 		int n = vertices.size();
-		int step = PrimeFinder.nextPrime(n+1);
-		int k = 0;
 		int nbInserted = 0;
 		swapper.setGroup(group);
+		List<Integer> randomIterator = createRandomIterator(n);
 		main: for(int i = 0; i < n; i++)
 		{
-			k = (k + step) % n;
-			Vertex v = vertices.get(k);
+			Vertex v = vertices.get(randomIterator.get(i));
 			double localMetric = metric.getTargetSize(
 				v.getX(), v.getY(), v.getZ(), group);
 			double localMetric2 = localMetric * localMetric;
@@ -293,5 +291,13 @@ public class VertexInsertion {
 			Logger.getLogger(VertexInsertion.class.getName()).log(Level.SEVERE,
 				null, ex);
 		}
+	}
+
+	private List<Integer> createRandomIterator(final int n) {
+		ArrayList<Integer> toReturn = new ArrayList<Integer>(n);
+		for(int i = 0; i < n; i++)
+			toReturn.add(i);
+		Collections.shuffle(toReturn, new Random(0));
+		return toReturn;
 	}
 }
