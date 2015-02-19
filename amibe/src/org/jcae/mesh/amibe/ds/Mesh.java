@@ -2426,6 +2426,15 @@ public class Mesh implements Serializable
 		vertexGroups.putAll(toMerge.getVertexGroup());
 	}
 
+	public void changeGroups(Map<Integer, Integer> map)
+	{
+		for(Triangle t: triangleList)
+		{
+			Integer newId = map.get(t.getGroupId());
+			if(newId != null)
+				t.setGroupId(newId);
+		}
+	}
 	/**
 	 * Return nodes even if hasNodes is false
 	 * @triangles if not null, receive the triangle in the group
