@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
@@ -76,6 +77,14 @@ public class Skeleton {
 		return a;
 	}
 
+	public Collection<AbstractHalfEdge> getByGroupsAtLeast(int ... groupIds)
+	{
+		ArrayList<AbstractHalfEdge> a = new ArrayList<AbstractHalfEdge>();
+		for(List<AbstractHalfEdge> l:getPolylinesAtLeast(groupIds))
+			a.addAll(l);
+		return a;
+	}
+
 	public Collection<List<AbstractHalfEdge>> getPolylines(int groupIds)
 	{
 		ArrayList<List<AbstractHalfEdge>> toReturn = new ArrayList<List<AbstractHalfEdge>>();
@@ -84,6 +93,49 @@ public class Skeleton {
 			AbstractHalfEdge e = l.get(0);
 			if(e.getTri().getGroupId() == groupIds)
 				toReturn.add(l);
+		}
+		return toReturn;
+	}
+	/**
+	 * Return polylines which are border of, at least, the given groups without
+	 * taking the order into account
+	 * @param groupIds
+	 * @return
+	 */
+	public Collection<List<AbstractHalfEdge>> getPolylinesAtLeast(int ... groupIds)
+	{
+		ArrayList<List<AbstractHalfEdge>> toReturn = new ArrayList<List<AbstractHalfEdge>>();
+		ArrayList<Integer> query = new ArrayList<Integer>();
+		for(int i: groupIds)
+			query.add(i);
+		TreeSet<Integer> current = new TreeSet<Integer>();
+		for(List<AbstractHalfEdge> l: polylines)
+		{
+			AbstractHalfEdge e = l.get(0);
+			if(e.getTri().getGroupId() == groupIds[0])
+			{
+				if(e.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+				{
+					Iterator<AbstractHalfEdge> it = e.fanIterator();
+					while(it.hasNext())
+					{
+						AbstractHalfEdge ne = it.next();
+						current.add(ne.getTri().getGroupId());
+					}
+				}
+				else if(e.hasAttributes(AbstractHalfEdge.BOUNDARY) && groupIds.length == 1)
+				{
+					current.add(e.getTri().getGroupId());
+				}
+				else
+				{
+					current.add(e.getTri().getGroupId());
+					current.add(e.sym().getTri().getGroupId());
+				}
+			}
+			if(current.containsAll(query))
+				toReturn.add(l);
+			current.clear();
 		}
 		return toReturn;
 	}

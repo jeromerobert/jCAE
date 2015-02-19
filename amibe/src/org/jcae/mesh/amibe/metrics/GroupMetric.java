@@ -62,6 +62,22 @@ public class GroupMetric extends DistanceMetric {
 		addFrontier(skeleton.getByGroups(ids), size0, d0, d1);
 	}
 
+	/**
+	 * Add the frontier between n groups.
+	 * Metric will be added to frontier which contains at least the list of
+	 * groups. If n is one a metric could be added manifold or non-manifold edges,
+	 * not only to boundary edges.
+	 * @param groupNames
+	 * @param size0 size of edges when distance is between zero and d0
+	 * @param d0
+	 * @param d1 Use the size set by addGroup when distance is greater than d1
+	 */
+	public void addFrontierAtLeast(List<String> groupNames, double size0, double d0, double d1)
+	{
+		int[] ids = mesh.getGroupIDs(groupNames.toArray(new String[groupNames.size()]));
+		addFrontier(skeleton.getByGroupsAtLeast(ids), size0, d0, d1);
+	}
+
 	private void addFrontier(Iterable<AbstractHalfEdge> edges, double size0, double d0, double d1)
 	{
 		for(AbstractHalfEdge edge: edges)
