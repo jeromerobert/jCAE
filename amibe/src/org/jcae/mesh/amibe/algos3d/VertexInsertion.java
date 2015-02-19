@@ -103,8 +103,9 @@ public class VertexInsertion {
 			{
 				@Override
 				protected boolean isQualityImproved(Quality quality) {
-					return super.isQualityImproved(quality) &&
-						quality.swappedVolume() < swapperVolume;
+					return (super.isQualityImproved(quality) &&
+						quality.swappedVolume() < swapperVolume) ||
+						needRemoveSharpEdge(quality);
 				}
 			};
 		else
@@ -112,11 +113,17 @@ public class VertexInsertion {
 			{
 				@Override
 				protected boolean isQualityImproved(Quality quality) {
-					return super.isQualityImproved(quality) &&
-						quality.sqrSwappedDeflection(swapperGroup) < swapperDeflection;
+					return (super.isQualityImproved(quality) &&
+						quality.sqrSwappedDeflection(swapperGroup) < swapperDeflection) ||
+						needRemoveSharpEdge(quality);
 				}
 			};
 		swapper.setKdTree(kdTree);
+	}
+
+	private boolean needRemoveSharpEdge(Quality q)
+	{
+		return q.getAngle() < -0.1 && q.getSwappedAngle() > q.getAngle() && q.getSwappedQuality() > 1E-3;
 	}
 
 	public void insertNodes(String fileName, int group) throws IOException
