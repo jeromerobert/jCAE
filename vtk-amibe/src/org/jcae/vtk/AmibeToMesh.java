@@ -88,7 +88,42 @@ public class AmibeToMesh
 			for (int i = 0; i < arrayToRenumber.length; i++)
 				arrayToRenumber[i] = map.get(arrayToRenumber[i]);
 	}
-	
+
+	/** Create an index array for triangles to be used as input from createCells */
+	// copied from vtk-util to avoid loading VTK native libraries
+	private static int[] createTriangleCells(int[] cells, int offsetID)
+	{
+		int k = 0;
+		int nCell = cells.length / 3;
+		int[] fCells = new int[nCell * 4];
+		for (int i = 0; i < nCell * 3; i += 3)
+		{
+			fCells[k++] = 3;
+			fCells[k++] = cells[i] + offsetID;
+			fCells[k++] = cells[i + 1] + offsetID;
+			fCells[k++] = cells[i + 2] + offsetID;
+		}
+		return fCells;
+	}
+	/**
+	 * Create an index array for beams to be used as input from createCells
+	 * change {a, b, c, d} to {2, a, b, 2, c, d}
+	 */
+	// copied from vtk-util to avoid loading VTK native libraries
+	private static int[] createBeamCells(int[] beams)
+	{
+		int numberOfBeam = beams.length / 2;
+		int k = 0;
+		int j = 0;
+		int[] fCells = new int[3 * numberOfBeam];
+		for (int i = 0; i < numberOfBeam; i++)
+		{
+			fCells[k++] = 2;
+			fCells[k++] = beams[j++];
+			fCells[k++] = beams[j++];
+		}
+		return fCells;
+	}
 	private static class TriaData extends LeafNode.DataProvider
 	{
 		private final AmibeReader.Dim3 provider;
@@ -110,7 +145,7 @@ public class AmibeToMesh
 				int[] nodesID = makeNodeIDArray(triangles);
 				setNodes(sm.readNodes(nodesID));
 				renumberArray(nodesID, triangles);
-				setPolys(triangles.length/3, Utils.createTriangleCells(triangles, 0));
+				setPolys(triangles.length/3, createTriangleCells(triangles, 0));
 			} catch (IOException ex) {
 				LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
 			}
@@ -138,7 +173,7 @@ public class AmibeToMesh
 				int[] nodesID = makeNodeIDArray(beams);
 				setNodes(sm.readNodes(nodesID));
 				renumberArray(nodesID, beams);
-				setLines(Utils.createBeamCells(beams));
+				setLines(createBeamCells(beams));
 			} catch (IOException ex) {
 				LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
 			}
