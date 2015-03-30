@@ -65,10 +65,44 @@ public class HoleCutter {
 				return false;
 		}
 	}
+
+	/**
+	 * Compute the vector normal to an half edge on its triangle
+	 * @param result the normalized result vector
+	 */
+	private void edgeNormal(AbstractHalfEdge edge, double[] result, double[] tmp1, double[] tmp2)
+	{
+		for(int i = 0; i < 3; i++)
+		{
+			tmp1[i] = edge.destination().get(i) -
+				edge.origin().get(i); //OD
+			tmp2[i] = edge.apex().get(i) -
+				edge.origin().get(i); //OA
+		}
+		double alpha = Matrix3D.prodSca(tmp1, tmp2) /
+			Matrix3D.prodSca(tmp1, tmp1);
+
+		for(int i = 0; i < 3; i++)
+			result[i] = tmp2[i] - alpha * tmp1[i];
+
+		double norm = Matrix3D.norm(result);
+		for(int i = 0; i < 3; i++)
+			result[i] /= norm;
+	}
+
+	@Deprecated
+	public Collection<Triangle> cut(Set<AbstractHalfEdge> edges)
+	{
+		return cut(edges, true);
+	}
+
 	/**
 	 * return the list of triangles in the hole
+	 * @param normalCut true if the cutting triangle is expected to be perpendicular
+	 * to the cutted surface, false if the cutting triangle is expected to be
+	 * parallel to the cutted surface.
 	 */
-	public Collection<Triangle> cut(Set<AbstractHalfEdge> edges)
+	public Collection<Triangle> cut(Set<AbstractHalfEdge> edges, boolean normalCut)
 	{
 		Set<Triangle> toReturn = HashFactory.createSet();
 		if(!isClosedLoop(edges))
@@ -81,7 +115,14 @@ public class HoleCutter {
 		for(AbstractHalfEdge edge: edges)
 		{
 			edge = getCutter(edge);
-			Matrix3D.computeNormal3D(edge.origin(), edge.destination(), edge.apex(), tmp1, tmp2, normal);
+			if(normalCut)
+			{
+				// compute the opposite of the triangle normal because in
+				// normalCut mode, the normal target the out side of the loop
+				Matrix3D.computeNormal3D(edge.origin(), edge.apex(), edge.destination(), tmp1, tmp2, normal);				
+			}
+			else
+				edgeNormal(edge, normal, tmp1, tmp2);
 			Iterator<AbstractHalfEdge> it = edge.fanIterator();
 			AbstractHalfEdge bestEdge = null;
 			double bestDot = Double.MAX_VALUE;
@@ -91,24 +132,10 @@ public class HoleCutter {
 				// select the fan which is inside the loop
 				if(otherEdge != edge && isCutted(otherEdge))
 				{
-					for(int i = 0; i < 3; i++)
-					{
-						tmp1[i] = otherEdge.destination().get(i) -
-							otherEdge.origin().get(i); //OD
-						tmp2[i] = otherEdge.apex().get(i) -
-							otherEdge.origin().get(i); //OA
-					}
-					double alpha = Matrix3D.prodSca(tmp1, tmp2) /
-						Matrix3D.prodSca(tmp1, tmp1);
-
-					for(int i = 0; i < 3; i++)
-						triDir[i] = tmp2[i] - alpha * tmp1[i];
-
-					double norm = Matrix3D.norm(triDir);
-					for(int i = 0; i < 3; i++)
-						triDir[i] /= norm;
+					edgeNormal(otherEdge, triDir, tmp1, tmp2);
 					double dot = Matrix3D.prodSca(triDir, normal);
-					if(dot < bestDot)
+					// keep the most parallel vector
+					if(dot > bestDot)
 					{
 						bestDot = dot;
 						bestEdge = otherEdge;
