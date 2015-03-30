@@ -90,19 +90,10 @@ public class HoleCutter {
 			result[i] /= norm;
 	}
 
-	@Deprecated
-	public Collection<Triangle> cut(Set<AbstractHalfEdge> edges)
-	{
-		return cut(edges, true);
-	}
-
 	/**
 	 * return the list of triangles in the hole
-	 * @param normalCut true if the cutting triangle is expected to be perpendicular
-	 * to the cutted surface, false if the cutting triangle is expected to be
-	 * parallel to the cutted surface.
 	 */
-	public Collection<Triangle> cut(Set<AbstractHalfEdge> edges, boolean normalCut)
+	public Collection<Triangle> cut(Set<AbstractHalfEdge> edges)
 	{
 		Set<Triangle> toReturn = HashFactory.createSet();
 		if(!isClosedLoop(edges))
@@ -115,11 +106,11 @@ public class HoleCutter {
 		for(AbstractHalfEdge edge: edges)
 		{
 			edge = getCutter(edge);
-			if(normalCut)
+			if(isNormalCut(edge))
 			{
 				// compute the opposite of the triangle normal because in
 				// normalCut mode, the normal target the out side of the loop
-				Matrix3D.computeNormal3D(edge.origin(), edge.apex(), edge.destination(), tmp1, tmp2, normal);				
+				Matrix3D.computeNormal3D(edge.origin(), edge.apex(), edge.destination(), tmp1, tmp2, normal);
 			}
 			else
 				edgeNormal(edge, normal, tmp1, tmp2);
@@ -177,6 +168,14 @@ public class HoleCutter {
 		return true;
 	}
 
+	/**
+	 * return true if the cutting triangle is expected to be perpendicular
+	 * to the cutted surface, false if the cutting triangle is expected to be
+	 * parallel to the cutted surface.
+	 */
+	protected boolean isNormalCut(AbstractHalfEdge edge) {
+		return true;
+	}
 	/**
 	 * tag the triangle which are inside the hole
 	 * @param triangle the list of tagged triangles
