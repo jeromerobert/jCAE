@@ -150,9 +150,12 @@ public class EdgeProjectorNG {
 			trianglesInOBB.clear();
 			for(Triangle t: trianglesInAABB)
 			{
-				taabb.setTriangle(t, matrix);
-				if(taabb.triBoxOverlap(aabb, true))
-					trianglesInOBB.add(t);
+				if(isProjectionAllowed(t))
+				{
+					taabb.setTriangle(t, matrix);
+					if(taabb.triBoxOverlap(aabb, true))
+						trianglesInOBB.add(t);
+				}
 			}
 		}
 	}
@@ -179,10 +182,16 @@ public class EdgeProjectorNG {
 		}
 		holeFiller.triangulate(mesh, border,
 			Collections.singleton(Arrays.asList(v1, v2)));
-		for(Triangle t:holeFiller.getNewTriangles())
-			mesh.add(t);
 		for(Triangle t:triangleFinder.trianglesInOBB)
+		{
 			mesh.remove(t);
+			kdTree.remove(t);
+		}
+		for(Triangle t:holeFiller.getNewTriangles())
+		{
+			mesh.add(t);
+			kdTree.addTriangle(t);
+		}
 		assert mesh.isValid();
 	}
 
@@ -219,6 +228,16 @@ public class EdgeProjectorNG {
 			mesh.remove(t);
 		assert mesh.isValid();
 		mesh.edgeCollapse(e, v1);
+	}
+
+	/**
+	 * Return true is the projection can be done on this triangle.
+	 * This methods aims at being redefine in subclasses.
+	 * The default implementation return true.
+	 */
+	protected boolean isProjectionAllowed(Triangle triangle)
+	{
+		return true;
 	}
 
 	public static void test()
