@@ -105,23 +105,23 @@ public class HoleCutter {
 		double[] triDir = new double[3];
 		for(AbstractHalfEdge edge: edges)
 		{
-			edge = getCutter(edge);
+			AbstractHalfEdge cEdge = getCutter(edge);
 			if(isNormalCut(edge))
 			{
 				// compute the opposite of the triangle normal because in
 				// normalCut mode, the normal target the out side of the loop
-				Matrix3D.computeNormal3D(edge.origin(), edge.apex(), edge.destination(), tmp1, tmp2, normal);
+				Matrix3D.computeNormal3D(cEdge.origin(), cEdge.apex(), cEdge.destination(), tmp1, tmp2, normal);
 			}
 			else
-				edgeNormal(edge, normal, tmp1, tmp2);
-			Iterator<AbstractHalfEdge> it = edge.fanIterator();
+				edgeNormal(cEdge, normal, tmp1, tmp2);
+			Iterator<AbstractHalfEdge> it = cEdge.fanIterator();
 			AbstractHalfEdge bestEdge = null;
-			double bestDot = Double.MAX_VALUE;
+			double bestDot = Double.NEGATIVE_INFINITY;
 			while(it.hasNext())
 			{
 				AbstractHalfEdge otherEdge = it.next();
 				// select the fan which is inside the loop
-				if(otherEdge != edge && isCutted(otherEdge))
+				if(otherEdge != cEdge && isCutted(otherEdge))
 				{
 					edgeNormal(otherEdge, triDir, tmp1, tmp2);
 					double dot = Matrix3D.prodSca(triDir, normal);
