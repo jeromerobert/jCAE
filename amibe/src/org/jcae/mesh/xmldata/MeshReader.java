@@ -312,7 +312,13 @@ public class MeshReader
 					f.setGroupId(id);
 				}
 				for(int j : g.readBeamsIds())
+				{
+					if(mesh.getBeamGroup(j) > 0)
+						logger.warning("Trying to tag a beam as "+g.getName()
+							+" while it's already in "+
+							mesh.getGroupName(mesh.getBeamGroup(j)));
 					mesh.setBeamGroup(j, id);
+				}
 				for(int j : g.readNodesIds())
 					mesh.setVertexGroup(nodelist[j], g.getName());
 			}
