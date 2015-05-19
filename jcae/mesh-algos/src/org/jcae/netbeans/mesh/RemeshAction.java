@@ -24,14 +24,13 @@ package org.jcae.netbeans.mesh;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import org.jcae.netbeans.options.OptionNode;
 
 /**
  *
  * @author Jerome Robert
  */
 public class RemeshAction extends AlgoAction {
-	protected final static String AFRONT =
-		System.getProperty("org.jcae.mesh.afront.path", null);
 	@Override
 	public String getName() {
 		return "Remesh";
@@ -40,6 +39,13 @@ public class RemeshAction extends AlgoAction {
 	@Override
 	protected String getCommand() {
 		return "remesh";
+	}
+
+	protected String getAfrontPath() {
+		String r = (String) OptionNode.AFRONT_PATH.getValue();
+		if(r == null || r.isEmpty())
+			r = System.getProperty("org.jcae.mesh.afront.path", null);
+		return r;
 	}
 
 	@Override
@@ -62,10 +68,11 @@ public class RemeshAction extends AlgoAction {
 				l.add("--point-metric");
 				l.add(metricFile.getAbsolutePath());
 			}
-			if(AFRONT != null)
+			String aFrontPath = getAfrontPath();
+			if(aFrontPath != null && !aFrontPath.isEmpty())
 			{
 				l.add("--afront");
-				l.add(AFRONT);
+				l.add(aFrontPath);
 			}
 			l.add(meshDirectory);
 			l.add(meshDirectory);

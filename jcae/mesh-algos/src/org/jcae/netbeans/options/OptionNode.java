@@ -50,7 +50,10 @@ public final class OptionNode extends AbstractNode {
 		"amibeARThreshold", "Mesh auto-refresh threshold", 400000,
 		"Mesh whose number of triangles is greater than this value will not "+
 		"automatically be refresh in the 3D view");
-
+	public final static PrefProperty AFRONT_PATH = new PrefProperty(
+		"afrontPath", "AFront executable location", "",
+		"<a href='http://bitbucket.org/jeromerobert/afront/downloads'>"+
+		"http://bitbucket.org/jeromerobert/afront/downloads</a>");
 	public OptionNode() {
 		super(Children.LEAF);
 	}
@@ -63,6 +66,7 @@ public final class OptionNode extends AbstractNode {
 		mesher.put(JVM_OPTIONS);
 		mesher.put(AMIBE_OPTIONS);
 		mesher.put(SAME_JVM);
+		mesher.put(AFRONT_PATH);
 		Sheet.Set viewer = new Sheet.Set();
 		viewer.setName("Viewer 3D Settings");
 		viewer.put(REFRESH_THRESHOLD);
