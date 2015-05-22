@@ -132,6 +132,9 @@ public abstract class AbstractLocaleRemesher {
 			while(current != start)
 			{
 				Vertex next = vertexMap.get(current);
+				assert next != null : "Cannot find next point after " + current
+					+ " in\n" + edges + "\n. Map is\n" + vertexMap +
+					"\n polylines is " + polylines;
 				vertexMap.remove(current);
 				polyline.add(current);
 				current = next;

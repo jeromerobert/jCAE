@@ -180,6 +180,9 @@ public class EdgeProjectorNG {
 				e = e.next();
 			}
 		}
+		assert !border.isEmpty() : "Cannot find triangles under " + v1 + " " +
+			v2 + " in the group " + group + " with tolerance " + tolerance +
+			". "+ triangleFinder.trianglesInOBB.size()+ " where found in the OBB.";
 		holeFiller.triangulate(mesh, border,
 			Collections.singleton(Arrays.asList(v1, v2)));
 		for(Triangle t:triangleFinder.trianglesInOBB)
