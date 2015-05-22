@@ -121,8 +121,8 @@ public class EdgeProjectorNG {
 
 	private class TriangleFinder
 	{
-		private final Collection<Triangle> trianglesInAABB = new ArrayList<Triangle>();
-		public final Collection<Triangle> trianglesInOBB = new HashSet<Triangle>();
+		private final Collection<Triangle> trianglesInAABB = HashFactory.createSet();
+		public final Collection<Triangle> trianglesInOBB = HashFactory.createSet();
 		private final double[] aabb = new double[6];
 		private final double[] matrix = new double[12];
 		private final TriangleInterAABB taabb = new TriangleInterAABB();
