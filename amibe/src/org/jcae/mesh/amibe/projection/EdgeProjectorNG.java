@@ -90,9 +90,9 @@ public class EdgeProjectorNG {
 		double x = Math.abs(m[0]);
 		double y = Math.abs(m[1]);
 		double z = Math.abs(m[2]);
-		boolean uyx = (x - y) >= 0;
-		boolean uzx = (x - z) >= 0;
-		boolean uzy = (y - z) >= 0;
+		boolean uyx = (x - y) < 0;
+		boolean uzx = (x - z) < 0;
+		boolean uzy = (y - z) < 0;
 		boolean xm = uyx && uzx;
 		boolean ym = !xm && uzy;
 		boolean zm = !(xm || ym);
