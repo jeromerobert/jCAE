@@ -36,6 +36,7 @@
                 <package>org.jcae.mesh.amibe.algos3d</package>
                 <package>org.jcae.mesh.amibe.ds</package>
                 <package>org.jcae.mesh.amibe.metrics</package>
+                <package>org.jcae.mesh.amibe.patch</package>
                 <package>org.jcae.mesh.amibe.projection</package>
                 <package>org.jcae.mesh.amibe.traits</package>
                 <package>org.jcae.mesh.amibe.util</package>
