@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.mesh.amibe.algos3d.TriMultPoly;
@@ -35,6 +36,7 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
+import org.jcae.mesh.amibe.util.HashFactory;
 import org.jcae.mesh.xmldata.Amibe2VTK;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
@@ -141,12 +143,12 @@ public class EdgeProjectorNG {
 			trianglesInAABB.clear();
 			kdTree.getNearTriangles(aabb, trianglesInAABB, group);
 			double norm = nullSpace(v1, v2, matrix);
-			for(int i = 0; i < 3; i++)
-			{
-				aabb[i] = -tolerance;
-				aabb[3+i] = tolerance;
-			}
-			aabb[3] += norm;
+			aabb[0] = 0;
+			aabb[1] = -tolerance;
+			aabb[2] = -tolerance;
+			aabb[3] = norm;
+			aabb[4] = tolerance;
+			aabb[5] = tolerance;
 			trianglesInOBB.clear();
 			for(Triangle t: trianglesInAABB)
 			{
@@ -166,8 +168,29 @@ public class EdgeProjectorNG {
 		this.tolerance = tolerance;
 	}
 
-	public void project(Vertex v1, Vertex v2, int group)
+	/** Ensure that removing triangles would not remove not removable edges */
+	private boolean checkInternalEdges(Collection<Triangle> triangles) {
+		boolean toReturn = true;
+		Iterator<Triangle> it = triangles.iterator();
+		mainLoop: while(it.hasNext()) {
+			Triangle t = it.next();
+			AbstractHalfEdge e = t.getAbstractHalfEdge();
+			for(int i = 0; i < 3; i++) {
+				boolean isInternalEdge = triangles.contains(e.sym().getTri());
+				if(isInternalEdge && !isEdgeRemovable(e)) {
+					it.remove();
+					toReturn = false;
+					continue mainLoop;
+				}
+				e = e.next();
+			}
+		}
+		return toReturn;
+	}
+	public AbstractHalfEdge project(Vertex v1, Vertex v2, int group)
 	{
+		assert v1 != null;
+		assert v2 != null;
 		triangleFinder.findTriangles(v1, v2, group);
 		ArrayList<AbstractHalfEdge> border = new ArrayList<AbstractHalfEdge>();
 		for(Triangle t:triangleFinder.trianglesInOBB)
@@ -180,9 +203,10 @@ public class EdgeProjectorNG {
 				e = e.next();
 			}
 		}
-		assert !border.isEmpty() : "Cannot find triangles under " + v1 + " " +
-			v2 + " in the group " + group + " with tolerance " + tolerance +
-			". "+ triangleFinder.trianglesInOBB.size()+ " where found in the OBB.";
+		if(!checkInternalEdges(triangleFinder.trianglesInOBB))
+			return null;
+		if(border.isEmpty())
+			return null;
 		holeFiller.triangulate(mesh, border,
 			Collections.singleton(Arrays.asList(v1, v2)));
 		for(Triangle t:triangleFinder.trianglesInOBB)
@@ -196,6 +220,21 @@ public class EdgeProjectorNG {
 			kdTree.addTriangle(t);
 		}
 		assert mesh.isValid();
+		return holeFiller.getEdge(v1, v2);
+	}
+
+	private boolean checkVertexLinks() {
+		for(Triangle t: mesh.getTriangles())
+		{
+			for(int i = 0; i < 3; i++) {
+				Vertex v = t.getV(i);
+				if(v.getLink() == null && v != mesh.outerVertex) {
+					System.err.println("invalid vertex: "+v);
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	public void projectTriMultPoly(Vertex v1, Vertex v2, int group) throws IOException
@@ -240,6 +279,10 @@ public class EdgeProjectorNG {
 	 */
 	protected boolean isProjectionAllowed(Triangle triangle)
 	{
+		return true;
+	}
+
+	protected boolean isEdgeRemovable(AbstractHalfEdge edge) {
 		return true;
 	}
 
