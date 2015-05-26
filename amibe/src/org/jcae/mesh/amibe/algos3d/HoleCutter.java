@@ -39,7 +39,7 @@ import org.jcae.mesh.amibe.util.HashFactory;
  * @author Jerome Robert
  */
 public class HoleCutter {
-	private boolean isClosedLoop(Set<AbstractHalfEdge> edges)
+	private boolean isClosedLoop(Collection<AbstractHalfEdge> edges)
 	{
 		Map<Vertex, Vertex> map = HashFactory.createMap(edges.size());
 		Vertex start = null;
@@ -93,7 +93,7 @@ public class HoleCutter {
 	/**
 	 * return the list of triangles in the hole
 	 */
-	public Collection<Triangle> cut(Set<AbstractHalfEdge> edges)
+	public Collection<Triangle> cut(Collection<AbstractHalfEdge> edges)
 	{
 		Set<Triangle> toReturn = HashFactory.createSet();
 		if(!isClosedLoop(edges))
