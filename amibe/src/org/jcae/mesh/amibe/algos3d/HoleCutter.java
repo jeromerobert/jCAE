@@ -105,6 +105,12 @@ public class HoleCutter {
 		double[] triDir = new double[3];
 		for(AbstractHalfEdge edge: edges)
 		{
+			if(!edge.hasAttributes(AbstractHalfEdge.NONMANIFOLD)) {
+				assert isCutter(edge);
+				assert isCutted(edge);
+				loop.add(edge);
+				continue;
+			}
 			AbstractHalfEdge cEdge = getCutter(edge);
 			if(isNormalCut(edge))
 			{
