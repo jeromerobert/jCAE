@@ -23,6 +23,7 @@ package org.jcae.mesh.amibe.projection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.jcae.mesh.amibe.algos2d.Initial;
@@ -55,14 +56,13 @@ abstract public class Delaunay2DProjector {
 
 	private static abstract class LoopBuilder {
 		public List<AbstractHalfEdge> build(Vertex cutterVertex) {
-			Triangle t = (Triangle)cutterVertex.getLink();
-			AbstractHalfEdge e = t.getAbstractHalfEdge();
-			for(int i = 0; i < 3; i++) {
-				if(isValid(e))
-					break;
-				e = e.next();
+			Iterator<AbstractHalfEdge> it = cutterVertex.getNeighbourIteratorAbstractHalfEdge();
+			while(it.hasNext()) {
+				AbstractHalfEdge e = it.next();
+				if(isValid(e) && !e.hasAttributes(AbstractHalfEdge.OUTER))
+					return build(e);
 			}
-			return build(e);
+			return null;
 		}
 
 		public List<AbstractHalfEdge> build(AbstractHalfEdge e) {
@@ -148,6 +148,9 @@ abstract public class Delaunay2DProjector {
 			}
 		}.build(cutterVertex);
 
+		if(freeEdges == null)
+			throw new IllegalArgumentException(
+				"The cutter vertices must be on the boundary. "+cutterVertex+" is not.");
 		List<AbstractHalfEdge> cutteeEdges = cutteeLoop(freeEdges, tolerance);
 		HoleCutter hc = new HoleCutter() {
 			@Override
