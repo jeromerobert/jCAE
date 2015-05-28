@@ -156,7 +156,7 @@ abstract public class Delaunay2DProjector {
 			}
 		};
 		int group = cutteeEdges.get(0).getTri().getGroupId();
-		trianglesToRemove = hc.cut(cutteeEdges);
+		trianglesToRemove = hc.cut(cutteeEdges, false);
 		Map<Vertex, Vertex> v2dTov3d = HashFactory.createMap();
 		Mesh2D m2d = createMesh2D();
 		int k = 0;

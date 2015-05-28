@@ -23,6 +23,7 @@ package org.jcae.mesh.amibe.algos3d;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -90,14 +91,7 @@ public class HoleCutter {
 			result[i] /= norm;
 	}
 
-	/**
-	 * return the list of triangles in the hole
-	 */
-	public Collection<Triangle> cut(Collection<AbstractHalfEdge> edges)
-	{
-		Set<Triangle> toReturn = HashFactory.createSet();
-		if(!isClosedLoop(edges))
-			return toReturn;
+	private Set<AbstractHalfEdge> findLoopFan(Collection<AbstractHalfEdge> edges) {
 		Set<AbstractHalfEdge> loop = HashFactory.createSet(edges.size());
 		double[] tmp1 = new double[3];
 		double[] tmp2 = new double[3];
@@ -105,12 +99,6 @@ public class HoleCutter {
 		double[] triDir = new double[3];
 		for(AbstractHalfEdge edge: edges)
 		{
-			if(!edge.hasAttributes(AbstractHalfEdge.NONMANIFOLD)) {
-				assert isCutter(edge);
-				assert isCutted(edge);
-				loop.add(edge);
-				continue;
-			}
 			AbstractHalfEdge cEdge = getCutter(edge);
 			if(isNormalCut(edge))
 			{
@@ -143,6 +131,30 @@ public class HoleCutter {
 			{
 				loop.add(bestEdge);
 			}
+		}
+		return loop;
+	}
+
+	public Collection<Triangle> cut(Collection<AbstractHalfEdge> edges) {
+		return cut(edges, true);
+	}
+
+	/**
+	 * return the list of triangles in the hole
+	 */
+	public Collection<Triangle> cut(Collection<AbstractHalfEdge> edges, boolean searchLoopFan)
+	{
+		Set<Triangle> toReturn = HashFactory.createSet();
+		if(!isClosedLoop(edges))
+			return toReturn;
+
+		Set<AbstractHalfEdge> loop;
+		if(searchLoopFan) {
+			loop = findLoopFan(edges);
+		} else if(edges instanceof Set) {
+			loop = (Set<AbstractHalfEdge>) edges;
+		} else {
+			loop = new HashSet<AbstractHalfEdge>(edges);
 		}
 		if(!loop.isEmpty())
 			cutHole(toReturn, loop);
