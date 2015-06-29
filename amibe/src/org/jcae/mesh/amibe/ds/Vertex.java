@@ -243,8 +243,8 @@ public class Vertex extends Location implements Serializable
 			ot = ot.next();
 		else if (ot.apex() == this)
 			ot = ot.prev();
-		assert ot.origin() == this : "Cannot find the half edge of\n" + t +
-			"\nstarting from\n" + this;
+		assert ot != null && ot.origin() == this : "Cannot find the half edge of\n"
+			+ t + "\nstarting from\n" + this;
 		return ot;
 	}
 
