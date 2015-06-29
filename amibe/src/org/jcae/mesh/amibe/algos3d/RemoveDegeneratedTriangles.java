@@ -70,6 +70,8 @@ public class RemoveDegeneratedTriangles extends AbstractAlgoHalfEdge
 	private static final Logger LOGGER = Logger.getLogger(
 		RemoveDegeneratedTriangles.class.getName());
 	private Vertex collapseVertex = null;
+	private HalfEdge maxRatioHE = null;
+	private double maxRatio;
 
 	/**
 	 * Creates a <code>RemoveDegeneratedTriangles</code> instance.
@@ -99,7 +101,9 @@ public class RemoveDegeneratedTriangles extends AbstractAlgoHalfEdge
 		/* Only 'a few' triangles should be removed */
 		setProgressBarStatus(10);
 		/* Tolerance is 1 / rho * rho; default value for rho is 100 */
-		tolerance = 1. / 10000;
+		tolerance = 1. / 100;
+		/* Maximum ratio in the mesh */
+		maxRatio = -1.0;
 		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
 			final String key = opt.getKey();
@@ -120,7 +124,7 @@ public class RemoveDegeneratedTriangles extends AbstractAlgoHalfEdge
 		 * one is larger than 10.
 		 */
 		if (tolerance >= 0.25)
-			throw new RuntimeException("Edge ratio 'rho' must be striclty greater than 2.0");
+			throw new RuntimeException("Edge ratio 'rho' must be strictly greater than 2.0");
 	}
 
 	@Override
@@ -132,6 +136,7 @@ public class RemoveDegeneratedTriangles extends AbstractAlgoHalfEdge
 	@Override
 	public void preProcessAllHalfEdges()
 	{
+		LOGGER.info("Using maximum edge ratio: "+1./Math.sqrt(tolerance));
 	}
 
 	/**
@@ -143,45 +148,86 @@ public class RemoveDegeneratedTriangles extends AbstractAlgoHalfEdge
 	@Override
 	protected final double cost(final HalfEdge e)
 	{
-		double inverseSqrEdgeRatio = tolerance + 1.;
-		int nfan = 0;
-
 		/* square length of 'e' */
 		double ae = e.origin().sqrDistance3D(e.destination());
+		/* max square length of the neighbors of 'e' */
+		double maxNeighSqrLength = -ae;
+		/* Neighbor of 'e' whose length is max */
+		HalfEdge maxNeighHE = null;
+		/* fan number of e (1 if manifold) */
+		int nfan = 0;
 
 		/* neighbors of 'e' (including non-manifold) */
 		for (Iterator<AbstractHalfEdge> it = e.fanIterator(); it.hasNext(); )
 		{
 			HalfEdge fan = (HalfEdge) it.next();
-			HalfEdge fn = fan.next();
-			HalfEdge fp = fan.prev();
-			double an = fn.origin().sqrDistance3D(fn.destination());
-			double ap = fp.origin().sqrDistance3D(fp.destination());
-			inverseSqrEdgeRatio = Math.min(inverseSqrEdgeRatio, ae/an);
-			inverseSqrEdgeRatio = Math.min(inverseSqrEdgeRatio, ae/ap);
+			assert !fan.hasAttributes(AbstractHalfEdge.OUTER) : "fan edge is OUTER: "+fan;
+
+			/* Consider only non-outer edges */
+			if (!fan.getTri().hasAttributes(AbstractHalfEdge.OUTER)) {
+				HalfEdge fn = fan.next();
+				HalfEdge fp = fan.prev();
+				double an = fn.origin().sqrDistance3D(fn.destination());
+				double ap = fp.origin().sqrDistance3D(fp.destination());
+				if (an > maxNeighSqrLength) {
+					maxNeighSqrLength = an;
+					maxNeighHE = fn;
+				}
+				if (ap > maxNeighSqrLength) {
+					maxNeighSqrLength = ap;
+					maxNeighHE = fp;
+				}
+			}
+			else if (LOGGER.isLoggable(Level.FINE)) {
+				LOGGER.fine("Triangle is OUTER: "+fan.getTri());
+			}
 			nfan++;
 		}
+
 		/* free edges are considered but not their symmetric (OUTER) */
 		if (e.hasSymmetricEdge() && !e.hasAttributes(AbstractHalfEdge.BOUNDARY))
 		{
 			HalfEdge sym = e.sym();
-			assert !sym.hasAttributes(AbstractHalfEdge.OUTER) : "sym() edge is OUTER!";
+			assert !sym.hasAttributes(AbstractHalfEdge.OUTER) : "sym edge is OUTER: "+sym;
 
-			HalfEdge sn = sym.next();
-			HalfEdge sp = sym.prev();
-			double an = sn.origin().sqrDistance3D(sn.destination());
-			double ap = sp.origin().sqrDistance3D(sp.destination());
-			inverseSqrEdgeRatio = Math.min(inverseSqrEdgeRatio, ae/an);
-			inverseSqrEdgeRatio = Math.min(inverseSqrEdgeRatio, ae/ap);
+			/* Consider only non-outer edges */
+			if (!sym.getTri().hasAttributes(AbstractHalfEdge.OUTER)) {
+				HalfEdge sn = sym.next();
+				HalfEdge sp = sym.prev();
+				double an = sn.origin().sqrDistance3D(sn.destination());
+				double ap = sp.origin().sqrDistance3D(sp.destination());
+				if (an > maxNeighSqrLength) {
+					maxNeighSqrLength = an;
+					maxNeighHE = sn;
+				}
+				if (ap > maxNeighSqrLength) {
+					maxNeighSqrLength = ap;
+					maxNeighHE = sp;
+				}
+			}
+			else if (LOGGER.isLoggable(Level.FINE)) {
+				LOGGER.fine("Triangle is OUTER: "+sym.getTri());
+			}
 		}
+
+		/* inverse of square ratio */
+		double inverseSqrEdgeRatio = ae/Math.abs(maxNeighSqrLength);
+		double ratio = 1./Math.sqrt(inverseSqrEdgeRatio);
 
 		/* debug info if candidate */
 		if (LOGGER.isLoggable(Level.FINE)) {
 			if (inverseSqrEdgeRatio <= tolerance) {
 				LOGGER.fine("Candidate edge: "+e);
-				LOGGER.fine("Ratio: "+1./Math.sqrt(inverseSqrEdgeRatio));
+				LOGGER.fine("Candidate edge length: "+Math.sqrt(ae));
+				LOGGER.fine("Max neighbor length: "+Math.sqrt(maxNeighSqrLength));
+				LOGGER.fine("Ratio: "+ratio);
+				LOGGER.fine("Max neighbor edge: "+maxNeighHE);
 				LOGGER.fine("Nr fan: "+nfan);
 			}
+		}
+		if (ratio > maxRatio) {
+			maxRatioHE = e;
+			maxRatio = ratio;
 		}
 		return inverseSqrEdgeRatio;
 	}
@@ -189,6 +235,10 @@ public class RemoveDegeneratedTriangles extends AbstractAlgoHalfEdge
 	@Override
 	void postComputeTree()
 	{
+		LOGGER.info("Maximum Ratio: "+maxRatio);
+		if (LOGGER.isLoggable(Level.FINE)) {
+			LOGGER.fine("Maximum Ratio found at edge: "+maxRatioHE);
+		}
 	}
 
 	/**
@@ -223,12 +273,8 @@ public class RemoveDegeneratedTriangles extends AbstractAlgoHalfEdge
 	 */
 	private void updateTree(HalfEdge current)
 	{
-		if (!current.origin().isReadable() || !current.destination().isReadable())
-			return;
-		double newCost = cost(current);
-		if (newCost > tolerance)
-			return;
-		updateCost(current, newCost);
+		if (current.origin().isReadable() && current.destination().isReadable())
+			updateCost(current, cost(current));
 	}
 
 	/**
