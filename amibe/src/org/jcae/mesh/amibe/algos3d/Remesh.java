@@ -607,10 +607,10 @@ public class Remesh
 		long endTime = System.nanoTime();
 		LOGGER.log(Level.INFO, "Computation time: {0}ms",
 			Double.toString((endTime - startTime)/1E6));
-		long usedMemory = Runtime.getRuntime().totalMemory() -
-			Runtime.getRuntime().freeMemory();
 		// Most of the time this is the pick memory point
 		System.gc();
+		long usedMemory = Runtime.getRuntime().totalMemory() -
+			Runtime.getRuntime().freeMemory();
 		LOGGER.log(Level.INFO, "In use heap memory: {0} MiB", usedMemory / 1024.0 / 1024.0);
 		return this;
 	}
