@@ -27,17 +27,26 @@ import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.util.ArrayList;
 import java.util.ListIterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -71,6 +80,23 @@ public class XMLHelper
 		return (Element)document.importNode(e, true);
 	}
 	
+	private static void removeEmptyLines(Document doc) {
+		try {
+			XPath xp = XPathFactory.newInstance().newXPath();
+			NodeList nl = (NodeList) xp.evaluate(
+				"//text()[normalize-space(.)='']",
+				doc, XPathConstants.NODESET);
+
+			for (int i = 0; i < nl.getLength(); ++i) {
+				Node node = nl.item(i);
+				node.getParentNode().removeChild(node);
+			}
+		} catch (XPathExpressionException ex) {
+			Logger.getLogger(XMLHelper.class.getName()).log(Level.SEVERE, null,
+				ex);
+		}
+	}
+
 	/** Write a DOM to a file. */
 	public static void writeXML(Document document, File file)
 		throws IOException
@@ -80,8 +106,11 @@ public class XMLHelper
 		TransformerFactory transFactory = TransformerFactory.newInstance();
 		try
 		{
+			document.normalizeDocument();
+			removeEmptyLines(document);
 			Transformer transformer = transFactory.newTransformer();
-			transformer.setOutputProperty("indent", "yes");
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 			transformer.transform(new DOMSource(document), result);
 		}
 		catch (TransformerConfigurationException ex)

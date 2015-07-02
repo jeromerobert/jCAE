@@ -197,7 +197,7 @@ public class Groups
 		if (f.exists())
 		{
 			xmlDoc = org.jcae.mesh.xmldata.XMLHelper.parseXML(f);
-			modifyXMLGroups(xmlDoc, groupsBin, xmlDir);
+			modifyXMLGroups(xmlDoc);
 			org.jcae.mesh.xmldata.XMLHelper.writeXML(xmlDoc, f);
 		}
 		
@@ -251,8 +251,7 @@ public class Groups
 	 *@param groupFile the file groups.bin.
 	 *@param baseDir the directory containing jcae3d.xml.
 	 */
-	final void modifyXMLGroups(org.w3c.dom.Document xmlDoc,
-		java.io.File groupFile, String baseDir)
+	final void modifyXMLGroups(org.w3c.dom.Document xmlDoc)
 	{		
 		org.w3c.dom.NodeList listGroups = xmlDoc.getElementsByTagName("groups");
 		if (listGroups.getLength() > 0)
@@ -272,8 +271,7 @@ public class Groups
 				for (int i = 0; i < groups.size(); i++)
 				{
 					Group g = groups.get(i);
-					eltGroups.appendChild(g.createXMLGroup(xmlDoc, groupFile,
-						baseDir));
+					eltGroups.appendChild(g.createXMLGroup(xmlDoc));
 				}
 			}
 		}
@@ -290,9 +288,7 @@ public class Groups
 			try
 			{
 				xmlDoc = org.jcae.mesh.xmldata.XMLHelper.parseXML(f);
-				File groupFile = new File(xmlDir + "/jcae3d.files",
-					"groups.bin");
-				modifyXMLGroups(xmlDoc, groupFile, xmlDir);
+				modifyXMLGroups(xmlDoc);
 				org.jcae.mesh.xmldata.XMLHelper.writeXML(xmlDoc, f);
 			} catch (Exception e)
 			{
@@ -426,11 +422,15 @@ public class Groups
 			{
 				for (AmibeReader.Group ag:groups)
 				{
-					Group group = new Group();
-					group.setName(ag.getName());
-					group.setNumberOfElements(ag.getNumberOfTrias());
-					group.setOffset((int) ag.getTriasOffset());
-					groupList.addGroup(group);
+					if(ag.getNumberOfNodes() == 0) {
+						Group group = new Group();
+						group.setName(ag.getName());
+						group.setNumberOfElements(ag.getNumberOfTrias());
+						group.setOffset((int) ag.getTriasOffset());
+						group.setBeamNumber(ag.getNumberOfBeams());
+						group.setBeamOffset((int) ag.getBeamsOffset());
+						groupList.addGroup(group);
+					}
 				}
 			}
 		}

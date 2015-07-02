@@ -22,10 +22,13 @@ package org.jcae.mesh.xmldata;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 public class Group
 {
@@ -33,6 +36,8 @@ public class Group
 	private String name;
 	private int number;
 	private int offset;
+	private int beamNumber;
+	private int beamOffset;
     private final PropertyChangeSupport propertyChangeSupport =  new PropertyChangeSupport(this);
     private boolean visible;   
 	private boolean selected;
@@ -87,6 +92,22 @@ public class Group
 		this.offset = newOffset;
 	}
 
+	public int getBeamNumber() {
+		return beamNumber;
+	}
+
+	public void setBeamNumber(int beamNumber) {
+		this.beamNumber = beamNumber;
+	}
+
+	public int getBeamOffset() {
+		return beamOffset;
+	}
+
+	public void setBeamOffset(int beamOffset) {
+		this.beamOffset = beamOffset;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#toString()
@@ -110,23 +131,33 @@ public class Group
 	 *@param baseDir the directory which contains jcae3d.xml.
 	 *@return the DOM element corresponding to the group.
 	 */
-	public final Element createXMLGroup(Document xmlDoc, java.io.File groupFile,
-		String baseDir)
+	public final Element createXMLGroup(Document xmlDoc)
 	{
 		Element newElt = null;
 		try
 		{
+			String bg = "";
+			if(beamNumber > 0) {
+				bg ="<beams><number>" + beamNumber + "</number>"
+					+ "<file format='integerstream' location='jcae3d.files/bgroups.bin' offset='"
+					+ beamOffset + "'/></beams>";
+			}
+
+			String tg = "";
+			if(number > 0) {
+				tg = "<number>" + number + "</number>"
+					+ "<file format='integerstream' location='jcae3d.files/groups.bin' offset='"
+					+ offset + "'/>";
+			}
+
 			newElt = org.jcae.mesh.xmldata.XMLHelper.parseXMLString(xmlDoc,
-				"<group>"
-				+ "<name>" + name + "</name>" 
-				+ "<number>" + number + "</number>"
-				+ "<file format=\"integerstream\" location=\""
-				+ XMLHelper.canonicalize(baseDir, groupFile.toString())
-				+ "\" offset=\"" + offset + "\"/>" + "</group>");
-		}
-		catch (Exception ex)
-		{
-			LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+				"<group><name>" + name + "</name>" + tg + bg + "</group>");
+		} catch (ParserConfigurationException ex) {
+			LOGGER.log(Level.SEVERE, null, ex);
+		} catch (SAXException ex) {
+			LOGGER.log(Level.SEVERE, null, ex);
+		} catch (IOException ex) {
+			LOGGER.log(Level.SEVERE, null, ex);
 		}
 		return newElt;
 	}
