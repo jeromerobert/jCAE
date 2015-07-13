@@ -164,7 +164,7 @@ public abstract class QualityProcedure
 	 * @return The triangles with the lowest or highest quality
 	 */
 	public static List<Triangle> worstTriangles(QualityProcedure qualityProcedure,
-		final List<Triangle> input, final int nb)
+		final List<Triangle> input, final int nb, final boolean reverse)
 	{
 		Integer[] indices = new Integer[input.size()];
 		for (int i = 0; i < indices.length; i++) {
@@ -177,7 +177,10 @@ public abstract class QualityProcedure
 		}
 		Arrays.sort(indices, new Comparator<Integer>() {
 			public int compare(Integer o1, Integer o2) {
-				return Float.compare(qualities[o1], qualities[o2]);
+				if(reverse)
+					return Float.compare(qualities[o2], qualities[o1]);
+				else
+					return Float.compare(qualities[o1], qualities[o2]);
 			}
 		});
 		Triangle[] toReturn;

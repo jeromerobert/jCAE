@@ -30,6 +30,7 @@
             <file name="org-jcae-netbeans-mesh-DecimateAction.instance"/>
             <file name="org-jcae-netbeans-mesh-RefineAction.instance"/>
             <file name="org-jcae-netbeans-mesh-BadTrianglesAction.instance"/>
+			<file name="org-jcae-netbeans-mesh-TooLongEdgesAction.instance"/>
 			<file name="org-jcae-netbeans-mesh-RemeshAction.instance"/>
 			<file name="org-jcae-netbeans-mesh-ViewGroupAction.instance"/>
 			<file name="org-jcae-netbeans-mesh-HideGroupAction.instance"/>
@@ -69,6 +70,10 @@
                     <file name="org-jcae-netbeans-mesh-BadTrianglesAction.shadow">
                         <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-BadTrianglesAction.instance"/>
                         <attr name="position" intvalue="44"/>
+                    </file>
+                    <file name="org-jcae-netbeans-mesh-TooLongEdgesAction.shadow">
+                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-TooLongEdgesAction.instance"/>
+                        <attr name="position" intvalue="45"/>
                     </file>
                     <file name="Separator1.instance">
                         <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
