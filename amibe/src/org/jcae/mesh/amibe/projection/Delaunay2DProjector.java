@@ -49,6 +49,7 @@ abstract public class Delaunay2DProjector {
 	private final EdgeTrianglesLocator edgeTrianglesLocator;
 	private Collection<Triangle> trianglesToRemove;
 	private final Collection<Triangle> trianglesToAdd = new ArrayList<Triangle>();
+	private boolean swapOrientation;
 	public Delaunay2DProjector(Mesh mesh, TriangleKdTree kdTree) {
 		this.mesh = mesh;
 		this.edgeTrianglesLocator = new EdgeTrianglesLocator(kdTree);
@@ -187,9 +188,9 @@ abstract public class Delaunay2DProjector {
 			if(t.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			Triangle t3d = mesh.createTriangle(
-				v2dTov3d.get(t.getV0()),
+				v2dTov3d.get(swapOrientation ? t.getV2() : t.getV0()),
 				v2dTov3d.get(t.getV1()),
-				v2dTov3d.get(t.getV2()));
+				v2dTov3d.get(swapOrientation ? t.getV0() : t.getV2()));
 			t3d.setGroupId(group);
 			trianglesToAdd.add(t3d);
 		}
@@ -213,4 +214,8 @@ abstract public class Delaunay2DProjector {
 	}
 
 	abstract protected void transformTo2D(Location location, Vertex2D v2d);
+
+	public void setSwapOrientation(boolean swapOrientation) {
+		this.swapOrientation = swapOrientation;
+	}
 }
