@@ -564,7 +564,7 @@ public class RawStorage
 			int nrleaves = bufIn.readInt();
 			int nrbytes = bufIn.readInt();
 			int nrT = 0;
-			byte [] name = new byte[nrbytes+1];
+			byte [] name = new byte[nrbytes];
 			bufIn.read(name, 0, nrbytes);
 			ret = new OEMM(new String(name));
 			ret.leaves = new OEMM.Node[nrleaves];
@@ -628,7 +628,7 @@ public class RawStorage
 			
 			//  Index internal vertices
 			logger.fine("Index internal vertices");
-			FileInputStream fis = new FileInputStream(ret.getFileName());
+			FileInputStream fis = new FileInputStream(ret.getDirectory());
 			IndexInternalVerticesProcedure iiv_proc = new IndexInternalVerticesProcedure(fis, oos, outDir);
 			ret.walk(iiv_proc);
 			fis.close();
@@ -636,7 +636,7 @@ public class RawStorage
 			
 			//  Index external vertices
 			logger.fine("Index external vertices");
-			fis = new FileInputStream(ret.getFileName());
+			fis = new FileInputStream(ret.getDirectory());
 			//  We have a handle on triangle soup, which will be
 			//  no more read, we can now set output diirectory
 			//  to its final value.
