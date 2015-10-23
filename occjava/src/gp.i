@@ -19,6 +19,8 @@
  */
 
 %{
+	#include <Standard_Version.hxx>
+	#include <gp_Trsf.hxx>
 	jdoubleArray XYZtoDoubleArray(JNIEnv* jenv, const gp_XYZ & xyz)
 	{
 	    jdouble nativeArray[]={xyz.X(), xyz.Y(), xyz.Z()};
@@ -26,6 +28,21 @@
 		jenv->SetDoubleArrayRegion(toReturn, 0, 3, nativeArray);
 		return toReturn;
 	}
+    inline static void gp_Trsf_setValuesImpl(gp_Trsf * self, const Standard_Real a11,const Standard_Real a12,
+        const Standard_Real a13,const Standard_Real a14,const Standard_Real a21,
+        const Standard_Real a22,const Standard_Real a23,const Standard_Real a24,
+        const Standard_Real a31,const Standard_Real a32,const Standard_Real a33,
+        const Standard_Real a34,const Standard_Real Tolang,
+        const Standard_Real TolDist) {
+        self->SetValues(a11, a12, a13, a14,
+                        a21, a22, a23, a24,
+                        a31, a32, a33, a34
+#if OCC_VERSION_MAJOR >= 6 && OCC_VERSION_MINOR >= 8
+                        );
+#else
+                        ,Tolang, TolDist);
+#endif
+    }
 %}
 
 /**
@@ -267,12 +284,16 @@
 /**
  * gp_Trsf
  */
- %{#include <gp_Trsf.hxx>%}
  
 %rename(GP_Trsf) gp_Trsf;
 
 %typemap(javacode) gp_Trsf
 %{
+	public void setValues(double[] matrix) {
+        setValues(matrix, 0, 0);
+    }
+    /** @Deprecated Since OCCT 6.8 tolAng and tolDist arguments not longer exists */
+    @Deprecated
 	public void setValues(double[] matrix, double tolAng, double tolDist)
 	{
 		if(matrix.length!=12)
@@ -282,7 +303,7 @@
 			matrix[4], matrix[5], matrix[6], matrix[7],
 			matrix[8], matrix[9], matrix[10], matrix[11],
 			tolAng, tolDist);
-	}	
+	}
 %}
 
 class gp_Trsf
@@ -294,16 +315,33 @@ class gp_Trsf
 	gp_Trsf();
 	void SetRotation(const gp_Ax1& A1,const Standard_Real Ang) ;
 	void SetTranslation(const gp_Vec& V) ;
-	void SetValues(const Standard_Real a11,const Standard_Real a12,
-		const Standard_Real a13,const Standard_Real a14,const Standard_Real a21,
-		const Standard_Real a22,const Standard_Real a23,const Standard_Real a24,
-		const Standard_Real a31,const Standard_Real a32,const Standard_Real a33,
-		const Standard_Real a34,const Standard_Real Tolang,
-		const Standard_Real TolDist);
 };
+
 
 %extend gp_Trsf
 {
+    //TODO Should be generated as deprecated but I don't know how to do
+    void setValues(const Standard_Real a11,const Standard_Real a12,
+        const Standard_Real a13,const Standard_Real a14,const Standard_Real a21,
+        const Standard_Real a22,const Standard_Real a23,const Standard_Real a24,
+        const Standard_Real a31,const Standard_Real a32,const Standard_Real a33,
+        const Standard_Real a34,const Standard_Real Tolang,
+        const Standard_Real TolDist) {
+        gp_Trsf_setValuesImpl(self, a11, a12, a13, a14,
+                        a21, a22, a23, a24,
+                        a31, a32, a33, a34
+                        ,Tolang, TolDist);
+    }
+    void setValues(const Standard_Real a11,const Standard_Real a12,
+        const Standard_Real a13,const Standard_Real a14,const Standard_Real a21,
+        const Standard_Real a22,const Standard_Real a23,const Standard_Real a24,
+        const Standard_Real a31,const Standard_Real a32,const Standard_Real a33,
+        const Standard_Real a34) {
+        gp_Trsf_setValuesImpl(self, a11, a12, a13, a14,
+                        a21, a22, a23, a24,
+                        a31, a32, a33, a34, 0, 0);
+    }
+
 	/** Easy to use with javax.vecmath.Matrix4D */
 	void getValues(double matrix[16])
 	{

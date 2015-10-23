@@ -347,7 +347,6 @@ class BRepMesh_DiscretRoot
 class BRepMesh_IncrementalMesh : public BRepMesh_DiscretRoot
 {
 	%rename(perform) Perform;
-	%rename(update) Update;
 	%rename(isModified) IsModified;
 	
 	public:
@@ -357,7 +356,6 @@ class BRepMesh_IncrementalMesh : public BRepMesh_DiscretRoot
 		const Standard_Real Ang = 0.5);
 		
 	void Perform();
-	void Update(const TopoDS_Shape& S) ;
 	Standard_Boolean IsModified() const;
 };
 
