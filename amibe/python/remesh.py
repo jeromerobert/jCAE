@@ -121,22 +121,30 @@ def afront(afront_path, tmp_dir, mesh, size, point_metric, immutable_groups,
         logstd = sys.stdout if afront_stderr is subprocess.STDOUT else sys.stderr
         logstd.write("meshing %s\n" % g.name)
         logstd.write(" ".join(cmd)+"\n")
-        p = subprocess.Popen(cmd, stdin = subprocess.PIPE, cwd = tmp_dir,
-             stderr = afront_stderr)
-        sm.readGroup(g, p.stdin.fileno().channel)
-        p.stdin.flush()
-        return_code = p.wait()
-        if return_code != 0:
-            print "Exit code: "+str(return_code)
-    return MultiDoubleFileReader(nodes_file)
+        try:
+            p = subprocess.Popen(cmd, stdin = subprocess.PIPE, cwd = tmp_dir,
+                 stderr = afront_stderr)
+            sm.readGroup(g, p.stdin.fileno().channel)
+            p.stdin.flush()
+            return_code = p.wait()
+            if return_code != 0:
+                print "Exit code: "+str(return_code)
+        except OSError:
+            print "Cannot run afront"
+    if os.path.isfile(nodes_file):
+        return MultiDoubleFileReader(nodes_file)
+    else:
+        return
 
 def afront_insert(liaison, nodes_reader, size, point_metric):
     """ Return the list of mutable nodes which have been inserted """
+    inserted_vertices = ArrayList()
+    if nodes_reader is None:
+        return inserted_vertices
     if point_metric:
         remesh = VertexInsertion(liaison, point_metric)
     else:
         remesh = VertexInsertion(liaison, size)
-    inserted_vertices = ArrayList()
     for g_id in xrange(1, liaison.mesh.getNumberOfGroups()+1):
         vs = nodes_reader.next()
         remesh.insertNodes(vs, g_id)
