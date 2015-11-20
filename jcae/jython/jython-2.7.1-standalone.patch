@@ -1,0 +1,96 @@
+jCAE need a "standalone" bundle of jython. It can be downloaded from the
+jython website or build using the ant jar-standalone command.
+
+The patch bellow allow to build such jar file
+with .py files replaced by $py.class files so the bootstrap is much faster.
+
+It also change the default value of cachedir and cachedir.skip so java -jar jython.jar
+does what you expect.
+
+It also remove icu and bouncycastle to make the jar smaller.
+
+diff --git a/build.xml b/build.xml
+index 879173a..b69c36d 100644
+--- a/build.xml
++++ b/build.xml
+@@ -577,16 +577,10 @@ The readme text for the next release will be like:
+             <zipfileset src="extlibs/asm-commons-5.0.3.jar"/>
+             <zipfileset src="extlibs/asm-util-5.0.3.jar"/>
+             <rule pattern="org.objectweb.asm.**" result="org.python.objectweb.asm.@1"/>
+-            <zipfileset src="extlibs/bcpkix-jdk15on-150.jar" excludes="META-INF/**"/>
+-            <rule pattern="org.bouncycastle.**" result="org.python.bouncycastle.@1"/>
+-            <zipfileset src="extlibs/bcprov-jdk15on-150.jar" excludes="META-INF/**"/>
+-            <rule pattern="org.bouncycastle.**" result="org.python.bouncycastle.@1"/>
+             <zipfileset src="extlibs/commons-compress-1.9.jar"/>
+             <rule pattern="org.apache.**" result="org.python.apache.@1"/>
+             <zipfileset src="extlibs/guava-18.0.jar"/>
+             <rule pattern="com.google.**" result="org.python.google.@1"/>
+-            <zipfileset src="extlibs/icu4j-54_1_1.jar"/>
+-            <rule pattern="com.ibm.icu.**" result="org.python.icu.@1"/>
+             <zipfileset src="extlibs/netty-buffer-4.0.31.Final.jar" excludes="META-INF/**"/>
+             <rule pattern="io.netty.**" result="org.python.netty.@1"/>
+             <zipfileset src="extlibs/netty-codec-4.0.31.Final.jar" excludes="META-INF/**"/>
+@@ -645,10 +639,13 @@ The readme text for the next release will be like:
+     </target>
+ 
+     <target name="jar-standalone" depends="jar-complete">
++        <java jar="${dist.dir}/${jython.deploy.jar}" fork="true" dir="${dist.dir}">
++            <arg line="-m compileall Lib"/>
++        </java>
+         <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="extlibs/jarjar-1.4.jar"/>
+         <jar destfile="${dist.dir}/${jython.standalone.jar}">
++            <fileset dir="${dist.dir}" includes="Lib/**/*.class" excludes="Lib/test/**,Lib/email/test/**"/>
+             <zipfileset src="${dist.dir}/${jython.deploy.jar}"/>
+-            <fileset dir="${dist.dir}" includes="Lib/**" excludes="Lib/test/**" />
+             <manifest>
+                 <attribute name="Main-Class" value="org.python.util.jython" />
+                 <attribute name="Built-By" value="${user.name}" />
+diff --git a/src/org/python/core/PySystemState.java b/src/org/python/core/PySystemState.java
+index 2731091..6d4062c 100644
+--- a/src/org/python/core/PySystemState.java
++++ b/src/org/python/core/PySystemState.java
+@@ -59,7 +59,8 @@ public class PySystemState extends PyObject implements AutoCloseable,
+     public static final String PYTHON_CONSOLE_ENCODING = "python.console.encoding";
+     public static final String PYTHON_IO_ENCODING = "python.io.encoding";
+     public static final String PYTHON_IO_ERRORS = "python.io.errors";
+-    protected static final String CACHEDIR_DEFAULT_NAME = "cachedir";
++    protected static final String CACHEDIR_DEFAULT_NAME = System.getProperty("user.home") +
++        File.separator + ".cache" + File.separator + "jython";
+ 
+     public static final String JYTHON_JAR = "jython.jar";
+     public static final String JYTHON_DEV_JAR = "jython-dev.jar";
+@@ -808,7 +809,7 @@ public class PySystemState extends PyObject implements AutoCloseable,
+ 
+         // Now the post properties (possibly set by custom JythonInitializer).
+         registry.putAll(postProperties);
+-        if (standalone) {
++        if (standalone && false) {
+             // set default standalone property (if not yet set)
+             if (!registry.containsKey(PYTHON_CACHEDIR_SKIP)) {
+                 registry.put(PYTHON_CACHEDIR_SKIP, "true");
+@@ -1296,13 +1297,12 @@ public class PySystemState extends PyObject implements AutoCloseable,
+     private static PyList initPath(Properties props, boolean standalone, String jarFileName) {
+         PyList path = new PyList();
+         addPaths(path, props.getProperty("python.path", ""));
+-        if (prefix != null) {
+-            String libpath = new File(prefix.toString(), "Lib").toString();
+-            path.append(new PyString(libpath));
+-        }
+         if (standalone) {
+             // standalone jython: add the /Lib directory inside JYTHON_JAR to the path
+             addPaths(path, jarFileName + "/Lib");
++        } else if (prefix != null) {
++            String libpath = new File(prefix.toString(), "Lib").toString();
++            path.append(new PyString(libpath));
+         }
+ 
+         return path;
+@@ -1321,7 +1321,7 @@ public class PySystemState extends PyObject implements AutoCloseable,
+             JarFile jarFile = null;
+             try {
+                 jarFile = new JarFile(jarFileName);
+-                JarEntry jarEntry = jarFile.getJarEntry("Lib/os.py");
++                JarEntry jarEntry = jarFile.getJarEntry("Lib/os$py.class");
+                 standalone = jarEntry != null;
+             } catch (IOException ioe) {
+                 // Continue
