@@ -16,7 +16,7 @@ parser.add_option("-n", "--number", metavar="NUMBER",
                   action="store", type="int", dest="number",
                   help="Number of triangles to display (default: 10)")
 parser.add_option("-r", "--reverse", action="store_true", dest="reverse",
-                  help="Reverse the criteria")
+                  help="Reverse the criteria", default="False")
 parser.set_defaults(crit="MinAngleFace", number=10)
 
 (options, args) = parser.parse_args(args=sys.argv[1:])
