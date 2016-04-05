@@ -4,7 +4,7 @@ from org.jcae.mesh.amibe.ds import Mesh, AbstractHalfEdge, Vertex
 from org.jcae.mesh.amibe.algos3d import *
 from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.projection import MeshLiaison
-from org.jcae.mesh.amibe.metrics import EuclidianMetric3D, DistanceMetric
+from org.jcae.mesh.amibe.metrics import EuclidianMetric3D, DistanceMetric, SingularMetric
 from org.jcae.mesh.xmldata import MeshReader, MeshWriter, Amibe2VTK
 
 # Java
@@ -27,6 +27,26 @@ def read_groups(file_name):
     r=f.read().split()
     f.close()
     return r
+
+def check_metric_type(file_name):
+    """Read a first data line of a point metric file and return corresponding
+    format. Returns 'distance', 'singular', 'empty', 'unknown'
+    """
+    ftype = 'empty'
+    with open(file_name, 'r') as fid:
+        line = fid.readline()
+        while line.startswith('#'):
+            line = fid.readline()
+        if not line.startswith('#'):
+            data = line.strip().split()
+            ndata = len(data)
+            if ndata == 7 or ndata == 12:
+                ftype = 'distance'
+            elif ndata == 8 or ndata == 13:
+                ftype = 'singular'
+            else:
+                ftype = 'unknown'
+        return ftype
 
 # Set to 1 to enable writing mesh at each stage
 debug_write_counter=0
@@ -204,7 +224,11 @@ def __remesh(options):
         liaison.mesh.tagGroups(immutable_groups, AbstractHalfEdge.IMMUTABLE)
 
     if options.point_metric_file:
-        point_metric = DistanceMetric(options.size, options.point_metric_file)
+        metric_type = check_metric_type(options.point_metric_file)
+        if metric_type == 'singular':
+            point_metric = SingularMetric(options.size, options.point_metric_file, 2.0, True)
+        else:
+            point_metric = DistanceMetric(options.size, options.point_metric_file)
     elif getattr(options, 'point_metric', None):
         point_metric = options.point_metric
     else:

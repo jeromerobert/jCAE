@@ -23,6 +23,22 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+
+import java.io.PrintWriter;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
+import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
+import java.util.Locale;
+
+import java.util.logging.Logger;
+
 /**
  * An abstract AnalyticMetric which refines a mesh around a set of sources.
  * A source is a point, a line, etc. around which a metric is defined as
@@ -266,4 +282,41 @@ public abstract class AbstractDistanceMetric extends MetricSupport.AnalyticMetri
 	{
 		return sizeInf;
 	}
+
+	/**
+	 * Save the metric to a binary file.
+	 * Do not use this for long term storage, the format may change.
+	 */
+	public void save(String fileName) throws IOException
+	{
+		FileChannel fc = new FileOutputStream(fileName).getChannel();
+		save(fc);
+		fc.close();
+	}
+
+	public abstract void save(WritableByteChannel out) throws IOException;
+
+	/** Read a metric in binary format */
+	public void load(String fileName) throws IOException
+	{
+		FileChannel channel = new FileInputStream(fileName).getChannel();
+		load(channel);
+		channel.close();
+	}
+
+	public abstract void load(ReadableByteChannel in) throws IOException;
+
+	/**
+	 * Save the metric to a text file.
+	 * Do not use this for long term storage, the format may change.
+	 */
+	public void saveTxt(String fileName) throws IOException
+	{
+		PrintWriter out = new PrintWriter(fileName);
+		saveTxt(out);
+		out.close();
+	}
+
+	public abstract void saveTxt(PrintWriter out) throws IOException;
+
 }

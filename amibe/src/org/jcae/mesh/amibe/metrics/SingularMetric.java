@@ -22,6 +22,13 @@ package org.jcae.mesh.amibe.metrics;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
+import java.util.ArrayList;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 /**
@@ -176,6 +183,127 @@ public class SingularMetric extends AbstractDistanceMetric {
 			minValue = Math.min(v, minValue);
 		}
 		return minValue * scaling;
+	}
+
+	/**
+	 * Save the metric to a binary file.
+	 * Do not use this for long term storage, the format may change.
+	 */
+	public void save(WritableByteChannel out) throws IOException
+	{
+		ArrayList<PointSource> ps = new ArrayList<PointSource>();
+		ArrayList<LineSource> ls = new ArrayList<LineSource>();
+		for(DistanceMetricInterface s:sources)
+		{
+			if(s instanceof PointSource)
+				ps.add((PointSource)s);
+			else
+				ls.add((LineSource)s);
+		}
+		ByteBuffer bb = ByteBuffer.allocate(
+			ps.size() * 7 * 8 + ls.size() * 10 * 8 + 2 * 4);
+		bb.order(ByteOrder.nativeOrder());
+		bb.putInt(ps.size());
+		for(PointSource s:ps)
+		{
+			bb.putDouble(s.size0);
+			bb.putDouble(s.sqrD0);
+			bb.putDouble(s.sqrD1);
+			bb.putDouble(s.sx);
+			bb.putDouble(s.sy);
+			bb.putDouble(s.sz);
+			bb.putDouble(s.alpha);
+		}
+		bb.putInt(ls.size());
+		for(LineSource s:ls)
+		{
+			bb.putDouble(s.size0);
+			bb.putDouble(s.sqrD0);
+			bb.putDouble(s.sqrD1);
+			bb.putDouble(s.sx0);
+			bb.putDouble(s.sy0);
+			bb.putDouble(s.sz0);
+			bb.putDouble(s.sx1);
+			bb.putDouble(s.sy1);
+			bb.putDouble(s.sz1);
+			bb.putDouble(s.alpha);
+		}
+		bb.rewind();
+		out.write(bb);
+	}
+
+	/** Read a metric in binary format */
+	public void load(ReadableByteChannel in) throws IOException
+	{
+		ByteBuffer size = ByteBuffer.allocate(4);
+		in.read(size);
+		int nbPoints = size.getInt(0);
+		ByteBuffer bb = ByteBuffer.allocate(nbPoints * 7 * 8);
+		bb.order(ByteOrder.nativeOrder());
+		in.read(bb);
+		bb.rewind();
+		for(int i = 0; i < nbPoints; i++)
+		{
+			double size0 = bb.getDouble();
+			double sqrD0 = bb.getDouble();
+			double sqrD1 = bb.getDouble();
+			double x = bb.getDouble();
+			double y = bb.getDouble();
+			double z = bb.getDouble();
+			double alpha = bb.getDouble();
+			addPoint(x, y, z, size0, Math.sqrt(sqrD0), Math.sqrt(sqrD1), alpha);
+		}
+		size.rewind();
+		in.read(size);
+		int nbLines = size.get(0);
+		bb = ByteBuffer.allocate(nbLines * 10 * 8);
+		bb.order(ByteOrder.nativeOrder());
+		in.read(bb);
+		bb.rewind();
+		for(int i = 0; i < nbLines; i++)
+		{
+			double size0 = bb.getDouble();
+			double sqrD0 = bb.getDouble();
+			double sqrD1 = bb.getDouble();
+			double x0 = bb.getDouble();
+			double y0 = bb.getDouble();
+			double z0 = bb.getDouble();
+			double x1 = bb.getDouble();
+			double y1 = bb.getDouble();
+			double z1 = bb.getDouble();
+			double alpha = bb.getDouble();
+			addLine(x0, y0, z0, true, x1, y1, z1, true, size0,
+				Math.sqrt(sqrD0), Math.sqrt(sqrD1), alpha);
+		}
+	}
+
+	/**
+	 * Save the metric to a text file.
+	 * Do not use this for long term storage, the format may change.
+	 */
+	public void saveTxt(PrintWriter out) throws IOException
+	{
+		for(DistanceMetricInterface source:sources)
+		{
+			if(source instanceof PointSource)
+			{
+				PointSource s = (PointSource)source;
+				out.printf(Locale.ROOT, "1 %g %g %g %g %g %g %g\n", s.sx, s.sy, s.sz,
+					s.size0, Math.sqrt(s.sqrD0), Math.sqrt(s.sqrD1), s.alpha);
+			}
+			else if(source instanceof LineSource)
+			{
+				LineSource s = (LineSource)source;
+				out.printf(Locale.ROOT, "2 %g %g %g %d %g %g %g %d %g %g %g %g\n",
+					s.sx0, s.sy0, s.sz0, s.closed0 ? 1 : 0,
+					s.sx1, s.sy1, s.sz1, s.closed1 ? 1 : 0,
+					s.size0, Math.sqrt(s.sqrD0), Math.sqrt(s.sqrD1), s.alpha);
+			}
+			else
+			{
+				LOGGER.warning("Unknown source type "+source.getClass());
+			}
+		}
 	}
 
 }

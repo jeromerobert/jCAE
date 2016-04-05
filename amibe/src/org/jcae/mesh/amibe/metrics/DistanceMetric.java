@@ -176,14 +176,6 @@ public class DistanceMetric extends AbstractDistanceMetric {
 		return minValue * scaling;
 	}
 
-
-	public void save(String fileName) throws IOException
-	{
-		FileChannel fc = new FileOutputStream(fileName).getChannel();
-		save(fc);
-		fc.close();
-	}
-
 	/**
 	 * Save the metric to a binary file.
 	 * Do not use this for long term storage, the format may change.
@@ -228,12 +220,7 @@ public class DistanceMetric extends AbstractDistanceMetric {
 		bb.rewind();
 		out.write(bb);
 	}
-	public void load(String fileName) throws IOException
-	{
-		FileChannel channel = new FileInputStream(fileName).getChannel();
-		load(channel);
-		channel.close();
-	}
+
 	/** Read a metric in binary format */
 	public void load(ReadableByteChannel in) throws IOException
 	{
@@ -277,13 +264,10 @@ public class DistanceMetric extends AbstractDistanceMetric {
 		}
 	}
 
-	public void saveTxt(String fileName) throws IOException
-	{
-		PrintWriter out = new PrintWriter(fileName);
-		saveTxt(out);
-		out.close();
-	}
-
+	/**
+	 * Save the metric to a text file.
+	 * Do not use this for long term storage, the format may change.
+	 */
 	public void saveTxt(PrintWriter out) throws IOException
 	{
 		for(DistanceMetricInterface source:sources)
