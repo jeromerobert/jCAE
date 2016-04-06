@@ -45,6 +45,12 @@ import java.util.logging.Logger;
  */
 public class SingularMetric extends AbstractDistanceMetric {
 
+	/**
+	 * version file: each child of AbstractDistanceMetric has a file version
+	 * attribute which must be negative.
+	 */
+	private static final int version = -2;
+
 	private static final Logger LOGGER=Logger.getLogger(SingularMetric.class.getName());
 
 	public SingularMetric(double sizeInf) {
@@ -201,8 +207,9 @@ public class SingularMetric extends AbstractDistanceMetric {
 				ls.add((LineSource)s);
 		}
 		ByteBuffer bb = ByteBuffer.allocate(
-			ps.size() * 7 * 8 + ls.size() * 10 * 8 + 2 * 4);
+			ps.size() * 7 * 8 + ls.size() * 10 * 8 + 3 * 4);
 		bb.order(ByteOrder.nativeOrder());
+		bb.putInt(version);
 		bb.putInt(ps.size());
 		for(PointSource s:ps)
 		{
@@ -235,6 +242,8 @@ public class SingularMetric extends AbstractDistanceMetric {
 	/** Read a metric in binary format */
 	public void load(ReadableByteChannel in) throws IOException
 	{
+		ByteBuffer v = ByteBuffer.allocate(4);
+		in.read(v);
 		ByteBuffer size = ByteBuffer.allocate(4);
 		in.read(size);
 		int nbPoints = size.getInt(0);
