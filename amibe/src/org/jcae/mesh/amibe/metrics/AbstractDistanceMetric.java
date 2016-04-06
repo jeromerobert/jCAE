@@ -23,21 +23,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 
 import java.io.PrintWriter;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
-import java.util.Locale;
-
-import java.util.logging.Logger;
 
 /**
  * An abstract AnalyticMetric which refines a mesh around a set of sources.
