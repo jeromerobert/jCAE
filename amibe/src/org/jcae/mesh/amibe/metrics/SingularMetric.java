@@ -216,10 +216,11 @@ public class SingularMetric extends AbstractDistanceMetric {
 			bb.putDouble(s.size0);
 			bb.putDouble(s.sqrD0);
 			bb.putDouble(s.sqrD1);
+			bb.putDouble(s.alpha);
 			bb.putDouble(s.sx);
 			bb.putDouble(s.sy);
 			bb.putDouble(s.sz);
-			bb.putDouble(s.alpha);
+
 		}
 		bb.putInt(ls.size());
 		for(LineSource s:ls)
@@ -227,13 +228,13 @@ public class SingularMetric extends AbstractDistanceMetric {
 			bb.putDouble(s.size0);
 			bb.putDouble(s.sqrD0);
 			bb.putDouble(s.sqrD1);
+			bb.putDouble(s.alpha);
 			bb.putDouble(s.sx0);
 			bb.putDouble(s.sy0);
 			bb.putDouble(s.sz0);
 			bb.putDouble(s.sx1);
 			bb.putDouble(s.sy1);
 			bb.putDouble(s.sz1);
-			bb.putDouble(s.alpha);
 		}
 		bb.rewind();
 		out.write(bb);
