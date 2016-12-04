@@ -24,27 +24,26 @@
 %}
  
  class GC_MakeArcOfCircle {
-   public:
-   GC_MakeArcOfCircle(const gp_Pnt& P1,const gp_Pnt& P2,const gp_Pnt& P3);
-   GC_MakeArcOfCircle(const gp_Circ& Circ,const gp_Pnt& P1,const gp_Pnt& P2,const Standard_Boolean Sense);
-   const Handle_Geom_TrimmedCurve& Value() const;
+	public:
+	GC_MakeArcOfCircle(const gp_Pnt& P1,const gp_Pnt& P2,const gp_Pnt& P3);
+	GC_MakeArcOfCircle(const gp_Circ& Circ,const gp_Pnt& P1,const gp_Pnt& P2,const Standard_Boolean Sense);
+	const Handle_Geom_TrimmedCurve& Value() const;
  };
  
  class GC_MakeSegment {
     public:
-    	GC_MakeSegment(const gp_Pnt& P1, const gp_Pnt& P2);
+    GC_MakeSegment(const gp_Pnt& P1, const gp_Pnt& P2);
  	const Handle_Geom_TrimmedCurve& Value() const;
  };
  
  class  GCE2d_Root {
- public:
+ 	 public:
  };
 
 class GCE2d_MakeSegment  : public GCE2d_Root
 {
-public:
+	public:
   	GCE2d_MakeSegment(const gp_Pnt2d& P1, const gp_Pnt2d& P2);
 	Handle_Geom2d_TrimmedCurve& Value () const;
-
 };
 
