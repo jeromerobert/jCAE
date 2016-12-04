@@ -29,6 +29,7 @@
 #include <Geom_TrimmedCurve.hxx>
 #include <Geom_Plane.hxx>
 #include <Geom_ElementarySurface.hxx>
+#include <Geom_CylindricalSurface.hxx>
 %}
 
 %rename(Geom_Geometry) Handle_Geom_Geometry;
@@ -41,6 +42,7 @@
 %rename(Geom_TrimmedCurve) Handle_Geom_TrimmedCurve;
 %rename(Geom_Plane) Handle_Geom_Plane;
 %rename(Geom_ElementarySurface) Handle_Geom_ElementarySurface;
+%rename(Geom_CylindricalSurface) Handle_Geom_CylindricalSurface;
 
 class Handle_Geom_Geometry
 {
@@ -320,5 +322,21 @@ class Handle_Geom_ElementarySurface : public Handle_Geom_Surface {
 	{
 	return STANDARD_TYPE(Geom_ElementarySurface);
 	}	
+}
+
+class Handle_Geom_CylindricalSurface : public Handle_Geom_ElementarySurface {
+	Handle_Geom_CylindricalSurface()=0;
+};
+
+%extend Handle_Geom_CylindricalSurface
+{
+	static const Handle_Standard_Type& STANDARD_TYPE() 
+	{
+	return STANDARD_TYPE(Geom_CylindricalSurface);
+	}	
+	Handle_Geom_CylindricalSurface(const gp_Ax3& A3,const Standard_Real Radius) 
+	{
+	return new Handle_Geom_CylindricalSurface(new Geom_CylindricalSurface(A3,Radius));
+	}
 }
 
