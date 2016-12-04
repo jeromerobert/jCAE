@@ -126,3 +126,21 @@
 	return $jnicall;
 }
 
+%rename(Standard_Type) Handle_Standard_Type;
+%typemap(javacode) Handle_Standard_Type %{  
+  public boolean equals(Object obj) {
+    boolean equal = false;
+    if (obj instanceof $javaclassname)
+      equal = ((($javaclassname)obj).swigCPtr == this.swigCPtr);
+    return equal;
+  }
+  
+  public int hashCode() { 
+	   // Not sure if this is optimal as far hash-functions go but at least this is correct.
+	   // I assume C objects are 64 bit aligned so getting rid of the 3 LSB seems like a good idea,
+	   // and regardless this is semantically correct.
+       return (int) (this.swigCPtr>>3);
+    }
+%}
+
+class Handle_Standard_Type {};
