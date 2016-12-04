@@ -32,6 +32,7 @@
 #include <Geom_CylindricalSurface.hxx>
 #include <Geom2d_Conic.hxx>
 #include <Geom2d_Ellipse.hxx>
+#include <Geom2d_BoundedCurve.hxx>
 %}
 
 %rename(Geom_Geometry) Handle_Geom_Geometry;
@@ -47,6 +48,7 @@
 %rename(Geom_CylindricalSurface) Handle_Geom_CylindricalSurface;
 %rename(Geom2d_Conic) Handle_Geom2d_Conic;
 %rename(Geom2d_Ellipse) Handle_Geom2d_Ellipse;
+%rename(Geom2d_BoundedCurve) Handle_Geom2d_BoundedCurve;
 
 class Handle_Geom_Geometry
 {
@@ -376,4 +378,16 @@ class Handle_Geom2d_Ellipse : public Handle_Geom2d_Conic {
 	{
 	return (*self)->Value(U);
 	}
+}
+
+class Handle_Geom2d_BoundedCurve : public Handle_Geom2d_Curve {
+	Handle_Geom2d_BoundedCurve()=0;
+};
+
+%extend Handle_Geom2d_BoundedCurve
+{
+	static const Handle_Standard_Type& STANDARD_TYPE() 
+	{
+	return STANDARD_TYPE(Geom2d_BoundedCurve);
+	}	
 }
