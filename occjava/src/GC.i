@@ -20,6 +20,7 @@
 #include <GC_MakeArcOfCircle.hxx>
 #include <GC_MakeSegment.hxx>
 #include <GCE2d_Root.hxx>
+#include <GCE2d_MakeSegment.hxx>
 %}
  
  class GC_MakeArcOfCircle {
@@ -38,4 +39,12 @@
  class  GCE2d_Root {
  public:
  };
+
+class GCE2d_MakeSegment  : public GCE2d_Root
+{
+public:
+  	GCE2d_MakeSegment(const gp_Pnt2d& P1, const gp_Pnt2d& P2);
+	Handle_Geom2d_TrimmedCurve& Value () const;
+
+};
 
