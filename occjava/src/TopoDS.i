@@ -20,6 +20,7 @@
  */
 
 %{
+#include <TopoDS.hxx>
 #include <TopoDS_CompSolid.hxx>
 #include <TopoDS_Solid.hxx>
 #include <TopoDS_Shell.hxx>
@@ -284,3 +285,14 @@ class TopoDS_Builder
 	void Remove(TopoDS_Shape& S,const TopoDS_Shape& C) const;	
 };
 
+class TopoDS {
+ 	public:
+    static  const  TopoDS_Vertex& Vertex (const TopoDS_Shape& S) ;
+    static  const  TopoDS_Edge& Edge (const TopoDS_Shape& S) ;
+    static  const  TopoDS_Wire& Wire (const TopoDS_Shape& S) ;
+    static  const  TopoDS_Face& Face (const TopoDS_Shape& S) ;
+    static  const  TopoDS_Shell& Shell (const TopoDS_Shape& S) ;
+    static  const  TopoDS_Solid& Solid (const TopoDS_Shape& S) ;
+    static  const  TopoDS_CompSolid& CompSolid (const TopoDS_Shape& S) ;
+    static  const  TopoDS_Compound& Compound (const TopoDS_Shape& S) ;
+};
