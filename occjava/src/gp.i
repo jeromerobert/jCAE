@@ -534,3 +534,25 @@ class gp_Parab
 {
 	return $jnicall;
 }
+
+
+%rename(GP) gp;
+class gp {
+public:
+   static const gp_Pnt& Origin() ;
+   static const gp_Dir& DX() ; 
+   static const gp_Dir& DY() ;
+   static const gp_Dir& DZ() ;
+   static const gp_Ax1& OX() ; 
+   static const gp_Ax1& OY() ;
+   static const gp_Ax1& OZ() ;
+   static const gp_Ax2& XOY() ; 
+   static const gp_Ax2& ZOX() ;
+   static const gp_Ax2& YOZ() ;
+   //static const gp_Pnt2d& Origin2d() ;
+   static const gp_Dir2d& DX2d() ; 
+   static const gp_Dir2d& DY2d() ;
+   static const gp_Ax2d& OX2d() ; 
+   static const gp_Ax2d& OY2d() ;
+};
+
