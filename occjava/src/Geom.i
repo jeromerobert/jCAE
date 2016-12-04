@@ -301,9 +301,9 @@ class Handle_Geom_Plane: public Handle_Geom_Geometry
 
 %extend Handle_Geom_Plane {
 	static const Handle_Standard_Type& STANDARD_TYPE() 
-		{
-		return STANDARD_TYPE(Geom_Plane);
-		}	
+	{
+	return STANDARD_TYPE(Geom_Plane);
+	}	
 	
 	gp_Pnt Location() 
 	{
