@@ -37,10 +37,18 @@
 %rename(Geom_BoundedCurve) Handle_Geom_BoundedCurve;
 %rename(Geom_BSplineCurve) Handle_Geom_BSplineCurve;
 %rename(Geom_TrimmedCurve) Handle_Geom_TrimmedCurve;
+
 class Handle_Geom_Geometry
 {
 	Handle_Geom_Geometry()=0;
 };
+
+%extend Handle_Geom_Geometry {
+	const Handle_Standard_Type& DynamicType() 
+	{
+		return (*self)->DynamicType();
+	}	
+}
 
 class Handle_Geom_Curve: public Handle_Geom_Geometry
 {
