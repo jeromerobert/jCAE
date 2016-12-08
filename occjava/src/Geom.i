@@ -27,6 +27,13 @@
 #include <Geom_BoundedCurve.hxx>
 #include <Geom_BSplineCurve.hxx>
 #include <Geom_TrimmedCurve.hxx>
+#include <Geom_Plane.hxx>
+#include <Geom_ElementarySurface.hxx>
+#include <Geom_CylindricalSurface.hxx>
+#include <Geom2d_Conic.hxx>
+#include <Geom2d_Ellipse.hxx>
+#include <Geom2d_BoundedCurve.hxx>
+#include <Geom2d_TrimmedCurve.hxx>
 %}
 
 %rename(Geom_Geometry) Handle_Geom_Geometry;
@@ -37,10 +44,25 @@
 %rename(Geom_BoundedCurve) Handle_Geom_BoundedCurve;
 %rename(Geom_BSplineCurve) Handle_Geom_BSplineCurve;
 %rename(Geom_TrimmedCurve) Handle_Geom_TrimmedCurve;
+%rename(Geom_Plane) Handle_Geom_Plane;
+%rename(Geom_ElementarySurface) Handle_Geom_ElementarySurface;
+%rename(Geom_CylindricalSurface) Handle_Geom_CylindricalSurface;
+%rename(Geom2d_Conic) Handle_Geom2d_Conic;
+%rename(Geom2d_Ellipse) Handle_Geom2d_Ellipse;
+%rename(Geom2d_BoundedCurve) Handle_Geom2d_BoundedCurve;
+%rename(Geom2d_TrimmedCurve) Handle_Geom2d_TrimmedCurve;
+
 class Handle_Geom_Geometry
 {
 	Handle_Geom_Geometry()=0;
 };
+
+%extend Handle_Geom_Geometry {
+	const Handle_Standard_Type& DynamicType() 
+	{
+		return (*self)->DynamicType();
+	}	
+}
 
 class Handle_Geom_Curve: public Handle_Geom_Geometry
 {
@@ -82,6 +104,11 @@ class Handle_Geom_Surface: public Handle_Geom_Geometry
 
 %extend Handle_Geom_Surface
 {
+	Handle_Geom_Plane DownCast(Handle_Geom_Surface aSurface) 
+	{
+	return (Handle_Geom_Plane) Handle_Geom_Plane::DownCast(aSurface);
+	}
+
 	gp_Pnt value(const Standard_Real U,const Standard_Real V) const
 	{
 		return (*self)->Value(U, V);
@@ -281,3 +308,107 @@ class Handle_Geom_BSplineCurve : public Handle_Geom_BoundedCurve {
 class Handle_Geom_TrimmedCurve : public Handle_Geom_BoundedCurve {
 	Handle_Geom_TrimmedCurve()=0;
 };
+
+class Handle_Geom_Plane: public Handle_Geom_Geometry
+{
+	Handle_Geom_Plane()=0;
+};
+
+%extend Handle_Geom_Plane {
+	static const Handle_Standard_Type& STANDARD_TYPE() 
+	{
+	return STANDARD_TYPE(Geom_Plane);
+	}	
+	
+	gp_Pnt Location() 
+	{
+    return (*self)->Location();
+	}
+}
+
+class Handle_Geom_ElementarySurface : public Handle_Geom_Surface {
+	Handle_Geom_ElementarySurface()=0;
+};
+
+%extend Handle_Geom_ElementarySurface {
+	static const Handle_Standard_Type& STANDARD_TYPE() 
+	{
+	return STANDARD_TYPE(Geom_ElementarySurface);
+	}	
+}
+
+class Handle_Geom_CylindricalSurface : public Handle_Geom_ElementarySurface {
+	Handle_Geom_CylindricalSurface()=0;
+};
+
+%extend Handle_Geom_CylindricalSurface
+{
+	static const Handle_Standard_Type& STANDARD_TYPE() 
+	{
+	return STANDARD_TYPE(Geom_CylindricalSurface);
+	}	
+	Handle_Geom_CylindricalSurface(const gp_Ax3& A3,const Standard_Real Radius) 
+	{
+	return new Handle_Geom_CylindricalSurface(new Geom_CylindricalSurface(A3,Radius));
+	}
+}
+
+class Handle_Geom2d_Conic : public Handle_Geom2d_Curve {
+	Handle_Geom2d_Conic()=0;
+};
+
+%extend Handle_Geom2d_Conic
+{
+	static const Handle_Standard_Type& STANDARD_TYPE() 
+	{
+	return STANDARD_TYPE(Geom2d_Conic);
+	}	
+}
+
+class Handle_Geom2d_Ellipse : public Handle_Geom2d_Conic {
+	Handle_Geom2d_Ellipse()=0;
+};
+
+%extend Handle_Geom2d_Ellipse
+{
+	static const Handle_Standard_Type& STANDARD_TYPE() 
+	{
+	return STANDARD_TYPE(Geom2d_Ellipse);
+	}	
+	
+	Handle_Geom2d_Ellipse(const gp_Ax22d& Axis, const Standard_Real MajorRadius, const Standard_Real MinorRadius) 
+	{
+	return new Handle_Geom2d_Ellipse(new Geom2d_Ellipse(Axis,MajorRadius,MinorRadius));
+	}
+	
+    gp_Pnt2d Value(const Standard_Real U) const
+	{
+	return (*self)->Value(U);
+	}
+}
+
+class Handle_Geom2d_BoundedCurve : public Handle_Geom2d_Curve {
+	Handle_Geom2d_BoundedCurve()=0;
+};
+
+%extend Handle_Geom2d_BoundedCurve
+{
+	static const Handle_Standard_Type& STANDARD_TYPE() 
+	{
+	return STANDARD_TYPE(Geom2d_BoundedCurve);
+	}	
+}
+
+class Handle_Geom2d_TrimmedCurve : public Handle_Geom2d_BoundedCurve {
+	Handle_Geom2d_TrimmedCurve()=0;
+};
+
+%extend Handle_Geom2d_TrimmedCurve
+{
+public: 
+	Handle_Geom2d_TrimmedCurve(const Handle_Geom2d_Curve& C, const Standard_Real U1, const Standard_Real U2, const Standard_Boolean Sense = Standard_True, const Standard_Boolean theAdjustPeriodic = Standard_True) 
+	{
+	return new Handle_Geom2d_TrimmedCurve(new Geom2d_TrimmedCurve(C,U1,U2,Sense));
+	}
+}
+

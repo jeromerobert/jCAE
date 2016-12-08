@@ -16,11 +16,34 @@
  *
  */
  
- %{#include <GC_MakeArcOfCircle.hxx>%}
+%{
+#include <GC_MakeArcOfCircle.hxx>
+#include <GC_MakeSegment.hxx>
+#include <GCE2d_Root.hxx>
+#include <GCE2d_MakeSegment.hxx>
+%}
  
- class GC_MakeArcOfCircle {
-   public:
-   GC_MakeArcOfCircle(const gp_Pnt& P1,const gp_Pnt& P2,const gp_Pnt& P3);
-   GC_MakeArcOfCircle(const gp_Circ& Circ,const gp_Pnt& P1,const gp_Pnt& P2,const Standard_Boolean Sense);
-   const Handle_Geom_TrimmedCurve& Value() const;
+class GC_MakeArcOfCircle {
+	public:
+	GC_MakeArcOfCircle(const gp_Pnt& P1,const gp_Pnt& P2,const gp_Pnt& P3);
+	GC_MakeArcOfCircle(const gp_Circ& Circ,const gp_Pnt& P1,const gp_Pnt& P2,const Standard_Boolean Sense);
+	const Handle_Geom_TrimmedCurve& Value() const;
  };
+ 
+class GC_MakeSegment {
+    public:
+    GC_MakeSegment(const gp_Pnt& P1, const gp_Pnt& P2);
+ 	const Handle_Geom_TrimmedCurve& Value() const;
+ };
+ 
+class  GCE2d_Root {
+ 	 public:
+ };
+
+class GCE2d_MakeSegment  : public GCE2d_Root
+{
+	public:
+  	GCE2d_MakeSegment(const gp_Pnt2d& P1, const gp_Pnt2d& P2);
+	Handle_Geom2d_TrimmedCurve& Value () const;
+};
+
