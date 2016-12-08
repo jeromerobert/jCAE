@@ -80,6 +80,11 @@ class Handle_Geom_Surface: public Handle_Geom_Geometry
 	Handle_Geom_Surface()=0;
 };
 
+%typemap(javaout) Handle_Geom_Surface, Handle_Geom_Surface* {
+    long cPtr = $jnicall;
+    return ($javaclassname)Standard_Transient.downcastHandle(cPtr, $javaclassname.class);
+}
+
 %extend Handle_Geom_Surface
 {
 	gp_Pnt value(const Standard_Real U,const Standard_Real V) const
