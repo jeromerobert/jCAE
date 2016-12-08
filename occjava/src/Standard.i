@@ -126,3 +126,92 @@
 	return $jnicall;
 }
 
+%typemap(javaimports) Standard_Transient
+%{
+    import java.util.*;
+    import java.lang.reflect.*;
+%}
+
+%typemap(javacode) Standard_Transient
+%{
+    /** Cache for fast constructor search */
+    private static Map<String, Constructor> constructors =
+        new HashMap<String, Constructor>();
+
+    /**
+     * Downcast a Handle_Standard_Transient pointer to the lowest
+     * available class in OccJava
+     * @parameter ptr the pointer to get an object from
+     * @parameter fallback the Class to use as return type if the lowest
+     * one is not yet implemented in OccJava
+     */
+    public static Object downcastHandle(long ptr, Class fallback) {
+        if(ptr == 0)
+            return null;
+        return downcastImpl(ptr, dynamicHandleType(ptr), fallback);
+    }
+
+    /**
+     * Downcast a Standard_Transient pointer to the lowest
+     * available class in OccJava
+     * @parameter ptr the pointer to get an object from
+     * @parameter fallback the Class to use as return type if the lowest
+     * one is not yet implemented in OccJava
+     */
+    public static Object downcast(long ptr, Class fallback) {
+        if(ptr == 0)
+            return null;
+        return downcastImpl(ptr, dynamicType(ptr), fallback);
+    }
+
+    private static Object downcastImpl(long ptr, String cName, Class fallback) {
+        Constructor ct = constructors.get(cName);
+        try {
+            if(ct == null) {
+                // TODO: may be something about Handle_ prefix
+                Class clazz;
+                try {
+                    clazz = Class.forName("org.jcae.opencascade.jni." + cName);
+                } catch(ClassNotFoundException ex) {
+                    clazz = fallback;
+                }
+                ct = clazz.getDeclaredConstructor(Long.TYPE, Boolean.TYPE);
+                constructors.put(cName, ct);
+            }
+            return ct.newInstance(ptr, true);
+
+        // TODO: replace with ReflectiveOperationException ?
+        } catch(NoSuchMethodException ex) {
+            ex.printStackTrace();
+        } catch(InstantiationException ex) {
+            ex.printStackTrace();
+        } catch(IllegalAccessException ex) {
+            ex.printStackTrace();
+        } catch(InvocationTargetException ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+%}
+
+class Standard_Transient {
+    Standard_Transient()=0;
+};
+
+%extend Standard_Transient {
+    /*
+     * There is nothing very usefull in Standard_Type but the
+     * type name so we remove a layer and just return the name.
+     * We also want to be able to get the type without actually
+     * instantiating the Java object so we make it static.
+     */
+    static const char * dynamicType(jlong ptr) {
+        Standard_Transient * t = reinterpret_cast<Standard_Transient*>(ptr);
+        return t->DynamicType()->Name();
+    }
+    static const char * dynamicHandleType(jlong ptr) {
+        Handle_Standard_Transient * t = reinterpret_cast<Handle_Standard_Transient*>(ptr);
+        return (*t)->DynamicType()->Name();
+    }
+}
+
