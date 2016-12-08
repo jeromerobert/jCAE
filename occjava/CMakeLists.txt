@@ -49,6 +49,7 @@ include_directories(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2} ${OCE_INCLUDE_DIR
 set(CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_SOURCE_DIR}/src-java/org/jcae/opencascade/jni)
 set(CMAKE_SWIG_FLAGS -package org.jcae.opencascade.jni)
 
+file(GLOB SWIG_MODULE_OccJava_EXTRA_DEPS src/*.i)
 SWIG_ADD_MODULE(OccJava java src/OccJava.i src/jnistream.cxx)
 SWIG_LINK_LIBRARIES(OccJava ${OCE_TOOLKITS})
 
