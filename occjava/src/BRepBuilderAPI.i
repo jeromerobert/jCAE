@@ -28,6 +28,7 @@
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepBuilderAPI_MakeSolid.hxx>
 #include <BRepBuilderAPI_NurbsConvert.hxx>
+#include <BRepOffsetAPI_ThruSections.hxx>
 #include <Standard_Version.hxx>
 #if OCC_VERSION_MAJOR >= 6
 #include <BRepBuilderAPI_Sewing.hxx>
@@ -102,7 +103,7 @@ class BRepBuilderAPI_MakeWire : public BRepBuilderAPI_MakeShape
 	void Add(const TopoDS_Wire& W) ;
 	void Add(const TopTools_ListOfShape & shapes);
 	Standard_Boolean IsDone() const;
-	//const TopoDS_Wire& Wire() const;
+	const TopoDS_Wire& Wire() const;
 };
 
 class BRepBuilderAPI_MakeEdge : public BRepBuilderAPI_MakeShape
@@ -122,8 +123,9 @@ class BRepBuilderAPI_MakeEdge : public BRepBuilderAPI_MakeShape
 	BRepBuilderAPI_MakeEdge(const gp_Parab& L,const Standard_Real p1,const Standard_Real p2);
 	BRepBuilderAPI_MakeEdge(const gp_Parab& L,const gp_Pnt& P1,const gp_Pnt& P2);
 	BRepBuilderAPI_MakeEdge(const gp_Parab& L,const TopoDS_Vertex& V1,const TopoDS_Vertex& V2);
+   	BRepBuilderAPI_MakeEdge(const Handle_Geom2d_Curve& L, const Handle_Geom_Surface& S);
 	Standard_Boolean IsDone() const;
-	//const TopoDS_Edge& Edge() const;
+	const TopoDS_Edge& Edge() const;
 };
 
 class BRepBuilderAPI_MakeFace  : public BRepBuilderAPI_MakeShape
@@ -220,3 +222,12 @@ class BRepBuilderAPI_NurbsConvert : public BRepBuilderAPI_ModifyShape
 		const Standard_Boolean Copy = Standard_False) ;
 };
 
+class BRepOffsetAPI_ThruSections  : public BRepBuilderAPI_MakeShape
+{
+public:
+	BRepOffsetAPI_ThruSections(const Standard_Boolean isSolid = Standard_False, const Standard_Boolean ruled = Standard_False, const Standard_Real pres3d = 1.0e-06);
+	void AddWire (const TopoDS_Wire& wire) ;
+	void CheckCompatibility (const Standard_Boolean check = Standard_True) ;
+    const  TopoDS_Shape& Shape()  const; 
+
+};
