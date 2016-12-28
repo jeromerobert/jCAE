@@ -305,6 +305,10 @@ class Handle_Geom_Plane: public Handle_Geom_Surface {
 	}
 }
 
+class Handle_Geom_ElementarySurface : public Handle_Geom_Surface {
+	Handle_Geom_ElementarySurface()=0;
+};
+
 class Handle_Geom_CylindricalSurface : public Handle_Geom_ElementarySurface {
 	Handle_Geom_CylindricalSurface()=0;
 };
