@@ -298,6 +298,12 @@ class Handle_Geom_Plane: public Handle_Geom_Surface {
        Handle_Geom_Plane()=0;
 };
 
+%extend Handle_Geom_Plane {
+	gp_Pnt Location() 
+	{
+    return (*self)->Location();
+	}
+}
 
 class Handle_Geom_CylindricalSurface : public Handle_Geom_ElementarySurface {
 	Handle_Geom_CylindricalSurface()=0;
