@@ -315,6 +315,7 @@ class gp_Trsf
 	gp_Trsf();
 	void SetRotation(const gp_Ax1& A1,const Standard_Real Ang) ;
 	void SetTranslation(const gp_Vec& V) ;
+	void SetMirror(const gp_Ax1& P); 
 };
 
 
