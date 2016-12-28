@@ -380,6 +380,36 @@ class gp_Parab
 };
 
 
+/**
+ * gp_Pnt
+ */
+
+%typemap(jni) gp_Pnt, const gp_Pnt&  "jdoubleArray"
+%typemap(jtype) gp_Pnt, const gp_Pnt& "double[]"
+%typemap(jstype) gp_Pnt, const gp_Pnt& "double[]"
+
+%typemap(in) gp_Pnt, const gp_Pnt&
+{
+	if(JCALL1(GetArrayLength, jenv, $input)!=3)
+		SWIG_JavaThrowException(jenv, SWIG_JavaIllegalArgumentException, "array length must be 3");
+	jdouble * naxe=JCALL2(GetDoubleArrayElements, jenv, $input, NULL);
+	$1=new gp_Pnt(naxe[0],naxe[1],naxe[2]);
+}
+
+%typemap(out) const gp_Pnt&
+{
+    $result=XYZtoDoubleArray(jenv, $1->XYZ());
+}
+
+%typemap(out) gp_Pnt
+{
+    $result=XYZtoDoubleArray(jenv, $1.XYZ());
+}
+
+%typemap(freearg) gp_Pnt, const gp_Pnt&
+{
+	delete $1;
+}
 
 %typemap(javain) gp_Pnt, const gp_Pnt& "$javainput"
 %typemap(javaout) gp_Pnt, const gp_Pnt&
