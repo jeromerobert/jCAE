@@ -272,7 +272,11 @@
 
 %typemap(out) gp_Ax1, const gp_Ax1&
 {
-	##error TODO
+	gp_Pnt loc=result->Location();
+	gp_Dir dir=result->Direction();
+	jdouble nativeArray[]={loc.X(), loc.Y(), loc.Z(),dir.X(), dir.Y(), dir.Z()};
+	jresult =jenv->NewDoubleArray(6);
+	jenv->SetDoubleArrayRegion(jresult, 0, 6, nativeArray);
 }
 
 %typemap(javain) gp_Ax1, const gp_Ax1& "$javainput"
