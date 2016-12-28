@@ -220,6 +220,74 @@
 }
 
 /**
+ * gp_Pnt
+ */
+%typemap(jni) gp_Pnt, const gp_Pnt&, gp_Pnt&  "jdoubleArray"
+%typemap(jtype) gp_Pnt, const gp_Pnt&, gp_Pnt& "double[]"
+%typemap(jstype) gp_Pnt, const gp_Pnt&, gp_Pnt& "double[]"
+
+%typemap(in) gp_Pnt, const gp_Pnt&
+{
+	if(JCALL1(GetArrayLength, jenv, $input)!=3)
+		SWIG_JavaThrowException(jenv, SWIG_JavaIllegalArgumentException, "array length must be 3");
+	jdouble * naxe=JCALL2(GetDoubleArrayElements, jenv, $input, NULL);
+	$1=new gp_Pnt(naxe[0],naxe[1],naxe[2]);
+}
+
+%typemap(freearg) gp_Pnt, const gp_Pnt&
+{
+	delete $1;
+}
+
+%typemap(out) const gp_Pnt&
+{
+    $result=XYZtoDoubleArray(jenv, $1->XYZ());
+}
+
+%typemap(out) gp_Pnt
+{
+    $result=XYZtoDoubleArray(jenv, $1.XYZ());
+}
+
+%typemap(javain) gp_Pnt, const gp_Pnt&, gp_Pnt&  "$javainput"
+%typemap(javaout) gp_Pnt, const gp_Pnt&, gp_Pnt&
+{
+	return $jnicall;
+}
+
+
+/**
+ * gp_Ax3
+ */
+%typemap(jni) gp_Ax3, const gp_Ax3&  "jdoubleArray"
+%typemap(jtype) gp_Ax3, const gp_Ax3& "double[]"
+%typemap(jstype) gp_Ax3, const gp_Ax3& "double[]"
+
+%typemap(in) gp_Ax3, const gp_Ax3&
+{
+	if(JCALL1(GetArrayLength, jenv, $input)!=6)
+		SWIG_JavaThrowException(jenv, SWIG_JavaIllegalArgumentException, "array length must be 6");
+	jdouble * naxe=JCALL2(GetDoubleArrayElements, jenv, $input, NULL);
+	$1=new gp_Ax3(gp_Pnt(naxe[0],naxe[1],naxe[2]), gp_Dir(naxe[3], naxe[4], naxe[5]));
+}
+
+%typemap(freearg) gp_Ax3, const gp_Ax3&
+{
+	delete $1;
+}
+
+%typemap(out) gp_Ax3, const gp_Ax3&
+{
+	##error TODO
+}
+
+%typemap(javain) gp_Ax3, const gp_Ax3& "$javainput"
+%typemap(javaout) gp_Ax3, const gp_Ax3&
+{
+	return $jnicall;
+}
+
+/**
  * gp_Ax2
  */
 %typemap(jni) gp_Ax2, const gp_Ax2&  "jdoubleArray"
