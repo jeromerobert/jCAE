@@ -282,6 +282,49 @@
 }
 
 /**
+ * gp_Ax22d
+ */
+%typemap(jni) gp_Ax22d, const gp_Ax22d&  "jdoubleArray"
+%typemap(jtype) gp_Ax22d, const gp_Ax22d& "double[]"
+%typemap(jstype) gp_Ax22d, const gp_Ax22d& "double[]"
+
+%typemap(in) gp_Ax22d, const gp_Ax22d&
+{
+	if(JCALL1(GetArrayLength, jenv, $input)!=4)
+		SWIG_JavaThrowException(jenv, SWIG_JavaIllegalArgumentException, "array length must be 4");
+	jdouble * naxe=JCALL2(GetDoubleArrayElements, jenv, $input, NULL);
+	$1=new gp_Ax22d(gp_Pnt2d(naxe[0],naxe[1]), gp_Dir2d(naxe[2], naxe[3]));
+}
+
+%typemap(freearg) gp_Ax22d, const gp_Ax22d&
+{
+	delete $1;
+}
+
+%typemap(out) gp_Ax22d, const gp_Ax22d&
+{
+	##error TODO
+}
+
+%typemap(javain) gp_Ax22d, const gp_Ax22d& "$javainput"
+%typemap(javaout) gp_Ax22d, const gp_Ax22d&
+{
+	return $jnicall;
+}
+
+
+
+
+
+
+
+
+/**
+ * gp
+ */
+
+
+/**
  * gp_Trsf
  */
  
