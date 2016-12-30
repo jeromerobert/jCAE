@@ -30,6 +30,7 @@
 #include <Geom_Plane.hxx>
 #include <Geom_ElementarySurface.hxx>
 #include <Geom_CylindricalSurface.hxx>
+#include <Geom2d_Conic.hxx>
 %}
 
 %rename(Geom_Geometry) Handle_Geom_Geometry;
@@ -43,6 +44,7 @@
 %rename(Geom_Plane) Handle_Geom_Plane;
 %rename(Geom_ElementarySurface) Handle_Geom_ElementarySurface;
 %rename(Geom_CylindricalSurface) Handle_Geom_CylindricalSurface;
+%rename(Geom2d_Conic) Handle_Geom2d_Conic;
 
 class Handle_Geom_Geometry
 {
@@ -320,4 +322,8 @@ class Handle_Geom_CylindricalSurface : public Handle_Geom_ElementarySurface {
 	return new Handle_Geom_CylindricalSurface(new Geom_CylindricalSurface(A3,Radius));
 	}
 }
+
+class Handle_Geom2d_Conic : public Handle_Geom2d_Curve {
+	Handle_Geom2d_Conic()=0;
+};
 
