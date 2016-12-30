@@ -24,6 +24,7 @@
  %}
  
  class GC_MakeArcOfCircle {
+   %rename(value) Value;
    public:
    GC_MakeArcOfCircle(const gp_Pnt& P1,const gp_Pnt& P2,const gp_Pnt& P3);
    GC_MakeArcOfCircle(const gp_Circ& Circ,const gp_Pnt& P1,const gp_Pnt& P2,const Standard_Boolean Sense);
