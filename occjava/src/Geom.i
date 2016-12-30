@@ -33,6 +33,7 @@
 #include <Geom2d_Conic.hxx>
 #include <Geom2d_Ellipse.hxx>
 #include <Geom2d_BoundedCurve.hxx>
+#include <Geom2d_TrimmedCurve.hxx>
 %}
 
 %rename(Geom_Geometry) Handle_Geom_Geometry;
@@ -49,6 +50,7 @@
 %rename(Geom2d_Conic) Handle_Geom2d_Conic;
 %rename(Geom2d_Ellipse) Handle_Geom2d_Ellipse;
 %rename(Geom2d_BoundedCurve) Handle_Geom2d_BoundedCurve;
+%rename(Geom2d_TrimmedCurve) Handle_Geom2d_TrimmedCurve;
 
 class Handle_Geom_Geometry
 {
@@ -347,3 +349,15 @@ class Handle_Geom2d_BoundedCurve : public Handle_Geom2d_Curve {
 	Handle_Geom2d_BoundedCurve()=0;
 };
 
+class Handle_Geom2d_TrimmedCurve : public Handle_Geom2d_BoundedCurve {
+	Handle_Geom2d_TrimmedCurve()=0;
+};
+
+%extend Handle_Geom2d_TrimmedCurve
+{
+public: 
+	Handle_Geom2d_TrimmedCurve(const Handle_Geom2d_Curve& C, const Standard_Real U1, const Standard_Real U2, const Standard_Boolean Sense = Standard_True, const Standard_Boolean theAdjustPeriodic = Standard_True) 
+	{
+	return new Handle_Geom2d_TrimmedCurve(new Geom2d_TrimmedCurve(C,U1,U2,Sense));
+	}
+}
