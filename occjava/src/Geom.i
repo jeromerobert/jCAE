@@ -159,6 +159,16 @@ class Handle_Geom2d_Curve: public Handle_Geom2d_Geometry
 	Handle_Geom2d_Curve()=0;
 };
 
+
+%extend Handle_Geom2d_Curve
+{
+	gp_Pnt2d value(const Standard_Real U) const
+	{
+		return (*self)->Value(U);
+	}
+}
+
+
 class Handle_Geom_BoundedCurve : public Handle_Geom_Curve {
 	Handle_Geom_BoundedCurve()=0;
 };
