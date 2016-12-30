@@ -219,6 +219,39 @@
 	return $jnicall;
 }
 
+
+
+/**
+ * gp_Ax3
+ */
+%typemap(jni) gp_Ax3, const gp_Ax3&  "jdoubleArray"
+%typemap(jtype) gp_Ax3, const gp_Ax3& "double[]"
+%typemap(jstype) gp_Ax3, const gp_Ax3& "double[]"
+
+%typemap(in) gp_Ax3, const gp_Ax3&
+{
+	if(JCALL1(GetArrayLength, jenv, $input)!=6)
+		SWIG_JavaThrowException(jenv, SWIG_JavaIllegalArgumentException, "array length must be 6");
+	jdouble * naxe=JCALL2(GetDoubleArrayElements, jenv, $input, NULL);
+	$1=new gp_Ax3(gp_Pnt(naxe[0],naxe[1],naxe[2]), gp_Dir(naxe[3], naxe[4], naxe[5]));
+}
+
+%typemap(freearg) gp_Ax3, const gp_Ax3&
+{
+	delete $1;
+}
+
+%typemap(out) gp_Ax3, const gp_Ax3&
+{
+	##error TODO
+}
+
+%typemap(javain) gp_Ax3, const gp_Ax3& "$javainput"
+%typemap(javaout) gp_Ax3, const gp_Ax3&
+{
+	return $jnicall;
+}
+
 /**
  * gp_Ax2
  */
