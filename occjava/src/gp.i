@@ -385,6 +385,20 @@ class gp_Parab
 	gp_Parab(const gp_Ax1& D,const gp_Pnt& F);
 };
 
+%rename(GP) gp;
+%typemap(javacode) gp
+%{	
+	final public static double[] ORIGIN = {0, 0, 0};
+	final public static double[] DX = {1, 0, 0};
+	final public static double[] DY = {0, 1, 0};
+	final public static double[] DZ = {0, 0, 1};
+	final public static double[] OX = {0, 0, 0, 1, 0, 0};
+	final public static double[] OY = {0, 0, 0, 0, 1, 0};
+	final public static double[] OZ = {0, 0, 0, 0, 0, 1};
+%}
 
+class gp {
+public:
+};
 
 
