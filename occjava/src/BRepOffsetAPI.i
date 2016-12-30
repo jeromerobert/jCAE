@@ -21,6 +21,7 @@
 %{
 #include <BRepOffsetAPI_NormalProjection.hxx>
 #include <BRepOffsetAPI_MakeOffsetShape.hxx>
+#include <BRepOffsetAPI_MakeThickSolid.hxx>
 %}
 
 class BRepOffsetAPI_NormalProjection: public BRepBuilderAPI_MakeShape
@@ -59,3 +60,11 @@ class BRepOffsetAPI_NormalProjection: public BRepBuilderAPI_MakeShape
 class BRepOffsetAPI_MakeOffsetShape : public BRepBuilderAPI_MakeShape {
 };
 
+class BRepOffsetAPI_MakeThickSolid  : public BRepOffsetAPI_MakeOffsetShape {
+public:
+	BRepOffsetAPI_MakeThickSolid(
+		const TopoDS_Shape& S, 
+		const TopTools_ListOfShape& ClosingFaces, 
+		const Standard_Real Offset, 
+		const Standard_Real Tol);
+};
