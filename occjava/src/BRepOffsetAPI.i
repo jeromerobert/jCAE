@@ -20,6 +20,7 @@
 
 %{
 #include <BRepOffsetAPI_NormalProjection.hxx>
+#include <BRepOffsetAPI_MakeOffsetShape.hxx>
 %}
 
 class BRepOffsetAPI_NormalProjection: public BRepBuilderAPI_MakeShape
@@ -54,3 +55,7 @@ class BRepOffsetAPI_NormalProjection: public BRepBuilderAPI_MakeShape
 	const TopoDS_Shape& Ancestor(const TopoDS_Edge& E) const;
 	Standard_Boolean BuildWire(TopTools_ListOfShape& Liste) const;
 };
+
+class BRepOffsetAPI_MakeOffsetShape : public BRepBuilderAPI_MakeShape {
+};
+
