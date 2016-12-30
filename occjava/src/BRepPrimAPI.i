@@ -55,6 +55,8 @@ class BRepPrimAPI_MakeCylinder : public BRepBuilderAPI_MakeShape
 public";
 	BRepPrimAPI_MakeCylinder(const gp_Ax2& axes,const Standard_Real radius,
 		const Standard_Real height,const Standard_Real angle);
+	BRepPrimAPI_MakeCylinder(const gp_Ax2& axes,const Standard_Real radius,
+		const Standard_Real height);
 };
 
 class BRepPrimAPI_MakeTorus : public BRepBuilderAPI_MakeShape
