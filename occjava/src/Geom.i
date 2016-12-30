@@ -31,6 +31,7 @@
 #include <Geom_ElementarySurface.hxx>
 #include <Geom_CylindricalSurface.hxx>
 #include <Geom2d_Conic.hxx>
+#include <Geom2d_Ellipse.hxx>
 %}
 
 %rename(Geom_Geometry) Handle_Geom_Geometry;
@@ -45,6 +46,7 @@
 %rename(Geom_ElementarySurface) Handle_Geom_ElementarySurface;
 %rename(Geom_CylindricalSurface) Handle_Geom_CylindricalSurface;
 %rename(Geom2d_Conic) Handle_Geom2d_Conic;
+%rename(Geom2d_Ellipse) Handle_Geom2d_Ellipse;
 
 class Handle_Geom_Geometry
 {
@@ -326,4 +328,16 @@ class Handle_Geom_CylindricalSurface : public Handle_Geom_ElementarySurface {
 class Handle_Geom2d_Conic : public Handle_Geom2d_Curve {
 	Handle_Geom2d_Conic()=0;
 };
+
+class Handle_Geom2d_Ellipse : public Handle_Geom2d_Conic {
+	Handle_Geom2d_Ellipse()=0;
+};
+
+%extend Handle_Geom2d_Ellipse
+{
+	Handle_Geom2d_Ellipse(const gp_Ax22d& Axis, const Standard_Real MajorRadius, const Standard_Real MinorRadius) 
+	{
+	return new Handle_Geom2d_Ellipse(new Geom2d_Ellipse(Axis,MajorRadius,MinorRadius));
+	}
+}
 
