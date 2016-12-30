@@ -28,6 +28,7 @@
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepBuilderAPI_MakeSolid.hxx>
 #include <BRepBuilderAPI_NurbsConvert.hxx>
+#include <BRepOffsetAPI_ThruSections.hxx>
 #include <Standard_Version.hxx>
 #if OCC_VERSION_MAJOR >= 6
 #include <BRepBuilderAPI_Sewing.hxx>
@@ -220,3 +221,14 @@ class BRepBuilderAPI_NurbsConvert : public BRepBuilderAPI_ModifyShape
 		const Standard_Boolean Copy = Standard_False) ;
 };
 
+class BRepOffsetAPI_ThruSections  : public BRepBuilderAPI_MakeShape
+{
+public:
+	%rename(addWire) AddWire;
+	%rename(checkCompatibility) CheckCompatibility;
+	BRepOffsetAPI_ThruSections(const Standard_Boolean isSolid = Standard_False, const Standard_Boolean ruled = Standard_False, const Standard_Real pres3d = 1.0e-06);
+	void AddWire (const TopoDS_Wire& wire) ;
+	void CheckCompatibility (const Standard_Boolean check = Standard_True) ;
+    const  TopoDS_Shape& Shape()  const; 
+
+};
