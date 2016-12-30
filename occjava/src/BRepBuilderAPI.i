@@ -103,7 +103,7 @@ class BRepBuilderAPI_MakeWire : public BRepBuilderAPI_MakeShape
 	void Add(const TopoDS_Wire& W) ;
 	void Add(const TopTools_ListOfShape & shapes);
 	Standard_Boolean IsDone() const;
-	//const TopoDS_Wire& Wire() const;
+	const TopoDS_Wire& Wire() const;
 };
 
 class BRepBuilderAPI_MakeEdge : public BRepBuilderAPI_MakeShape
