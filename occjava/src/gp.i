@@ -219,6 +219,39 @@
 	return $jnicall;
 }
 
+
+
+/**
+ * gp_Ax3
+ */
+%typemap(jni) gp_Ax3, const gp_Ax3&  "jdoubleArray"
+%typemap(jtype) gp_Ax3, const gp_Ax3& "double[]"
+%typemap(jstype) gp_Ax3, const gp_Ax3& "double[]"
+
+%typemap(in) gp_Ax3, const gp_Ax3&
+{
+	if(JCALL1(GetArrayLength, jenv, $input)!=6)
+		SWIG_JavaThrowException(jenv, SWIG_JavaIllegalArgumentException, "array length must be 6");
+	jdouble * naxe=JCALL2(GetDoubleArrayElements, jenv, $input, NULL);
+	$1=new gp_Ax3(gp_Pnt(naxe[0],naxe[1],naxe[2]), gp_Dir(naxe[3], naxe[4], naxe[5]));
+}
+
+%typemap(freearg) gp_Ax3, const gp_Ax3&
+{
+	delete $1;
+}
+
+%typemap(out) gp_Ax3, const gp_Ax3&
+{
+	##error TODO
+}
+
+%typemap(javain) gp_Ax3, const gp_Ax3& "$javainput"
+%typemap(javaout) gp_Ax3, const gp_Ax3&
+{
+	return $jnicall;
+}
+
 /**
  * gp_Ax2
  */
@@ -272,7 +305,11 @@
 
 %typemap(out) gp_Ax1, const gp_Ax1&
 {
-	##error TODO
+	gp_Pnt loc=result->Location();
+	gp_Dir dir=result->Direction();
+	jdouble nativeArray[]={loc.X(), loc.Y(), loc.Z(),dir.X(), dir.Y(), dir.Z()};
+	jresult =jenv->NewDoubleArray(6);
+	jenv->SetDoubleArrayRegion(jresult, 0, 6, nativeArray);
 }
 
 %typemap(javain) gp_Ax1, const gp_Ax1& "$javainput"
@@ -280,6 +317,49 @@
 {
 	return $jnicall;
 }
+
+/**
+ * gp_Ax22d
+ */
+%typemap(jni) gp_Ax22d, const gp_Ax22d&  "jdoubleArray"
+%typemap(jtype) gp_Ax22d, const gp_Ax22d& "double[]"
+%typemap(jstype) gp_Ax22d, const gp_Ax22d& "double[]"
+
+%typemap(in) gp_Ax22d, const gp_Ax22d&
+{
+	if(JCALL1(GetArrayLength, jenv, $input)!=4)
+		SWIG_JavaThrowException(jenv, SWIG_JavaIllegalArgumentException, "array length must be 4");
+	jdouble * naxe=JCALL2(GetDoubleArrayElements, jenv, $input, NULL);
+	$1=new gp_Ax22d(gp_Pnt2d(naxe[0],naxe[1]), gp_Dir2d(naxe[2], naxe[3]));
+}
+
+%typemap(freearg) gp_Ax22d, const gp_Ax22d&
+{
+	delete $1;
+}
+
+%typemap(out) gp_Ax22d, const gp_Ax22d&
+{
+	##error TODO
+}
+
+%typemap(javain) gp_Ax22d, const gp_Ax22d& "$javainput"
+%typemap(javaout) gp_Ax22d, const gp_Ax22d&
+{
+	return $jnicall;
+}
+
+
+
+
+
+
+
+
+/**
+ * gp
+ */
+
 
 /**
  * gp_Trsf
@@ -311,10 +391,12 @@ class gp_Trsf
 	%rename(setRotation) SetRotation;
 	%rename(setTranslation) SetTranslation;
 	%rename(setValues) SetValues;
+	%rename(setMirror) SetMirror;
 	public:
 	gp_Trsf();
 	void SetRotation(const gp_Ax1& A1,const Standard_Real Ang) ;
 	void SetTranslation(const gp_Vec& V) ;
+	void SetMirror(const gp_Ax1& P); 
 };
 
 
@@ -379,6 +461,20 @@ class gp_Parab
 	gp_Parab(const gp_Ax1& D,const gp_Pnt& F);
 };
 
+%rename(GP) gp;
+%typemap(javacode) gp
+%{	
+	final public static double[] ORIGIN = {0, 0, 0};
+	final public static double[] DX = {1, 0, 0};
+	final public static double[] DY = {0, 1, 0};
+	final public static double[] DZ = {0, 0, 1};
+	final public static double[] OX = {0, 0, 0, 1, 0, 0};
+	final public static double[] OY = {0, 0, 0, 0, 1, 0};
+	final public static double[] OZ = {0, 0, 0, 0, 0, 1};
+%}
 
+class gp {
+public:
+};
 
 

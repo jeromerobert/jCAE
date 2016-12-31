@@ -28,6 +28,12 @@
 #include <Geom_BSplineCurve.hxx>
 #include <Geom_TrimmedCurve.hxx>
 #include <Geom_Plane.hxx>
+#include <Geom_ElementarySurface.hxx>
+#include <Geom_CylindricalSurface.hxx>
+#include <Geom2d_Conic.hxx>
+#include <Geom2d_Ellipse.hxx>
+#include <Geom2d_BoundedCurve.hxx>
+#include <Geom2d_TrimmedCurve.hxx>
 %}
 
 %rename(Geom_Geometry) Handle_Geom_Geometry;
@@ -39,6 +45,12 @@
 %rename(Geom_BSplineCurve) Handle_Geom_BSplineCurve;
 %rename(Geom_TrimmedCurve) Handle_Geom_TrimmedCurve;
 %rename(Geom_Plane) Handle_Geom_Plane;
+%rename(Geom_ElementarySurface) Handle_Geom_ElementarySurface;
+%rename(Geom_CylindricalSurface) Handle_Geom_CylindricalSurface;
+%rename(Geom2d_Conic) Handle_Geom2d_Conic;
+%rename(Geom2d_Ellipse) Handle_Geom2d_Ellipse;
+%rename(Geom2d_BoundedCurve) Handle_Geom2d_BoundedCurve;
+%rename(Geom2d_TrimmedCurve) Handle_Geom2d_TrimmedCurve;
 
 class Handle_Geom_Geometry
 {
@@ -146,6 +158,16 @@ class Handle_Geom2d_Curve: public Handle_Geom2d_Geometry
 {
 	Handle_Geom2d_Curve()=0;
 };
+
+
+%extend Handle_Geom2d_Curve
+{
+	gp_Pnt2d value(const Standard_Real U) const
+	{
+		return (*self)->Value(U);
+	}
+}
+
 
 class Handle_Geom_BoundedCurve : public Handle_Geom_Curve {
 	Handle_Geom_BoundedCurve()=0;
@@ -290,6 +312,62 @@ class Handle_Geom_TrimmedCurve : public Handle_Geom_BoundedCurve {
 	Handle_Geom_TrimmedCurve()=0;
 };
 
-class Handle_Geom_Plane: public Handle_Geom_Surface {
+class Handle_Geom_ElementarySurface : public Handle_Geom_Surface {
+	Handle_Geom_ElementarySurface()=0;
+};
+
+%extend Handle_Geom_ElementarySurface {
+	gp_Pnt location() 
+	{
+    return (*self)->Location();
+	}
+}
+
+class Handle_Geom_Plane: public Handle_Geom_ElementarySurface {
        Handle_Geom_Plane()=0;
 };
+
+class Handle_Geom_CylindricalSurface : public Handle_Geom_ElementarySurface {
+	Handle_Geom_CylindricalSurface()=0;
+};
+
+%extend Handle_Geom_CylindricalSurface
+{
+	Handle_Geom_CylindricalSurface(const gp_Ax3& A3,const Standard_Real Radius) 
+	{
+	return new Handle_Geom_CylindricalSurface(new Geom_CylindricalSurface(A3,Radius));
+	}
+}
+
+class Handle_Geom2d_Conic : public Handle_Geom2d_Curve {
+	Handle_Geom2d_Conic()=0;
+};
+
+class Handle_Geom2d_Ellipse : public Handle_Geom2d_Conic {
+	Handle_Geom2d_Ellipse()=0;
+};
+
+%extend Handle_Geom2d_Ellipse
+{
+	Handle_Geom2d_Ellipse(const gp_Ax22d& Axis, const Standard_Real MajorRadius, const Standard_Real MinorRadius) 
+	{
+	return new Handle_Geom2d_Ellipse(new Geom2d_Ellipse(Axis,MajorRadius,MinorRadius));
+	}
+}
+
+class Handle_Geom2d_BoundedCurve : public Handle_Geom2d_Curve {
+	Handle_Geom2d_BoundedCurve()=0;
+};
+
+class Handle_Geom2d_TrimmedCurve : public Handle_Geom2d_BoundedCurve {
+	Handle_Geom2d_TrimmedCurve()=0;
+};
+
+%extend Handle_Geom2d_TrimmedCurve
+{
+public: 
+	Handle_Geom2d_TrimmedCurve(const Handle_Geom2d_Curve& C, const Standard_Real U1, const Standard_Real U2, const Standard_Boolean Sense = Standard_True, const Standard_Boolean theAdjustPeriodic = Standard_True) 
+	{
+	return new Handle_Geom2d_TrimmedCurve(new Geom2d_TrimmedCurve(C,U1,U2,Sense));
+	}
+}
