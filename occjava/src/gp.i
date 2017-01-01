@@ -37,7 +37,7 @@
         self->SetValues(a11, a12, a13, a14,
                         a21, a22, a23, a24,
                         a31, a32, a33, a34
-#if OCC_VERSION_MAJOR >= 6 && OCC_VERSION_MINOR >= 8
+#if (OCC_VERSION_MAJOR == 6 && OCC_VERSION_MINOR >= 8) || OCC_VERSION_MAJOR > 6
                         );
 #else
                         ,Tolang, TolDist);
