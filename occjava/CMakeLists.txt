@@ -23,7 +23,7 @@ else(OCE_FOUND)
     # has to set OCE_DIR to the directory containing
     # OCEConfig.cmake, or OCE is not installed and we
     # try to find OpenCascade files.
-    find_path(OCC_INCLUDE_PATH "TopoDS_Shape.hxx" PATHS ENV CASROOT PATH_SUFFIXES inc include opencascade)
+    find_path(OCC_INCLUDE_PATH "TopoDS_Shape.hxx" PATHS ENV CASROOT PATH_SUFFIXES inc include opencascade include/opencascade)
     if(NOT OCC_INCLUDE_PATH)
         message(FATAL_ERROR "Header file TopoDS_Shape.hxx not found.  To specify paths of OpenCascade files, you may either define the CASROOT environment variable, or set both OCC_INCLUDE_PATH and OCC_LIB_PATH variables.")
     endif(NOT OCC_INCLUDE_PATH)
