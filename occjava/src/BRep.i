@@ -93,7 +93,7 @@ class BRep_Tool
 		if(hgc.IsNull())
 			return NULL;
 		else
-			return (Poly_Triangulation*)(Standard_Transient*)hgc;
+			return (Poly_Triangulation*)hgc.get();
 	}
 
 	static void range(const TopoDS_Edge& E, double range[2])

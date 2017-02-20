@@ -54,7 +54,7 @@ class BRepBuilderAPI_MakeShape: public BRepBuilderAPI_Command
 	%rename(build) Build;
 	%rename(shape) Shape;
 	virtual void Build();
-	const TopoDS_Shape& Shape() const;
+	const TopoDS_Shape& Shape();
 };
 
 class BRepBuilderAPI_ModifyShape: public BRepBuilderAPI_MakeShape
@@ -62,7 +62,7 @@ class BRepBuilderAPI_ModifyShape: public BRepBuilderAPI_MakeShape
 	%rename(modifiedShape) ModifiedShape;
 	BRepBuilderAPI_ModifyShape()=0;
 	public:
-	virtual const TopoDS_Shape& ModifiedShape(const TopoDS_Shape& S) const;
+	virtual TopoDS_Shape ModifiedShape(const TopoDS_Shape& S) const;
 };
 
 class BRepBuilderAPI_Transform : public BRepBuilderAPI_ModifyShape

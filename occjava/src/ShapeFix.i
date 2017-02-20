@@ -38,8 +38,7 @@ class ShapeFix_Root
 {
     ShapeBuild_ReShape * getContext()
     {
-        Standard_Transient * p = self->Context();
-        return dynamic_cast<ShapeBuild_ReShape *>(p);
+        return self->Context().get();
     }
 }
 
