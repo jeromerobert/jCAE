@@ -79,6 +79,15 @@ public class Canvas extends vtkCanvas
 	}
 
 	/**
+	 * Fix mouse wheel bug with VTK 6.3.
+	 * Starting with VTK 6.3 vtkCanvas implement mouse wheel support using this
+	 * method (see VTK commit 4fc0088). It does work alone but as we also
+	 * implement mouse wheel in this class in create a bug. So we override it
+	 * to do nothing.
+	 */
+	public void mouseWheelMoved(MouseWheelEvent e) {}
+
+	/**
 	 * Save the current image to reuse it when no 3D rendering is necessary.
 	 * Called by VTK when vtkRendererWindow fire EndEvent.
 	 */
