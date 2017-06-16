@@ -57,7 +57,23 @@ class BRepOffsetAPI_NormalProjection: public BRepBuilderAPI_MakeShape
 	Standard_Boolean BuildWire(TopTools_ListOfShape& Liste) const;
 };
 
+enum BRepOffset_Mode
+{
+	BRepOffset_Skin,
+	BRepOffset_Pipe,
+	BRepOffset_RectoVerso
+};
+
 class BRepOffsetAPI_MakeOffsetShape : public BRepBuilderAPI_MakeShape {
+public:
+	BRepOffsetAPI_MakeOffsetShape(const TopoDS_Shape& S,
+		const Standard_Real Offset,
+		const Standard_Real Tol,
+		const BRepOffset_Mode Mode = BRepOffset_Skin,
+		const Standard_Boolean Intersection = Standard_False,
+		const Standard_Boolean SelfInter = Standard_False,
+		const GeomAbs_JoinType Join = GeomAbs_Arc);
+	void Build();
 };
 
 class BRepOffsetAPI_MakeThickSolid  : public BRepOffsetAPI_MakeOffsetShape {
