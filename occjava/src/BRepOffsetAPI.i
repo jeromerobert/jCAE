@@ -21,6 +21,7 @@
 %{
 #include <BRepOffsetAPI_NormalProjection.hxx>
 #include <BRepOffsetAPI_MakeOffsetShape.hxx>
+#include <BRepOffsetAPI_MakeOffset.hxx>
 #include <BRepOffsetAPI_MakeThickSolid.hxx>
 %}
 
@@ -83,4 +84,12 @@ public:
 		const TopTools_ListOfShape& ClosingFaces, 
 		const Standard_Real Offset, 
 		const Standard_Real Tol);
+};
+
+class BRepOffsetAPI_MakeOffset : public BRepBuilderAPI_MakeShape {
+public:
+	BRepOffsetAPI_MakeOffset(const TopoDS_Wire& Spine,
+		const GeomAbs_JoinType Join = GeomAbs_Arc);
+	void Perform(const Standard_Real Offset,const Standard_Real Alt = 0.0);
+	virtual void Build();
 };
