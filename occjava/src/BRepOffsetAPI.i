@@ -23,7 +23,10 @@
 #include <BRepOffsetAPI_MakeOffsetShape.hxx>
 #include <BRepOffsetAPI_MakeOffset.hxx>
 #include <BRepOffsetAPI_MakeThickSolid.hxx>
+#include <BRepOffsetAPI_MakePipeShell.hxx>
 %}
+
+%include "BRepPrimAPI.i"
 
 class BRepOffsetAPI_NormalProjection: public BRepBuilderAPI_MakeShape
 {
@@ -92,4 +95,24 @@ public:
 		const GeomAbs_JoinType Join = GeomAbs_Arc);
 	void Perform(const Standard_Real Offset,const Standard_Real Alt = 0.0);
 	virtual void Build();
+};
+enum BRepBuilderAPI_TransitionMode
+{
+	BRepBuilderAPI_Transformed,
+	BRepBuilderAPI_RightCorner,
+	BRepBuilderAPI_RoundCorner
+};
+
+class BRepOffsetAPI_MakePipeShell : public BRepPrimAPI_MakeSweep {
+public:
+	BRepOffsetAPI_MakePipeShell(const TopoDS_Wire& Spine);
+	virtual void Build();
+	Standard_Boolean MakeSolid();
+	void Add(const TopoDS_Shape& Profile,
+		const Standard_Boolean WithContact = Standard_False,
+		const Standard_Boolean WithCorrection = Standard_False);
+	void SetTransitionMode(const BRepBuilderAPI_TransitionMode Mode = BRepBuilderAPI_Transformed);
+	void SetMode(const gp_Ax2& Axe);
+	void SetMode(const Standard_Boolean IsFrenet = Standard_False);
+	Standard_Boolean SetMode(const TopoDS_Shape& SpineSupport);
 };
