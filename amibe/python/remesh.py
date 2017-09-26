@@ -4,7 +4,7 @@ from org.jcae.mesh.amibe.ds import Mesh, AbstractHalfEdge, Vertex
 from org.jcae.mesh.amibe.algos3d import *
 from org.jcae.mesh.amibe.traits import MeshTraitsBuilder
 from org.jcae.mesh.amibe.projection import MeshLiaison
-from org.jcae.mesh.amibe.metrics import EuclidianMetric3D, DistanceMetric, SingularMetric
+from org.jcae.mesh.amibe.metrics import EuclidianMetric3D, DistanceMetric, SingularMetric, AbstractDistanceMetric
 from org.jcae.mesh.xmldata import MeshReader, MeshWriter, Amibe2VTK
 
 # Java
@@ -65,14 +65,16 @@ def read_mesh(path):
     return mesh
 
 def afront_debug(afront_path, tmp_dir, mesh, size, point_metric, immutable_groups,
-		afront_stderr = None):
+		afront_stderr = None, custom_options=[]):
     from org.jcae.mesh.xmldata import Amibe2OFF, AFront2Amibe, AmibeReader, MultiDoubleFileReader
     """ Same as afront but with temporary files to help debugging """
     mesh_dir = os.path.join(tmp_dir, "mesh.amibe")
-    if point_metric:
+    if isinstance(point_metric, AbstractDistanceMetric):
         metric_file = os.path.join(tmp_dir, "metric.bin")
         point_metric.save(metric_file)
         g_id = 1
+    else:
+        metric_file = None
     MeshWriter.writeObject3D(mesh, mesh_dir, "")
     ar = AmibeReader.Dim3(mesh_dir)
     sm = ar.submeshes[0]
@@ -91,8 +93,8 @@ def afront_debug(afront_path, tmp_dir, mesh, size, point_metric, immutable_group
         cmd = [afront_path, '-nogui', off_fn, '-failsafe','false',
             '-resamp_bounds', 'false', '-lf_progress', 'true',
             '-stop_every', '10000', '-quiet', 'true', '-outname', nodes_file,
-            '-idealNumThreads', '1']
-        if point_metric:
+            '-idealNumThreads', '1'] + custom_options
+        if metric_file:
             cmd.extend(['-target_size', str(point_metric.getSize(g_id)),
                 '-metric_file', metric_file])
             g_id = g_id + 1
@@ -108,15 +110,17 @@ def afront_debug(afront_path, tmp_dir, mesh, size, point_metric, immutable_group
     return MultiDoubleFileReader(nodes_file)
 
 def afront(afront_path, tmp_dir, mesh, size, point_metric, immutable_groups,
-    afront_stderr = None):
+    afront_stderr = None, custom_options = []):
     from org.jcae.mesh.xmldata import AmibeReader, MultiDoubleFileReader
     """ Run afront and return a MultiDoubleFileReader allowing to read created
     nodes """
     mesh_dir = os.path.join(tmp_dir, "mesh.amibe")
-    if point_metric:
+    if isinstance(point_metric, AbstractDistanceMetric):
         metric_file = os.path.join(tmp_dir, "metric.bin")
         point_metric.save(metric_file)
         g_id = 1
+    else:
+        metric_file = None
     MeshWriter.writeObject3D(mesh, mesh_dir, "")
     ar = AmibeReader.Dim3(mesh_dir)
     sm = ar.submeshes[0]
@@ -130,8 +134,8 @@ def afront(afront_path, tmp_dir, mesh, size, point_metric, immutable_groups,
         cmd = [afront_path, '-nogui', ':stdin', '-failsafe','false',
             '-resamp_bounds', 'false', '-lf_progress', 'true',
             '-stop_every', '10000', '-quiet', 'true', '-outname', nodes_file,
-            '-idealNumThreads', '1']
-        if point_metric:
+            '-idealNumThreads', '1'] + custom_options
+        if metric_file:
             cmd.extend(['-target_size', str(point_metric.getSize(g_id)),
                 '-metric_file', metric_file])
             g_id = g_id + 1
@@ -296,7 +300,8 @@ def __remesh(options):
     if options.afront_path:
         tmp_dir = tempfile.mkdtemp()
         afront_nodes_reader = afront(options.afront_path, tmp_dir, liaison.mesh,
-            options.size, point_metric, immutable_groups, afront_stderr = afront_stderr)
+            options.size, point_metric, immutable_groups, afront_stderr = afront_stderr,
+            custom_options = options.afront_custom_options)
         afront_frozen = afront_insert(liaison, afront_nodes_reader, options.size, point_metric)
         Vertex.setMutable(afront_frozen, False)
         shutil.rmtree(tmp_dir, ignore_errors=True)
