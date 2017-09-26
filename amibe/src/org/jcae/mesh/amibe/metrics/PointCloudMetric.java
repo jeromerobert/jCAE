@@ -51,6 +51,7 @@ public class PointCloudMetric extends MetricSupport.AnalyticMetric {
     /** The metric to use while searching in the kd-tree */
     private final Metric metric = new EuclidianMetric3D();
     private double defaultValue = 1;
+    protected double scaling = 1;
     private KdTree<Point> kdTree;
 
     /**
@@ -70,6 +71,7 @@ public class PointCloudMetric extends MetricSupport.AnalyticMetric {
             ByteBuffer bb = ByteBuffer.allocate((int) fc.size());
             bb.order(ByteOrder.nativeOrder());
             fc.read(bb);
+            bb.rewind();
             for(int i = 0; i < pointNumber; i++) {
                 points.add(new Point(bb.getDouble(), bb.getDouble(),
                     bb.getDouble(), bb.getDouble()));
@@ -107,6 +109,10 @@ public class PointCloudMetric extends MetricSupport.AnalyticMetric {
         this.defaultValue = defaultValue;
     }
 
+    public void setScaling(double v) {
+        this.scaling = v;
+    }
+
     @Override
     public double getTargetSize(double x, double y, double z, int groupId) {
         double r = defaultValue;
@@ -114,6 +120,6 @@ public class PointCloudMetric extends MetricSupport.AnalyticMetric {
             Point l = kdTree.getNearVertex(metric, new Point(x, y, z));
             r = l == null ? r : l.value;
         }
-        return r;
+        return r * scaling;
     }
 }
