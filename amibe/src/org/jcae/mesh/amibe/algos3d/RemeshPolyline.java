@@ -288,6 +288,7 @@ public class RemeshPolyline
 			int cnt = nrDichotomy;
 			if (edgeLength > 1.0)
 				cnt *= (int) edgeLength;
+			double previousError = -1;
 			while(cnt >= 0)
 			{
 				np.middle(lower, upper);
@@ -300,7 +301,8 @@ public class RemeshPolyline
 					m = new EuclidianMetric3D(analyticMetric.getTargetSize(
 						np.getX(), np.getY(), np.getZ(), -1));
 				double l = interpolatedDistance(vS, mS, np, m);
-				if (Math.abs(l - target) < maxError)
+				double error = Math.abs(l - target);
+				if (error < maxError || previousError == error || cnt == 0)
 				{
 					if (LOGGER.isLoggable(Level.FINER))
 						LOGGER.log(Level.FINER, "Add point: {0} =~ {1} {2}", new Object[]{l, target, np});
@@ -329,11 +331,7 @@ public class RemeshPolyline
 						LOGGER.log(Level.FINEST, "{0} < {1} {2} {3} {4}", new Object[]{l, target, cnt, delta, alpha});
 					lower.moveTo(np);
 				}
-			}
-			if (cnt < 0)
-			{
-				LOGGER.severe("Dichotomy failed near "+vS+" "+vE);
-				return -1.0;
+				previousError = error;
 			}
 		}
 	}
