@@ -93,7 +93,7 @@ def afront_debug(afront_path, tmp_dir, mesh, size, point_metric, immutable_group
         cmd = [afront_path, '-nogui', off_fn, '-failsafe','false',
             '-resamp_bounds', 'false', '-lf_progress', 'true',
             '-stop_every', '10000', '-quiet', 'true', '-outname', nodes_file,
-            '-idealNumThreads', '1'] + custom_options
+            '-idealNumThreads', '1'] + ([] if custom_options is None else custom_options)
         if metric_file:
             cmd.extend(['-target_size', str(point_metric.getSize(g_id)),
                 '-metric_file', metric_file])
@@ -134,7 +134,7 @@ def afront(afront_path, tmp_dir, mesh, size, point_metric, immutable_groups,
         cmd = [afront_path, '-nogui', ':stdin', '-failsafe','false',
             '-resamp_bounds', 'false', '-lf_progress', 'true',
             '-stop_every', '10000', '-quiet', 'true', '-outname', nodes_file,
-            '-idealNumThreads', '1'] + custom_options
+            '-idealNumThreads', '1'] + ([] if custom_options is None else custom_options)
         if metric_file:
             cmd.extend(['-target_size', str(point_metric.getSize(g_id)),
                 '-metric_file', metric_file])
