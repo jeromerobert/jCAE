@@ -345,8 +345,8 @@ public class RemeshPolyline
 		// Linear interpolation:
 		//double l = (2.0/3.0) * (a*a + a*b + b*b) / (a + b);
 		// Geometric interpolation
-		double l = Math.abs(a-b) < 1.e-6*(a+b) ? 0.5*(a+b) : (a - b)/Math.log(a/b);
-
+		double l = Math.abs(a-b) <= 1.e-6*(a+b) ? 0.5*(a+b) : (a - b)/Math.log(a/b);
+		assert(!Double.isNaN(l));
 		return l;
 	}
 
