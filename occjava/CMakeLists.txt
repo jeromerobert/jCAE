@@ -50,7 +50,11 @@ set(CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_SOURCE_DIR}/src-java/org/jcae/opencascade/
 set(CMAKE_SWIG_FLAGS -package org.jcae.opencascade.jni)
 
 file(GLOB SWIG_MODULE_OccJava_EXTRA_DEPS src/*.i)
-SWIG_ADD_MODULE(OccJava java src/OccJava.i src/jnistream.cxx)
+if("${CMAKE_VERSION}" VERSION_GREATER 3.8)
+  SWIG_ADD_LIBRARY(OccJava LANGUAGE java TYPE MODULE SOURCES src/OccJava.i src/jnistream.cxx)
+else()
+  SWIG_ADD_MODULE(OccJava java src/OccJava.i src/jnistream.cxx)
+endif()
 SWIG_LINK_LIBRARIES(OccJava ${OCE_TOOLKITS})
 
 if(WIN32)
