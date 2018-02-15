@@ -54,6 +54,7 @@ public class RandomizeGroups {
 	private final String amibeDir;
 	private final double ratio;
 	private final String newGroupName;
+	private int newGroupId=-1;
 
 	public RandomizeGroups(double ratio, String newGroupName)
 	{
@@ -81,6 +82,16 @@ public class RandomizeGroups {
 		return v.isManifold() && !forbidden.contains(v);
 	}
 
+	/**
+	 * Set the group ID of the random elements.
+	 * If -1 (the default) the id is org.jcae.mesh.amibe.ds.getFreeGroupID
+	 * This is only used for in the core computation.
+	 */
+	public void setNewGroupID(int id) {
+	    this.newGroupId = id;
+	}
+
+	/** in-core computation */
 	public void compute(Mesh mesh, boolean neighbors) throws IOException, SAXException
 	{
 		Random random = new Random(0);
@@ -88,7 +99,8 @@ public class RandomizeGroups {
 		for(Collection<Vertex> l:mesh.getVertexGroup().values())
 			vertices.addAll(l);
 		vertices.addAll(mesh.getBeams());
-		int newGroupId =  mesh.getNumberOfGroups();
+		if(newGroupId == -1)
+			newGroupId =  mesh.getFreeGroupID();
 		mesh.setGroupName(newGroupId, newGroupName);
 		triangles: for(Triangle t:mesh.getTriangles())
 		{
@@ -121,6 +133,7 @@ public class RandomizeGroups {
 		}
 	}
 
+	/** out-of-core computation */
 	public void compute() throws IOException, SAXException
 	{
 		AmibeReader.Dim3 ar = new AmibeReader.Dim3(amibeDir);

@@ -238,7 +238,7 @@ public class Mesh implements Serializable
 		triangleList.add(t);
 	}
 
-	private int getFreeGroupID()
+	public int getFreeGroupID()
 	{
 		int i = 1;
 		while(groupNames.get(i) != null)
