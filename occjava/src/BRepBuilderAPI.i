@@ -59,11 +59,16 @@ class BRepBuilderAPI_MakeShape: public BRepBuilderAPI_Command
 
 class BRepBuilderAPI_ModifyShape: public BRepBuilderAPI_MakeShape
 {
-	%rename(modifiedShape) ModifiedShape;
 	BRepBuilderAPI_ModifyShape()=0;
 	public:
-	virtual const TopoDS_Shape& ModifiedShape(const TopoDS_Shape& S) const;
 };
+
+%extend BRepBuilderAPI_ModifyShape {
+    // Use %extend to be compatible with OCE < 0.18 and OCE >= 0.18
+	TopoDS_Shape modifiedShape(const TopoDS_Shape& S) const {
+		return self->ModifiedShape(S);
+	}
+}
 
 class BRepBuilderAPI_Transform : public BRepBuilderAPI_ModifyShape
 {
