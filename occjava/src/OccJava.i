@@ -210,6 +210,10 @@ class Adaptor3d_Curve
 {		
 	Adaptor3d_Curve()=0;
 	public:
+	%rename(firstParameter) FirstParameter;
+	Standard_Real FirstParameter() const;
+	%rename(lastParameter) LastParameter;
+	Standard_Real LastParameter() const;
 	%rename(continuity) Continuity;
 	GeomAbs_Shape Continuity() const;
 	%rename(value) Value;
@@ -285,6 +289,14 @@ class Adaptor3d_Surface
 {
 	Adaptor3d_Surface()=0;
 	public:
+	%rename(firstUParameter) FirstUParameter;
+	Standard_Real FirstUParameter() const;
+	%rename(lastUParameter) LastUParameter;
+	Standard_Real LastUParameter() const;
+	%rename(firstVParameter) FirstVParameter;
+	Standard_Real FirstVParameter() const;
+	%rename(lastVParameter) LastVParameter;
+	Standard_Real LastVParameter() const;
 	%rename(uContinuity) UContinuity;
 	GeomAbs_Shape UContinuity() const;
 	%rename(vContinuity) VContinuity;
