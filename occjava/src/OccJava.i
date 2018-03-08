@@ -210,8 +210,18 @@ class Adaptor3d_Curve
 {		
 	Adaptor3d_Curve()=0;
 	public:
+	%rename(continuity) Continuity;
+	GeomAbs_Shape Continuity() const;
 	%rename(value) Value;
 	const gp_Pnt Value(const Standard_Real U) const;
+	%rename(d0) D0;
+	void D0(const Standard_Real U, gp_Pnt & P) const;
+	%rename(d1) D1;
+	void D1(const Standard_Real U, gp_Pnt & P, gp_Vec & V) const;
+	%rename(d2) D2;
+	void D2(const Standard_Real U, gp_Pnt & P, gp_Vec & V1, gp_Vec & V2) const;
+	%rename(getType) GetType;
+	GeomAbs_CurveType GetType() const;
 };
 
 //extends the Adaptor3d_Curve class to reduce the JNI overhead when
@@ -227,7 +237,7 @@ class Adaptor3d_Curve
 			u[3*i]   = gp.X();
 			u[3*i+1] = gp.Y();
 			u[3*i+2] = gp.Z();
-		}	
+		}
 	}
 };
 
@@ -250,6 +260,60 @@ class GeomAdaptor_Curve: public Adaptor3d_Curve
 
 };
 
+/**
+ * BRepAdaptor_Curve
+ */
+%{#include "BRepAdaptor_Curve.hxx"%}
+
+class BRepAdaptor_Curve: public Adaptor3d_Curve
+{
+	%rename(initialize) Initialize;
+	public:
+	BRepAdaptor_Curve();
+	BRepAdaptor_Curve(const TopoDS_Edge &E);
+	BRepAdaptor_Curve(const TopoDS_Edge &E, const TopoDS_Face &F);
+	void Initialize(const TopoDS_Edge &E);
+	void Initialize(const TopoDS_Edge &E, const TopoDS_Face &F);
+};
+
+/**
+ * Adaptor3d_Surface
+ */
+%{#include "Adaptor3d_Surface.hxx"%}
+
+class Adaptor3d_Surface
+{
+	Adaptor3d_Surface()=0;
+	public:
+	%rename(uContinuity) UContinuity;
+	GeomAbs_Shape UContinuity() const;
+	%rename(vContinuity) VContinuity;
+	GeomAbs_Shape VContinuity() const;
+	%rename(value) Value;
+	const gp_Pnt Value(const Standard_Real U, const Standard_Real V) const;
+	%rename(d0) D0;
+	void D0(const Standard_Real U, const Standard_Real V, gp_Pnt & P) const;
+	%rename(d1) D1;
+	void D1(const Standard_Real U, const Standard_Real V, gp_Pnt & P, gp_Vec & D1U, gp_Vec & D1V) const;
+	%rename(d2) D2;
+	void D2(const Standard_Real U, const Standard_Real V, gp_Pnt & P, gp_Vec & D1U, gp_Vec & D1V, gp_Vec & D2U, gp_Vec & D2V, gp_Vec & D2UV) const;
+	%rename(getType) GetType;
+	GeomAbs_SurfaceType GetType() const;
+};
+
+/**
+ * BRepAdaptor_Surface
+ */
+%{#include "BRepAdaptor_Surface.hxx"%}
+
+class BRepAdaptor_Surface: public Adaptor3d_Surface
+{
+	%rename(initialize) Initialize;
+	public:
+	BRepAdaptor_Surface();
+	BRepAdaptor_Surface(const TopoDS_Face &F, const Standard_Boolean R = Standard_True);
+	void Initialize(const TopoDS_Face &F, const Standard_Boolean R = Standard_True);
+};
 
 /**
  * GProp_GProps
@@ -278,6 +342,17 @@ class BRepGProp
         static Standard_Real VolumeProperties(const TopoDS_Shape& shape, GProp_GProps& properties, const Standard_Real Eps, const Standard_Boolean onlyClosed = Standard_False) ;
         static void SurfaceProperties(const TopoDS_Shape& shape, GProp_GProps& properties) ;
         static Standard_Real SurfaceProperties(const TopoDS_Shape& shape, GProp_GProps& properties, const Standard_Real Eps) ;
+};
+
+/**
+ * BRepLProp
+ */
+%{#include "BRepLProp.hxx"%}
+class BRepLProp
+{
+	public:
+	%rename(continuity) Continuity;
+	static GeomAbs_Shape Continuity(const BRepAdaptor_Curve & C1, const BRepAdaptor_Curve & C2, const Standard_Real u1, const Standard_Real u2);
 };
 
 /**
