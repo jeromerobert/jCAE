@@ -218,12 +218,6 @@ class Adaptor3d_Curve
 	GeomAbs_Shape Continuity() const;
 	%rename(value) Value;
 	const gp_Pnt Value(const Standard_Real U) const;
-	%rename(d0) D0;
-	void D0(const Standard_Real U, gp_Pnt & P) const;
-	%rename(d1) D1;
-	void D1(const Standard_Real U, gp_Pnt & P, gp_Vec & V) const;
-	%rename(d2) D2;
-	void D2(const Standard_Real U, gp_Pnt & P, gp_Vec & V1, gp_Vec & V2) const;
 	%rename(getType) GetType;
 	GeomAbs_CurveType GetType() const;
 };
@@ -243,6 +237,44 @@ class Adaptor3d_Curve
 			u[3*i+2] = gp.Z();
 		}
 	}
+
+	void d0(double u, double p[3])
+    {
+		gp_Pnt pp;
+		self->D0(u, pp);
+		p[0] = pp.X();
+		p[1] = pp.Y();
+		p[2] = pp.Z();
+    }
+
+	void d1(double u, double p[3], double v[3])
+    {
+		gp_Pnt pp;
+		gp_Vec vv;
+		self->D1(u, pp, vv);
+		p[0] = pp.X();
+		p[1] = pp.Y();
+		p[2] = pp.Z();
+		v[0] = vv.X();
+		v[1] = vv.Y();
+		v[2] = vv.Z();
+    }
+
+	void d2(double u, double p[3], double v1[3], double v2[3])
+    {
+		gp_Pnt pp;
+		gp_Vec vv1, vv2;
+		self->D2(u, pp, vv1, vv2);
+		p[0] = pp.X();
+		p[1] = pp.Y();
+		p[2] = pp.Z();
+		v1[0] = vv1.X();
+		v1[1] = vv1.Y();
+		v1[2] = vv1.Z();
+		v2[0] = vv2.X();
+		v2[1] = vv2.Y();
+		v2[2] = vv2.Z();
+    }
 };
 
 /**
@@ -303,14 +335,37 @@ class Adaptor3d_Surface
 	GeomAbs_Shape VContinuity() const;
 	%rename(value) Value;
 	const gp_Pnt Value(const Standard_Real U, const Standard_Real V) const;
-	%rename(d0) D0;
-	void D0(const Standard_Real U, const Standard_Real V, gp_Pnt & P) const;
-	%rename(d1) D1;
-	void D1(const Standard_Real U, const Standard_Real V, gp_Pnt & P, gp_Vec & D1U, gp_Vec & D1V) const;
-	%rename(d2) D2;
-	void D2(const Standard_Real U, const Standard_Real V, gp_Pnt & P, gp_Vec & D1U, gp_Vec & D1V, gp_Vec & D2U, gp_Vec & D2V, gp_Vec & D2UV) const;
 	%rename(getType) GetType;
 	GeomAbs_SurfaceType GetType() const;
+};
+
+%extend Adaptor3d_Surface
+{
+	public:
+	void d0(double u, double v, double p[3])
+    {
+		gp_Pnt pp;
+		self->D0(u, v, pp);
+		p[0] = pp.X();
+		p[1] = pp.Y();
+		p[2] = pp.Z();
+    }
+
+	void d1(double u, double v, double p[3], double d1u[3], double d1v[3])
+    {
+		gp_Pnt pp;
+		gp_Vec dd1u, dd1v;
+		self->D1(u, v, pp, dd1u, dd1v);
+		p[0] = pp.X();
+		p[1] = pp.Y();
+		p[2] = pp.Z();
+		d1u[0] = dd1u.X();
+		d1u[1] = dd1u.Y();
+		d1u[2] = dd1u.Z();
+		d1v[0] = dd1v.X();
+		d1v[1] = dd1v.Y();
+		d1v[2] = dd1v.Z();
+    }
 };
 
 /**
