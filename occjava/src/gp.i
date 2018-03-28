@@ -436,6 +436,14 @@ class gp_Trsf
 		matrix[14]=0;
 		matrix[15]=1;
 	}
+
+    void transforms(double point[3]) {
+        gp_Pnt p(point[0], point[1], point[2]);
+        p.Transform(*self);
+        point[0] = p.X();
+        point[1] = p.Y();
+        point[2] = p.Z();
+    }
 }
 
 /**
