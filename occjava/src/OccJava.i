@@ -546,3 +546,17 @@ class BRepAlgo
 	static Standard_Boolean IsValid(const TopoDS_Shape& S);
 	static Standard_Boolean IsTopologicallyValid(const TopoDS_Shape& S);
 };
+
+/**
+ * BRepClass_FaceClassifier
+ */
+%{#include <BRepClass_FaceClassifier.hxx>%}
+class BRepClass_FaceClassifier
+{
+	%rename(perform) Perform;
+	%rename(state) State;
+	public:
+	BRepClass_FaceClassifier();
+    void Perform(const TopoDS_Face & F, const gp_Pnt & P, const Standard_Real Tol);
+	TopAbs_State State();
+};
