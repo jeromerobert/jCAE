@@ -19,9 +19,12 @@
  */
 
 //Refine the catch keywoard
-%{#include <Standard_ErrorHandler.hxx>%}
+%{
+#include <Standard_ErrorHandler.hxx>
+#include <cstring>
+%}
 
-/*%exception
+%exception
 {
 	try
 	{
@@ -29,10 +32,22 @@
 	}
 	catch(Standard_Failure) 
 	{
-		SWIG_JavaThrowException(jenv, SWIG_JavaRuntimeException, Standard_Failure::Caught()->DynamicType()->Name());
+        char * err_msg;
+        int l1 = strlen(Standard_Failure::Caught()->DynamicType()->Name());
+        int l2 = strlen(Standard_Failure::Caught()->GetMessageString());
+        int len = l1 + l2 + 4;
+        if((err_msg = (char *)malloc(len)) != NULL){
+            err_msg [0] = '\0';
+            strcat(err_msg, Standard_Failure::Caught()->DynamicType()->Name());
+            strcat(err_msg, ": \0");
+            strcat(err_msg, Standard_Failure::Caught()->GetMessageString());
+            SWIG_JavaThrowException(jenv, SWIG_JavaRuntimeException, err_msg);
+        } else {
+            SWIG_JavaThrowException(jenv, SWIG_JavaRuntimeException, Standard_Failure::Caught()->DynamicType()->Name());
+        }
 		return $null;
 	}
-}*/
+}
 // Now we bind Opencascade types with Java types.
 // /usr/share/swig1.3/java/java.swg contains many simple example to do that.
 /**
