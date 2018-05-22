@@ -95,6 +95,8 @@ parser.add_option("-e", "--eratio", metavar="FLOAT", default=10.0,
                   action="store", type="float", dest="eratio",
                   help="remove triangles whose edge ratio is greater than "
                   "tolerance (default: 10.0)")
+parser.add_option("--no-clean", default=False, action="store_true", dest="noclean",
+                  help="Do not clean after remesh")
 parser.add_option("-I", "--immutable-border",
                   action="store_true", dest="immutable_border",
                   help="Tag free edges as immutable")
@@ -196,35 +198,36 @@ refineAlgo = Remesh(liaison, refineOptions)
 refineAlgo.setAnalyticMetric(metric)
 refineAlgo.compute();
 
-## Swap
-swapOptions = HashMap()
-swapOptions.put("coplanarity", str(coplanarity))
-swapOptions.put("minCosAfterSwap", "0.3")
-SwapEdge(liaison, swapOptions).compute()
+if not options.noclean:
+    ## Swap
+    swapOptions = HashMap()
+    swapOptions.put("coplanarity", str(coplanarity))
+    swapOptions.put("minCosAfterSwap", "0.3")
+    SwapEdge(liaison, swapOptions).compute()
 
-## Improve valence
-valenceOptions = HashMap()
-valenceOptions.put("coplanarity", str(coplanarity))
-valenceOptions.put("checkNormals", "false")
-ImproveVertexValence(liaison, valenceOptions).compute()
+    ## Improve valence
+    valenceOptions = HashMap()
+    valenceOptions.put("coplanarity", str(coplanarity))
+    valenceOptions.put("checkNormals", "false")
+    ImproveVertexValence(liaison, valenceOptions).compute()
 
-## Smooth
-smoothOptions = HashMap()
-smoothOptions.put("iterations", str(8))
-smoothOptions.put("boundaries", "false")
-smoothOptions.put("check", "true")
-smoothOptions.put("size", str(-1.0))
-smoothOptions.put("tolerance", str(2.0))
-smoothOptions.put("relaxation", str(0.6))
-smoothOptions.put("refresh", "false")
-if (coplanarity >= 0.0):
-    smoothOptions.put("coplanarity", str(coplanarity))
-SmoothNodes3DBg(liaison, smoothOptions).compute()
+    ## Smooth
+    smoothOptions = HashMap()
+    smoothOptions.put("iterations", str(8))
+    smoothOptions.put("boundaries", "false")
+    smoothOptions.put("check", "true")
+    smoothOptions.put("size", str(-1.0))
+    smoothOptions.put("tolerance", str(2.0))
+    smoothOptions.put("relaxation", str(0.6))
+    smoothOptions.put("refresh", "false")
+    if (coplanarity >= 0.0):
+        smoothOptions.put("coplanarity", str(coplanarity))
+    SmoothNodes3DBg(liaison, smoothOptions).compute()
 
-## Remove Degenerated
-rdOptions = HashMap()
-rdOptions.put("rho", str(options.eratio))
-RemoveDegeneratedTriangles(liaison, rdOptions).compute()
+    ## Remove Degenerated
+    rdOptions = HashMap()
+    rdOptions.put("rho", str(options.eratio))
+    RemoveDegeneratedTriangles(liaison, rdOptions).compute()
 
 ## Remesh beams
 if options.wire > 0.0:
