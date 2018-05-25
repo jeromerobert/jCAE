@@ -112,14 +112,14 @@ public class MeshWriter
 	/**
 	 * Used by {@link #writeObject(org.jcae.mesh.amibe.patch.Mesh2D, String, String, int)}
 	 */
-	private static void writeObjectTriangles(Collection<Triangle> trianglelist,
+	private void writeObjectTriangles(Collection<Triangle> trianglelist,
 		TObjectIntHashMap<Vertex> nodeIndex, AmibeWriter aw, boolean writeOuter) throws IOException
 	{
 		int nrTriangles=0;
 		// First write inner triangles
 		for(Triangle f: trianglelist)
 		{
-			if (!f.isWritable())
+			if (!isSelected(f))
 				continue;
 			aw.addTriangle(
 				nodeIndex.get(f.getV0()),
@@ -143,7 +143,7 @@ public class MeshWriter
 		}
 	}
 
-	private static void writeObjectGroups(Mesh mesh, AmibeWriter aw)
+	private void writeObjectGroups(Mesh mesh, AmibeWriter aw)
 		throws IOException
 	{
 		int cnt=0;
@@ -151,7 +151,7 @@ public class MeshWriter
 		HashMap<Integer, TIntArrayList> bgroupMap = new HashMap<Integer, TIntArrayList>();
 		for(Triangle f: mesh.getTriangles())
 		{
-			if (!f.isWritable())
+			if (!isSelected(f))
 				continue;
 			int id = f.getGroupId();
 			TIntArrayList list = groupMap.get(id);
@@ -209,6 +209,12 @@ public class MeshWriter
 	public static void writeObject(Mesh2D submesh, String xmlDir, String brepFile, int index)
 		throws IOException
 	{
+		MeshWriter mw = new MeshWriter(submesh);
+		mw.setBRepFile(brepFile);
+		mw.write(xmlDir, index);
+	}
+ 
+	public void write(String xmlDir, int index) throws IOException {
 		AmibeWriter aw = new AmibeWriter.Dim2(xmlDir, index);
 		Collection<Triangle> trianglelist = submesh.getTriangles();
 		Collection<Vertex> nodelist = submesh.getNodes();
@@ -217,7 +223,7 @@ public class MeshWriter
 			nodelist = new LinkedHashSet<Vertex>(trianglelist.size() / 2);
 			for (Triangle t: trianglelist)
 			{
-				if (!t.isWritable())
+				if (!isSelected(t))
 					continue;
 				for (int j = 0; j < 3; j++)
 				{
@@ -245,6 +251,12 @@ public class MeshWriter
 	public static void writeObject3D(Mesh submesh, String xmlDir, String brepFile)
 		throws IOException
 	{
+		MeshWriter mw = new MeshWriter(submesh);
+		mw.setBRepFile(brepFile);
+		mw.write3D(xmlDir);
+	}
+
+	public void write3D(String xmlDir) throws IOException {
 		logger.info("Write mesh into "+xmlDir+java.io.File.separator+JCAEXMLData.xml3dFilename);
 		Collection<Triangle> trianglelist = submesh.getTriangles();
 		Collection<Vertex> nodelist = submesh.getNodes();
@@ -253,7 +265,7 @@ public class MeshWriter
 			nodelist = new LinkedHashSet<Vertex>(trianglelist.size() / 2);
 			for (Triangle t: trianglelist)
 			{
-				if (!t.isWritable())
+				if (!isSelected(t))
 					continue;
 				for (int j = 0; j < 3; j++)
 				{
@@ -290,6 +302,30 @@ public class MeshWriter
 			for(Vertex v:e.getValue())
 				aw.addNodeToGroup(nodeIndex.get(v));
 		}
+	}
+
+	private Mesh submesh;
+	private String brepFile;
+	private TIntHashSet selectedGroupsID;
+	public MeshWriter(Mesh mesh) {
+		this.submesh = mesh;
+	}
+
+	public void setBRepFile(String brepFile) {
+		this.brepFile = brepFile;
+	}
+
+	protected boolean isSelected(Triangle triangle) {
+		if(!triangle.isWritable())
+			return false;
+		else if(selectedGroupsID == null)
+			return true;
+		else
+			return selectedGroupsID.contains(triangle.getGroupId());
+	}
+
+	public void selectGroups(String ... groups) {
+		selectedGroupsID = new TIntHashSet(submesh.getGroupIDs(groups));
 	}
 }
 
