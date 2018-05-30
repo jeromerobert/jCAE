@@ -417,6 +417,22 @@ abstract public class MeshExporter
 			out.println(FORMAT_I10.format(n0)+FORMAT_I10.format(n1)+FORMAT_I10.format(n2));
 		}
 
+		/** Write a linear, quad or cubic triangle */
+		public static void writeHOTria(PrintStream out, int count, int[] nodes, int elementary) {
+			// element label
+			out.print(FORMAT_I10.format(count));
+			// fe descriptor: 91 for linear, 92 for quad, 93 for cubic
+			out.print(FORMAT_I10.format(90+nodes.length/3));
+			// physical property table number
+			out.print(FORMAT_I10.format(elementary));
+			// material property table number and color
+			out.print("         1         1");
+			out.println(FORMAT_I10.format(nodes.length));
+			for(int i = 0; i < nodes.length; i++)
+				out.print(FORMAT_I10.format(nodes[i]));
+			out.println();
+		}
+
 		public static void writeSingleGroup(PrintStream out, int groupId, String name, int[] ids)
 		{
 			out.println(FORMAT_I10.format(groupId)+"         0         0         0         0         0         0"+FORMAT_I10.format(ids.length));
