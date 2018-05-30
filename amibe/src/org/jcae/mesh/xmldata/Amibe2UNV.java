@@ -75,6 +75,14 @@ public class Amibe2UNV
 	private final MeshExporter.UNV unvWriter;
 	private double scale = 1.0;
 	private int elementary = 1;
+	private boolean quadratic;
+	private QuadraticTriaConverter quadraticTriaConverter;
+	private int quadraticVerticesOffset;
+
+	/** Export quadratic triangles instead of linear triangles */
+	public void setQuadratic(boolean quadratic) {
+		this.quadratic = quadratic;
+	}
 
 	/**
 	 * This is the number written just after the type of elements.
@@ -227,9 +235,12 @@ public class Amibe2UNV
 		out.println("    -1");
 	}	
 	
-	private void writeNodes(PrintStream out) throws IOException
+	private void writeNodes(PrintStream out) throws IOException, SAXException
 	{
 		DoubleFileReader f=unvWriter.getSubMesh().getNodes();
+		if(quadratic) {
+			quadraticTriaConverter = new QuadraticTriaConverter(unvWriter.getSubMesh());
+		}
 		int count = 1;
 		out.println("    -1"+CR+"  2411");
 		double[] buffer = new double[3];
@@ -240,6 +251,16 @@ public class Amibe2UNV
 			MeshExporter.UNV.writeSingleNode(out, count,
 				buffer[0]*scale, buffer[1]*scale, buffer[2]*scale);
 			count ++;
+		}
+		quadraticVerticesOffset = nbNodes;
+		if(quadratic) {
+			DoubleFileReader vReader =  quadraticTriaConverter.getVertices();
+			for(int i = 0; i < quadraticTriaConverter.getNumberOfVertices(); i++) {
+				vReader.get(buffer);
+				MeshExporter.UNV.writeSingleNode(out, count,
+					buffer[0]*scale, buffer[1]*scale, buffer[2]*scale);
+				count ++;
+			}
 		}
 
 		out.println("    -1");
@@ -257,18 +278,38 @@ public class Amibe2UNV
 		int count = 1;
 		if(subMesh.getNumberOfTrias() > 0)
 		{
+			IntFileReader quadTrias = null;
+			int[] quadVertices = new int[6];
 			IntFileReader trias = subMesh.getTriangles();
 			long nb = trias.size() / 3;
+			if(quadratic) {
+				quadTrias = quadraticTriaConverter.getTriangles();
+			}
 			for(int i = 0; i<nb; i++)
 			{
 				int n1 = trias.get();
 				int n2 = trias.get();
 				int n3 = trias.get();
-				if(n1 >= 0)
-					MeshExporter.UNV.writeSingleTriangle(out, count,
-						n1+1, n2+1, n3+1, elementary);
+				if(n1 >= 0) {
+					if(quadratic) {
+						for(int j = 0; j < 3; j++)
+							quadVertices[j * 2 + 1] = quadTrias.get() + quadraticVerticesOffset + 1;
+						quadVertices[0] = n1 + 1;
+						quadVertices[2] = n2 + 1;
+						quadVertices[4] = n3 + 1;
+						MeshExporter.UNV.writeHOTria(out, count, quadVertices, elementary);
+					} else {
+						MeshExporter.UNV.writeSingleTriangle(out, count,
+							n1+1, n2+1, n3+1, elementary);
+					}
+				}
+				// FIXME: why to we increment when n1 < 0 ?
 				count ++;
 			}
+		}
+		if(quadraticTriaConverter != null) {
+			quadraticTriaConverter.delete();
+			quadraticTriaConverter=null;
 		}
 		logger.log(Level.INFO, "Total number of triangles: {0}", count-1);
 		return count;
