@@ -175,6 +175,10 @@ public abstract class AmibeReader extends XMLReader implements JCAEXMLData {
 		private int nodesOffset, beamsOffset, triasOffset;
 		private LinkedHashMap<String, Group> groups = new LinkedHashMap<String, Group>();
 
+		public AmibeReader getReader() {
+			return AmibeReader.this;
+		}
+
 		/**
 		 * @return the subShape
 		 */
