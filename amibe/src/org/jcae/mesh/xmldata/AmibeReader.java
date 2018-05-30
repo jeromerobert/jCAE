@@ -27,6 +27,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
@@ -296,10 +297,12 @@ public abstract class AmibeReader extends XMLReader implements JCAEXMLData {
 		private void flushByteBuffer(ByteBuffer bb, WritableByteChannel out)
 			throws IOException
 		{
-			bb.limit(bb.position());
-			bb.rewind();
+			//Buffer cast is needed with Java 9 (see https://jira.mongodb.org/browse/JAVA-2559)
+			Buffer b = bb;
+			b.limit(bb.position());
+			b.rewind();
 			out.write(bb);
-			bb.clear();
+			b.clear();
 		}
 
 		/** Read a group and write it to a channel */

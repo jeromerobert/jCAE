@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
@@ -76,7 +77,7 @@ public class IntFileReaderByDirectBuffer implements IntFileReader
 		if (remaining == 0)
 			copyBufferIntoArray();
 		if (remaining < 0)
-			throw new IOException();
+			throw new IndexOutOfBoundsException(remaining);
 
 		int ret = array[arrayIndex];
 		arrayIndex++;
@@ -152,7 +153,9 @@ public class IntFileReaderByDirectBuffer implements IntFileReader
 	public final int get(int index, int[] dst, int offset, int len) throws IOException
 	{
 		int relIndex = index - startBufferIndex;
-		if (relIndex < 0 || relIndex >= tb.limit())
+		// Buffer cast to support Java 9 (see https://jira.mongodb.org/browse/JAVA-2559)
+		Buffer tbb = tb;
+		if (relIndex < 0 || relIndex >= tbb.limit())
 		{
 			moveBufferTo(index * ELEMENT_SIZE);
 			if (remaining < 0)
@@ -161,15 +164,17 @@ public class IntFileReaderByDirectBuffer implements IntFileReader
 			relIndex = index - startBufferIndex;
 		}
 		// Change buffer position and discard array
-		tb.position(relIndex);
+		tbb.position(relIndex);
 		remaining = 0;
 		return get(dst, offset, len);
 	}
 
 	private boolean copyFileIntoBuffer() throws IOException
 	{
-		tb.clear();
-		bb.clear();
+		// Buffer cast to support Java 9 (see https://jira.mongodb.org/browse/JAVA-2559)
+		Buffer tbb = tb;
+		tbb.clear();
+		((Buffer)bb).clear();
 		int nr;
 
 		if (fc.position() == fc.size())
@@ -189,8 +194,8 @@ public class IntFileReaderByDirectBuffer implements IntFileReader
 			return false;
 		}
 		nr /= ELEMENT_SIZE;
-		tb.position(0);
-		tb.limit(nr);
+		tbb.position(0);
+		tbb.limit(nr);
 		// Discard array
 		remaining = 0;
 
