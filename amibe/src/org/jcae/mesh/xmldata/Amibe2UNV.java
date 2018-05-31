@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.projection.MeshLiaison;
 import org.xml.sax.SAXException;
 
 /**
@@ -76,12 +77,21 @@ public class Amibe2UNV
 	private double scale = 1.0;
 	private int elementary = 1;
 	private boolean quadratic;
+	private MeshLiaison quadraticLiaison;
 	private QuadraticTriaConverter quadraticTriaConverter;
 	private int quadraticVerticesOffset;
 
 	/** Export quadratic triangles instead of linear triangles */
 	public void setQuadratic(boolean quadratic) {
 		this.quadratic = quadratic;
+	}
+
+	/**
+	 * Project the quadratic vertices to a give liaison.
+	 * If null the projection is disabled.
+	 */
+	public void setQuadraticLiaison(MeshLiaison liaison) {
+		this.quadraticLiaison = liaison;
 	}
 
 	/**
@@ -239,7 +249,8 @@ public class Amibe2UNV
 	{
 		DoubleFileReader f=unvWriter.getSubMesh().getNodes();
 		if(quadratic) {
-			quadraticTriaConverter = new QuadraticTriaConverter(unvWriter.getSubMesh());
+			quadraticTriaConverter = new QuadraticTriaConverter(
+				unvWriter.getSubMesh(), quadraticLiaison);
 		}
 		int count = 1;
 		out.println("    -1"+CR+"  2411");

@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.projection.MeshLiaison;
 import org.jcae.mesh.xmldata.AmibeReader.SubMesh;
 import org.xml.sax.SAXException;
 
@@ -43,12 +45,19 @@ public class QuadraticTriaConverter {
 	protected boolean deleteFiles;
 	protected int dimension;
 	protected int numberOfVertices;
+	protected MeshLiaison liaison;
+	protected Vertex tmpVertex;
 	/** Constructor and high level wrapper for the convert method */
-	public QuadraticTriaConverter(AmibeReader.SubMesh subMesh) throws IOException, SAXException {
+	public QuadraticTriaConverter(AmibeReader.SubMesh subMesh, MeshLiaison liaison)
+		throws IOException, SAXException
+	{
 		dimension = subMesh.getReader().dim();
 		verticesFile = File.createTempFile("jcaevert", ".bin");
 		trianglesFile = File.createTempFile("jcaetria", ".bin");
 		deleteFiles = true;
+		this.liaison = liaison;
+		if(liaison != null)
+			tmpVertex = liaison.getMesh().createVertex(0, 0, 0);
 		convert(subMesh);
 	}
 
@@ -103,11 +112,16 @@ public class QuadraticTriaConverter {
 		}
 	}
 
-	// TODO: To be overriden with projection (MeshLiaison.move)
 	protected void computeMidVertex(double[] vertices, int v1, int v2, ByteBuffer output) {
-		for(int i = 0; i < dimension; i++) {
-			output.putDouble(i*8, (vertices[v1*dimension + i] + vertices[v2*dimension + i])/2.);
-		}
+		tmpVertex.moveTo(
+			(vertices[v1*dimension + 0] + vertices[v2*dimension + 0])/2,
+			(vertices[v1*dimension + 1] + vertices[v2*dimension + 1])/2,
+			(vertices[v1*dimension + 2] + vertices[v2*dimension + 2])/2);
+		if(liaison != null)
+			liaison.move(tmpVertex, tmpVertex, false);
+		output.putDouble(0, tmpVertex.getX());
+		output.putDouble(8, tmpVertex.getY());
+		output.putDouble(16, tmpVertex.getZ());
 	}
 
 	/**
