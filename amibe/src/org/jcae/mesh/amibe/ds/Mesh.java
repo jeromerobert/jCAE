@@ -611,6 +611,12 @@ public class Mesh implements Serializable
 		beamGroups.clear();
 	}
 
+	public void clear() {
+		resetBeams();
+		triangleList.clear();
+		nodeList.clear();
+	}
+
 	public void setGroupName(int id, String name)
 	{
 		if(name == null)
