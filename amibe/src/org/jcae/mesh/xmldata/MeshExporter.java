@@ -410,21 +410,21 @@ abstract public class MeshExporter
 			writeSingleTriangle(out, count, n0, n1, n2, 1);
 		}
 
-		public static void writeSingleTriangle(PrintStream out, int count, int n0, int n1, int n2, int elementary)
+		public static void writeSingleTriangle(PrintStream out, int count, int n0, int n1, int n2, int physical)
 		{
 			out.println(FORMAT_I10.format(count) + "        91" +
-				FORMAT_I10.format(elementary) + "         1         1         3");
+				FORMAT_I10.format(physical) + "         1         1         3");
 			out.println(FORMAT_I10.format(n0)+FORMAT_I10.format(n1)+FORMAT_I10.format(n2));
 		}
 
 		/** Write a linear, quad or cubic triangle */
-		public static void writeHOTria(PrintStream out, int count, int[] nodes, int elementary) {
+		public static void writeHOTria(PrintStream out, int count, int[] nodes, int physical) {
 			// element label
 			out.print(FORMAT_I10.format(count));
 			// fe descriptor: 91 for linear, 92 for quad, 93 for cubic
 			out.print(FORMAT_I10.format(90+nodes.length/3));
 			// physical property table number
-			out.print(FORMAT_I10.format(elementary));
+			out.print(FORMAT_I10.format(physical));
 			// material property table number and color
 			out.print("         1         1");
 			out.println(FORMAT_I10.format(nodes.length));

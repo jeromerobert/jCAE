@@ -75,7 +75,8 @@ public class Amibe2UNV
 	private final String directory;
 	private final MeshExporter.UNV unvWriter;
 	private double scale = 1.0;
-	private int elementary = 1;
+	private int physical = 1;
+	private boolean physicalGroup;
 	private boolean quadratic;
 	private MeshLiaison quadraticLiaison;
 	private QuadraticTriaConverter quadraticTriaConverter;
@@ -96,13 +97,21 @@ public class Amibe2UNV
 
 	/**
 	 * This is the number written just after the type of elements.
+	 * This is known as "physical property ID" in the UNV specification.
 	 * The default is 1. gmsh use this number to set the id of the create GFace
 	 * when using the Merge command.
 	 */
-	public void setElementary(int elementary) {
-		this.elementary = elementary;
+	public void setPhysical(int physical) {
+		this.physical = physical;
 	}
 
+	/**
+	 * Use Amibe group ID as UNV physical property.
+	 * When enabled setPhysical() is ignored.
+	 */
+	public void setPhysicalGroup(boolean physicalGroup) {
+		this.physicalGroup = physicalGroup;
+	}
 	/**
 	 * @param directory The directory which contain 3d files
 	 */
@@ -280,6 +289,21 @@ public class Amibe2UNV
 		logger.info("Total number of nodes: "+count);
 	}
 
+	private int[] createTrianglePhysicalMapping(AmibeReader.SubMesh subMesh)
+		throws IOException {
+		int[] result = new int[(int)subMesh.getTriangles().size()];
+		int groupId = 1;
+		for(Entry<String, Collection<Group>> e:indexUNVGroups(subMesh.getGroups()).entrySet()) {
+			for(Group g:e.getValue()) {
+				for(int id:g.readTria3Ids()) {
+					result[id] = groupId;
+				}
+			}
+			groupId++;
+		}
+		return result;
+	}
+
 	/**
 	 * @param out
 	 * @throws IOException 
@@ -293,25 +317,29 @@ public class Amibe2UNV
 			int[] quadVertices = new int[6];
 			IntFileReader trias = subMesh.getTriangles();
 			long nb = trias.size() / 3;
+			int[] physicalMapping = null;
 			if(quadratic) {
 				quadTrias = quadraticTriaConverter.getTriangles();
 			}
+			if(physicalGroup)
+				physicalMapping = createTrianglePhysicalMapping(subMesh);
 			for(int i = 0; i<nb; i++)
 			{
 				int n1 = trias.get();
 				int n2 = trias.get();
 				int n3 = trias.get();
 				if(n1 >= 0) {
+					int trianglePhysical = physicalGroup ? physicalMapping[i] : physical;
 					if(quadratic) {
 						for(int j = 0; j < 3; j++)
 							quadVertices[j * 2 + 1] = quadTrias.get() + quadraticVerticesOffset + 1;
 						quadVertices[0] = n1 + 1;
 						quadVertices[2] = n2 + 1;
 						quadVertices[4] = n3 + 1;
-						MeshExporter.UNV.writeHOTria(out, count, quadVertices, elementary);
+						MeshExporter.UNV.writeHOTria(out, count, quadVertices, trianglePhysical);
 					} else {
 						MeshExporter.UNV.writeSingleTriangle(out, count,
-							n1+1, n2+1, n3+1, elementary);
+							n1+1, n2+1, n3+1, trianglePhysical);
 					}
 				}
 				// FIXME: why to we increment when n1 < 0 ?
