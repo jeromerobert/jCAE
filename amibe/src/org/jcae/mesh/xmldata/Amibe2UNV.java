@@ -33,6 +33,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -164,6 +165,12 @@ public class Amibe2UNV
 	protected String[] formatGroupName(String name)
 	{
 		return new String[]{name};
+	}
+
+	/** Return groups name in the same order as written in the UNV file */
+	public Collection<String> getGroupNames() throws IOException, SAXException {
+		return indexUNVGroups(new AmibeReader.Dim3(directory).
+			getSubmeshes().get(0).getGroups()).keySet();
 	}
 
 	private Map<String, Collection<Group>> indexUNVGroups(Collection<Group> groups)
