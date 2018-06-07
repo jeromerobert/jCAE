@@ -23,6 +23,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.ReadableByteChannel;
@@ -221,7 +222,7 @@ public class DistanceMetric extends AbstractDistanceMetric {
 			bb.putDouble(s.sy1);
 			bb.putDouble(s.sz1);
 		}
-		bb.rewind();
+		((Buffer)bb).rewind();
 		out.write(bb);
 	}
 

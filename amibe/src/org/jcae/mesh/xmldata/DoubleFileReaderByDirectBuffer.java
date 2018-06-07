@@ -25,6 +25,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.Buffer;
 import java.nio.DoubleBuffer;
 import java.nio.channels.FileChannel;
 
@@ -160,15 +161,17 @@ public class DoubleFileReaderByDirectBuffer implements DoubleFileReader
 			relIndex = index - startBufferIndex;
 		}
 		// Change buffer position and discard array
-		tb.position(relIndex);
+		((Buffer)tb).position(relIndex);
 		remaining = 0;
 		return get(dst, offset, len);
 	}
 
 	private boolean copyFileIntoBuffer() throws IOException
 	{
-		tb.clear();
-		bb.clear();
+		//Buffer cast is needed with Java 9 (see https://jira.mongodb.org/browse/JAVA-2559)
+		Buffer tbb = tb;
+		tbb.clear();
+		((Buffer)bb).clear();
 		int nr;
 
 		startBufferIndex = (int) (fc.position() / ELEMENT_SIZE);
@@ -182,8 +185,8 @@ public class DoubleFileReaderByDirectBuffer implements DoubleFileReader
 			return false;
 		}
 		nr /= ELEMENT_SIZE;
-		tb.position(0);
-		tb.limit(nr);
+		tbb.position(0);
+		tbb.limit(nr);
 		// Discard array
 		remaining = 0;
 

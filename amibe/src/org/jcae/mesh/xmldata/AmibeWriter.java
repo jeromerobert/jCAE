@@ -27,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.Buffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
@@ -171,9 +172,9 @@ public abstract class AmibeWriter {
 			if(bb2 == null || bb2.capacity() != len)
 				bb2 = ByteBuffer.allocate(len);
 			else
-				bb2.rewind();
+				((Buffer)bb2).rewind();
 			bb2.put(b, off, len);
-			bb2.rewind();
+			((Buffer)bb2).rewind();
 			channel.write(bb2);
 		}
 

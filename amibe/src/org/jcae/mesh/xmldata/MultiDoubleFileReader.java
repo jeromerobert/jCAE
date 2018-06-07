@@ -22,6 +22,7 @@ package org.jcae.mesh.xmldata;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
@@ -62,7 +63,7 @@ public class MultiDoubleFileReader implements Iterable<DoubleBuffer>, Iterator<D
 
 	public DoubleBuffer next() {
 		try {
-			buffer.clear();
+			((Buffer)buffer).clear();
 			int r = channel.read(buffer);
 			if(r != 4)
 				throw new NoSuchElementException(
@@ -74,7 +75,7 @@ public class MultiDoubleFileReader implements Iterable<DoubleBuffer>, Iterator<D
 			int n = channel.read(toReturn);
 			if(n != size * 8)
 				throw new NoSuchElementException("End of file");
-			toReturn.rewind();
+			((Buffer)toReturn).rewind();
 			return toReturn.asDoubleBuffer();
 		} catch (IOException ex) {
 			NoSuchElementException ne = new NoSuchElementException(ex.getMessage());
