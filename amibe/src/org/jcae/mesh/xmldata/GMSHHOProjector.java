@@ -129,7 +129,7 @@ public class GMSHHOProjector {
 				for (int i = 0; i < numElmFollow; i++) {
 					channel.read(elementBuffer);
 					for (int j = 0; j < NODE_NUMBER[elmType - 1] / 2; j++) {
-						verticesToProject.add(elementBuffer.getInt(hoOffset + 4 * j));
+						verticesToProject.add(elementBuffer.getInt(hoOffset + 4 * j)-1);
 					}
 					((Buffer)elementBuffer).rewind();
 				}
