@@ -409,7 +409,7 @@ def __remesh(options):
         Vertex.setMutable(afront_frozen, True)
 
     opts.clear()
-    opts.put("checkNormals", "false")
+    opts.put("checkNormals", "true" if options.afront_path else "false")
     ImproveVertexValence(liaison, opts).compute()
 
     #14
