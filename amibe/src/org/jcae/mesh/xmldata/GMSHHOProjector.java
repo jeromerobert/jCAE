@@ -169,6 +169,12 @@ public class GMSHHOProjector {
 		for(int i = 0; i < verticesToProject.length; i++) {
 			channel.position(verticesOffset + verticesToProject[i] * vertexRecordSize);
 			channel.read(vertexBuffer);
+			// FIXME: This can create bad tetrahedron if the projection point is too
+			// far. The best would be to check the tetrahedron quality after moving
+			// the point. But 1- this would be expensive, 2- we don't have data
+			// structure to do that. A cheap solution would be to check that
+			// the projection distance is always smaller than a fraction of the
+			// edge size.
 			tmpVertex.moveTo(
 				vertexBuffer.getDouble(4 + DATA_SIZE * 0),
 				vertexBuffer.getDouble(4 + DATA_SIZE * 1),
