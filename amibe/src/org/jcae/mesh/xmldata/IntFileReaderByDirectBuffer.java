@@ -77,7 +77,7 @@ public class IntFileReaderByDirectBuffer implements IntFileReader
 		if (remaining == 0)
 			copyBufferIntoArray();
 		if (remaining < 0)
-			throw new IndexOutOfBoundsException(remaining);
+			throw new IndexOutOfBoundsException(Integer.toString(remaining));
 
 		int ret = array[arrayIndex];
 		arrayIndex++;
