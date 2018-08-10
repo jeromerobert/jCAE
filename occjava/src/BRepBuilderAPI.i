@@ -28,6 +28,7 @@
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepBuilderAPI_MakeSolid.hxx>
 #include <BRepBuilderAPI_NurbsConvert.hxx>
+#include <BRepBuilderAPI_Copy.hxx>
 #include <BRepOffsetAPI_ThruSections.hxx>
 #include <Standard_Version.hxx>
 #if OCC_VERSION_MAJOR >= 6
@@ -238,4 +239,17 @@ public:
 	void CheckCompatibility (const Standard_Boolean check = Standard_True) ;
     const  TopoDS_Shape& Shape()  const; 
 
+};
+
+class BRepBuilderAPI_Copy : public BRepBuilderAPI_ModifyShape
+{
+	%rename(perform) Perform;
+	public:
+	BRepBuilderAPI_Copy();
+	BRepBuilderAPI_Copy(const TopoDS_Shape& S,
+		const Standard_Boolean copyGeom = Standard_True,
+        const Standard_Boolean copyMesh = Standard_False);
+	void Perform(const TopoDS_Shape& S,
+		const Standard_Boolean copyGeom = Standard_True,
+        const Standard_Boolean copyMesh = Standard_False);
 };
