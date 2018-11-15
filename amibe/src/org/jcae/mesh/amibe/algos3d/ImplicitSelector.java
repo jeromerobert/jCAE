@@ -79,7 +79,9 @@ public class ImplicitSelector {
 		for(Triangle t: mesh.getTriangles()) {
 			AbstractHalfEdge e = t.getAbstractHalfEdge();
 			for(int i = 0; i < 3; i++) {
-				if(e.hasAttributes(edgeAttribute)) {
+				if(e.hasAttributes(edgeAttribute) &&
+					f.inside(e.origin()) && f.inside(e.destination())) {					
+					System.out.println(e);
 					toTag.add(e.origin());
 					toTag.add(e.destination());
 				}
