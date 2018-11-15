@@ -37,6 +37,7 @@ import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 
 /**
@@ -54,6 +55,7 @@ import java.util.logging.Logger;
  */
 public class UNV2Amibe
 {
+	private final static Pattern TOKENIZE = Pattern.compile("\\s+");
 	/** A 2412 element which won't be stored into the amibe file */
 	private abstract class Element
 	{
@@ -343,17 +345,9 @@ public class UNV2Amibe
 		String line = in.readLine();
 		while(!line.trim().equals("-1"))
 		{
-			// read the number of elements to read in the last number of the line
-			StringTokenizer st = new StringTokenizer(line);
-			String snb = "";
-			// Block number
-			st.nextToken();
-			while(st.hasMoreTokens())
-			{
-				snb = st.nextToken();
-			}
+			String[] tokens = TOKENIZE.split(line);
 			// Number of elements
-			int nbelem = Integer.valueOf(snb).intValue();
+			int nbelem = Integer.parseInt(tokens[tokens.length-1]);
 			// Read group name
 			String groupName = in.readLine().trim();
 			boolean skipGroup = skipGroup(groupName);
@@ -363,7 +357,7 @@ public class UNV2Amibe
 				continue;
 			while (line.charAt(0) == '8' || line.charAt(0) == '7')
 			{
-				st = new StringTokenizer(line);
+				StringTokenizer st = new StringTokenizer(line);
 				// read one element over two, the first one doesnt matter
 				while(st.hasMoreTokens())
 				{
