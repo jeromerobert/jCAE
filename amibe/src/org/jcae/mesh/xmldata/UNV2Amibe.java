@@ -28,6 +28,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
@@ -172,7 +173,7 @@ public class UNV2Amibe
 
 		public void add(int amibeID, int type) throws IOException
 		{
-			buffer.rewind();
+			((Buffer)buffer).rewind();
 			buffer.putInt(amibeID);
 			buffer.putInt(type);
 			buffer.rewind();			
