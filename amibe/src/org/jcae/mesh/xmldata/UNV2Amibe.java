@@ -358,6 +358,8 @@ public class UNV2Amibe
 			boolean skipGroup = skipGroup(groupName);
 			boolean groupCreated = false;
 			line = in.readLine().trim();
+			if(nbelem == 0)
+				continue;
 			while (line.charAt(0) == '8' || line.charAt(0) == '7')
 			{
 				st = new StringTokenizer(line);
