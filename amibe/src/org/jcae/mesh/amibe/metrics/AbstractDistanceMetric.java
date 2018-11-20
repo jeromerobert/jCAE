@@ -195,7 +195,7 @@ public abstract class AbstractDistanceMetric extends MetricSupport.AnalyticMetri
 	protected void update(DistanceMetricInterface ps)
 	{
 		if(ps.sqrD1 < ps.sqrD0)
-			ps.sqrD1 = sizeInf * sizeInf * 4;
+			ps.sqrD1 = ps.sqrD0 + sizeInf * sizeInf * 4;
 		ps.delta = ps.sqrD1 - ps.sqrD0;
 		ps.ratio = ps.sqrD0 / ps.delta;
 	}
