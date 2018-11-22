@@ -141,6 +141,8 @@ class BRepBuilderAPI_MakeFace  : public BRepBuilderAPI_MakeShape
 	public:
 	BRepBuilderAPI_MakeFace(const TopoDS_Wire& W,
 		const Standard_Boolean OnlyPlane = Standard_False);
+	BRepBuilderAPI_MakeFace(const gp_Pln & P, const  TopoDS_Wire & W,
+		const Standard_Boolean inside = Standard_True);
     BRepBuilderAPI_MakeFace(const TopoDS_Face& F,const TopoDS_Wire& W);
 	BRepBuilderAPI_MakeFace(const gp_Pln& P);
 	//const TopoDS_Face& Face() const;
