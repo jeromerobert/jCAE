@@ -378,7 +378,7 @@ public class TriangleKdTree {
 		}
 		Location otherProj = new Location();
 		Triangle other = getClosestTriangle(coords, otherProj, group);
-		if(other != toReturn || other == null)
+		if(other == null || (other != toReturn && coords.sqrDistance3D(projection) < coords.sqrDistance3D(otherProj)))
 		{
 			System.err.println("--- real solution ---");
 			System.err.println(toReturn);
@@ -388,13 +388,7 @@ public class TriangleKdTree {
 			System.err.println(other);
 			if(other != null)
 			{
-				int n = 0;
-				for(int i = 0; i < 3; i++)
-				{
-					double d = otherProj.get(i) - coords.get(i);
-					n += d * d;
-				}
-				System.err.println(Math.sqrt(n));
+				System.err.println(otherProj.distance3D(coords));
 				System.err.println(otherProj);
 			}
 			throw new IllegalStateException();
