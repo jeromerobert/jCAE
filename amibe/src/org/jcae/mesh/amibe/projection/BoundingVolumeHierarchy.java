@@ -38,10 +38,18 @@ public class BoundingVolumeHierarchy {
 	private static class Node
 	{
 		public final double[] bbox = new double[6];
+		/* If numberOfTriangles >= 0, this node is a leaf node.
+		   It contains 'numberOfTriangles' triangles
+		     trianglesArray[sortedIndices[offset:offset+numberOfTriangles]]
+		   Members 'left' and 'right' are null.
+
+		   If numberOfTriangles < 0, this is an inner node; it
+		   contains 2 children stored in 'left' and 'right' members.
+		   Split axis is stored as (- numberOfTriangles - 1).
+		   Member 'offset' is irrelevant.
+                 */
 		public Node left, right;
-		/* If < 0, inner node; otherwise, leaf node */
 		public int numberOfTriangles;
-		/* For leaf nodes, index of the first triangle. */
 		public int offset;
 	}
 	private final static Logger LOGGER = Logger.getLogger(BoundingVolumeHierarchy.class.getName());
@@ -147,7 +155,6 @@ public class BoundingVolumeHierarchy {
 			return;
 		}
 		/* otherwise split node */
-		current.numberOfTriangles = -1;
 
 		/* find the largest extent */
 		for(int j = 0; j < 3; j++)
@@ -170,6 +177,7 @@ public class BoundingVolumeHierarchy {
 			current.offset = firstTriangleIndex;
 			return;
 		}
+		current.numberOfTriangles = - splitAxis - 1;
 		double splitValue = 0.5 * (workMiddle[splitAxis] + workMiddle[3 + splitAxis]);
 		int index = BVH_pivot(splitAxis, splitValue, firstTriangleIndex, lastTriangleIndex);
 		// Build left child
@@ -251,8 +259,17 @@ public class BoundingVolumeHierarchy {
 			}
 			else
 			{
-				stack.push(current.right);
-				stack.push(current.left);
+				int splitAxis = - current.numberOfTriangles - 1;
+				if (current.bbox[splitAxis] + current.bbox[splitAxis + 3] < 2.0 * coords.get(splitAxis))
+				{
+					stack.push(current.left);
+					stack.push(current.right);
+				}
+				else
+				{
+					stack.push(current.right);
+					stack.push(current.left);
+				}
 			}
 		}
 		return trianglesArray[toReturn];
