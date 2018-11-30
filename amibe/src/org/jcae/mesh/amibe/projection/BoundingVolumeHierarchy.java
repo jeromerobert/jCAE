@@ -76,12 +76,12 @@ public class BoundingVolumeHierarchy {
 
 	public BoundingVolumeHierarchy(Mesh mesh)
 	{
-		this(mesh, 10);
+		this(mesh, 20);
 	}
 
 	public BoundingVolumeHierarchy(Iterable<Triangle> triangles)
 	{
-		this(triangles, 10);
+		this(triangles, 20);
 	}
 
 	public BoundingVolumeHierarchy(Mesh mesh, int bucketSize)
