@@ -305,7 +305,7 @@ public class BoundingVolumeHierarchy {
 		}
 		Location otherProj = new Location();
 		Triangle other = getClosestTriangle(coords, otherProj, group);
-		if(other == null || (other != toReturn && coords.sqrDistance3D(projection) < coords.sqrDistance3D(otherProj)))
+		if(other == null || (other != toReturn && Math.abs(coords.sqrDistance3D(projection) - coords.sqrDistance3D(otherProj)) > 1.e-12 * coords.sqrDistance3D(projection)))
 		{
 			System.err.println("--- real solution ---");
 			System.err.println(toReturn);
