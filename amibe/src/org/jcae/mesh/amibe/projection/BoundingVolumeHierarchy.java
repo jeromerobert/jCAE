@@ -21,11 +21,11 @@
 package org.jcae.mesh.amibe.projection;
 
 import java.io.IOException;
-import java.util.Deque;
-import java.util.ArrayDeque;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.stack.array.TIntArrayStack;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
@@ -35,26 +35,34 @@ import org.jcae.mesh.amibe.projection.MeshLiaison.TriangleDistance;
 
 public class BoundingVolumeHierarchy {
 
-	private static class Node
-	{
-		public final double[] bbox = new double[6];
-		/* If numberOfTriangles >= 0, this node is a leaf node.
-		   It contains 'numberOfTriangles' triangles
-		     trianglesArray[sortedIndices[offset:offset+numberOfTriangles]]
-		   Members 'left' and 'right' are null.
+	/*
+	Tree is linearized.
+	It it were not linearized, nodes would contain:
+	  * 6 doubles for its bounding box
+	  * for inner nodes, 2 pointers to children
+	  * for leaves, 2 integers to represent the numbers of triangles
+	    stored in this leaf, and the index of the first triangle in a
+	    sorted list.
 
-		   If numberOfTriangles < 0, this is an inner node; it
-		   contains 2 children stored in 'left' and 'right' members.
-		   Split axis is stored as (- numberOfTriangles - 1).
-		   Member 'offset' is irrelevant.
-                 */
-		public Node left, right;
-		public int numberOfTriangles;
-		public int offset;
-	}
+	The total number of tree nodes is stored in 'numberOfNodes'.
+	Bounding boxes are stored in 'bboxNodes'.
+	In order to have a more compact representation in memory, pointers
+	to children are not used, we encode the same information into the same
+	2 integers as for leaf nodes; they are stored into 'linearTree' member.
+
+	By convention, if linearTree[2*index] >= 0, this is a leaf node and
+	this number represents the number of triangles stored in this leaf.
+	Offset of first triangle in sortedIndices is stored in linearTree[2*index+1].
+	If linearTree[2*index] < 0, this is an inner node, and this number gives
+	its split axis (-1 for axis 0, -2 for axis 1 and -3 for axis 2).  Its first
+	child is stored just after this one, its index is thus (index+1).  And
+	linearTree[2*index+1] gives the index of its right child.
+	 */
 	private final static Logger LOGGER = Logger.getLogger(BoundingVolumeHierarchy.class.getName());
 	private final int bucketSize;
-	private final Node rootNode;
+	private int numberOfNodes;
+	private final TIntArrayList linearTree = new TIntArrayList();
+	private final TDoubleArrayList bboxNodes = new TDoubleArrayList();
 	// Triangles (size: number of non-outer triangles)
 	private final Triangle[] trianglesArray;
 	// Nodes bounds (size: 6 * number of non-outer triangles)
@@ -129,29 +137,38 @@ public class BoundingVolumeHierarchy {
 		}
 		LOGGER.info("Inserting "+countTriangles+" triangles");
 		// Recursively build tree
-		rootNode = new Node();
-		recursiveBuild(rootNode, 0, countTriangles);
+		// There will be at least (countTriangles/bucketSize) leaves, and thus
+		// 2*(countTriangles/bucketSize) nodes.
+		int capacity = Math.max(2 * countTriangles / bucketSize, 1000);
+		linearTree.ensureCapacity(2 * capacity);
+		bboxNodes.ensureCapacity(6 * capacity);
+		numberOfNodes = 1;
+		recursiveBuild(0, 0, countTriangles);
 		LOGGER.info("BVH built");
+		linearTree.trimToSize();
+		bboxNodes.trimToSize();
 	}
 
-	void recursiveBuild(Node current, int firstTriangleIndex, int lastTriangleIndex)
+	void recursiveBuild(int current, int firstTriangleIndex, int lastTriangleIndex)
 	{
 		/* compute node bounding box */
-		for(int j = 0; j < 6; j++)
-			current.bbox[j] = boundsArray[6 * sortedIndices[firstTriangleIndex] + j];
+		System.arraycopy(boundsArray, 6 * sortedIndices[firstTriangleIndex], workMiddle, 0, 6);
 		for(int i = firstTriangleIndex + 1; i < lastTriangleIndex; i++)
 		{
 			for(int j = 0; j < 3; j++)
 			{
-				current.bbox[j] = Math.min(current.bbox[j], boundsArray[6 * sortedIndices[i] + j]);
-				current.bbox[j + 3] = Math.max(current.bbox[j + 3], boundsArray[6 * sortedIndices[i] + 3 + j]);
+				workMiddle[j] = Math.min(workMiddle[j], boundsArray[6 * sortedIndices[i] + j]);
+				workMiddle[j + 3] = Math.max(workMiddle[j + 3], boundsArray[6 * sortedIndices[i] + 3 + j]);
 			}
 		}
+		bboxNodes.add(workMiddle);
 		/* create a leaf node if there are few triangles */
 		if (lastTriangleIndex - firstTriangleIndex <= bucketSize)
 		{
-			current.numberOfTriangles = lastTriangleIndex - firstTriangleIndex;
-			current.offset = firstTriangleIndex;
+			// number of triangles
+			linearTree.add(lastTriangleIndex - firstTriangleIndex);
+			// offset in sortedIndices of the first triangle
+			linearTree.add(firstTriangleIndex);
 			return;
 		}
 		/* otherwise split node */
@@ -173,19 +190,31 @@ public class BoundingVolumeHierarchy {
 		if (4 == splitAxis)
 		{
 			// All centers are at the same place, node cannot be split
-			current.numberOfTriangles = lastTriangleIndex - firstTriangleIndex;
-			current.offset = firstTriangleIndex;
+			// number of triangles
+			linearTree.add(lastTriangleIndex - firstTriangleIndex);
+			// offset in sortedIndices of the first triangle
+			linearTree.add(firstTriangleIndex);
 			return;
 		}
-		current.numberOfTriangles = - splitAxis - 1;
+		// A negative value tells that this is an inner node, and we encode split axis
+		linearTree.add(- splitAxis - 1);
+		// Second int contains the index of the right child in linearTree; we will know
+		// this index only after left child is built, thus store a fake one for now.
+		linearTree.add(0);
 		double splitValue = 0.5 * (workMiddle[splitAxis] + workMiddle[3 + splitAxis]);
 		int index = BVH_pivot(splitAxis, splitValue, firstTriangleIndex, lastTriangleIndex);
 		// Build left child
-		current.left = new Node();
-		this.recursiveBuild(current.left, firstTriangleIndex, index);
+		numberOfNodes++;
+		bboxNodes.ensureCapacity(6 * numberOfNodes);
+		linearTree.ensureCapacity(2 * numberOfNodes);
+		recursiveBuild(numberOfNodes - 1, firstTriangleIndex, index);
+		// Left child had been fully built, we can now store its index into its parent node.
+		linearTree.set(2 * current + 1, numberOfNodes);
 		// Build right child
-		current.right = new Node();
-		recursiveBuild(current.right, index, lastTriangleIndex);
+		numberOfNodes++;
+		bboxNodes.ensureCapacity(6 * numberOfNodes);
+		linearTree.ensureCapacity(2 * numberOfNodes);
+		recursiveBuild(numberOfNodes - 1, index, lastTriangleIndex);
 	}
 
 	/* Sort sortedIndices and return pivot index such that
@@ -227,22 +256,25 @@ public class BoundingVolumeHierarchy {
 	 */
 	public Triangle getClosestTriangle(Location coords, Location projection, int group)
 	{
-		Deque<Node> stack = new ArrayDeque<Node>(100);
+		TIntArrayStack stack = new TIntArrayStack(100);
 		double minDist2 = Double.POSITIVE_INFINITY;
 		int toReturn = -1;
-		stack.push(rootNode);
+		stack.push(0);
 		double [] bbox = new double[6];
-		while(!stack.isEmpty())
+		while(stack.size() > 0)
 		{
-			Node current = stack.pop();
-			if (distanceAABB(coords, current.bbox) >= minDist2)
+			int current = stack.pop();
+			bboxNodes.toArray(bbox, 6 * current, 0, 6);
+			if (distanceAABB(coords, bbox) >= minDist2)
 				continue;
-			if (current.numberOfTriangles >= 0)
+			int numberOfTriangles = linearTree.get(2 * current);
+			int offset = linearTree.get(2 * current + 1);
+			if (numberOfTriangles >= 0)
 			{
 				// Leaf node
-				for(int i = 0; i < current.numberOfTriangles; i++)
+				for(int i = 0; i < numberOfTriangles; i++)
 				{
-					int index = sortedIndices[current.offset + i];
+					int index = sortedIndices[offset + i];
 					System.arraycopy(boundsArray, 6 * index, bbox, 0, 6);
 					if (distanceAABB(coords, bbox) < minDist2)
 					{
@@ -259,16 +291,16 @@ public class BoundingVolumeHierarchy {
 			}
 			else
 			{
-				int splitAxis = - current.numberOfTriangles - 1;
-				if (current.bbox[splitAxis] + current.bbox[splitAxis + 3] < 2.0 * coords.get(splitAxis))
+				int splitAxis = - numberOfTriangles - 1;
+				if (bboxNodes.get(6 * current + splitAxis) + bboxNodes.get(6 * current + splitAxis + 3) < 2.0 * coords.get(splitAxis))
 				{
-					stack.push(current.left);
-					stack.push(current.right);
+					stack.push(current + 1);
+					stack.push(offset);
 				}
 				else
 				{
-					stack.push(current.right);
-					stack.push(current.left);
+					stack.push(offset);
+					stack.push(current + 1);
 				}
 			}
 		}
