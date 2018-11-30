@@ -276,7 +276,7 @@ public class BoundingVolumeHierarchy {
 	}
 
 	/** Euclidian distance between a point and an AABB */
-	private double distanceAABB(Location coord, double[] aabb)
+	private static final double distanceAABB(Location coord, double[] aabb)
 	{
 		double v0 = Math.max(Math.max(coord.get(0) - aabb[3], 0.0), aabb[0] - coord.get(0));
 		double v1 = Math.max(Math.max(coord.get(1) - aabb[4], 0.0), aabb[1] - coord.get(1));
