@@ -278,10 +278,16 @@ public class BoundingVolumeHierarchy {
 	/** Euclidian distance between a point and an AABB */
 	private static final double distanceAABB(Location coord, double[] aabb)
 	{
-		double v0 = Math.max(Math.max(coord.get(0) - aabb[3], 0.0), aabb[0] - coord.get(0));
-		double v1 = Math.max(Math.max(coord.get(1) - aabb[4], 0.0), aabb[1] - coord.get(1));
-		double v2 = Math.max(Math.max(coord.get(2) - aabb[5], 0.0), aabb[2] - coord.get(2));
-		return v0 * v0 + v1 * v1 + v2 * v2;
+		double sqrDistance = 0.0;
+		for (int j = 0; j < 3; ++j)
+		{
+			double xLeft = coord.get(j) - aabb[j + 3];
+			double xRight = aabb[j] - coord.get(j);
+			// max(coord.get(j) - aabb[j + 3], 0.0, aabb[j] - coord.get(j))
+			double maxValue = xLeft > xRight ? (xLeft > 0.0 ? xLeft : 0.0) : (xRight > 0.0 ? xRight : 0.0);
+			sqrDistance += maxValue * maxValue;
+		}
+		return sqrDistance;
 	}
 
 	public Triangle getClosestTriangleDebug(Mesh mesh, Location coords, Location projection, int group)
