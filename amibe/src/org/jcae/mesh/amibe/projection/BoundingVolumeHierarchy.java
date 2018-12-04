@@ -292,7 +292,7 @@ public class BoundingVolumeHierarchy {
 			else
 			{
 				int splitAxis = - numberOfTriangles - 1;
-				if (bboxNodes.get(6 * current + splitAxis) + bboxNodes.get(6 * current + splitAxis + 3) < 2.0 * coords.get(splitAxis))
+				if (bbox[splitAxis] + bbox[splitAxis + 3] < 2.0 * coords.get(splitAxis))
 				{
 					stack.push(current + 1);
 					stack.push(offset);
