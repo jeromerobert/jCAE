@@ -229,15 +229,16 @@ public class BoundingVolumeHierarchy {
 		
 		while (left <= right)
 		{
-			if (centerArray[3 * sortedIndices[left] + splitAxis] < splitValue)
-			{
+			while (centerArray[3 * sortedIndices[left] + splitAxis] < splitValue)
 				++left;
-			}
-			else
+			while (centerArray[3 * sortedIndices[right] + splitAxis] > splitValue)
+				--right;
+			if (left <= right)
 			{
 				tmp = sortedIndices[left];
 				sortedIndices[left] = sortedIndices[right];
 				sortedIndices[right] = tmp;
+				++left;
 				--right;
 			}
 		}
