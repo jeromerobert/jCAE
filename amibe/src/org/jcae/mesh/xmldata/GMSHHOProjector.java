@@ -20,6 +20,8 @@
 
 package org.jcae.mesh.xmldata;
 
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -29,7 +31,11 @@ import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.metrics.Location;
 import org.jcae.mesh.amibe.projection.MeshLiaison;
 
 /**
@@ -39,13 +45,16 @@ import org.jcae.mesh.amibe.projection.MeshLiaison;
  * @author Jerome Robert
  */
 public class GMSHHOProjector {
-
+	private final static Logger LOGGER = Logger.getLogger(GMSHHOProjector.class.getName());
 	private final static int DATA_SIZE = 8;
 	private final MeshLiaison liaison;
 	private int verticesOffset;
-	private final Vertex tmpVertex;
+	private final Vertex tmpVertex, tmpVertex2;
 	private int numberOfElements;
 	private int numberOfVertices;
+	private int vertexRecordSize;
+	private double projectionRatioThreshold = 0.1;
+	private ByteBuffer vertexBuffer;
 
 	/**
 	 * Read a string from the current position to the next 0x0a char
@@ -89,6 +98,7 @@ public class GMSHHOProjector {
 	public GMSHHOProjector(MeshLiaison liaison) {
 		this.liaison = liaison;
 		tmpVertex = liaison.getMesh().createVertex(0, 0, 0);
+		tmpVertex2 = liaison.getMesh().createVertex(0, 0, 0);
 	}
 
 	private boolean toProject(int type) {
@@ -96,7 +106,14 @@ public class GMSHHOProjector {
 		return type == 9 || type == 10;
 	}
 
-	private TIntHashSet selectVertices(FileChannel channel) throws IOException {
+	/**
+	 * Select quadratic vertices
+	 * @param channel The file to read
+	 * @param edges The edges (extremities ID) where each quadratic vertex is
+	 * @return Map quadratic vertices ID to edges
+	 * @throws IOException
+	 */
+	private TIntIntHashMap selectVertices(FileChannel channel, TIntArrayList edges) throws IOException {
 		// Jump after $Elements
 		channel.position(
 			verticesOffset + numberOfVertices * (4 + 3 * DATA_SIZE) + 21);
@@ -106,7 +123,8 @@ public class GMSHHOProjector {
 		ByteBuffer rawElementHeaderBuffer = ByteBuffer.allocate(3 * 4);
 		rawElementHeaderBuffer.order(ByteOrder.nativeOrder());
 		IntBuffer elementHeaderBuffer = rawElementHeaderBuffer.asIntBuffer();
-		TIntHashSet verticesToProject = new TIntHashSet();
+		edges.ensureCapacity(5000);
+		TIntIntHashMap verticesToProject = new TIntIntHashMap(5000);
 		// loop on block of elements
 		while (processedElements < numberOfElements) {
 			assert(rawElementHeaderBuffer.position() == 0);
@@ -117,19 +135,27 @@ public class GMSHHOProjector {
 			int elmType = elementHeaderBuffer.get();
 			int numElmFollow = elementHeaderBuffer.get();
 			int numTag = elementHeaderBuffer.get();
+			processedElements += numElmFollow;
+			// linear vertex number in the element
+			int nodeNumber = NODE_NUMBER[elmType - 1] / 2;
 			// memory size of one element
 			int recordSize = 4 + numTag * 4 + NODE_NUMBER[elmType - 1] * 4;
-			processedElements += numElmFollow;
 			if (toProject(elmType)) {
 				// offset of high order vertices in the element buffer
-				int hoOffset = recordSize - NODE_NUMBER[elmType - 1] * 2;
+				int hoOffset = recordSize - nodeNumber * 4;
+				int vertOffset = 4 + numTag * 4;
 				ByteBuffer elementBuffer = ByteBuffer.allocate(recordSize);
 				elementBuffer.order(ByteOrder.nativeOrder());
 				// loop on elements in the block
 				for (int i = 0; i < numElmFollow; i++) {
 					channel.read(elementBuffer);
-					for (int j = 0; j < NODE_NUMBER[elmType - 1] / 2; j++) {
-						verticesToProject.add(elementBuffer.getInt(hoOffset + 4 * j)-1);
+					for (int j = 0; j < nodeNumber; j++) {
+						int quadVert = elementBuffer.getInt(hoOffset + 4 * j)-1;
+						int edgeVert1 = elementBuffer.getInt(vertOffset + 4 * j)-1;
+						int edgeVert2 = elementBuffer.getInt(vertOffset + 4 * (j+1))-1;
+						edges.add(edgeVert1);
+						edges.add(edgeVert2);
+						verticesToProject.put(quadVert, (edges.size() / 2) - 1);
 					}
 					((Buffer)elementBuffer).rewind();
 				}
@@ -156,37 +182,95 @@ public class GMSHHOProjector {
 		}
 	}
 
+	/**
+	 * Return the edges non-quadratic vertices coordinates
+	 * @param channel The file to read
+	 * @param verticesID The list of vertices to read
+	 * @param vertToCoord Maps the returned coordinate array ID to the verticesID array
+	 * @return The coordinates of the vertices in the ordered describes by vertToCoord
+	 * @throws IOException
+	 */
+	private double[] readEdgeVertices(FileChannel channel, TIntArrayList verticesID,
+		TIntIntHashMap vertToCoord) throws IOException {
+		int[] sortedEdgesVertices = new TIntHashSet(verticesID).toArray();
+		// sort vertices for efficient I/O
+		Arrays.sort(sortedEdgesVertices);
+
+		double[] edgesCoord = new double[verticesID.size() * 2 * 3];
+		int k = 0;
+		for(int i = 0; i < sortedEdgesVertices.length; i++) {
+			channel.position(verticesOffset + sortedEdgesVertices[i] * vertexRecordSize);
+			((Buffer)vertexBuffer).rewind();
+			channel.read(vertexBuffer);
+			vertToCoord.put(sortedEdgesVertices[i], i);
+			for(int dim = 0; dim < 3; dim++)
+				edgesCoord[k++]=vertexBuffer.getDouble(4 + DATA_SIZE * dim);
+		}
+		return edgesCoord;
+	}
+
+	/** Compute the square of the length of edges */
+	private double[] edgesLength(FileChannel channel, TIntArrayList edges) throws IOException {
+		// Map vertex to edgesCoord array id
+		TIntIntHashMap vertToCoord = new TIntIntHashMap(edges.size());
+		double[] edgesCoord = readEdgeVertices(channel, edges, vertToCoord);
+		double[] edgesLength = new double[edges.size() / 2];
+		for(int i = 0; i < edges.size() / 2; i++) {
+			int coord1 = vertToCoord.get(edges.get(2*i));
+			int coord2 = vertToCoord.get(edges.get(2*i+1));
+			for(int j = 0; j < 3; j++) {
+				double v = edgesCoord[coord1 * 3 + j] - edgesCoord[coord2 * 3 + j];
+				edgesLength[i] += v * v;
+			}
+		}
+		return edgesLength;
+	}
+
 	public void project(FileChannel channel) throws IOException {
-		channel.position(0x2f); // skip header and $Nodes
+		channel.position(0x2f); // skip header and "$Nodes"
 		String word = readWord(channel);
 		numberOfVertices = Integer.parseInt(word);
 		verticesOffset = 0x2f + word.length() + 1;
-		int[] verticesToProject = selectVertices(channel).toArray();
-		Arrays.sort(verticesToProject);
-		int vertexRecordSize = 4 + 3 * DATA_SIZE;
-		ByteBuffer vertexBuffer = ByteBuffer.allocate(vertexRecordSize);
+		vertexRecordSize = 4 + 3 * DATA_SIZE;
+		vertexBuffer = ByteBuffer.allocate(vertexRecordSize);
 		vertexBuffer.order(ByteOrder.nativeOrder());
+
+		TIntArrayList edges = new TIntArrayList();
+		// Vertices to project mapped to their edge
+		TIntIntHashMap verticesToEdges = selectVertices(channel, edges);
+		double[] edgesLength = edgesLength(channel, edges);
+		assert(edgesLength.length == edges.size() / 2);
+
+		int[] verticesToProject = verticesToEdges.keys();
+		Arrays.sort(verticesToProject);
 		for(int i = 0; i < verticesToProject.length; i++) {
 			channel.position(verticesOffset + verticesToProject[i] * vertexRecordSize);
+			((Buffer)vertexBuffer).rewind();
 			channel.read(vertexBuffer);
-			// FIXME: This can create bad tetrahedron if the projection point is too
-			// far. The best would be to check the tetrahedron quality after moving
-			// the point. But 1- this would be expensive, 2- we don't have data
-			// structure to do that. A cheap solution would be to check that
-			// the projection distance is always smaller than a fraction of the
-			// edge size.
 			tmpVertex.moveTo(
 				vertexBuffer.getDouble(4 + DATA_SIZE * 0),
 				vertexBuffer.getDouble(4 + DATA_SIZE * 1),
 				vertexBuffer.getDouble(4 + DATA_SIZE * 2));
+			tmpVertex2.moveTo(tmpVertex);
 			liaison.move(tmpVertex, tmpVertex, false);
-			vertexBuffer.putDouble(4 + DATA_SIZE * 0, tmpVertex.getX());
-			vertexBuffer.putDouble(4 + DATA_SIZE * 1, tmpVertex.getY());
-			vertexBuffer.putDouble(4 + DATA_SIZE * 2, tmpVertex.getZ());
-			((Buffer)vertexBuffer).rewind();
-			channel.position(verticesOffset + verticesToProject[i] * vertexRecordSize);
-			channel.write(vertexBuffer);
-			((Buffer)vertexBuffer).rewind();
+			double projectionDistance = tmpVertex.sqrDistance3D(tmpVertex2);
+			double edgeLength = edgesLength[verticesToEdges.get(verticesToProject[i])];
+			// Risk of creating degenerated tetrahedron
+			if(projectionDistance / edgeLength > projectionRatioThreshold) {
+				LOGGER.warning("Do not project " + new Location(tmpVertex2));
+			} else {
+				vertexBuffer.putDouble(4 + DATA_SIZE * 0, tmpVertex.getX());
+				vertexBuffer.putDouble(4 + DATA_SIZE * 1, tmpVertex.getY());
+				vertexBuffer.putDouble(4 + DATA_SIZE * 2, tmpVertex.getZ());
+				((Buffer)vertexBuffer).rewind();
+				channel.position(verticesOffset + verticesToProject[i] * vertexRecordSize);
+				channel.write(vertexBuffer);
+			}
 		}
 	}
+
+	public void setProjectionRatioThreshold(double projectionRatioThreshold) {
+		this.projectionRatioThreshold = projectionRatioThreshold;
+	}
+
 }
