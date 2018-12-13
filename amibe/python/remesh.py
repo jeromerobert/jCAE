@@ -65,9 +65,11 @@ def read_mesh(path):
     return mesh
 
 def afront_debug(afront_path, tmp_dir, mesh, size, point_metric, immutable_groups,
-		afront_stderr = None, custom_options=[]):
+		afront_stderr = None, custom_options=None):
     from org.jcae.mesh.xmldata import Amibe2OFF, AFront2Amibe, AmibeReader, MultiDoubleFileReader
     """ Same as afront but with temporary files to help debugging """
+    if custom_options is None:
+        custom_options = []
     mesh_dir = os.path.join(tmp_dir, "mesh.amibe")
     if isinstance(point_metric, AbstractDistanceMetric):
         metric_file = os.path.join(tmp_dir, "metric.bin")
@@ -110,10 +112,12 @@ def afront_debug(afront_path, tmp_dir, mesh, size, point_metric, immutable_group
     return MultiDoubleFileReader(nodes_file)
 
 def afront(afront_path, tmp_dir, mesh, size, point_metric, immutable_groups,
-    afront_stderr = None, custom_options = []):
+    afront_stderr = None, custom_options=None):
     from org.jcae.mesh.xmldata import AmibeReader, MultiDoubleFileReader
     """ Run afront and return a MultiDoubleFileReader allowing to read created
     nodes """
+    if custom_options is None:
+        custom_options = []
     mesh_dir = os.path.join(tmp_dir, "mesh.amibe")
     if isinstance(point_metric, AbstractDistanceMetric):
         metric_file = os.path.join(tmp_dir, "metric.bin")
