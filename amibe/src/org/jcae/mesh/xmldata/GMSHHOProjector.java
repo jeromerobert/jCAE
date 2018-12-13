@@ -53,7 +53,7 @@ public class GMSHHOProjector {
 	private int numberOfElements;
 	private int numberOfVertices;
 	private int vertexRecordSize;
-	private double projectionRatioThreshold = 0.1;
+	private double projectionRatioThreshold = 0.2 * 0.2;
 	private ByteBuffer vertexBuffer;
 
 	/**
@@ -270,7 +270,7 @@ public class GMSHHOProjector {
 	}
 
 	public void setProjectionRatioThreshold(double projectionRatioThreshold) {
-		this.projectionRatioThreshold = projectionRatioThreshold;
+		this.projectionRatioThreshold = projectionRatioThreshold * projectionRatioThreshold;
 	}
 
 }
