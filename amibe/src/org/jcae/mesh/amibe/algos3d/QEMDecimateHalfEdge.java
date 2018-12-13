@@ -123,6 +123,8 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 	private final Quadric3DError qCostOpt = new Quadric3DError();
 	private static final boolean testDump = false;
 	private final MetricSupport metrics;
+	private MetricSupport.AnalyticMetricInterface analyticMetric;
+	private double toleranceFactor = -1;
 	private final Collection<Vertex> frozenVertices = new ArrayList<Vertex>();
 	/**
 	 * Creates a <code>QEMDecimateHalfEdge</code> instance.
@@ -212,6 +214,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 	public void setAnalyticMetric(MetricSupport.AnalyticMetricInterface m)
 	{
 		metrics.setAnalyticMetric(m);
+		analyticMetric = m;
 	}
 
 	public void setAnalyticMetric(int groupId, MetricSupport.AnalyticMetricInterface m)
@@ -219,10 +222,33 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		metrics.setAnalyticMetric(groupId, m);
 	}
 
+	/**
+	 * Set tolerance factor.
+	 * When tolerance factor is greater than 0 and an analytic metric has been
+	 * provided the effective tolerance is the metric multiplied by this value.
+	 */
+	public void setToleranceFactor(double toleranceFactor) {
+		this.toleranceFactor = toleranceFactor;
+	}
+
 	@Override
 	public Logger thisLogger()
 	{
 		return LOGGER;
+	}
+
+	private double scaleAreaWithTolerance(Triangle t, double area) {
+		if(toleranceFactor > 0 && analyticMetric != null) {
+			// TODO: it would be more precise to use the center of the triangle
+			// than a random vertex
+			Vertex v = t.getV0();
+			double m = analyticMetric.getTargetSize(v.getX(), v.getY(),
+				v.getZ(), t.getGroupId());
+			return area / toleranceFactor / m;
+		} else if(tolerance > 0)
+			return area / tolerance;
+		else
+			return area;
 	}
 
 	@Override
@@ -255,9 +281,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 			Matrix3D.prodVect3D(vect1, vect2, normal);
 			double norm = Matrix3D.norm(normal);
 			// This is in fact 2*area, but that does not matter
-			double area = norm;
-			if (tolerance > 0.0)
-				area /= tolerance;
+			double area = scaleAreaWithTolerance(f, norm);
 			if (norm > 1.e-20)
 			{
 				norm = 1.0 / norm;
