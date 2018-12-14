@@ -228,7 +228,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 	 * provided the effective tolerance is the metric multiplied by this value.
 	 */
 	public void setToleranceFactor(double toleranceFactor) {
-		this.toleranceFactor = toleranceFactor;
+		this.toleranceFactor = toleranceFactor * toleranceFactor;
 	}
 
 	@Override
