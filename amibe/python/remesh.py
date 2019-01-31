@@ -294,7 +294,7 @@ def __remesh(options):
     if point_metric:
         point_metric.scaling = sqrt(2)
         algo.analyticMetric = point_metric
-        algo.toleranceFactor = 0.2
+        algo.toleranceFactor = 0.3
     algo.compute()
 
     #3
@@ -394,7 +394,7 @@ def __remesh(options):
     if point_metric:
         point_metric.scaling = sqrt(2)
         algo.analyticMetric = point_metric
-        algo.toleranceFactor = 0.2
+        algo.toleranceFactor = 0.3
     algo.compute()
 
     #12

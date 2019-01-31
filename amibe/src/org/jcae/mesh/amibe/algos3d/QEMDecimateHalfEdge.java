@@ -244,7 +244,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 			Vertex v = t.getV0();
 			double m = analyticMetric.getTargetSize(v.getX(), v.getY(),
 				v.getZ(), t.getGroupId());
-			return area / toleranceFactor / m;
+			return area / toleranceFactor / m / m;
 		} else if(tolerance > 0)
 			return area / tolerance;
 		else
