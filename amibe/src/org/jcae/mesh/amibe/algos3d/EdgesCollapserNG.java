@@ -97,6 +97,7 @@ public class EdgesCollapserNG {
 
 	private AbstractHalfEdge getEdge(Vertex v1, Triangle t, Vertex v2)
 	{
+		assert v1 == t.getV0() || v1 == t.getV1() || v1 == t.getV2();
 		assert v1 != v2;
 		AbstractHalfEdge e = v1.getIncidentAbstractHalfEdge(t, null);
 		Vertex start = e.destination();

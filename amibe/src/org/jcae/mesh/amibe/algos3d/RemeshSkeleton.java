@@ -127,6 +127,14 @@ public class RemeshSkeleton {
 				edgeIndex.add(e);
 			}
 
+			if(toInsert.size() == 2)
+			{
+				int n = Math.max(1, polyline.size() / 2);
+				if(toInsert.get(0) != toInsert.get(1))
+					edgeCollapser.collapse(polyline.get(0), polyline.get(polyline.size() - 1), polyline.get(n));
+				continue main;
+			}
+
 			for(int k = 0; k < toInsert.size(); k++)
 			{
 				Vertex v = toInsert.get(k);
@@ -157,17 +165,9 @@ public class RemeshSkeleton {
 					vertexSwapper.swap(v);
 				}
 			}
-			if(toInsert.size() == 2)
-			{
-				int n = Math.max(1, polyline.size() / 2);
-				if(toInsert.get(0) != toInsert.get(1))
-					edgeCollapser.collapse(toInsert.get(0), toInsert.get(1), polyline.get(n));
-			}
-			else
-			{
-				for(int k = 0; k < toInsert.size() - 1; k++)
-					edgeCollapser.collapse(toInsert.get(k), toInsert.get(k+1), null);
-			}
+
+			for(int k = 0; k < toInsert.size() - 1; k++)
+				edgeCollapser.collapse(toInsert.get(k), toInsert.get(k+1), null);
 
 			for(Vertex v:toInsert)
 				v.setMutable(false);
