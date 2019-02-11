@@ -88,7 +88,7 @@ def remesh(**kwargs):
 
     # Remesh Skeleton
     if kwargs['skeleton']:
-        RemeshSkeleton(liaison, 1.66, kwargs['sizeinf']/100.0, metric).compute()
+        RemeshSkeleton(liaison, 1.66, metric, 0.01).compute()
 
     # Remesh
     refineOptions = HashMap()

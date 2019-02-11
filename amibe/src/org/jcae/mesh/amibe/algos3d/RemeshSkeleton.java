@@ -41,8 +41,11 @@ import org.jcae.mesh.xmldata.MeshWriter;
 public class RemeshSkeleton {
 	private final Mesh mesh;
 	private final double angle;
-	/** tolerance for point insertion */
-	private final double tolerance;
+	/**
+	 * Factor to apply to the square of distance metric to get the square of the
+	 * distance tolerance for point insertion
+	 */
+	private final double toleranceFactor;
 	private final AnalyticMetricInterface metric;
 	private final MeshLiaison liaison;
 	private final VertexSwapper vertexSwapper;
@@ -50,7 +53,7 @@ public class RemeshSkeleton {
 
 	public RemeshSkeleton(MeshLiaison liaison, double angle, double tolerance,
 		final double size) {
-		this(liaison, angle, tolerance, new AnalyticMetricInterface() {
+		this(liaison, angle, new AnalyticMetricInterface() {
 
 			public double getTargetSize(double x, double y, double z, int groupId) {
 				return size;
@@ -59,15 +62,15 @@ public class RemeshSkeleton {
 			public double getTargetSizeTopo(Mesh mesh, Vertex v) {
 				return size;
 			}
-		});
+		}, tolerance / size);
 	}
 
-	public RemeshSkeleton(MeshLiaison liaison, double angle, double tolerance,
-		AnalyticMetricInterface metric) {
+	public RemeshSkeleton(MeshLiaison liaison, double angle,
+		AnalyticMetricInterface metric, double toleranceFactor) {
 		this.liaison = liaison;
 		this.mesh = liaison.getMesh();
 		this.angle = angle;
-		this.tolerance = tolerance * tolerance;
+		this.toleranceFactor = toleranceFactor * toleranceFactor;
 		this.metric = metric;
 		vertexSwapper = new VertexSwapper(liaison)
 		{
@@ -138,6 +141,8 @@ public class RemeshSkeleton {
 			for(int k = 0; k < toInsert.size(); k++)
 			{
 				Vertex v = toInsert.get(k);
+				double m2 = metric.getTargetSize(v.getX(), v.getY(), v.getZ(), -1);
+				double tolerance = m2 * m2 * toleranceFactor;
 				int segId = bgLink.get(k);
 				AbstractHalfEdge toSplit = edgeIndex.get(segId);
 				double od = v.sqrDistance3D(toSplit.origin());
@@ -160,7 +165,6 @@ public class RemeshSkeleton {
 					liaison.move(v, v, true);
 					AbstractHalfEdge e = getEdge(v, oldDestination);
 					edgeIndex.set(segId, e);
-					double m2 = metric.getTargetSizeTopo(mesh, v);
 					swapVolume = m2 * m2 * m2 / 64;
 					vertexSwapper.swap(v);
 				}
