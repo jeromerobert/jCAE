@@ -186,7 +186,7 @@ public class VertexInsertion {
 			Vertex v = vertices.get(randomIterator.get(i));
 			double localMetric = metric.getTargetSize(
 				v.getX(), v.getY(), v.getZ(), group);
-			double localMetric2 = localMetric * localMetric;
+			double localMetric2 = localMetric * localMetric / 2;
 			double tol2 = localMetric2 / (40 * 40);
 			TriangleHE t = (TriangleHE) kdTree.getClosestTriangle(
 				v, projection, group);
