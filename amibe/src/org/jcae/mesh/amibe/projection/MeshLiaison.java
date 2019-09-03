@@ -64,10 +64,20 @@ public abstract class MeshLiaison
 		return new KdTreeLiaison(backgroundMesh, mtb);
 	}
 
+	public static MeshLiaison create(Mesh backgroundMesh, Mesh currentMesh, MeshTraitsBuilder mtb)
+	{
+		return new KdTreeLiaison(backgroundMesh, currentMesh, mtb);
+	}
+
 	protected MeshLiaison(Mesh backgroundMesh, MeshTraitsBuilder mtb)
 	{
+		this(backgroundMesh, null, mtb);
+	}
+
+	protected MeshLiaison(Mesh backgroundMesh, Mesh currentMesh, MeshTraitsBuilder mtb)
+	{
 		this.backgroundMesh = backgroundMesh;
-		
+
 		// Adjacency relations are needed on backgroundMesh
 		if (!this.backgroundMesh.hasAdjacency())
 			throw new IllegalArgumentException();
@@ -93,51 +103,54 @@ public abstract class MeshLiaison
 				f.addVertexTo(backgroundNodeset);
 			}
 		}
-		
+
 		// count the number of vertices for each group
-		this.currentMesh = new Mesh(mtb);
+		this.currentMesh = currentMesh == null ? new Mesh(mtb) : currentMesh;
 		this.currentMesh.getTrace().setDisabled(this.backgroundMesh.getTrace().getDisabled());
-		Map<Vertex, String> vgGroups = createVGMap();
 
-		// Create vertices of currentMesh
-		Map<Vertex, Vertex> mapBgToCurrent = HashFactory.createMap(backgroundNodeset.size());
-		for (Vertex v : backgroundNodeset)
-		{
-			Vertex currentV = cloneVertex(v, mapBgToCurrent, vgGroups);
-			if (this.currentMesh.hasNodes())
-				this.currentMesh.add(currentV);
+		if (currentMesh == null) {
+			Map<Vertex, String> vgGroups = createVGMap();
+
+			// Create vertices of currentMesh
+			Map<Vertex, Vertex> mapBgToCurrent = HashFactory.createMap(backgroundNodeset.size());
+			for (Vertex v : backgroundNodeset)
+			{
+				Vertex currentV = cloneVertex(v, mapBgToCurrent, vgGroups);
+				if (this.currentMesh.hasNodes())
+					this.currentMesh.add(currentV);
+			}
+
+			mapBgToCurrent.put(this.backgroundMesh.outerVertex, this.currentMesh.outerVertex);
+
+			// Create triangles of currentMesh
+			for (Triangle t : this.backgroundMesh.getTriangles())
+			{
+				if (t.hasAttributes(AbstractHalfEdge.OUTER))
+					continue;
+				Triangle newT = this.currentMesh.createTriangle(
+					mapBgToCurrent.get(t.getV0()),
+					mapBgToCurrent.get(t.getV1()),
+					mapBgToCurrent.get(t.getV2()));
+				newT.setGroupId(t.getGroupId());
+				this.currentMesh.add(newT);
+			}
+
+			cloneBeams(backgroundMesh, this.currentMesh, mapBgToCurrent, vgGroups);
+			// Create groups of currentMesh
+			for (int i = 1; i <= this.backgroundMesh.getNumberOfGroups(); i++)
+				this.currentMesh.setGroupName(i, this.backgroundMesh.getGroupName(i));
+			this.currentMesh.buildAdjacency();
+
+			init(backgroundNodeset);
+
+			for (Vertex v: backgroundNodeset)
+			{
+				Iterator<Triangle> it = v.getNeighbourIteratorTriangle();
+				if(it.hasNext())
+					this.addVertex(mapBgToCurrent.get(v), it.next());
+			}
+			mapBgToCurrent.clear();
 		}
-
-		mapBgToCurrent.put(this.backgroundMesh.outerVertex, this.currentMesh.outerVertex);
-
-		// Create triangles of currentMesh
-		for (Triangle t : this.backgroundMesh.getTriangles())
-		{
-			if (t.hasAttributes(AbstractHalfEdge.OUTER))
-				continue;
-			Triangle newT = this.currentMesh.createTriangle(
-				mapBgToCurrent.get(t.getV0()),
-				mapBgToCurrent.get(t.getV1()),
-				mapBgToCurrent.get(t.getV2()));
-			newT.setGroupId(t.getGroupId());
-			this.currentMesh.add(newT);
-		}
-
-		cloneBeams(backgroundMesh, currentMesh, mapBgToCurrent, vgGroups);
-		// Create groups of currentMesh
-		for (int i = 1; i <= this.backgroundMesh.getNumberOfGroups(); i++)
-			this.currentMesh.setGroupName(i, this.backgroundMesh.getGroupName(i));
-		this.currentMesh.buildAdjacency();
-
-		init(backgroundNodeset);
-
-		for (Vertex v: backgroundNodeset)
-		{
-			Iterator<Triangle> it = v.getNeighbourIteratorTriangle();
-			if(it.hasNext())
-				this.addVertex(mapBgToCurrent.get(v), it.next());
-		}
-		mapBgToCurrent.clear();
 
 		this.currentMesh.setPersistentReferences(this.backgroundMesh.hasPersistentReferences());
 	}

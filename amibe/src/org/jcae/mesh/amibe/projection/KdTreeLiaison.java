@@ -46,6 +46,11 @@ public class KdTreeLiaison extends MeshLiaison{
 		kdTree = new TriangleKdTree(backgroundMesh);
 	}
 
+	public KdTreeLiaison(Mesh backgroundMesh, Mesh currentMesh, MeshTraitsBuilder mtb) {
+		super(backgroundMesh, currentMesh, mtb);
+		kdTree = new TriangleKdTree(backgroundMesh);
+	}
+
 	@Override
 	protected void init(Collection<Vertex> backgroundNodeset) { }
 
