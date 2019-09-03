@@ -241,7 +241,9 @@ def __remesh(options):
         point_metric = options.point_metric
     else:
         point_metric = None
-    safe_coplanarity = str(max(options.coplanarity, 0.8))
+    if options.safe_coplanarity == None:
+        options.safe_coplanarity = 0.8
+    safe_coplanarity = str(max(options.coplanarity, options.safe_coplanarity))
 
     if options.forced_points:
         if point_metric:
@@ -334,7 +336,7 @@ def __remesh(options):
     writeVTK(liaison)
     opts.clear()
     opts.put("size", str(options.size))
-    opts.put("coplanarity", str(options.coplanarity))
+    opts.put("coplanarity", safe_coplanarity)
     opts.put("minCosAfterSwap", "0.3")
     opts.put("nearLengthRatio", "0.6")
     algo = Remesh(liaison, opts)
@@ -355,7 +357,7 @@ def __remesh(options):
     writeVTK(liaison)
 
     opts.clear()
-    opts.put("coplanarity", str(options.coplanarity))
+    opts.put("coplanarity", safe_coplanarity)
     opts.put("iterations", "2")
     opts.put("size", str(options.size))
     algo = SmoothNodes3DBg(liaison, opts)
@@ -365,7 +367,7 @@ def __remesh(options):
     writeVTK(liaison)
 
     opts.clear()
-    opts.put("coplanarity", str(options.coplanarity))
+    opts.put("coplanarity", safe_coplanarity)
     opts.put("expectInsert", "false" if options.afront_path else "true")
     opts.put("minCosAfterSwap", "0.3")
     algo = SwapEdge(liaison, opts)
@@ -401,7 +403,7 @@ def __remesh(options):
     writeVTK(liaison)
 
     opts.clear()
-    opts.put("coplanarity", str(options.coplanarity))
+    opts.put("coplanarity", safe_coplanarity)
     opts.put("expectInsert", "false" if options.afront_path else "true")
     opts.put("minCosAfterSwap", "0.3")
     algo = SwapEdge(liaison, opts)
@@ -483,6 +485,9 @@ if __name__ == "__main__":
     parser.add_option("-c", "--coplanarity", metavar="FLOAT",
                       action="store", type="float", dest="coplanarity", default=0.9,
                       help="dot product of face normals to detect feature edges")
+    parser.add_option("-s", "--safe-coplanarity", metavar="FLOAT",
+                      action="store", type="float", dest="safe_coplanarity", default=0.8,
+                      help="dot product of face normals tolerance for algorithms")
     parser.add_option("-P", "--point-metric", metavar="STRING",
                       action="store", type="string", dest="point_metric_file",
                       help="""A CSV file containing points which to refine around. Each line must contains 6 values:

@@ -25,10 +25,15 @@ def remesh(**kwargs):
     """
     Remesh an existing mesh with a singular analytical metric
     """
-    # Process coplanarity option
+    # Process coplanarity options
     coplanarity = cos(kwargs['coplanarityAngle'] * pi / 180.)
     if kwargs['coplanarity']:
         coplanarity = kwargs['coplanarity']
+
+    safe_coplanarity = kwargs['safe_coplanarity']
+    if safe_coplanarity is None:
+        safe_coplanarity = 0.8
+    safe_coplanarity = str(max(coplanarity, safe_coplanarity))
 
     # Build background mesh
     try:
@@ -76,10 +81,10 @@ def remesh(**kwargs):
             decimateOptions.put("size", str(kwargs['decimateSize']))
         elif kwargs['decimateTarget']:
             decimateOptions.put("maxtriangles", str(kwargs['decimateTarget']))
-        decimateOptions.put("coplanarity", str(coplanarity))
+        decimateOptions.put("coplanarity", str(safe_coplanarity))
         QEMDecimateHalfEdge(liaison, decimateOptions).compute()
         swapOptions = HashMap()
-        swapOptions.put("coplanarity", str(coplanarity))
+        swapOptions.put("coplanarity", str(safe_coplanarity))
         SwapEdge(liaison, swapOptions).compute()
 
     # Metric
@@ -97,7 +102,7 @@ def remesh(**kwargs):
     # Remesh
     refineOptions = HashMap()
     refineOptions.put("size", str(kwargs['sizeinf']))
-    refineOptions.put("coplanarity", str(coplanarity))
+    refineOptions.put("coplanarity", str(safe_coplanarity))
     refineOptions.put("nearLengthRatio", str(kwargs['nearLengthRatio']))
     refineOptions.put("project", "false")
     if kwargs['allowNearNodes']:
@@ -109,13 +114,13 @@ def remesh(**kwargs):
     if not kwargs['noclean']:
         # Swap
         swapOptions = HashMap()
-        swapOptions.put("coplanarity", str(coplanarity))
+        swapOptions.put("coplanarity", str(safe_coplanarity))
         swapOptions.put("minCosAfterSwap", "0.3")
         SwapEdge(liaison, swapOptions).compute()
 
         # Improve valence
         valenceOptions = HashMap()
-        valenceOptions.put("coplanarity", str(coplanarity))
+        valenceOptions.put("coplanarity", str(safe_coplanarity))
         valenceOptions.put("checkNormals", "false")
         ImproveVertexValence(liaison, valenceOptions).compute()
 
@@ -128,8 +133,8 @@ def remesh(**kwargs):
         smoothOptions.put("tolerance", str(2.0))
         smoothOptions.put("relaxation", str(0.6))
         smoothOptions.put("refresh", "false")
-        if (coplanarity >= 0.0):
-            smoothOptions.put("coplanarity", str(coplanarity))
+        if (safe_coplanarity >= 0.0):
+            smoothOptions.put("coplanarity", str(safe_coplanarity))
         SmoothNodes3DBg(liaison, smoothOptions).compute()
 
         # Remove Degenerated
@@ -203,6 +208,9 @@ if __name__ == '__main__':
     parser.add_option("-c", "--coplanarity", metavar="FLOAT",
                       action="store", type="float", dest="coplanarity",
                       help="dot product of face normals to detect feature edges")
+    parser.add_option("-s", "--safe-coplanarity", metavar="FLOAT",
+                      action="store", type="float", dest="safe_coplanarity", default=0.8,
+                      help="dot product of face normals tolerance for algorithms")
     parser.add_option("-D", "--decimate-target", metavar="NUMBER",
                       action="store", type="int", dest="decimateTarget",
                       help="decimate mesh before remeshing, keep only NUMBER "
