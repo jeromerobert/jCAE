@@ -31,15 +31,19 @@ def remesh(**kwargs):
         coplanarity = kwargs['coplanarity']
 
     # Build background mesh
-    mtb = MeshTraitsBuilder.getDefault3D()
-    if kwargs['recordFile']:
-        mtb.addTraceRecord()
-    mtb.addNodeSet()
-    mesh = Mesh(mtb)
-    if kwargs['recordFile']:
-        mesh.getTrace().setDisabled(True)
-    MeshReader.readObject3D(mesh, kwargs['in_dir'])
-    liaison = MeshLiaison.create(mesh, mtb)
+    try:
+        liaison = kwargs['liaison']
+    except KeyError:
+        mtb = MeshTraitsBuilder.getDefault3D()
+        if kwargs['recordFile']:
+            mtb.addTraceRecord()
+        mtb.addNodeSet()
+        mesh = Mesh(mtb)
+        if kwargs['recordFile']:
+            mesh.getTrace().setDisabled(True)
+
+        MeshReader.readObject3D(mesh, kwargs['in_dir'])
+        liaison = MeshLiaison.create(mesh, mtb)
 
     if kwargs['recordFile']:
         liaison.getMesh().getTrace().setDisabled(False)
