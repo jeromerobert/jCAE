@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
+import java.util.TreeSet;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Iterator;
@@ -392,6 +393,39 @@ public class Mesh implements Serializable
 	public final Collection<Triangle> getTriangles()
 	{
 		return triangleList;
+	}
+
+	/**
+	 * Returns a subset of the triangle list using triangle indexes.
+	 *
+	 * @param tags  triangle indexes
+	 * @return triangle subset. Empty if <code>tags</code> is <code>null</code>,
+	 * empty or invalid.
+	 */
+	public final Collection<Triangle> getTriangles(List<Integer> tags)
+	{
+		ArrayList<Triangle> triangles = new ArrayList<Triangle>();
+		if (tags == null)
+			return triangles;
+
+		// sort tags to iterate through linked list
+		TreeSet<Integer> tagsSorted = new TreeSet(tags);
+
+		// invalid if index is out of range
+		if (tagsSorted.last() >= getTriangles().size())
+			return triangles;
+
+		Iterator<Triangle> it = getTriangles().iterator();
+		Triangle t = it.next();
+		Integer prev = 0;
+		for (Integer tag: tagsSorted)
+		{
+			for (Integer k=0; k<tag-prev; k++)
+				t = it.next();
+			triangles.add(t);
+			prev = tag;
+		}
+		return triangles;
 	}
 
 	/**
