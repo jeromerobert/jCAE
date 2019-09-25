@@ -40,6 +40,7 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.mesh.amibe.metrics.Location;
+import static org.jcae.mesh.amibe.metrics.Location.dot;
 import org.jcae.mesh.amibe.util.HashFactory;
 
 public abstract class MeshLiaison
@@ -49,6 +50,7 @@ public abstract class MeshLiaison
 	protected final Mesh backgroundMesh;
 	protected final Mesh currentMesh;
 	private Skeleton skeleton;
+	private SkeletonProjector skeletonProjector;
 
 	protected final double [] work1 = new double[3];
 	protected final double [] work2 = new double[3];
@@ -241,6 +243,20 @@ public abstract class MeshLiaison
 	}
 
 	protected abstract boolean move(Vertex v, Location target, boolean backup,  int group, boolean doCheck);
+
+	/**
+	 * Get the projection of a vertex on the closest edge of the skeleton (list of edge which are non-manifold or
+	 * border of groups)
+	 * @param v the vertex being projected
+	 * @param groups the list of adjacent groups around the edge (all edges will be tested if empty)
+	 * @return true if a projection has been found
+	 */
+	public boolean moveToClosestEdge(Vertex v, int ... groups) {
+		if(skeletonProjector == null) {
+			skeletonProjector = new SkeletonProjector(backgroundMesh);
+		}
+		return skeletonProjector.moveToClosestEdge(v, groups);
+	}
 
 	public final boolean project(Vertex v, Location target, Vertex start)
 	{
@@ -609,11 +625,6 @@ public abstract class MeshLiaison
 	private static double norm2(double[] v)
 	{
 		return v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
-	}
-
-	private static double dot(double[] v1, double[] v2)
-	{
-		return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
 	}
 
 	public static class TriangleDistance

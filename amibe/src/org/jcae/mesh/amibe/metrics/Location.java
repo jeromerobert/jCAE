@@ -164,4 +164,44 @@ public class Location
 	public String toString() {
 		return "(" + x + ", " + y + ", " + z + ")";
 	}
+
+	public static double dot(double[] v1, double[] v2)
+	{
+		return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
+	}
+
+	/**
+	 * Return the distance between this and an edge
+	 * @param origin the origin of the edge
+	 * @param destination the destination of the edge
+	 * @param projection the projection of this on the edge
+	 * @return the square of the distance
+	 */
+	public double sqrDistance3D(Location origin, Location destination, Location projection) {
+		// adapted from https://www.geometrictools.com/GTEngine/Include/Mathematics/GteDistPointSegment.h
+		double direction[] = new double[3];
+		destination.sub(origin, direction);
+		double diff[] = new double[3];
+		sub(destination, diff);
+		if(dot(direction, diff) < 0) {
+			projection.moveTo(origin);
+			sub(origin, diff);
+			double t = dot(direction, diff);
+			if (t > 0)  {
+				double sqrLength = dot(direction, direction);
+				if (sqrLength > 0) {
+					t /= sqrLength;
+					projection.moveTo(
+						origin.getX() + t * direction[0],
+						origin.getY() + t * direction[1],
+						origin.getZ() + t * direction[2]);
+				}
+			}
+		} else {
+			projection.moveTo(destination);
+		}
+
+		sub(projection, diff);
+		return dot(diff, diff);
+	}
 }

@@ -21,6 +21,7 @@ package org.jcae.mesh.amibe.algos3d;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -114,6 +115,7 @@ public class RemeshSkeleton {
 		EdgesCollapserNG edgeCollapser = new EdgesCollapserNG(mesh);
 		main: for(List<Vertex> polyline: skeleton.getPolylinesVertices())
 		{
+			int[] groups = null;
 			RemeshPolyline rp = new RemeshPolyline(mesh, polyline, metric);
 			rp.setBuildBackgroundLink(true);
 			List<Vertex> toInsert = rp.compute();
@@ -160,9 +162,14 @@ public class RemeshSkeleton {
 					Vertex oldDestination = toSplit.destination();
 					mesh.vertexSplit(toSplit, v);
 					liaison.addVertex(v, toSplit.getTri());
-					//TODO this will be slow as as toSplit.getTri() may be far
-					//from the wanted triangle so we will loop on all triangles
-					liaison.move(v, v, true);
+					if(groups == null) {
+						// Lazily get the list of groups which is the same for all edges of this polyline
+						groups = getGroups(toSplit);
+					} else {
+						assert(Arrays.equals(groups, getGroups(toSplit)));
+					}
+					boolean r = liaison.moveToClosestEdge(v, groups);
+					assert(r);
 					AbstractHalfEdge e = getEdge(v, oldDestination);
 					edgeIndex.set(segId, e);
 					swapVolume = m2 * m2 * m2 / 64;
@@ -178,6 +185,18 @@ public class RemeshSkeleton {
 		}
 	}
 
+	private static int[] getGroups(AbstractHalfEdge edge) {
+		Iterator<AbstractHalfEdge> it = edge.fanIterator();
+		List<Integer> r = new ArrayList<Integer>();
+		while(it.hasNext()) {
+			r.add(it.next().getTri().getGroupId());
+		}
+		// convert the ArrayList to int[]
+		int[] rr = new int[r.size()];
+		for(int i = 0; i < rr.length; i++)
+			rr[i] = r.get(i);
+		return rr;
+	}
 	public static void main(final String[] args) {
 		try {
 			Mesh mesh = new Mesh();
