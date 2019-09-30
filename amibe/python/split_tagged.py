@@ -35,7 +35,12 @@ def split_tagged(**kwargs):
         mtb.addNodeSet()
         mesh = Mesh(mtb)
         MeshReader.readObject3D(mesh, kwargs['in_dir'])
-        liaison = MeshLiaison.create(mesh, mtb)
+        if kwargs['background']:
+            mesh_bg = Mesh(mtb)
+            MeshReader.readObject3D(mesh_bg, kwargs['background'])
+            liaison = MeshLiaison.create(mesh_bg, mesh, mtb)
+        else:
+            liaison = MeshLiaison.create(mesh, mtb)
 
     liaison.getMesh().buildRidges(coplanarity)
     if kwargs['immutable_border']:
@@ -93,6 +98,8 @@ if __name__ == '__main__':
     parser.add_argument('out_dir', help='Output amibe mesh')
     parser.add_argument('-t', '--tag', action='store', dest='tag_file', default=None,
                         help='file containing a list of triangle ids')
+    parser.add_argument('-b', '--background', action='store', dest='background', default=None,
+                        help='background amibe file')
     parser.add_argument('-c', '--coplanarity', action='store', type=float, dest='coplanarity', default=None,
                         help='dot product of face normals to detect feature edges')
     parser.add_argument('-s', '--safe-coplanarity', action='store', type=float, dest='safe_coplanarity', default=0.8,
