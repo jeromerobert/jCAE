@@ -127,12 +127,8 @@ def remesh(**kwargs):
         # Smooth
         smoothOptions = HashMap()
         smoothOptions.put("iterations", str(8))
-        smoothOptions.put("boundaries", "false")
         smoothOptions.put("check", "true")
-        smoothOptions.put("size", str(-1.0))
-        smoothOptions.put("tolerance", str(2.0))
         smoothOptions.put("relaxation", str(0.6))
-        smoothOptions.put("refresh", "false")
         if (safe_coplanarity >= 0.0):
             smoothOptions.put("coplanarity", str(safe_coplanarity))
         SmoothNodes3DBg(liaison, smoothOptions).compute()

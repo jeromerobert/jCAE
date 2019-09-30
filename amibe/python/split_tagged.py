@@ -65,21 +65,18 @@ def split_tagged(**kwargs):
     if kwargs['clean']:
         swapOptions = HashMap()
         swapOptions.put('coplanarity', str(safe_coplanarity))
+        swapOptions.put('minCosAfterSwap', '0.3')
         SwapEdge(liaison, swapOptions).compute()
 
         valenceOptions = HashMap()
         valenceOptions.put('coplanarity', str(safe_coplanarity))
-        valenceOptions.put('checkNormals', 'false')
+        valenceOptions.put('checkNormals', 'true')
         ImproveVertexValence(liaison, valenceOptions).compute()
 
         smoothOptions = HashMap()
-        smoothOptions.put('iterations', str(8))
-        smoothOptions.put('boundaries', 'false')
+        smoothOptions.put('iterations', str(5))
+        smoothOptions.put('boundaries', 'true')
         smoothOptions.put('check', 'true')
-        smoothOptions.put('size', str(-1.0))
-        smoothOptions.put('tolerance', str(2.0))
-        smoothOptions.put('relaxation', str(0.6))
-        smoothOptions.put('refresh', 'false')
         smoothOptions.put('coplanarity', str(safe_coplanarity))
         SmoothNodes3DBg(liaison, smoothOptions).compute()
 
