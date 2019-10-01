@@ -189,11 +189,13 @@ class BRepBuilderAPI_Sewing
 	%rename(modifiedSubShape) ModifiedSubShape;
 
 	BRepBuilderAPI_Sewing(const Standard_Real tolerance = 1.0e-06,
-		const Standard_Boolean option = Standard_True,
+		const Standard_Boolean sewing = Standard_True,
+		const Standard_Boolean analysis = Standard_True,
 		const Standard_Boolean cutting = Standard_True,
 		const Standard_Boolean nonmanifold = Standard_False);
 	void Init(const Standard_Real tolerance,
-		const Standard_Boolean option = Standard_True,
+		const Standard_Boolean sewing = Standard_True,
+		const Standard_Boolean analysis = Standard_True,
 		const Standard_Boolean cutting = Standard_True,
 		const Standard_Boolean nonmanifold = Standard_False) ;
 	void Load(const TopoDS_Shape& shape) ;
