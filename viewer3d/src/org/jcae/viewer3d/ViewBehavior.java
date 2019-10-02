@@ -90,6 +90,7 @@ public  class ViewBehavior extends OrbitBehavior
 	public final static int CLIP_RECTANGLE_MODE=1;
 	public final static int CLIP_BOX_MODE=2;
 	public final static int RECTANGLE_MODE=3;
+	public final static int SINGLE_RECTANGLE_MODE=4;
 	private int mouseMode=DEFAULT_MODE;
 	
 	private BranchGroup firstClipBoxPointGroup=null;
@@ -135,12 +136,16 @@ public  class ViewBehavior extends OrbitBehavior
 			case RECTANGLE_MODE :
 				rectangleMode(evt);
 				break;
+			case SINGLE_RECTANGLE_MODE :
+				singleRectangleMode(evt);
+				break;
 			case DEFAULT_MODE:
 			default :
 				defaultMode(evt);
 			}
 	}
 	
+	/** Defines what to do for the CLIP_BOX_MODE*/
 	private void clipBoxMode(MouseEvent evt) {
 		if (evt.getID() == MouseEvent.MOUSE_CLICKED
 				&& evt.getButton() == MouseEvent.BUTTON1)
@@ -211,7 +216,7 @@ public  class ViewBehavior extends OrbitBehavior
 		}
 	}
 	
-	/** Defines what to do for the BOX_MODE*/
+	/** Defines what to do for the CLIP_RECTANGLE_MODE*/
 	private void rectangleClipMode(MouseEvent evt){		
 		if (anchor == null && evt.getButton() == MouseEvent.BUTTON1
 				&& evt.getID() == MouseEvent.MOUSE_PRESSED)
@@ -252,7 +257,29 @@ public  class ViewBehavior extends OrbitBehavior
 			}
 		}
 	} 
-	
+
+	/** Defines what to do for the SINGLE_RECTANGLE_MODE*/
+	private void singleRectangleMode(MouseEvent evt) {
+		if (anchor == null && evt.getButton() == MouseEvent.BUTTON1
+				&& evt.getID() == MouseEvent.MOUSE_PRESSED)
+		{
+			startRectangleDrawing(evt, Color.WHITE);
+		}
+		else if (anchor != null)
+		{
+			if (evt.getButton() == MouseEvent.BUTTON1
+					&& evt.getID() == MouseEvent.MOUSE_RELEASED)
+			{
+				pickRectangle(evt);
+				endRectangleDrawing(evt);
+				restoreDefaultMode();
+			} else
+			{
+				selectionRectangle3D.setGeometry(anchor, evt.getPoint());
+			}
+		}
+	}
+
 	/** clear all variables needed for other modes*/
 	private void restoreDefaultMode(){
 		//for box and rectangle mode
@@ -290,6 +317,10 @@ public  class ViewBehavior extends OrbitBehavior
 		case RECTANGLE_MODE :
 			mouseMode=RECTANGLE_MODE;
 			view.println("> Rectangle Selection mode (press space key to escape)");
+			break;
+		case SINGLE_RECTANGLE_MODE :
+			mouseMode=SINGLE_RECTANGLE_MODE;
+			view.println("> Single rectangle Selection mode");
 			break;
 		}
 	}
