@@ -774,17 +774,27 @@ public class View extends Canvas3D implements PositionListener
 		zoomTo((float)c.x,(float)c.y,(float)c.z,(float)b.getRadius());
 	}
 	
+	/** Fit the view to show all groups */
+	public void fitAll(Collection<BranchGroup> groups)
+	{
+        BoundingSphere bs;
+		if (groups == null)
+			bs = getBound();
+		else
+			bs = getBound(groups);
+		if (bs.getRadius()<=0)
+			bs = new BoundingSphere();
+		Point3d c = new Point3d();
+		bs.getCenter(c);
+		zoomTo((float)c.x, (float)c.y, (float)c.z, (float)bs.getRadius());
+	}
+
 	/** Fit the view to show all the Viewable */
 	public void fitAll()
 	{
-		BoundingSphere bs=getBound();
-		if(bs.getRadius()<=0)
-			bs=new BoundingSphere();		
-		Point3d c=new Point3d();
-		bs.getCenter(c);
-		zoomTo((float)c.x,(float)c.y,(float)c.z,(float)bs.getRadius());
+		fitAll(null);
 	}
-	
+
 	/**
 	 * This transforms from Normalized Eyes Coordinates (NEC) to Display Coordinates in AWT meanings (the z value is the same value of the zbuffer).
 	 * You can go from virtual world coordinates to NEC with getVWorldProjection method and using left projection.
@@ -829,7 +839,30 @@ public class View extends Canvas3D implements PositionListener
 	public void setBackClipDistance(double d){
 		getView().setBackClipDistance(d);
 	}
-	
+
+	public BoundingSphere getBound(Collection<BranchGroup> groups)
+	{
+		ArrayList<Bounds> bounds=new ArrayList<Bounds>();
+		for(Group g: groups)
+		{
+			bounds.add(g.getBounds());
+		}
+
+		BoundingSphere bs;
+		if(!bounds.isEmpty())
+		{
+			Bounds bbs= bounds.get(0);
+			if(bbs instanceof BoundingSphere)
+				bs=(BoundingSphere) bbs;
+			else
+				bs = new BoundingSphere(bbs);
+			bs.combine(bounds.toArray(new Bounds[bounds.size()]));
+		}
+		else
+			bs=new BoundingSphere();
+		return bs;
+	}
+
 	public BoundingSphere getBound()
 	{
 		Iterator<ViewSpecificGroup> it=viewableToViewSpecificGroup.values().iterator();
