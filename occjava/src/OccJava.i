@@ -353,8 +353,9 @@ class BRepMesh_IncrementalMesh : public BRepMesh_DiscretRoot
 	BRepMesh_IncrementalMesh();
 	BRepMesh_IncrementalMesh(const TopoDS_Shape& S,const Standard_Real D,
 		const Standard_Boolean Relatif = Standard_False,
-		const Standard_Real Ang = 0.5);
-		
+		const Standard_Real Ang = 0.5,
+		const Standard_Boolean Parallel = Standard_False);
+
 	void Perform();
 	Standard_Boolean IsModified() const;
 };
