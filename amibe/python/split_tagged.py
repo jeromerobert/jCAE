@@ -79,9 +79,10 @@ def split_tagged(**kwargs):
         ImproveVertexValence(liaison, valenceOptions).compute()
 
         smoothOptions = HashMap()
-        smoothOptions.put('iterations', str(5))
+        smoothOptions.put('iterations', str(8))
         smoothOptions.put('boundaries', 'true')
         smoothOptions.put('check', 'true')
+        smoothOptions.put('relaxation', str(0.6))
         smoothOptions.put('coplanarity', str(safe_coplanarity))
         SmoothNodes3DBg(liaison, smoothOptions).compute()
 

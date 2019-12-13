@@ -21,7 +21,9 @@ def clean(**kwargs):
     """Clean a mesh
     """
     # Process coplanarity options
-    coplanarity = cos(kwargs['coplanarityAngle'] * pi / 180.)
+    coplanarity = -2.0
+    if kwargs['coplanarityAngle'] > 0:
+        coplanarity = cos(kwargs['coplanarityAngle'] * pi / 180.)
     if kwargs['coplanarity']:
         coplanarity = kwargs['coplanarity']
 
@@ -85,6 +87,7 @@ def clean(**kwargs):
     smoothOptions = HashMap()
     smoothOptions.put("iterations", str(8))
     smoothOptions.put("check", "true")
+    smoothOptions.put("boundaries", "true")
     smoothOptions.put("relaxation", str(0.6))
     if (safe_coplanarity >= 0.0):
         smoothOptions.put("coplanarity", str(safe_coplanarity))
