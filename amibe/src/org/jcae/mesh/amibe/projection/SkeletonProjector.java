@@ -19,6 +19,7 @@
 
 package org.jcae.mesh.amibe.projection;
 
+import java.util.Arrays;
 import org.jcae.mesh.amibe.algos3d.Skeleton;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Mesh;
@@ -42,6 +43,7 @@ public class SkeletonProjector {
             polylines = skeleton.getPolylines();
         else
             polylines = skeleton.getPolylines(groups);
+        assert !polylines.isEmpty(): Arrays.toString(groups);
         double minDistSqr = Double.POSITIVE_INFINITY;
         Location projection = new Location();
         Location bestProjection = new Location();

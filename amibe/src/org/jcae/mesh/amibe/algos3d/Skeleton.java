@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import gnu.trove.set.hash.TIntHashSet;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
@@ -147,23 +148,25 @@ public class Skeleton {
 	 */
 	public Collection<List<AbstractHalfEdge>> getPolylines(int ... groupIds)
 	{
+		TIntHashSet nonManifoldGroupsQuery = null, nonManifoldGroups = null;
+		if(groupIds.length > 2) {
+			nonManifoldGroupsQuery = new TIntHashSet(groupIds);
+			nonManifoldGroups = new TIntHashSet();
+		}
 		ArrayList<List<AbstractHalfEdge>> toReturn = new ArrayList<List<AbstractHalfEdge>>();
 		main: for(List<AbstractHalfEdge> l: polylines)
 		{
 			AbstractHalfEdge e = l.get(0);
 			if(e.getTri().getGroupId() == groupIds[0])
 			{
-				if(e.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+				if(e.hasAttributes(AbstractHalfEdge.NONMANIFOLD) && nonManifoldGroups != null)
 				{
-					int k = 0;
+					nonManifoldGroups.clear();
 					Iterator<AbstractHalfEdge> it = e.fanIterator();
 					while(it.hasNext())
-					{
-						AbstractHalfEdge ne = it.next();
-						if(k >= groupIds.length || ne.getTri().getGroupId() != groupIds[k++])
-							continue main;
-					}
-					toReturn.add(l);
+						nonManifoldGroups.add(it.next().getTri().getGroupId());
+					if(nonManifoldGroups.equals(nonManifoldGroupsQuery))
+						toReturn.add(l);
 				}
 				else if(e.hasAttributes(AbstractHalfEdge.BOUNDARY) && groupIds.length == 1)
 				{
