@@ -33,7 +33,7 @@ def remesh(**kwargs):
     safe_coplanarity = kwargs["safe_coplanarity"]
     if safe_coplanarity is None:
         safe_coplanarity = 0.8
-    safe_coplanarity = str(max(coplanarity, safe_coplanarity))
+    safe_coplanarity = max(coplanarity, safe_coplanarity)
 
     # Build background mesh
     try:
@@ -297,7 +297,7 @@ if __name__ == "__main__":
         default=-1.0,
         action="store",
         type="float",
-        dest="wire",
+        dest="wire_size",
         help="remesh beams (default: -1.0: do not remesh)",
     )
     parser.add_option(
