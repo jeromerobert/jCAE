@@ -25,6 +25,7 @@ import org.jcae.mesh.xmldata.AmibeReader.Group;
 import org.jcae.mesh.xmldata.AmibeReader.SubMesh;
 import org.jcae.mesh.xmldata.MeshExporter.UNV.Unit;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
@@ -40,6 +41,7 @@ import java.util.TreeMap;
 import java.util.logging.Logger;
 import org.jcae.mesh.amibe.projection.MeshLiaison;
 import org.xml.sax.SAXException;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Convert an Amibe mesh to a UNV mesh.
@@ -139,7 +141,11 @@ public class Amibe2UNV
 
 	public void write(String fileName) throws IOException, SAXException
 	{
-		PrintStream out = new PrintStream(fileName);
+		PrintStream out;
+		if (fileName.endsWith(".gz"))
+			out = new PrintStream(new GZIPOutputStream(new FileOutputStream(fileName)));
+		else	
+			out = new PrintStream(fileName);
 		write(out);
 		out.close();
 	}

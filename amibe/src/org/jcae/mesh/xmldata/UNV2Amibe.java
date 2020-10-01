@@ -23,8 +23,10 @@ package org.jcae.mesh.xmldata;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
@@ -38,6 +40,7 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 
 
 /**
@@ -215,7 +218,11 @@ public class UNV2Amibe
 
 	public final void importMesh(File input, String output) throws IOException
 	{
-		BufferedReader br=new BufferedReader(new FileReader(input));
+		BufferedReader br;
+		if (input.getName().endsWith(".gz"))
+			br = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(input))));
+		else
+			br = new BufferedReader(new FileReader(input));
 		importMesh(br, output);
 		br.close();
 	}
