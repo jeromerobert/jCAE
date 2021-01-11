@@ -301,6 +301,16 @@ if __name__ == "__main__":
         help="remesh beams (default: -1.0: do not remesh)",
     )
     parser.add_option(
+        "-f",
+        "--wire-metric",
+        metavar="FLOAT",
+        default=None,
+        action="store",
+        type="str",
+        dest="wire_metric_file",
+        help="wire metric file",
+    )
+    parser.add_option(
         "-e",
         "--eratio",
         metavar="FLOAT",
