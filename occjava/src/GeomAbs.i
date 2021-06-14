@@ -48,3 +48,29 @@ enum GeomAbs_JoinType
     GeomAbs_Tangent,
     GeomAbs_Intersection
 };
+
+enum GeomAbs_CurveType
+{
+    GeomAbs_Line,
+    GeomAbs_Circle,
+    GeomAbs_Ellipse,
+    GeomAbs_Hyperbola,
+    GeomAbs_Parabola,
+    GeomAbs_BezierCurve,
+    GeomAbs_BSplineCurve,
+    GeomAbs_OtherCurve
+};
+
+enum GeomAbs_SurfaceType {
+    GeomAbs_Plane,
+    GeomAbs_Cylinder,
+    GeomAbs_Cone,
+    GeomAbs_Sphere,
+    GeomAbs_Torus,
+    GeomAbs_BezierSurface,
+    GeomAbs_BSplineSurface,
+    GeomAbs_SurfaceOfRevolution,
+    GeomAbs_SurfaceOfExtrusion,
+    GeomAbs_OffsetSurface,
+    GeomAbs_OtherSurface
+};

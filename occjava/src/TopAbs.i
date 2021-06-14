@@ -31,7 +31,7 @@
 %rename(EDGE) TopAbs_EDGE;
 %rename(VERTEX) TopAbs_VERTEX;
 %rename(SHAPE) TopAbs_SHAPE;
-	
+
 enum TopAbs_ShapeEnum 
 {
 	TopAbs_COMPOUND,
@@ -55,4 +55,16 @@ enum TopAbs_Orientation
 	TopAbs_REVERSED,
 	TopAbs_INTERNAL,
 	TopAbs_EXTERNAL
+};
+
+%rename(IN) TopAbs_IN;
+%rename(OUT) TopAbs_OUT;
+%rename(ON) TopAbs_ON;
+%rename(UNKNOWN) TopAbs_UNKNOWN;
+enum TopAbs_State
+{
+    TopAbs_IN,
+    TopAbs_OUT,
+    TopAbs_ON,
+    TopAbs_UNKNOWN
 };

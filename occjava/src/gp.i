@@ -21,6 +21,7 @@
 %{
 	#include <Standard_Version.hxx>
 	#include <gp_Trsf.hxx>
+	#include <gp_Pln.hxx>
 	jdoubleArray XYZtoDoubleArray(JNIEnv* jenv, const gp_XYZ & xyz)
 	{
 	    jdouble nativeArray[]={xyz.X(), xyz.Y(), xyz.Z()};
@@ -128,7 +129,7 @@
 	if(JCALL1(GetArrayLength, jenv, $input)!=4)
 		SWIG_JavaThrowException(jenv, SWIG_JavaIllegalArgumentException, "array length must be 4");
 	jdouble * naxe=JCALL2(GetDoubleArrayElements, jenv, $input, NULL);
-	$1=new gp_Pln(naxe[0],naxe[1],naxe[2],naxe[4]);
+	$1=new gp_Pln(naxe[0],naxe[1],naxe[2],naxe[3]);
 }
 
 %typemap(freearg) gp_Pln, const gp_Pln&
@@ -436,6 +437,14 @@ class gp_Trsf
 		matrix[14]=0;
 		matrix[15]=1;
 	}
+
+    void transforms(double point[3]) {
+        gp_Pnt p(point[0], point[1], point[2]);
+        p.Transform(*self);
+        point[0] = p.X();
+        point[1] = p.Y();
+        point[2] = p.Z();
+    }
 }
 
 /**
