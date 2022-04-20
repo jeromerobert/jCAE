@@ -181,13 +181,13 @@ public class UNV2Amibe
 			((Buffer)buffer).rewind();
 			buffer.putInt(amibeID);
 			buffer.putInt(type);
-			buffer.rewind();			
+			((Buffer)buffer).rewind();
 			channel.write(buffer);
 		}
 
 		public void seek(int id) throws IOException
 		{
-			buffer.rewind();
+			((Buffer)buffer).rewind();
 			channel.read(buffer, 8*id);
 		}
 
