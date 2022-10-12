@@ -68,6 +68,12 @@ public class RemeshAction extends AlgoAction {
 				l.add("--point-metric");
 				l.add(metricFile.getAbsolutePath());
 			}
+			File immutableFile = new File(ado.getMeshDirectory(), "immutable-groups.txt");
+			if (immutableFile.exists())
+			{
+				l.add("--immutable-groups");
+				l.add(immutableFile.getAbsolutePath());
+			}
 			String aFrontPath = getAfrontPath();
 			if(aFrontPath != null && !aFrontPath.isEmpty())
 			{
