@@ -1419,7 +1419,12 @@ public class Mesh implements Serializable
 						ot.setAttributes(attr);
 						if (fixVertex)
 						{
-							ot.sym().setAttributes(attr);
+							if(ot.hasAttributes(AbstractHalfEdge.NONMANIFOLD)) {
+								for (Iterator<AbstractHalfEdge> it = ot.fanIterator(); it.hasNext(); )
+									it.next().setAttributes(attr);
+							} else {
+								ot.sym().setAttributes(attr);
+							}
 							ot.origin().setMutable(false);
 							ot.destination().setMutable(false);
 						}
