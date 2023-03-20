@@ -210,8 +210,16 @@ class Adaptor3d_Curve
 {		
 	Adaptor3d_Curve()=0;
 	public:
+	%rename(firstParameter) FirstParameter;
+	Standard_Real FirstParameter() const;
+	%rename(lastParameter) LastParameter;
+	Standard_Real LastParameter() const;
+	%rename(continuity) Continuity;
+	GeomAbs_Shape Continuity() const;
 	%rename(value) Value;
 	const gp_Pnt Value(const Standard_Real U) const;
+	%rename(getType) GetType;
+	GeomAbs_CurveType GetType() const;
 };
 
 //extends the Adaptor3d_Curve class to reduce the JNI overhead when
@@ -227,8 +235,46 @@ class Adaptor3d_Curve
 			u[3*i]   = gp.X();
 			u[3*i+1] = gp.Y();
 			u[3*i+2] = gp.Z();
-		}	
+		}
 	}
+
+	void d0(double u, double p[3])
+    {
+		gp_Pnt pp;
+		self->D0(u, pp);
+		p[0] = pp.X();
+		p[1] = pp.Y();
+		p[2] = pp.Z();
+    }
+
+	void d1(double u, double p[3], double v[3])
+    {
+		gp_Pnt pp;
+		gp_Vec vv;
+		self->D1(u, pp, vv);
+		p[0] = pp.X();
+		p[1] = pp.Y();
+		p[2] = pp.Z();
+		v[0] = vv.X();
+		v[1] = vv.Y();
+		v[2] = vv.Z();
+    }
+
+	void d2(double u, double p[3], double v1[3], double v2[3])
+    {
+		gp_Pnt pp;
+		gp_Vec vv1, vv2;
+		self->D2(u, pp, vv1, vv2);
+		p[0] = pp.X();
+		p[1] = pp.Y();
+		p[2] = pp.Z();
+		v1[0] = vv1.X();
+		v1[1] = vv1.Y();
+		v1[2] = vv1.Z();
+		v2[0] = vv2.X();
+		v2[1] = vv2.Y();
+		v2[2] = vv2.Z();
+    }
 };
 
 /**
@@ -250,6 +296,91 @@ class GeomAdaptor_Curve: public Adaptor3d_Curve
 
 };
 
+/**
+ * BRepAdaptor_Curve
+ */
+%{#include "BRepAdaptor_Curve.hxx"%}
+
+class BRepAdaptor_Curve: public Adaptor3d_Curve
+{
+	%rename(initialize) Initialize;
+	public:
+	BRepAdaptor_Curve();
+	BRepAdaptor_Curve(const TopoDS_Edge &E);
+	BRepAdaptor_Curve(const TopoDS_Edge &E, const TopoDS_Face &F);
+	void Initialize(const TopoDS_Edge &E);
+	void Initialize(const TopoDS_Edge &E, const TopoDS_Face &F);
+};
+
+/**
+ * Adaptor3d_Surface
+ */
+%{#include "Adaptor3d_Surface.hxx"%}
+
+class Adaptor3d_Surface
+{
+	Adaptor3d_Surface()=0;
+	public:
+	%rename(firstUParameter) FirstUParameter;
+	Standard_Real FirstUParameter() const;
+	%rename(lastUParameter) LastUParameter;
+	Standard_Real LastUParameter() const;
+	%rename(firstVParameter) FirstVParameter;
+	Standard_Real FirstVParameter() const;
+	%rename(lastVParameter) LastVParameter;
+	Standard_Real LastVParameter() const;
+	%rename(uContinuity) UContinuity;
+	GeomAbs_Shape UContinuity() const;
+	%rename(vContinuity) VContinuity;
+	GeomAbs_Shape VContinuity() const;
+	%rename(value) Value;
+	const gp_Pnt Value(const Standard_Real U, const Standard_Real V) const;
+	%rename(getType) GetType;
+	GeomAbs_SurfaceType GetType() const;
+};
+
+%extend Adaptor3d_Surface
+{
+	public:
+	void d0(double u, double v, double p[3])
+    {
+		gp_Pnt pp;
+		self->D0(u, v, pp);
+		p[0] = pp.X();
+		p[1] = pp.Y();
+		p[2] = pp.Z();
+    }
+
+	void d1(double u, double v, double p[3], double d1u[3], double d1v[3])
+    {
+		gp_Pnt pp;
+		gp_Vec dd1u, dd1v;
+		self->D1(u, v, pp, dd1u, dd1v);
+		p[0] = pp.X();
+		p[1] = pp.Y();
+		p[2] = pp.Z();
+		d1u[0] = dd1u.X();
+		d1u[1] = dd1u.Y();
+		d1u[2] = dd1u.Z();
+		d1v[0] = dd1v.X();
+		d1v[1] = dd1v.Y();
+		d1v[2] = dd1v.Z();
+    }
+};
+
+/**
+ * BRepAdaptor_Surface
+ */
+%{#include "BRepAdaptor_Surface.hxx"%}
+
+class BRepAdaptor_Surface: public Adaptor3d_Surface
+{
+	%rename(initialize) Initialize;
+	public:
+	BRepAdaptor_Surface();
+	BRepAdaptor_Surface(const TopoDS_Face &F, const Standard_Boolean R = Standard_True);
+	void Initialize(const TopoDS_Face &F, const Standard_Boolean R = Standard_True);
+};
 
 /**
  * GProp_GProps
@@ -278,6 +409,17 @@ class BRepGProp
         static Standard_Real VolumeProperties(const TopoDS_Shape& shape, GProp_GProps& properties, const Standard_Real Eps, const Standard_Boolean onlyClosed = Standard_False) ;
         static void SurfaceProperties(const TopoDS_Shape& shape, GProp_GProps& properties) ;
         static Standard_Real SurfaceProperties(const TopoDS_Shape& shape, GProp_GProps& properties, const Standard_Real Eps) ;
+};
+
+/**
+ * BRepLProp
+ */
+%{#include "BRepLProp.hxx"%}
+class BRepLProp
+{
+	public:
+	%rename(continuity) Continuity;
+	static GeomAbs_Shape Continuity(const BRepAdaptor_Curve & C1, const BRepAdaptor_Curve & C2, const Standard_Real u1, const Standard_Real u2);
 };
 
 /**
@@ -404,4 +546,18 @@ class BRepAlgo
 	public:	
 	static Standard_Boolean IsValid(const TopoDS_Shape& S);
 	static Standard_Boolean IsTopologicallyValid(const TopoDS_Shape& S);
+};
+
+/**
+ * BRepClass_FaceClassifier
+ */
+%{#include <BRepClass_FaceClassifier.hxx>%}
+class BRepClass_FaceClassifier
+{
+	%rename(perform) Perform;
+	%rename(state) State;
+	public:
+	BRepClass_FaceClassifier();
+    void Perform(const TopoDS_Face & F, const gp_Pnt & P, const Standard_Real Tol);
+	TopAbs_State State();
 };
