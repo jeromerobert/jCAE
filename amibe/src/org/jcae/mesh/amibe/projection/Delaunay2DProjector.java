@@ -165,6 +165,7 @@ abstract public class Delaunay2DProjector {
 		Mesh2D m2d = createMesh2D();
 		int k = 0;
 		Vertex2D[] border = new Vertex2D[freeEdges.size() + 1 + cutteeEdges.size() + 1];
+		Vertex2D[] borderCuttee = new Vertex2D[freeEdges.size() + 1];
 		for(AbstractHalfEdge e: cutteeEdges) {
 			Vertex2D v2d = (Vertex2D) m2d.createVertex(0, 0);
 			transformTo2D(e.origin(), v2d);
@@ -173,14 +174,17 @@ abstract public class Delaunay2DProjector {
 		}
 		border[k++] = border[0];
 		int start2 = k;
+		int j = freeEdges.size();
 		Collections.reverse(freeEdges);
 		for(AbstractHalfEdge e: freeEdges) {
 			Vertex2D v2d = (Vertex2D) m2d.createVertex(0, 0);
 			transformTo2D(e.origin(), v2d);
 			v2dTov3d.put(v2d, e.origin());
 			border[k++] = v2d;
+			borderCuttee[j--] = v2d;
 		}
 		border[k] = border[start2];
+		borderCuttee[0] = borderCuttee[freeEdges.size()];
 		new Initial(m2d, m2d.getBuilder(), border, null).compute();
 		trianglesToAdd.clear();
 		for(Triangle t:m2d.getTriangles())
@@ -193,6 +197,20 @@ abstract public class Delaunay2DProjector {
 				v2dTov3d.get(swapOrientation ? t.getV0() : t.getV2()));
 			t3d.setGroupId(group);
 			trianglesToAdd.add(t3d);
+		}
+		if (cutteeGroup > 0) {
+			Mesh2D m2dCuttee = createMesh2D();
+			new Initial(m2dCuttee, m2dCuttee.getBuilder(), borderCuttee, null).compute();
+			for (Triangle t : m2dCuttee.getTriangles()) {
+				if (t.hasAttributes(AbstractHalfEdge.OUTER))
+					continue;
+				Triangle t3d = mesh.createTriangle(
+						v2dTov3d.get(swapOrientation ? t.getV2() : t.getV0()),
+						v2dTov3d.get(t.getV1()),
+						v2dTov3d.get(swapOrientation ? t.getV0() : t.getV2()));
+				t3d.setGroupId(cutteeGroup);
+				trianglesToAdd.add(t3d);
+			}
 		}
 	}
 
