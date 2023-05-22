@@ -62,9 +62,8 @@ def remesh(**kwargs):
 
     immutable_groups = []
     if kwargs["immutable_groups_file"]:
-        f = open(kwargs["immutable_groups_file"])
-        immutable_groups = f.read().split()
-        f.close()
+        with open(kwargs["immutable_groups_file"]) as fid:
+            immutable_groups = [f.strip() for f in fid]
         liaison.mesh.tagGroups(immutable_groups, AbstractHalfEdge.IMMUTABLE)
 
     if kwargs["recordFile"]:
