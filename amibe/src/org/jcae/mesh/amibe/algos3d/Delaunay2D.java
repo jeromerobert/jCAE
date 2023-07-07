@@ -99,7 +99,7 @@ public class Delaunay2D {
 		switch(direction)
 		{
 		case X: r = mesh.createVertex(0, x, y); break;
-		case Y: r = mesh.createVertex(y, 0, x); break;
+		case Y: r = mesh.createVertex(x, 0, y); break;
 		case Z: r = mesh.createVertex(x, y, 0); break;
 		default:
 			throw new IllegalStateException();
