@@ -90,6 +90,32 @@ public class Delaunay2D {
 		this.group = group;
 	}
 
+	/** Add a new ordered vertices to the current polyline */
+	public ArrayList<Vertex> addVertices(double[] xy)
+	{
+		int n = xy.length / 2;
+		ArrayList<Vertex> loopVertices = new ArrayList<Vertex>(n);
+		for (int i=0; i<n; i++)
+		{
+			double x = xy[2 * i];
+			double y = xy[2 * i + 1];
+			Vertex r;
+			switch (direction) {
+				case X:	r = mesh.createVertex(0, x, y); break;
+				case Y: r = mesh.createVertex(x, 0, y); break;
+				case Z:	r = mesh.createVertex(x, y, 0);	break;
+				default:
+					throw new IllegalStateException();
+			}
+			orderedVertices.add(r);
+		}
+		if(orderedVertices == null)
+			orderedVertices = loopVertices;
+		else
+			orderedVertices.addAll(loopVertices);
+		return loopVertices;
+	}
+
 	/** Add a new vertex to the current polyline */
 	public Vertex addVertex(double x, double y)
 	{
