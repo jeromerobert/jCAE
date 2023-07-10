@@ -21,11 +21,8 @@
 package org.jcae.mesh.amibe.algos3d;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jcae.mesh.amibe.algos2d.Initial;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Mesh;
@@ -37,8 +34,6 @@ import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 import org.jcae.mesh.amibe.util.HashFactory;
-import org.jcae.mesh.xmldata.Amibe2VTK;
-import org.jcae.mesh.xmldata.MeshWriter;
 
 // Jython script exemple to use this class
 /*
