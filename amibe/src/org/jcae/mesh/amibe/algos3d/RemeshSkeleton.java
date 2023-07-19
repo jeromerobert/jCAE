@@ -166,7 +166,7 @@ public class RemeshSkeleton {
 						// Lazily get the list of groups which is the same for all edges of this polyline
 						groups = getGroups(toSplit);
 					} else {
-						assert(Arrays.equals(groups, getGroups(toSplit)));
+						assert Arrays.equals(groups, getGroups(toSplit)): "Error near "+v ;
 					}
 					boolean r = liaison.moveToClosestEdge(v, groups);
 					assert(r);
