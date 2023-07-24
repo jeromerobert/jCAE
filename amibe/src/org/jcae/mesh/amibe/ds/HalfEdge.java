@@ -1040,7 +1040,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			else
 				h.HEcollapseSameFan(m, v);
 		}
-		assert ret != null;
+		assert ret != null: "Error near: "+v;
 		return ret;
 	}
 
